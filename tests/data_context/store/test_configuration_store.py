@@ -72,9 +72,7 @@ class SampleConfigurationStore(ConfigurationStore):
 
     def list_keys(self) -> List[DataContextKey]:
         # Mock values to work with self.self_check
-        return [
-            ConfigurationIdentifier(f"key{char}") for char in string.ascii_uppercase
-        ]
+        return [ConfigurationIdentifier(f"key{char}") for char in string.ascii_uppercase]
 
 
 @pytest.mark.filesystem
@@ -280,9 +278,7 @@ def test_config_property_and_defaults() -> None:
         pytest.param(
             None,
             "abc123",
-            GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.CHECKPOINT, id="abc123"
-            ),
+            GXCloudIdentifier(resource_type=GXCloudRESTResource.CHECKPOINT, id="abc123"),
             id="id",
         ),
     ],
@@ -307,9 +303,7 @@ def test_get_key_constructs_key(
     ],
 )
 @pytest.mark.unit
-def test_get_key_raises_error_with_conflicting_args(
-    name: Optional[str], id: Optional[str]
-) -> None:
+def test_get_key_raises_error_with_conflicting_args(name: Optional[str], id: Optional[str]) -> None:
     with pytest.raises(AssertionError) as e:
         ConfigurationStore(store_name="test").get_key(name=name, id=id)
 
@@ -328,6 +322,6 @@ def test_init_with_invalid_configuration_class_raises_error() -> None:
         InvalidConfigurationStore(store_name="my_configuration_store")
 
     assert (
-        "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
+        "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."  # noqa: E501
         in str(e.value)
     )

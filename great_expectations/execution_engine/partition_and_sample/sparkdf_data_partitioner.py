@@ -132,10 +132,8 @@ class SparkDataPartitioner(DataPartitioner):
 
         column_batch_identifiers: dict = batch_identifiers[column_name]
 
-        date_parts_dict: dict = (
-            self._convert_datetime_batch_identifiers_to_date_parts_dict(
-                column_batch_identifiers, date_parts
-            )
+        date_parts_dict: dict = self._convert_datetime_batch_identifiers_to_date_parts_dict(
+            column_batch_identifiers, date_parts
         )
 
         for date_part, date_part_value in date_parts_dict.items():
@@ -158,7 +156,7 @@ class SparkDataPartitioner(DataPartitioner):
 
         Returns:
             String representing the spark function to use for the given DatePart.
-        """
+        """  # noqa: E501
         date_part = DatePart(date_part)
 
         spark_date_part_decoder: dict = {
@@ -199,7 +197,7 @@ class SparkDataPartitioner(DataPartitioner):
 
         Returns:
             Filtered spark DataFrame.
-        """
+        """  # noqa: E501
         return df.filter(F.col(column_name) == batch_identifiers[column_name])
 
     @staticmethod
@@ -225,18 +223,14 @@ class SparkDataPartitioner(DataPartitioner):
         """
         matching_string = batch_identifiers[column_name]
         res = (
-            df.withColumn(
-                "date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)
-            )
+            df.withColumn("date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string))
             .filter(F.col("date_time_tmp") == matching_string)
             .drop("date_time_tmp")
         )
         return res
 
     @staticmethod
-    def partition_on_divided_integer(
-        df, column_name: str, divisor: int, batch_identifiers: dict
-    ):
+    def partition_on_divided_integer(df, column_name: str, divisor: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and partition on that"""
         matching_divisor = batch_identifiers[column_name]
         res = (
@@ -250,24 +244,18 @@ class SparkDataPartitioner(DataPartitioner):
         return res
 
     @staticmethod
-    def partition_on_mod_integer(
-        df, column_name: str, mod: int, batch_identifiers: dict
-    ):
+    def partition_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and partition on that"""
         matching_mod_value = batch_identifiers[column_name]
         res = (
-            df.withColumn(
-                "mod_temp", (F.col(column_name) % mod).cast(pyspark.types.IntegerType())
-            )
+            df.withColumn("mod_temp", (F.col(column_name) % mod).cast(pyspark.types.IntegerType()))
             .filter(F.col("mod_temp") == matching_mod_value)
             .drop("mod_temp")
         )
         return res
 
     @staticmethod
-    def partition_on_multi_column_values(
-        df, column_names: list, batch_identifiers: dict
-    ):
+    def partition_on_multi_column_values(df, column_names: list, batch_identifiers: dict):
         """Partition on the joint values in the named columns"""
         for column_name in column_names:
             value = batch_identifiers.get(column_name)
@@ -295,7 +283,7 @@ class SparkDataPartitioner(DataPartitioner):
             raise (
                 gx_exceptions.ExecutionEngineError(
                     f"""The partitioning method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""
+                    Reference to {hash_function_name} cannot be found."""  # noqa: E501
                 )
             )
 

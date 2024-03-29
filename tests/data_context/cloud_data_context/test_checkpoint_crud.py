@@ -149,9 +149,7 @@ def mocked_get_by_name_response_1_result(
                 "data": [
                     {
                         "attributes": {
-                            "checkpoint_config": copy.deepcopy(
-                                checkpoint_config_with_ids
-                            ),
+                            "checkpoint_config": copy.deepcopy(checkpoint_config_with_ids),
                             "class_name": "Checkpoint",
                             "created_by_id": created_by_id,
                             "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
@@ -199,7 +197,7 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
     """
     A Cloud-backed context should get from a Cloud-backed CheckpointStore when calling `get_checkpoint`.
     When provided only a name, it should hit ".../checkpoints?name=my-checkpoint-name"
-    """
+    """  # noqa: E501
     context = empty_cloud_data_context
 
     validation_id_1, validation_id_2 = validation_ids
@@ -209,7 +207,7 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
         autospec=True,
         side_effect=mocked_get_by_name_response_1_result,
     ) as mock_get:
-        checkpoint = context.checkpoints.get(name=checkpoint_config["name"])
+        checkpoint = context.get_legacy_checkpoint(name=checkpoint_config["name"])
 
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
@@ -241,7 +239,7 @@ def test_cloud_backed_data_context_add_checkpoint(
     """
     A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
     When saving, it should use the id from the response to create the checkpoint.
-    """
+    """  # noqa: E501
     context = empty_cloud_data_context
 
     validation_id_1, validation_id_2 = validation_ids
@@ -298,7 +296,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
     """
     A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
     When saving, it should use the id from the response to create the checkpoint.
-    """
+    """  # noqa: E501
     context = empty_cloud_data_context
 
     validation_id_1, validation_id_2 = validation_ids
@@ -354,7 +352,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
     """
     A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
     When saving, it should use the id from the response to create the checkpoint.
-    """
+    """  # noqa: E501
     context = empty_cloud_data_context
 
     validation_id_1, validation_id_2 = validation_ids
@@ -413,7 +411,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
     """
     A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
     When saving, it should use the id from the response to create the checkpoint.
-    """
+    """  # noqa: E501
     context = empty_cloud_data_context
 
     validation_id_1, validation_id_2 = validation_ids
@@ -473,7 +471,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
     """
     A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
     When saving, it should use the id from the response to create the checkpoint.
-    """
+    """  # noqa: E501
     context = empty_cloud_data_context
 
     validation_id_1, validation_id_2 = validation_ids
@@ -529,7 +527,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
 ) -> None:
     """
     A Cloud-backed context should update a Cloud-backed CheckpointStore when calling `update_checkpoint`.
-    """
+    """  # noqa: E501
     context = empty_cloud_data_context
 
     validation_id_1, validation_id_2 = validation_ids
@@ -628,7 +626,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
 ) -> None:
     """
     A Cloud-backed context should update a Cloud-backed CheckpointStore when calling `update_checkpoint`.
-    """
+    """  # noqa: E501
     context = empty_cloud_data_context
 
     validation_id_1, validation_id_2 = validation_ids

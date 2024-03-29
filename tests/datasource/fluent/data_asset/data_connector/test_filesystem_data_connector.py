@@ -108,9 +108,7 @@ def test_instantiation_batching_regex_does_not_match_paths(tmp_path_factory):
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_all_batch_definitions_unsorted(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -486,9 +484,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_only_unique_batch_definitions(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_only_unique_batch_definitions")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_return_only_unique_batch_definitions"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -632,9 +628,7 @@ def test_alpha(tmp_path_factory):
     my_batch_request: BatchRequest
 
     # Try to fetch a batch from a nonexistent asset
-    my_batch_request = BatchRequest(
-        datasource_name="BASE", data_asset_name="A", options={}
-    )
+    my_batch_request = BatchRequest(datasource_name="BASE", data_asset_name="A", options={})
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
     )
@@ -772,9 +766,7 @@ def test_foxtrot(tmp_path_factory):
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_relative_base_directory_path(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_relative_asset_base_directory_path")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_relative_asset_base_directory_path"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[

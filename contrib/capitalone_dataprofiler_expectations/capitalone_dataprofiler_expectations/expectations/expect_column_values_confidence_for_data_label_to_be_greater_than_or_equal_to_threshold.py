@@ -22,14 +22,14 @@ from great_expectations.expectations.metrics import (
 )
 
 
-class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
-    ColumnMapMetricProvider
-):
+class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(ColumnMapMetricProvider):
     """MetricProvider Class for Data Label Probability greater than \
     or equal to the user-specified threshold"""
 
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.prediction_confidence_for_data_label_greater_than_or_equal_to_threshold"
+    condition_metric_name = (
+        "column_values.prediction_confidence_for_data_label_greater_than_or_equal_to_threshold"
+    )
 
     condition_value_keys = (
         "threshold",
@@ -157,7 +157,9 @@ class ExpectColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.prediction_confidence_for_data_label_greater_than_or_equal_to_threshold"
+    map_metric = (
+        "column_values.prediction_confidence_for_data_label_greater_than_or_equal_to_threshold"
+    )
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = (

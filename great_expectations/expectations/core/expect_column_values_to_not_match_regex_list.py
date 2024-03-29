@@ -146,7 +146,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
                   "meta": {},
                   "success": false
                 }
-    """
+    """  # noqa: E501
 
     regex_list: Union[List[str], EvaluationParameterDict]
 
@@ -203,8 +203,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             )
 
         template_str = (
-            "values must not match any of the following regular expressions: "
-            + values_string
+            "values must not match any of the following regular expressions: " + values_string
         )
 
         if params.mostly and params.mostly.value < 1.0:
@@ -247,19 +246,14 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
         else:
             for i, v in enumerate(params["regex_list"]):
                 params[f"v__{i!s}"] = v
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["regex_list"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["regex_list"])])
 
         template_str = (
-            "values must not match any of the following regular expressions: "
-            + values_string
+            "values must not match any of the following regular expressions: " + values_string
         )
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

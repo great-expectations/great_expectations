@@ -213,7 +213,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
         "subheader": {
             "content_block_type": "string_template",
             "string_template": {
-                "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",
+                "template": "${suite_title} ${expectation_suite_name}\n ${data_asset} ${data_asset_name}\n ${status_title} ${html_success_icon} ${success}",  # noqa: E501
                 "params": {
                     "suite_title": "Expectation Suite:",
                     "data_asset": "Data asset:",
@@ -221,7 +221,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
                     "status_title": "Status:",
                     "expectation_suite_name": "default",
                     "success": "Failed",
-                    "html_success_icon": '<i class="fas fa-times text-danger" aria-hidden="true"></i>',
+                    "html_success_icon": '<i class="fas fa-times text-danger" aria-hidden="true"></i>',  # noqa: E501
                 },
                 "styling": {
                     "params": {
@@ -229,9 +229,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
                         "status_title": {"classes": ["h6"]},
                         "expectation_suite_name": {
                             "tag": "a",
-                            "attributes": {
-                                "href": "../../../../expectations/default.html"
-                            },
+                            "attributes": {"href": "../../../../expectations/default.html"},
                         },
                     },
                     "classes": ["mb-0", "mt-1"],
@@ -386,9 +384,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                     "styling": {"parent": {"classes": []}},
                     "string_template": {
                         "template": "$value",
-                        "params": {
-                            "value": "project_dir/project_path/data/titanic/Titanic.csv"
-                        },
+                        "params": {"value": "project_dir/project_path/data/titanic/Titanic.csv"},
                         "styling": {"default": {"styles": {"word-break": "break-all"}}},
                     },
                 },
@@ -418,11 +414,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                                 "string_template": {
                                     "template": "$value",
                                     "params": {"value": "engine"},
-                                    "styling": {
-                                        "default": {
-                                            "styles": {"word-break": "break-all"}
-                                        }
-                                    },
+                                    "styling": {"default": {"styles": {"word-break": "break-all"}}},
                                 },
                             },
                             {
@@ -431,11 +423,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                                 "string_template": {
                                     "template": "$value",
                                     "params": {"value": "python"},
-                                    "styling": {
-                                        "default": {
-                                            "styles": {"word-break": "break-all"}
-                                        }
-                                    },
+                                    "styling": {"default": {"styles": {"word-break": "break-all"}}},
                                 },
                             },
                         ],
@@ -446,11 +434,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                                 "string_template": {
                                     "template": "$value",
                                     "params": {"value": "sep"},
-                                    "styling": {
-                                        "default": {
-                                            "styles": {"word-break": "break-all"}
-                                        }
-                                    },
+                                    "styling": {"default": {"styles": {"word-break": "break-all"}}},
                                 },
                             },
                             {
@@ -459,11 +443,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
                                 "string_template": {
                                     "template": "$value",
                                     "params": {"value": "None"},
-                                    "styling": {
-                                        "default": {
-                                            "styles": {"word-break": "break-all"}
-                                        }
-                                    },
+                                    "styling": {"default": {"styles": {"word-break": "break-all"}}},
                                 },
                             },
                         ],
@@ -512,45 +492,37 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
     titanic_profiled_evrs_1,
     ValidationResultsPageRenderer_render_with_run_info_at_end,
 ):
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=True
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
     rendered_validation_results = validation_results_page_renderer.render(
         titanic_profiled_evrs_1
     ).to_json_dict()
 
     # replace version of vega-lite in res to match snapshot test
-    content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
-        "table"
-    ][10][2]["content_blocks"][1]
+    content_block = rendered_validation_results["sections"][5]["content_blocks"][1]["table"][10][2][
+        "content_blocks"
+    ][1]
     content_block["graph"]["$schema"] = re.sub(
         r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
     )
-    assert (
-        rendered_validation_results
-        == ValidationResultsPageRenderer_render_with_run_info_at_end
-    )
+    assert rendered_validation_results == ValidationResultsPageRenderer_render_with_run_info_at_end
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     titanic_profiled_evrs_1,
     ValidationResultsPageRenderer_render_with_run_info_at_start,
 ):
-    validation_results_page_renderer = ValidationResultsPageRenderer(
-        run_info_at_end=False
-    )
+    validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=False)
     rendered_validation_results = validation_results_page_renderer.render(
         titanic_profiled_evrs_1
     ).to_json_dict()
 
     # replace version of vega-lite in res to match snapshot test
-    content_block = rendered_validation_results["sections"][5]["content_blocks"][1][
-        "table"
-    ][10][2]["content_blocks"][1]
+    content_block = rendered_validation_results["sections"][5]["content_blocks"][1]["table"][10][2][
+        "content_blocks"
+    ][1]
     content_block["graph"]["$schema"] = re.sub(
         r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
     )
     assert (
-        rendered_validation_results
-        == ValidationResultsPageRenderer_render_with_run_info_at_start
+        rendered_validation_results == ValidationResultsPageRenderer_render_with_run_info_at_start
     )

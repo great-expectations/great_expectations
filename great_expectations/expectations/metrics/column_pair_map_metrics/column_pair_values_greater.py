@@ -57,8 +57,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
 
         or_equal: bool = kwargs.get("or_equal") or False
         if or_equal:
-            return (temp_column_A >= temp_column_B) | (
-                temp_column_A.eqNullSafe(temp_column_B)
-            )
+            return (temp_column_A >= temp_column_B) | (temp_column_A.eqNullSafe(temp_column_B))
         else:
             return temp_column_A > temp_column_B

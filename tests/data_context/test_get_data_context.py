@@ -34,9 +34,7 @@ GX_CLOUD_PARAMS_REQUIRED = {
 @pytest.fixture()
 def set_up_cloud_envs(monkeypatch):
     monkeypatch.setenv("GX_CLOUD_BASE_URL", "http://hello.com")
-    monkeypatch.setenv(
-        "GX_CLOUD_ORGANIZATION_ID", "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
-    )
+    monkeypatch.setenv("GX_CLOUD_ORGANIZATION_ID", "bd20fead-2c31-4392-bcd1-f1e87ad5a79c")
     monkeypatch.setenv("GX_CLOUD_ACCESS_TOKEN", "i_am_a_token")
 
 
@@ -61,7 +59,7 @@ def test_base_context(clear_env_vars):
             "checkpoint_store": {"class_name": "CheckpointStore"},
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
             "validation_result_store": {"class_name": "ValidationsStore"},
-            "validation_config_store": {"class_name": "ValidationConfigStore"},
+            "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
         validations_store_name="validation_result_store",
         data_docs_sites={},
@@ -90,9 +88,7 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
         stores={
             "new_expectations_store": {"class_name": "ExpectationsStore"},
             "new_checkpoint_store": {"class_name": "CheckpointStore"},
-            "new_evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore"
-            },
+            "new_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
             "new_validation_result_store": {"class_name": "ValidationsStore"},
         },
         validations_store_name="new_validation_result_store",
@@ -122,9 +118,7 @@ def test_data_context_root_dir_returns_data_context(
     project_path.mkdir()
     gx.data_context.FileDataContext.create(project_path)
     context_path = project_path / FileDataContext.GX_DIR
-    assert isinstance(
-        gx.get_context(context_root_dir=str(context_path)), FileDataContext
-    )
+    assert isinstance(gx.get_context(context_root_dir=str(context_path)), FileDataContext)
 
 
 @pytest.mark.unit
@@ -157,9 +151,7 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
 
 @pytest.mark.parametrize("ge_cloud_mode", [True, None])
 @pytest.mark.cloud
-def test_cloud_context_env(
-    set_up_cloud_envs, empty_ge_cloud_data_context_config, ge_cloud_mode
-):
+def test_cloud_context_env(set_up_cloud_envs, empty_ge_cloud_data_context_config, ge_cloud_mode):
     with mock.patch.object(
         CloudDataContext,
         "retrieve_data_context_config_from_cloud",
@@ -181,9 +173,7 @@ def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
 
 
 @pytest.mark.cloud
-def test_cloud_missing_env_throws_exception(
-    clear_env_vars, empty_ge_cloud_data_context_config
-):
+def test_cloud_missing_env_throws_exception(clear_env_vars, empty_ge_cloud_data_context_config):
     with pytest.raises(GXCloudConfigurationError):
         gx.get_context(cloud_mode=True)
 
@@ -230,9 +220,7 @@ def test_cloud_context_with_in_memory_config_overrides(
             stores={
                 "new_expectations_store": {"class_name": "ExpectationsStore"},
                 "new_checkpoint_store": {"class_name": "CheckpointStore"},
-                "new_evaluation_parameter_store": {
-                    "class_name": "EvaluationParameterStore"
-                },
+                "new_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
                 "new_validation_result_store": {"class_name": "ValidationsStore"},
             },
             validations_store_name="new_validation_result_store",
@@ -316,15 +304,11 @@ def test_get_context_with_context_root_dir_scaffolds_filesystem(tmp_path: pathli
 
     assert isinstance(context, FileDataContext)
     assert context_root_dir.exists()
-    assert (
-        context_root_dir / FileDataContext.GITIGNORE
-    ).read_text() == "\nuncommitted/"
+    assert (context_root_dir / FileDataContext.GITIGNORE).read_text() == "\nuncommitted/"
 
 
 @pytest.mark.filesystem
-def test_get_context_with_context_root_dir_scaffolds_existing_gitignore(
-    clear_env_vars, tmp_path
-):
+def test_get_context_with_context_root_dir_scaffolds_existing_gitignore(clear_env_vars, tmp_path):
     context_root_dir = tmp_path / FileDataContext.GX_DIR
     context_root_dir.mkdir()
     with open(context_root_dir / FileDataContext.GITIGNORE, "w") as f:
@@ -333,24 +317,18 @@ def test_get_context_with_context_root_dir_scaffolds_existing_gitignore(
     context = gx.get_context(context_root_dir=context_root_dir)
 
     assert isinstance(context, FileDataContext)
-    assert (
-        context_root_dir / FileDataContext.GITIGNORE
-    ).read_text() == "asdf\nuncommitted/"
+    assert (context_root_dir / FileDataContext.GITIGNORE).read_text() == "asdf\nuncommitted/"
 
 
 @pytest.mark.filesystem
-def test_get_context_with_context_root_dir_scaffolds_new_gitignore(
-    clear_env_vars, tmp_path
-):
+def test_get_context_with_context_root_dir_scaffolds_new_gitignore(clear_env_vars, tmp_path):
     context_root_dir = tmp_path / FileDataContext.GX_DIR
     context_root_dir.mkdir()
 
     context = gx.get_context(context_root_dir=context_root_dir)
 
     assert isinstance(context, FileDataContext)
-    assert (
-        context_root_dir / FileDataContext.GITIGNORE
-    ).read_text() == "\nuncommitted/"
+    assert (context_root_dir / FileDataContext.GITIGNORE).read_text() == "\nuncommitted/"
 
 
 @pytest.mark.filesystem

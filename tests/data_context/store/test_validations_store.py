@@ -18,7 +18,7 @@ from tests import test_utils
 @freeze_time("09/26/2019 13:42:41")
 @mock_s3
 @pytest.mark.filterwarnings(
-    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"  # noqa: E501
 )
 @pytest.mark.aws_deps
 def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
@@ -29,7 +29,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
     conn = boto3.resource("s3", region_name="us-east-1")
     conn.create_bucket(Bucket=bucket)
 
-    # First, demonstrate that we pick up default configuration including from an S3TupleS3StoreBackend
+    # First, demonstrate that we pick up default configuration including from an S3TupleS3StoreBackend  # noqa: E501
     my_store = ValidationsStore(
         store_backend={
             "class_name": "TupleS3StoreBackend",
@@ -69,9 +69,9 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
     # Verify that internals are working as expected, including the default filepath
     assert {
         s3_object_info["Key"]
-        for s3_object_info in boto3.client("s3").list_objects_v2(
-            Bucket=bucket, Prefix=prefix
-        )["Contents"]
+        for s3_object_info in boto3.client("s3").list_objects_v2(Bucket=bucket, Prefix=prefix)[
+            "Contents"
+        ]
     } == {
         "test/prefix/.ge_store_backend_id",
         "test/prefix/asset/quarantine/20191007T151224.1234Z_prod_100/20190926T134241.000000Z/batch_id.json",
@@ -155,7 +155,7 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
 @pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.filterwarnings(
-    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"  # noqa: E501
 )
 def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
     full_test_dir = tmp_path_factory.mktemp(
@@ -245,7 +245,7 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
 
 
 @pytest.mark.filterwarnings(
-    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
+    "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"  # noqa: E501
 )
 @pytest.mark.big
 def test_ValidationsStore_with_DatabaseStoreBackend(sa):
@@ -307,7 +307,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 @pytest.mark.cloud
 def test_gx_cloud_response_json_to_object_dict() -> None:
     validation_id = "c1e8f964-ba44-4a13-a9b6-7331a358f12d"
-    validation_config = {
+    validation_definition = {
         "results": [],
         "success": True,
         "statistics": {
@@ -321,12 +321,12 @@ def test_gx_cloud_response_json_to_object_dict() -> None:
         "data": {
             "id": validation_id,
             "attributes": {
-                "result": validation_config,
+                "result": validation_definition,
             },
         }
     }
 
-    expected = validation_config
+    expected = validation_definition
     expected["id"] = validation_id
 
     actual = ValidationsStore.gx_cloud_response_json_to_object_dict(response_json)

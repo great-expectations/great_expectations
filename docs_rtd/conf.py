@@ -228,9 +228,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (index_doc, "great_expectations", "great_expectations Documentation", [author], 1)
-]
+man_pages = [(index_doc, "great_expectations", "great_expectations Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -282,7 +280,7 @@ def process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
     |           **Integration Infrastructure/Test Coverage**: {maturity_details[integration_infrastructure_test_coverage]}
     |           **Documentation Completeness**: {maturity_details[documentation_completeness]}
     |           **Bug Risk**: {maturity_details[bug_risk]}\
-"""
+"""  # noqa: E501
     expectation_completeness_template = """
     |           **Expectation Completeness**: {maturity_details[expectation_completeness]}\
 """
@@ -308,14 +306,12 @@ def process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
 
         if annotation["maturity_details"].get("expectation_completeness"):
             feature_annotation_admonition += (
-                feature_annotation_template
-                + expectation_completeness_template
-                + icon_template
+                feature_annotation_template + expectation_completeness_template + icon_template
             ).format(**annotation)
         else:
-            feature_annotation_admonition += (
-                feature_annotation_template + icon_template
-            ).format(**annotation)
+            feature_annotation_admonition += (feature_annotation_template + icon_template).format(
+                **annotation
+            )
 
     lines += feature_annotation_admonition.splitlines()
 

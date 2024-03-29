@@ -66,34 +66,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
     If that Metric meets the conditions you set, the Expectation considers that data valid.
 
-    For example:
-    ::
-
-        # my_df.my_col = [1,2,2,3,3,3,4]
-        >>> my_df.expect_column_quantile_values_to_be_between(
-            "my_col",
-            {
-                "quantiles": [0., 0.333, 0.6667, 1.],
-                "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
-            }
-        )
-        {
-          "success": True,
-            "result": {
-              "observed_value": {
-                "quantiles: [0., 0.333, 0.6667, 1.],
-                "values": [1, 2, 3, 4],
-              }
-              "element_count": 7,
-              "missing_count": 0,
-              "missing_percent": 0.0,
-              "details": {
-                "success_details": [true, true, true, true]
-              }
-            }
-          }
-        }
-
     expect_column_quantile_values_to_be_between can be computationally intensive for large datasets.
 
     Args:
@@ -241,7 +213,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                   "meta": {},
                   "success": false
                 }
-    """
+    """  # noqa: E501
 
     quantile_ranges: QuantileRange
     allow_relative_error: Union[bool, str] = False
@@ -269,23 +241,17 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     )
 
     @pydantic.validator("quantile_ranges")
-    def validate_quantile_ranges(
-        cls, quantile_ranges: QuantileRange
-    ) -> Optional[QuantileRange]:
+    def validate_quantile_ranges(cls, quantile_ranges: QuantileRange) -> Optional[QuantileRange]:
         try:
             assert all(
-                True
-                if None in x
-                else x == sorted([val for val in x if val is not None])
+                True if None in x else x == sorted([val for val in x if val is not None])
                 for x in quantile_ranges["value_ranges"]
             ), "quantile_ranges must consist of ordered pairs"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
         if len(quantile_ranges["quantiles"]) != len(quantile_ranges["value_ranges"]):
-            raise ValueError(
-                "quantile_values and quantiles must have the same number of elements"
-            )
+            raise ValueError("quantile_values and quantiles must have the same number of elements")
 
         return quantile_ranges
 
@@ -311,9 +277,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         quantiles: list = renderer_configuration.kwargs.get("quantile_ranges", {}).get(
             "quantiles", []
         )
-        value_ranges: list = renderer_configuration.kwargs.get(
-            "quantile_ranges", {}
-        ).get("value_ranges", [])
+        value_ranges: list = renderer_configuration.kwargs.get("quantile_ranges", {}).get(
+            "value_ranges", []
+        )
 
         header_row = [
             RendererTableValue(
@@ -333,15 +299,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
         for quantile, value_range in zip(quantiles, value_ranges):
             quantile_string = quantile_strings.get(quantile, f"{quantile:3.2f}")
-            value_range_lower: Union[Number, str] = (
-                value_range[0] if value_range[0] else "Any"
-            )
+            value_range_lower: Union[Number, str] = value_range[0] if value_range[0] else "Any"
             value_rage_lower_type = (
                 RendererValueType.NUMBER if value_range[0] else RendererValueType.STRING
             )
-            value_range_upper: Union[Number, str] = (
-                value_range[1] if value_range[1] else "Any"
-            )
+            value_range_upper: Union[Number, str] = value_range[1] if value_range[1] else "Any"
             value_range_upper_type = (
                 RendererValueType.NUMBER if value_range[0] else RendererValueType.STRING
             )
@@ -438,10 +400,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                 conditional_params,
             ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
+                conditional_template_str + ", then " + template_str[0].lower() + template_str[1:]
             )
             params.update(conditional_params)
 
@@ -547,17 +506,15 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         quantiles = renderer_configuration.result.result.get("observed_value", {}).get(
             "quantiles", []
         )
-        value_ranges = renderer_configuration.result.result.get(
-            "observed_value", {}
-        ).get("values", [])
+        value_ranges = renderer_configuration.result.result.get("observed_value", {}).get(
+            "values", []
+        )
 
         header_row = [
             RendererTableValue(
                 schema=RendererSchema(type=RendererValueType.STRING), value="Quantile"
             ),
-            RendererTableValue(
-                schema=RendererSchema(type=RendererValueType.STRING), value="Value"
-            ),
+            RendererTableValue(schema=RendererSchema(type=RendererValueType.STRING), value="Value"),
         ]
 
         table = []
@@ -652,11 +609,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                     {
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": quantile_string
-                            if quantile_string
-                            else f"{quantile:3.2f}",
+                            "template": quantile_string if quantile_string else f"{quantile:3.2f}",
                             "tooltip": {
-                                "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
+                                "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"  # noqa: E501
                                 if quantile == 0.50  # noqa: PLR2004
                                 else "expect_column_quantile_values_to_be_between"
                             },
@@ -690,16 +645,14 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = (
-            super().get_validation_dependencies(execution_engine, runtime_configuration)
+        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
+            execution_engine, runtime_configuration
         )
         configuration = self.configuration
         # column.quantile_values expects a "quantiles" key
         validation_dependencies.get_metric_configuration(
             metric_name="column.quantile_values"
-        ).metric_value_kwargs["quantiles"] = configuration.kwargs["quantile_ranges"][
-            "quantiles"
-        ]
+        ).metric_value_kwargs["quantiles"] = configuration.kwargs["quantile_ranges"]["quantiles"]
         return validation_dependencies
 
     def _validate(

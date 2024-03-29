@@ -36,7 +36,7 @@ def empty_data_context(empty_data_context: AbstractDataContext) -> AbstractDataC
 def patch_power_bi_datasource(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     Monkeypatch the PowerBI datasource to enable datasource creation even without `semantic-link` installed
-    """
+    """  # noqa: E501
     monkeypatch.setattr(FabricPowerBIDatasource, "test_connection", lambda _: True)
 
 

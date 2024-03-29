@@ -41,9 +41,7 @@ class YAMLReadyDictDatasourceConfigSerializer(AbstractConfigSerializer):
         config.pop("name", None)
 
         # Remove data connector name fields
-        for data_connector_name, data_connector_config in config.get(
-            "data_connectors", {}
-        ).items():
+        for data_connector_name, data_connector_config in config.get("data_connectors", {}).items():
             data_connector_config.pop("name", None)
 
         return config
@@ -59,14 +57,12 @@ class NamedDatasourceSerializer(AbstractConfigSerializer):
 
         Returns:
             Representation of object as a dict suitable for return in list_datasources().
-        """
+        """  # noqa: E501
 
         config: dict = self.schema.dump(obj)
 
         # Remove data connector config names
-        for data_connector_name, data_connector_config in config.get(
-            "data_connectors", {}
-        ).items():
+        for data_connector_name, data_connector_config in config.get("data_connectors", {}).items():
             data_connector_config.pop("name", None)
 
         return config
@@ -86,9 +82,7 @@ class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
         """
 
         raw_config: dict = self.schema.dump(obj)
-        loaded_obj: AbstractConfig = cast(
-            "DatasourceConfig", self.schema.load(raw_config)
-        )
+        loaded_obj: AbstractConfig = cast("DatasourceConfig", self.schema.load(raw_config))
         config: dict = self.schema.dump(loaded_obj)
 
         json_serializable_dict: dict = convert_to_json_serializable(data=config)

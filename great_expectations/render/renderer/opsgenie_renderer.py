@@ -15,9 +15,7 @@ class OpsgenieRenderer(Renderer):
         data_docs_pages=None,
         notify_with=None,
     ):
-        summary_text = (
-            "No validation occurred. Please ensure you passed a validation_result."
-        )
+        summary_text = "No validation occurred. Please ensure you passed a validation_result."
         status = "Failed ❌"
 
         if validation_result:
@@ -41,12 +39,8 @@ class OpsgenieRenderer(Renderer):
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
             run_id = validation_result.meta.get("run_id", "__no_run_id__")
-            batch_id = BatchKwargs(
-                validation_result.meta.get("batch_kwargs", {})
-            ).to_id()
-            check_details_text = "{} of {} expectations were met".format(
-                n_checks_succeeded, n_checks
-            )
+            batch_id = BatchKwargs(validation_result.meta.get("batch_kwargs", {})).to_id()
+            check_details_text = f"{n_checks_succeeded} of {n_checks} expectations were met"
 
             if validation_result.success:
                 status = "Success 🎉"

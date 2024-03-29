@@ -24,15 +24,15 @@ _EXCLUDE_METHODS: Final[set[str]] = {
     # we don't care about overriding these methods for InvalidDatasource
     "copy",
     "delete_asset",
-    "delete_batch_config",
+    "delete_batch_definition",
     "dict",
     "get_asset_names",
     "get_assets_as_dict",
-    "get_batch_config",  # DataAsset
+    "get_batch_definition",  # DataAsset
     "get_execution_engine",
     "json",
     "parse_order_by_sorters",
-    "update_batch_config_field_set",  # DataAsset
+    "update_batch_definition_field_set",  # DataAsset
     "yaml",
 }
 DATASOURCE_PUBLIC_METHODS: Final[list[str]] = [
@@ -54,16 +54,14 @@ class TestPublicMethodsAreOverridden:
     and would want to know if the Datasource is invalid.
 
     If a method is not overridden, it will be inherited from the base class and will not be present in the InvalidDatasource.__dict__.
-    """
+    """  # noqa: E501
 
     @pytest.mark.parametrize("base_ds_method_name", DATASOURCE_PUBLIC_METHODS)
     def test_datasource_methods(self, base_ds_method_name: str):
         """Ensure that InvalidDatasource overrides the applicable Datasource methods."""
         for base_ds_method_name in DATASOURCE_PUBLIC_METHODS:
             method = getattr(InvalidDatasource, base_ds_method_name, None)
-            assert (
-                method
-            ), f"Expected {base_ds_method_name} to be defined on InvalidDatasource"
+            assert method, f"Expected {base_ds_method_name} to be defined on InvalidDatasource"
             with pytest.raises(TypeError):
                 method()
 
@@ -72,9 +70,7 @@ class TestPublicMethodsAreOverridden:
         """Ensure that InvalidAsset overrides the applicable DataAsset methods."""
         for base_ds_method_name in DATA_ASSET_PUBLIC_METHODS:
             method = getattr(InvalidAsset, base_ds_method_name, None)
-            assert (
-                method
-            ), f"Expected {base_ds_method_name} to be defined on InvalidAsset"
+            assert method, f"Expected {base_ds_method_name} to be defined on InvalidAsset"
             with pytest.raises(TypeError):
                 method()
 
@@ -147,9 +143,7 @@ def invalid_datasource_factory() -> InvalidDSFactory:
                 "type": "snowflake",
                 "connection_string": "${MY_CONN_STR}",
                 "user": "invalid_extra_field",
-                "assets": [
-                    {"name": "my_asset", "type": "table", "table_name": "foobar"}
-                ],
+                "assets": [{"name": "my_asset", "type": "table", "table_name": "foobar"}],
             },
             id="extra field",
         ),
@@ -250,7 +244,7 @@ class TestInvalidDatasource:
 
         Standard fields such as `type`, `name`, `id` etc. should be included in the InvalidDatasource instance and should
         never be sensitive.
-        """
+        """  # noqa: E501
         print(f"Datasource config:\n{pf(invalid_ds_cfg)}")
         invalid_ds = invalid_datasource_factory(invalid_ds_cfg)
 
@@ -270,18 +264,14 @@ class TestInvalidDatasource:
             asset_dict = asset.dict()
             extra_asset_fields = set(asset_dict.keys()) - data_asset_fields
             for field in extra_asset_fields:
-                assert (
-                    field not in asset_dict
-                ), f"Expected asset `{field}` to be ignored"
+                assert field not in asset_dict, f"Expected asset `{field}` to be ignored"
 
 
 @pytest.fixture
 def rand_invalid_datasource_with_assets(
     invalid_datasource_factory: InvalidDSFactory,
 ) -> InvalidDatasource:
-    random_ds_type = random.choice(
-        [t for t in _SourceFactories.type_lookup.type_names()]
-    )
+    random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
     invalid_ds = invalid_datasource_factory(
         {
             "name": "my invalid ds",
@@ -302,15 +292,13 @@ class TestInvalidDataAsset:
     def test_connection_raises_informative_error(
         self, invalid_datasource_factory: InvalidDSFactory
     ):
-        random_ds_type = random.choice(
-            [t for t in _SourceFactories.type_lookup.type_names()]
-        )
+        random_ds_type = random.choice([t for t in _SourceFactories.type_lookup.type_names()])
         print(f"{random_ds_type=}")
         invalid_datasource: InvalidDatasource = invalid_datasource_factory(
             {
                 "name": "my invalid ds",
                 "type": random_ds_type,
-                "foo": "bar",  # regardless of the type this extra field should make the datasource invalid
+                "foo": "bar",  # regardless of the type this extra field should make the datasource invalid  # noqa: E501
                 "assets": [
                     {"name": "definitely_invalid", "type": "NOT_A_VALID_TYPE"},
                     {"name": "maybe_valid", "type": "table", "table_name": "my_table"},
@@ -331,9 +319,7 @@ class TestInvalidDataAsset:
     def test_base_data_asset_attribute_does_not_error(
         self, rand_invalid_datasource_with_assets: InvalidDatasource, attr_name: str
     ):
-        assert (
-            rand_invalid_datasource_with_assets.assets
-        ), "Expected assets to be present"
+        assert rand_invalid_datasource_with_assets.assets, "Expected assets to be present"
         for asset in rand_invalid_datasource_with_assets.assets:
             value = getattr(asset, attr_name)
             print(attr_name, value)

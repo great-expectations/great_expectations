@@ -77,7 +77,7 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         """Returns a dictionary of given metric names and their corresponding configuration, specifying the metric
-        types and their respective domains"""
+        types and their respective domains"""  # noqa: E501
         dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,

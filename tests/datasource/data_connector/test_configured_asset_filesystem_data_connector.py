@@ -66,9 +66,7 @@ def test_basic_instantiation(tmp_path_factory):
 
 
 def test_return_all_batch_definitions_unsorted(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -102,17 +100,13 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_filesystem_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     with pytest.raises(TypeError):
@@ -144,102 +138,78 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
     ]
     assert expected == unsorted_batch_definition_list
 
     # with named data_asset_name
-    unsorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-            )
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert expected == unsorted_batch_definition_list
 
 
 def test_return_all_batch_definitions_sorted(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_all_batch_definitions_sorted")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_return_all_batch_definitions_sorted"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -285,26 +255,20 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_filesystem_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-            )
+    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
         )
     )
 
@@ -313,81 +277,61 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
+            batch_identifiers=IDDict({"name": "abe", "timestamp": "20200809", "price": "1040"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200819", "price": "1300"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
+            batch_identifiers=IDDict({"name": "alex", "timestamp": "20200809", "price": "1000"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20201129", "price": "1900"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
+            batch_identifiers=IDDict({"name": "eugene", "timestamp": "20200809", "price": "1500"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200811", "price": "1009"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200810", "price": "1003"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
+            batch_identifiers=IDDict({"name": "james", "timestamp": "20200713", "price": "1567"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200810", "price": "1001"}),
         ),
         LegacyBatchDefinition(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
+            batch_identifiers=IDDict({"name": "will", "timestamp": "20200809", "price": "1002"}),
         ),
     ]
 
@@ -413,10 +357,8 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     my_batch_definition: LegacyBatchDefinition
 
     # TEST 2: Should only return the specified partition
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
 
     assert len(my_batch_definition_list) == 1
@@ -443,18 +385,14 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         data_connector_query=None,
     )
     # should return 10
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 10
 
 
 def test_return_only_unique_batch_definitions(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_only_unique_batch_definitions")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_return_only_unique_batch_definitions"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -480,17 +418,13 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_filesystem_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     expected = [
@@ -521,13 +455,11 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     assert expected == unsorted_batch_definition_list
 
     # with named data_asset_name
-    unsorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-            )
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
         )
     )
     assert expected == unsorted_batch_definition_list
@@ -561,17 +493,13 @@ def test_alpha(tmp_path_factory):
             """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_filesystem_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     my_batch_definition_list: List[LegacyBatchDefinition]
@@ -585,10 +513,8 @@ def test_alpha(tmp_path_factory):
         data_connector_query=None,
     )
 
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 0
 
@@ -598,10 +524,8 @@ def test_alpha(tmp_path_factory):
         data_asset_name="A",
         data_connector_query=IDDict(**{"batch_filter_parameters": {"part_1": "B"}}),
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 1
 
@@ -657,17 +581,13 @@ def test_foxtrot(tmp_path_factory):
         """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "general_filesystem_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     my_batch_request = BatchRequest(
         datasource_name="BASE",
@@ -684,9 +604,7 @@ def test_foxtrot(tmp_path_factory):
 
 
 def test_relative_asset_base_directory_path(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_relative_asset_base_directory_path")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_relative_asset_base_directory_path"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -720,17 +638,13 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
         """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "my_configured_asset_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "my_configured_asset_filesystem_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     my_data_connector.data_context_root_directory = base_directory
 
@@ -756,9 +670,7 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
 
 def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_factory):
     base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_relative_default_and_relative_asset_base_directory_paths"
-        )
+        tmp_path_factory.mktemp("test_relative_default_and_relative_asset_base_directory_paths")
     )
     create_files_in_directory(
         directory=base_directory,
@@ -793,17 +705,13 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
         """,
     )
 
-    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
-        instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "my_configured_asset_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
-        )
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = instantiate_class_from_config(
+        config=my_data_connector_yaml,
+        runtime_environment={
+            "name": "my_configured_asset_filesystem_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     my_data_connector.data_context_root_directory = base_directory
 
@@ -823,10 +731,8 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 1
 
@@ -893,9 +799,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
                     "name": "general_filesystem_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={
-                    "module_name": "great_expectations.datasource.data_connector"
-                },
+                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
             )
         )
 
@@ -954,17 +858,13 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
                     "name": "general_filesystem_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={
-                    "module_name": "great_expectations.datasource.data_connector"
-                },
+                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
             )
         )
 
 
 def test_example_with_explicit_data_asset_names(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_example_with_explicit_data_asset_names")
-    )
+    base_directory = str(tmp_path_factory.mktemp("test_example_with_explicit_data_asset_names"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -1057,9 +957,7 @@ assets:
     )
 
 
-def test_one_half_year_as_6_data_assets_1_batch_each(
-    empty_data_context, tmp_path_factory
-):
+def test_one_half_year_as_6_data_assets_1_batch_each(empty_data_context, tmp_path_factory):
     context = empty_data_context
     base_directory: str = str(tmp_path_factory.mktemp("log_data"))
     create_files_in_directory(
@@ -1172,16 +1070,12 @@ def test_one_year_as_1_data_asset_12_batches(empty_data_context, tmp_path_factor
     )
     # making the result deterministic
     data_asset_names["default_configured_data_connector_name"].sort()
-    assert data_asset_names == {
-        "default_configured_data_connector_name": ["report_2018"]
-    }
+    assert data_asset_names == {"default_configured_data_connector_name": ["report_2018"]}
     assert len(data_asset_names["default_configured_data_connector_name"]) == 1
 
 
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
-    )
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -1216,9 +1110,7 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
 
 
 def test_basic_instantiation_with_empty_datasource(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
-    )
+    base_directory = str(tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector"))
 
     # noinspection PyUnusedLocal
     my_data_connector = ConfiguredAssetFilesystemDataConnector(  # noqa: F841

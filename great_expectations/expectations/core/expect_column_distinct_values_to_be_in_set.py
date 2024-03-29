@@ -164,7 +164,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                   "meta": {},
                   "success": false
                 }
-    """
+    """  # noqa: E501
 
     value_set: Union[list, set, EvaluationParameterDict, None]
 
@@ -178,7 +178,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.value_counts",)
     success_keys = ("value_set",)
 
@@ -205,7 +205,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
-                template_str = "distinct values must belong to a set, but that set is not specified."
+                template_str = (
+                    "distinct values must belong to a set, but that set is not specified."
+                )
         else:
             array_param_name = "value_set"
             param_prefix = "v__"
@@ -221,13 +223,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             )
 
             if renderer_configuration.include_column_name:
-                template_str = (
-                    f"$column distinct values must belong to this set: {value_set_str}."
-                )
+                template_str = f"$column distinct values must belong to this set: {value_set_str}."
             else:
-                template_str = (
-                    f"distinct values must belong to this set: {value_set_str}."
-                )
+                template_str = f"distinct values must belong to this set: {value_set_str}."
 
         renderer_configuration.template_str = template_str
 
@@ -256,23 +254,19 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
-                template_str = "distinct values must belong to a set, but that set is not specified."
+                template_str = (
+                    "distinct values must belong to a set, but that set is not specified."
+                )
 
         else:
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
             if renderer_configuration.include_column_name:
-                template_str = (
-                    f"$column distinct values must belong to this set: {values_string}."
-                )
+                template_str = f"$column distinct values must belong to this set: {values_string}."
             else:
-                template_str = (
-                    f"distinct values must belong to this set: {values_string}."
-                )
+                template_str = f"distinct values must belong to this set: {values_string}."
 
         if params["row_condition"] is not None:
             (
@@ -282,9 +276,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
-        styling = (
-            runtime_configuration.get("styling", {}) if runtime_configuration else {}
-        )
+        styling = runtime_configuration.get("styling", {}) if runtime_configuration else {}
 
         return [
             RenderedStringTemplateContent(
@@ -313,12 +305,8 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             values = value_count_dicts.index.tolist()
             counts = value_count_dicts.tolist()
         else:
-            values = [
-                value_count_dict["value"] for value_count_dict in value_count_dicts
-            ]
-            counts = [
-                value_count_dict["count"] for value_count_dict in value_count_dicts
-            ]
+            values = [value_count_dict["value"] for value_count_dict in value_count_dicts]
+            counts = [value_count_dict["count"] for value_count_dict in value_count_dicts]
 
         df = pd.DataFrame(
             {
@@ -362,9 +350,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": "Value Counts",
-                            "tooltip": {
-                                "content": "expect_column_distinct_values_to_be_in_set"
-                            },
+                            "tooltip": {"content": "expect_column_distinct_values_to_be_in_set"},
                             "tag": "h6",
                         },
                     }

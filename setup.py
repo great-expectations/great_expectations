@@ -1,7 +1,8 @@
 import re
 from pathlib import Path
 
-import pkg_resources
+# https://setuptools.pypa.io/en/latest/pkg_resources.html
+import pkg_resources  # noqa: TID251: TODO: switch to poetry
 from setuptools import find_packages, setup
 
 import versioneer
@@ -50,7 +51,7 @@ def get_extras_require():
         match = rx_name_part.match(file_path.name)
         assert (
             match is not None
-        ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
+        ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"  # noqa: E501
         key = match.group(1)
         if key in ignore_keys:
             continue
@@ -86,7 +87,7 @@ def get_extras_require():
 with open("requirements.txt") as f:
     required = f.read().splitlines()
 
-long_description = "Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description)."
+long_description = "Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description)."  # noqa: E501
 
 config = {
     "description": "Always know what to expect from your data.",
@@ -98,9 +99,7 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": get_extras_require(),
-    "packages": find_packages(
-        exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
-    ),
+    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]),
     "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,

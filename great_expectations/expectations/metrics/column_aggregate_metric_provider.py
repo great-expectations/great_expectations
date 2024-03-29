@@ -55,7 +55,7 @@ def column_aggregate_value(
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-    """
+    """  # noqa: E501
     domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
     if issubclass(engine, PandasExecutionEngine):
 
@@ -83,9 +83,7 @@ def column_aggregate_value(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
@@ -101,12 +99,10 @@ def column_aggregate_value(
 
         return wrapper
     else:
-        raise ValueError(
-            "column_aggregate_value decorator only supports PandasExecutionEngine"
-        )
+        raise ValueError("column_aggregate_value decorator only supports PandasExecutionEngine")
 
 
-def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
+def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):  # noqa: C901
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
     A column_aggregate_partial must provide an aggregate function; it will be executed with the specified engine
@@ -123,10 +119,8 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-    """
-    partial_fn_type: MetricPartialFunctionTypes = (
-        MetricPartialFunctionTypes.AGGREGATE_FN
-    )
+    """  # noqa: E501
+    partial_fn_type: MetricPartialFunctionTypes = MetricPartialFunctionTypes.AGGREGATE_FN
     domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
     if issubclass(engine, SqlAlchemyExecutionEngine):
 
@@ -159,7 +153,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                         metric_domain_kwargs
                     )
                 else:
-                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
+                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain  # noqa: E501
                     compute_domain_kwargs = metric_domain_kwargs
                 (
                     selectable,
@@ -169,9 +163,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
@@ -223,7 +215,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                         metric_domain_kwargs
                     )
                 else:
-                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain
+                    # We do not copy here because if compute domain is different, it will be copied by get_compute_domain  # noqa: E501
                     compute_domain_kwargs = metric_domain_kwargs
 
                 (
@@ -234,9 +226,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, sqlalchemy.quoted_name] = (
-                    accessor_domain_kwargs["column"]
-                )
+                column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
                 column = data[column_name]
                 metric_aggregate = metric_fn(
@@ -324,7 +314,5 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
         return dependencies
 
 
-class ColumnMetricProvider(
-    ColumnAggregateMetricProvider, metaclass=DeprecatedMetaMetricProvider
-):
+class ColumnMetricProvider(ColumnAggregateMetricProvider, metaclass=DeprecatedMetaMetricProvider):
     _DeprecatedMetaMetricProvider__alias = ColumnAggregateMetricProvider

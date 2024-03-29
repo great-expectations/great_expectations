@@ -70,7 +70,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     See Also:
         [expect_column_values_to_be_json_parseable](https://greatexpectations.io/expectations/expect_column_values_to_be_json_parseable)
         [The JSON-schema docs](https://json-schema.org)
-    """
+    """  # noqa: E501
 
     json_schema: dict
 
@@ -112,9 +112,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         if not params.json_schema:
             template_str = "values must match a JSON Schema but none was specified."
         else:
-            formatted_json = (
-                f"<pre>{json.dumps(params.json_schema.value, indent=4)}</pre>"
-            )
+            formatted_json = f"<pre>{json.dumps(params.json_schema.value, indent=4)}</pre>"
             renderer_configuration.add_param(
                 name="formatted_json",
                 param_type=RendererValueType.STRING,
@@ -125,11 +123,9 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
-                template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
+                template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"  # noqa: E501
             else:
-                template_str = (
-                    "values must match the following JSON Schema: $formatted_json"
-                )
+                template_str = "values must match the following JSON Schema: $formatted_json"
 
         if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
@@ -165,15 +161,11 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
                 f"<pre>{json.dumps(params.get('json_schema'), indent=4)}</pre>"
             )
             if params["mostly"] is not None and params["mostly"] < 1.0:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"
+                params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")  # noqa: E501
+                template_str = "values must match the following JSON Schema, at least $mostly_pct % of the time: $formatted_json"  # noqa: E501
             else:
-                template_str = (
-                    "values must match the following JSON Schema: $formatted_json"
-                )
+                template_str = "values must match the following JSON Schema: $formatted_json"
 
         if include_column_name:
             template_str = f"$column {template_str}"

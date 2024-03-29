@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from itertools import chain
 from typing import TYPE_CHECKING, List, Optional, Sequence
 
@@ -12,6 +13,8 @@ from great_expectations.experimental.metric_repository.metrics import (
     Metric,
     MetricTypes,
 )
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -46,12 +49,18 @@ class MetricListMetricRetriever(MetricRetriever):
 
         # exit early if only Table Metrics exist
         if not self._column_metrics_in_metric_list(metric_list):
+            # if no column metrics are present in the metric list, we can return the table metrics
+            return metrics_result
+
+        if MetricTypes.TABLE_COLUMN_TYPES not in metric_list:
+            logger.warning(
+                "TABLE_COLUMN_TYPES metric is required to compute column metrics. \
+                Skipping column metrics."
+            )
             return metrics_result
 
         table_column_types = list(
-            filter(
-                lambda m: m.metric_name == MetricTypes.TABLE_COLUMN_TYPES, table_metrics
-            )
+            filter(lambda m: m.metric_name == MetricTypes.TABLE_COLUMN_TYPES, table_metrics)
         )[0]
 
         # We need to skip columns that do not report a type, because the metric computation
@@ -102,13 +111,11 @@ class MetricListMetricRetriever(MetricRetriever):
         Returns:
             Sequence[Metric]: List of metrics for non-numeric columns.
         """
-        # currently only the null-count is supported. If more metrics are added, this set will need to be updated.
+        # currently only the null-count is supported. If more metrics are added, this set will need to be updated.  # noqa: E501
         column_metric_names = {MetricTypes.COLUMN_NULL_COUNT}
         metrics: list[Metric] = []
         metrics_list_as_set = set(metrics_list)
-        metrics_to_calculate = sorted(
-            column_metric_names.intersection(metrics_list_as_set)
-        )
+        metrics_to_calculate = sorted(column_metric_names.intersection(metrics_list_as_set))
 
         if not metrics_to_calculate:
             return metrics
@@ -144,9 +151,7 @@ class MetricListMetricRetriever(MetricRetriever):
             MetricTypes.COLUMN_MEDIAN,
         }
         metrics_list_as_set = set(metrics_list)
-        metrics_to_calculate = sorted(
-            column_metric_names.intersection(metrics_list_as_set)
-        )
+        metrics_to_calculate = sorted(column_metric_names.intersection(metrics_list_as_set))
         if not metrics_to_calculate:
             return metrics
 
@@ -181,14 +186,12 @@ class MetricListMetricRetriever(MetricRetriever):
             #  MetricTypes.COLUMN_MEDIAN,  # Currently not supported for timestamp in Snowflake
         }
         metrics_list_as_set = set(metrics_list)
-        metrics_to_calculate = sorted(
-            column_metric_names.intersection(metrics_list_as_set)
-        )
+        metrics_to_calculate = sorted(column_metric_names.intersection(metrics_list_as_set))
         if not metrics_to_calculate:
             return metrics
 
         # Note: Timestamps are returned as strings for Snowflake, this may need to be adjusted
-        # when we support other datasources. For example in Pandas, timestamps can be returned as Timestamp().
+        # when we support other datasources. For example in Pandas, timestamps can be returned as Timestamp().  # noqa: E501
         return self._get_column_metrics(
             batch_request=batch_request,
             column_list=column_list,
@@ -225,7 +228,7 @@ class MetricListMetricRetriever(MetricRetriever):
 
         Returns:
             bool: True if all the metric types in the list are valid, False otherwise.
-        """
+        """  # noqa: E501
         for metric in metric_list:
             if metric not in MetricTypes:
                 return False
@@ -239,7 +242,7 @@ class MetricListMetricRetriever(MetricRetriever):
 
         Returns:
             bool: True if any column metrics are present in the metric list, False otherwise.
-        """
+        """  # noqa: E501
         column_metrics: List[MetricTypes] = [
             MetricTypes.COLUMN_MIN,
             MetricTypes.COLUMN_MAX,

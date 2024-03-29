@@ -21,31 +21,9 @@ module.exports = {
           label: 'Install GX 1.0'
         },
         {
-          type: 'category',
-          label: 'Install additional dependencies',
-          link: {type: 'doc', id: 'core/installation_and_setup/additional_dependencies/additional_dependencies'},
-          items: [
-            {
-              type: 'link',
-              label: 'Amazon S3',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=amazon',
-            },
-            {
-              type: 'link',
-              label: 'Microsoft Azure Blob Storage',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=azure',
-            },
-            {
-              type: 'link',
-              label: 'Google Cloud Storage',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=gcs',
-            },
-            {
-              type: 'link',
-              label: 'SQL databases',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=sql',
-            },
-          ]
+          type: 'doc',
+          id: 'core/installation_and_setup/additional_dependencies/additional_dependencies',
+          label: 'Install additional dependencies'
         },
         {
           type: 'category',
@@ -54,35 +32,52 @@ module.exports = {
           items: [
             {
               type: 'link',
-              label: 'Quickstart with a Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#quickstart-with-a-data-context',
+              label: 'Request a Data Context',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#request-a-data-context',
             },
             {
               type: 'link',
-              label: '🚧 Initialize a new Data Context',
+              label: 'Initialize a new Data Context',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#initialize-a-new-data-context',
             },
             {
               type: 'link',
-              label: '🚧 Connect to an existing Data Context',
+              label: 'Connect to an existing Data Context',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#connect-to-an-existing-data-context',
             },
             {
               type: 'link',
-              label: '🚧 Export an Ephemeral Data Context to a new File Data Context',
+              label: 'Export an Ephemeral Data Context to a new File Data Context',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#export-an-ephemeral-data-context-to-a-new-file-data-context',
             },
             {
               type: 'link',
-              label: '🚧 View the full configuration of a Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view-the-full-configuration-of-a-data-context',
+              label: 'View a Data Context configuration',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view-a-data-context-configuration',
             },
           ]
         },
         {
-          type: 'doc',
-          id: 'core/installation_and_setup/manage_credentials',
-          label: '🚧 Manage credentials'
+          type: 'category',
+          label: 'Manage credentials',
+          link: {type: 'doc', id: 'core/installation_and_setup/manage_credentials'},
+          items: [
+            {
+              type: 'link',
+              label: 'Environment variables',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#environment-variables',
+            },
+            {
+              type: 'link',
+              label: 'YAML file',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#yaml-file',
+            },
+            {
+              type: 'link',
+              label: 'Secrets manager',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#secrets-manager',
+            },
+          ]
         },
         {
           type: 'doc',
@@ -128,7 +123,6 @@ module.exports = {
             },
           ]
         },
-
         {
           type: 'category',
           label: '🚧 Manage Data Sources',
@@ -280,6 +274,11 @@ module.exports = {
             },
             {
               type: 'link',
+              label: 'Rename an Expectation Suite',
+              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#rename-an-expectation-suite',
+            },
+            {
+              type: 'link',
               label: 'Delete an Expectation Suite',
               href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
             },
@@ -326,20 +325,91 @@ module.exports = {
       link: {type: 'doc', id: 'core/validate_data/validate_data'},
       items: [
         {
-          type: 'doc',
-          id: 'core/validate_data/manage_validators',
-          label: 'Manage Validators'
+          type: 'category',
+          label: 'Manage Validation Definitions',
+          link: { type: 'doc', id: 'core/validate_data/validation_definitions/manage_validation_definitions' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create a Validation Definition',
+              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#create-a-validation-definition',
+            },
+            {
+              type: 'link',
+              label: 'List available Validation Definitions',
+              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#list-available-validation-definitions',
+            },
+            {
+              type: 'link',
+              label: 'Get a Validation Definition by name',
+              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#get-a-validation-definition-by-name',
+            },
+            {
+              type: 'link',
+              label: 'Get Validation Definitions by attributes',
+              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#get-validation-definitions-by-attributes',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Validation Definition',
+              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#delete-a-validation-definition',
+            },
+            {
+              type: 'link',
+              label: 'Duplicate a Validation Definition',
+              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#duplicate-a-validation-definition',
+            },
+            {
+              type: 'link',
+              label: 'Run a Validation Definition',
+              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#run-a-validation-definition',
+            },
+          ]
         },
         {
-          type: 'doc',
-          id: 'core/validate_data/manage_checkpoints',
-          label: 'Manage Checkpoints'
+          type: 'category',
+          label: 'Manage Checkpoints',
+          link: { type: 'doc', id: 'core/validate_data/checkpoints/manage_checkpoints' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#create-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'List available Checkpoints',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#list-available-checkpoints',
+            },
+            {
+              type: 'link',
+              label: 'Get a Checkpoint by name',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#get-a-checkpoint-by-name',
+            },
+            {
+              type: 'link',
+              label: 'Get Checkpoints by attributes',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#get-checkpoints-by-attributes',
+            },
+            {
+              type: 'link',
+              label: 'Update a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#update-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#delete-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: '🚧 Run a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#run-a-checkpoint',
+            },
+          ]
         },
       ]
     }
-    <!--TODO: Validate Data -->
-      <!-- TODO: Manage Validators -->
-      <!-- TODO: Manage Checkpoints -->
   ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
@@ -380,7 +450,7 @@ module.exports = {
             },
           ]
         },
-        { type: 'doc', id: 'cloud/try_gx_cloud' },
+        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         {
           type: 'category',
           label: 'Connect GX Cloud',

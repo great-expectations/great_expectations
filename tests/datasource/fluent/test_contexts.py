@@ -86,9 +86,7 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     context = empty_file_context
     datasource_name = "save_ds_test"
 
-    context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    )
+    context.sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{db_file}")
 
     yaml_path = pathlib.Path(context.root_directory, context.GX_YML)
     assert yaml_path.exists()
@@ -114,14 +112,14 @@ def test_partitioners_are_persisted_on_creation(
     my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
     my_asset.test_connection()
     partitioner = PartitionerYear(column_name="date")
-    my_asset.add_batch_config(name="cloud partitioner test", partitioner=partitioner)
+    my_asset.add_batch_definition(name="cloud partitioner test", partitioner=partitioner)
 
-    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
-        "attributes"
-    ]["datasource_config"]
+    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
+        "datasource_config"
+    ]
 
     # partitioners should be present
-    assert datasource_config["assets"][0]["batch_configs"][0]["partitioner"]
+    assert datasource_config["assets"][0]["batch_definitions"][0]["partitioner"]
 
 
 @pytest.mark.filesystem
@@ -141,9 +139,7 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
 
     context.sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    ).add_query_asset(
-        asset_name, query='SELECT name FROM sqlite_master WHERE type = "table"'
-    )
+    ).add_query_asset(asset_name, query='SELECT name FROM sqlite_master WHERE type = "table"')
 
     fds_after_add: dict = yaml.load(yaml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
     print(f"'{asset_name}' added\n-----------------\n{pf(fds_after_add)}")
@@ -180,9 +176,9 @@ def test_delete_asset_with_cloud_data_context(
 
     asset_names = [
         asset["name"]
-        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
-            "attributes"
-        ]["datasource_config"]["assets"]
+        for asset in cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
+            "datasource_config"
+        ]["assets"]
     ]
     assert asset_name not in asset_names
 
@@ -411,9 +407,7 @@ def test_invalid_datasource_config_does_not_break_cloud_context(
     print(f"{bad_datasource!r}\n{bad_datasource!s}")
     assert isinstance(bad_datasource, InvalidDatasource)
     assert bad_datasource.name == datasource_name
-    assert len(bad_datasource.assets) == len(
-        invalid_datasource_config.get("assets", [])
-    )
+    assert len(bad_datasource.assets) == len(invalid_datasource_config.get("assets", []))
 
 
 @pytest.fixture
@@ -434,9 +428,7 @@ def verify_asset_names_mock(
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
-            old_datasource: dict | None = cloud_api_fake_db["datasources"].get(
-                datasource_id
-            )
+            old_datasource: dict | None = cloud_api_fake_db["datasources"].get(datasource_id)
             if old_datasource:
                 if (
                     payload.data.name
@@ -470,9 +462,7 @@ class TestPandasDefaultWithCloud:
         verify_asset_names_mock: RequestsMock,
     ):
         context = empty_cloud_context_fluent
-        df = pd.DataFrame.from_dict(
-            {"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]}
-        )
+        df = pd.DataFrame.from_dict({"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]})
 
         context.sources.pandas_default.read_dataframe(df)
 

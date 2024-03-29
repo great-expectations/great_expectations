@@ -138,7 +138,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                   "meta": {},
                   "success": false
                 }
-    """
+    """  # noqa: E501
 
     column_set: Union[list, set, EvaluationParameterDict, None]
     exact_match: Union[bool, None]
@@ -195,12 +195,12 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             )
 
             exact_match_str = (
-                "exactly"
-                if params.exact_match and params.exact_match.value is True
-                else "at least"
+                "exactly" if params.exact_match and params.exact_match.value is True else "at least"
             )
 
-            template_str = f"Must have {exact_match_str} these columns (in any order): {column_set_str}"
+            template_str = (
+                f"Must have {exact_match_str} these columns (in any order): {column_set_str}"
+            )
 
         renderer_configuration.template_str = template_str
 
@@ -219,9 +219,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_set", "exact_match"]
-        )
+        params = substitute_none_for_missing(configuration.kwargs, ["column_set", "exact_match"])
 
         if params["column_set"] is None:
             template_str = "Must specify a set or list of columns."
@@ -236,7 +234,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
 
             exact_match_str = "exactly" if params["exact_match"] is True else "at least"
 
-            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
+            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"  # noqa: E501
 
             for idx in range(len(params["column_list"])):
                 params[f"column_list_{idx!s}"] = params["column_list"][idx]
@@ -262,9 +260,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     ):
         # Obtaining columns and ordered list for sake of comparison
         expected_column_set = self._get_success_kwargs().get("column_set")
-        expected_column_set = (
-            set(expected_column_set) if expected_column_set is not None else set()
-        )
+        expected_column_set = set(expected_column_set) if expected_column_set is not None else set()
         actual_column_list = metrics.get("table.columns")
         actual_column_set = set(actual_column_list)
         exact_match = self._get_success_kwargs().get("exact_match")
@@ -275,9 +271,9 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             return {"success": True, "result": {"observed_value": actual_column_list}}
         else:
             # Convert to lists and sort to lock order for testing and output rendering
-            # unexpected_list contains items from the dataset columns that are not in expected_column_set
+            # unexpected_list contains items from the dataset columns that are not in expected_column_set  # noqa: E501
             unexpected_list = sorted(list(actual_column_set - expected_column_set))
-            # missing_list contains items from expected_column_set that are not in the dataset columns
+            # missing_list contains items from expected_column_set that are not in the dataset columns  # noqa: E501
             missing_list = sorted(list(expected_column_set - actual_column_set))
             # observed_value contains items that are in the dataset columns
             observed_value = sorted(actual_column_list)

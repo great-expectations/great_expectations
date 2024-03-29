@@ -18,9 +18,6 @@ from tests.test_utils import create_files_in_directory
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
-# module level markers
-pytestmark = pytest.mark.big
-
 
 @pytest.mark.big
 def test__get_full_file_path_pandas(fs: FakeFilesystem):
@@ -86,15 +83,13 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
     assert len(my_batch_definition_list) == 2
 
     my_batch_definition: LegacyBatchDefinition = my_batch_definition_list[0]
-    batch_spec: BatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=my_batch_definition
-    )
+    batch_spec: BatchSpec = my_data_connector.build_batch_spec(batch_definition=my_batch_definition)
 
     assert isinstance(batch_spec, PathBatchSpec)
     assert batch_spec.path == f"{base_directory}/path/A-100.csv"
 
 
-@pytest.mark.big
+@pytest.mark.spark
 def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     """
     What does this test and why?
@@ -149,9 +144,7 @@ def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     assert len(my_batch_definition_list) == 2
 
     my_batch_definition: LegacyBatchDefinition = my_batch_definition_list[0]
-    batch_spec: BatchSpec = my_data_connector.build_batch_spec(
-        batch_definition=my_batch_definition
-    )
+    batch_spec: BatchSpec = my_data_connector.build_batch_spec(batch_definition=my_batch_definition)
 
     assert isinstance(batch_spec, PathBatchSpec)
     assert batch_spec.path == f"{base_directory_colon}/path/A-100.csv"

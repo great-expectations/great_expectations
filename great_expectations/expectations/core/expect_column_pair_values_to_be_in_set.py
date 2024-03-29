@@ -130,12 +130,12 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
                   "meta": {},
                   "success": false
                 }
-    """
+    """  # noqa: E501
 
     value_pairs_set: List[Tuple[Any, Any]]
-    ignore_row_if: Literal[
-        "both_values_are_missing", "either_value_is_missing", "neither"
-    ] = "both_values_are_missing"
+    ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
+        "both_values_are_missing"
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

@@ -142,7 +142,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
                   "meta": {},
                   "success": true
                 }
-    """
+    """  # noqa: E501
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -217,9 +217,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
             template_str = "values must be unique"
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, no_scientific=True
-            )
+            params["mostly_pct"] = num_to_str(params["mostly"] * 100, no_scientific=True)
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:

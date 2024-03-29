@@ -36,12 +36,10 @@ if TYPE_CHECKING:
     )
 
 
-class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-    MetricMultiBatchParameterBuilder
-):
+class MeanUnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
     Compute mean unexpected count ratio (as a fraction) of specified map-style metric across every Batch of data given.
-    """
+    """  # noqa: E501
 
     exclude_field_names: ClassVar[Set[str]] = (
         MetricMultiBatchParameterBuilder.exclude_field_names
@@ -62,9 +60,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         null_count_parameter_builder_name: Optional[str] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
+        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -82,7 +78,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
-        """
+        """  # noqa: E501
         super().__init__(
             name=name,
             metric_name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
@@ -123,36 +119,32 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
 
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
-        """
-        # Obtain total_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        total_count_parameter_builder_name: str = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.total_count_parameter_builder_name,
-                expected_return_type=str,
-                variables=variables,
-                parameters=parameters,
-            )
+        """  # noqa: E501
+        # Obtain total_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        total_count_parameter_builder_name: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.total_count_parameter_builder_name,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
         )
 
         fully_qualified_total_count_parameter_builder_name: str = (
             f"{RAW_PARAMETER_KEY}{total_count_parameter_builder_name}"
         )
-        # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        total_count_parameter_node: ParameterNode = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=fully_qualified_total_count_parameter_builder_name,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        # Obtain total_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
+        total_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fully_qualified_total_count_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
         total_count_values: MetricValues = total_count_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        # Obtain null_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain null_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         null_count_parameter_builder_name: Optional[str] = (
             get_parameter_value_and_validate_return_type(
                 domain=domain,
@@ -177,7 +169,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             fully_qualified_null_count_parameter_builder_name: str = (
                 f"{RAW_PARAMETER_KEY}{null_count_parameter_builder_name}"
             )
-            # Obtain null_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            # Obtain null_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
             null_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
                 domain=domain,
                 parameter_reference=fully_qualified_null_count_parameter_builder_name,
@@ -185,13 +177,11 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 variables=variables,
                 parameters=parameters,
             )
-            null_count_values = null_count_parameter_node[
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-            ]
+            null_count_values = null_count_parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY]
 
         nonnull_count_values: np.ndarray = total_count_values - null_count_values
 
-        # Compute "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").
+        # Compute "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").  # noqa: E501
         super().build_parameters(
             domain=domain,
             variables=variables,
@@ -200,7 +190,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             runtime_configuration=runtime_configuration,
         )
 
-        # Retrieve "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").
+        # Retrieve "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").  # noqa: E501
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.raw_fully_qualified_parameter_name,

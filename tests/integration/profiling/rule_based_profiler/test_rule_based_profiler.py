@@ -28,7 +28,7 @@ def test_batches_are_accessible(
     Batches created in the multibatch_generic_csv_generator fixture should be available using the
     multibatch_generic_csv_generator_context
     This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
-    """
+    """  # noqa: E501
 
     context: AbstractDataContext = multibatch_generic_csv_generator_context
     data_relative_path = "../data"
@@ -117,9 +117,7 @@ def test_batches_are_accessible(
             create_expectation_suite_with_name=f"my_expectation_suite_name__{batch_num}",
         )
         metric_max = validator.get_metric(
-            MetricConfiguration(
-                "column.max", metric_domain_kwargs={"column": "batch_num"}
-            )
+            MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
         )
         assert metric_max == (total_batches + 1) - batch_num
         metric_value_set = set(
@@ -148,7 +146,7 @@ def test_profile_includes_citations(
     # Instantiate Profiler
     profiler_config = yaml.load(yaml_config)
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     profiler_config.pop("class_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -185,7 +183,7 @@ def test_profile_get_expectation_suite(
     # Instantiate Profiler
     profiler_config = yaml.load(yaml_config)
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
-    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern  # noqa: E501
     profiler_config.pop("class_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(

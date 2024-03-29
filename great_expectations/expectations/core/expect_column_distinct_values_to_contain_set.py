@@ -153,7 +153,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
                   "meta": {},
                   "success": false
                 }
-    """
+    """  # noqa: E501
 
     value_set: Union[list, set, EvaluationParameterDict, None]
 
@@ -167,7 +167,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.value_counts",)
     success_keys = ("value_set",)
 
@@ -247,9 +247,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{i!s}"] = v
 
-            values_string = " ".join(
-                [f"$v__{i!s}" for i, v in enumerate(params["value_set"])]
-            )
+            values_string = " ".join([f"$v__{i!s}" for i, v in enumerate(params["value_set"])])
 
         template_str = f"distinct values must contain this set: {values_string}."
 
@@ -264,9 +262,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             template_str = f"{conditional_template_str}, then {template_str}"
             params.update(conditional_params)
 
-        styling = (
-            runtime_configuration.get("styling", {}) if runtime_configuration else {}
-        )
+        styling = runtime_configuration.get("styling", {}) if runtime_configuration else {}
 
         return [
             RenderedStringTemplateContent(

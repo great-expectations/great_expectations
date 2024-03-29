@@ -68,9 +68,7 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
         value_pairs_set = [(x, y) for x, y in value_pairs_set]
 
         # or_ implementation was required due to mssql issues with in_
-        conditions = [
-            sa.or_(sa.and_(column_A == x, column_B == y)) for x, y in value_pairs_set
-        ]
+        conditions = [sa.or_(sa.and_(column_A == x, column_B == y)) for x, y in value_pairs_set]
         row_wise_cond = sa.or_(*conditions)
 
         return row_wise_cond

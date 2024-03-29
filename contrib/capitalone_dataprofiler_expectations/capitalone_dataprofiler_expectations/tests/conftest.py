@@ -132,12 +132,8 @@ def pytest_addoption(parser):
         action="store_true",
         help="If set, run integration tests for docs",
     )
-    parser.addoption(
-        "--azure", action="store_true", help="If set, execute tests against Azure"
-    )
-    parser.addoption(
-        "--cloud", action="store_true", help="If set, execute tests against GX Cloud"
-    )
+    parser.addoption("--azure", action="store_true", help="If set, execute tests against Azure")
+    parser.addoption("--cloud", action="store_true", help="If set, execute tests against GX Cloud")
     parser.addoption(
         "--performance-tests",
         action="store_true",

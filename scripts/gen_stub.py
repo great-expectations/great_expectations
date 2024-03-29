@@ -59,9 +59,7 @@ def _print_method(  # noqa: C901, PLR0912
     if return_type_override:
         return_type = return_type_override
     else:
-        return_type = getattr(
-            signature.return_annotation, "__name__", signature.return_annotation
-        )
+        return_type = getattr(signature.return_annotation, "__name__", signature.return_annotation)
     print(f") -> {return_type}:\n\t...")
 
 

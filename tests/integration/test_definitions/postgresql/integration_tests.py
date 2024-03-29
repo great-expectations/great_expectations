@@ -87,7 +87,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for POSTGRESQL is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for POSTGRESQL is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_hashed_column_postgres",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
@@ -130,7 +130,7 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>
+    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>  # noqa: E501
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_postgres",
     #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
@@ -160,14 +160,6 @@ sample_data = [
                 "connection_string.yml",
             ),
         ),
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
-    ),
-]
-
-creating_custom_expectations = [
-    IntegrationTestFixture(
-        name="expect_multicolumn_values_to_be_multiples_of_three",
-        user_flow_script="docs/docusaurus/docs/oss/guides/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
 ]
@@ -205,7 +197,6 @@ getting_started = [
 postgresql_integration_tests += connecting_to_your_data
 postgresql_integration_tests += partition_data
 postgresql_integration_tests += sample_data
-postgresql_integration_tests += creating_custom_expectations
 postgresql_integration_tests += evaluation_parameters
 postgresql_integration_tests += fluent_datasources
 postgresql_integration_tests += getting_started

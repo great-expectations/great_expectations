@@ -82,13 +82,9 @@ def csv_asset(spark_dbfs_datasource: SparkDBFSDatasource) -> _FilePathDataAsset:
 
 @pytest.fixture
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(
-        r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
-    )
-    data_connector: DBFSDataConnector = cast(
-        DBFSDataConnector, csv_asset._data_connector
-    )
-    test_connection_error_message = f"""No file at base_directory path "{data_connector._base_directory.resolve()}" matched regular expressions pattern "{data_connector._batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""
+    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
+    data_connector: DBFSDataConnector = cast(DBFSDataConnector, csv_asset._data_connector)
+    test_connection_error_message = f"""No file at base_directory path "{data_connector._base_directory.resolve()}" matched regular expressions pattern "{data_connector._batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""  # noqa: E501
     return regex, test_connection_error_message
 
 
@@ -129,7 +125,7 @@ def test_construct_csv_asset_directly():
 
 @pytest.mark.spark
 @pytest.mark.xfail(
-    reason="Accessing objects on pyfakefs.fake_filesystem.FakeFilesystem using Spark is not working (this test is conducted using Jupyter notebook manually)."
+    reason="Accessing objects on pyfakefs.fake_filesystem.FakeFilesystem using Spark is not working (this test is conducted using Jupyter notebook manually)."  # noqa: E501
 )
 def test_get_batch_list_from_fully_specified_batch_request(
     spark_dbfs_datasource: SparkDBFSDatasource,
@@ -141,9 +137,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         batch_metadata=asset_specified_metadata,
     )
 
-    request = asset.build_batch_request(
-        {"name": "alex", "timestamp": "20200819", "price": "1300"}
-    )
+    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -162,10 +156,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "price": "1300",
         **asset_specified_metadata,
     }
-    assert (
-        batch.id
-        == "spark_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-    )
+    assert batch.id == "spark_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
 
     request = asset.build_batch_request({"name": "alex"})
     batches = asset.get_batch_list_from_batch_request(request)

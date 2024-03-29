@@ -207,7 +207,7 @@ warn_untyped_fields = true
 
 [tool.ruff]
 target-version = "py38"
-line-length = 88
+line-length = 100
 lint.preview = true  # This enables preview rules for specified rules e.g. NPY201
 lint.explicit-preview-rules = true  # https://docs.astral.sh/ruff/preview/#selecting-single-preview-rules
 lint.select = [
@@ -250,7 +250,6 @@ lint.ignore = [
     "E111", # indentation-with-invalid-multiple
     "E114", # indentation-with-invalid-multiple-comment
     "E117", # over-idented
-    "E501", # line-too-long
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
     "F842", # variable annotated but unused # TODO enable
     # https://beta.ruff.rs/docs/rules/#pycodestyle-e-w
@@ -298,6 +297,9 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"ci/checks" = [
+    "E501", # line too long - too many violation & not relevant for CI checks
+]
 "assets/benchmark/benchmark.py" = [
     "DTZ", # flake8-datetimez-dtz - doesn't matter for benchmark tests
 ]
@@ -305,6 +307,7 @@ extend-exclude = [
     "PLR0912", # Too many branches  - scripts are not part of the main codebase
     "PLR0913", # Too many arguments - scripts are not part of the main codebase
     "PLR0915", # Too many statements - scripts are not part of the main codebase
+    "E501", # line too long - scripts are not part of the main codebase
 ]
 "__init__.py" = [
     "F401", # unused import
@@ -320,8 +323,12 @@ extend-exclude = [
 "great_expectations/compatibility/*.py" = [
     "TID251", # flake8-banned-api
 ]
+"tasks.py" = [
+    "PLR0913",
+]
 "tests/integration/docusaurus/*.py" = [
     "F841", # local variable is assigned to but never used - ignored for code used in snippets
+    "E501", # may affect how code is displayed in the docs
 ]
 
 [tool.ruff.lint.flake8-type-checking]
@@ -336,7 +343,8 @@ runtime-evaluated-base-classes = [
 runtime-evaluated-decorators = ["pydantic.dataclasses.dataclass"]
 
 [tool.ruff.lint.mccabe]
-max-complexity = 10
+# https://docs.astral.sh/ruff/rules/complex-structure/
+max-complexity = 8
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -355,6 +363,7 @@ If you are working in a configuration file you may use the inline comment \
 "typing_extensions.override".msg = "Do not import typing_extensions.override directly, import `override` from great_expectations.compatibility.typing_extensions instead."
 # TODO: remove pydantic once our min version is pydantic v2
 "pydantic".msg = "Please do not import pydantic directly, import from great_expectations.compatibility.pydantic instead."
+"pkg_resources".msg = "pkg_resources module has been deprecated. Use importlib.resources or importlib.metada instead."
 
 
 # -----------------------------------------------------------------
@@ -373,6 +382,13 @@ filterwarnings = [
     # The mocker fixture automatically undoes mocking at the end of a test. This warning can be ignored if it was triggered by mocking a context manager.
     # https://pytest-mock.readthedocs.io/en/latest/remarks.html#usage-as-context-manager
     "default::pytest_mock.plugin.PytestMockWarning",
+
+    # the pkg_resources module distributed with setuptools has been deprecated
+    # we should never use it but it is used in some of our dependencies
+    # https://setuptools.pypa.io/en/latest/pkg_resources.html
+    "once:pkg_resources is deprecated as an API:DeprecationWarning",
+    # ruamel, google, etc.
+    "once:Deprecated call to `pkg_resources.declare_namespace:DeprecationWarning",
 
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation

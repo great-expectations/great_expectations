@@ -15,7 +15,7 @@ from subprocess import CalledProcessError, CompletedProcess, check_output, run
 from typing import Dict, Final, List, Optional, Tuple
 
 import click
-import pkg_resources
+import pkg_resources  # noqa: TID251 # TODO: switch to importlib.metadata or importlib.resources
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_diagnostics.expectation_doctor import (
@@ -113,7 +113,7 @@ def execute_shell_command(command: str) -> int:
     return status_code
 
 
-def get_expectations_info_dict(  # noqa: C901
+def get_expectations_info_dict(  # noqa: C901 - too complex
     include_core: bool = True,
     include_contrib: bool = True,
     only_these_expectations: list[str] | None = None,
@@ -218,12 +218,8 @@ def get_expectations_info_dict(  # noqa: C901
         updated_at_cmd = f'git log -1 --format="%ai %ar" -- {file_path!r}'
         created_at_cmd = f'git log --diff-filter=A --format="%ai %ar" -- {file_path!r}'
         result[expectation_name] = {
-            "updated_at": check_output(updated_at_cmd, shell=True)
-            .decode("utf-8")
-            .strip(),
-            "created_at": check_output(created_at_cmd, shell=True)
-            .decode("utf-8")
-            .strip(),
+            "updated_at": check_output(updated_at_cmd, shell=True).decode("utf-8").strip(),
+            "created_at": check_output(created_at_cmd, shell=True).decode("utf-8").strip(),
             "path": file_path,
             "package": package_name,
             "requirements": requirements,
@@ -277,15 +273,13 @@ def install_necessary_requirements(requirements) -> list:
 def uninstall_requirements(requirements):
     """Uninstall any requirements that were added to the venv"""
     print("\n\n\n=== (Uninstalling) ===")
-    logger.info(
-        "Uninstalling packages that were installed while running this script..."
-    )
+    logger.info("Uninstalling packages that were installed while running this script...")
     for req in requirements:
         logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
         execute_shell_command(f'pip uninstall -y "{req}"')
 
 
-def get_expectation_instances(expectations_info):
+def get_expectation_instances(expectations_info):  # noqa: C901 - too complex
     """Return a dict of Expectation instances
 
     Any contrib Expectations must be imported so they appear in the Expectation registry
@@ -311,10 +305,8 @@ def get_expectation_instances(expectations_info):
                 continue
 
         try:
-            expectation_class = (
-                great_expectations.expectations.registry.get_expectation_impl(
-                    expectation_name
-                )
+            expectation_class = great_expectations.expectations.registry.get_expectation_impl(
+                expectation_name
             )
             expectation = create_expectation_instance(expectation_class)
             expectation_instances[expectation_name] = expectation
@@ -333,9 +325,7 @@ def get_expectation_instances(expectations_info):
             )
             expectation_tracebacks.write(traceback.format_exc())
         except (IndexError, ValueError):
-            expectation_tracebacks.write(
-                f"Expectation {expectation_name} has invalid test case."
-            )
+            expectation_tracebacks.write(f"Expectation {expectation_name} has invalid test case.")
             expectation_tracebacks.write(traceback.format_exc())
         except Exception:  # continue even if this expectation fails catastrophically
             expectation_tracebacks.write("Unexpected error occurred.")
@@ -350,26 +340,20 @@ def create_expectation_instance(expectation_class: type[Expectation]) -> Expecta
     expectation_params: dict
     if expectation_class.examples:
         # take the first test case available:
-        expectation_params = get_success_test_case(
-            expectation_class.examples[0]["tests"]
-        )
+        expectation_params = get_success_test_case(expectation_class.examples[0]["tests"])
 
     else:
         _TEST_DEFS_DIR: Final = pathlib.Path(
             __file__, "..", "..", "..", "tests", "test_definitions"
         ).resolve()
-        found = next(
-            _TEST_DEFS_DIR.rglob(f"**/{expectation_class.expectation_type}.json"), None
-        )
+        found = next(_TEST_DEFS_DIR.rglob(f"**/{expectation_class.expectation_type}.json"), None)
         if not found:
             raise Exception(
                 f"No JSON test case found for Expectation {expectation_class.expectation_type}, cannot build gallery example."
             )
         with open(found) as fp:
             test_cases = json.load(fp)
-            expectation_params = get_success_test_case(
-                test_cases["datasets"][0]["tests"]
-            )
+            expectation_params = get_success_test_case(test_cases["datasets"][0]["tests"])
     return expectation_class(**expectation_params)
 
 
@@ -383,12 +367,10 @@ def get_success_test_case(tests: list[dict]) -> dict:
         raise ValueError("Error: Expectation test case is malformed.")
 
 
-def combine_backend_results(
+def combine_backend_results(  # noqa: C901 - too complex
     expectations_info, expectation_instances, diagnostic_objects, outfile_name
 ):
-    expected_full_backend_files = [
-        f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS
-    ]
+    expected_full_backend_files = [f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS]
     found_full_backend_files = glob("*_full.json")  # noqa: PTH207
 
     if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
@@ -404,13 +386,13 @@ def combine_backend_results(
 
             for expectation_name in data:
                 try:
-                    expectations_info[expectation_name][
-                        "backend_test_result_counts"
-                    ].extend(data[expectation_name]["backend_test_result_counts"])
+                    expectations_info[expectation_name]["backend_test_result_counts"].extend(
+                        data[expectation_name]["backend_test_result_counts"]
+                    )
                 except KeyError:
-                    expectations_info[expectation_name][
-                        "backend_test_result_counts"
-                    ] = data[expectation_name]["backend_test_result_counts"]
+                    expectations_info[expectation_name]["backend_test_result_counts"] = data[
+                        expectation_name
+                    ]["backend_test_result_counts"]
 
         # Re-calculate maturity_checklist, library_metadata, and coverage_score
         for expectation_name in expectations_info:
@@ -442,16 +424,12 @@ def combine_backend_results(
             expectations_info[expectation_name]["maturity_checklist"] = (
                 maturity_checklist_object.to_dict()
             )
-            expectations_info[expectation_name]["coverage_score"] = (
-                Expectation._get_coverage_score(
-                    backend_test_result_counts=backend_test_result_counts_object,
-                    execution_engines=diagnostic_object.execution_engines,
-                )
+            expectations_info[expectation_name]["coverage_score"] = Expectation._get_coverage_score(
+                backend_test_result_counts=backend_test_result_counts_object,
+                execution_engines=diagnostic_object.execution_engines,
             )
             expectations_info[expectation_name]["library_metadata"]["maturity"] = (
-                Expectation._get_final_maturity_level(
-                    maturity_checklist=maturity_checklist_object
-                )
+                Expectation._get_final_maturity_level(maturity_checklist=maturity_checklist_object)
             )
 
         for bad_key_name in bad_key_names:
@@ -547,9 +525,7 @@ def build_gallery(  # noqa: C901 - 17
         backend_outfile_suffix += "_nonstandard"
     if only_consider_these_backends:
         only_consider_these_backends = [
-            backend
-            for backend in only_consider_these_backends
-            if backend in ALL_GALLERY_BACKENDS
+            backend for backend in only_consider_these_backends if backend in ALL_GALLERY_BACKENDS
         ]
     else:
         only_consider_these_backends = list(ALL_GALLERY_BACKENDS)
@@ -595,16 +571,12 @@ def build_gallery(  # noqa: C901 - 17
                     + "=" * 80
                     + f"\n\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
                 )
-                expectation_docstrings.write(
-                    f"{diagnostics['description']['docstring']}\n"
-                )
+                expectation_docstrings.write(f"{diagnostics['description']['docstring']}\n")
                 diagnostics["description"]["docstring"] = format_docstring_to_markdown(
                     diagnostics["description"]["docstring"]
                 )
                 expectation_docstrings.write("\n" + "." * 80 + "\n\n")
-                expectation_docstrings.write(
-                    f"{diagnostics['description']['docstring']}\n"
-                )
+                expectation_docstrings.write(f"{diagnostics['description']['docstring']}\n")
         except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation_name}")
             print(traceback.format_exc())
@@ -617,9 +589,7 @@ def build_gallery(  # noqa: C901 - 17
                 diagnostics_json_dict = diagnostics.to_json_dict()
 
                 # Some items need to be recalculated when {backend}_full.json files get combined
-                backend_test_result_counts = diagnostics_json_dict.pop(
-                    "backend_test_result_counts"
-                )
+                backend_test_result_counts = diagnostics_json_dict.pop("backend_test_result_counts")
                 diagnostics_json_dict.pop("maturity_checklist")
                 diagnostics_json_dict.pop("coverage_score")
 
@@ -660,7 +630,7 @@ def build_gallery(  # noqa: C901 - 17
         )
 
 
-def format_docstring_to_markdown(docstr: str) -> str:  # noqa: C901
+def format_docstring_to_markdown(docstr: str) -> str:  # noqa: C901 - too complex
     """
     Add markdown formatting to a provided docstring
 

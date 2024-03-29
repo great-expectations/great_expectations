@@ -88,9 +88,7 @@ def test_get_batch_data_and_metadata_without_partitions(
     glue_titanic_catalog,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     my_data_connector = InferredAssetAWSGlueDataCatalogDataConnector(
         name="my_data_connector",
         datasource_name="FAKE_Datasource_NAME",
@@ -129,12 +127,10 @@ def test_get_batch_data_and_metadata_with_partitions(
     glue_titanic_catalog,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
 ):
-    execution_engine = (
-        test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
-    )
+    execution_engine = test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
         name="FAKE_Datasource_NAME",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
         execution_engine=execution_engine.config,
         data_connectors={
             "my_data_connector": {
@@ -145,7 +141,7 @@ def test_get_batch_data_and_metadata_with_partitions(
             },
         },
     )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"
     ]._execution_engine = execution_engine  # type: ignore[union-attr]
@@ -166,9 +162,7 @@ def test_get_batch_data_and_metadata_with_partitions(
 
     batch = Batch(data=batch_data, batch_definition=batch_definition)
 
-    validator = Validator(
-        execution_engine, batches=[batch], data_context=in_memory_runtime_context
-    )
+    validator = Validator(execution_engine, batches=[batch], data_context=in_memory_runtime_context)
 
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
     assert validator.expect_column_values_to_be_in_set("SexCode", ["0"]).success

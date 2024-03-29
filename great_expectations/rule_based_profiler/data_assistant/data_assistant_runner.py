@@ -52,7 +52,7 @@ class DataAssistantRunner:
 
     The approach is to instantiate "DataAssistant" class of specified type with "Validator", containing "Batch" objects,
     specified by "batch_request", loaded into memory.  Then, "DataAssistant.run()" is issued with given directives.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -77,7 +77,7 @@ class DataAssistantRunner:
 
         Returns:
             BaseRuleBasedProfiler: The "BaseRuleBasedProfiler" object, corresponding to this instance's "DataAssistant".
-        """
+        """  # noqa: E501
         return self._build_data_assistant().profiler
 
     def get_profiler_config(
@@ -93,7 +93,7 @@ class DataAssistantRunner:
 
         Returns:
             Union[BaseYamlConfig, dict, str]: Configuration of effective "BaseRuleBasedProfiler" object in given format.
-        """
+        """  # noqa: E501
         return self._profiler.get_config(mode=mode)
 
     def run_impl(self) -> Callable:
@@ -104,7 +104,7 @@ class DataAssistantRunner:
         Returns:
             Callable: Template "DataAssistant.run()" method implementation, customized with signature appropriate for
             "DataAssistant.run()" method of "DataAssistant" class (corresponding to this object's "DataAssistant" type).
-        """
+        """  # noqa: E501
 
         def run(
             batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -126,17 +126,17 @@ class DataAssistantRunner:
 
             Returns:
                 DataAssistantResult: The result object for the DataAssistant
-            """
+            """  # noqa: E501
             if batch_request is None and validator is None:
                 data_assistant_name: str = self._data_assistant_cls.data_assistant_type
                 raise gx_exceptions.DataAssistantExecutionError(
-                    message=f'Utilizing "{data_assistant_name}.run()" requires either a valid "batch_request" or "validator" to be specified'
+                    message=f'Utilizing "{data_assistant_name}.run()" requires either a valid "batch_request" or "validator" to be specified'  # noqa: E501
                 )
 
             if estimation is None:
                 estimation = NumericRangeEstimatorType.EXACT
 
-            # The "estimation" directive needs to be a recognized member of "NumericRangeEstimatorType" "Enum" type.
+            # The "estimation" directive needs to be a recognized member of "NumericRangeEstimatorType" "Enum" type.  # noqa: E501
             if isinstance(estimation, str):
                 estimation = estimation.lower()
                 estimation = NumericRangeEstimatorType(estimation)
@@ -158,22 +158,20 @@ class DataAssistantRunner:
             )
             variables_directives_kwargs: dict = dict(
                 filter(
-                    lambda element: element[0]
-                    not in rule_based_profiler_domain_type_attributes,
+                    lambda element: element[0] not in rule_based_profiler_domain_type_attributes,
                     directives.items(),
                 )
             )
             domain_type_directives_kwargs: dict = dict(
                 filter(
-                    lambda element: element[0]
-                    in rule_based_profiler_domain_type_attributes,
+                    lambda element: element[0] in rule_based_profiler_domain_type_attributes,
                     directives.items(),
                 )
             )
             """
             Convert "dict"-typed "variables"-level and "Domain"-level arguments/directives into lists of corresponding
             "Enum" typed objects ("RuntimeEnvironmentVariablesDirectives" and "RuntimeEnvironmentDomainTypeDirectives").
-            """
+            """  # noqa: E501
             variables_directives_list: List[RuntimeEnvironmentVariablesDirectives] = (
                 build_variables_directives(
                     exact_estimation=(estimation == NumericRangeEstimatorType.EXACT),
@@ -181,22 +179,22 @@ class DataAssistantRunner:
                     **variables_directives_kwargs,
                 )
             )
-            domain_type_directives_list: List[
-                RuntimeEnvironmentDomainTypeDirectives
-            ] = build_domain_type_directives(**domain_type_directives_kwargs)
+            domain_type_directives_list: List[RuntimeEnvironmentDomainTypeDirectives] = (
+                build_domain_type_directives(**domain_type_directives_kwargs)
+            )
             """
             Run "data_assistant" with thus constructed "variables"-level and "Domain"-level custom user-specified
             overwrite arguments/directives and return computed "data_assistant_result" to caller.
-            """
+            """  # noqa: E501
             data_assistant_result: DataAssistantResult = data_assistant.run(
                 variables_directives_list=variables_directives_list,
                 domain_type_directives_list=domain_type_directives_list,
             )
             return data_assistant_result
 
-        # Construct arguments to "DataAssistantRunner.run()" method, implemented using "DataAssistantRunner.run_impl()".
+        # Construct arguments to "DataAssistantRunner.run()" method, implemented using "DataAssistantRunner.run_impl()".  # noqa: E501
 
-        # 1. The signature includes "batch_request" and "estimation" arguments for all "DataAssistant" implementations.
+        # 1. The signature includes "batch_request" and "estimation" arguments for all "DataAssistant" implementations.  # noqa: E501
         parameters: List[Parameter] = [
             Parameter(
                 name="batch_request",
@@ -218,23 +216,17 @@ class DataAssistantRunner:
             ),
         ]
 
-        # 2. Extend the signature to include "DataAssistant"-specific "Domain"-level arguments/directives.
-        parameters.extend(
-            self._get_method_signature_parameters_for_domain_type_directives()
-        )
-        # 3. Extend the signature to include "DataAssistant"-specific "variables"-level arguments/directives.
-        # Use separate call for "variables" so as to organize "domain_type_attributes" and "variables" arguments neatly.
-        parameters.extend(
-            self._get_method_signature_parameters_for_variables_directives()
-        )
+        # 2. Extend the signature to include "DataAssistant"-specific "Domain"-level arguments/directives.  # noqa: E501
+        parameters.extend(self._get_method_signature_parameters_for_domain_type_directives())
+        # 3. Extend the signature to include "DataAssistant"-specific "variables"-level arguments/directives.  # noqa: E501
+        # Use separate call for "variables" so as to organize "domain_type_attributes" and "variables" arguments neatly.  # noqa: E501
+        parameters.extend(self._get_method_signature_parameters_for_variables_directives())
 
-        # 4. Encapsulate all arguments/directives into "DataAssistant"-specific "DataAssistantRunner.run()" signature.
-        func_sig = Signature(
-            parameters=parameters, return_annotation=DataAssistantResult
-        )
-        # 5. Override the runner docstring with the docstring defined in the implemented DataAssistant child-class.
+        # 4. Encapsulate all arguments/directives into "DataAssistant"-specific "DataAssistantRunner.run()" signature.  # noqa: E501
+        func_sig = Signature(parameters=parameters, return_annotation=DataAssistantResult)
+        # 5. Override the runner docstring with the docstring defined in the implemented DataAssistant child-class.  # noqa: E501
         run.__doc__ = self._data_assistant_cls.__doc__
-        # 6. Create "DataAssistant"-specific "DataAssistantRunner.run()" method and parametrized implementation closure.
+        # 6. Create "DataAssistant"-specific "DataAssistantRunner.run()" method and parametrized implementation closure.  # noqa: E501
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)
 
         return gen_func
@@ -252,7 +244,7 @@ class DataAssistantRunner:
 
         Returns:
             DataAssistant: The "DataAssistant" object, corresponding to this instance's specified "DataAssistant" type.
-        """
+        """  # noqa: E501
         data_assistant_name: str = self._data_assistant_cls.data_assistant_type
 
         data_assistant: DataAssistant
@@ -285,7 +277,7 @@ class DataAssistantRunner:
         """
         Using "DataAssistant"-specific configured "Rule" objects of underlying "RuleBasedProfiler", return "Parameter"
         signature components containing "Rule" "variables" (converted to "dictionary" representation) as default values.
-        """
+        """  # noqa: E501
         rule: Rule
         parameters: List[Parameter] = [
             Parameter(
@@ -313,7 +305,7 @@ class DataAssistantRunner:
         maintains list of arguments/directives that are conflicting among "Rule" configurations and (for now) prevents
         customization if default values conflict, unless default "DomainBuilder" argument/directive value is None.
         Enabling per-"Rule" customization can be added as well (in addition to having this capability at common level).
-        """
+        """  # noqa: E501
         domain_type_attribute_name_to_parameter_map: Dict[str, Parameter] = {}
         conflicting_domain_type_attribute_names: List[str] = []
 
@@ -323,23 +315,23 @@ class DataAssistantRunner:
             str
         ]  # list of specific "DomainBuilder" arguments/directives of "Rule"
         key: str  # one argument/directive of "DomainBuilder" of "Rule"
-        property_accessor_method: Callable  # property accessor method for one argument/directive of "DomainBuilder" of "Rule"
-        property_accessor_method_return_type: Type  # return type of property accessor method for one argument/directive of "DomainBuilder" of "Rule"
-        property_value: Any  # default return value of property accessor method for one argument/directive of "DomainBuilder" of "Rule"
+        property_accessor_method: Callable  # property accessor method for one argument/directive of "DomainBuilder" of "Rule"  # noqa: E501
+        property_accessor_method_return_type: Type  # return type of property accessor method for one argument/directive of "DomainBuilder" of "Rule"  # noqa: E501
+        property_value: Any  # default return value of property accessor method for one argument/directive of "DomainBuilder" of "Rule"  # noqa: E501
         parameter: (
             Parameter | None
-        )  #  "Parameter" signature component containing one argument/directive of "DomainBuilder" of "Rule"
+        )  #  "Parameter" signature component containing one argument/directive of "DomainBuilder" of "Rule"  # noqa: E501
         for rule in self._profiler.rules:
             domain_builder = rule.domain_builder
-            assert domain_builder, "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
+            assert (
+                domain_builder
+            ), "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
             domain_builder_attributes = self._get_rule_domain_type_attributes(rule=rule)
             for key in domain_builder_attributes:
                 """
                 "getattr_static()" returns "getter" "property" definition object, and "fget" on it gives its "Callable"
-                """
-                property_accessor_method = getattr_static(
-                    domain_builder, key, None
-                ).fget
+                """  # noqa: E501
+                property_accessor_method = getattr_static(domain_builder, key, None).fget
                 property_accessor_method_return_type = signature(
                     obj=property_accessor_method, follow_wrapped=False
                 ).return_annotation
@@ -358,7 +350,7 @@ class DataAssistantRunner:
                     not yet been incorporated, or it has already been incorporated, but its previous (processed) default
                     value is None, while configured default value in "DomainBuilder" of current "Rule" is not None (in
                     other words, if not None is encountered during "Rule" processing, not None value overrites None).
-                    """
+                    """  # noqa: E501
                     if key not in conflicting_domain_type_attribute_names:
                         parameter = Parameter(
                             name=key,
@@ -379,7 +371,7 @@ class DataAssistantRunner:
                     current "Rule" being processed.  For now, customization is prevented/disabled if default values
                     conflict, unless configured default value of argument/directive in "DomainBuilder" of current "Rule"
                     being processed is None.  In the future, enable argument/directive customization at "Rule" level.
-                    """
+                    """  # noqa: E501
                     domain_type_attribute_name_to_parameter_map.pop(key)
                     conflicting_domain_type_attribute_names.append(key)
 
@@ -391,9 +383,7 @@ class DataAssistantRunner:
         if rule is None:
             domain_type_attributes: List[str] = []
             for rule in self._profiler.rules:
-                domain_type_attributes.extend(
-                    self._get_rule_domain_type_attributes(rule=rule)
-                )
+                domain_type_attributes.extend(self._get_rule_domain_type_attributes(rule=rule))
 
             return list(set(domain_type_attributes))
 
@@ -406,9 +396,7 @@ class DataAssistantRunner:
         parameters: Dict[str, Parameter] = dict(sig.parameters)
 
         domain_builder = rule.domain_builder
-        assert (
-            domain_builder
-        ), f"The underlying domain_builder on rule {rule.name} must be non-null"
+        assert domain_builder, f"The underlying domain_builder on rule {rule.name} must be non-null"
         exclude_field_names = domain_builder.exclude_field_names
 
         attribute_names: List[str] = list(

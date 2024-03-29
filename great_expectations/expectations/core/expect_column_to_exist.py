@@ -109,7 +109,7 @@ class ExpectColumnToExist(BatchExpectation):
               "success": false,
               "result": {}
             }
-    """
+    """  # noqa: E501
 
     column: str
     column_index: Union[int, EvaluationParameterDict, None]

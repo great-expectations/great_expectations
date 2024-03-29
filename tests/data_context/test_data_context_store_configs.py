@@ -14,7 +14,7 @@ yaml = YAMLHandler()
 @pytest.fixture(scope="function")
 def totally_empty_data_context(tmp_path_factory):
     # NOTE: This sets up a DataContext with a real path and a config saved to that path.
-    # Now that BaseDataContext exists, it's possible to test most DataContext methods without touching the file system.
+    # Now that BaseDataContext exists, it's possible to test most DataContext methods without touching the file system.  # noqa: E501
     # However, as of 2019/08/22, most tests still use filesystem-based fixtures.
     # TODO: Where appropriate, switch DataContext tests to the new method.
     project_root_dir = str(tmp_path_factory.mktemp("totally_empty_data_context"))
@@ -98,7 +98,7 @@ def test_default_config_yml_stores(tmp_path_factory):
         "evaluation_parameter_store",
         "profiler_store",
         "checkpoint_store",
-        "validation_config_store",
+        "validation_definition_store",
     }
 
     context.add_store(
@@ -115,6 +115,6 @@ def test_default_config_yml_stores(tmp_path_factory):
         "validations_store",
         "evaluation_parameter_store",
         "profiler_store",
-        "validation_config_store",
+        "validation_definition_store",
         "my_new_validations_store",
     }
