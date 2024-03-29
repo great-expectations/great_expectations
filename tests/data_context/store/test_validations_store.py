@@ -48,7 +48,10 @@ def test_ValidationsStore_with_TupleS3StoreBackend(aws_credentials):
         run_id="20191007T151224.1234Z_prod_100",
         batch_identifier="batch_id",
     )
-    my_store.set(ns_1, ExpectationSuiteValidationResult(success=True))
+    my_store.set(
+        ns_1,
+        ExpectationSuiteValidationResult(success=True, results=[], suite_name="asset.quarantine"),
+    )
     assert my_store.get(ns_1) == ExpectationSuiteValidationResult(
         success=True, statistics={}, results=[], suite_name="asset.quarantine"
     )

@@ -264,6 +264,7 @@ def serialized_configuration_bundle() -> dict:
                 "evaluation_parameters": {},
                 "meta": {},
                 "results": [],
+                "suite_name": "my_suite",
                 "statistics": {},
                 "success": True,
             }
