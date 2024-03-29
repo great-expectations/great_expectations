@@ -121,6 +121,7 @@ def test_evaluation_parameter_store_methods(
             )
         ],
         success=True,
+        suite_name="source_patient_data.default",
     )
 
     data_context_parameterized_expectation_suite.store_evaluation_parameters(
@@ -162,6 +163,7 @@ def test_evaluation_parameter_store_methods(
             )
         ],
         success=True,
+        suite_name="source_diabetes_data.default",
     )
 
     data_context_parameterized_expectation_suite.store_evaluation_parameters(

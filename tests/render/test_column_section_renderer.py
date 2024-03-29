@@ -1623,6 +1623,8 @@ def test_ValidationResultsTableContentBlockRenderer_render_evr_with_description(
 def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
     # This rather specific test is a reaction to the error documented in #679
     validation = ExpectationSuiteValidationResult(
+        success=True,
+        suite_name="default",
         results=[
             ExpectationValidationResult(
                 success=True,
@@ -1644,7 +1646,7 @@ def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
                     meta={"BasicDatasetProfiler": {"confidence": "very low"}},
                 ),
             )
-        ]
+        ],
     )
 
     result = ProfilingResultsOverviewSectionRenderer().render(validation)
