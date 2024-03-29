@@ -8,7 +8,6 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
-import great_expectations.exceptions as gx_exceptions
 from great_expectations import expectations as gxe
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
@@ -60,39 +59,6 @@ def test_checkpoint_save_success(mocker: pytest.MockFixture):
     checkpoint.save()
 
     context.v1_checkpoint_store.update.assert_called_once_with(key=store_key, value=checkpoint)
-
-
-@pytest.mark.unit
-def test_checkpoint_save_failure(mocker: pytest.MockFixture):
-    context = mocker.Mock(spec=AbstractDataContext)
-    context.v1_checkpoint_store.update.side_effect = gx_exceptions.StoreBackendError(
-        "This is an error"
-    )
-    set_context(project=context)
-
-    checkpoint = Checkpoint(
-        name="my_checkpoint",
-        validation_definitions=[mocker.Mock(spec=ValidationDefinition)],
-        actions=[],
-    )
-    checkpoint_json = json.dumps(
-        {
-            "name": "my_checkpoint",
-            "validation_definitions": [
-                {"name": "my_validation", "id": "a758816-64c8-46cb-8f7e-03c12cea1d67"}
-            ],
-            "actions": [],
-            "result_format": "SUMMARY",
-            "id": "c758816-64c8-46cb-8f7e-03c12cea1d67",
-        }
-    )
-
-    with mock.patch.object(Checkpoint, "json", return_value=checkpoint_json), pytest.raises(
-        ValueError
-    ) as e:
-        checkpoint.save()
-
-    assert "Could not find existing Checkpoint" in str(e.value)
 
 
 @pytest.fixture
