@@ -4,10 +4,10 @@
 extend = "../pyproject.toml"
 
 line-length = 88 # NOTE: consider changing this to 100 to match the rest of the project
-extend-ignore = [
+lint.extend-ignore = [
     # https://docs.astral.sh/ruff/rules/magic-value-comparison/
     "PLR2004", # can be tedious and overly verbose in docs
 ]
 
-[isort]
+[lint.isort]
 known-first-party = ["great_expectations", "tests"]
