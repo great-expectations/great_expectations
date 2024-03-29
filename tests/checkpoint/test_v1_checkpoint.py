@@ -403,6 +403,7 @@ class TestCheckpointResult:
                     },
                 ),
             ],
+            suite_name=self.suite_name,
             statistics={
                 "evaluated_expectations": 1,
                 "successful_expectations": 1,

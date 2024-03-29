@@ -174,6 +174,7 @@ def test_expectation_suite_validation_result_returns_expected_shape(
             "unsuccessful_expectations": 0,
             "success_percent": 100.0,
         },
+        suite_name="empty_suite",
         results=[
             ExpectationValidationResult(
                 **{

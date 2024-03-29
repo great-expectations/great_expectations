@@ -100,7 +100,9 @@ def test_StoreAction(mock_context):
             run_id=RunIdentifier(run_name="prod_20190801"),
             batch_identifier="1234",
         ),
-        validation_result_suite=ExpectationSuiteValidationResult(success=False, results=[]),
+        validation_result_suite=ExpectationSuiteValidationResult(
+            success=False, results=[], suite_name="empty_suite"
+        ),
         data_asset=None,
     )
 
@@ -118,7 +120,7 @@ def test_StoreAction(mock_context):
             run_id=expected_run_id,
             batch_identifier="1234",
         )
-    ) == ExpectationSuiteValidationResult(success=False, results=[])
+    ) == ExpectationSuiteValidationResult(success=False, results=[], suite_name="empty_suite")
 
 
 @pytest.mark.big
@@ -217,6 +219,7 @@ def test_SlackNotificationAction(
         validation_result_suite=ExpectationSuiteValidationResult(
             success=False,
             results=[],
+            suite_name="empty_suite",
             statistics={
                 "successful_expectations": [],
                 "evaluated_expectations": [],
@@ -239,6 +242,7 @@ def test_SlackNotificationAction(
         validation_result_suite=ExpectationSuiteValidationResult(
             success=True,
             results=[],
+            suite_name="empty_suite",
             statistics={
                 "successful_expectations": [],
                 "evaluated_expectations": [],

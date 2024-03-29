@@ -683,7 +683,9 @@ def checkpoint_result(checkpoint_config: dict) -> CheckpointResult:
             run_id=RunIdentifier(run_time=timestamp),
             batch_identifier="default_pandas_datasource-#ephemeral_pandas_asset",
         ): {
-            "validation_result": ExpectationSuiteValidationResult(),
+            "validation_result": ExpectationSuiteValidationResult(
+                success=True, results=[], suite_name="my_suite"
+            ),
             "actions_results": {"my_action": {"class": "StoreValidationResultAction"}},
         }
     }

@@ -68,6 +68,7 @@ class Validator:
         return ExpectationSuiteValidationResult(
             results=results,
             success=statistics.success,
+            suite_name=expectation_suite.name,
             statistics={
                 "evaluated_expectations": statistics.evaluated_expectations,
                 "successful_expectations": statistics.successful_expectations,
