@@ -46,7 +46,7 @@ You'll need your user access token and organization ID to set your environment v
 
     GX recommends deleting the temporary file after you set the environment variables.
 
-## Set the environment variables and start the GX Agent
+## Set the environment variables and deploy the GX Agent
 
 Environment variables securely store your GX Cloud access credentials. The GX Agent runs open source GX code in GX Cloud, and it allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
 
@@ -110,7 +110,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
     - **Username**: Enter the username you use to access Snowflake.
 
-   - **Account identifier**: Enter your Snowflake organization and account name separated by a hyphen (`oraganizationname-accountname`) or your account name and a legacy account locator separated by a period (`accountname.region`). The legacy account locator value must include the geographical region. For example, `us-east-1`. 
+    - **Account identifier**: Enter your Snowflake organization and account name separated by a hyphen (`oraganizationname-accountname`) or your account name and a legacy account locator separated by a period (`accountname.region`). The legacy account locator value must include the geographical region. For example, `us-east-1`. 
     
         To locate your Snowflake organization name, account name, or legacy account locator values see [Finding the Organization and Account Name for an Account](https://docs.snowflake.com/en/user-guide/admin-account-identifier#finding-the-organization-and-account-name-for-an-account) or [Using an Account Locator as an Identifier](https://docs.snowflake.com/en/user-guide/admin-account-identifier#using-an-account-locator-as-an-identifier).
 
@@ -144,7 +144,7 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
 10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-11. Click **Finish**. The Data Asset(s), a default empty [Expectation Suite](../reference/learn/terms/expectation_suite.md), and a default [Checkpoint](../reference/learn/terms/checkpoint.md) are created. 
+11. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created.
 
 </TabItem>
 <TabItem value="PostgreSQL">
@@ -187,7 +187,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-10. Click **Finish**. The Data Asset(s), a default empty [Expectation Suite](../reference/learn/terms/expectation_suite.md), and a default [Checkpoint](../reference/learn/terms/checkpoint.md) are created. 
+10. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created. 
 
 </TabItem>
 </Tabs>
