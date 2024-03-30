@@ -13,12 +13,7 @@ plugins = [
 files = [
     "great_expectations",
     "docs",
-    "tests/datasource/fluent",
-    "tests/integration/cloud",
-    "tests/integration/docusaurus",
-    "tests/core/test_batch_config.py",
-    "tests/validator/test_v1_validator.py",
-    'tests/expectations/core/test_expect_column_values_to_be_present_in_other_table.py',
+    "tests",
     # "contrib" # ignore entire `contrib` package
 ]
 warn_unused_configs = true
