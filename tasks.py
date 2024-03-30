@@ -27,7 +27,6 @@ from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBu
 
 if TYPE_CHECKING:
     from invoke.context import Context
-    from pydantic import BaseModel
 
 
 LOGGER = logging.getLogger(__name__)
