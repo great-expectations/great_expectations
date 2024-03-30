@@ -195,14 +195,11 @@ def test_construct_url(
         pytest.param(
             "expectation_suite",
             "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-            "my_attribute",
-            {"suite": {"expectations": []}},
+            "v1_configs_dont_use_attribute_key",
+            {"expectations": [], "meta": None, "notes": None},
             {},
             {
-                "data": {
-                    "organization_id": "de5b9ca6-caf7-43c8-a820-5540ec6df9b2",
-                    "suite": {"expectations": []},
-                },
+                "data": {"expectations": [], "meta": None, "notes": None},
             },
             id="V1 expectation suite",
         ),
@@ -234,7 +231,7 @@ def test_construct_json_payload_raises_error_with_V1_resource_and_wrong_attribut
     organization_id = "de5b9ca6-caf7-43c8-a820-5540ec6df9b2"
     attributes_value_of_legacy_type = "a string"
     with pytest.raises(
-        TypeError, match="Type of parameter attributes_value is unsupported in GX V1."
+        TypeError, match="Parameter attributes_value of type <class 'str'> is unsupported in GX V1."
     ):
         GXCloudStoreBackend.construct_versioned_payload(
             resource_type=v1_resource,
@@ -403,7 +400,7 @@ def test_remove_key_with_only_id(
 
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         mock_response = mock_delete.return_value
-        mock_response.status_code = 200
+        mock_response.status_code = 204
 
         store_backend.remove_key(
             (
@@ -416,13 +413,6 @@ def test_remove_key_with_only_id(
             f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                    "attributes": {"deleted": True},
-                }
-            },
         )
 
 
@@ -433,7 +423,7 @@ def test_remove_key_with_id_and_name(
 
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         mock_response = mock_delete.return_value
-        mock_response.status_code = 200
+        mock_response.status_code = 204
 
         store_backend.remove_key(
             ("checkpoint", "0ccac18e-7631-4bdd-8a42-3c35cce574c6", "checkpoint_name")
@@ -443,13 +433,6 @@ def test_remove_key_with_id_and_name(
             f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
             "-4bdd"
             "-8a42-3c35cce574c6",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                    "attributes": {"deleted": True},
-                }
-            },
         )
 
 
