@@ -66,7 +66,7 @@ def test_cloud_context_add_datasource_with_fds(
 
 @pytest.mark.e2e
 def test_cloud_context_datasource_crud_e2e() -> None:
-    context = cast(CloudDataContext, gx.get_context(cloud_mode=True))
+    context = gx.get_context(cloud_mode=True)
     datasource_name = f"OSSTestDatasource_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"  # noqa: E501
 
     context.sources.add_pandas(name=datasource_name)

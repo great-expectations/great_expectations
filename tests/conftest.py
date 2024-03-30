@@ -7566,7 +7566,7 @@ def multibatch_generic_csv_generator():
                     ],
                     "batch_num": [batch_num + 1 for _ in range(num_events_per_batch)],  # type: ignore[arg-type]
                     "string_cardinality_3": [
-                        category_strings[i % 3]  # type: ignore[arg-type]
+                        category_strings[i % 3]
                         for i in range(num_events_per_batch)  # type: ignore[arg-type]
                     ],
                 }

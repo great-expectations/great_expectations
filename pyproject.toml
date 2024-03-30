@@ -195,6 +195,7 @@ module = [
     "great_expectations.rule_based_profiler.*",
     "great_expectations.self_check.*",
     "great_expectations.validation_operators.*",
+    "tests.rule_based_profiler.*",
     "tests.test_utils",
 ]
 follow_imports = 'silent'
@@ -223,6 +224,7 @@ module = [
     "pyarrow.*",
     "pyfakefs.*",
     "pypd.*",
+    "pytest_timeout.*",
     "ruamel.*",
     "scipy.*",
     "sempy.*",
