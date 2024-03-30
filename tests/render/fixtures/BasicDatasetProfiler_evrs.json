@@ -10,6 +10,7 @@
     "batch_parameters": {}
   },
   "success": false,
+  "suite_name": "default",
   "evaluation_parameters": {},
   "results": [
     {

@@ -1,4 +1,4 @@
-def apply_markdown_adjustments(soup, html_file_path, html_file_contents):
+def apply_markdown_adjustments(soup, html_file_path, html_file_contents):  # noqa: C901
     # Add newline before closing dt tags when they have more than one child
     for item in soup.find_all("dt"):
         lengthChildren = len(item.findChildren())
