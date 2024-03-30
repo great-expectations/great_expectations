@@ -351,7 +351,7 @@ def test_has_key_with_empty_payload_from_backend(
     name = "my_nonexistent_suite"
     responses.add(
         responses.GET,
-        f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/expectation-suites?name={name}",
+        f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/expectation-suites?name={name}",
         json={"data": []},
         status=200,
     )
@@ -370,7 +370,7 @@ def test_get_with_empty_payload_from_backend(
     name = "my_nonexistent_suite"
     responses.add(
         responses.GET,
-        f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/expectation-suites?name={name}",
+        f"{CLOUD_DEFAULT_BASE_URL}api/v1/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/expectation-suites?name={name}",
         json={"data": []},
         status=200,
     )
