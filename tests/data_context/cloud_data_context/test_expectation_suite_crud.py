@@ -169,6 +169,7 @@ def mocked_get_by_name_response(
                             },
                         ],
                         "id": suite_id,
+                        "meta": {},
                     }
                 ]
             },
@@ -329,13 +330,10 @@ def test_delete_expectation_suite_by_id_deletes_suite_in_cloud(
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         context.delete_expectation_suite(id=suite_id)
 
-    assert mock_delete.call_args[1]["json"] == {
-        "data": {
-            "type": GXCloudRESTResource.EXPECTATION_SUITE,
-            "id": suite_id,
-            "attributes": {"deleted": True},
-        }
-    }
+    assert (
+        mock_delete.call_args[0][1]
+        == "https://app.greatexpectations.fake.io/api/v1/organizations/12345678-1234-5678-1234-567812345678/expectation-suites/9db8721d-52e3-4263-90b3-ddb83a7aca04"
+    )
 
 
 @pytest.mark.cloud

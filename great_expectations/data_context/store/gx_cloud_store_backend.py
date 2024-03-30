@@ -444,7 +444,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             keys = []
             for resource in response_json["data"]:
                 id: str = resource["id"]
-                resource_name: str = resource["name"]
+                if self._is_v1_resource:
+                    resource_name: str = resource["name"]
+                else:  # V0 config
+                    attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
+                    resource_dict: dict = resource.get("attributes", {}).get(attributes_key, {})
+                    resource_name: str = resource_dict.get("name", "")
                 key = (resource_type, id, resource_name)
                 keys.append(key)
 
@@ -481,25 +486,13 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         try:
             # prefer deletion by id if id present
             if id:
-                # this is the wrong shape for V1, but it doesn't matter, since the
-                # server doesn't look at JSON payload on delete operations.
-                data = {
-                    "data": {
-                        "type": self.ge_cloud_resource_type,
-                        "id": id,
-                        "attributes": {
-                            "deleted": True,
-                        },
-                    }
-                }
-
                 url = self.construct_versioned_url(
                     base_url=self.ge_cloud_base_url,
                     organization_id=self.ge_cloud_credentials["organization_id"],
                     resource_name=self.ge_cloud_resource_name,
                     id=id,
                 )
-                response = self._session.delete(url, json=data)
+                response = self._session.delete(url)
                 response.raise_for_status()
                 return True
             # delete by name
