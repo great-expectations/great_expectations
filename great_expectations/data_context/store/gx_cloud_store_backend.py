@@ -442,14 +442,15 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response_json = self._send_get_request_to_api(url=url)
 
             keys = []
+            resource_name: str
             for resource in response_json["data"]:
                 id: str = resource["id"]
                 if self._is_v1_resource:
-                    resource_name: str = resource["name"]
+                    resource_name = resource["name"]
                 else:  # V0 config
                     attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
                     resource_dict: dict = resource.get("attributes", {}).get(attributes_key, {})
-                    resource_name: str = resource_dict.get("name", "")
+                    resource_name = resource_dict.get("name", "")
                 key = (resource_type, id, resource_name)
                 keys.append(key)
 
