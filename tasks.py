@@ -722,7 +722,7 @@ def show_automerges(ctx: Context):
     url = "https://api.github.com/repos/great-expectations/great_expectations/pulls"
     response = requests.get(
         url,
-        params={
+        params={  # type: ignore[arg-type]
             "state": "open",
             "sort": "updated",
             "direction": "desc",
