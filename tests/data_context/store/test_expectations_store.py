@@ -187,16 +187,18 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
             {
                 "data": {
                     "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                    "attributes": {
-                        "suite": {
-                            "expectation_suite_name": "my_suite",
-                        },
-                    },
+                    "name": "my_suite",
+                    "expectations": [],
+                    "meta": {},
+                    "notes": None,
                 }
             },
             {
-                "expectation_suite_name": "my_suite",
+                "name": "my_suite",
                 "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                "expectations": [],
+                "meta": {},
+                "notes": None,
             },
             None,
             id="single_config",
@@ -207,17 +209,19 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
                 "data": [
                     {
                         "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                        "attributes": {
-                            "suite": {
-                                "expectation_suite_name": "my_suite",
-                            },
-                        },
+                        "name": "my_suite",
+                        "expectations": [],
+                        "meta": {},
+                        "notes": None,
                     }
                 ]
             },
             {
-                "expectation_suite_name": "my_suite",
                 "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                "name": "my_suite",
+                "expectations": [],
+                "meta": {},
+                "notes": None,
             },
             None,
             id="single_config_in_list",
