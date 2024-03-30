@@ -121,7 +121,7 @@ def test_get_expectation_suite(
         .upon_receiving(scenario=scenario)
         .with_request(
             method=method,
-            path=path,
+            path=str(path),
             headers=dict(gx_cloud_session.headers),
         )
         .will_respond_with(
@@ -160,7 +160,7 @@ def test_get_non_existent_expectation_suite(
         .upon_receiving(scenario=scenario)
         .with_request(
             method=method,
-            path=path,
+            path=str(path),
             headers=dict(gx_cloud_session.headers),
         )
         .will_respond_with(
@@ -185,7 +185,14 @@ def test_get_expectation_suites(
     provider_state = "Expectation Suite exist"
     scenario = "a request to get Expectation Suites"
     method = "GET"
-    path = f"/api/v1/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    path = pathlib.Path(
+        "/",
+        "api",
+        "v1",
+        "organizations",
+        EXISTING_ORGANIZATION_ID,
+        "expectation-suites",
+    )
     status = 200
     response_body = GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY
 
@@ -194,7 +201,7 @@ def test_get_expectation_suites(
         .upon_receiving(scenario=scenario)
         .with_request(
             method=method,
-            path=path,
+            path=str(path),
             headers=dict(gx_cloud_session.headers),
         )
         .will_respond_with(
@@ -332,7 +339,7 @@ def test_put_non_existent_expectation_suite(
 
 
 @pytest.mark.cloud
-@pytest.mark.skip(reason="unexpected 401 instead of 204 in CI only")
+# @pytest.mark.skip(reason="unexpected 401 instead of 204 in CI only")
 def test_delete_expectation_suite(
     pact_test: pact.Pact,
     cloud_data_context: CloudDataContext,
