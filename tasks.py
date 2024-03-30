@@ -27,6 +27,7 @@ from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBu
 
 if TYPE_CHECKING:
     from invoke.context import Context
+    from pydantic import BaseModel
 
 
 LOGGER = logging.getLogger(__name__)
@@ -496,6 +497,7 @@ def type_schema(  # noqa: C901 - too complex
     from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
         BatchRequest,
+        DataAsset,
         Datasource,
     )
     from great_expectations.datasource.fluent.sources import (
@@ -515,7 +517,7 @@ def type_schema(  # noqa: C901 - too complex
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    name_model = [
+    name_model: list[tuple[str, type[Datasource | BatchRequest | DataAsset]]] = [
         ("BatchRequest", BatchRequest),
         (Datasource.__name__, Datasource),
         *_iter_all_registered_types(),
@@ -626,7 +628,7 @@ def docs(
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
-        docs_builder.create_version(version=parse_version(version))
+        docs_builder.create_version(version=parse_version(version))  # type: ignore[arg-type]
     elif start:
         ctx.run(" ".join(["yarn start"]), echo=True)
     elif clear:
@@ -694,9 +696,9 @@ def link_checker(ctx: Context, skip_external: bool = True):
     """Checks the Docusaurus docs for broken links"""
     import docs.checks.docs_link_checker as checker
 
-    path: str = "docs/docusaurus/docs"
-    docs_root: str = "docs/docusaurus/docs"
-    static_root: str = "docs/docusaurus/static"
+    path = pathlib.Path("docs/docusaurus/docs")
+    docs_root = pathlib.Path("docs/docusaurus/docs")
+    static_root = pathlib.Path("docs/docusaurus/static")
     site_prefix: str = "docs"
     static_prefix: str = "static"
 
