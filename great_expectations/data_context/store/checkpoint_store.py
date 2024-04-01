@@ -300,4 +300,4 @@ class V1CheckpointStore(Store):
             super()._update(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError as e:
             name = key.to_tuple()[0]
-            raise ValueError(f"Could not find existing Checkpoint '{name}' to update") from e
+            raise ValueError(f"Could not update Checkpoint '{name}'") from e
