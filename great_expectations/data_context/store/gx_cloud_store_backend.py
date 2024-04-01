@@ -641,15 +641,15 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 base_url,
                 f"api/v1/organizations/{organization_id}/{hyphen(resource_name)}",
             )
-            if id:
-                url = f"{url}/{id}"
         else:  # default to EndpointVersion.V0
             url = urljoin(
                 base_url,
                 f"organizations/{organization_id}/{hyphen(resource_name)}",
             )
-            if id:
-                url = f"{url}/{id}"
+
+        if id:
+            url = f"{url}/{id}"
+
         return url
 
     @classmethod
