@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
@@ -83,6 +83,12 @@ class CheckpointFactory(Factory[Checkpoint]):
             raise DataContextError(f"Checkpoint with name {name} was not found.")
 
         return self._get(key=key)
+
+    @public_api
+    @override
+    def all(self) -> List[Checkpoint]:
+        """Get all Checkpoints."""
+        return []
 
     def _get(self, key: GXCloudIdentifier | StringKey) -> Checkpoint:
         checkpoint = self._store.get(key=key)

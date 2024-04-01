@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.analytics.client import submit as submit_event
@@ -94,3 +94,9 @@ class SuiteFactory(Factory[ExpectationSuite]):
         if self._include_rendered_content:
             suite.render()
         return suite
+
+    @public_api
+    @override
+    def all(self) -> List[ExpectationSuite]:
+        """Get all ExpectationSuites."""
+        return []
