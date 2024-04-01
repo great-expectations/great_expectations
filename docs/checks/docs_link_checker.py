@@ -279,7 +279,7 @@ class LinkChecker:
             if match:
                 result = self._check_relative_image(link, file, match.group("path"))
             else:
-                match = self._absolute_image_pattern.match(link)  # type: ignore[assignment]
+                match = self._absolute_image_pattern.match(link)
                 if match:
                     result = self._check_absolute_image(link, file, match.group("path"))
                 else:
@@ -289,17 +289,17 @@ class LinkChecker:
             if match:
                 result = self._check_relative_link(link, file, match.group("path"))
             else:
-                match = self._absolute_link_pattern.match(link)  # type: ignore[assignment]
+                match = self._absolute_link_pattern.match(link)
                 if match:
                     result = self._check_absolute_link(
                         link, file, match.group("path"), match.group("version")
                     )
-                elif match := self._absolute_file_pattern.match(link):  # type: ignore[assignment]
+                elif match := self._absolute_file_pattern.match(link):
                     # This could be more robust like the other checks, but the level of complexity will be high for versioned_docs,
                     # and we should be able to just set onBrokenMarkdownLinks: 'error'
                     result = None
                 else:
-                    match = self._docroot_link_pattern.match(link)  # type: ignore[assignment]
+                    match = self._docroot_link_pattern.match(link)
                     if match:
                         result = self._check_docroot_link(
                             link, file, match.group("path")
