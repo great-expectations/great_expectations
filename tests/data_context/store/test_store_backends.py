@@ -477,6 +477,29 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
 
 
 @pytest.mark.filesystem
+def test_TupleFilesystemStoreBackend_get_all(tmp_path_factory):
+    path = "dummy_str"
+    full_test_dir = tmp_path_factory.mktemp("test_TupleFilesystemStoreBackend__dir")
+    project_path = str(full_test_dir)
+
+    my_store = TupleFilesystemStoreBackend(
+        root_directory=project_path,
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
+        filepath_template="my_file_{0}",
+    )
+
+    value_a = "aaa"
+    value_b = "bbb"
+
+    my_store.set(("AAA",), value_a)
+    my_store.set(("BBB",), value_b)
+
+    all_values = my_store.get_all()
+
+    assert all_values == [value_a, value_b]
+
+
+@pytest.mark.filesystem
 def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
     tmp_path_factory,
 ):

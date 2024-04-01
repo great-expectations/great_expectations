@@ -316,7 +316,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        keys = [key for key in self.list_keys() if key != StoreBackend.STORE_BACKEND_ID_KEY]
+        return [self._get(key) for key in keys]
 
     def _set(self, key, value, **kwargs):
         if not isinstance(key, tuple):
