@@ -10,9 +10,6 @@ from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.core.data_context_key import StringKey
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
     from great_expectations.data_context.store.checkpoint_store import (
         V1CheckpointStore as CheckpointStore,
     )
@@ -21,9 +18,8 @@ if TYPE_CHECKING:
 
 # TODO: Add analytics as needed
 class CheckpointFactory(Factory[Checkpoint]):
-    def __init__(self, store: CheckpointStore, context: AbstractDataContext):
+    def __init__(self, store: CheckpointStore):
         self._store = store
-        self._context = context
 
     @public_api
     @override
