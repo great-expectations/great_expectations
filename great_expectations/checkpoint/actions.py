@@ -56,6 +56,7 @@ from great_expectations.render.renderer import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
@@ -102,11 +103,10 @@ class ValidationAction(BaseModel):
         return project_manager.is_using_cloud()
 
     @public_api
-    def run(  # noqa: PLR0913
+    def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
         **kwargs,
@@ -119,7 +119,6 @@ class ValidationAction(BaseModel):
         Args:
             validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
             validation_result_suite_identifier: an instance of either the ValidationResultIdentifier class (for open source Great Expectations) or the GXCloudIdentifier (from Great Expectations Cloud).
-            data_asset: An instance of the Validator class.
             expectation_suite_identifier: Optionally, an instance of the ExpectationSuiteIdentifier class.
             checkpoint_identifier: Optionally, an Identifier for the Checkpoint.
             kwargs: named parameters that are specific to a given Action, and need to be assigned a value in the Action's configuration in a Checkpoint's action_list.
@@ -130,18 +129,16 @@ class ValidationAction(BaseModel):
         return self._run(
             validation_result_suite=validation_result_suite,
             validation_result_suite_identifier=validation_result_suite_identifier,
-            data_asset=data_asset,
             expectation_suite_identifier=expectation_suite_identifier,
             checkpoint_identifier=checkpoint_identifier,
             **kwargs,
         )
 
     @public_api
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -156,14 +153,16 @@ class ValidationAction(BaseModel):
             validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
             validation_result_suite_identifier: an instance of either the ValidationResultIdentifier
                 class (for open source Great Expectations) or the GeCloudIdentifier (from Great Expectations Cloud).
-            data_asset: An instance of the Validator class.
             expectation_suite_identifier:  Optionally, an instance of the ExpectationSuiteIdentifier class.
             checkpoint_identifier:  Optionally, an Identifier for the Checkpoints.
 
         Returns:
             A Dict describing the result of the Action.
         """  # noqa: E501
-        return NotImplementedError
+
+    # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
+    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+        raise NotImplementedError
 
 
 class DataDocsAction(ValidationAction):
@@ -273,7 +272,6 @@ class SlackNotificationAction(DataDocsAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -417,7 +415,6 @@ class PagerdutyAlertAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -425,6 +422,7 @@ class PagerdutyAlertAction(ValidationAction):
         import pypd
 
         logger.debug("PagerdutyAlertAction.run")
+
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."  # noqa: E501
@@ -524,7 +522,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -624,7 +621,6 @@ class OpsgenieAlertAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -771,7 +767,6 @@ class EmailAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -881,12 +876,12 @@ class StoreValidationResultAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
+
         output = self._target_store.store_validation_results(
             validation_result_suite,
             validation_result_suite_identifier,
@@ -939,7 +934,6 @@ class UpdateDataDocsAction(DataDocsAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -1013,13 +1007,12 @@ class SNSNotificationAction(ValidationAction):
     sns_message_subject: Optional[str]
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        data_asset=None,
         **kwargs,
     ) -> str:
         logger.debug("SNSNotificationAction.run")
@@ -1053,11 +1046,10 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
-        data_asset,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
         **kwargs,

@@ -2051,7 +2051,6 @@ def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
             check_json_test_result(
                 test=test,
                 result=result,
-                data_asset=validator.execution_engine.batch_manager.active_batch_data,
                 pk_column=pk_column,
             )
         except Exception as e:
@@ -2065,7 +2064,7 @@ def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
 
 
 def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
-    test, result, data_asset=None, pk_column=False
+    test, result, pk_column=False
 ) -> None:
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists  # noqa: E501
     # this will work for testing since result_format is COMPLETE

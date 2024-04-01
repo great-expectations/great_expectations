@@ -416,7 +416,6 @@ class ActionListValidationOperator(ValidationOperator):
                 action_result = self.actions[name].run(
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
-                    data_asset=batch,
                     payload=batch_actions_results,
                     expectation_suite_identifier=expectation_suite_identifier,
                     checkpoint_identifier=checkpoint_identifier,
