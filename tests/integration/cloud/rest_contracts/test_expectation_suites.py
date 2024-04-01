@@ -374,7 +374,7 @@ def test_delete_non_existent_expectation_suite(
     provider_state = "the Expectation Suite does not exist"
     scenario = "a request to delete an Expectation Suite"
     method = "DELETE"
-    path = f"/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
+    path = f"api/v1/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
     query = {
         "name": str(uuid.uuid4()),
     }
