@@ -159,15 +159,10 @@ class ValidationAction(BaseModel):
         Returns:
             A Dict describing the result of the Action.
         """  # noqa: E501
-        return NotImplementedError
 
-    # NOTE: To be promoted to 'run' after V1 development
+    # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
     def v1_run(self, checkpoint_result: CheckpointResult) -> None:
-        return self._v1_run(checkpoint_result=checkpoint_result)
-
-    # NOTE: To be promoted to '_run' after V1 development
-    def _v1_run(self, checkpoint_result: CheckpointResult):
-        raise NotImplementedError
+        return NotImplementedError
 
 
 class DataDocsAction(ValidationAction):
