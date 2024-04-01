@@ -89,15 +89,16 @@ def sort(
 
 
 @invoke.task(
+    aliases=("fmt",),
     help={
         "check": _CHECK_HELP_DESC,
         "exclude": _EXCLUDE_HELP_DESC,
         "path": _PATH_HELP_DESC,
         "sort": "Disable import sorting. Runs by default.",
         "pty": _PTY_HELP_DESC,
-    }
+    },
 )
-def fmt(
+def format(
     ctx: Context,
     path: str = ".",
     sort_: bool = True,
@@ -138,7 +139,7 @@ def lint(
 ):
     """Run formatter (ruff format) and linter (ruff)"""
     if fmt_:
-        fmt(ctx, path, check=not fix, pty=pty)
+        format(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
     cmds = ["ruff", "check", path]
@@ -153,7 +154,7 @@ def lint(
 def fix(ctx: Context, path: str = "."):
     """Automatically fix all possible code issues."""
     lint(ctx, path=path, fix=True)
-    fmt(ctx, path=path, sort_=True)
+    format(ctx, path=path, sort_=True)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
