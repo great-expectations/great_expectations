@@ -39,6 +39,7 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -864,6 +865,63 @@ class StoreValidationResultAction(ValidationAction):
             raise ValueError("target_store must be a ValidationsStore")
 
         self._target_store = target_store
+
+    @override
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
+        payload=None,
+        expectation_suite_identifier=None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
+    ):
+        logger.debug("StoreValidationResultAction.run")
+        output = self._target_store.store_validation_results(
+            validation_result_suite,
+            validation_result_suite_identifier,
+            expectation_suite_identifier,
+            checkpoint_identifier,
+        )
+
+        if isinstance(output, GXCloudResourceRef) and isinstance(
+            validation_result_suite_identifier, GXCloudIdentifier
+        ):
+            validation_result_suite_identifier.id = output.id
+
+        if self._using_cloud_context and isinstance(output, GXCloudResourceRef):
+            return output
+
+
+@public_api
+class UpdateDataDocsAction(DataDocsAction):
+    """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
+
+    YAML configuration example:
+
+    ```yaml
+    - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+    ```
+
+    You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
+    list of sites to update:
+
+    ```yaml
+    - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names:
+        - local_site
+    ```
+
+    Args:
+        site_names: Optional. A list of the names of sites to update.
+    """  # noqa: E501
+
+    type: Literal["update_data_docs"] = "update_data_docs"
+
+    site_names: List[str] = []
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
