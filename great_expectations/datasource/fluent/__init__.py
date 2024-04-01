@@ -2,6 +2,7 @@
 
 import pathlib
 
+from great_expectations.core.batch_definition.batch_definition_base import BatchDefinitionBase
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
@@ -20,7 +21,7 @@ from great_expectations.datasource.fluent.invalid_datasource import (
 # provide it to the BatchDefinition pydantic model.
 from great_expectations.core.batch_definition import BatchDefinition
 
-BatchDefinition.update_forward_refs(DataAsset=DataAsset)
+BatchDefinitionBase.update_forward_refs(DataAsset=DataAsset)
 
 
 from great_expectations.datasource.fluent.batch_request import (

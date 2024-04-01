@@ -1,13 +1,11 @@
-from great_expectations.core.batch_definition import BatchDefinition
+
+from great_expectations.core.batch_definition.batch_definition_base import BatchDefinitionBase
 from great_expectations.core.partitioners import PartitionerYearAndMonthAndDay
 
 
-class Date(BatchDefinition):
+class Date(BatchDefinitionBase):
     column: str
 
-    def __init__(self, column, **kwargs):
-        super().__init__(
-            **kwargs,
-            column=column,
-            partitioner=PartitionerYearAndMonthAndDay(column_name=column),
-        )
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._partitioner = PartitionerYearAndMonthAndDay(column_name=self.column)

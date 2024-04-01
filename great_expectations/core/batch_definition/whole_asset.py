@@ -1,7 +1,5 @@
-from great_expectations.compatibility import pydantic
-
-from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.batch_definition.batch_definition_base import BatchDefinitionBase
 
 
-class WholeAsset(BatchDefinition):
-    partitioner: None = pydantic.PrivateAttr()
+class WholeAsset(BatchDefinitionBase):
+    partitioner: None = None
