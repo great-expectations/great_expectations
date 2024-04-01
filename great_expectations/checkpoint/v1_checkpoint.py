@@ -204,7 +204,12 @@ class Checkpoint(BaseModel):
 
     @public_api
     def save(self) -> None:
-        raise NotImplementedError
+        from great_expectations import project_manager
+
+        store = project_manager.get_checkpoints_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        store.update(key=key, value=self)
 
 
 class CheckpointResult(BaseModel):

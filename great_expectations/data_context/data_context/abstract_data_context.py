@@ -325,16 +325,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         self._checkpoints: CheckpointFactory | None = None
-        if checkpoint_store := self.stores.get(self.checkpoint_store_name):
+        if self.stores.get(self.checkpoint_store_name):
             # NOTE: Currently in an intermediate state where both the legacy and V1 stores exist.
             #       Upon the deletion of the old checkpoint store, the new one will be promoted.
-            v1_checkpoint_store = V1CheckpointStore()
-            v1_checkpoint_store._store_backend = (
-                checkpoint_store.store_backend
-            )  # Leverage same backend as what was configured for the old store
             self._checkpoints = CheckpointFactory(
-                store=v1_checkpoint_store,
-                context=self,
+                store=self.v1_checkpoint_store,
             )
 
         self._validation_definitions: ValidationDefinitionFactory = ValidationDefinitionFactory(
@@ -653,6 +648,18 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def checkpoint_store(self) -> CheckpointStore:
         return self.stores[self.checkpoint_store_name]
+
+    @property
+    def v1_checkpoint_store(self) -> V1CheckpointStore:
+        # Temporary property until the legacy checkpoint store is removed
+        # and the new checkpoint store is promoted to the old namespace
+        legacy_checkpoint_store = self.checkpoint_store
+        store = V1CheckpointStore()
+
+        # Leverage same backend as what was configured for the old store
+        store._store_backend = legacy_checkpoint_store.store_backend
+
+        return store
 
     @property
     def assistants(self) -> DataAssistantDispatcher:
