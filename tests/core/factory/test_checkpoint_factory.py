@@ -1,7 +1,7 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations import set_context
+from great_expectations import get_context, set_context
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
@@ -235,6 +235,56 @@ def _test_checkpoint_factory_delete_success(context):
         match=f"Checkpoint with name {name} was not found.",
     ):
         context.checkpoints.get(name)
+
+
+@pytest.mark.unit
+def test_checkpoint_factory_get_all_ephemeral():
+    context = get_context(mode="ephemeral")
+    _test_checkpoint_factory_get_all(context)
+
+
+@pytest.mark.filesystem
+def test_checkpoint_factory_get_all_filesystem(empty_data_context):
+    _test_checkpoint_factory_get_all(empty_data_context)
+
+
+@pytest.mark.cloud
+def test_checkpoint_factory_get_all_cloud(empty_cloud_context_fluent):
+    _test_checkpoint_factory_get_all(empty_cloud_context_fluent)
+
+
+def _test_checkpoint_factory_get_all(context: AbstractDataContext):
+    # Arrange
+    ds = context.sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")
+    batch_def = asset.add_batch_definition("my_batch_definition")
+    suite = ExpectationSuite(name="my_suite")
+
+    checkpoint_a = context.checkpoints.add(
+        Checkpoint(
+            name="a",
+            validation_definitions=[
+                ValidationDefinition(name="val def a", data=batch_def, suite=suite)
+            ],
+            actions=[],
+        )
+    )
+    checkpoint_b = context.checkpoints.add(
+        Checkpoint(
+            name="b",
+            validation_definitions=[
+                ValidationDefinition(name="val def b", data=batch_def, suite=suite)
+            ],
+            actions=[],
+        )
+    )
+
+    # Act
+    result = context.checkpoints.all()
+
+    # Assert
+    assert [r.name for r in result] == [checkpoint_a.name, checkpoint_b.name]
+    assert result == [checkpoint_a, checkpoint_b]
 
 
 class TestCheckpointFactoryAnalytics:

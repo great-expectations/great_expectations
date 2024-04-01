@@ -88,7 +88,7 @@ class CheckpointFactory(Factory[Checkpoint]):
     @override
     def all(self) -> List[Checkpoint]:
         """Get all Checkpoints."""
-        return []
+        return self._store.get_all()
 
     def _get(self, key: GXCloudIdentifier | StringKey) -> Checkpoint:
         checkpoint = self._store.get(key=key)
