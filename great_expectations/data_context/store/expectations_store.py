@@ -131,8 +131,9 @@ class ExpectationsStore(Store):
 
         # Cloud backend adds a default result format type of None, so ensure we remove it:
         for expectation in suite_data.get("expectations", []):
-            if expectation.get("kwargs", {}).get("result_format", False) is None:
-                expectation["kwargs"].pop("result_format")
+            kwargs = expectation["kwargs"]
+            if "result_format" in kwargs and kwargs["result_format"] is None:
+                kwargs.pop("result_format")
 
         suite_dto = ExpectationSuiteDTO.parse_obj(suite_data)
         return suite_dto.dict()
