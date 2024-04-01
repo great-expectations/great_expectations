@@ -256,7 +256,7 @@ def test_checkpoint_factory_get_all_cloud(empty_cloud_context_fluent):
 def _test_checkpoint_factory_get_all(context: AbstractDataContext):
     # Arrange
     ds = context.sources.add_pandas("my_datasource")
-    asset = ds.add_csv_asset("my_asset", "data.csv")
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore
     batch_def = asset.add_batch_definition("my_batch_definition")
     suite = ExpectationSuite(name="my_suite")
 
