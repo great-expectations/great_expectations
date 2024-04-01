@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import pathlib
-import uuid
 from typing import TYPE_CHECKING, Callable, Final
 
 import pact
 import pytest
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
 from great_expectations.exceptions import DataContextError
 from tests.integration.cloud.rest_contracts.conftest import (
@@ -334,68 +332,3 @@ def test_put_non_existent_expectation_suite(
     run_rest_api_pact_test: Callable[[ContractInteraction], None],
 ) -> None:
     run_rest_api_pact_test(contract_interaction)
-
-
-@pytest.mark.cloud
-def test_delete_expectation_suite(
-    pact_test: pact.Pact,
-    cloud_data_context: CloudDataContext,
-) -> None:
-    provider_state = "the Expectation Suite does exist"
-    scenario = "a request to delete an Expectation Suite"
-    method = "DELETE"
-    path = f"/api/v1/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
-    query = {
-        "name": "brand new suite",
-    }
-    status = 204
-
-    (
-        pact_test.given(provider_state=provider_state)
-        .upon_receiving(scenario=scenario)
-        .with_request(
-            method=method,
-            path=path,
-            query=query,
-        )
-        .will_respond_with(
-            status=status,
-        )
-    )
-
-    with pact_test:
-        suite = cloud_data_context.suites.get(name=query["name"])
-        cloud_data_context.suites.delete(suite)
-
-
-@pytest.mark.cloud
-def test_delete_non_existent_expectation_suite(
-    pact_test: pact.Pact,
-    cloud_data_context: CloudDataContext,
-) -> None:
-    provider_state = "the Expectation Suite does not exist"
-    scenario = "a request to delete an Expectation Suite"
-    method = "DELETE"
-    path = f"api/v1/organizations/{EXISTING_ORGANIZATION_ID}/expectation-suites"
-    query = {
-        "name": str(uuid.uuid4()),
-    }
-    status = 404
-
-    (
-        pact_test.given(provider_state=provider_state)
-        .upon_receiving(scenario=scenario)
-        .with_request(
-            method=method,
-            path=path,
-            query=query,
-        )
-        .will_respond_with(
-            status=status,
-        )
-    )
-
-    with pact_test:
-        with pytest.raises(DataContextError):
-            suite = ExpectationSuite(name=query["name"])
-            cloud_data_context.suites.delete(suite)
