@@ -211,7 +211,7 @@ class PandasDataPartitioner(DataPartitioner):
         for column_name in column_names:
             value = batch_identifiers.get(column_name)
             if not value:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     f"In order for PandasExecution to `_partition_on_multi_column_values`, "
                     f"all values in column_names must also exist in batch_identifiers. "
                     f"{column_name} was not found in batch_identifiers."
@@ -232,7 +232,7 @@ class PandasDataPartitioner(DataPartitioner):
             hash_method = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):
             raise (
-                gx_exceptions.ExecutionEngineError(
+                gx_exceptions.ExecutionEngineError(  # noqa: TRY003
                     f"""The partitioning method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
                         Reference to {hash_function_name} cannot be found."""  # noqa: E501
                 )

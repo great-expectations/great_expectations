@@ -54,7 +54,7 @@ class DataSampler(abc.ABC):  # noqa: B024 # abstract-base-class-without-abstract
             SamplerError
         """
         if batch_spec.get("sampling_kwargs") is None:
-            raise gx_exceptions.SamplerError(
+            raise gx_exceptions.SamplerError(  # noqa: TRY003
                 "Please make sure to provide sampling_kwargs in addition to your sampling_method."
             )
 
@@ -71,7 +71,7 @@ class DataSampler(abc.ABC):  # noqa: B024 # abstract-base-class-without-abstract
             SamplerError
         """
         if batch_spec["sampling_kwargs"].get(key) is None:
-            raise gx_exceptions.SamplerError(
+            raise gx_exceptions.SamplerError(  # noqa: TRY003
                 f"Please make sure to provide the {key} key in sampling_kwargs in addition to your sampling_method."  # noqa: E501
             )
 

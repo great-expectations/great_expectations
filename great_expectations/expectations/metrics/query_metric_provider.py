@@ -39,6 +39,6 @@ class QueryMetricProvider(MetricProvider):
             query_param
         )
         if not query:
-            raise ValueError(f"Must provide `{query_param}` to `{cls.__name__}` metric.")
+            raise ValueError(f"Must provide `{query_param}` to `{cls.__name__}` metric.")  # noqa: TRY003
 
         return query

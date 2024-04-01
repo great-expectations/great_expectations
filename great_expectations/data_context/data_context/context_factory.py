@@ -196,7 +196,7 @@ class ProjectManager:
         try:
             kwargs = param_lookup[mode]
         except KeyError:
-            raise ValueError(f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud.")
+            raise ValueError(f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud.")  # noqa: TRY003
 
         from great_expectations.data_context.data_context import (
             AbstractDataContext,
@@ -232,7 +232,7 @@ class ProjectManager:
         if not isinstance(context, expected_type):
             # example I want an ephemeral context but the presence of a GX_CLOUD env var gives me a cloud context  # noqa: E501
             # this kind of thing should not be possible but there may be some edge cases
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003, TRY004
                 f"Provided mode {mode} returned context of type {type(context).__name__} instead of {expected_type.__name__}; please check your input arguments."  # noqa: E501
             )
 
@@ -329,7 +329,7 @@ class ProjectManager:
             )
 
         if cloud_mode and not config_available:
-            raise GXCloudConfigurationError(
+            raise GXCloudConfigurationError(  # noqa: TRY003
                 "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"  # noqa: E501
             )
 

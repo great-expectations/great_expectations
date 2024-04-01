@@ -99,7 +99,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
                 )
             self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
-            raise ImportError(
+            raise ImportError(  # noqa: TRY003
                 "Unable to load GCS Client (it is required for ConfiguredAssetGCSDataConnector)."
             )
 

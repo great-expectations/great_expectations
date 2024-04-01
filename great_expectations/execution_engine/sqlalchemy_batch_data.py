@@ -142,9 +142,9 @@ class SqlAlchemyBatchData(BatchData):
         self._source_schema_name = source_schema_name
 
         if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
-            raise ValueError("Exactly one of table_name, query, or selectable must be specified")
+            raise ValueError("Exactly one of table_name, query, or selectable must be specified")  # noqa: TRY003
         elif (query and schema_name) or (selectable is not None and schema_name):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "schema_name can only be used with table_name. Use temp_table_schema_name to provide a target schema for creating a temporary table."  # noqa: E501
             )
 
