@@ -162,7 +162,7 @@ class ValidationAction(BaseModel):
 
     # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
     def v1_run(self, checkpoint_result: CheckpointResult) -> None:
-        return NotImplementedError
+        raise NotImplementedError
 
 
 class DataDocsAction(ValidationAction):

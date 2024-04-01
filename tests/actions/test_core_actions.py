@@ -828,13 +828,17 @@ class TestV1ActionRun:
         )
 
     @pytest.mark.unit
-    @pytest.mark.xfail(reason="Not yet implemented for this class", raises=NotImplementedError)
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
     def test_APINotificationAction_run(self, checkpoint_result: CheckpointResult):
         action = APINotificationAction(url="http://www.example.com")
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(reason="Not yet implemented for this class", raises=NotImplementedError)
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
     def test_EmailAction_run(self, checkpoint_result: CheckpointResult):
         action = EmailAction(
             smtp_address="test", smtp_port=587, receiver_emails="test1@gmail.com, test2@hotmail.com"
@@ -842,13 +846,17 @@ class TestV1ActionRun:
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(reason="Not yet implemented for this class", raises=NotImplementedError)
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
     def test_MicrosoftTeamsNotificationAction_run(self, checkpoint_result: CheckpointResult):
         action = MicrosoftTeamsNotificationAction(teams_webhook="test")
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(reason="Not yet implemented for this class", raises=NotImplementedError)
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
     def test_OpsgenieAlertAction_run(self, checkpoint_result: CheckpointResult):
         action = OpsgenieAlertAction(api_key="test")
         action.v1_run(checkpoint_result=checkpoint_result)
@@ -858,25 +866,33 @@ class TestV1ActionRun:
         reason="pypd is not installed",
     )
     @pytest.mark.unit
-    @pytest.mark.xfail(reason="Not yet implemented for this class", raises=NotImplementedError)
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
     def test_PagerdutyAlertAction_run(self, checkpoint_result: CheckpointResult):
         action = PagerdutyAlertAction()
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(reason="Not yet implemented for this class", raises=NotImplementedError)
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
     def test_SlackNotificationAction_run(self, checkpoint_result: CheckpointResult):
         action = SlackNotificationAction(slack_webhook="test")
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(reason="Not yet implemented for this class", raises=NotImplementedError)
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
     def test_SNSNotificationAction_run(self, checkpoint_result: CheckpointResult):
         action = SNSNotificationAction(sns_topic_arn="test")
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(reason="Not yet implemented for this class", raises=NotImplementedError)
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
     def test_UpdateDataDocsAction_run(self, checkpoint_result: CheckpointResult):
         action = UpdateDataDocsAction()
         action.v1_run(checkpoint_result=checkpoint_result)
