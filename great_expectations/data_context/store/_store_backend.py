@@ -183,9 +183,7 @@ class StoreBackend(metaclass=ABCMeta):
 
     def get_url_for_key(self, key, protocol=None) -> None:
         raise StoreError(
-            "Store backend of type {:s} does not have an implementation of get_url_for_key".format(
-                type(self).__name__
-            )
+            f"Store backend of type {type(self).__name__:s} does not have an implementation of get_url_for_key"
         )
 
     def _validate_key(self, key) -> None:

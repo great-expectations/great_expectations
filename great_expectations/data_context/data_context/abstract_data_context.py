@@ -463,8 +463,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             key = ExpectationSuiteIdentifier(name=expectation_suite_name)
         if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
             raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "  # noqa: E501
-                "expectation_suite, set overwrite_existing=True.".format(expectation_suite_name)
+                f"expectation_suite with name {expectation_suite_name} already exists. If you would like to overwrite this "  # noqa: E501
+                "expectation_suite, set overwrite_existing=True."
             )
         self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
@@ -3195,9 +3195,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 usage_statistics_enabled = False
             else:
                 logger.warning(
-                    "GE_USAGE_STATS environment variable must be one of: {}".format(
-                        AbstractDataContext.FALSEY_STRINGS
-                    )
+                    f"GE_USAGE_STATS environment variable must be one of: {AbstractDataContext.FALSEY_STRINGS}"
                 )
         for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
@@ -3811,8 +3809,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                     except gx_exceptions.UnavailableMetricError:
                         # This will happen frequently in larger pipelines
                         logger.debug(
-                            "metric {} was requested by another expectation suite but is not available in "  # noqa: E501
-                            "this validation result.".format(metric_name)
+                            f"metric {metric_name} was requested by another expectation suite but is not available in "  # noqa: E501
+                            "this validation result."
                         )
 
     def _determine_if_expectation_suite_include_rendered_content(

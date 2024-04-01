@@ -217,9 +217,7 @@ class ActionListValidationOperator(ValidationOperator):
             # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
             if not set(action_config.keys()) == {"name", "action"}:
                 raise KeyError(
-                    'Action config keys must be ("name", "action"). Instead got {}'.format(
-                        action_config.keys()
-                    )
+                    f'Action config keys must be ("name", "action"). Instead got {action_config.keys()}'
                 )
 
             if "class_name" in action_config["action"]:
@@ -711,9 +709,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Learn about FailureVsWarning Validation Operators at {}".format(
-                        documentation_url
-                    ),
+                    "text": f"Learn about FailureVsWarning Validation Operators at {documentation_url}",
                 }
             ],
         }

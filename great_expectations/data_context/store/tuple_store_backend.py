@@ -84,23 +84,14 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             for substring in self.forbidden_substrings:
                 if substring in key_element:
                     raise ValueError(
-                        "Keys in {} must not contain substrings in {} : {}".format(
-                            self.__class__.__name__,
-                            self.forbidden_substrings,
-                            key,
-                        )
+                        f"Keys in {self.__class__.__name__} must not contain substrings in {self.forbidden_substrings} : {key}"
                     )
 
     @override
     def _validate_value(self, value) -> None:
         if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError(
-                "Values in {} must be instances of {} or {}, not {}".format(
-                    self.__class__.__name__,
-                    str,
-                    bytes,
-                    type(value),
-                )
+                f"Values in {self.__class__.__name__} must be instances of {str} or {bytes}, not {type(value)}"
             )
 
     def _convert_key_to_filepath(self, key):
@@ -207,12 +198,8 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:
             raise ValueError(
-                "filepath template {} for class {} is not reversible for a tuple of length {}. "
-                "Have you included all elements in the key tuple?".format(
-                    self.filepath_template,
-                    self.__class__.__name__,
-                    self.key_length,
-                )
+                f"filepath template {self.filepath_template} for class {self.__class__.__name__} is not reversible for a tuple of length {self.key_length}. "
+                "Have you included all elements in the key tuple?"
             )
 
     @property
