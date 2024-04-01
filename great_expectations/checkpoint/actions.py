@@ -163,11 +163,11 @@ class ValidationAction(BaseModel):
 
     # NOTE: To be promoted to 'run' after V1 development
     def v1_run(self, checkpoint_result: CheckpointResult) -> None:
-        return self._run(checkpoint_result=checkpoint_result)
+        return self._v1_run(checkpoint_result=checkpoint_result)
 
     # NOTE: To be promoted to '_run' after V1 development
     def _v1_run(self, checkpoint_result: CheckpointResult):
-        return NotImplementedError
+        raise NotImplementedError
 
 
 class DataDocsAction(ValidationAction):

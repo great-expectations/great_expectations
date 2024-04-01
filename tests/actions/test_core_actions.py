@@ -22,6 +22,7 @@ from great_expectations.checkpoint.actions import (
     ValidationAction,
 )
 from great_expectations.checkpoint.util import smtplib
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
 from great_expectations.compatibility.pydantic import BaseModel, Field, ValidationError
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -808,3 +809,74 @@ class TestActionSerialization:
         parsed_action = DummyClassWithActionChild.parse_raw(json_dict)
 
         assert isinstance(parsed_action.action, action_class)
+
+
+class TestV1ActionRun:
+    @pytest.fixture
+    def checkpoint_result(self, mocker: MockerFixture):
+        return CheckpointResult(
+            run_id=mocker.Mock(spec=RunIdentifier),
+            run_results={
+                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
+                    spec=ExpectationSuiteValidationResult, success=True
+                ),
+                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
+                    spec=ExpectationSuiteValidationResult, success=False
+                ),
+            },
+            checkpoint_config=mocker.Mock(spec=Checkpoint),
+        )
+
+    @pytest.mark.unit
+    def test_APINotificationAction_run(self, checkpoint_result: CheckpointResult):
+        action = APINotificationAction(url="http://www.example.com")
+        with pytest.raises(NotImplementedError):
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    def test_EmailAction_run(self, checkpoint_result: CheckpointResult):
+        action = EmailAction(
+            smtp_address="test", smtp_port=587, receiver_emails="test1@gmail.com, test2@hotmail.com"
+        )
+        with pytest.raises(NotImplementedError):
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    def test_MicrosoftTeamsNotificationAction_run(self, checkpoint_result: CheckpointResult):
+        action = MicrosoftTeamsNotificationAction(teams_webhook="test")
+        with pytest.raises(NotImplementedError):
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    def test_OpsgenieAlertAction_run(self, checkpoint_result: CheckpointResult):
+        action = OpsgenieAlertAction(api_key="test")
+        with pytest.raises(NotImplementedError):
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="pypd"),
+        reason="pypd is not installed",
+    )
+    @pytest.mark.unit
+    def test_PagerdutyAlertAction_run(self, checkpoint_result: CheckpointResult):
+        action = PagerdutyAlertAction()
+        with pytest.raises(NotImplementedError):
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    def test_SlackNotificationAction_run(self, checkpoint_result: CheckpointResult):
+        action = SlackNotificationAction(slack_webhook="test")
+        with pytest.raises(NotImplementedError):
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    def test_SNSNotificationAction_run(self, checkpoint_result: CheckpointResult):
+        action = SNSNotificationAction(sns_topic_arn="test")
+        with pytest.raises(NotImplementedError):
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    def test_UpdateDataDocsAction_run(self, checkpoint_result: CheckpointResult):
+        action = UpdateDataDocsAction()
+        with pytest.raises(NotImplementedError):
+            action.v1_run(checkpoint_result=checkpoint_result)
