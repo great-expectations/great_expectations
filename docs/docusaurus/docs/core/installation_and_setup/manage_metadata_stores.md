@@ -1,17 +1,18 @@
 ---
 title: Manage Metadata Stores
+description: Create Stores to store data metadata.
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-A Store retrieves and stores data metadata. Stores are available from your Data Context.
+A Store retrieves and stores data metadata. Stores are available from your Data Context. GX Core supports the following Stores: 
 
-GX Core supports the following Stores 
-
-- **Validation Result Store** - stores and retrieves information about objects generated when data is Validated against an Expectation Suite.
 - **Expectation Store** - stores and retrieves information about collections of verifiable assertions about data.  These are Stores for Expectation Suites.
 - **Checkpoint Store** - stores and retrieves information about means for validating data in a production deployment of GX Cores.
+- **Validation Result Store** - stores and retrieves information about objects generated when data is Validated against an Expectation Suite.
 - **Validation Definition Store** - stores and retrieves information about validation definitions.
 
 ## Configure Validation Result Stores
@@ -147,7 +148,7 @@ Run a Checkpoint to store results in the new Validation Results Store on S3 then
 
 Use the information provided here to configure a new storage location for Validation Results in Azure Blob Storage.
 
-## Prerequisites
+### Prerequisites
 
 - [A Data Context](./manage_data_contexts.md).
 - [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
@@ -156,7 +157,7 @@ Use the information provided here to configure a new storage location for Valida
 - An Azure Blob container.
 - A prefix (folder) to store Validation Results. You don't need to create the folder, the prefix is just part of the Blob name.
 
-## Configure the ``config_variables.yml`` file with your Azure Storage credentials
+### Configure the ``config_variables.yml`` file with your Azure Storage credentials
 
 GX recommends that you store Azure Storage credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following code adds Azure Storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``: 
 
@@ -182,7 +183,7 @@ stores:
 ```
 This configuration tells Great Expectations to look for Validation Results in a Store named ``validations_store``. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
-## Update your configuration file to include a new Store for Validation Results on Azure Storage account
+### Update your configuration file to include a new Store for Validation Results on Azure Storage account
 
 In the following example, `validations_store_name` is set to ``validations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is ``TupleAzureBlobStoreBackend``, ``container`` is the name of your blob container where Validation Results are stored, ``prefix`` is the folder in the container where Validation Result files are located, and ``connection_string`` is ``${AZURE_STORAGE_CONNECTION_STRING}``to reference the corresponding key in the ``config_variables.yml`` file.
 
@@ -203,7 +204,7 @@ stores:
 If the container for hosting and sharing Data Docs on Azure Blob Storage is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
 :::
 
-## Copy existing Validation Results JSON files to the Azure blob (Optional)
+### Copy existing Validation Results JSON files to the Azure blob (Optional)
 
 You can use the ``az storage blob upload`` command to copy Validation Results into Azure Blob Storage. The following command copies one Validation Result from a local folder to the Azure blob: 
 
@@ -220,7 +221,7 @@ Finished[#############################################################]  100.000
 ```
 To learn more about other methods that are available to copy Validation Result JSON files into Azure Blob Storage, see [Quickstart: Upload, download, and list blobs with the Azure portal](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal).
 
-## Reference the new configuration
+### Reference the new configuration
 
 To make Great Expectations look for Validation Results on the Azure store, set the ``validations_store_name`` variable to the name of your Azure Validations Store. In the previous example this was `validations_AZ_store`.
 
@@ -235,7 +236,7 @@ Use the information provided here to configure a new storage location for Valida
 
 To view all the code used in this topic, see [how_to_configure_a_validation_result_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py).
 
-## Prerequisites
+### Prerequisites
 
 - [A Data Context](./manage_data_contexts.md).
 - [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
@@ -243,7 +244,7 @@ To view all the code used in this topic, see [how_to_configure_a_validation_resu
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Validation Results.
 
-## Configure your GCP credentials
+### Configure your GCP credentials
 
 Confirm that your environment is configured with the appropriate authentication credentials needed to connect to the GCS bucket where Validation Results will be stored. This includes the following:
 
@@ -253,7 +254,7 @@ Confirm that your environment is configured with the appropriate authentication 
 
 For more information about validating your GCP authentication credentials, see [Authenticate to Cloud services using client libraries](https://cloud.google.com/docs/authentication/getting-started).
 
-## Identify your Data Context Validation Results Store
+### Identify your Data Context Validation Results Store
 
 The configuration for your Validation Results Store is available in your Data Context. Open ``great_expectations.yml``and find the following entry: 
 
@@ -261,7 +262,7 @@ The configuration for your Validation Results Store is available in your Data Co
 ```
 This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
-## Update your configuration file to include a new Store for Validation Results
+### Update your configuration file to include a new Store for Validation Results
 
 In the following example, `validations_store_name` is set to ``validations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Validation Result files are stored.
 
@@ -272,7 +273,7 @@ In the following example, `validations_store_name` is set to ``validations_GCS_s
 If you are also storing Expectations in GCS make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
-## Copy existing Validation Results to the GCS bucket (Optional)
+### Copy existing Validation Results to the GCS bucket (Optional)
 
 Use the ``gsutil cp`` command to copy Validation Results into GCS. For example, the following command copies the Validation results ``validation_1`` and ``validation_2``into a GCS bucket: 
 
@@ -284,11 +285,11 @@ The following confirmation message is returned:
 ```
 Additional methods for copying Validation Results into GCS are available. See [Upload objects from a filesystem](https://cloud.google.com/storage/docs/uploading-objects).
 
-## Reference the new configuration
+### Reference the new configuration
 
 To make Great Expectations look for Validation Results on the GCS store, set the ``validations_store_name`` variable to the name of your GCS Validations Store. In the previous example this was `validations_GCS_store`.
 
-## Confirm that the Validation Results Store has been correctly configured
+### Confirm that the Validation Results Store has been correctly configured
 
 [Run a Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store on GCS, and then visualize the results by re-building Data Docs.
 
@@ -297,14 +298,14 @@ To make Great Expectations look for Validation Results on the GCS store, set the
 
 Use the information provided here to configure a new storage location for Validation Results in your filesystem. You'll learn how to use an Action to update Data Docs sites with new Validation Results from Checkpoint runs.
 
-## Prerequisites
+### Prerequisites
 
 - [A Data Context](./manage_data_contexts.md).
 - [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - [A Checkpoint](../validate_data/checkpoints/manage_checkpoints.md).
 - A new storage location to store Validation Results. This can be a local path, or a path to a secure network filesystem.
 
-## Create a new folder for Validation Results
+### Create a new folder for Validation Results
 
 Run the following command to create a new folder for your Validation Results and move your existing Validation Results to the new folder:
 
@@ -315,7 +316,7 @@ mv uncommitted/validations/npi_validations/ uncommitted/shared_validations/
 ```
 In this example, the name of the Validation Result is ``npi_validations`` and the path to the new storage location is ``shared_validations/``.
 
-## Identify your Data Context Validation Results Store
+### Identify your Data Context Validation Results Store
 
 The configuration for your Validation Results Store is available in your Data Context.  Open ``great_expectations.yml``and find the following entry: 
 
@@ -332,7 +333,7 @@ stores:
 
 This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
-## Update your configuration file to include a new Store for Validation results
+### Update your configuration file to include a new Store for Validation results
 
 In the following example, `validations_store_name` is set to ``shared_validations_filesystem_store``, but it can be personalized.  Also, ``base_directory`` is set to ``uncommitted/shared_validations/``, but you can set it to another path that is accessible by Great Expectations.
 
@@ -356,14 +357,14 @@ Run a [Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store 
 
 Use the information provided here to configure Great Expectations to store Validation Results in a PostgreSQL database.
 
-## Prerequisites
+### Prerequisites
 
 - [A Data Context](./manage_data_contexts.md).
 - [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - [A Checkpoint](../validate_data/checkpoints/manage_checkpoints.md).
 - [A PostgreSQL database](https://www.postgresql.org/) with appropriate credentials.
 
-## Configure the ``config_variables.yml`` file with your database credentials
+### Configure the ``config_variables.yml`` file with your database credentials
 
 GX recommends storing database credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and not part of source control. 
 
@@ -393,7 +394,7 @@ GX recommends storing database credentials in the ``config_variables.yml`` file,
       schema: '<your_schema_name>'
     ```
 
-## Identify your Data Context Validation Results Store
+### Identify your Data Context Validation Results Store
 
 The configuration for your Validation Results Store is available in your Data Context.  Open ``great_expectations.yml``and find the following entry:
 
@@ -409,7 +410,7 @@ stores:
 ```
 This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
-## Update your configuration file to include a new Validation Results Store
+### Update your configuration file to include a new Validation Results Store
 
 Add the following entry to your ``great_expectations.yml``: 
 
@@ -426,7 +427,7 @@ stores:
 
 In the previous example, `validations_store_name` is set to ``validations_postgres_store``, but it can be personalized.  Also, ``class_name`` is set to ``DatabaseStoreBackend``, and ``credentials`` is set to ``${db_creds}``, which references the corresponding key in the ``config_variables.yml`` file.  
 
-## Confirm the addition of the new Validation Results Store
+### Confirm the addition of the new Validation Results Store
 
 In the previous example, a ``validations_store`` on the local filesystem and a ``validations_postgres_store`` are configured.  Great Expectations looks for Validation Results in PostgreSQL when the ``validations_store_name`` variable is set to ``validations_postgres_store``. Run the following command to remove ``validations_store`` and confirm the ``validations_postgres_store`` configuration:
 
@@ -481,14 +482,14 @@ By default, new Expectations are stored as Expectation Suites in JSON format in 
 
 Use the information provided here to configure a new storage location for Expectations in Amazon S3.
 
-## Prerequisites
+### Prerequisites
 
 - [A Data Context](./manage_data_contexts.md).
 - [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - Permissions to install boto3 in your local environment.
 - An S3 bucket and prefix to store Expectations.
 
-## Install boto3 with pip
+### Install boto3 with pip
 
 Python interacts with AWS through the boto3 library. Great Expectations makes use of this library in the background when working with AWS. Although you won't use boto3 directly, you'll need to install it in your virtual environment.
 
@@ -506,7 +507,7 @@ or
 python3 -m pip install boto3
 ```
 
-## Verify your AWS credentials
+### Verify your AWS credentials
 
 Run the following command in the AWS CLI to verify that your AWS credentials are properly configured:
 
@@ -516,7 +517,7 @@ aws sts get-caller-identity
 
 When your credentials are properly configured, your UserId, Account, and Arn are returned. If your credentials are not configured correctly, an error message appears. If you received an error message, or you couldn't verify your credentials, see Configuring the AWS CLI.
 
-## Identify your Data Context Expectations Store
+### Identify your Data Context Expectations Store
 
 Your Expectation Store configuration is in your Data Context.
 
@@ -534,7 +535,7 @@ expectations_store_name: expectations_store
 ```
 The default base directory for `expectations_store` is `expectations/`.
 
-## Update your configuration file to include a new Store for Expectations
+### Update your configuration file to include a new Store for Expectations
 
 To manually add an Expectations Store to your configuration, add the following configuration to the stores section of your `great_expectations.yml` file:
 
@@ -603,7 +604,7 @@ store_backend:
 
 If you're storing Validations in S3 or DataDocs in S3, make sure that the prefix values are disjoint and one is not a substring of the other.
 
-## Copy existing Expectation JSON files to the S3 bucket (Optional)
+### Copy existing Expectation JSON files to the S3 bucket (Optional)
 
 If you are converting an existing local Great Expectations deployment to one that works in AWS, you might have Expectations saved that you want to transfer to your S3 bucket.
 
@@ -622,7 +623,7 @@ upload: ./exp1.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name
 upload: ./exp2.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'/exp2.json
 ```
 
-## Confirm Expectation Suite availability
+### Confirm Expectation Suite availability
 
 If you copied your existing Expectation Suites to the S3 bucket, run the following Python code to confirm that Great Expectations can find them:
 
@@ -639,7 +640,7 @@ The Expectations you copied to S3 are returned as a list. Expectations that were
 
 Use the information provided here to configure a new storage location for Expectations in Microsoft Azure Blob Storage.
 
-## Prerequisites
+### Prerequisites
 
 - [A Data Context](./manage_data_contexts.md).
 - [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
@@ -647,7 +648,7 @@ Use the information provided here to configure a new storage location for Expect
 - An Azure Blob container.
 - A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Azure Blob name.
 
-## Configure the ``config_variables.yml`` file with your Azure Storage credentials
+### Configure the ``config_variables.yml`` file with your Azure Storage credentials
 
 GX recommends that you store Azure Storage credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following code adds Azure Storage credentials below the ``AZURE_STORAGE_CONNECTION_STRING`` key:
 
@@ -656,7 +657,7 @@ AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=
 ```
 To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](../installation_and_setup/manage_credentials.md).
 
-## Identify your Data Context Expectations Store
+### Identify your Data Context Expectations Store
 
 Your Expectations Store configuration is provided in your Data Context. Open ``great_expectations.yml`` and find the following entry:
 
@@ -673,7 +674,7 @@ stores:
 
 This configuration tells Great Expectations to look for Expectations in a Store named ``expectations_store``. The default ``base_directory`` for ``expectations_store`` is ``expectations/``.
 
-## Update your configuration file to include a new Store for Expectations
+### Update your configuration file to include a new Store for Expectations
 
 In the following example, ``expectations_store_name`` is set to ``expectations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is ``TupleAzureBlobStoreBackend``, ``container`` is the name of your blob container where Expectations are stored, ``prefix`` is the folder in the container where Expectations are located, and ``connection_string`` is ``${AZURE_STORAGE_CONNECTION_STRING}`` to reference the corresponding key in the ``config_variables.yml`` file.
 
@@ -694,7 +695,7 @@ stores:
 If the container for hosting and sharing Data Docs on Azure Blob Storage is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
 :::
 
-## Copy existing Expectation JSON files to the Azure blob (Optional)
+### Copy existing Expectation JSON files to the Azure blob (Optional)
 
 You can use the ``az storage blob upload`` command to copy Expectations into Azure Blob Storage. The following command copies the Expectation ``exp1`` from a local folder to Azure Blob Storage: 
 
@@ -712,7 +713,7 @@ Finished[#############################################################]  100.000
 ```
 To learn more about other methods that are available to copy Expectation JSON files into Azure Blob Storage, see [Introduction to Azure Blob Storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction).
 
-## Confirm that the new Expectation Suites have been added
+### Confirm that the new Expectation Suites have been added
 
 If you copied your existing Expectation Suites to Azure Blob Storage, run the following Python command to confirm that Great Expectations can find them:
 
@@ -726,7 +727,7 @@ context.list_expectation_suite_names()
 ```
 A list of Expectations you copied to Azure Blob Storage is returned. Expectations that weren't copied to the new folder are not listed.
 
-## Confirm that Expectations can be accessed from Azure Blob Storage
+### Confirm that Expectations can be accessed from Azure Blob Storage
 
 Run the following command to confirm your Expectations have been copied to Azure Blob Storage: 
 
@@ -742,14 +743,14 @@ Use the information provided here to configure a new storage location for Expect
 
 To view all the code used in this topic, see [how_to_configure_an_expectation_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py).
 
-## Prerequisites
+### Prerequisites
 
 - [A Data Context](./manage_data_contexts.md).
 - [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - A GCP [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that allow access to GCP resources such as Storage Objects.
 - A GCP project, GCS bucket, and prefix to store Expectations.
 
-## Configure your GCP credentials
+### Configure your GCP credentials
 
 Confirm that your environment is configured with the appropriate authentication credentials needed to connect to the GCS bucket where Expectations will be stored. This includes the following:
 
@@ -759,7 +760,7 @@ Confirm that your environment is configured with the appropriate authentication 
 
 For more information about validating your GCP authentication credentials, see [Authenticate to Cloud services using client libraries](https://cloud.google.com/docs/authentication/getting-started).
 
-## Identify your Data Context Expectations Store
+### Identify your Data Context Expectations Store
 
 The configuration for your Expectations Store is available in your Data Context. Open ``great_expectations.yml`` and find the following entry: 
 
@@ -768,7 +769,7 @@ The configuration for your Expectations Store is available in your Data Context.
 
 This configuration tells Great Expectations to look for Expectations in the ``expectations_store`` Store. The default ``base_directory`` for ``expectations_store`` is ``expectations/``.
 
-## Update your configuration file to include a new store for Expectations
+### Update your configuration file to include a new store for Expectations
 
 In the following example, `expectations_store_name` is set to ``expectations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Expectations are stored.
 
@@ -779,7 +780,7 @@ In the following example, `expectations_store_name` is set to ``expectations_GCS
 If you are storing Validations in GCS make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
-## Copy existing Expectation JSON files to the GCS bucket (Optional)
+### Copy existing Expectation JSON files to the GCS bucket (Optional)
 
 Use the ``gsutil cp`` command to copy Expectations into GCS. For example, the following command copies the Expectation ```my_expectation_suite`` from a local folder into a GCS bucket:
 
@@ -793,7 +794,7 @@ The following confirmation message is returned:
 
 Additional methods for copying Expectations into GCS are available. See [Upload objects from a filesystem](https://cloud.google.com/storage/docs/uploading-objects).
 
-## Confirm that the new Expectation Suites have been added
+### Confirm that the new Expectation Suites have been added
 
 If you copied your existing Expectation Suites to GCS, run the following Python command to confirm that Great Expectations can find them:
 
@@ -808,7 +809,7 @@ context.list_expectation_suite_names()
 
 A list of Expectation Suites you copied to GCS is returned. Expectation Suites that weren't copied to the new Store aren't listed.
 
-## Confirm that Expectations can be accessed from GCS
+### Confirm that Expectations can be accessed from GCS
 
 Run the following command to confirm your Expectations were copied to GCS:
 
@@ -822,13 +823,13 @@ If your Expectations were not copied to Azure Blob Storage, a message indicating
 
 Use the information provided here to configure a new storage location for Expectations on your Filesystem.
 
-## Prerequisites
+### Prerequisites
 
 - [A Data Context](./manage_data_contexts.md).
 - [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - A storage location for Expectations. This can be a local path, or a path to a network filesystem.
 
-## Create a new folder for Expectations
+### Create a new folder for Expectations
 
 Run the following command to create a new folder for your Expectations and move your existing Expectations to the new folder:
 
@@ -839,7 +840,7 @@ mv expectations/npi_expectations.json shared_expectations/
 ```
 In this example, the name of the Expectation is ``npi_expectations`` and the path to the new storage location is ``/shared_expectations``.
 
-## Identify your Data Context Expectations Store
+### Identify your Data Context Expectations Store
 
 The configuration for your Expectations Store is available in your Data Context.  Open ``great_expectations.yml``and find the following entry:
 
@@ -870,7 +871,7 @@ stores:
           base_directory: shared_expectations/
 ```
 
-## Confirm that the new Expectation Suites have been added
+### Confirm that the new Expectation Suites have been added
 
 If you copied your existing Expectation Suites to your filesystem, run the following Python command to confirm that Great Expectations can find them:
 
@@ -885,7 +886,7 @@ context.list_expectation_suite_names()
 
 A list of Expectation Suites you copied your filesystem is returned. Expectation Suites that weren't copied to the new Store aren't listed.
 
-## Version control systems
+### Version control systems
 
 GX recommends that you store Expectations in a version control system such as Git. The JSON format of Expectations allows for informative diff-statements and modification tracking. In the following example, the ```expect_table_column_count_to_equal`` value changes from ``333`` to ``331``, and then to ``330``:
 
@@ -925,13 +926,13 @@ diff --git a/gx/expectations/npi_expectations.json b/great_expectations/expectat
 
 Use the information provided here to configure an Expectations store in a PostgreSQL database.
 
-## Prerequisites
+### Prerequisites
 
 - [A Data Context](./manage_data_contexts.md).
 - [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
 - A [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
 
-## Configure the `config_variables.yml` file with your database credentials
+### Configure the `config_variables.yml` file with your database credentials
 
 GX recommends storing database credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and not part of source control. 
 
@@ -948,7 +949,7 @@ To add database credentials, open ``config_variables.yml`` and add the following
 ```
 To configure the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](../installation_and_setup/manage_credentials.md).
 
-## Identify your Data Context Expectations Store
+### Identify your Data Context Expectations Store
 
 Open ``great_expectations.yml``and find the following entry:
 
@@ -965,7 +966,7 @@ stores:
 
 This configuration tells Great Expectations to look for Expectations in the ``expectations_store`` Store. The default ``base_directory`` for ``expectations_store`` is ``expectations/``.
 
-## Update your configuration file to include a new Store for Expectations
+### Update your configuration file to include a new Store for Expectations
 
 In the following example, `expectations_store_name` is set to ``expectations_postgres_store``, but it can be personalized. You also need to make some changes to the ``store_backend`` settings.  The ``class_name`` is ``DatabaseStoreBackend``, and ``credentials`` is ``${db_creds}`` to reference the corresponding key in the ``config_variables.yml`` file.
 
