@@ -189,7 +189,7 @@ Connect to a Microsoft Azure Blob Storage Data Source.
 
 <Prerequisites>
 
-- [An installation of GX set up to work with Azure Blob Storage](/oss/guides/setup/installation/install_gx.md)
+- [GX installed and set up to work with Azure Blob Storage](/oss/guides/setup/installation/install_gx.md)
 - Access to data in Azure Blob Storage
 
 </Prerequisites> 
