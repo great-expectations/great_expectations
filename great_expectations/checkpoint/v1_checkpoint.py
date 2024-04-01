@@ -198,8 +198,8 @@ class Checkpoint(BaseModel):
         checkpoint_result: CheckpointResult,
     ) -> None:
         for action in self.actions:
-            action.run(
-                result=checkpoint_result,
+            action.v1_run(
+                checkpoint_result=checkpoint_result,
             )
 
     @public_api

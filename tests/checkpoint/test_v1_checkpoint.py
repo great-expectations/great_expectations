@@ -444,10 +444,11 @@ class TestCheckpointResult:
             actions=actions,
         )
 
-        with mock.patch.object(ValidationAction, "run") as mock_run:
-            _ = checkpoint.run()
+        with mock.patch.object(ValidationAction, "v1_run") as mock_run:
+            result = checkpoint.run()
 
         assert mock_run.call_count == len(actions)
+        mock_run.assert_called_with(checkpoint_result=result)
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(

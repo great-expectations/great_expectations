@@ -103,14 +103,12 @@ class ValidationAction(BaseModel):
         return project_manager.is_using_cloud()
 
     @public_api
-    def run(  # noqa: PLR0913
+    def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
-        # NOTE: In V1, the API for ValidationAction.run will remove all of the above args.
-        checkpoint_result: Optional[CheckpointResult] = None,
         **kwargs,
     ):
         """Public entrypoint GX uses to trigger a ValidationAction.
@@ -133,19 +131,16 @@ class ValidationAction(BaseModel):
             validation_result_suite_identifier=validation_result_suite_identifier,
             expectation_suite_identifier=expectation_suite_identifier,
             checkpoint_identifier=checkpoint_identifier,
-            checkpoint_result=checkpoint_result,
             **kwargs,
         )
 
     @public_api
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        # NOTE: In V1, the API for ValidationAction.run will remove all of the above args.
-        checkpoint_result: CheckpointResult | None = None,
     ):
         """Private method containing the logic specific to a ValidationAction's implementation.
 
@@ -164,6 +159,14 @@ class ValidationAction(BaseModel):
         Returns:
             A Dict describing the result of the Action.
         """  # noqa: E501
+        return NotImplementedError
+
+    # NOTE: To be promoted to 'run' after V1 development
+    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+        return self._run(checkpoint_result=checkpoint_result)
+
+    # NOTE: To be promoted to '_run' after V1 development
+    def _v1_run(self, checkpoint_result: CheckpointResult):
         return NotImplementedError
 
 
@@ -270,21 +273,15 @@ class SlackNotificationAction(DataDocsAction):
         return values
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0912, PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        checkpoint_result: CheckpointResult | None = None,
     ):
         logger.debug("SlackNotificationAction.run")
-
-        if checkpoint_result:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not yet support V1 CheckpointResults."
-            )
 
         if validation_result_suite is None:
             logger.warning(
@@ -426,16 +423,10 @@ class PagerdutyAlertAction(ValidationAction):
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        checkpoint_result: CheckpointResult | None = None,
     ):
         import pypd
 
         logger.debug("PagerdutyAlertAction.run")
-
-        if checkpoint_result:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not yet support V1 CheckpointResults."
-            )
 
         if validation_result_suite is None:
             logger.warning(
@@ -539,14 +530,8 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        checkpoint_result: CheckpointResult | None = None,
     ):
         logger.debug("MicrosoftTeamsNotificationAction.run")
-
-        if checkpoint_result:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not yet support V1 CheckpointResults."
-            )
 
         if validation_result_suite is None:
             logger.warning(
@@ -644,14 +629,8 @@ class OpsgenieAlertAction(ValidationAction):
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        checkpoint_result: CheckpointResult | None = None,
     ):
         logger.debug("OpsgenieAlertAction.run")
-
-        if checkpoint_result:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not yet support V1 CheckpointResults."
-            )
 
         if validation_result_suite is None:
             logger.warning(
@@ -796,14 +775,8 @@ class EmailAction(ValidationAction):
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        checkpoint_result: CheckpointResult | None = None,
     ):
         logger.debug("EmailAction.run")
-
-        if checkpoint_result:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not yet support V1 CheckpointResults."
-            )
 
         if validation_result_suite is None:
             logger.warning(
@@ -911,12 +884,8 @@ class StoreValidationResultAction(ValidationAction):
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
-        checkpoint_result: CheckpointResult | None = None,
     ):
         logger.debug("StoreValidationResultAction.run")
-
-        if checkpoint_result:
-            raise ValueError("StoreValidationResultAction does not support V1 CheckpointResult.")
 
         output = self._target_store.store_validation_results(
             validation_result_suite,
@@ -973,14 +942,8 @@ class UpdateDataDocsAction(DataDocsAction):
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        checkpoint_result: CheckpointResult | None = None,
     ):
         logger.debug("UpdateDataDocsAction.run")
-
-        if checkpoint_result:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not yet support V1 CheckpointResults."
-            )
 
         if validation_result_suite is None:
             logger.warning(
@@ -1049,21 +1012,15 @@ class SNSNotificationAction(ValidationAction):
     sns_message_subject: Optional[str]
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        checkpoint_result: CheckpointResult | None = None,
         **kwargs,
     ) -> str:
         logger.debug("SNSNotificationAction.run")
-
-        if checkpoint_result:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not yet support V1 CheckpointResults."
-            )
 
         if validation_result_suite is None:
             logger.warning(
@@ -1094,20 +1051,14 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
-        checkpoint_result: CheckpointResult | None = None,
         **kwargs,
     ):
-        if checkpoint_result:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not yet support V1 CheckpointResults."
-            )
-
         suite_name: str = validation_result_suite.meta["expectation_suite_name"]
         if "batch_kwargs" in validation_result_suite.meta:
             data_asset_name = validation_result_suite.meta["batch_kwargs"].get(
