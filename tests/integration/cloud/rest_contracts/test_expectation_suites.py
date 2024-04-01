@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Callable, Final
 import pact
 import pytest
 
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
 from great_expectations.exceptions import DataContextError
 from tests.integration.cloud.rest_contracts.conftest import (
@@ -363,7 +364,8 @@ def test_delete_expectation_suite(
     )
 
     with pact_test:
-        cloud_data_context.delete_expectation_suite(expectation_suite_name=query["name"])
+        suite = cloud_data_context.suites.get(name=query["name"])
+        cloud_data_context.suites.delete(suite)
 
 
 @pytest.mark.cloud
@@ -395,4 +397,5 @@ def test_delete_non_existent_expectation_suite(
 
     with pact_test:
         with pytest.raises(DataContextError):
-            cloud_data_context.delete_expectation_suite(expectation_suite_name=query["name"])
+            suite = ExpectationSuite(name=query["name"])
+            cloud_data_context.suites.delete(suite)
