@@ -173,9 +173,6 @@ def test_get_non_existent_expectation_suite(
             cloud_data_context.get_expectation_suite(id=NON_EXISTENT_EXPECTATION_SUITE_ID)
 
 
-# This test only passes now because GET_EXPECTATION_SUITES_MIN_RESPONSE_BODY
-# uses "expectation_suite_name" which is the 0.*  API. We will need to update that
-# once we start hitting the v1.0.0 mercury endpoints.
 @pytest.mark.cloud
 def test_get_expectation_suites(
     pact_test: pact.Pact,
@@ -339,7 +336,6 @@ def test_put_non_existent_expectation_suite(
 
 
 @pytest.mark.cloud
-# @pytest.mark.skip(reason="unexpected 401 instead of 204 in CI only")
 def test_delete_expectation_suite(
     pact_test: pact.Pact,
     cloud_data_context: CloudDataContext,
@@ -371,7 +367,6 @@ def test_delete_expectation_suite(
 
 
 @pytest.mark.cloud
-@pytest.mark.skip(reason="unexpected 401 instead of 404 in CI only")
 def test_delete_non_existent_expectation_suite(
     pact_test: pact.Pact,
     cloud_data_context: CloudDataContext,
