@@ -14,6 +14,7 @@ def test_EmailRenderer_validation_results_with_datadocs():
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
+        suite_name="default",
         statistics={
             "evaluated_expectations": 0,
             "successful_expectations": 0,
@@ -74,6 +75,7 @@ def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
+        suite_name="default",
         statistics={
             "evaluated_expectations": 0,
             "successful_expectations": 0,

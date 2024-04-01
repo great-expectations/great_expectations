@@ -29,6 +29,7 @@ def test_render_DefaultJinjaPageView_meta_info():
     validation_results = ExpectationSuiteValidationResult(
         **{
             "results": [],
+            "success": True,
             "statistics": {
                 "evaluated_expectations": 156,
                 "successful_expectations": 139,
@@ -45,6 +46,7 @@ def test_render_DefaultJinjaPageView_meta_info():
                     "timestamp": 1561474688.693565,
                 },
             },
+            "suite_name": "my_suite",
         }
     )
 

@@ -496,6 +496,7 @@ def type_schema(  # noqa: C901 - too complex
     from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
         BatchRequest,
+        DataAsset,
         Datasource,
     )
     from great_expectations.datasource.fluent.sources import (
@@ -515,7 +516,7 @@ def type_schema(  # noqa: C901 - too complex
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    name_model = [
+    name_model: list[tuple[str, type[Datasource | BatchRequest | DataAsset]]] = [
         ("BatchRequest", BatchRequest),
         (Datasource.__name__, Datasource),
         *_iter_all_registered_types(),
@@ -626,7 +627,7 @@ def docs(
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
-        docs_builder.create_version(version=parse_version(version))
+        docs_builder.create_version(version=parse_version(version))  # type: ignore[arg-type]
     elif start:
         ctx.run(" ".join(["yarn start"]), echo=True)
     elif clear:
@@ -694,9 +695,9 @@ def link_checker(ctx: Context, skip_external: bool = True):
     """Checks the Docusaurus docs for broken links"""
     import docs.checks.docs_link_checker as checker
 
-    path: str = "docs/docusaurus/docs"
-    docs_root: str = "docs/docusaurus/docs"
-    static_root: str = "docs/docusaurus/static"
+    path = pathlib.Path("docs/docusaurus/docs")
+    docs_root = pathlib.Path("docs/docusaurus/docs")
+    static_root = pathlib.Path("docs/docusaurus/static")
     site_prefix: str = "docs"
     static_prefix: str = "static"
 
@@ -721,7 +722,7 @@ def show_automerges(ctx: Context):
     url = "https://api.github.com/repos/great-expectations/great_expectations/pulls"
     response = requests.get(
         url,
-        params={
+        params={  # type: ignore[arg-type]
             "state": "open",
             "sort": "updated",
             "direction": "desc",
@@ -992,10 +993,14 @@ def docs_snippet_tests(
 
 
 @invoke.task(
-    help={"pty": _PTY_HELP_DESC, "reports": "Generate coverage reports to be uploaded to codecov"},
+    help={
+        "pty": _PTY_HELP_DESC,
+        "reports": "Generate coverage reports to be uploaded to codecov",
+        "W": "Warnings control",
+    },
     iterable=["service_names", "up_services", "verbose"],
 )
-def ci_tests(
+def ci_tests(  # noqa: C901 - too complex (9)
     ctx: Context,
     marker: str,
     up_services: bool = False,
@@ -1005,6 +1010,7 @@ def ci_tests(
     slowest: int = 5,
     timeout: float = 0.0,  # 0 indicates no timeout
     xdist: bool = False,
+    W: str | None = None,
     pty: bool = True,
 ):
     """
@@ -1034,6 +1040,10 @@ def ci_tests(
 
     if verbose:
         pytest_options.append("-vv")
+
+    if W:
+        # https://docs.python.org/3/library/warnings.html#describing-warning-filters
+        pytest_options.append(f"-W={W}")
 
     for test_deps in _get_marker_dependencies(marker):
         if restart_services or up_services:
@@ -1090,9 +1100,7 @@ def service(
         for service_name in service_names:
             cmds = []
 
-            if (
-                service_name == "mercury" and os.environ.get("CI") != "true"  # noqa: TID251
-            ):
+            if service_name == "mercury" and os.environ.get("CI") != "true":
                 cmds.extend(
                     [
                         "FORCE_NO_ALIAS=true",

@@ -374,7 +374,7 @@ def test__get_import_names(various_imports: str):
 
     for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
-            import_names.extend(_get_import_names(node))
+            import_names.extend(_get_import_names(node))  # type: ignore[arg-type]
 
     assert import_names == [
         "some_module",

@@ -21,31 +21,9 @@ module.exports = {
           label: 'Install GX 1.0'
         },
         {
-          type: 'category',
-          label: 'Install additional dependencies',
-          link: {type: 'doc', id: 'core/installation_and_setup/additional_dependencies/additional_dependencies'},
-          items: [
-            {
-              type: 'link',
-              label: 'Amazon S3',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=amazon',
-            },
-            {
-              type: 'link',
-              label: 'Microsoft Azure Blob Storage',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=azure',
-            },
-            {
-              type: 'link',
-              label: 'Google Cloud Storage',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=gcs',
-            },
-            {
-              type: 'link',
-              label: 'SQL databases',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/additional_dependencies?dependencies=sql',
-            },
-          ]
+          type: 'doc',
+          id: 'core/installation_and_setup/additional_dependencies/additional_dependencies',
+          label: 'Install additional dependencies'
         },
         {
           type: 'category',
@@ -145,7 +123,6 @@ module.exports = {
             },
           ]
         },
-
         {
           type: 'category',
           label: '🚧 Manage Data Sources',
@@ -390,15 +367,49 @@ module.exports = {
           ]
         },
         {
-          type: 'doc',
-          id: 'core/validate_data/checkpoints/manage_checkpoints',
-          label: 'Manage Checkpoints'
+          type: 'category',
+          label: 'Manage Checkpoints',
+          link: { type: 'doc', id: 'core/validate_data/checkpoints/manage_checkpoints' },
+          items: [
+            {
+              type: 'link',
+              label: 'Create a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#create-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'List available Checkpoints',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#list-available-checkpoints',
+            },
+            {
+              type: 'link',
+              label: 'Get a Checkpoint by name',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#get-a-checkpoint-by-name',
+            },
+            {
+              type: 'link',
+              label: 'Get Checkpoints by attributes',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#get-checkpoints-by-attributes',
+            },
+            {
+              type: 'link',
+              label: 'Update a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#update-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#delete-a-checkpoint',
+            },
+            {
+              type: 'link',
+              label: '🚧 Run a Checkpoint',
+              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#run-a-checkpoint',
+            },
+          ]
         },
       ]
     }
-    <!--TODO: Validate Data -->
-      <!-- TODO: Manage Validators -->
-      <!-- TODO: Manage Checkpoints -->
   ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
@@ -439,7 +450,7 @@ module.exports = {
             },
           ]
         },
-        { type: 'doc', id: 'cloud/try_gx_cloud' },
+        { type: 'doc', id: 'cloud/deploy_gx_agent' },
         {
           type: 'category',
           label: 'Connect GX Cloud',

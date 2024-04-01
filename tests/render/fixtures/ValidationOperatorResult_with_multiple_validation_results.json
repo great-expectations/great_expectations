@@ -9,6 +9,7 @@
           "success_percent": 81.81818181818183
         },
         "success": false,
+        "suite_name": "basic.warning",
         "meta": {
           "great_expectations.__version__": "0.11.8+4.g4ab34df3.dirty",
           "expectation_suite_name": "basic.warning",
@@ -391,6 +392,7 @@
           "success_percent": 81.81818181818183
         },
         "success": false,
+        "suite_name": "basic.warning",
         "meta": {
           "great_expectations.__version__": "0.11.8+4.g4ab34df3.dirty",
           "expectation_suite_name": "basic.warning",

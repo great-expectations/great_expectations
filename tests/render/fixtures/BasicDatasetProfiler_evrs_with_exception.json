@@ -2016,6 +2016,7 @@
     }
   ],
   "success": false,
+  "suite_name": "default",
   "statistics": {
     "evaluated_expectations": 51,
     "successful_expectations": 42,
