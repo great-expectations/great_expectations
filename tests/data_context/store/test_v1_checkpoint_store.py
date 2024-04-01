@@ -19,6 +19,8 @@ from great_expectations.data_context.store.checkpoint_store import V1CheckpointS
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
     from tests.datasource.fluent._fake_cloud_api import CloudDetails
 
 
@@ -106,7 +108,7 @@ def mock_checkpoint_dict(mocker, mock_checkpoint_json: dict) -> dict:
 
 @pytest.fixture
 def checkpoint(
-    mocker: pytest.MockFixture, mock_checkpoint_json: dict, mock_checkpoint_dict: dict
+    mocker: MockerFixture, mock_checkpoint_json: dict, mock_checkpoint_dict: dict
 ) -> V1CheckpointStore:
     cp = mocker.Mock(spec=Checkpoint, name="my_checkpoint", id=None)
     cp.json.return_value = json.dumps(mock_checkpoint_json)
@@ -192,8 +194,8 @@ def test_get_key(request, store_fixture: str):
 @pytest.mark.cloud
 def test_get_key_cloud(cloud_backed_store: V1CheckpointStore):
     key = cloud_backed_store.get_key(name="my_checkpoint")
-    assert key.resource_type == GXCloudRESTResource.CHECKPOINT
-    assert key.resource_name == "my_checkpoint"
+    assert key.resource_type == GXCloudRESTResource.CHECKPOINT  # type: ignore[union-attr]
+    assert key.resource_name == "my_checkpoint"  # type: ignore[union-attr]
 
 
 _CHECKPOINT_ID = "a4sdfd-64c8-46cb-8f7e-03c12cea1d67"

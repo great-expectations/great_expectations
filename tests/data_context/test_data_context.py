@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import configparser
 import copy
 import json
@@ -9,6 +11,7 @@ from typing import Dict, List, Union
 
 import pandas as pd
 import pytest
+from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
@@ -1485,7 +1488,8 @@ class ExpectSkyToBeColor(BatchExpectation):
     ) -> None:
         raise ValueError("This renderer is broken!")
 
-    def _validate(
+    @override
+    def _validate(  # type: ignore[override]
         self,
         **kwargs: dict,
     ) -> Dict[str, Union[bool, dict]]:

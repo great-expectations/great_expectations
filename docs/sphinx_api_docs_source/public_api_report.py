@@ -733,8 +733,9 @@ class CodeReferenceFilter:
         definitions_excluded = [d for d in self.excludes if d.name and d.filepath]
         for definition_excluded in definitions_excluded:
             filepath_excluded = self._repo_relative_filepath_comparison(
-                definition.filepath, definition_excluded.filepath
-            )  # type: ignore[arg-type]
+                definition.filepath,
+                definition_excluded.filepath,  # type: ignore[arg-type]
+            )
             name_excluded = definition.name == definition_excluded.name
             if filepath_excluded and name_excluded:
                 return True
@@ -750,8 +751,9 @@ class CodeReferenceFilter:
         definitions_included = [d for d in self.includes if d.name and d.filepath]
         for definition_included in definitions_included:
             filepath_included = self._repo_relative_filepath_comparison(
-                definition.filepath, definition_included.filepath
-            )  # type: ignore[arg-type]
+                definition.filepath,
+                definition_included.filepath,  # type: ignore[arg-type]
+            )
             name_included = definition.name == definition_included.name
             if filepath_included and name_included:
                 return True
@@ -845,16 +847,16 @@ def _default_code_absolute_paths() -> Set[pathlib.Path]:
     """All Great Expectations modules related to the main library."""
     base_directory = _repo_root() / "great_expectations"
     paths = base_directory.rglob("**/*.py")
-    return {pathlib.Path(p) for p in paths}
+    return set(paths)
 
 
 def _default_docs_absolute_paths() -> Set[pathlib.Path]:
     """All Great Expectations modules related to the main library."""
     base_directory = _repo_root() / "docs"
-    paths = []
+    paths: list[pathlib.Path] = []
     for extension in ("md", "mdx", "yml", "yaml"):
         paths.extend(base_directory.rglob(f"**/*.{extension}"))
-    return {pathlib.Path(p) for p in paths}
+    return set(paths)
 
 
 def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
