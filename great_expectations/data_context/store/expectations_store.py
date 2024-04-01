@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Dict, List, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, TypeVar, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pydantic
@@ -222,7 +222,7 @@ class ExpectationsStore(Store):
             result = super()._add(key=key, value=value, **kwargs)
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
-                result = cast(GXCloudResourceRef, result)
+                assert isinstance(result, GXCloudResourceRef)
                 suite_kwargs = self.deserialize(
                     self.gx_cloud_response_json_to_object_dict(result.response)
                 )
@@ -246,7 +246,7 @@ class ExpectationsStore(Store):
 
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
-                result = cast(GXCloudResourceRef, result)
+                assert isinstance(result, GXCloudResourceRef)
                 suite_kwargs = self.deserialize(
                     self.gx_cloud_response_json_to_object_dict(result.response)
                 )
