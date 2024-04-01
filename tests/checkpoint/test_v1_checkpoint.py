@@ -50,7 +50,7 @@ def test_checkpoint_no_validation_definitions_raises_error():
 
 
 @pytest.mark.unit
-def test_checkpoint_save_success(mocker: pytest.MockFixture):
+def test_checkpoint_save_success(mocker: MockerFixture):
     context = mocker.Mock(spec=AbstractDataContext)
     set_context(project=context)
 
