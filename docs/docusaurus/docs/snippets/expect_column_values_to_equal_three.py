@@ -59,7 +59,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
         domain_type=MetricDomainTypes.COLUMN,
     )
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs,
@@ -70,7 +70,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         # </snippet>
         # <snippet name="docs/docusaurus/docs/snippets/expect_column_values_to_equal_three.py spark_selectable">
         (
-            selectable,
+            selectable,  # noqa: F841 # unused variable
             compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
@@ -308,7 +308,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
     @renderer(renderer_type="renderer.diagnostic.unexpected_table")
     @render_evaluation_parameter_string
-    def _diagnostic_unexpected_table_renderer(  # noqa: PLR0912 # too complex
+    def _diagnostic_unexpected_table_renderer(  # noqa: C901, PLR0912
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,

@@ -220,6 +220,7 @@
     }
   ],
   "success": false,
+  "suite_name": "default",
   "statistics": {
     "evaluated_expectations": 10,
     "successful_expectations": 9,
