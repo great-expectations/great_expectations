@@ -696,7 +696,7 @@ def checkpoint_result(checkpoint_config: dict) -> CheckpointResult:
 
     return CheckpointResult(
         run_id=run_id,
-        run_results=run_results,
+        run_results=run_results,  # type: ignore[arg-type]
         checkpoint_config=config,
         validation_result_url=validation_result_url,
     )

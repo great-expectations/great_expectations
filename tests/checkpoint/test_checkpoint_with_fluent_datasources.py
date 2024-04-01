@@ -304,7 +304,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                     },
                 ],
                 validations=[
-                    {
+                    {  # type: ignore[list-item]
                         "batch_request": {
                             "datasource_name": "my_pandas_filesystem_datasource",
                             "data_asset_name": "Titanic_1911",
@@ -350,7 +350,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                     },
                 ],
                 validations=[
-                    {
+                    {  # type: ignore[list-item]
                         "id": "f22601d9-00b7-4d54-beb6-605d87a74e40",
                         "batch_request": {
                             "datasource_name": "my_pandas_filesystem_datasource",
@@ -376,7 +376,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                     },
                 ],
                 validations=[
-                    {
+                    {  # type: ignore[list-item]
                         "id": "f22601d9-00b7-4d54-beb6-605d87a74e40",
                         "batch_request": {
                             "datasource_name": "my_pandas_filesystem_datasource",
@@ -404,11 +404,11 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     result: CheckpointResult = checkpoint.run()
 
     # Always have a single validation result based on the test's parametrization
-    validation_result: ExpectationValidationResult | dict = tuple(result.run_results.values())[0][
+    validation_result: ExpectationValidationResult | dict = tuple(result.run_results.values())[0][  # type: ignore[assignment]
         "validation_result"
     ]
 
-    actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
+    actual_validation_id: Optional[str] = validation_result.meta["validation_id"]  # type: ignore[union-attr]
     assert expected_validation_id == actual_validation_id
 
 

@@ -13,12 +13,7 @@ plugins = [
 files = [
     "great_expectations",
     "docs",
-    "tests/datasource/fluent",
-    "tests/integration/cloud",
-    "tests/integration/docusaurus",
-    "tests/core/test_batch_config.py",
-    "tests/validator/test_v1_validator.py",
-    'tests/expectations/core/test_expect_column_values_to_be_present_in_other_table.py',
+    "tests",
     # "contrib" # ignore entire `contrib` package
 ]
 warn_unused_configs = true
@@ -128,14 +123,60 @@ exclude = [
     'validation_operators/types/validation_operator_result\.py',                                           # 35
     'validation_operators/validation_operators\.py',                                                       # 16
     # tests
+    'tests/actions/test_core_actions\.py',
+    'tests/checkpoint/test_checkpoint_result_format\.py',
+    'tests/checkpoint/test_checkpoint\.py',
+    'tests/core/test_batch\.py',
+    'tests/core/test_expectation_configuration\.py',
+    'tests/core/test_expectation_suite\.py',
+    'tests/core/test_expectation_validation_result\.py',
+    'tests/core/test_validation_definition\.py',
+    'tests/core/test_yaml_handler\.py',
+    'tests/data_context/abstract_data_context/test_abstract_data_context_datasource_crud\.py',
+    'tests/data_context/abstract_data_context/test_data_docs_config_crud\.py',
+    'tests/data_context/cloud_data_context/test_include_rendered_content\.py',
+    'tests/data_context/fixtures/plugins/extended_checkpoint\.py',
+    'tests/data_context/migrator',
+    'tests/data_context/store/test_configuration_store\.py',
+    'tests/data_context/store/test_data_asset_store\.py',
+    'tests/data_context/store/test_datasource_store\.py',
+    'tests/data_context/store/test_store_backends\.py',
+    'tests/data_context/test_data_context_in_code_config\.py',
+    'tests/data_context/test_data_context_state_management\.py',
+    'tests/data_context/test_data_context_variables\.py',
+    'tests/datasource/data_connector',
     'tests/datasource/fluent/tasks\.py',
-    'tests/integration/docusaurus/tutorials',
+    'tests/datasource/test_datasource_dict\.py',
+    'tests/datasource/test_new_datasource_with_sql_data_connector\.py',
+    'tests/datasource/test_simple_sqlalchemy_datasource\.py',
+    'tests/execution_engine/partition_and_sample',
+    'tests/expectations',
+    'tests/experimental/metric_repository/test_column_descriptive_metrics_metric_retriever_integration\.py',
+    'tests/experimental/metric_repository/test_column_descriptive_metrics_metric_retriever\.py',
+    'tests/experimental/metric_repository/test_metric_list_metric_retriever_integration\.py',
+    'tests/experimental/metric_repository/test_metric_list_metric_retriever\.py',
+    'tests/integration/common_workflows',
+    'tests/integration/db',
     'tests/integration/docusaurus/connecting_to_your_data',
     'tests/integration/docusaurus/deployment_patterns',
     'tests/integration/docusaurus/expectations',
     'tests/integration/docusaurus/reference',
     'tests/integration/docusaurus/setup',
+    'tests/integration/docusaurus/tutorials',
     'tests/integration/docusaurus/validation',
+    'tests/integration/fixtures/partition_and_sample_data',
+    'tests/integration/fixtures/yellow_tripdata_pandas_fixture',
+    'tests/integration/spark/test_spark_config\.py',
+    'tests/integration/test_definitions',
+    'tests/integration/test_script_runner\.py',
+    'tests/performance',
+    'tests/render',
+    'tests/rule_based_profiler',
+    'tests/test_fixtures/rule_based_profiler/plugins',
+    'tests/test_utils\.py',
+    'tests/validator/test_metric_configuration\.py',
+    'tests/validator/test_metrics_calculator\.py',
+    'tests/validator/test_validation_graph\.py',
 ]
 
 [[tool.mypy.overrides]]
@@ -154,6 +195,7 @@ module = [
     "great_expectations.rule_based_profiler.*",
     "great_expectations.self_check.*",
     "great_expectations.validation_operators.*",
+    "tests.rule_based_profiler.*",
     "tests.test_utils",
 ]
 follow_imports = 'silent'
@@ -168,12 +210,12 @@ disable_error_code = [
 
 [[tool.mypy.overrides]]
 module = [
-    "great_expectations.compatibility.pydantic.*",
     "altair.*",
     "boto3.*",
     "botocore.*",
     "clickhouse_sqlalchemy.*",
     "google.*",
+    "great_expectations.compatibility.pydantic.*",
     "ipywidgets.*",
     "mistune.*",
     "moto.*",
@@ -182,10 +224,12 @@ module = [
     "pyarrow.*",
     "pyfakefs.*",
     "pypd.*",
+    "pytest_timeout.*",
     "ruamel.*",
     "scipy.*",
     "sempy.*",
     "shapely.*",
+    "snapshottest.*",
     "snowflake.*",
     "sqlalchemy_bigquery.*",
     "sqlalchemy_dremio.*",
@@ -324,6 +368,7 @@ extend-exclude = [
 ]
 "tasks.py" = [
     "PLR0913",
+    "TID251", # not part of core code
 ]
 "tests/integration/docusaurus/*.py" = [
     "F841", # local variable is assigned to but never used - ignored for code used in snippets

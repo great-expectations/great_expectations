@@ -300,7 +300,7 @@ def test_checkpoint_store(empty_data_context):
     ],
 )
 def test_gx_cloud_response_json_to_object_dict(
-    response_json: dict, expected: dict | None, error_type: Exception | None
+    response_json: dict, expected: dict | None, error_type: type[Exception] | None
 ) -> None:
     if error_type:
         with pytest.raises(error_type):
