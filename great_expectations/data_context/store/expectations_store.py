@@ -129,10 +129,10 @@ class ExpectationsStore(Store):
         else:
             suite_data = response_json["data"]
 
-        # Cloud backend defaults to an invalid result format type, so ensure we remove it:
+        # Cloud backend adds a default result format type of None, so ensure we remove it:
         for expectation in suite_data.get("expectations", []):
-            if expectation.get("result_format", False) is None:
-                expectation.pop("result_format")
+            if expectation.get("kwargs", {}).get("result_format", False) is None:
+                expectation["kwargs"].pop("result_format")
 
         suite_dto = ExpectationSuiteDTO.parse_obj(suite_data)
         return suite_dto.dict()

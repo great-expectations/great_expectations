@@ -226,6 +226,42 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
             None,
             id="single_config_in_list",
         ),
+        pytest.param(
+            {
+                "data": {
+                    "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                    "name": "my_suite",
+                    "expectations": [
+                        {
+                            "expectation_type": "expect_column_to_exist",
+                            "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
+                            "kwargs": {"column": "infinities", "result_format": None},
+                            "meta": {},
+                        }
+                    ],
+                    "meta": {},
+                    "notes": None,
+                }
+            },
+            {
+                "name": "my_suite",
+                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+                "expectations": [
+                    {
+                        "expectation_type": "expect_column_to_exist",
+                        "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
+                        "kwargs": {"column": "infinities"},
+                        "meta": {},
+                        "expectation_context": None,
+                        "rendered_content": [],
+                    }
+                ],
+                "meta": {},
+                "notes": None,
+            },
+            None,
+            id="null_result_format",
+        ),
     ],
 )
 def test_gx_cloud_response_json_to_object_dict(
@@ -479,3 +515,27 @@ def _test_delete_expectation_raises_error_for_missing_expectation(context):
     updated_suite = ExpectationSuite(**updated_suite_dict)
     assert suite == updated_suite
     assert len(updated_suite.expectations) == 1
+
+
+@pytest.mark.cloud
+def test_update_cloud_suite(empty_cloud_data_context):
+    # Arrange
+    context = empty_cloud_data_context
+    store = context.expectations_store
+    existing_expectation = gxe.ExpectColumnValuesToBeInSet(
+        column="a",
+        value_set=[1, 2, 3],
+        result_format="BASIC",
+    )
+    suite_name = "test-suite"
+    updated_suite_name = "test-suite-22"
+    suite = ExpectationSuite(suite_name, expectations=[existing_expectation.configuration])
+    context.suites.add(suite)
+
+    # act
+    suite.name = updated_suite_name
+    store.update(key=store.get_key(name=suite_name, id=suite.id), value=suite)
+
+    # assert
+    updated_suite_dict = store.get(key=store.get_key(name=updated_suite_name, id=suite.id))
+    assert updated_suite_dict["name"] == updated_suite_name
