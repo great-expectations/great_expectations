@@ -1,1 +1,4 @@
 from great_expectations.core.batch_definition.batch_definition import BatchDefinition
+from great_expectations.core.batch_definition.date import Date
+from great_expectations.core.batch_definition.whole_asset import WholeAsset
+from great_expectations.core.batch_definition.year import Year

@@ -253,31 +253,27 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # End Abstract Methods
 
     @public_api
-    def add_batch_definition(
-        self, name: str, partitioner: Optional[Partitioner] = None
-    ) -> BatchDefinition:
+    def add_batch_definition(self, batch_definition: BatchDefinition) -> BatchDefinition:
         """Add a BatchDefinition to this DataAsset.
         BatchDefinition names must be unique within a DataAsset.
 
         If the DataAsset is tied to a DataContext, the BatchDefinition will be persisted.
 
         Args:
-            name (str): Name of the new batch definition.
-            partitioner: Optional Partitioner to partition this BatchDefinition
+            batch_definition: BatchDefinition
 
         Returns:
             BatchDefinition: The new batch definition.
         """
         batch_definition_names = {bc.name for bc in self.batch_definitions}
-        if name in batch_definition_names:
+        if batch_definition.name in batch_definition_names:
             raise ValueError(
-                f'"{name}" already exists (all existing batch_definition names are {", ".join(batch_definition_names)})'  # noqa: E501
+                f'"{batch_definition.name}" already exists (all existing batch_definition names are {", ".join(batch_definition_names)})'  # noqa: E501
             )
 
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
-        batch_definition = BatchDefinition(name=name, partitioner=partitioner)
         batch_definition.set_data_asset(self)
         self.batch_definitions.append(batch_definition)
         self.update_batch_definition_field_set()

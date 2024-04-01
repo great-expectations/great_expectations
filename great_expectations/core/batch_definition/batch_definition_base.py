@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core.batch_definition import BatchDefinition
 
 # if we move this import into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
@@ -47,7 +46,9 @@ class BatchDefinitionBase(pydantic.BaseModel):
             options=batch_request_options, partitioner=self._partitioner
         )
 
-    def save(self: BatchDefinition) -> None:
+    def save(self) -> None:
+        from great_expectations.core.batch_definition import BatchDefinition
+
         if not isinstance(self, BatchDefinition):
             raise NotImplementedError
         self.data_asset._save_batch_definition(self)

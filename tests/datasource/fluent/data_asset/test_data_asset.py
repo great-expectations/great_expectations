@@ -2,6 +2,7 @@ from typing import List
 
 import pytest
 
+import great_expectations.core.batch_definition as gxb
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -33,11 +34,11 @@ def file_context_with_assets(file_context: AbstractDataContext) -> AbstractDataC
     datasource.add_csv_asset(
         DATA_ASSET_WITH_BATCH_DEFINITION_NAME,
         "taxi.csv",  # type: ignore [arg-type]
-    ).add_batch_definition(BATCH_DEFINITION_NAME)
+    ).add_batch_definition(gxb.WholeAsset(name=BATCH_DEFINITION_NAME))
     datasource.add_csv_asset(
         ANOTHER_DATA_ASSET_WITH_BATCH_DEFINITION_NAME,
         "taxi.csv",  # type: ignore [arg-type]
-    ).add_batch_definition(BATCH_DEFINITION_NAME)
+    ).add_batch_definition(gxb.WholeAsset(name=BATCH_DEFINITION_NAME))
 
     return file_context
 
@@ -49,11 +50,11 @@ def cloud_context(empty_cloud_context_fluent: CloudDataContext) -> AbstractDataC
     datasource.add_csv_asset(
         DATA_ASSET_WITH_BATCH_DEFINITION_NAME,
         "taxi.csv",  # type: ignore [arg-type]
-    ).add_batch_definition(BATCH_DEFINITION_NAME)
+    ).add_batch_definition(gxb.WholeAsset(name=BATCH_DEFINITION_NAME))
     datasource.add_csv_asset(
         ANOTHER_DATA_ASSET_WITH_BATCH_DEFINITION_NAME,
         "taxi.csv",  # type: ignore [arg-type]
-    ).add_batch_definition(BATCH_DEFINITION_NAME)
+    ).add_batch_definition(gxb.WholeAsset(name=BATCH_DEFINITION_NAME))
     return empty_cloud_context_fluent
 
 
@@ -82,7 +83,7 @@ def persisted_batch_definition(data_asset_with_batch_definition: DataAsset) -> B
 @pytest.mark.unit
 def test_add_batch_definition__success(empty_data_asset: DataAsset):
     name = "my batch config"
-    batch_definition = empty_data_asset.add_batch_definition(name)
+    batch_definition = empty_data_asset.add_batch_definition(gxb.WholeAsset(name=name))
 
     assert batch_definition.name == name
     assert batch_definition.data_asset == empty_data_asset
@@ -92,10 +93,11 @@ def test_add_batch_definition__success(empty_data_asset: DataAsset):
 @pytest.mark.unit
 def test_add_batch_definition_with_partitioner__success(empty_data_asset: DataAsset):
     name = "my batch config"
-    partitioner = PartitionerYear(column_name="test-column")
-    batch_definition = empty_data_asset.add_batch_definition(name, partitioner=partitioner)
+    column = "test-column"
+    expected_partitioner = PartitionerYear(column_name=column)
+    batch_definition = empty_data_asset.add_batch_definition(gxb.Year(name=name, column=column))
 
-    assert batch_definition.partitioner == partitioner
+    assert batch_definition._partitioner == expected_partitioner
 
 
 @pytest.mark.unit
@@ -103,8 +105,9 @@ def test_add_batch_definition__persists(
     file_context: AbstractDataContext, empty_data_asset: DataAsset
 ):
     name = "my batch config"
-    partitioner = PartitionerYear(column_name="test-column")
-    batch_definition = empty_data_asset.add_batch_definition(name, partitioner=partitioner)
+    batch_definition = empty_data_asset.add_batch_definition(
+        gxb.Year(name=name, column="test-column")
+    )
 
     loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
@@ -118,32 +121,31 @@ def test_add_batch_definition_with_partitioner__persists(
     file_context: AbstractDataContext, empty_data_asset: DataAsset
 ):
     name = "my batch config"
-    partitioner = PartitionerYear(column_name="test-column")
-    empty_data_asset.add_batch_definition(name, partitioner=partitioner)
+    expected_partitioner = PartitionerYear(column_name="test-column")
+    empty_data_asset.add_batch_definition(gxb.Year(name=name, column="test-column"))
 
     loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)
     assert isinstance(loaded_datasource, Datasource)
     loaded_asset = loaded_datasource.get_asset(EMPTY_DATA_ASSET_NAME)
 
     loaded_batch_definition = loaded_asset.batch_definitions[0]
-    assert loaded_batch_definition.partitioner == partitioner
+    assert loaded_batch_definition._partitioner == expected_partitioner
 
 
 @pytest.mark.unit
 def test_add_batch_definition__multiple(empty_data_asset: DataAsset):
-    empty_data_asset.add_batch_definition("foo")
-    empty_data_asset.add_batch_definition("bar")
+    empty_data_asset.add_batch_definition(gxb.WholeAsset(name="foo"))
+    empty_data_asset.add_batch_definition(gxb.WholeAsset(name="bar"))
 
     assert len(empty_data_asset.batch_definitions) == 2
 
 
 @pytest.mark.unit
 def test_add_batch_definition__duplicate_key(empty_data_asset: DataAsset):
-    name = "my batch config"
-    empty_data_asset.add_batch_definition(name)
+    empty_data_asset.add_batch_definition(gxb.WholeAsset(name="foo"))
 
     with pytest.raises(ValueError, match="already exists"):
-        empty_data_asset.add_batch_definition(name)
+        empty_data_asset.add_batch_definition(gxb.WholeAsset(name="foo"))
 
 
 @pytest.mark.unit
@@ -181,8 +183,10 @@ def _test_add_batch_definition__does_not_clobber_other_assets(
     assert isinstance(ds2, PandasDatasource)
     your_asset = ds2.add_csv_asset("your asset", "taxi.csv")  # type: ignore [arg-type]
 
-    my_batch_definition = my_asset.add_batch_definition("my batch config")
-    your_batch_definition = your_asset.add_batch_definition("your batch config")
+    my_batch_definition = my_asset.add_batch_definition(gxb.WholeAsset(name="my batch config"))
+    your_batch_definition = your_asset.add_batch_definition(
+        gxb.WholeAsset(name="your batch config")
+    )
 
     loaded_datasource = context.get_datasource(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
@@ -225,8 +229,8 @@ def _test_add_batch_definition__does_not_clobber_other_batch_definitions(
     asset_1 = ds1.get_asset(asset_name)
     asset_2 = ds2.get_asset(asset_name)
 
-    my_batch_definition = asset_1.add_batch_definition("my batch config")
-    your_batch_definition = asset_2.add_batch_definition("your batch config")
+    my_batch_definition = asset_1.add_batch_definition(gxb.WholeAsset(name="my batch config"))
+    your_batch_definition = asset_2.add_batch_definition(gxb.WholeAsset(name="your batch config"))
 
     loaded_datasource = context.get_datasource(datasource_name)
     assert isinstance(loaded_datasource, Datasource)
@@ -265,7 +269,7 @@ def test_delete_batch_definition__persists(
 
 @pytest.mark.unit
 def test_delete_batch_definition__unsaved_batch_definition(empty_data_asset: DataAsset):
-    batch_definition = BatchDefinition(name="uh oh")
+    batch_definition = gxb.WholeAsset(name="uh oh")
 
     with pytest.raises(ValueError, match="does not exist"):
         empty_data_asset.delete_batch_definition(batch_definition)
@@ -284,8 +288,8 @@ def test_fields_set(empty_data_asset: DataAsset):
     assert "batch_definitions" not in asset.__fields_set__
 
     # add some batch configs and ensure we have it in the set
-    batch_definition_a = asset.add_batch_definition("a")
-    batch_definition_b = asset.add_batch_definition("b")
+    batch_definition_a = asset.add_batch_definition(gxb.WholeAsset(name="a"))
+    batch_definition_b = asset.add_batch_definition(gxb.WholeAsset(name="b"))
     assert "batch_definitions" in asset.__fields_set__
 
     # delete one of the batch configs and ensure we still have it in the set
