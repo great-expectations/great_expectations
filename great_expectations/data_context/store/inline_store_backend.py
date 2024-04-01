@@ -98,7 +98,14 @@ class InlineStoreBackend(StoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        project_config = self._data_context.config
+        variable_config = project_config.get(self._resource_type)
+        if isinstance(variable_config, dict):
+            return list(variable_config.values())
+        else:
+            raise StoreBackendError(
+                f"StoreBackend::get_all is not supported for resource type {self._resource_type}"
+            )
 
     @override
     def _set(self, key: tuple[str, ...], value: Any, **kwargs: dict) -> None:
