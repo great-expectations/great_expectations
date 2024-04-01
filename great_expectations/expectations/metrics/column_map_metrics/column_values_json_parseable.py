@@ -22,7 +22,7 @@ class ColumnValuesJsonParseable(ColumnMapMetricProvider):
         def is_json(val):
             try:
                 json.loads(val)
-                return True
+                return True  # noqa: TRY300
             except Exception:
                 return False
 
@@ -33,7 +33,7 @@ class ColumnValuesJsonParseable(ColumnMapMetricProvider):
         def is_json(val):
             try:
                 json.loads(val)
-                return True
+                return True  # noqa: TRY300
             except Exception:
                 return False
 

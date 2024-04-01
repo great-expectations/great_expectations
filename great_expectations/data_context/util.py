@@ -152,7 +152,7 @@ def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
     both_parser = curly_brace_parser | non_curly_brace_parser
     try:
         parsed_substitution_variable = both_parser.parseString(substitution_variable)
-        return parsed_substitution_variable.substitution_variable_name
+        return parsed_substitution_variable.substitution_variable_name  # noqa: TRY300
     except pp.ParseException:
         return None
 
@@ -215,13 +215,13 @@ class PasswordMasker:
         try:
             matched: re.Match[str] | None = azure_conn_str_re.match(url)
             if not matched:
-                raise StoreConfigurationError(
+                raise StoreConfigurationError(  # noqa: TRY003, TRY301
                     f"The URL for the Azure connection-string, was not configured properly. Please check and try again: {url} "  # noqa: E501
                 )
             res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"  # noqa: E501
-            return res
+            return res  # noqa: TRY300
         except Exception as e:
-            raise StoreConfigurationError(
+            raise StoreConfigurationError(  # noqa: TRY003
                 f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"  # noqa: E501
             )
 

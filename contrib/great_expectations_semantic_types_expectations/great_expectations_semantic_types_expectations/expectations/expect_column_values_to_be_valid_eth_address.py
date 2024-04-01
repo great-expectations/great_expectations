@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_eth_address(address: str) -> bool:
     try:
         EthereumAddress(address)
-        return True
+        return True  # noqa: TRY300
     except ValueError:
         return False
 

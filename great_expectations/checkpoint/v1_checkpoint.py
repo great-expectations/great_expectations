@@ -98,7 +98,7 @@ class Checkpoint(BaseModel):
         from great_expectations import project_manager
 
         if len(validation_definitions) == 0:
-            raise ValueError("Checkpoint must contain at least one validation definition")
+            raise ValueError("Checkpoint must contain at least one validation definition")  # noqa: TRY003
 
         if isinstance(validation_definitions[0], dict):
             validation_definition_store = project_manager.get_validation_definition_store()
@@ -123,10 +123,10 @@ class Checkpoint(BaseModel):
             try:
                 validation_definition = store.get(key=key)
             except (KeyError, gx_exceptions.InvalidKeyError):
-                raise ValueError(f"Unable to retrieve validation definition {id_bundle} from store")
+                raise ValueError(f"Unable to retrieve validation definition {id_bundle} from store")  # noqa: TRY003
 
             if not validation_definition:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "ValidationDefinitionStore did not retrieve a validation definition"
                 )
             validation_definitions.append(validation_definition)
@@ -225,7 +225,7 @@ class CheckpointResult(BaseModel):
     def _root_validate_result(cls, values: dict) -> dict:
         run_results = values["run_results"]
         if len(run_results) == 0:
-            raise ValueError("CheckpointResult must contain at least one run result")
+            raise ValueError("CheckpointResult must contain at least one run result")  # noqa: TRY003
 
         values["success"] = all(result.success for result in run_results.values())
         return values

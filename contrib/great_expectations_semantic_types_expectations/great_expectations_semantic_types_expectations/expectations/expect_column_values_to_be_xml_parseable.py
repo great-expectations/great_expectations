@@ -44,7 +44,7 @@ class ColumnValuesXmlParseable(ColumnMapMetricProvider):
         def is_xml(val):
             try:
                 etree.fromstring(val)
-                return True
+                return True  # noqa: TRY300
             except Exception:
                 return False
 
@@ -55,7 +55,7 @@ class ColumnValuesXmlParseable(ColumnMapMetricProvider):
         def is_xml(val):
             try:
                 etree.fromstring(val)
-                return True
+                return True  # noqa: TRY300
             except Exception:
                 return False
 

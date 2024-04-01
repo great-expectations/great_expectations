@@ -106,13 +106,13 @@ def _get_query_result(func, selectable, execution_engine: SqlAlchemyExecutionEng
 
     try:
         result: sqlalchemy.Row = execution_engine.execute_query(simple_query).fetchone()[0]
-        return result
+        return result  # noqa: TRY300
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
-        logger.error(exception_message)
-        raise pe
+        logger.error(exception_message)  # noqa: TRY400
+        raise pe  # noqa: TRY201
 
     # @classmethod
     # def _get_evaluation_dependencies(

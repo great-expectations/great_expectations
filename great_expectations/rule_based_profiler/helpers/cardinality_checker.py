@@ -155,19 +155,19 @@ class CardinalityChecker:
         if isinstance(self._cardinality_limit_mode, RelativeCardinalityLimit):
             return float(metric_value) <= self._cardinality_limit_mode.max_proportion_unique
 
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             f'Unknown "cardinality_limit_mode" mode "{self._cardinality_limit_mode}" encountered.'
         )
 
     @staticmethod
     def _validate_metric_value(metric_value: Union[int, float]) -> None:  # noqa: PYI041
         if not isinstance(metric_value, (int, float)):
-            raise ProfilerConfigurationError(
+            raise ProfilerConfigurationError(  # noqa: TRY003
                 f"Value of measured cardinality must be of type int or float, you provided {type(metric_value)}"  # noqa: E501
             )
 
         if metric_value < 0.00:
-            raise ProfilerConfigurationError(
+            raise ProfilerConfigurationError(  # noqa: TRY003
                 f"Value of cardinality (number of rows or percent unique) should be greater than 0.00, your value is {metric_value}"  # noqa: E501
             )
 
@@ -179,7 +179,7 @@ class CardinalityChecker:
             try:
                 return CardinalityLimitMode[cardinality_limit_mode.upper()].value
             except KeyError:
-                raise ProfilerConfigurationError(
+                raise ProfilerConfigurationError(  # noqa: TRY003
                     f"Please specify a supported cardinality mode. Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"  # noqa: E501
                 )
         elif isinstance(cardinality_limit_mode, dict):
@@ -205,7 +205,7 @@ class CardinalityChecker:
                         ],
                     )
                 except (KeyError, ValueError):
-                    raise ProfilerConfigurationError(
+                    raise ProfilerConfigurationError(  # noqa: TRY003
                         f"Please specify a supported cardinality mode.  Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"  # noqa: E501
                     )
         else:
@@ -255,13 +255,13 @@ def validate_input_parameters(  # noqa: C901
         )
     )
     if num_supplied_params != required_num_supplied_params:
-        raise ProfilerConfigurationError(
+        raise ProfilerConfigurationError(  # noqa: TRY003
             f"Please pass ONE of the following parameters: cardinality_limit_mode, max_unique_values, max_proportion_unique, you passed {num_supplied_params} parameters."  # noqa: E501
         )
 
     if cardinality_limit_mode is not None:
         if not isinstance(cardinality_limit_mode, (str, CardinalityLimitMode, dict)):
-            raise ProfilerConfigurationError(
+            raise ProfilerConfigurationError(  # noqa: TRY003
                 f"Please specify a supported cardinality limit type, supported classes are {','.join(CardinalityChecker.SUPPORTED_LIMIT_MODE_CLASS_NAMES)} and supported strings are {','.join(CardinalityChecker.SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS)}"  # noqa: E501
             )
 
@@ -270,18 +270,18 @@ def validate_input_parameters(  # noqa: C901
                 assert isinstance(cardinality_limit_mode, str)
                 return CardinalityLimitMode[cardinality_limit_mode.upper()].value
             except KeyError:
-                raise ProfilerConfigurationError(
+                raise ProfilerConfigurationError(  # noqa: TRY003
                     f"Please specify a supported cardinality mode. Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"  # noqa: E501
                 )
 
     if max_unique_values is not None:
         if not isinstance(max_unique_values, int):
-            raise ProfilerConfigurationError(
+            raise ProfilerConfigurationError(  # noqa: TRY003
                 f"Please specify an int, you specified a {type(max_unique_values)}"
             )
 
     if max_proportion_unique is not None:
         if not isinstance(max_proportion_unique, (float, int)):
-            raise ProfilerConfigurationError(
+            raise ProfilerConfigurationError(  # noqa: TRY003
                 f"Please specify a float or int, you specified a {type(max_proportion_unique)}"
             )

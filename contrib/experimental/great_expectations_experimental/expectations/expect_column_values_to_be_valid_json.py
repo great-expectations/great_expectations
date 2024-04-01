@@ -33,7 +33,7 @@ class ColumnValuesToBeValidJson(ColumnMapMetricProvider):
                 return False
             try:
                 loads(x)
-                return True
+                return True  # noqa: TRY300
             except ValueError:
                 return False
 

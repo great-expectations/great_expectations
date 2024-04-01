@@ -84,7 +84,7 @@ class PandasDatasource(LegacyDatasource):
             if isinstance(boto3_options, dict):
                 configuration.update(boto3_options)
             else:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
                     "initialization."
                 )
@@ -94,7 +94,7 @@ class PandasDatasource(LegacyDatasource):
             if isinstance(reader_options, dict):
                 configuration.update(reader_options)
             else:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
                     "initialization."
                 )
@@ -219,7 +219,7 @@ class PandasDatasource(LegacyDatasource):
 
                 s3 = aws.boto3.client("s3", **self._boto3_options)
             except ImportError:
-                raise BatchKwargsError(
+                raise BatchKwargsError(  # noqa: TRY003
                     "Unable to load boto3 client to read s3 asset.", batch_kwargs
                 )
             raw_url = batch_kwargs["s3"]
@@ -245,7 +245,7 @@ class PandasDatasource(LegacyDatasource):
             batch_kwargs["ge_batch_id"] = str(uuid.uuid1())
 
         else:
-            raise BatchKwargsError(
+            raise BatchKwargsError(  # noqa: TRY003
                 "Invalid batch_kwargs: path, s3, or dataset is required for a PandasDatasource",
                 batch_kwargs,
             )
@@ -285,7 +285,7 @@ class PandasDatasource(LegacyDatasource):
         elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
             return {"reader_method": "read_sas"}
 
-        raise BatchKwargsError(
+        raise BatchKwargsError(  # noqa: TRY003
             f"Unable to determine reader method from path: {path}",
             {"path": path},
         )
@@ -325,7 +325,7 @@ class PandasDatasource(LegacyDatasource):
 
         """  # noqa: E501
         if reader_method is None and path is None:
-            raise BatchKwargsError(
+            raise BatchKwargsError(  # noqa: TRY003
                 "Unable to determine pandas reader function without reader_method or path.",
                 {"reader_method": reader_method},
             )
@@ -342,9 +342,9 @@ class PandasDatasource(LegacyDatasource):
             reader_fn = getattr(pd, reader_method)
             if reader_options:
                 reader_fn = partial(reader_fn, **reader_options)
-            return reader_fn
+            return reader_fn  # noqa: TRY300
         except AttributeError:
-            raise BatchKwargsError(
+            raise BatchKwargsError(  # noqa: TRY003
                 f"Unable to find reader_method {reader_method} in pandas.",
                 {"reader_method": reader_method},
             )

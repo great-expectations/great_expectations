@@ -17,7 +17,7 @@ def is_valid_powerful_number(num: str) -> bool:
         for p in unique_factors:
             if n % (p * p) != 0:
                 return False
-        return True
+        return True  # noqa: TRY300
     except ValueError:
         return False
 

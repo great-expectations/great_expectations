@@ -103,12 +103,12 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def _get_schema_instance(cls: Type[BYC]) -> Schema:
         if not issubclass(cls.get_schema_class(), Schema):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."  # noqa: E501
             )
 
         if not issubclass(cls.get_config_class(), BaseYamlConfig):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."  # noqa: E501
             )
 
@@ -132,9 +132,9 @@ class BaseYamlConfig(SerializableDictDot):
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
 
-            return config
+            return config  # noqa: TRY300
         except ValidationError:
-            logger.error(
+            logger.error(  # noqa: TRY400
                 "Encountered errors during loading config.  See ValidationError for more details."
             )
             raise
@@ -722,7 +722,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
                 "ConfiguredAssetDBFSDataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by a
 subclass of the FilePathDataConnector class (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
@@ -737,7 +737,7 @@ configuration to continue.
                 "ConfiguredAssetDBFSDataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by a
 filesystem type of the data connector (your data connector is "{data['class_name']}").  Please update your
 configuration to continue.
@@ -754,7 +754,7 @@ configuration to continue.
                 "ConfiguredAssetGCSDataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 S3/Azure/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration \
 to continue.
@@ -769,7 +769,7 @@ to continue.
                 "ConfiguredAssetGCSDataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 S3/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -782,7 +782,7 @@ continue.
                 "ConfiguredAssetS3DataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 S3 type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -795,7 +795,7 @@ continue.
                 "ConfiguredAssetAzureDataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -807,7 +807,7 @@ continue.
         ]:
             azure_options = data["azure_options"]
             if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
-                raise gx_exceptions.InvalidConfigError(
+                raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                     """Your current configuration is either missing methods of authentication or is using too many for \
 the Azure type of data connector. You must only select one between `conn_str` or `account_url`. Please update your \
 configuration to continue.
@@ -820,7 +820,7 @@ configuration to continue.
                 "ConfiguredAssetGCSDataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by a
 GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -832,7 +832,7 @@ continue.
         ]:
             gcs_options = data["gcs_options"]
             if "filename" in gcs_options and "info" in gcs_options:
-                raise gx_exceptions.InvalidConfigError(
+                raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                     """Your current configuration can only use a single method of authentication for the GCS type of \
 data connector. You must only select one between `filename` (from_service_account_file) and `info` \
 (from_service_account_info). Please update your configuration to continue.
@@ -852,7 +852,7 @@ data connector. You must only select one between `filename` (from_service_accoun
                 "ConfiguredAssetSqlDataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 SQL type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -872,7 +872,7 @@ continue.
                 "ConfiguredAssetAWSGlueDataCatalogDataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 SQL/GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -888,7 +888,7 @@ continue.
                 "ConfiguredAssetAWSGlueDataCatalogDataConnector",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
 GlueCatalog type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration to
 continue.
@@ -1025,14 +1025,14 @@ class ExecutionEngineConfigSchema(Schema):
         if ("connection_string" in data or "credentials" in data) and not (
             data["class_name"] == "SqlAlchemyExecutionEngine"
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses the "connection_string" key in an execution engine, but only
 SqlAlchemyExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
                 """  # noqa: E501
             )
         if "spark_config" in data and not (data["class_name"] == "SparkDFExecutionEngine"):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses the "spark_config" key in an execution engine, but only
 SparkDFExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
@@ -1217,7 +1217,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '  # noqa: E501
                 'GX that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'  # noqa: E501
             )
@@ -1237,7 +1237,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
                 "SimpleSqlalchemyDatasource",
             ]
         ):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"""Your current configuration uses one or more keys in a data source that are required only by a
 sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
                 """  # noqa: E501
@@ -1279,7 +1279,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
     @enabled.setter
     def enabled(self, enabled) -> None:
         if not isinstance(enabled, bool):
-            raise ValueError("usage statistics enabled property must be boolean")
+            raise ValueError("usage statistics enabled property must be boolean")  # noqa: TRY003, TRY004
 
         self._enabled = enabled
 
@@ -1292,7 +1292,7 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         try:
             uuid.UUID(data_context_id)
         except ValueError:
-            raise gx_exceptions.InvalidConfigError("data_context_id must be a valid uuid")
+            raise gx_exceptions.InvalidConfigError("data_context_id must be a valid uuid")  # noqa: TRY003
 
         self._data_context_id = data_context_id
         self._explicit_id = True
@@ -1385,7 +1385,7 @@ class GXCloudConfig(DictDot):
     ) -> None:
         # access_token was given a default value to maintain arg position of organization_id
         if access_token is None:
-            raise ValueError("Access token cannot be None.")
+            raise ValueError("Access token cannot be None.")  # noqa: TRY003
 
         self.base_url = base_url
         self.organization_id = organization_id
@@ -1481,13 +1481,13 @@ class DataContextConfigSchema(Schema):
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
         if "config_version" not in data:
-            raise gx_exceptions.InvalidDataContextConfigError(
+            raise gx_exceptions.InvalidDataContextConfigError(  # noqa: TRY003
                 "The key `config_version` is missing; please check your config file.",
                 validation_error=ValidationError(message="no config_version key"),
             )
 
         if not isinstance(data["config_version"], (int, float)):
-            raise gx_exceptions.InvalidDataContextConfigError(
+            raise gx_exceptions.InvalidDataContextConfigError(  # noqa: TRY003
                 "The key `config_version` must be a number. Please check your config file.",
                 validation_error=ValidationError(message="config version not a number"),
             )
@@ -1497,7 +1497,7 @@ class DataContextConfigSchema(Schema):
             store_config["class_name"] == "ValidationsStore"
             for store_config in data["stores"].values()
         ):
-            raise gx_exceptions.UnsupportedConfigVersionError(
+            raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."  # noqa: E501
             )
 
@@ -2319,7 +2319,7 @@ class DataContextConfig(BaseYamlConfig):
         configured_stores = {config["class_name"] for config in store_configs.values()}
         for name, config in DataContextConfigDefaults.DEFAULT_STORES.value.items():
             if not isinstance(config, dict):
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     "Store defaults must be a mapping of default names to default dictionary configurations."  # noqa: E501
                 )
             if config["class_name"] not in configured_stores:
@@ -2509,7 +2509,7 @@ class CheckpointConfigSchema(Schema):
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
         if not ("name" in data or "validation_operator_name" in data or "batches" in data):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 """Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
                 continue.
                 """  # noqa: E501
@@ -2517,7 +2517,7 @@ class CheckpointConfigSchema(Schema):
 
         if data.get("config_version"):
             if "name" not in data:
-                raise gx_exceptions.InvalidConfigError(
+                raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                     """Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
                     configuration to continue.
                     """  # noqa: E501

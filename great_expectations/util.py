@@ -269,13 +269,13 @@ def is_library_loadable(library_name: str) -> bool:
 
 def load_class(class_name: str, module_name: str) -> type:
     if class_name is None:
-        raise TypeError("class_name must not be None")
+        raise TypeError("class_name must not be None")  # noqa: TRY003
     if not isinstance(class_name, str):
-        raise TypeError("class_name must be a string")
+        raise TypeError("class_name must be a string")  # noqa: TRY003
     if module_name is None:
-        raise TypeError("module_name must not be None")
+        raise TypeError("module_name must not be None")  # noqa: TRY003
     if not isinstance(module_name, str):
-        raise TypeError("module_name must be a string")
+        raise TypeError("module_name must be a string")  # noqa: TRY003
     try:
         verify_dynamic_loading_support(module_name=module_name)
     except FileNotFoundError:
@@ -467,7 +467,7 @@ def filter_properties_dict(  # noqa: C901, PLR0912, PLR0913
         delete_fields = set()
 
     if keep_fields & delete_fields:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Common keys between sets of keep_fields and delete_fields filtering directives are illegal."  # noqa: E501
         )
 
@@ -478,7 +478,7 @@ def filter_properties_dict(  # noqa: C901, PLR0912, PLR0913
         properties = {}
 
     if not isinstance(properties, dict):
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003, TRY004
             f'Source "properties" must be a dictionary (illegal type "{type(properties)!s}" detected).'  # noqa: E501
         )
 
@@ -870,11 +870,11 @@ def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
         _ = parse(value, fuzzy=fuzzy)
-        return True
+        return True  # noqa: TRY300
     except (TypeError, ValueError):
         try:
             _ = datetime.datetime.fromisoformat(value)
-            return True
+            return True  # noqa: TRY300
         except (TypeError, ValueError):
             return False
 

@@ -532,9 +532,9 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
 
-            return config
+            return config  # noqa: TRY300
         except ValidationError:
-            logger.error(
+            logger.error(  # noqa: TRY400
                 "Encountered errors during loading config.  See ValidationError for more details."
             )
             raise

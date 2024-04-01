@@ -19,7 +19,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_bic(bic_code: str) -> bool:
     try:
         BIC(bic_code)
-        return True
+        return True  # noqa: TRY300
     except SchwiftyException:
         return False
 

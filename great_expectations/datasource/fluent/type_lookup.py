@@ -89,13 +89,13 @@ class TypeLookup(
             # This key, value pair has already been registered so we return
             return
         if key is None:
-            raise TypeLookupError(f"`NoneType` for {value} is not allowed - bad key")
+            raise TypeLookupError(f"`NoneType` for {value} is not allowed - bad key")  # noqa: TRY003
         if value is None:
-            raise TypeLookupError(f"`NoneType` for {key} is not allowed - bad value")
+            raise TypeLookupError(f"`NoneType` for {key} is not allowed - bad value")  # noqa: TRY003
         if key in self:
-            raise TypeLookupError(f"`{key}` already set - bad key")
+            raise TypeLookupError(f"`{key}` already set - bad key")  # noqa: TRY003
         if value in self:
-            raise TypeLookupError(f"`{value}` already set - bad value")
+            raise TypeLookupError(f"`{value}` already set - bad value")  # noqa: TRY003
         super().__setitem__(key, value)
         super().__setitem__(value, key)
 
@@ -118,7 +118,7 @@ class TypeLookup(
         """Raise a TypeLookup error if the passed iterable contains any overlapping items."""
         intersection = self.intersection(collection_)
         if intersection:
-            raise TypeLookupError(f"Items are already present - {intersection}")
+            raise TypeLookupError(f"Items are already present - {intersection}")  # noqa: TRY003
 
     @override
     def clear(self) -> None:

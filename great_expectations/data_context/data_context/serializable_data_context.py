@@ -95,7 +95,7 @@ class SerializableDataContext(AbstractDataContext):
         cls, context_root_dir: PathStr | None, project_root_dir: PathStr | None
     ) -> PathStr | None:
         if project_root_dir and context_root_dir:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"  # noqa: E501
             )
 
@@ -283,7 +283,7 @@ class SerializableDataContext(AbstractDataContext):
         try:
             cls._scaffold_gitignore(base_dir)
         except Exception as e:
-            raise gx_exceptions.GitIgnoreScaffoldingError(
+            raise gx_exceptions.GitIgnoreScaffoldingError(  # noqa: TRY003
                 f"Could not create .gitignore in {base_dir} because of an error: {e}"
             )
 
@@ -387,7 +387,7 @@ class SerializableDataContext(AbstractDataContext):
         validate_config_version: bool = True,
     ) -> bool:
         if not isinstance(config_version, (int, float)):
-            raise gx_exceptions.UnsupportedConfigVersionError(
+            raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
                 "The argument `config_version` must be a number.",
             )
 
@@ -520,7 +520,7 @@ class SerializableDataContext(AbstractDataContext):
     def _attempt_context_instantiation(cls, ge_dir: PathStr) -> Optional[SerializableDataContext]:
         try:
             context = cls(context_root_dir=ge_dir)
-            return context
+            return context  # noqa: TRY300
         except (
             gx_exceptions.DataContextError,
             gx_exceptions.InvalidDataContextConfigError,

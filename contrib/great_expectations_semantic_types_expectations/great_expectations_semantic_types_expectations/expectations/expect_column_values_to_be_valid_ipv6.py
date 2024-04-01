@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_ipv6(addr: str) -> bool:
     try:
         ipaddress.IPv6Address(addr)
-        return True
+        return True  # noqa: TRY300
     except ipaddress.AddressValueError:
         return False
 

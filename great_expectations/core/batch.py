@@ -162,31 +162,31 @@ class LegacyBatchDefinition(SerializableDictDot):
         batch_identifiers: IDDict,
     ) -> None:
         if datasource_name is None:
-            raise ValueError("A valid datasource must be specified.")
+            raise ValueError("A valid datasource must be specified.")  # noqa: TRY003
         if datasource_name and not isinstance(datasource_name, str):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
 "{type(datasource_name)!s}", which is illegal.
             """  # noqa: E501
             )
         if data_connector_name is None:
-            raise ValueError("A valid data_connector must be specified.")
+            raise ValueError("A valid data_connector must be specified.")  # noqa: TRY003
         if data_connector_name and not isinstance(data_connector_name, str):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type of a data_connector name must be a string (Python "str").  The type given is
 "{type(data_connector_name)!s}", which is illegal.
                 """  # noqa: E501
             )
         if data_asset_name is None:
-            raise ValueError("A valid data_asset_name must be specified.")
+            raise ValueError("A valid data_asset_name must be specified.")  # noqa: TRY003
         if data_asset_name and not isinstance(data_asset_name, str):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type of a data_asset name must be a string (Python "str").  The type given is
 "{type(data_asset_name)!s}", which is illegal.
                 """  # noqa: E501
             )
         if batch_identifiers and not isinstance(batch_identifiers, IDDict):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type of batch_identifiers must be an IDDict object.  The type given is \
 "{type(batch_identifiers)!s}", which is illegal.
 """
@@ -373,7 +373,7 @@ class BatchRequestBase(SerializableDictDot):
         serializeable_dict: dict
         if batch_request_contains_batch_data(batch_request=self):
             if self.runtime_parameters is None:
-                raise ValueError("BatchRequestBase missing runtime_parameters during serialization")
+                raise ValueError("BatchRequestBase missing runtime_parameters during serialization")  # noqa: TRY003
             batch_data: BatchRequestBase | dict = self.runtime_parameters["batch_data"]
             self.runtime_parameters["batch_data"] = str(type(batch_data))
 
@@ -441,32 +441,32 @@ class BatchRequestBase(SerializableDictDot):
     ) -> None:
         # TODO test and check all logic in this validator!
         if not (datasource_name and isinstance(datasource_name, str)):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
 "{type(datasource_name)!s}", which is illegal.
             """  # noqa: E501
             )
         if not (data_connector_name and isinstance(data_connector_name, str)):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type of data_connector name must be a string (Python "str").  The type given is
 "{type(data_connector_name)!s}", which is illegal.
                 """  # noqa: E501
             )
         if not (data_asset_name and isinstance(data_asset_name, str)):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type of data_asset name must be a string (Python "str").  The type given is
         "{type(data_asset_name)!s}", which is illegal.
                         """
             )
         # TODO Abe 20201015: Switch this to DataConnectorQuery.
         if data_connector_query and not isinstance(data_connector_query, dict):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type of data_connector_query must be a dict object.  The type given is
 "{type(data_connector_query)!s}", which is illegal.
                 """
             )
         if limit and not isinstance(limit, int):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type of limit must be an integer (Python "int").  The type given is "{type(limit)!s}", which
 is illegal.
                 """  # noqa: E501
@@ -640,26 +640,26 @@ class RuntimeBatchRequest(BatchRequestBase):
         if (not runtime_parameters and batch_identifiers) or (
             runtime_parameters and not batch_identifiers
         ):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "It must be that either both runtime_parameters and batch_identifiers are present, or both are missing"  # noqa: E501
             )
 
         # if there is a value, make sure it is a dict
         if runtime_parameters and not (isinstance(runtime_parameters, dict)):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The runtime_parameters must be a non-empty dict object.
                 The type given is "{type(runtime_parameters)!s}", which is an illegal type or an empty dictionary."""  # noqa: E501
             )
 
         # if there is a value, make sure it is a dict
         if batch_identifiers and not isinstance(batch_identifiers, dict):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type for batch_identifiers must be a dict object, with keys being identifiers defined in the
                 data connector configuration.  The type given is "{type(batch_identifiers)!s}", which is illegal."""  # noqa: E501
             )
 
         if batch_spec_passthrough and not (isinstance(batch_spec_passthrough, dict)):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"""The type for batch_spec_passthrough must be a dict object. The type given is \
 "{type(batch_spec_passthrough)!s}", which is illegal.
 """
@@ -675,7 +675,7 @@ class BatchMarkers(BatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "ge_load_time" not in self:
-            raise InvalidBatchIdError("BatchMarkers requires a ge_load_time")
+            raise InvalidBatchIdError("BatchMarkers requires a ge_load_time")  # noqa: TRY003
 
     @property
     def ge_load_time(self):
@@ -1024,7 +1024,7 @@ def _get_block_batch_request(  # noqa: C901, PLR0913
     """
     if data_connector_query is None:
         if batch_filter_parameters is not None and batch_identifiers is not None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 'Must provide either "batch_filter_parameters" or "batch_identifiers", not both.'
             )
 
@@ -1105,7 +1105,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
     ):  # one of these must be specified for runtime batch requests
         # parameter checking
         if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
-            raise ValueError("Must provide only one of batch_data, query, or path.")
+            raise ValueError("Must provide only one of batch_data, query, or path.")  # noqa: TRY003
 
         if runtime_parameters and any(
             [
@@ -1114,7 +1114,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
                 path and "path" in runtime_parameters,
             ]
         ):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "  # noqa: E501
                 "runtime_parameters argument."
             )
@@ -1246,7 +1246,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     # ensure that the first parameter is datasource_name, which should be a str. This check prevents users  # noqa: E501
     # from passing in batch_request as an unnamed parameter.
     if datasource_name and not isinstance(datasource_name, str):
-        raise TypeError(
+        raise TypeError(  # noqa: TRY003
             f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
         )
 
@@ -1256,7 +1256,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
             batch_request,
             (BatchRequest, RuntimeBatchRequest, _get_fluent_batch_request_class()),
         ):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "batch_request must be a BatchRequest, RuntimeBatchRequest, or a "
                 f"fluent BatchRequest object, not {type(batch_request)}"
             )
@@ -1284,7 +1284,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     if (datasource_name and data_asset_name) and not data_connector_name:
         block_args = block_style_args()
         if block_args:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"Arguments: {', '.join(block_args)} are not supported for Fluent Batch Requests. Block-config Requests require a data connector name"  # noqa: E501
             )
 

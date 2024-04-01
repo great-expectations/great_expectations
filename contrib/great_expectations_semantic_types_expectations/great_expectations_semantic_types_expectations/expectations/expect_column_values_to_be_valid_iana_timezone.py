@@ -16,7 +16,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_timezone(timezone: str) -> bool:
     try:
         pytz.timezone(timezone)
-        return True
+        return True  # noqa: TRY300
     except pytz.UnknownTimeZoneError:
         return False
 

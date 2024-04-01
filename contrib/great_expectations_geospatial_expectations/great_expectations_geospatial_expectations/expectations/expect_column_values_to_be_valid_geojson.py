@@ -37,7 +37,7 @@ class ColumnValuesValidGeojson(ColumnMapMetricProvider):
         def valid_geojson(value):
             try:
                 pygeos.from_geojson(value)
-                return True
+                return True  # noqa: TRY300
             except pygeos.GEOSException:
                 return False
 

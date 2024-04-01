@@ -163,7 +163,7 @@ class BatchKwargsGenerator:
         self._generator_config = {"class_name": self.__class__.__name__}
         self._data_asset_iterators: Dict = {}
         if datasource is None:
-            raise ValueError("datasource must be provided for a BatchKwargsGenerator")
+            raise ValueError("datasource must be provided for a BatchKwargsGenerator")  # noqa: TRY003
         self._datasource = datasource
 
     @property
@@ -255,7 +255,7 @@ class BatchKwargsGenerator:
         try:
             batch_kwargs = next(data_asset_iterator)
             batch_kwargs["datasource"] = self._datasource.name
-            return batch_kwargs
+            return batch_kwargs  # noqa: TRY300
         except StopIteration:
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
             data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
@@ -269,7 +269,7 @@ class BatchKwargsGenerator:
             try:
                 batch_kwargs = next(data_asset_iterator)
                 batch_kwargs["datasource"] = self._datasource.name
-                return batch_kwargs
+                return batch_kwargs  # noqa: TRY300
             except StopIteration:
                 # This is a degenerate case in which no kwargs are actually being generated
                 logger.warning(f"No batch_kwargs found for data_asset_name {data_asset_name}")

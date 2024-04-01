@@ -91,7 +91,7 @@ class ExpectationSuite(SerializableDictDot):
         id: Optional[str] = None,
     ) -> None:
         if not name or not isinstance(name, str):
-            raise ValueError("name must be provided as a non-empty string")
+            raise ValueError("name must be provided as a non-empty string")  # noqa: TRY003
         self.name = name
         self.id = id
 
@@ -133,7 +133,7 @@ class ExpectationSuite(SerializableDictDot):
     def add_expectation(self, expectation: _TExpectation) -> _TExpectation:
         """Add an Expectation to the collection."""
         if expectation.id:
-            raise RuntimeError(
+            raise RuntimeError(  # noqa: TRY003
                 "Cannot add Expectation because it already belongs to an ExpectationSuite. "
                 "If you want to update an existing Expectation, please call Expectation.save(). "
                 "If you are copying this Expectation to a new ExpectationSuite, please copy "
@@ -154,7 +154,7 @@ class ExpectationSuite(SerializableDictDot):
                     self.expectations[-1].id = expectation.id
                 except Exception as exc:
                     self.expectations.pop()
-                    raise exc
+                    raise exc  # noqa: TRY201
 
         expectation.register_save_callback(save_callback=self._save_expectation)
 
@@ -195,7 +195,7 @@ class ExpectationSuite(SerializableDictDot):
 
         if isinstance(expectation_like, Expectation):
             if expectation_like.id:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "Expectations in parameter `expectations` must not belong to another ExpectationSuite. "  # noqa: E501
                     "Instead, please use copies of Expectations, by calling `copy.copy(expectation)`."  # noqa: E501
                 )
@@ -208,7 +208,7 @@ class ExpectationSuite(SerializableDictDot):
                 expectation_configuration=ExpectationConfiguration(**expectation_like)
             )
         else:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"Expected Expectation, ExpectationConfiguration, or dict, but received type {type(expectation_like)}."  # noqa: E501
             )
 
@@ -223,7 +223,7 @@ class ExpectationSuite(SerializableDictDot):
             exp for exp in self.expectations if exp.configuration != expectation.configuration
         ]
         if len(remaining_expectations) != len(self.expectations) - 1:
-            raise KeyError("No matching expectation was found.")
+            raise KeyError("No matching expectation was found.")  # noqa: TRY003
         self.expectations = remaining_expectations
 
         if self._has_been_saved():
@@ -234,7 +234,7 @@ class ExpectationSuite(SerializableDictDot):
                 # rollback this change
                 # expectation suite is set-like so order of expectations doesn't matter
                 self.expectations.append(expectation)
-                raise exc
+                raise exc  # noqa: TRY201
 
         submit_event(
             event=ExpectationSuiteExpectationDeletedEvent(
@@ -273,7 +273,7 @@ class ExpectationSuite(SerializableDictDot):
 
     @expectation_configurations.setter
     def expectation_configurations(self, value):
-        raise AttributeError(
+        raise AttributeError(  # noqa: TRY003
             "Cannot set ExpectationSuite.expectation_configurations. "
             "Please use ExpectationSuite.expectations instead."
         )
@@ -303,7 +303,7 @@ class ExpectationSuite(SerializableDictDot):
         elif isinstance(citation_date, datetime.datetime):
             citation_date_obj = citation_date
         else:
-            raise gx_exceptions.GreatExpectationsTypeError(
+            raise gx_exceptions.GreatExpectationsTypeError(  # noqa: TRY003
                 f"citation_date should be of type - {' '.join(str(t) for t in _citation_date_types)}"  # noqa: E501
             )
 
@@ -482,7 +482,7 @@ class ExpectationSuite(SerializableDictDot):
         """  # noqa: E501
         expectation_configurations = [exp.configuration for exp in self.expectations]
         if expectation_configuration is None and id is None:
-            raise TypeError("Must provide either expectation_configuration or id")
+            raise TypeError("Must provide either expectation_configuration or id")  # noqa: TRY003
 
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration=expectation_configuration,
@@ -490,7 +490,7 @@ class ExpectationSuite(SerializableDictDot):
             id=id,  # type: ignore[arg-type]
         )
         if len(found_expectation_indexes) < 1:
-            raise ValueError("No matching expectation was found.")
+            raise ValueError("No matching expectation was found.")  # noqa: TRY003
 
         elif len(found_expectation_indexes) > 1:
             if remove_multiple_matches:
@@ -502,7 +502,7 @@ class ExpectationSuite(SerializableDictDot):
                 ]
                 return removed_expectations
             else:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "More than one matching expectation was found. Specify more precise matching criteria,"  # noqa: E501
                     "or set remove_multiple_matches=True"
                 )
@@ -564,12 +564,12 @@ class ExpectationSuite(SerializableDictDot):
         )
 
         if expectation_configuration is None and id is None:
-            raise TypeError("Must provide either expectation_configuration or id")
+            raise TypeError("Must provide either expectation_configuration or id")  # noqa: TRY003
 
         if expectation_configuration and not isinstance(
             expectation_configuration, ExpectationConfiguration
         ):
-            raise gx_exceptions.InvalidExpectationConfigurationError(
+            raise gx_exceptions.InvalidExpectationConfigurationError(  # noqa: TRY003
                 "Ensure that expectation configuration is valid."
             )
 
@@ -612,7 +612,7 @@ class ExpectationSuite(SerializableDictDot):
         """  # noqa: E501
 
         if expectation_configuration is None and id is None:
-            raise TypeError("Must provide either expectation_configuration or id")
+            raise TypeError("Must provide either expectation_configuration or id")  # noqa: TRY003
 
         found_expectation_indexes: List[int] = self.find_expectation_indexes(
             expectation_configuration, match_type, id
@@ -652,7 +652,7 @@ class ExpectationSuite(SerializableDictDot):
         )
 
         if len(found_expectation_indexes) > 1:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "More than one matching expectation was found. Please be more specific with your search "  # noqa: E501
                 "criteria"
             )
@@ -672,7 +672,7 @@ class ExpectationSuite(SerializableDictDot):
                     expectation_configuration=expectation_configuration
                 )
             else:
-                raise gx_exceptions.DataContextError(
+                raise gx_exceptions.DataContextError(  # noqa: TRY003
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "  # noqa: E501
                     "ExpectationConfiguration, set overwrite_existing=True"
                 )
@@ -755,12 +755,12 @@ class ExpectationSuite(SerializableDictDot):
         try:
             expectation = expectation_configuration.to_domain_obj()
             expectation.register_save_callback(save_callback=self._save_expectation)
-            return expectation
+            return expectation  # noqa: TRY300
         except (
             gx_exceptions.ExpectationNotFoundError,
             gx_exceptions.InvalidExpectationConfigurationError,
         ) as e:
-            raise gx_exceptions.InvalidExpectationConfigurationError(
+            raise gx_exceptions.InvalidExpectationConfigurationError(  # noqa: TRY003
                 f"Could not add expectation; provided configuration is not valid: {e.message}"
             ) from e
 

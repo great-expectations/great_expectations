@@ -22,7 +22,7 @@ context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 # GCP project information
 GCP_PROJECT_NAME = os.environ.get("GE_TEST_GCP_PROJECT")
 if not GCP_PROJECT_NAME:
-    raise ValueError(
+    raise ValueError(  # noqa: TRY003
         "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
     )
 BIGQUERY_DATASET = "demo"

@@ -13,7 +13,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_base64(code: str) -> bool:
     try:
         base64.b64decode(code)
-        return True
+        return True  # noqa: TRY300
     except binascii.Error:
         return False
 

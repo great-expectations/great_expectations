@@ -143,7 +143,7 @@ class SnowflakeDatasource(SQLDatasource):
                 connection_string.account and connection_string.user and connection_string.password
             ):
                 return values
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Must provide either a connection string or a combination of account, user, and password."  # noqa: E501
         )
 
@@ -215,7 +215,7 @@ class SnowflakeDatasource(SQLDatasource):
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine  # noqa: E501
                 # one possible case is a missing plugin (e.g. psycopg2)
-                raise SQLDatasourceError(
+                raise SQLDatasourceError(  # noqa: TRY003
                     "Unable to create a SQLAlchemy engine due to the " f"following exception: {e!s}"
                 ) from e
             # Since a connection string isn't strictly required for Snowflake, we conditionally cache  # noqa: E501

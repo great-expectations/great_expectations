@@ -26,7 +26,7 @@ def is_private_ip_address_in_class(addr: str, ip_class) -> bool:  # noqa: C901 -
             if ic == "C":
                 if ipaddress.ip_address(addr) in ipaddress.ip_network("192.168.0.0/16"):
                     return True
-        return False
+        return False  # noqa: TRY300
     except Exception:
         return False
 

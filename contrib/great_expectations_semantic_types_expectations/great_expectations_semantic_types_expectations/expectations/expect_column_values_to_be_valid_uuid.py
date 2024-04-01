@@ -20,7 +20,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_uuid(uuid: str) -> bool:
     try:
         UUID(uuid)
-        return True
+        return True  # noqa: TRY300
     except ValueError:
         return False
 

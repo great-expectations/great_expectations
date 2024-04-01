@@ -90,7 +90,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
         if is_root:
             trace = " -> ".join(reversed(exc.traces))
             exc = AssertionError(f"{exc!s}\nTRACE: {trace}")
-        raise exc
+        raise exc  # noqa: TRY201
 
 
 def safe_remove(path):
@@ -356,7 +356,7 @@ def load_checkpoint_config_from_store_backend(
     try:
         return config_store.get(key=key)  # type: ignore[return-value]
     except gx_exceptions.InvalidBaseYamlConfigError as exc:
-        logger.error(exc.messages)
+        logger.error(exc.messages)  # noqa: TRY400
         raise gx_exceptions.InvalidCheckpointConfigError(
             "Error while processing DataContextConfig.", exc
         )
@@ -663,10 +663,10 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
                 table_name=table_name,
                 connection=connection,
             )
-            return return_value
+            return return_value  # noqa: TRY300
         except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501
-            logger.error(error_message)
+            logger.error(error_message)  # noqa: TRY400
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501
             # sensitive information does not make it into our CI logs.
@@ -693,10 +693,10 @@ def load_data_into_test_database(  # noqa: C901, PLR0912, PLR0915
                     if_exists="append",
                     method=to_sql_method,
                 )
-            return return_value
+            return return_value  # noqa: TRY300
         except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501
-            logger.error(error_message)
+            logger.error(error_message)  # noqa: TRY400
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501
             # sensitive information does not make it into our CI logs.
@@ -866,7 +866,7 @@ def check_athena_table_count(
         return len(result) == expected_table_count
     except SQLAlchemyError:
         error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""  # noqa: E501
-        logger.error(error_message)
+        logger.error(error_message)  # noqa: TRY400
         raise gx_exceptions.DatabaseConnectionError(error_message)
         # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that  # noqa: E501
         # sensitive information does not make it into our CI logs.

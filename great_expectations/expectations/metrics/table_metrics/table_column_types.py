@@ -53,7 +53,7 @@ class ColumnTypes(TableMetricProvider):
             if execution_engine.batch_manager.active_batch_data_id is not None:
                 batch_id = execution_engine.batch_manager.active_batch_data_id
             else:
-                raise GreatExpectationsError(
+                raise GreatExpectationsError(  # noqa: TRY003
                     "batch_id could not be determined from domain kwargs and no active_batch_data is loaded into the "  # noqa: E501
                     "execution engine"
                 )
@@ -63,7 +63,7 @@ class ColumnTypes(TableMetricProvider):
             execution_engine.batch_manager.batch_data_cache.get(batch_id),
         )
         if batch_data is None:
-            raise GreatExpectationsError(
+            raise GreatExpectationsError(  # noqa: TRY003
                 "the requested batch is not available; please load the batch into the execution engine."  # noqa: E501
             )
 
@@ -146,6 +146,6 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):  # n
                     include_nested=include_nested,
                 )
     else:
-        raise ValueError("unrecognized field type")
+        raise ValueError("unrecognized field type")  # noqa: TRY003
 
     return cols

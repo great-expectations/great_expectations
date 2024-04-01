@@ -39,13 +39,13 @@ class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
                 elif shape_format == "geojson":
                     shape_ref = geos.from_geojson(shape)
                 else:
-                    raise NotImplementedError(
+                    raise NotImplementedError(  # noqa: TRY301
                         "Shape constructor method not implemented. Must be in WKT, WKB, or GeoJSON format."
                     )
             except Exception:
-                raise Exception("A valid reference shape was not given.")
+                raise Exception("A valid reference shape was not given.")  # noqa: TRY002, TRY003
         else:
-            raise Exception("A shape must be provided for this method.")
+            raise Exception("A shape must be provided for this method.")  # noqa: TRY002, TRY003
 
         # Load the column into a pygeos Geometry vector from numpy array (Series not supported).
         if column_shape_format == "wkt":

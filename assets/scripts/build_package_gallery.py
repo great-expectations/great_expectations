@@ -68,7 +68,7 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
                 f"Successfully serialized {package.package_name} to dict and appended to manifest list"  # noqa: E501
             )
         except Exception as e:
-            logger.error(f"Something went wrong when syncing {path} and serializing to dict: {e}")
+            logger.error(f"Something went wrong when syncing {path} and serializing to dict: {e}")  # noqa: TRY400
         finally:
             # Always ensure we revert back to the project root
             os.chdir(root)
