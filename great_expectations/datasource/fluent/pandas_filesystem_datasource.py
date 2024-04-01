@@ -50,7 +50,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             TestConnectionError: If the connection test fails.
         """  # noqa: E501
         if not self.base_directory.exists():
-            raise TestConnectionError(f"Path: {self.base_directory.resolve()} does not exist.")  # noqa: TRY003
+            raise TestConnectionError(f"Path: {self.base_directory.resolve()} does not exist.")
 
         if self.assets and test_assets:
             for asset in self.assets:
@@ -62,7 +62,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     ) -> None:
         """Builds and attaches the `FilesystemDataConnector` to the asset."""
         if kwargs:
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
         data_asset._data_connector = self.data_connector_type.build_data_connector(

@@ -451,7 +451,7 @@ def _generate_pandas_data_asset_models(
         try:
             asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
         except TypeError as e:
-            raise DynamicAssetError(  # noqa: TRY003
+            raise DynamicAssetError(
                 f"Updating forward references for asset model {asset_model.__name__} raised TypeError: {e}"  # noqa: E501
             ) from e
 

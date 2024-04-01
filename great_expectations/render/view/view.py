@@ -258,7 +258,7 @@ class DefaultJinjaView:
             class_str = ""
         else:
             if type(class_list) == str:  # noqa: E721
-                raise TypeError("classes must be a list, not a string.")  # noqa: TRY003
+                raise TypeError("classes must be a list, not a string.")
             class_str = f"class=\"{' '.join(class_list)}\" "
 
         attribute_dict = styling.get("attributes", None)

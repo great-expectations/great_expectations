@@ -29,7 +29,7 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
                 jsonschema.validate(val_json, json_schema)
                 # jsonschema.validate raises an error if validation fails.
                 # So if we make it this far, we know that the validation succeeded.
-                return True  # noqa: TRY300
+                return True
             except jsonschema.ValidationError:
                 return False
             except jsonschema.SchemaError:
@@ -52,7 +52,7 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
                 jsonschema.validate(instance=val_json, schema=json_schema)
                 # jsonschema.validate raises an error if validation fails.
                 # So if we make it this far, we know that the validation succeeded.
-                return True  # noqa: TRY300
+                return True
             except jsonschema.ValidationError:
                 return False
             except jsonschema.SchemaError:

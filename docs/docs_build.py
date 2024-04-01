@@ -95,7 +95,7 @@ class DocsBuilder:
         if not result:
             return None
         elif not result.ok:
-            raise Exception(f"Failed to run command: {command}")  # noqa: TRY002, TRY003
+            raise Exception(f"Failed to run command: {command}")
         return result.stdout.strip()
 
     def _run_and_get_output(self, command: str) -> str:

@@ -85,7 +85,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         try:
             self._s3 = aws.boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
-            raise ImportError(  # noqa: TRY003
+            raise ImportError(
                 "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
             )
 

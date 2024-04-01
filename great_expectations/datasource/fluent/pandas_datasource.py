@@ -190,17 +190,17 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             get_batch_list_from_batch_request method.
         """  # noqa: E501
         if options:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "options is not currently supported for this DataAssets and must be None or {}."
             )
 
         if batch_slice is not None:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "batch_slice is not currently supported and must be None for this DataAsset."
             )
 
         if partitioner is not None:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
 
@@ -228,7 +228,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 options={},
                 batch_slice=batch_request._batch_slice_input,
             )
-            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
+            raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
                 f"{pf(expect_batch_request_form.dict())}\n"
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
@@ -361,7 +361,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     @pydantic.validator("dataframe")
     def _validate_dataframe(cls, dataframe: pd.DataFrame) -> pd.DataFrame:
         if not isinstance(dataframe, pd.DataFrame):
-            raise ValueError("dataframe must be of type pandas.DataFrame")  # noqa: TRY003, TRY004
+            raise ValueError("dataframe must be of type pandas.DataFrame")
         return dataframe
 
     @override
@@ -403,17 +403,17 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             get_batch_list_from_batch_request method.
         """  # noqa: E501
         if options:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "options is not currently supported for this DataAssets and must be None or {}."
             )
 
         if batch_slice is not None:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "batch_slice is not currently supported and must be None for this DataAsset."
             )
 
         if partitioner is not None:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
 
@@ -423,7 +423,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             df = dataframe  # type: ignore[assignment]
 
         if df is None:
-            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")  # noqa: TRY003
+            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")
 
         self.dataframe = df
 
@@ -630,7 +630,7 @@ class PandasDatasource(_PandasDatasource):
     @staticmethod
     def _validate_asset_name(asset_name: Optional[str] = None) -> str:
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
-            raise PandasDatasourceError(  # noqa: TRY003
+            raise PandasDatasourceError(
                 f"""An asset_name of {DEFAULT_PANDAS_DATA_ASSET_NAME} cannot be passed because it is a reserved name."""  # noqa: E501
             )
         if not asset_name:
@@ -641,7 +641,7 @@ class PandasDatasource(_PandasDatasource):
         batch_request: BatchRequest
         if isinstance(asset, DataFrameAsset):
             if not isinstance(dataframe, pd.DataFrame):
-                raise ValueError(  # noqa: TRY003, TRY004
+                raise ValueError(
                     'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'  # noqa: E501
                 )
 

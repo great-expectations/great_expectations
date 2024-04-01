@@ -36,7 +36,7 @@ class ColumnWassersteinDistance(ColumnAggregateMetricProvider):
                 partition["weights"],
             )
         else:
-            raise ValueError("raw_values and partition object cannot both be None!")  # noqa: TRY003
+            raise ValueError("raw_values and partition object cannot both be None!")
 
         return w_value
 

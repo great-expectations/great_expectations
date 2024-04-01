@@ -81,7 +81,7 @@ def sqlite_table_for_unexpected_rows_with_index(
             except ValueError:
                 pass
 
-            return sqlite_engine  # noqa: TRY300
+            return sqlite_engine
         except ImportError:
             sa = None
     else:

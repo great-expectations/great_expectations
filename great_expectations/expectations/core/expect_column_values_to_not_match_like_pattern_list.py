@@ -75,7 +75,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         cls, like_pattern_list: list[str] | EvaluationParameterDict
     ) -> list[str] | EvaluationParameterDict:
         if len(like_pattern_list) < 1:
-            raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")  # noqa: TRY003
+            raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")
 
         return like_pattern_list
 

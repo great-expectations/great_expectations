@@ -292,7 +292,7 @@ class FileDataContextVariables(DataContextVariables):
         # This should be modified once our lowest supported version is 3.10.
 
         if self.data_context is None:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f"A reference to a data context is required for {self.__class__.__name__}"
             )
 
@@ -355,7 +355,7 @@ class FileDataContextVariables(DataContextVariables):
                 # this would be `deep_copy'ed in `instantiate_class_from_config` too
                 self.data_context.fluent_config.fluent_datasources = []
             yield
-        except Exception:  # noqa: TRY302
+        except Exception:
             raise
         finally:
             if config_fluent_datasources_stash:
@@ -390,7 +390,7 @@ class CloudDataContextVariables(DataContextVariables):
                 self.ge_cloud_access_token,
             )
         ):
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f"All of the following attributes are required for{ self.__class__.__name__}:\n  self.ge_cloud_base_url\n  self.ge_cloud_organization_id\n  self.ge_cloud_access_token"  # noqa: E501
             )
 

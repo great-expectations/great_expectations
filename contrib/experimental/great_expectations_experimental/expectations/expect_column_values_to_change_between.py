@@ -30,7 +30,7 @@ class ColumnValuesToChangeBetween(ColumnMapMetricProvider):
     def _pandas(cls, column, from_value, to_value, **kwargs):
         # throw an error if one of the values is not numeric
         if not pd.to_numeric(column, errors="coerce").notnull().all():
-            raise TypeError("Column values must be numeric !")  # noqa: TRY003
+            raise TypeError("Column values must be numeric !")
 
         # calculate the difference of the current row with the previous.
         # If previous is NaN fills with the initial value "from_value" to consider it true

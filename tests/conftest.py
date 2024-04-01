@@ -508,7 +508,7 @@ def sa(test_backends):
         try:
             from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
-            return sa  # noqa: TRY300
+            return sa
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
@@ -2276,7 +2276,7 @@ def titanic_sqlite_db_connection_string(sa):
             assert connection.execute(sa.text("select count(*) from titanic")).fetchall()[0] == (
                 1313,
             )
-        return f"sqlite:///{titanic_db_path}"  # noqa: TRY300
+        return f"sqlite:///{titanic_db_path}"
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 
@@ -2314,7 +2314,7 @@ def empty_sqlite_db(sa):
         engine = create_engine("sqlite://")
         with engine.begin() as connection:
             assert connection.execute(sa.text("select 1")).fetchall()[0] == (1,)
-        return engine  # noqa: TRY300
+        return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 
@@ -2739,7 +2739,7 @@ def sqlite_view_engine(test_backends) -> Engine:
                 connection.execute(
                     sa.text("CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;")
                 )
-            return sqlite_engine  # noqa: TRY300
+            return sqlite_engine
         except ImportError:
             sa = None
     else:

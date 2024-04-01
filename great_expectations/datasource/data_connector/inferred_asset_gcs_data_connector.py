@@ -102,7 +102,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
                 )
             self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
-            raise ImportError(  # noqa: TRY003
+            raise ImportError(
                 "Unable to load GCS Client (it is required for InferredAssetGCSDataConnector)."
             )
 

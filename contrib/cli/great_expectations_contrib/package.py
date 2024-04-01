@@ -251,7 +251,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                 )
             )
             diagnostics = GreatExpectationsContribPackageManifest._gather_diagnostics(expectations)
-            return diagnostics  # noqa: TRY300
+            return diagnostics
         except Exception as e:
             # Exceptions should not break the CLI - this behavior should be working in the background
             # without the user being concerned about the underlying functionality
@@ -271,9 +271,9 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
 
         # A sanity check in case the user modifies the Cookiecutter template in unexpected ways
         if len(packages) == 0:
-            raise FileNotFoundError("Could not find a user-defined package")  # noqa: TRY003
+            raise FileNotFoundError("Could not find a user-defined package")
         elif len(packages) > 1:
-            raise ValueError("Found more than one user-defined package")  # noqa: TRY003
+            raise ValueError("Found more than one user-defined package")
 
         return packages[0]
 
@@ -284,8 +284,8 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         sys.path.append(cwd)
         try:
             expectations_module = importlib.import_module(f"{package}.expectations")
-            return expectations_module  # noqa: TRY300
-        except ModuleNotFoundError:  # noqa: TRY302
+            return expectations_module
+        except ModuleNotFoundError:
             raise
 
     @staticmethod

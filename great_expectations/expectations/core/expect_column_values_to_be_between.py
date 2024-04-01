@@ -93,7 +93,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         max_val = values.get("max_val")
 
         if min_val is None and max_val is None:
-            raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
+            raise ValueError("min_value and max_value cannot both be None")
 
         return values
 

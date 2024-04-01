@@ -27,7 +27,7 @@ class ColumnValuesLatLonInTimezone(ColumnMapMetricProvider):
             try:
                 tf = TimezoneFinder()
                 detected_timezone = tf.timezone_at(lat=point[0], lng=point[1])
-                return detected_timezone == timezone  # noqa: TRY300
+                return detected_timezone == timezone
             except ValueError:
                 return False
 
@@ -45,7 +45,7 @@ class ColumnValuesLatLonInTimezone(ColumnMapMetricProvider):
             try:
                 tf = TimezoneFinder()
                 detected_timezone = tf.timezone_at(lat=point[0], lng=point[1])
-                return detected_timezone == timezone  # noqa: TRY300
+                return detected_timezone == timezone
             except ValueError:
                 return False
 

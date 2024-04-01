@@ -34,7 +34,7 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, rule, **kwargs):
         if rule["ranges"]:
-            raise ValueError("Ranges must contain at least 1 variable!")  # noqa: TRY003
+            raise ValueError("Ranges must contain at least 1 variable!")
 
         return column.apply(lambda x: ColumnRuleFollowers._helper(x, rule))
 
@@ -47,7 +47,7 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
         if x is None:
             x = ""
         if not isinstance(x, str):
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 "Column values must be strings in order to use 'expect_column_values_to_follow_rule'"
             )
         for name, rnge in rule["ranges"].items():
@@ -55,7 +55,7 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
                 strings[name] = str(x[rnge[0] : rnge[1]])
                 names += name + ","
             else:
-                raise ValueError(  # noqa: TRY003
+                raise ValueError(
                     "Unexpected range. Ensure that the second number in your range is larger than the first."
                 )
 

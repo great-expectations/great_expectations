@@ -120,7 +120,7 @@ class BaseDatasource:
     ) -> Batch:
         batch_list: List[Batch] = self.get_batch_list_from_batch_request(batch_request)
         if len(batch_list) != 1:
-            raise ValueError(f"Got {len(batch_list)} batches instead of a single batch.")  # noqa: TRY003
+            raise ValueError(f"Got {len(batch_list)} batches instead of a single batch.")
         return batch_list[0]
 
     def get_batch_definition_list_from_batch_request(
@@ -162,7 +162,7 @@ class BaseDatasource:
             # This is a runtime batch_request
 
             if len(batch_definition_list) != 1:
-                raise ValueError(  # noqa: TRY003
+                raise ValueError(
                     "RuntimeBatchRequests must specify exactly one corresponding BatchDefinition"
                 )
 
@@ -330,14 +330,14 @@ class BaseDatasource:
         if not (
             batch_request.datasource_name is None or batch_request.datasource_name == self.name
         ):
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not
                 match Datasource name: "{self.name}".
                 """
             )
 
         if batch_request.data_connector_name not in self.data_connectors.keys():
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" is not configured for DataSource: "{self.name}".
                     """  # noqa: E501
             )

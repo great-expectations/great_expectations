@@ -829,7 +829,7 @@ class ExpectationDoctor:
             result = ""
 
         else:
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."  # noqa: E501
             )
 

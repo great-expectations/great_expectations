@@ -42,7 +42,7 @@ def _parse_param_from_query_string(param: str, query: str) -> str | None:
     if not path_results:
         return None
     if len(path_results) > 1:
-        raise ValueError(f"Only one `{param}` query entry is allowed")  # noqa: TRY003
+        raise ValueError(f"Only one `{param}` query entry is allowed")
     return path_results[0]
 
 
@@ -210,10 +210,10 @@ class DatabricksSQLDatasource(SQLDatasource):
 
             # Raise specific error informing how to install dependencies only if relevant
             if isinstance(nested_exception, sa.exc.NoSuchModuleError):
-                raise TestConnectionError(  # noqa: TRY003
+                raise TestConnectionError(
                     "Could not connect to Databricks - please ensure you've installed necessary dependencies with `pip install great_expectations[databricks]`."  # noqa: E501
                 ) from e
-            raise e  # noqa: TRY201
+            raise e
 
     @override
     def _create_engine(self) -> sqlalchemy.Engine:

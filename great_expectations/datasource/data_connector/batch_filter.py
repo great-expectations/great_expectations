@@ -65,7 +65,7 @@ class SliceValidator:
     @classmethod
     def validate(cls, v):
         if not isinstance(v, slice):
-            raise TypeError("slice required")  # noqa: TRY003
+            raise TypeError("slice required")
         return cls(v)
 
 
@@ -101,7 +101,7 @@ def build_batch_filter(  # noqa: C901 - too complex
         )
     data_connector_query_keys: set = set(data_connector_query_dict.keys())
     if not data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS:
-        raise gx_exceptions.BatchFilterError(  # noqa: TRY003
+        raise gx_exceptions.BatchFilterError(
             f"""Unrecognized data_connector_query key(s):
 "{data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS!s}" detected.
             """
@@ -110,7 +110,7 @@ def build_batch_filter(  # noqa: C901 - too complex
         "custom_filter_function"
     )
     if custom_filter_function and not isinstance(custom_filter_function, Callable):  # type: ignore[arg-type]
-        raise gx_exceptions.BatchFilterError(  # noqa: TRY003
+        raise gx_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{type(custom_filter_function)!s}", which is illegal.
             """  # noqa: E501
@@ -120,13 +120,13 @@ def build_batch_filter(  # noqa: C901 - too complex
     )
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
-            raise gx_exceptions.BatchFilterError(  # noqa: TRY003
+            raise gx_exceptions.BatchFilterError(
                 f"""The type of batch_filter_parameters must be a dictionary (Python "dict").  The type given is
 "{type(batch_filter_parameters)!s}", which is illegal.
                 """  # noqa: E501
             )
         if not all(isinstance(key, str) for key in batch_filter_parameters.keys()):
-            raise gx_exceptions.BatchFilterError(  # noqa: TRY003
+            raise gx_exceptions.BatchFilterError(
                 'All batch_filter_parameters keys must strings (Python "str").'
             )
         batch_filter_parameters = IDDict(batch_filter_parameters)
@@ -135,13 +135,13 @@ def build_batch_filter(  # noqa: C901 - too complex
     )
     limit: Optional[int] = data_connector_query_dict.get("limit")  # type: ignore[assignment]
     if limit and (not isinstance(limit, int) or limit < 0):
-        raise gx_exceptions.BatchFilterError(  # noqa: TRY003
+        raise gx_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
 type and value given are "{type(limit)!s}" and "{limit}", respectively, which is illegal.
             """  # noqa: E501
         )
     if index is not None and limit is not None:
-        raise gx_exceptions.BatchFilterError(  # noqa: TRY003
+        raise gx_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."  # noqa: E501
         )
     parsed_index: slice | None = parse_batch_slice(batch_slice=index) if index is not None else None
@@ -174,7 +174,7 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
                 try:
                     slice_params.append(int(param))
                 except ValueError as e:
-                    raise ValueError(  # noqa: TRY003
+                    raise ValueError(
                         f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'  # noqa: E501
                     )
             else:
@@ -195,7 +195,7 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
     elif len(slice_params) == 3:  # noqa: PLR2004
         return slice(slice_params[0], slice_params[1], slice_params[2])
     else:
-        raise ValueError(  # noqa: TRY003
+        raise ValueError(
             f"batch_slice string must take the form of a python slice, but {batch_slice} was provided."  # noqa: E501
         )
 
@@ -210,7 +210,7 @@ def _batch_slice_from_list_or_tuple(batch_slice: list[int] | tuple[int, ...]) ->
     elif len(batch_slice) == 3:  # noqa: PLR2004
         return slice(batch_slice[0], batch_slice[1], batch_slice[2])
     else:
-        raise ValueError(  # noqa: TRY003
+        raise ValueError(
             f'batch_slice sequence must be of length 0-3, but "{batch_slice}" was provided.'
         )
 
@@ -237,7 +237,7 @@ def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
     elif isinstance(batch_slice, (list, tuple)):
         return_slice = _batch_slice_from_list_or_tuple(batch_slice=batch_slice)
     else:
-        raise TypeError(  # noqa: TRY003
+        raise TypeError(
             f"`batch_slice` should be of type `BatchSlice`, but type: {type(batch_slice)} was passed."  # noqa: E501
         )
     logger.info(f"batch_slice: {batch_slice} was parsed to: {return_slice}")

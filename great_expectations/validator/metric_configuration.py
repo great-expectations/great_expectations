@@ -135,7 +135,7 @@ class MetricConfiguration:
                 },
             )
 
-        raise ValueError(f"""Domain type "{domain_type}" is not recognized.""")  # noqa: TRY003
+        raise ValueError(f"""Domain type "{domain_type}" is not recognized.""")
 
     def get_domain_type(self) -> MetricDomainTypes:
         """Return "domain_type" of this "MetricConfiguration" object."""

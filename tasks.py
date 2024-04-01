@@ -68,7 +68,7 @@ def sort(
 ):
     """Sort module imports."""
     if ruff and isort:
-        raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)  # noqa: TRY003
+        raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)
     if not isort:
         cmds = [
             "ruff",
@@ -890,7 +890,7 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield "project"
         yield "sqlite"
     else:
-        raise ValueError(f"Unable to tokenize marker string: {marker_string}")  # noqa: TRY003
+        raise ValueError(f"Unable to tokenize marker string: {marker_string}")
 
 
 def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependencies]:

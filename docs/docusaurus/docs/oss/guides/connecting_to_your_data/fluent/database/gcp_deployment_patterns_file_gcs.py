@@ -24,7 +24,7 @@ context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 # GCP project information
 gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
 if not gcp_project:
-    raise ValueError(  # noqa: TRY003
+    raise ValueError(
         "Environment Variable GE_TEST_GCP_PROJECT is required to run GCS integration tests"
     )
 

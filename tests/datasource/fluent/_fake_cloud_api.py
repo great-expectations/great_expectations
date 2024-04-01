@@ -380,9 +380,9 @@ def post_datasources_cb(
             )
             result = CallbackResult(409, headers=DEFAULT_HEADERS, body=errors.json())
 
-        return result  # noqa: TRY300
+        return result
     except pydantic.ValidationError as val_err:
-        LOGGER.exception(val_err)  # noqa: TRY401
+        LOGGER.exception(val_err)
         return CallbackResult(
             400,
             headers=DEFAULT_HEADERS,

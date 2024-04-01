@@ -462,7 +462,7 @@ class SiteIndexPageRenderer(Renderer):
             if cta_object:
                 index_page_document.cta_footer = CallToActionRenderer.render(cta_object)
 
-            return index_page_document  # noqa: TRY300
+            return index_page_document
 
         except Exception as e:
             exception_message = """\
@@ -474,4 +474,4 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
             )
-            logger.error(exception_message)  # noqa: TRY400
+            logger.error(exception_message)

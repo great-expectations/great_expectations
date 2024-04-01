@@ -129,7 +129,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         data_docs_exception_message
                         + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                     )
-                    logger.error(exception_message)  # noqa: TRY400
+                    logger.error(exception_message)
 
                     if isinstance(obj_, ExpectationValidationResult):
                         content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
@@ -244,7 +244,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)  # noqa: TRY400
+                logger.error(exception_message)
 
                 if isinstance(render_object, ExpectationValidationResult):
                     content_block_fn = cls._get_content_block_fn("_missing_content_block_fn")
@@ -296,7 +296,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         expectation = configuration.to_domain_obj()
         description = expectation.description
         if not description:
-            raise ValueError("Cannot render an expectation with no description.")  # noqa: TRY003
+            raise ValueError("Cannot render an expectation with no description.")
         # If we wish to support $VAR substitution, we should use RenderedStringTemplateContent with params  # noqa: E501
         return [
             RenderedMarkdownContent(

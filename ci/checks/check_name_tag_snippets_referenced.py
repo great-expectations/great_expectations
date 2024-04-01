@@ -352,7 +352,7 @@ IGNORED_VIOLATIONS = [
 def check_dependencies(*deps: str) -> None:
     for dep in deps:
         if not shutil.which(dep):
-            raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")  # noqa: TRY002, TRY003
+            raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")
 
 
 def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
@@ -380,7 +380,7 @@ def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
         )
         return res_snippet_names.stdout.splitlines()
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(  # noqa: TRY003
+        raise RuntimeError(
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
         ) from e
 
@@ -412,7 +412,7 @@ def get_snippets_used(target_dir: pathlib.Path) -> List[str]:
         )
         return res_snippet_used_names.stdout.splitlines()
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(  # noqa: TRY003
+        raise RuntimeError(
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
         ) from e
 

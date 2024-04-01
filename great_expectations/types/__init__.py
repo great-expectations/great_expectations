@@ -183,7 +183,7 @@ class DictDot:
             exclude_keys = set()
 
         if include_keys & exclude_keys:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "Common keys between sets of include_keys and exclude_keys filtering directives are illegal."  # noqa: E501
             )
 
@@ -213,7 +213,7 @@ class DictDot:
                     try:
                         _ = self[f"_{name}"]
                     except AttributeError:
-                        raise ValueError(  # noqa: TRY003
+                        raise ValueError(
                             f'Property "{name}", marked for {purpose} on object "{type(self)!s}", does not exist.'  # noqa: E501
                         )
 

@@ -27,10 +27,10 @@ class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
             match_on = "any"
 
         if match_on not in ["any", "all"]:
-            raise ValueError("match_on must be any or all")  # noqa: TRY003
+            raise ValueError("match_on must be any or all")
 
         if len(like_pattern_list) == 0:
-            raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")  # noqa: TRY003
+            raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")
 
         like_pattern_expression = get_dialect_like_pattern_expression(
             column, _dialect, like_pattern_list[0]

@@ -44,7 +44,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             allow_relative_error = "nearest"
 
         if allow_relative_error not in interpolation_options:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'"  # noqa: E501
                 f"parameter of .quantile() (one of {interpolation_options})"
             )
@@ -176,7 +176,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             or allow_relative_error < 0.0
             or allow_relative_error > 1.0
         ):
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "SparkDFExecutionEngine requires relative error to be False or to be a float between 0 and 1."  # noqa: E501
             )
 
@@ -200,8 +200,8 @@ def _get_column_quantiles_mssql(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
-        logger.error(exception_message)  # noqa: TRY400
-        raise pe  # noqa: TRY201
+        logger.error(exception_message)
+        raise pe
 
 
 def _get_column_quantiles_bigquery(
@@ -220,8 +220,8 @@ def _get_column_quantiles_bigquery(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
-        logger.error(exception_message)  # noqa: TRY400
-        raise pe  # noqa: TRY201
+        logger.error(exception_message)
+        raise pe
 
 
 def _get_column_quantiles_mysql(
@@ -273,8 +273,8 @@ def _get_column_quantiles_mysql(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
-        logger.error(exception_message)  # noqa: TRY400
-        raise pe  # noqa: TRY201
+        logger.error(exception_message)
+        raise pe
 
 
 def _get_column_quantiles_trino(
@@ -292,8 +292,8 @@ def _get_column_quantiles_trino(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
-        logger.error(exception_message)  # noqa: TRY400
-        raise pe  # noqa: TRY201
+        logger.error(exception_message)
+        raise pe
 
 
 def _get_column_quantiles_clickhouse(
@@ -305,14 +305,14 @@ def _get_column_quantiles_clickhouse(
     quantiles_query: sqlalchemy.Select = sa.select(selects_approx).select_from(selectable)
     try:
         quantiles_results = execution_engine.execute(quantiles_query).fetchone()[0]
-        return quantiles_results  # noqa: TRY300
+        return quantiles_results
 
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
-        logger.error(exception_message)  # noqa: TRY400
-        raise pe  # noqa: TRY201
+        logger.error(exception_message)
+        raise pe
 
 
 def _get_column_quantiles_sqlite(
@@ -348,8 +348,8 @@ def _get_column_quantiles_sqlite(
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
-        logger.error(exception_message)  # noqa: TRY400
-        raise pe  # noqa: TRY201
+        logger.error(exception_message)
+        raise pe
 
 
 def _get_column_quantiles_athena(
@@ -365,13 +365,13 @@ def _get_column_quantiles_athena(
         quantiles_results = execution_engine.execute_query(quantiles_query_approx).fetchone()
         # the ast literal eval is needed because the method is returning a json string and not a dict  # noqa: E501
         results = ast.literal_eval(quantiles_results[0])
-        return results  # noqa: TRY300
+        return results
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
-        logger.error(exception_message)  # noqa: TRY400
-        raise pe  # noqa: TRY201
+        logger.error(exception_message)
+        raise pe
 
 
 # Support for computing the quantiles column for PostGreSQL and Redshift is included in the same method as that for  # noqa: E501
@@ -417,15 +417,15 @@ def _get_column_quantiles_generic_sqlalchemy(
                     exception_message += (
                         f'{type(pe).__name__}: "{pe!s}".  Traceback: "{exception_traceback}".'
                     )
-                    logger.error(exception_message)  # noqa: TRY400
-                    raise pe  # noqa: TRY201
+                    logger.error(exception_message)
+                    raise pe
             else:
-                raise ValueError(  # noqa: TRY003
+                raise ValueError(
                     f'The SQL engine dialect "{execution_engine.dialect!s}" does not support computing quantiles '  # noqa: E501
                     "without approximation error; set allow_relative_error to True to allow approximate quantiles."  # noqa: E501
                 )
         else:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f'The SQL engine dialect "{execution_engine.dialect!s}" does not support computing quantiles with '  # noqa: E501
                 "approximation error; set allow_relative_error to False to disable approximate quantiles."  # noqa: E501
             )

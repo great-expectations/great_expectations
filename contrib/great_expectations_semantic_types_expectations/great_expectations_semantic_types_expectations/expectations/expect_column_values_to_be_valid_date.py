@@ -20,7 +20,7 @@ def is_valid_date(date_in: str) -> bool:
             parse(date_in)
         else:
             pass
-        return True  # noqa: TRY300
+        return True
     except Exception:
         return False
 

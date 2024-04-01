@@ -145,7 +145,7 @@ def test_exhaustively_cardinality_within_limit_for_all_supported_cardinality_lim
         passing_cardinality = 0.0
         failing_cardinality = cardinality_limit + 0.01
     else:
-        raise ValueError("cardinality_limit_mode should be a supported type")  # noqa: TRY004
+        raise ValueError("cardinality_limit_mode should be a supported type")
 
     assert cardinality_checker.cardinality_within_limit(passing_cardinality)
     assert not cardinality_checker.cardinality_within_limit(failing_cardinality)

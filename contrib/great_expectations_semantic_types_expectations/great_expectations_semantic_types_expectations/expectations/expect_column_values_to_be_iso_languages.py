@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_iso_languages(lan: str) -> bool:
     try:
         languages.lookup(lan)
-        return True  # noqa: TRY300
+        return True
     except LookupError:
         return False
 

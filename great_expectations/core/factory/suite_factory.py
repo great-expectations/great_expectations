@@ -35,7 +35,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
         """
         key = self._store.get_key(name=suite.name, id=None)
         if self._store.has_key(key=key):
-            raise DataContextError(  # noqa: TRY003
+            raise DataContextError(
                 f"Cannot add ExpectationSuite with name {suite.name} because it already exists."
             )
         self._store.add(key=key, value=suite)
@@ -61,7 +61,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
         """
         key = self._store.get_key(name=suite.name, id=suite.id)
         if not self._store.has_key(key=key):
-            raise DataContextError(  # noqa: TRY003
+            raise DataContextError(
                 f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found."
             )
         self._store.remove_key(key=key)
@@ -88,7 +88,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
 
         key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
-            raise DataContextError(f"ExpectationSuite with name {name} was not found.")  # noqa: TRY003
+            raise DataContextError(f"ExpectationSuite with name {name} was not found.")
         suite_dict = self._store.get(key=key)
         suite = ExpectationSuite(**suite_dict)
         if self._include_rendered_content:

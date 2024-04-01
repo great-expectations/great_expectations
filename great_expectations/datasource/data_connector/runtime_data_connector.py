@@ -132,13 +132,13 @@ class RuntimeDataConnector(DataConnector):
         """  # noqa: E501
         if data_asset_name:
             if not batch_identifiers:
-                raise gx_exceptions.DataConnectorError(  # noqa: TRY003
+                raise gx_exceptions.DataConnectorError(
                     f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured when specifying Assets."""  # noqa: E501
                 )
             self._batch_identifiers[data_asset_name] = batch_identifiers
         else:
             if not batch_identifiers and len(self.assets) == 0:
-                raise gx_exceptions.DataConnectorError(  # noqa: TRY003
+                raise gx_exceptions.DataConnectorError(
                     f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured, either at the DataConnector or Asset-level."""  # noqa: E501
                 )
             if batch_identifiers:
@@ -255,7 +255,7 @@ class RuntimeDataConnector(DataConnector):
             batch_identifiers = batch_request.batch_identifiers
 
         if not batch_identifiers:
-            raise gx_exceptions.DataConnectorError(  # noqa: TRY003
+            raise gx_exceptions.DataConnectorError(
                 "Passed in a RuntimeBatchRequest with no batch_identifiers"
             )
 
@@ -345,7 +345,7 @@ class RuntimeDataConnector(DataConnector):
     @staticmethod
     def _validate_runtime_parameters(runtime_parameters: Union[dict, None]) -> None:
         if not isinstance(runtime_parameters, dict):
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 f"""The type of runtime_parameters must be a dict object. The type given is
         "{type(runtime_parameters)!s}", which is illegal.
                         """
@@ -356,7 +356,7 @@ class RuntimeDataConnector(DataConnector):
             if val is not None and key in ["batch_data", "query", "path"]
         ]
         if len(keys_present) != 1:
-            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
+            raise gx_exceptions.InvalidBatchRequestError(
                 "The runtime_parameters dict must have one (and only one) of the following keys: 'batch_data', "  # noqa: E501
                 "'query', 'path'."
             )
@@ -372,7 +372,7 @@ class RuntimeDataConnector(DataConnector):
             (not runtime_parameters and not batch_identifiers)
             or (runtime_parameters and batch_identifiers)
         ):
-            raise gx_exceptions.DataConnectorError(  # noqa: TRY003
+            raise gx_exceptions.DataConnectorError(
                 f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both
                 present and non-empty or both absent in the batch_request parameter."""  # noqa: E501
             )
@@ -418,7 +418,7 @@ class RuntimeDataConnector(DataConnector):
         asset: Asset = self.assets[data_asset_name]
         batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
         if not set(batch_identifiers_keys) == set(asset.batch_identifiers):  # type: ignore[arg-type]
-            raise gx_exceptions.DataConnectorError(  # noqa: TRY003
+            raise gx_exceptions.DataConnectorError(
                 f"""
                 Data Asset {data_asset_name} was invoked with one or more batch_identifiers
                 that were not configured for the asset.
@@ -434,7 +434,7 @@ class RuntimeDataConnector(DataConnector):
         """  # noqa: E501
         batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
         if not set(batch_identifiers_keys) <= set(self._batch_identifiers[self.name]):
-            raise gx_exceptions.DataConnectorError(  # noqa: TRY003
+            raise gx_exceptions.DataConnectorError(
                 f"""RuntimeDataConnector {self.name} was invoked with one or more batch identifiers that do not
         appear among the configured batch identifiers.
 

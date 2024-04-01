@@ -265,7 +265,7 @@ class FluentBaseModel(pydantic.BaseModel):
             logger.debug(f"{class_name}.dict() - substituting config values")
             _recursively_set_config_value(result, config_provider)
         elif raise_on_missing_config_provider:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f"{class_name}.dict() -"
                 " `config_provider` must be provided if `raise_on_missing_config_provider` is True."
                 f" {class_name} may be missing a context."

@@ -80,7 +80,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
                     strftime_format,
                 )
             except ValueError as e:
-                raise ValueError(f"Unable to use provided strftime_format. {e!s}") from e  # noqa: TRY003
+                raise ValueError(f"Unable to use provided strftime_format. {e!s}") from e
 
         return strftime_format
 

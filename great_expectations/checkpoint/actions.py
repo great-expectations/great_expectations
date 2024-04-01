@@ -245,7 +245,7 @@ class SlackNotificationAction(DataDocsAction):
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, SlackRenderer):
-                raise ValueError(  # noqa: TRY003, TRY004
+                raise ValueError(
                     "renderer must be a SlackRenderer or a valid configuration for one."
                 )
             renderer = _renderer
@@ -263,7 +263,7 @@ class SlackNotificationAction(DataDocsAction):
             else:
                 assert slack_token and slack_channel
         except AssertionError:
-            raise ValueError("Please provide either slack_webhook or slack_token and slack_channel")  # noqa: TRY003
+            raise ValueError("Please provide either slack_webhook or slack_token and slack_channel")
 
         return values
 
@@ -288,7 +288,7 @@ class SlackNotificationAction(DataDocsAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -404,7 +404,7 @@ class PagerdutyAlertAction(ValidationAction):
     @root_validator
     def _root_validate_deps(cls, values: dict) -> dict:
         if not importlib.util.find_spec("pypd"):
-            raise DataContextError(  # noqa: TRY003
+            raise DataContextError(
                 'ModuleNotFoundError: No module named "pypd". "pypd" is required for PageDuty notification actions.'  # noqa: E501
             )
 
@@ -433,7 +433,7 @@ class PagerdutyAlertAction(ValidationAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -511,7 +511,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, MicrosoftTeamsRenderer):
-                raise ValueError(  # noqa: TRY003, TRY004
+                raise ValueError(
                     "renderer must be a MicrosoftTeamsRenderer or a valid configuration for one."
                 )
             renderer = _renderer
@@ -538,7 +538,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -610,7 +610,7 @@ class OpsgenieAlertAction(ValidationAction):
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, OpsgenieRenderer):
-                raise ValueError(  # noqa: TRY003, TRY004
+                raise ValueError(
                     "renderer must be a OpsgenieRenderer or a valid configuration for one."
                 )
             renderer = _renderer
@@ -637,7 +637,7 @@ class OpsgenieAlertAction(ValidationAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -738,7 +738,7 @@ class EmailAction(ValidationAction):
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, EmailRenderer):
-                raise ValueError(  # noqa: TRY003, TRY004
+                raise ValueError(
                     "renderer must be a EmailRenderer or a valid configuration for one."
                 )
             renderer = _renderer
@@ -783,7 +783,7 @@ class EmailAction(ValidationAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -867,7 +867,7 @@ class StoreValidationResultAction(ValidationAction):
             target_store = data_context.stores[target_store_name]
 
         if not isinstance(target_store, ValidationsStore):
-            raise ValueError("target_store must be a ValidationsStore")  # noqa: TRY003, TRY004
+            raise ValueError("target_store must be a ValidationsStore")
 
         self._target_store = target_store
 
@@ -1082,7 +1082,7 @@ class APINotificationAction(ValidationAction):
             return requests.post(self.url, headers=headers, data=payload)
         except Exception as e:
             print(f"Exception when sending data to API - {e}")
-            raise e  # noqa: TRY201
+            raise e
 
     @staticmethod
     def create_payload(data_asset_name, suite_name, validation_results_serializable) -> str:

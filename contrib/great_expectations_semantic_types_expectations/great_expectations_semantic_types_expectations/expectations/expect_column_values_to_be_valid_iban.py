@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_iban(iban: str) -> bool:
     try:
         IBAN(iban)
-        return True  # noqa: TRY300
+        return True
     except SchwiftyException:
         return False
 

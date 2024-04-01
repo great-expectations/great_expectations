@@ -137,7 +137,7 @@ class DatasourceDict(UserDict):
         try:
             return self._datasource_store.retrieve_by_name(name)
         except ValueError:
-            raise KeyError(f"Could not find a datasource named '{name}'")  # noqa: TRY003
+            raise KeyError(f"Could not find a datasource named '{name}'")
 
     @override
     def __delitem__(self, name: str) -> None:
@@ -209,7 +209,7 @@ class CacheableDatasourceDict(DatasourceDict):
         try:
             # Resort to store only if not in cache
             _ = self._get_ds_from_store(str(name))
-            return True  # noqa: TRY300
+            return True
         except KeyError:
             return False
 

@@ -642,7 +642,7 @@ specified (empty "metric_name" value detected)."""  # noqa: E501
                 if enforce_numeric_metric:
                     if pd.isnull(metric_value):
                         if not replace_nan_with_zero:
-                            raise ValueError(  # noqa: TRY003
+                            raise ValueError(
                                 f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value."""  # noqa: E501
                             )
 

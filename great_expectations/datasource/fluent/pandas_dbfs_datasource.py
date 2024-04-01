@@ -36,7 +36,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
     ) -> None:
         """Builds and attaches the `DBFSDataConnector` to the asset."""
         if kwargs:
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
         data_asset._data_connector = self.data_connector_type.build_data_connector(

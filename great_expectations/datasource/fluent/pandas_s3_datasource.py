@@ -69,11 +69,11 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                     s3_client = aws.boto3.client("s3", **boto3_options)
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.  # noqa: E501
-                    raise PandasS3DatasourceError(  # noqa: TRY003
+                    raise PandasS3DatasourceError(
                         f'Due to exception: "{type(e).__name__}:{e}", "s3_client" could not be created.'  # noqa: E501
                     ) from e
             else:
-                raise PandasS3DatasourceError(  # noqa: TRY003
+                raise PandasS3DatasourceError(
                     'Unable to create "PandasS3Datasource" due to missing boto3 dependency.'
                 )
 
@@ -94,7 +94,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         try:
             _ = self._get_s3_client()
         except Exception as e:
-            raise TestConnectionError(  # noqa: TRY003
+            raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
@@ -116,7 +116,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         """Builds and attaches the `S3DataConnector` to the asset."""
         # TODO: use the `asset_options_type` for validation and defaults
         if kwargs:
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
 

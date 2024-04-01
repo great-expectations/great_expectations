@@ -9,12 +9,12 @@ from tests.test_utils import check_athena_table_count, clean_athena_db
 
 ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
 if not ATHENA_DB_NAME:
-    raise ValueError(  # noqa: TRY003
+    raise ValueError(
         "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"
     )
 ATHENA_STAGING_S3 = os.getenv("ATHENA_STAGING_S3")
 if not ATHENA_STAGING_S3:
-    raise ValueError(  # noqa: TRY003
+    raise ValueError(
         "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
     )
 

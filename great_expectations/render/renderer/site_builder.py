@@ -375,7 +375,7 @@ class DefaultSiteSectionBuilder:
         self.cloud_mode = cloud_mode
         self.ge_cloud_mode = cloud_mode
         if renderer is None:
-            raise exceptions.InvalidConfigError(  # noqa: TRY003
+            raise exceptions.InvalidConfigError(
                 "SiteSectionBuilder requires a renderer configuration " "with a class_name key."
             )
         module_name = renderer.get("module_name") or "great_expectations.render.renderer"
@@ -493,7 +493,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_message += (
                     f'{type(e).__name__}: "{e!s}".  ' f'Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)  # noqa: TRY400
+                logger.error(exception_message)
 
 
 class DefaultSiteIndexBuilder:
@@ -761,7 +761,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
             )
-            logger.error(exception_message)  # noqa: TRY400
+            logger.error(exception_message)
 
         return self.target_store.write_index_page(viewable_content), index_links_dict
 

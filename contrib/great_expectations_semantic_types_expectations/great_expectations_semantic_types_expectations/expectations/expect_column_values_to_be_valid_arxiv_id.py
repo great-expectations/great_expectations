@@ -13,7 +13,7 @@ def is_valid_arxiv_id(arxiv_id: str) -> bool:
     search = arxiv.Search(id_list=[arxiv_id])
     try:
         next(search.results())
-        return True  # noqa: TRY300
+        return True
     except Exception:
         return False
 

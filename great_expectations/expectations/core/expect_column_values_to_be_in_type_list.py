@@ -393,7 +393,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
-                raise ValueError("No recognized spark types in expected_types_list")  # noqa: TRY003
+                raise ValueError("No recognized spark types in expected_types_list")
             success = isinstance(actual_column_type, tuple(types))
         return {
             "success": success,

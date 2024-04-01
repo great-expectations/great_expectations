@@ -29,9 +29,9 @@ class DataProfilerProfileReport(DataProfilerProfileMetricProvider):
             profile_report["global_stats"]["profile_schema"] = dict(
                 profile_report["global_stats"]["profile_schema"]
             )
-            return profile_report  # noqa: TRY300
+            return profile_report
         except FileNotFoundError:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "'profile_path' does not point to a valid DataProfiler stored profile."
             )
         except Exception as e:

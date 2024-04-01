@@ -140,7 +140,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             runtime_configuration=runtime_configuration,
         )
         if renderer_configuration.configuration is None:
-            raise ValueError("renderer_configuration.configuration is None.")  # noqa: TRY003
+            raise ValueError("renderer_configuration.configuration is None.")
         params = substitute_none_for_missing(
             renderer_configuration.configuration.kwargs,
             [
@@ -198,7 +198,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         parsed_value_set = value_set
 
         if observed_value_counts is None:
-            raise ValueError("observed_value_counts None, but is required")  # noqa: TRY003
+            raise ValueError("observed_value_counts None, but is required")
         observed_value_set = set(observed_value_counts.index)
         expected_value_set = set(parsed_value_set)
 

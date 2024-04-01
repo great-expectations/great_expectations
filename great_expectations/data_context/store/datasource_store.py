@@ -151,7 +151,7 @@ class DatasourceStore(Store):
         if isinstance(data, list):
             if len(data) > 1:
                 # Larger arrays of datasources should be handled by `gx_cloud_response_json_to_object_collection`  # noqa: E501
-                raise TypeError(f"GX Cloud returned {len(data)} Datasources but expected 1")  # noqa: TRY003
+                raise TypeError(f"GX Cloud returned {len(data)} Datasources but expected 1")
             data = data[0]
 
         return DatasourceStore._convert_raw_json_to_object_dict(data)
@@ -168,7 +168,7 @@ class DatasourceStore(Store):
         logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
         if not isinstance(data, list):
-            raise TypeError("GX Cloud did not return a collection of Datasources when expected")  # noqa: TRY003
+            raise TypeError("GX Cloud did not return a collection of Datasources when expected")
 
         return [DatasourceStore._convert_raw_json_to_object_dict(d) for d in data]
 
@@ -196,7 +196,7 @@ class DatasourceStore(Store):
             self.store_backend.build_key(name=datasource_name)
         )
         if not self.has_key(datasource_key):
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."  # noqa: E501
             )
 
@@ -229,7 +229,7 @@ class DatasourceStore(Store):
         )
         datasource = self.get(key)
         if not isinstance(datasource, FluentDatasource):
-            raise ValueError("Datasource is not a FluentDatasource")  # noqa: TRY003, TRY004
+            raise ValueError("Datasource is not a FluentDatasource")
         return datasource
 
     @overload
@@ -321,7 +321,7 @@ class DatasourceStore(Store):
         try:
             self.update(key=datasource_key, value=datasource_config)
         except gx_exceptions.StoreBackendError:
-            raise gx_exceptions.DatasourceNotFoundError(  # noqa: TRY003
+            raise gx_exceptions.DatasourceNotFoundError(
                 f"Could not find an existing Datasource named {datasource_name}."
             )
 

@@ -186,7 +186,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 data_asset_name=batch_request.data_asset_name
             )
         except KeyError:
-            raise KeyError(f"data_asset_name {batch_request.data_asset_name} is not recognized.")  # noqa: TRY003
+            raise KeyError(f"data_asset_name {batch_request.data_asset_name} is not recognized.")
 
         for batch_identifiers in sub_cache:
             batch_definition = LegacyBatchDefinition(
@@ -324,7 +324,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 partitioner_method_name
             ]
         except KeyError:
-            raise gx_exceptions.SorterError(  # noqa: TRY003
+            raise gx_exceptions.SorterError(
                 f"No Sorter is defined in ConfiguredAssetSqlDataConnector.PARTITIONER_METHOD_TO_SORTER_METHOD_MAPPING for partitioner_method: {partitioner_method_name}"  # noqa: E501
             )
 
@@ -376,13 +376,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 if any(
                     sorter_name not in partitioner_group_names for sorter_name in sorters.keys()
                 ):
-                    raise gx_exceptions.DataConnectorError(  # noqa: TRY003
+                    raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 keys used for partitioning.
                         """  # noqa: E501
                     )
                 if len(partitioner_group_names) < len(sorters):
-                    raise gx_exceptions.DataConnectorError(  # noqa: TRY003
+                    raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" is configured with {len(partitioner_group_names)} partitioner groups;
 this is fewer than number of sorters specified, which is {len(sorters)}.
                         """  # noqa: E501

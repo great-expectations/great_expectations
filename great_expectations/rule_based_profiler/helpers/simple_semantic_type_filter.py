@@ -87,11 +87,11 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                     SemanticDomainTypes(semantic_type.lower()) for semantic_type in semantic_types
                 ]
 
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "All elements in semantic_types list must be either of str or SemanticDomainTypes type."  # noqa: E501
             )
 
-        raise ValueError("Unrecognized semantic_types directive.")  # noqa: TRY003
+        raise ValueError("Unrecognized semantic_types directive.")
 
     def _build_table_column_name_to_inferred_semantic_domain_type_map(
         self,

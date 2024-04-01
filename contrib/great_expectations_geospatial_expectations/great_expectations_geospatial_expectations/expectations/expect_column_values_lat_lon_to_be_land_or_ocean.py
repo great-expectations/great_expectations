@@ -38,7 +38,7 @@ class ColumnValuesLatLonLandOrOcean(ColumnMapMetricProvider):
         elif land_or_ocean == "ocean":
             return column.apply(lambda point: globe.is_ocean(point[0], point[1]))
         else:
-            raise ValueError("land_or_ocean must be 'land' or 'ocean'")  # noqa: TRY003
+            raise ValueError("land_or_ocean must be 'land' or 'ocean'")
 
 
 # This class defines the Expectation itself

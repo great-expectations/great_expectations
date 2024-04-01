@@ -40,11 +40,11 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
                 query_params = dict(exactly_one=True, geometry="wkt")
                 location = cls.geocode(geocoder, geocoder_config, place, query_params)
             except Exception:
-                raise Exception(  # noqa: TRY002, TRY003
+                raise Exception(
                     "Geocoding configuration and query failed to produce a valid result."
                 )
         else:
-            raise Exception(  # noqa: TRY002, TRY003
+            raise Exception(
                 "A valid geocoder must be provided for this method. See GeoPy for reference."
             )
 
@@ -54,7 +54,7 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
         if location is not None:
             shape_ref = geos.from_wkt(location.raw.get("geotext"))
         else:
-            raise Exception("Geocoding failed to return a result.")  # noqa: TRY002, TRY003
+            raise Exception("Geocoding failed to return a result.")
 
         # Load the column into a pygeos Geometry vector from numpy array (Series not supported).
         if column_shape_format == "wkt":

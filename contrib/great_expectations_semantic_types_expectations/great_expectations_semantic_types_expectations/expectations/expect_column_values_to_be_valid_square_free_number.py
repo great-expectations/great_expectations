@@ -18,7 +18,7 @@ def is_valid_square_free_number(num: str) -> bool:
         for root in range(2, n_sqrt + 1):
             if n % (root * root) == 0:
                 return False
-        return True  # noqa: TRY300
+        return True
     except ValueError:
         return False
 

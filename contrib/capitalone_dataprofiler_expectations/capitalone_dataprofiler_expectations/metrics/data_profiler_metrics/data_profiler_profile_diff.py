@@ -30,7 +30,7 @@ class DataProfilerProfileDiff(DataProfilerProfileMetricProvider):
             first_profile_path = metric_value_kwargs["profile_path"]
             first_profile = dp.Profiler.load(first_profile_path)
         except FileNotFoundError:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "'profile_path' does not point to a valid DataProfiler stored profile."
             )
 

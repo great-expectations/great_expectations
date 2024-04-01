@@ -94,7 +94,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
         try:
             num_of_inconsistent_rows = list(metrics.get("query.template_values")[0].values())[0]
         except IndexError:
-            raise IndexError("Invalid index - query.template_values has no [0] index]")  # noqa: TRY003
+            raise IndexError("Invalid index - query.template_values has no [0] index]")
 
         is_success = not num_of_inconsistent_rows or num_of_inconsistent_rows == 0
 

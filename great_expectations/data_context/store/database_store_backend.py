@@ -48,12 +48,12 @@ class DatabaseStoreBackend(StoreBackend):
             store_name=store_name,
         )
         if not sa:
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
+            raise gx_exceptions.DataContextError(
                 "ModuleNotFoundError: No module named 'sqlalchemy'"
             )
 
         if not self.fixed_length_key:
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
+            raise gx_exceptions.InvalidConfigError(
                 "DatabaseStoreBackend requires use of a fixed-length-key"
             )
 
@@ -78,7 +78,7 @@ class DatabaseStoreBackend(StoreBackend):
             self.drivername = parsed_url.drivername
             self.engine = sa.create_engine(url, **kwargs)
         else:
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
+            raise gx_exceptions.InvalidConfigError(
                 "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."  # noqa: E501
             )
 
@@ -88,7 +88,7 @@ class DatabaseStoreBackend(StoreBackend):
         cols = []
         for column_ in key_columns:
             if column_ == "value":
-                raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
+                raise gx_exceptions.InvalidConfigError(
                     "'value' cannot be used as a key_element name"
                 )
             cols.append(sa.Column(column_, sa.String, primary_key=True))
@@ -97,7 +97,7 @@ class DatabaseStoreBackend(StoreBackend):
             table = sa.Table(table_name, meta, autoload_with=self.engine)
             # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table  # noqa: E501
             if {str(col.name).lower() for col in table.columns} != (set(key_columns) | {"value"}):
-                raise gx_exceptions.StoreBackendError(  # noqa: TRY003
+                raise gx_exceptions.StoreBackendError(
                     f"Unable to use table {table_name}: it exists, but does not have the expected schema."  # noqa: E501
                 )
         except sqlalchemy.NoSuchTableError:
@@ -110,7 +110,7 @@ class DatabaseStoreBackend(StoreBackend):
                         )
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
-                raise gx_exceptions.StoreBackendError(  # noqa: TRY003
+                raise gx_exceptions.StoreBackendError(
                     f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {e!s}"  # noqa: E501
                 )
         self._table = table
@@ -214,7 +214,7 @@ class DatabaseStoreBackend(StoreBackend):
                         message="Decryption of key failed, was the passphrase incorrect?",
                     ) from e
                 else:
-                    raise e  # noqa: TRY201
+                    raise e
         pkb = p_key.private_bytes(
             encoding=serialization.Encoding.DER,
             format=serialization.PrivateFormat.PKCS8,
@@ -244,10 +244,10 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             with self.engine.begin() as connection:
                 row = connection.execute(sel).fetchone()[0]
-            return row  # noqa: TRY300
+            return row
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error fetching value: {e!s}")
-            raise gx_exceptions.StoreError(f"Unable to fetch value for key: {key!s}")  # noqa: TRY003
+            raise gx_exceptions.StoreError(f"Unable to fetch value for key: {key!s}")
 
     @override
     def _get_all(self) -> list[Any]:
@@ -277,7 +277,7 @@ class DatabaseStoreBackend(StoreBackend):
             if self._get(key) == value:
                 logger.info(f"Key {key!s} already exists with the same value.")
             else:
-                raise gx_exceptions.StoreBackendError(  # noqa: TRY003
+                raise gx_exceptions.StoreBackendError(
                     f"Integrity error {e!s} while trying to store key"
                 )
 
@@ -355,7 +355,7 @@ class DatabaseStoreBackend(StoreBackend):
             with self.engine.begin() as connection:
                 return connection.execute(delete_statement)
         except SQLAlchemyError as e:
-            raise gx_exceptions.StoreBackendError(  # noqa: TRY003
+            raise gx_exceptions.StoreBackendError(
                 f"Unable to delete key: got sqlalchemy error {e!s}"
             )
 

@@ -344,7 +344,7 @@ class FilePathDataConnector(DataConnector):
             group_names=group_names,
         )
         if not path:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
 """  # noqa: E501

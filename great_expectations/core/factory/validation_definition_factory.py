@@ -32,7 +32,7 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
         """
         key = self._store.get_key(name=validation.name, id=None)
         if self._store.has_key(key=key):
-            raise DataContextError(  # noqa: TRY003
+            raise DataContextError(
                 f"Cannot add ValidationDefinition with name {validation.name} because it already exists."  # noqa: E501
             )
         self._store.add(key=key, value=validation)
@@ -52,7 +52,7 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
         """
         key = self._store.get_key(name=validation.name, id=validation.id)
         if not self._store.has_key(key=key):
-            raise DataContextError(  # noqa: TRY003
+            raise DataContextError(
                 f"Cannot delete ValidationDefinition with name {validation.name} because it cannot be found."  # noqa: E501
             )
         self._store.remove_key(key=key)
@@ -72,6 +72,6 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
         """
         key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
-            raise DataContextError(f"ValidationDefinition with name {name} was not found.")  # noqa: TRY003
+            raise DataContextError(f"ValidationDefinition with name {name} was not found.")
 
         return cast(ValidationDefinition, self._store.get(key=key))

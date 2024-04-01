@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_tcp_port(port: str) -> bool:
     try:
         getservbyport(int(port), "tcp")
-        return True  # noqa: TRY300
+        return True
     except (ValueError, OSError, OverflowError):
         return False
 

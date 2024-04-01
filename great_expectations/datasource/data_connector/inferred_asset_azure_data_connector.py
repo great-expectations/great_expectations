@@ -103,7 +103,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
                 ).group(1)
                 self._azure = azure.BlobServiceClient(**azure_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
-            raise ImportError(  # noqa: TRY003
+            raise ImportError(
                 "Unable to load Azure BlobServiceClient"
                 " (it is required for InferredAssetAzureDataConnector)."
                 " Please ensure that you have provided the appropriate keys to `azure_options`"

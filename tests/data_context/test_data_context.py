@@ -940,7 +940,7 @@ def test_load_config_variables_property(basic_data_context_config, tmp_path_fact
         context = get_context(basic_data_context_config, context_root_dir=base_path)
         config_vars = context.config_variables
         assert config_vars["env"] == "prod"
-    except Exception:  # noqa: TRY302
+    except Exception:
         raise
     finally:
         # Make sure we unset the environment variable we're using

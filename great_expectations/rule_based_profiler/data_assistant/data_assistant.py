@@ -827,7 +827,7 @@ def build_map_metric_rule(  # noqa: PLR0913
             column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
         )
     else:
-        raise ValueError(  # noqa: TRY003
+        raise ValueError(
             f"""Metric "{map_metric_name}" is not supported as part of "{data_assistant_class_name}" implementation."""  # noqa: E501
         )
 

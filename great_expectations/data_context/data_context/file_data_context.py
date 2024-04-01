@@ -191,11 +191,11 @@ class FileDataContext(SerializableDataContext):
                 config_commented_map_from_yaml = yaml.load(data)
 
         except DuplicateKeyError:
-            raise gx_exceptions.InvalidConfigurationYamlError(  # noqa: TRY003
+            raise gx_exceptions.InvalidConfigurationYamlError(
                 "Error: duplicate key found in project YAML file."
             )
         except YAMLError as err:
-            raise gx_exceptions.InvalidConfigurationYamlError(  # noqa: TRY003
+            raise gx_exceptions.InvalidConfigurationYamlError(
                 f"Your configuration file is not a valid yml file likely due to a yml syntax error:\n\n{err}"  # noqa: E501
             )
         except OSError:
@@ -205,7 +205,7 @@ class FileDataContext(SerializableDataContext):
             return DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
-        except gx_exceptions.InvalidDataContextConfigError:  # noqa: TRY302
+        except gx_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
 

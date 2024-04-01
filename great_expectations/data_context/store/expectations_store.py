@@ -98,7 +98,7 @@ class ExpectationsStore(Store):
             if len(response_json["data"]) == 1:
                 suite_data = response_json["data"][0]
             else:
-                raise ValueError(  # noqa: TRY003
+                raise ValueError(
                     "More than one Expectation Suite was found with the expectation_suite_name."
                 )
         else:
@@ -135,14 +135,14 @@ class ExpectationsStore(Store):
                 #            we have no reliable way to know which new ID belongs to this expectation,  # noqa: E501
                 #            so we raise an exception and ask the user to refresh their suite.
                 #            The Expectation should have been successfully added to the suite.
-                raise RuntimeError(  # noqa: TRY003
+                raise RuntimeError(
                     "Expectation was added, however this ExpectationSuite is out of sync with the Cloud backend. "  # noqa: E501
                     f'Please fetch the latest state of this suite by calling `context.suites.get(name="{suite.name}")`.'  # noqa: E501
                 )
             elif len(new_ids) == 0:
                 # edge case: this is an unexpected state - if the cloud backend failed to add the expectation,  # noqa: E501
                 #            it should have already raised an exception.
-                raise RuntimeError("Unknown error occurred and Expectation was not added.")  # noqa: TRY003
+                raise RuntimeError("Unknown error occurred and Expectation was not added.")
             else:
                 new_id = new_ids[0]
             expectation.id = new_id
@@ -152,7 +152,7 @@ class ExpectationsStore(Store):
         suite_identifier, fetched_suite = self._refresh_suite(suite)
 
         if expectation.id not in {exp.id for exp in fetched_suite.expectations}:
-            raise KeyError("Cannot update Expectation because it was not found.")  # noqa: TRY003
+            raise KeyError("Cannot update Expectation because it was not found.")
 
         for i, old_expectation in enumerate(fetched_suite.expectations):
             if old_expectation.id == expectation.id:
@@ -169,7 +169,7 @@ class ExpectationsStore(Store):
         suite_identifier, suite = self._refresh_suite(suite)
 
         if expectation.id not in {exp.id for exp in suite.expectations}:
-            raise KeyError("Cannot delete Expectation because it was not found.")  # noqa: TRY003
+            raise KeyError("Cannot delete Expectation because it was not found.")
 
         for i, old_expectation in enumerate(suite.expectations):
             if old_expectation.id == expectation.id:
@@ -209,9 +209,9 @@ class ExpectationsStore(Store):
                     local_suite=value,
                     cloud_suite=cloud_suite,
                 )
-            return result  # noqa: TRY300
+            return result
         except gx_exceptions.StoreBackendError:
-            raise gx_exceptions.ExpectationSuiteError(  # noqa: TRY003
+            raise gx_exceptions.ExpectationSuiteError(
                 f"An ExpectationSuite named {value.name} already exists."
             )
 
@@ -237,7 +237,7 @@ class ExpectationsStore(Store):
                 )
         except gx_exceptions.StoreBackendError as exc:
             # todo: this generic error clobbers more informative errors coming from the store
-            raise gx_exceptions.ExpectationSuiteError(  # noqa: TRY003
+            raise gx_exceptions.ExpectationSuiteError(
                 f"Could not find an existing ExpectationSuite named {value.name}."
             ) from exc
 
@@ -266,7 +266,7 @@ class ExpectationsStore(Store):
         # enforce that every ID in this suite is unique
         expectation_ids = [exp.id for exp in suite.expectations if exp.id]
         if len(expectation_ids) != len(set(expectation_ids)):
-            raise RuntimeError("Expectation IDs must be unique within a suite.")  # noqa: TRY003
+            raise RuntimeError("Expectation IDs must be unique within a suite.")
 
         for expectation in suite.expectations:
             if not expectation.id:
@@ -296,7 +296,7 @@ class ExpectationsStore(Store):
         self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
     ) -> None:
         if isinstance(key, GXCloudIdentifier) and not key.id and not key.resource_name:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "GXCloudIdentifier for ExpectationsStore must contain either "
                 "an id or a resource_name, but neither are present."
             )

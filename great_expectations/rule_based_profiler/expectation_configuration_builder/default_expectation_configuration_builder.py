@@ -163,7 +163,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         try:
             return expr.parseString(self._condition)
         except ParseException:
-            raise ExpectationConfigurationConditionParserError(  # noqa: TRY003
+            raise ExpectationConfigurationConditionParserError(
                 f'Unable to parse Expectation Configuration Condition: "{self._condition}".'
             )
 

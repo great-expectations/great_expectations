@@ -102,7 +102,7 @@ class Builder(SerializableDictDot):
             ]
         )
         if num_supplied_batch_specification_args > 1:
-            raise gx_exceptions.ProfilerConfigurationError(  # noqa: TRY003
+            raise gx_exceptions.ProfilerConfigurationError(
                 f'Please pass at most one of "batch_list" and "batch_request" arguments (you passed {num_supplied_batch_specification_args} arguments).'  # noqa: E501
             )
 

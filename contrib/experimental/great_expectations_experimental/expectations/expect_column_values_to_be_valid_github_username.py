@@ -25,7 +25,7 @@ class ColumnValuesToBeValidGithubUsername(ColumnMapMetricProvider):
                 return False
             try:
                 urlopen(Request(BASE_API_URL + x, headers={"User-Agent": "great_expectations"}))
-                return True  # noqa: TRY300
+                return True
             except (URLError, HTTPError):
                 return False
 

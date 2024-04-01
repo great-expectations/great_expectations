@@ -167,7 +167,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
         if len(quantile_ranges["quantiles"]) != len(quantile_ranges["value_ranges"]):
-            raise ValueError("quantile_values and quantiles must have the same number of elements")  # noqa: TRY003
+            raise ValueError("quantile_values and quantiles must have the same number of elements")
 
         return quantile_ranges
 

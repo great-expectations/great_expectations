@@ -249,7 +249,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def dataframe(self) -> pyspark.DataFrame:
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""  # noqa: E501
         if self.batch_manager.active_batch_data is None:
-            raise ValueError("Batch has not been loaded - please run load_batch() to load a batch.")  # noqa: TRY003
+            raise ValueError("Batch has not been loaded - please run load_batch() to load a batch.")
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
@@ -404,7 +404,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if pyspark.DataFrame and isinstance(batch_data, pyspark.DataFrame):  # type: ignore[truthy-function]
             batch_data = SparkDFBatchData(self, batch_data)
         elif not isinstance(batch_data, SparkDFBatchData):
-            raise GreatExpectationsError(  # noqa: TRY003
+            raise GreatExpectationsError(
                 "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"  # noqa: E501
             )
 
@@ -445,7 +445,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
             if isinstance(batch_data, str):
-                raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
+                raise gx_exceptions.ExecutionEngineError(
                     f"""SparkDFExecutionEngine has been passed a string type batch_data, "{batch_data}", which is \
 illegal.  Please check your config."""  # noqa: E501
                 )
@@ -474,7 +474,7 @@ illegal.  Please check your config."""  # noqa: E501
                 )
                 batch_data = reader_fn(path)
             except AttributeError:
-                raise ExecutionEngineError(  # noqa: TRY003
+                raise ExecutionEngineError(
                     """
                     Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
                     """
@@ -493,7 +493,7 @@ illegal.  Please check your config."""  # noqa: E501
 
             # this can happen if we have not converted schema into json at Datasource-config level
             elif isinstance(schema, str):
-                raise gx_exceptions.ExecutionEngineError(  # noqa: TRY003
+                raise gx_exceptions.ExecutionEngineError(
                     """
                     Spark schema was not properly serialized.
                     Please run the .jsonValue() method on the schema object before loading into GX.
@@ -514,19 +514,19 @@ illegal.  Please check your config."""  # noqa: E501
                 )
                 batch_data = reader_fn(path)
             except AttributeError:
-                raise ExecutionEngineError(  # noqa: TRY003
+                raise ExecutionEngineError(
                     """
                     Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
                     """
                 )
             # pyspark will raise an AnalysisException error if path is incorrect
             except pyspark.AnalysisException:
-                raise ExecutionEngineError(  # noqa: TRY003
+                raise ExecutionEngineError(
                     f"""Unable to read in batch from the following path: {path}. Please check your configuration."""  # noqa: E501
                 )
 
         else:
-            raise BatchSpecError(  # noqa: TRY003
+            raise BatchSpecError(
                 """
                 Invalid batch_spec: batch_data is required for a SparkDFExecutionEngine to operate.
                 """
@@ -582,7 +582,7 @@ illegal.  Please check your config."""  # noqa: E501
         elif path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt"):
             return "parquet"
 
-        raise ExecutionEngineError(f"Unable to determine reader method from path: {path}")  # noqa: TRY003
+        raise ExecutionEngineError(f"Unable to determine reader method from path: {path}")
 
     @overload
     def _get_reader_fn(
@@ -605,7 +605,7 @@ illegal.  Please check your config."""  # noqa: E501
 
         """  # noqa: E501
         if reader_method is None and path is None:
-            raise ExecutionEngineError(  # noqa: TRY003
+            raise ExecutionEngineError(
                 "Unable to determine spark reader function without reader_method or path"
             )
 
@@ -618,7 +618,7 @@ illegal.  Please check your config."""  # noqa: E501
                 return reader.format(reader_method_op).load
             return getattr(reader, reader_method_op)
         except AttributeError:
-            raise ExecutionEngineError(  # noqa: TRY003
+            raise ExecutionEngineError(
                 f"Unable to find reader_method {reader_method} in spark.",
             )
 
@@ -643,7 +643,7 @@ illegal.  Please check your config."""  # noqa: E501
         """  # noqa: E501
         table = domain_kwargs.get("table", None)
         if table:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
@@ -653,7 +653,7 @@ illegal.  Please check your config."""  # noqa: E501
             if self.batch_manager.active_batch_data:
                 data = cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
             else:
-                raise ValidationError(  # noqa: TRY003
+                raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:  # noqa: PLR5501
@@ -662,7 +662,7 @@ illegal.  Please check your config."""  # noqa: E501
                     SparkDFBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
             else:
-                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")  # noqa: TRY003
+                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
         # Filtering by row condition.
         row_condition = domain_kwargs.get("row_condition", None)
@@ -674,7 +674,7 @@ illegal.  Please check your config."""  # noqa: E501
                 parsed_condition = parse_condition_to_spark(row_condition)
                 data = data.filter(parsed_condition)
             else:
-                raise GreatExpectationsError(  # noqa: TRY003
+                raise GreatExpectationsError(
                     f"unrecognized condition_parser {condition_parser!s} for Spark execution engine"
                 )
 
@@ -707,7 +707,7 @@ illegal.  Please check your config."""  # noqa: E501
                 data = data.filter(~ignore_condition)
             else:  # noqa: PLR5501
                 if ignore_row_if != "neither":
-                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')  # noqa: TRY003
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
 
             return data
 
@@ -724,7 +724,7 @@ illegal.  Please check your config."""  # noqa: E501
                 data = data.filter(~ignore_condition)
             else:  # noqa: PLR5501
                 if ignore_row_if != "never":
-                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')  # noqa: TRY003
+                    raise ValueError(f'Unrecognized value of ignore_row_if ("{ignore_row_if}").')
 
             return data
 
@@ -790,7 +790,7 @@ illegal.  Please check your config."""  # noqa: E501
         """  # noqa: E501
         table: str = domain_kwargs.get("table", None)
         if table:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 

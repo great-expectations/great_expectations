@@ -70,7 +70,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             conn_str: str | None = azure_options.get("conn_str")
             account_url: str | None = azure_options.get("account_url")
             if not bool(conn_str) ^ bool(account_url):
-                raise PandasAzureBlobStorageDatasourceError(  # noqa: TRY003
+                raise PandasAzureBlobStorageDatasourceError(
                     "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"  # noqa: E501
                 )
 
@@ -91,18 +91,18 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                         azure_client = azure.BlobServiceClient(**azure_options)
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.  # noqa: E501
-                    raise PandasAzureBlobStorageDatasourceError(  # noqa: TRY003
+                    raise PandasAzureBlobStorageDatasourceError(
                         f'Due to exception: "{e!s}", "azure_client" could not be created.'
                     ) from e
             else:
-                raise PandasAzureBlobStorageDatasourceError(  # noqa: TRY003
+                raise PandasAzureBlobStorageDatasourceError(
                     'Unable to create "PandasAzureBlobStorageDatasource" due to missing azure.storage.blob dependency.'  # noqa: E501
                 )
 
             self._azure_client = azure_client
 
         if not azure_client:
-            raise PandasAzureBlobStorageDatasourceError("Failed to return `azure_client`")  # noqa: TRY003
+            raise PandasAzureBlobStorageDatasourceError("Failed to return `azure_client`")
 
         return azure_client
 
@@ -119,7 +119,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         try:
             _ = self._get_azure_client()
         except Exception as e:
-            raise TestConnectionError(  # noqa: TRY003
+            raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
@@ -140,11 +140,11 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     ) -> None:
         """Builds and attaches the `AzureBlobStorageDataConnector` to the asset."""
         if kwargs:
-            raise TypeError(  # noqa: TRY003
+            raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
         if abs_container is _MISSING:
-            raise TypeError(f"'{data_asset.name}' is missing required argument 'abs_container'")  # noqa: TRY003
+            raise TypeError(f"'{data_asset.name}' is missing required argument 'abs_container'")
 
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,

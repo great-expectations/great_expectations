@@ -246,7 +246,7 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
                     for x in range((end_date - start_date).days + 1)
                 ]
             except TypeError as ex:
-                raise InvalidExpectationConfigurationError(  # noqa: TRY003
+                raise InvalidExpectationConfigurationError(
                     f"Expecting datetime when datetime_format is set\n{ex}"
                 )
         # else - no datetime format, so we're assuming integers

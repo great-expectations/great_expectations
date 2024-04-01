@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_country(c: str) -> bool:
     try:
         countries.lookup(c)
-        return True  # noqa: TRY300
+        return True
     except LookupError:
         return False
 

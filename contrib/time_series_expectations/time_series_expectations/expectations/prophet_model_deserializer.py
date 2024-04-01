@@ -19,7 +19,7 @@ class ProphetModelDeserializer:
         model_json: str,
     ) -> Prophet:
         if not model_from_json:
-            raise ImportError(  # noqa: TRY003
+            raise ImportError(
                 "Unable to import Prophet. Please install prophet to use this Expectation."
             )
 

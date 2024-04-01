@@ -68,11 +68,11 @@ class InvalidAsset(DataAsset):
     @override
     def test_connection(self) -> None:
         if datasource := getattr(self, "datasource", None):
-            raise TestConnectionError(  # noqa: TRY003
+            raise TestConnectionError(
                 f"The Datasource configuration for {self.name} is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
             ) from datasource.config_error
         # the asset should always have a datasource, but if it doesn't, we should still raise an error  # noqa: E501
-        raise TestConnectionError(  # noqa: TRY003
+        raise TestConnectionError(
             "This Asset configuration is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
         )
 
@@ -159,7 +159,7 @@ class InvalidDatasource(Datasource):
 
     @override
     def test_connection(self, test_assets: bool = True) -> None:
-        raise TestConnectionError(  # noqa: TRY003
+        raise TestConnectionError(
             "This Datasource configuration is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
         ) from self.config_error
 

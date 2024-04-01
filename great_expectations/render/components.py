@@ -693,7 +693,7 @@ class RenderedDocumentContent(RenderedContent):
         if not isinstance(sections, list) and all(
             isinstance(section, RenderedSectionContent) for section in sections
         ):
-            raise InvalidRenderedContentError(  # noqa: TRY003
+            raise InvalidRenderedContentError(
                 "RenderedDocumentContent requires a list of RenderedSectionContent for " "sections."
             )
         self.sections = sections
@@ -736,7 +736,7 @@ class RenderedSectionContent(RenderedContent):
         if not isinstance(content_blocks, list) and all(
             isinstance(content_block, RenderedComponentContent) for content_block in content_blocks
         ):
-            raise InvalidRenderedContentError(  # noqa: TRY003
+            raise InvalidRenderedContentError(
                 "Rendered section content requires a list of RenderedComponentContent "
                 "for content blocks."
             )

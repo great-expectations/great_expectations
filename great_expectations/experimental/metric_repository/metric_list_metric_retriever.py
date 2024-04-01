@@ -38,7 +38,7 @@ class MetricListMetricRetriever(MetricRetriever):
         metrics_result: List[Metric] = []
 
         if not metric_list:
-            raise ValueError("metric_list cannot be empty")  # noqa: TRY003
+            raise ValueError("metric_list cannot be empty")
 
         self._check_valid_metric_types(metric_list)
 

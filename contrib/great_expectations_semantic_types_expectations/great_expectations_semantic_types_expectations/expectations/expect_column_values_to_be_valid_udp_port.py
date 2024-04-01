@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_udp_port(port: str) -> bool:
     try:
         getservbyport(int(port), "udp")
-        return True  # noqa: TRY300
+        return True
     except (ValueError, OSError, OverflowError):
         return False
 

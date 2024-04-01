@@ -125,7 +125,7 @@ class InlineStoreBackend(StoreBackend):
 
     @override
     def _move(self, source_key: tuple[str, ...], dest_key: tuple[str, ...], **kwargs: dict) -> None:
-        raise StoreBackendError(  # noqa: TRY003
+        raise StoreBackendError(
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"  # noqa: E501
         )
 
@@ -154,7 +154,7 @@ class InlineStoreBackend(StoreBackend):
         else:
             config_values: dict = config_dict[config_section]
             if not isinstance(config_values, dict):
-                raise StoreBackendError(  # noqa: TRY003
+                raise StoreBackendError(
                     "Cannot list keys in a non-iterable section of a project config"
                 )
             keys = list((key,) for key in config_values.keys())
@@ -170,15 +170,15 @@ class InlineStoreBackend(StoreBackend):
         resource_type = self._resource_type
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
-            raise StoreBackendError(  # noqa: TRY003
+            raise StoreBackendError(
                 "InlineStoreBackend does not support the deletion of the overall DataContext project config"  # noqa: E501
             )
         if resource_name is None:
-            raise StoreBackendError(  # noqa: TRY003
+            raise StoreBackendError(
                 "InlineStoreBackend does not support the deletion of top level keys; the DataContext's config variables schema is immutable"  # noqa: E501
             )
         elif not self._has_key(key):
-            raise StoreBackendError(f"Could not find a value associated with key `{key}`")  # noqa: TRY003
+            raise StoreBackendError(f"Could not find a value associated with key `{key}`")
 
         del self._data_context.config[resource_type][resource_name]
 

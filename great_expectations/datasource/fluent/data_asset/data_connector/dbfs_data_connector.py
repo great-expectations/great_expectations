@@ -128,7 +128,7 @@ class DBFSDataConnector(FilesystemDataConnector):
     @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 f"""Converting file paths to fully-qualified object references for "{self.__class__.__name__}" \
 requires "file_path_template_map_fn: Callable" to be set.
 """  # noqa: E501

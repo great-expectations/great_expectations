@@ -70,7 +70,7 @@ class _ConfigurationProvider(_AbstractConfigurationProvider):
         """
         type_ = type(provider)
         if type_ in self._providers:
-            raise ValueError(f"Provider of type {type_} has already been registered!")  # noqa: TRY003
+            raise ValueError(f"Provider of type {type_} has already been registered!")
         self._providers[type_] = provider
 
     def get_provider(

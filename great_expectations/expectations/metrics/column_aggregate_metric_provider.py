@@ -99,7 +99,7 @@ def column_aggregate_value(
 
         return wrapper
     else:
-        raise ValueError("column_aggregate_value decorator only supports PandasExecutionEngine")  # noqa: TRY003, TRY004
+        raise ValueError("column_aggregate_value decorator only supports PandasExecutionEngine")
 
 
 def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):  # noqa: C901
@@ -244,7 +244,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):  # noqa: 
         return wrapper
 
     else:
-        raise ValueError("Unsupported engine for column_aggregate_partial")  # noqa: TRY003, TRY004
+        raise ValueError("Unsupported engine for column_aggregate_partial")
 
 
 class ColumnAggregateMetricProvider(TableMetricProvider):

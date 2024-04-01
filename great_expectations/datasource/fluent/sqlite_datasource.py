@@ -84,7 +84,7 @@ class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "datetime" not in options:
-            raise ValueError(  # noqa: TRY003
+            raise ValueError(
                 "'datetime' must be specified in the batch request options to create a batch identifier"  # noqa: E501
             )
         return {self.column_name: options["datetime"]}

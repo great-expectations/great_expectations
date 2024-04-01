@@ -27,7 +27,7 @@ def get_certificate_exp_date(host, port=443, timeout=1):
         cert = sock.getpeercert()
         expiry_date = datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z")
         before_date = datetime.strptime(cert["notBefore"], "%b %d %H:%M:%S %Y %Z")
-        return before_date, expiry_date  # noqa: TRY300
+        return before_date, expiry_date
     except Exception:
         return parse("1900-01-01"), parse("1900-01-01")
     finally:

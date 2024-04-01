@@ -324,7 +324,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
     def get_metric(self, metric_name, **kwargs):  # noqa: C901 - too complex
         if not self.expectation_config:
-            raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
+            raise gx_exceptions.UnavailableMetricError(
                 "No ExpectationConfig found in this ExpectationValidationResult. Unable to "
                 "return a metric."
             )
@@ -342,14 +342,14 @@ class ExpectationValidationResult(SerializableDictDot):
                     )
                 )
             if len(metric_name_parts) < 2:  # noqa: PLR2004
-                raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
+                raise gx_exceptions.UnavailableMetricError(
                     "Expectation-defined metrics must include a requested metric."
                 )
             elif len(metric_name_parts) == 2:  # noqa: PLR2004
                 if metric_name_parts[1] == "success":
                     return self.success
                 else:
-                    raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
+                    raise gx_exceptions.UnavailableMetricError(
                         "Metric name must have more than two parts for keys other than " "success."
                     )
             elif metric_name_parts[1] == "result":
@@ -359,11 +359,11 @@ class ExpectationValidationResult(SerializableDictDot):
                     elif metric_name_parts[2] == "details":
                         return self.result["details"].get(metric_name_parts[3])
                 except KeyError:
-                    raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
+                    raise gx_exceptions.UnavailableMetricError(
                         f"Unable to get metric {metric_name} -- KeyError in "
                         "ExpectationValidationResult."
                     )
-        raise gx_exceptions.UnavailableMetricError(f"Unrecognized metric name {metric_name}")  # noqa: TRY003
+        raise gx_exceptions.UnavailableMetricError(f"Unrecognized metric name {metric_name}")
 
     def describe_dict(self) -> dict:
         if self.expectation_config:
@@ -582,7 +582,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             if len(metric_name_parts) == 2:  # noqa: PLR2004
                 return self.statistics.get(metric_name_parts[1])
             else:
-                raise gx_exceptions.UnavailableMetricError(f"Unrecognized metric {metric_name}")  # noqa: TRY003
+                raise gx_exceptions.UnavailableMetricError(f"Unrecognized metric {metric_name}")
 
         # Expose expectation-defined metrics
         elif metric_name_parts[0].lower().startswith("expect_"):
@@ -601,7 +601,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                     self._metrics[(metric_name, metric_kwargs_id)] = metric_value
                     return metric_value
 
-        raise gx_exceptions.UnavailableMetricError(  # noqa: TRY003
+        raise gx_exceptions.UnavailableMetricError(
             f"Metric {metric_name} with metric_kwargs_id {metric_kwargs_id} is not available."
         )
 

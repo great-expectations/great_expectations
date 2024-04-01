@@ -35,7 +35,7 @@ class PathBatchKwargs(PandasDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "path" not in self:
-            raise InvalidBatchKwargsError("PathBatchKwargs requires a path element")  # noqa: TRY003
+            raise InvalidBatchKwargsError("PathBatchKwargs requires a path element")
 
     @property
     def path(self):
@@ -50,7 +50,7 @@ class S3BatchKwargs(PandasDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "s3" not in self:
-            raise InvalidBatchKwargsError("S3BatchKwargs requires a path element")  # noqa: TRY003
+            raise InvalidBatchKwargsError("S3BatchKwargs requires a path element")
 
     @property
     def s3(self):
@@ -65,7 +65,7 @@ class InMemoryBatchKwargs(PandasDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "dataset" not in self:
-            raise InvalidBatchKwargsError("InMemoryBatchKwargs requires a 'dataset' element")  # noqa: TRY003
+            raise InvalidBatchKwargsError("InMemoryBatchKwargs requires a 'dataset' element")
 
     @property
     def dataset(self):
@@ -78,7 +78,7 @@ class PandasDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
         import pandas as pd
 
         if not isinstance(self["dataset"], pd.DataFrame):
-            raise InvalidBatchKwargsError(  # noqa: TRY003
+            raise InvalidBatchKwargsError(
                 "PandasDatasourceInMemoryBatchKwargs 'dataset' must be a pandas DataFrame"
             )
 
@@ -87,7 +87,7 @@ class SqlAlchemyDatasourceTableBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "table" not in self:
-            raise InvalidBatchKwargsError(  # noqa: TRY003
+            raise InvalidBatchKwargsError(
                 "SqlAlchemyDatasourceTableBatchKwargs requires a 'table' element"
             )
 
@@ -100,7 +100,7 @@ class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "query" not in self:
-            raise InvalidBatchKwargsError(  # noqa: TRY003
+            raise InvalidBatchKwargsError(
                 "SqlAlchemyDatasourceQueryBatchKwargs requires a 'query' element"
             )
 
