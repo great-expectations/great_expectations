@@ -28,13 +28,13 @@ context = gx.get_context()
 # GCP project information
 gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
 if not gcp_project:
-    raise ValueError(
+    raise ValueError(  # noqa: TRY003
         "Environment Variable GE_TEST_GCP_PROJECT is required to run GCS integration tests"
     )
 # Although not used explicitly in this test, the following environment variable is required
 bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET")
 if not bigquery_dataset:
-    raise ValueError(
+    raise ValueError(  # noqa: TRY003
         "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run GCS integration tests"
     )
 

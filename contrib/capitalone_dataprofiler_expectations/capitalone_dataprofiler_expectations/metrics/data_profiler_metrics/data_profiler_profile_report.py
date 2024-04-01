@@ -31,7 +31,7 @@ class DataProfilerProfileReport(DataProfilerProfileMetricProvider):
             )
             return profile_report
         except FileNotFoundError:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "'profile_path' does not point to a valid DataProfiler stored profile."
             )
         except Exception as e:

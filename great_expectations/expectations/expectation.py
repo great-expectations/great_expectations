@@ -163,7 +163,7 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
                             )
                             rendered_string_template.append(rendered_content)
             else:
-                raise GreatExpectationsError(
+                raise GreatExpectationsError(  # noqa: TRY003
                     f"""GX was not able to render the value of evaluation parameters.
                         Expectation {render_func} had evaluation parameters set, but they were not passed in."""  # noqa: E501
                 )
@@ -183,7 +183,7 @@ def param_method(param_name: str) -> Callable:
     """  # noqa: E501
     if not param_name:
         # If param_name was passed as an empty string
-        raise RendererConfigurationError(
+        raise RendererConfigurationError(  # noqa: TRY003
             "Method decorated with @param_method must be passed an existing param_name."
         )
 
@@ -196,7 +196,7 @@ def param_method(param_name: str) -> Callable:
                 return_type: Type = param_func.__annotations__["return"]
             except KeyError:
                 method_name: str = getattr(param_func, "__name__", repr(param_func))
-                raise RendererConfigurationError(
+                raise RendererConfigurationError(  # noqa: TRY003
                     "Methods decorated with @param_method must have an annotated return "
                     f"type, but method {method_name} does not."
                 )
@@ -210,7 +210,7 @@ def param_method(param_name: str) -> Callable:
                     else:
                         return_obj = None
             else:
-                raise RendererConfigurationError(
+                raise RendererConfigurationError(  # noqa: TRY003
                     f"RendererConfiguration.param does not have a param called {param_name}. "
                     f'Use RendererConfiguration.add_param() with name="{param_name}" to add it.'
                 )
@@ -311,7 +311,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     @pydantic.validator("result_format")
     def _validate_result_format(cls, result_format: ResultFormat | dict) -> ResultFormat | dict:
         if isinstance(result_format, dict) and "result_format" not in result_format:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "If configuring result format with a dictionary, the key 'result_format' must be present."  # noqa: E501
             )
         return result_format
@@ -327,7 +327,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def save(self):
         """Save the current state of this Expectation."""
         if not self._save_callback:
-            raise RuntimeError(
+            raise RuntimeError(  # noqa: TRY003
                 "Expectation must be added to ExpectationSuite before it can be saved."
             )
         updated_self = self._save_callback(self)
@@ -414,7 +414,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         elif renderer_configuration.expectation_type:
             template_str = "$expectation_type"
         else:
-            raise ValueError("RendererConfiguration does not contain an expectation_type.")
+            raise ValueError("RendererConfiguration does not contain an expectation_type.")  # noqa: TRY003
 
         add_param_args = (
             (
@@ -1061,7 +1061,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                 evr = ExpectationValidationResult(**raw_response)
                 evr.expectation_config = configuration
             else:
-                raise GreatExpectationsError("Unable to build EVR")
+                raise GreatExpectationsError("Unable to build EVR")  # noqa: TRY003
         else:
             raw_response_dict: dict = raw_response.to_json_dict()
             evr = ExpectationValidationResult(**raw_response_dict)
@@ -1099,7 +1099,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         }
         missing_kwargs: Union[set, Set[str]] = set(self.domain_keys) - set(domain_kwargs.keys())
         if missing_kwargs:
-            raise InvalidExpectationKwargsError(f"Missing domain kwargs: {list(missing_kwargs)}")
+            raise InvalidExpectationKwargsError(f"Missing domain kwargs: {list(missing_kwargs)}")  # noqa: TRY003
         return domain_kwargs
 
     def _get_success_kwargs(self) -> Dict[str, Any]:
@@ -1350,7 +1350,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
         if not param_prefix:
-            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")
+            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")  # noqa: TRY003
 
         @param_method(param_name=array_param_name)
         def _add_params(
@@ -1381,7 +1381,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         renderer_configuration: RendererConfiguration,
     ) -> str:
         if not param_prefix:
-            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")
+            raise RendererConfigurationError("Array param_prefix must be a non-empty string.")  # noqa: TRY003
 
         @param_method(param_name=array_param_name)
         def _get_string(renderer_configuration: RendererConfiguration) -> str:
@@ -1524,7 +1524,7 @@ class BatchExpectation(Expectation, ABC):
                 try:
                     min_value = parse(min_value)
                 except TypeError:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"""Could not parse "min_value" of {min_value} (of type "{type(min_value)!s}) into datetime \
 representation."""  # noqa: E501
                     )
@@ -1533,7 +1533,7 @@ representation."""  # noqa: E501
                 try:
                     max_value = parse(max_value)
                 except TypeError:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"""Could not parse "max_value" of {max_value} (of type "{type(max_value)!s}) into datetime \
 representation."""  # noqa: E501
                     )
@@ -1543,7 +1543,7 @@ representation."""  # noqa: E501
                 try:
                     metric_value = parse(metric_value)
                 except TypeError:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"""Could not parse "metric_value" of {metric_value} (of type "{type(metric_value)!s}) into datetime \
 representation."""  # noqa: E501
                     )
@@ -1596,7 +1596,7 @@ class UnexpectedRowsExpectation(BatchExpectation, ABC):
     def _validate_query(cls, query: str) -> str:
         parsed_fields = [f[1] for f in Formatter().parse(query)]
         if "batch" not in parsed_fields:
-            raise ValueError("Query must contain {batch} parameter.")
+            raise ValueError("Query must contain {batch} parameter.")  # noqa: TRY003
 
         return query
 
@@ -1684,7 +1684,7 @@ class QueryExpectation(BatchExpectation, ABC):
             raise InvalidExpectationConfigurationError(str(e))
         try:
             if not isinstance(query, str):
-                raise TypeError(f"'query' must be a string, but your query is type: {type(query)}")
+                raise TypeError(f"'query' must be a string, but your query is type: {type(query)}")  # noqa: TRY003, TRY301
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
@@ -2616,7 +2616,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if result_format["result_format"] == ResultFormat.COMPLETE:
         return return_obj
 
-    raise ValueError(f"Unknown result_format {result_format['result_format']}.")
+    raise ValueError(f"Unknown result_format {result_format['result_format']}.")  # noqa: TRY003
 
 
 def _validate_dependencies_against_available_metrics(
@@ -2634,7 +2634,7 @@ def _validate_dependencies_against_available_metrics(
     """  # noqa: E501
     for metric_config in validation_dependencies:
         if metric_config.id not in metrics:
-            raise InvalidExpectationConfigurationError(
+            raise InvalidExpectationConfigurationError(  # noqa: TRY003
                 f"Metric {metric_config.id} is not available for validation of configuration. Please check your configuration."  # noqa: E501
             )
 

@@ -473,7 +473,7 @@ class ColumnDomainBuilder(DomainBuilder):
             property_value = [property_value]
         else:  # noqa: PLR5501
             if not isinstance(property_value, property_value_type):
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     f'Unrecognized "{property_name}" directive -- must be "{property_value_type}" (or string).'  # noqa: E501
                 )
 

@@ -349,7 +349,7 @@ class FilePathDataConnector(DataConnector):
     ) -> dict:
         path: str = self._map_batch_definition_to_data_reference(batch_definition=batch_definition)
         if not path:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
 """  # noqa: E501
@@ -370,14 +370,14 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
             group_names: List[str] = regex_config["group_names"]
             if any(sorter_name not in group_names for sorter_name in self.sorters.keys()):
-                raise gx_exceptions.DataConnectorError(
+                raise gx_exceptions.DataConnectorError(  # noqa: TRY003
                     f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 configured group_name.
                     """  # noqa: E501
                 )
 
             if len(group_names) < len(self.sorters):
-                raise gx_exceptions.DataConnectorError(
+                raise gx_exceptions.DataConnectorError(  # noqa: TRY003
                     f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;
 this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     """  # noqa: E501

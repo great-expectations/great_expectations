@@ -132,7 +132,7 @@ class SphinxInvokeDocsBuilder:
                 modules_not_installed.append(module_name)
 
         if modules_not_installed:
-            raise invoke.Exit(
+            raise invoke.Exit(  # noqa: TRY003
                 f"Please make sure to install missing docs dependencies: {', '.join(modules_not_installed)} by running pip install -r {self.api_docs_source_path / 'requirements-dev-api-docs.txt'}",
                 code=1,
             )
@@ -284,7 +284,7 @@ class SphinxInvokeDocsBuilder:
             )
             without_extension = str(relative_link).replace(".mdx", "")
             if not without_extension.endswith("_class"):
-                raise Exception(
+                raise Exception(  # noqa: TRY002, TRY003
                     f"Expected class mdx file path to end with _class; this could indicate a method link that will break: {without_extension}"
                 )
             internal_ref["href"] = str(without_extension)

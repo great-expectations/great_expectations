@@ -126,7 +126,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         """  # noqa: E501
 
         if domain.domain_type == MetricDomainTypes.COLUMN and "." in domain.domain_kwargs["column"]:
-            raise gx_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(  # noqa: TRY003
                 "Column names cannot contain '.' when computing parameters for unexpected count statistics."  # noqa: E501
             )
 
