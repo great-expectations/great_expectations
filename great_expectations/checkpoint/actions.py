@@ -39,7 +39,6 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.validations_store import ValidationsStore
-from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -102,11 +101,10 @@ class ValidationAction(BaseModel):
         return project_manager.is_using_cloud()
 
     @public_api
-    def run(  # noqa: PLR0913
+    def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
         **kwargs,
@@ -119,7 +117,6 @@ class ValidationAction(BaseModel):
         Args:
             validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
             validation_result_suite_identifier: an instance of either the ValidationResultIdentifier class (for open source Great Expectations) or the GXCloudIdentifier (from Great Expectations Cloud).
-            data_asset: An instance of the Validator class.
             expectation_suite_identifier: Optionally, an instance of the ExpectationSuiteIdentifier class.
             checkpoint_identifier: Optionally, an Identifier for the Checkpoint.
             kwargs: named parameters that are specific to a given Action, and need to be assigned a value in the Action's configuration in a Checkpoint's action_list.
@@ -130,18 +127,16 @@ class ValidationAction(BaseModel):
         return self._run(
             validation_result_suite=validation_result_suite,
             validation_result_suite_identifier=validation_result_suite_identifier,
-            data_asset=data_asset,
             expectation_suite_identifier=expectation_suite_identifier,
             checkpoint_identifier=checkpoint_identifier,
             **kwargs,
         )
 
     @public_api
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -156,7 +151,6 @@ class ValidationAction(BaseModel):
             validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
             validation_result_suite_identifier: an instance of either the ValidationResultIdentifier
                 class (for open source Great Expectations) or the GeCloudIdentifier (from Great Expectations Cloud).
-            data_asset: An instance of the Validator class.
             expectation_suite_identifier:  Optionally, an instance of the ExpectationSuiteIdentifier class.
             checkpoint_identifier:  Optionally, an Identifier for the Checkpoints.
 
@@ -273,7 +267,6 @@ class SlackNotificationAction(DataDocsAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -417,7 +410,6 @@ class PagerdutyAlertAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -524,7 +516,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -624,7 +615,6 @@ class OpsgenieAlertAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -771,7 +761,6 @@ class EmailAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -881,65 +870,6 @@ class StoreValidationResultAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
-        payload=None,
-        expectation_suite_identifier=None,
-        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
-    ):
-        logger.debug("StoreValidationResultAction.run")
-        output = self._target_store.store_validation_results(
-            validation_result_suite,
-            validation_result_suite_identifier,
-            expectation_suite_identifier,
-            checkpoint_identifier,
-        )
-
-        if isinstance(output, GXCloudResourceRef) and isinstance(
-            validation_result_suite_identifier, GXCloudIdentifier
-        ):
-            validation_result_suite_identifier.id = output.id
-
-        if self._using_cloud_context and isinstance(output, GXCloudResourceRef):
-            return output
-
-
-@public_api
-class UpdateDataDocsAction(DataDocsAction):
-    """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
-
-    YAML configuration example:
-
-    ```yaml
-    - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-    ```
-
-    You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
-    list of sites to update:
-
-    ```yaml
-    - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-      site_names:
-        - local_site
-    ```
-
-    Args:
-        site_names: Optional. A list of the names of sites to update.
-    """  # noqa: E501
-
-    type: Literal["update_data_docs"] = "update_data_docs"
-
-    site_names: List[str] = []
-
-    @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
-        self,
-        validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -1013,13 +943,12 @@ class SNSNotificationAction(ValidationAction):
     sns_message_subject: Optional[str]
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        data_asset=None,
         **kwargs,
     ) -> str:
         logger.debug("SNSNotificationAction.run")
@@ -1053,11 +982,10 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
-        data_asset,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
         **kwargs,

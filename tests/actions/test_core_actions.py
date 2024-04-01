@@ -103,7 +103,6 @@ def test_StoreAction(mock_context):
         validation_result_suite=ExpectationSuiteValidationResult(
             success=False, results=[], suite_name="empty_suite"
         ),
-        data_asset=None,
     )
 
     expected_run_id = RunIdentifier(run_name="prod_20190801", run_time="20190926T134241.000000Z")
@@ -149,7 +148,6 @@ def test_SlackNotificationAction(
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # Test with slack_token and slack_channel set; expect pass
@@ -163,7 +161,6 @@ def test_SlackNotificationAction(
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # test for long text message - should be split into multiple messages
@@ -177,7 +174,6 @@ def test_SlackNotificationAction(
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # Test with just slack_token set; expect fail
@@ -225,7 +221,6 @@ def test_SlackNotificationAction(
                 "evaluated_expectations": [],
             },
         ),
-        data_asset=None,
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # test notify on with successful run; expect pass
@@ -248,7 +243,6 @@ def test_SlackNotificationAction(
                 "evaluated_expectations": [],
             },
         ),
-        data_asset=None,
     ) == {"slack_notification_result": "none required"}
 
 
@@ -277,7 +271,6 @@ def test_PagerdutyAlertAction(
     assert pagerduty_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"pagerduty_alert_result": "success"}
 
     # Make sure the alert is not sent by default when the validation has success = True
@@ -286,7 +279,6 @@ def test_PagerdutyAlertAction(
     assert pagerduty_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"pagerduty_alert_result": "none sent"}
 
 
@@ -314,7 +306,6 @@ def test_OpsgenieAlertAction(
     assert opsgenie_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"opsgenie_alert_result": "error"}
 
     # Make sure the alert is not sent by default when the validation has success = True
@@ -323,7 +314,6 @@ def test_OpsgenieAlertAction(
     assert opsgenie_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"opsgenie_alert_result": "error"}
 
 
@@ -351,7 +341,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         teams_action.run(
             validation_result_suite_identifier=validation_result_suite_extended_id,
             validation_result_suite=None,
-            data_asset=None,
         )
         is None
     )
@@ -361,13 +350,11 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         teams_action.run(
             validation_result_suite_identifier="i_wont_work",
             validation_result_suite=validation_result_suite,
-            data_asset=None,
         )
 
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on = success will return "Microsoft Teams notification succeeded" message
@@ -382,7 +369,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": None}
 
     validation_result_suite.success = True
@@ -395,7 +381,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on failure will return "Microsoft Teams notification succeeded" message
@@ -410,7 +395,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     validation_result_suite.success = True
@@ -423,7 +407,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": None}
 
 
@@ -452,7 +435,6 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": None}
 
     assert "Request to Microsoft Teams webhook returned error 400" in caplog.text
@@ -605,7 +587,6 @@ def test_EmailAction(
         assert email_action.run(
             validation_result_suite_identifier=validation_result_suite_id,
             validation_result_suite=validation_result_suite,
-            data_asset=None,
         ) == {"email_result": expected}
 
 
@@ -634,7 +615,8 @@ def test_api_action_run(
     mock_requests.post.return_value = mock_response
     api_notification_action = APINotificationAction(url="http://www.example.com")
     response = api_notification_action.run(
-        validation_result_suite, validation_result_suite_id, data_asset=None
+        validation_result_suite,
+        validation_result_suite_id,
     )
     assert response == "Successfully Posted results to API, status code - 200"
 
@@ -657,7 +639,6 @@ def test_cloud_sns_notification_action(
     assert sns_action.run(
         validation_result_suite=validation_result_suite,
         validation_result_suite_identifier=validation_result_suite_id,
-        data_asset=None,
     ).endswith("Subject")
 
 
