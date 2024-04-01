@@ -1,4 +1,3 @@
-
 from great_expectations.core.batch_definition.batch_definition_base import BatchDefinitionBase
 from great_expectations.core.partitioners import PartitionerYearAndMonthAndDay
 
