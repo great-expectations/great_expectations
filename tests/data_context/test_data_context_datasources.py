@@ -185,12 +185,12 @@ def test_BaseDataContext_update_datasource_updates_existing_data_source(
 
     assert name in context.datasources
     cached_datasource = context.datasources[name]
-    assert cached_datasource.data_connectors.keys() != data_connectors.keys()
+    assert cached_datasource.data_connectors.keys() != data_connectors.keys()  # type: ignore[union-attr]
 
     context.update_datasource(datasource)
 
     retrieved_datasource = context.get_datasource(datasource_name=name)
-    assert retrieved_datasource.data_connectors.keys() == data_connectors.keys()
+    assert retrieved_datasource.data_connectors.keys() == data_connectors.keys()  # type: ignore[union-attr]
 
 
 @pytest.mark.unit
@@ -218,7 +218,7 @@ def test_BaseDataContext_update_datasource_fails_when_datsource_does_not_exist(
 @pytest.mark.unit
 def test_list_datasources() -> None:
     project_config = DataContextConfig(store_backend_defaults=InMemoryStoreBackendDefaults())
-    project_config.datasources = {
+    project_config.datasources = {  # type: ignore[assignment]
         "my_datasource_name": {
             "class_name": "Datasource",
             "data_connectors": {},

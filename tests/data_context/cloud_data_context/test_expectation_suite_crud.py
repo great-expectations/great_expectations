@@ -1,4 +1,7 @@
-from typing import Callable, NamedTuple
+from __future__ import annotations
+
+from collections.abc import Generator
+from typing import TYPE_CHECKING, Callable, NamedTuple
 from unittest import mock
 
 import pytest
@@ -19,6 +22,9 @@ from great_expectations.expectations.expectation_configuration import (
 )
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from tests.data_context.conftest import MockResponse
+
+if TYPE_CHECKING:
+    from pytest_mock import MockType
 
 
 class SuiteIdentifierTuple(NamedTuple):
@@ -216,7 +222,7 @@ def mocked_get_by_name_response(
 
 
 @pytest.fixture
-def mock_list_expectation_suite_names() -> mock.MagicMock:  # noqa: TID251
+def mock_list_expectation_suite_names() -> Generator[MockType, None, None]:
     """
     Expects a return value to be set within the test function.
     """
@@ -227,7 +233,7 @@ def mock_list_expectation_suite_names() -> mock.MagicMock:  # noqa: TID251
 
 
 @pytest.fixture
-def mock_list_expectation_suites() -> mock.MagicMock:  # noqa: TID251
+def mock_list_expectation_suites() -> Generator[MockType, None, None]:
     """
     Expects a return value to be set within the test function.
     """
@@ -238,7 +244,7 @@ def mock_list_expectation_suites() -> mock.MagicMock:  # noqa: TID251
 
 
 @pytest.fixture
-def mock_expectations_store_has_key() -> mock.MagicMock:  # noqa: TID251
+def mock_expectations_store_has_key() -> Generator[MockType, None, None]:
     """
     Expects a return value to be set within the test function.
     """
@@ -291,12 +297,12 @@ def test_list_expectation_suites(
 def test_create_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
-    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suite_names: MockType,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
     suite_name = "my_suite"
-    existing_suite_names = []
+    existing_suite_names: list[str] = []
 
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
@@ -310,8 +316,8 @@ def test_create_expectation_suite_saves_suite_to_cloud(
 @pytest.mark.cloud
 def test_create_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
-    mock_list_expectation_suites: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suite_names: MockType,
+    mock_list_expectation_suites: MockType,
     suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
@@ -341,7 +347,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
 @pytest.mark.cloud
 def test_create_expectation_suite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suite_names: MockType,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -505,8 +511,8 @@ def test_save_expectation_suite_overwrites_existing_suite(
 @pytest.mark.cloud
 def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_expectations_store_has_key: mock.MagicMock,  # noqa: TID251
-    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
+    mock_expectations_store_has_key: MockType,
+    mock_list_expectation_suite_names: MockType,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -528,7 +534,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
-    mock_expectations_store_has_key: mock.MagicMock,  # noqa: TID251
+    mock_expectations_store_has_key: MockType,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
