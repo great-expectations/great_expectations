@@ -304,4 +304,4 @@ def test_update_failure_wraps_store_backend_error(
     with pytest.raises(ValueError) as e:
         ephemeral_store.update(key=key, value=checkpoint)
 
-    assert "Could not find existing Checkpoint" in str(e.value)
+    assert "Could not update Checkpoint" in str(e.value)
