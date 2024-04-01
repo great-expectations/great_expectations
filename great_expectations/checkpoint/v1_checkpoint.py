@@ -146,13 +146,15 @@ class Checkpoint(BaseModel):
             result_format=self.result_format,
             run_id=run_id,
         )
-        self._run_actions(run_results=run_results)
 
-        return CheckpointResult(
+        checkpoint_result = CheckpointResult(
             run_id=run_id,
             run_results=run_results,
             checkpoint_config=self,
         )
+        self._run_actions(checkpoint_result=checkpoint_result)
+
+        return checkpoint_result
 
     def _run_validation_definitions(
         self,
@@ -192,15 +194,13 @@ class Checkpoint(BaseModel):
         )
 
     def _run_actions(
-        self, run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
+        self,
+        checkpoint_result: CheckpointResult,
     ) -> None:
-        # NOTE: Currently runs each action for each result (currently v0.18 checkpoint behavior)
-        #       This will be changed to run on the aggregate result in v1.0.
-        for identifier, result in run_results.items():
-            for action in self.actions:
-                action.run(
-                    validation_result_suite_identifier=identifier, validation_result_suite=result
-                )
+        for action in self.actions:
+            action.run(
+                result=checkpoint_result,
+            )
 
     @public_api
     def save(self) -> None:
