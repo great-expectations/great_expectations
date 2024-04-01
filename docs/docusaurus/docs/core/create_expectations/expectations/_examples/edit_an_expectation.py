@@ -5,6 +5,7 @@ The <snippet> tags are used to insert the corresponding code into the
  Great Expectations documentation.  They can be disregarded by anyone
  reviewing this script.
 """
+
 # <snippet name="core/expectations/_examples/edit_an_expectation.py full example code">
 import great_expectations as gx
 import great_expectations.expectations as gxe
