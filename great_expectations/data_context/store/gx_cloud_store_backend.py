@@ -674,7 +674,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             elif attributes_value is None:
                 payload = kwargs
             else:
-                raise TypeError(
+                raise TypeError(  # noqa: TRY003
                     f"Parameter attributes_value of type {type(attributes_value)}"
                     f" is unsupported in GX V1."
                 )

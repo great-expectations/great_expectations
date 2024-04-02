@@ -335,7 +335,7 @@ class ExpectationsStore(Store):
         elif isinstance(value, str):
             return self._expectationSuiteSchema.loads(value)
         else:
-            raise TypeError(f"Cannot deserialize value of unknown type: {type(value)}")
+            raise TypeError(f"Cannot deserialize value of unknown type: {type(value)}")  # noqa: TRY003
 
     def get_key(
         self, name: str, id: Optional[str] = None
