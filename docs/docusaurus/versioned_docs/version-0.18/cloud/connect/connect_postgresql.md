@@ -9,8 +9,6 @@ import Tabs from '@theme/Tabs';
 
 To validate data stored in a PostgreSQL database from GX Cloud, you must add the GX Agent to your deployment environment. The GX Agent acts as an intermediary between GX Cloud and PostgreSQL and allows you to securely access and validate your data in GX Cloud.
 
-New to GX Cloud and not sure that it's the right solution for your organization? See [Try GX Cloud](../try_gx_cloud.md).
-
 ## Prerequisites
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud) with [Admin or Editor permissions](../about_gx.md#roles-and-responsibilities).
