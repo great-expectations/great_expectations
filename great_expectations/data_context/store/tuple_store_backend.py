@@ -639,6 +639,15 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         return key_list
 
+    def _get_s3_objects(self):
+        s3r = self._create_resource()
+        bucket = s3r.Bucket(self.bucket)
+
+        if self.prefix:
+            return bucket.objects.filter(Prefix=self.prefix)
+        else:
+            return bucket.objects.all()
+
     def get_url_for_key(self, key, protocol=None):
         location = None
         if self.boto3_options.get("endpoint_url"):

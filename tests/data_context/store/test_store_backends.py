@@ -631,6 +631,29 @@ def test_TupleS3StoreBackend_with_prefix(aws_credentials):
 
 @mock_s3
 @pytest.mark.aws_deps
+def test_TupleS3StoreBackend_get_all(aws_credentials):
+    bucket = "leakybucket"
+
+    # create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    my_store = TupleS3StoreBackend(filepath_template="my_file_{0}", bucket=bucket)
+
+    val_a = "aaa"
+    val_b = "bbb"
+
+    my_store.set(("AAA",), val_a, content_type="text/html; charset=utf-8")
+    my_store.set(("BBB",), val_b, content_type="text/html; charset=utf-8")
+
+    my_store.list_keys()
+    result = my_store.get_all()
+
+    assert sorted(result) == [val_a, val_b]
+
+
+@mock_s3
+@pytest.mark.aws_deps
 def test_tuple_s3_store_backend_slash_conditions(aws_credentials):  # noqa: PLR0915
     bucket = "my_bucket"
     prefix = None
