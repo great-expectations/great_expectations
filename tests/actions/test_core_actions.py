@@ -812,16 +812,31 @@ class TestActionSerialization:
 
 
 class TestV1ActionRun:
+    suite_a: str = "suite_a"
+    suite_b: str = "suite_b"
+
     @pytest.fixture
     def checkpoint_result(self, mocker: MockerFixture):
         return CheckpointResult(
             run_id=mocker.Mock(spec=RunIdentifier),
             run_results={
-                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
-                    spec=ExpectationSuiteValidationResult, success=True
+                ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(
+                        name=self.suite_a,
+                    ),
+                    run_id=RunIdentifier(run_name="prod_20240401"),
+                    batch_identifier="1234",
+                ): mocker.Mock(
+                    spec=ExpectationSuiteValidationResult, suite_name=self.suite_a, success=True
                 ),
-                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
-                    spec=ExpectationSuiteValidationResult, success=False
+                ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(
+                        name=self.suite_b,
+                    ),
+                    run_id=RunIdentifier(run_name="prod_20240402"),
+                    batch_identifier="5678",
+                ): mocker.Mock(
+                    spec=ExpectationSuiteValidationResult, suite_name=self.suite_b, success=False
                 ),
             },
             checkpoint_config=mocker.Mock(spec=Checkpoint),
@@ -890,9 +905,41 @@ class TestV1ActionRun:
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
-    def test_UpdateDataDocsAction_run(self, checkpoint_result: CheckpointResult):
-        action = UpdateDataDocsAction()
-        action.v1_run(checkpoint_result=checkpoint_result)
+    def test_UpdateDataDocsAction_run(
+        self, mocker: MockerFixture, checkpoint_result: CheckpointResult
+    ):
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(context)
+
+        site_names = ["site_a", "site_b"]
+        site_urls = [
+            f"/gx/uncommitted/data_docs/{site_names[0]}/index.html",
+            f"/gx/uncommitted/data_docs/{site_names[1]}/index.html",
+        ]
+
+        context.get_docs_sites_urls.return_value = [
+            {
+                "site_url": site_urls[0],
+                "site_name": site_names[0],
+            },
+            {
+                "site_url": site_urls[1],
+                "site_name": site_names[1],
+            },
+        ]
+
+        action = UpdateDataDocsAction(site_names=site_names)
+        res = action.v1_run(checkpoint_result=checkpoint_result)
+
+        validation_identifer_a, validation_identifer_b = tuple(checkpoint_result.run_results.keys())
+        assert context.build_data_docs.call_count == 2
+        assert res == {
+            validation_identifer_a: {
+                site_names[0]: site_urls[0],
+                site_names[1]: site_urls[1],
+            },
+            validation_identifer_b: {
+                site_names[0]: site_urls[0],
+                site_names[1]: site_urls[1],
+            },
+        }
