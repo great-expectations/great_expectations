@@ -41,9 +41,9 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         )
 
         if sort not in ["value", "count", "none"]:
-            raise ValueError("sort must be either 'value', 'count', or 'none'")
+            raise ValueError("sort must be either 'value', 'count', or 'none'")  # noqa: TRY003
         if collate is not None:
-            raise ValueError("collate parameter is not supported in PandasDataset")
+            raise ValueError("collate parameter is not supported in PandasDataset")  # noqa: TRY003
 
         df: pd.DataFrame
         accessor_domain_kwargs: Dict[str, str]
@@ -83,9 +83,9 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         )
 
         if sort not in ["value", "count", "none"]:
-            raise ValueError("sort must be either 'value', 'count', or 'none'")
+            raise ValueError("sort must be either 'value', 'count', or 'none'")  # noqa: TRY003
         if collate is not None:
-            raise ValueError("collate parameter is not supported in PandasDataset")
+            raise ValueError("collate parameter is not supported in PandasDataset")  # noqa: TRY003
 
         selectable: sqlalchemy.Selectable
         accessor_domain_kwargs: Dict[str, str]
@@ -149,9 +149,9 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         )
 
         if sort not in ["value", "count", "none"]:
-            raise ValueError("sort must be either 'value', 'count', or 'none'")
+            raise ValueError("sort must be either 'value', 'count', or 'none'")  # noqa: TRY003
         if collate is not None:
-            raise ValueError("collate parameter is not supported in SparkDFDataset")
+            raise ValueError("collate parameter is not supported in SparkDFDataset")  # noqa: TRY003
 
         df: pyspark.DataFrame
         accessor_domain_kwargs: Dict[str, str]

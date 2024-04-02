@@ -10,6 +10,7 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import expectations as gxe
+from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     SlackNotificationAction,
@@ -26,6 +27,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -45,6 +47,22 @@ def test_checkpoint_no_validation_definitions_raises_error():
         Checkpoint(name="my_checkpoint", validation_definitions=[], actions=[])
 
     assert "Checkpoint must contain at least one validation definition" in str(e.value)
+
+
+@pytest.mark.unit
+def test_checkpoint_save_success(mocker: MockerFixture):
+    context = mocker.Mock(spec=AbstractDataContext)
+    set_context(project=context)
+
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        validation_definitions=[mocker.Mock(spec=ValidationDefinition)],
+        actions=[],
+    )
+    store_key = context.v1_checkpoint_store.get_key.return_value
+    checkpoint.save()
+
+    context.v1_checkpoint_store.update.assert_called_once_with(key=store_key, value=checkpoint)
 
 
 @pytest.fixture
@@ -446,10 +464,11 @@ class TestCheckpointResult:
             actions=actions,
         )
 
-        with mock.patch.object(ValidationAction, "run") as mock_run:
-            _ = checkpoint.run()
+        with mock.patch.object(ValidationAction, "v1_run") as mock_run:
+            result = checkpoint.run()
 
         assert mock_run.call_count == len(actions)
+        mock_run.assert_called_with(checkpoint_result=result)
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(

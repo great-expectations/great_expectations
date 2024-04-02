@@ -159,7 +159,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(ConfiguredAssetAWSGlueDataCat
                             }
                         )
             except self.glue_client.exceptions.EntityNotFoundException:
-                raise DataConnectorError(
+                raise DataConnectorError(  # noqa: TRY003
                     f"InferredAssetAWSGlueDataCatalogDataConnector could not find a database with name: {db}."  # noqa: E501
                 )
         return tables

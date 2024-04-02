@@ -265,7 +265,7 @@ def _add_text_below_string_docstring_argument(docstring: str, argument_name: str
 
     arg_list = list(param.arg_name for param in parsed_docstring.params)
     if argument_name not in arg_list:
-        raise ValueError(f"Please specify an existing argument, you specified {argument_name}.")
+        raise ValueError(f"Please specify an existing argument, you specified {argument_name}.")  # noqa: TRY003
 
     for param in parsed_docstring.params:
         if param.arg_name == argument_name:

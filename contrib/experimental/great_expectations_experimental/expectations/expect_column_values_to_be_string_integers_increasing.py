@@ -44,7 +44,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
         if all(_column.str.isdigit()) is True:
             temp_column = _column.astype(int)
         else:
-            raise TypeError("Column must be a string-type capable of being cast to int.")
+            raise TypeError("Column must be a string-type capable of being cast to int.")  # noqa: TRY003
 
         series_diff = np.diff(temp_column)
 
@@ -75,7 +75,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
         if pyspark.types and isinstance(column_metadata["type"], pyspark.types.StringType):
             column = F.col(column_name).cast(pyspark.types.IntegerType())
         else:
-            raise TypeError("Column must be a string-type capable of being cast to int.")
+            raise TypeError("Column must be a string-type capable of being cast to int.")  # noqa: TRY003
 
         compute_domain_kwargs = metric_domain_kwargs
 
@@ -88,7 +88,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
         )
 
         if any(np.array(df.select(column.isNull()).collect())):
-            raise TypeError("Column must be a string-type capable of being cast to int.")
+            raise TypeError("Column must be a string-type capable of being cast to int.")  # noqa: TRY003
 
         diff = column - F.lag(column).over(pyspark.Window.orderBy(F.lit("constant")))
         diff = F.when(diff.isNull(), 1).otherwise(diff)
@@ -196,7 +196,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
         """"""
         if param not in configuration.kwargs:
             if required:
-                raise InvalidExpectationKwargsError(
+                raise InvalidExpectationKwargsError(  # noqa: TRY003
                     f"Parameter {param} is required but was not found in configuration."
                 )
             return

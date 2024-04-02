@@ -784,7 +784,7 @@ def test_graph_validate_with_runtime_config(in_memory_runtime_context, basic_dat
 def test_graph_validate_with_exception(basic_datasource):
     # noinspection PyUnusedLocal
     def mock_error(*args, **kwargs):
-        raise Exception("Mock Error")
+        raise Exception("Mock Error")  # noqa: TRY002
 
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 

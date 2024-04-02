@@ -69,11 +69,11 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                     s3_client = aws.boto3.client("s3", **boto3_options)
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.  # noqa: E501
-                    raise SparkS3DatasourceError(
+                    raise SparkS3DatasourceError(  # noqa: TRY003
                         f'Due to exception: "{e!s}", "s3_client" could not be created.'
                     ) from e
             else:
-                raise SparkS3DatasourceError(
+                raise SparkS3DatasourceError(  # noqa: TRY003
                     'Unable to create "SparkS3Datasource" due to missing boto3 dependency.'
                 )
 
@@ -95,7 +95,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             # tests S3 connection
             _ = self._get_s3_client()
         except Exception as e:
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
@@ -119,7 +119,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     ) -> None:
         """Builds and attaches the `S3DataConnector` to the asset."""
         if kwargs:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
 

@@ -97,7 +97,7 @@ class Store:
                 module_name=module_name, package_name=None, class_name=store_backend
             )
         if not isinstance(self._store_backend, StoreBackend):
-            raise DataContextError(
+            raise DataContextError(  # noqa: TRY003
                 "Invalid StoreBackend configuration: expected a StoreBackend instance."
             )
         self._use_fixed_length_key = self._store_backend.fixed_length_key
@@ -125,7 +125,7 @@ class Store:
         elif isinstance(key, self.key_class):
             return
         else:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"key must be an instance of {self.key_class.__name__}, not {type(key)}"
             )
 
@@ -296,7 +296,7 @@ class Store:
         runtime_environment: Optional[dict] = None,
     ) -> Store:
         if store_config is None or module_name is None:
-            raise gx_exceptions.StoreConfigurationError(
+            raise gx_exceptions.StoreConfigurationError(  # noqa: TRY003
                 "Cannot build a store without both a store_config and a module_name"
             )
 

@@ -54,7 +54,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         self.platform_specific_separator = platform_specific_separator
 
         if filepath_template is not None and filepath_suffix is not None:
-            raise ValueError("filepath_suffix may only be used when filepath_template is None")
+            raise ValueError("filepath_suffix may only be used when filepath_template is None")  # noqa: TRY003
 
         self.filepath_template = filepath_template
         if filepath_prefix and len(filepath_prefix) > 0:
@@ -137,7 +137,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 and len(filepath) >= len(self.filepath_prefix) + 1
             ):
                 # If filepath_prefix is set, we expect that it is the first component of a valid filepath.  # noqa: E501
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "filepath must start with the filepath_prefix when one is set by the store_backend"  # noqa: E501
                 )
             else:
@@ -148,7 +148,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         if self.filepath_suffix:
             if not filepath.endswith(self.filepath_suffix):
                 # If filepath_suffix is set, we expect that it is the last component of a valid filepath.  # noqa: E501
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "filepath must end with the filepath_suffix when one is set by the store_backend"  # noqa: E501
                 )
             else:
@@ -260,11 +260,11 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             self.full_base_directory = base_directory
         else:  # noqa: PLR5501
             if root_directory is None:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "base_directory must be an absolute path if root_directory is not provided"
                 )
             elif not os.path.isabs(root_directory):  # noqa: PTH117
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     f"root_directory must be an absolute path. Got {root_directory} instead."
                 )
             else:
@@ -308,7 +308,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             with open(filepath) as infile:
                 contents: str = infile.read().rstrip("\n")
         except FileNotFoundError:
-            raise InvalidKeyError(
+            raise InvalidKeyError(  # noqa: TRY003
                 f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {filepath!s}"  # noqa: E501
             )
 
@@ -424,7 +424,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the TupleFilesystemStoreBackend
                 """  # noqa: E501
@@ -551,7 +551,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         try:
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
         except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
-            raise InvalidKeyError(
+            raise InvalidKeyError(  # noqa: TRY003
                 f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"  # noqa: E501
             )
 
@@ -590,7 +590,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 result_s3.put(Body=value, ContentType=content_type, **self.s3_put_options)
         except s3.meta.client.exceptions.ClientError as e:
             logger.debug(str(e))
-            raise StoreBackendError("Unable to set object in s3.")
+            raise StoreBackendError("Unable to set object in s3.")  # noqa: TRY003
 
         return s3_object_key
 
@@ -664,7 +664,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the
                 """
@@ -827,7 +827,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         bucket = gcs.bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
-            raise InvalidKeyError(
+            raise InvalidKeyError(  # noqa: TRY003
                 f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {key!s}"  # noqa: E501
             )
         else:
@@ -915,7 +915,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the
                 """
@@ -1029,16 +1029,16 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
                         account_url=self.account_url, credential=self.credential
                     )
                 else:
-                    raise StoreBackendError(
+                    raise StoreBackendError(  # noqa: TRY003, TRY301
                         "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"  # noqa: E501
                     )
             except Exception as e:
                 # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.  # noqa: E501
-                raise StoreBackendError(
+                raise StoreBackendError(  # noqa: TRY003
                     f'Due to exception: "{e!s}", "azure_client" could not be created.'
                 ) from e
         else:
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 'Unable to create azure "BlobServiceClient" due to missing azure.storage.blob dependency.'  # noqa: E501
             )
 
@@ -1132,7 +1132,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
         if copy_properties.status != "success":
             dest_blob.abort_copy(copy_properties.id)
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 f"Unable to copy blob {source_blob_path} with status {copy_properties.status}"
             )
         source_blob.delete_blob()

@@ -664,7 +664,7 @@ def _execute_integration_test(  # noqa: C901, PLR0912, PLR0915
         test_script_module = importlib.util.module_from_spec(spec)
         loader.exec_module(test_script_module)
     except Exception as e:
-        logger.error(str(e))
+        logger.error(str(e))  # noqa: TRY400
         if "JavaPackage" in str(e) and "aws_glue" in user_flow_script:
             logger.debug("This is something aws_glue related, so just going to return")
             # Should try to copy aws-glue-libs jar files to Spark jar during pipeline setup

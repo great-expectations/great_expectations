@@ -724,7 +724,7 @@ def _spark_map_condition_index(  # noqa: C901 - too complex
     # check that column name is in row
     for col_name in columns_to_keep:
         if col_name not in filtered.columns:
-            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(  # noqa: TRY003
                 f"Error: The unexpected_index_column '{col_name}' does not exist in Spark DataFrame. Please check your configuration and try again."  # noqa: E501
             )
 

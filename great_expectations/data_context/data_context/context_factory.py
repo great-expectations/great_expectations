@@ -33,11 +33,11 @@ if TYPE_CHECKING:
         FileDataContext,
     )
     from great_expectations.data_context.store import (
-        CheckpointStore,
         EvaluationParameterStore,
         ExpectationsStore,
         ValidationsStore,
     )
+    from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
@@ -97,8 +97,8 @@ class ProjectManager:
     def get_expectations_store(self) -> ExpectationsStore:
         return self._project.expectations_store
 
-    def get_checkpoints_store(self) -> CheckpointStore:
-        return self._project.checkpoint_store
+    def get_checkpoints_store(self) -> V1CheckpointStore:
+        return self._project.v1_checkpoint_store
 
     def get_validations_store(self) -> ValidationsStore:
         return self._project.validations_store
@@ -196,7 +196,7 @@ class ProjectManager:
         try:
             kwargs = param_lookup[mode]
         except KeyError:
-            raise ValueError(f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud.")
+            raise ValueError(f"Unknown mode {mode}. Please choose one of: ephemeral, file, cloud.")  # noqa: TRY003
 
         from great_expectations.data_context.data_context import (
             AbstractDataContext,
@@ -232,7 +232,7 @@ class ProjectManager:
         if not isinstance(context, expected_type):
             # example I want an ephemeral context but the presence of a GX_CLOUD env var gives me a cloud context  # noqa: E501
             # this kind of thing should not be possible but there may be some edge cases
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003, TRY004
                 f"Provided mode {mode} returned context of type {type(context).__name__} instead of {expected_type.__name__}; please check your input arguments."  # noqa: E501
             )
 
@@ -329,7 +329,7 @@ class ProjectManager:
             )
 
         if cloud_mode and not config_available:
-            raise GXCloudConfigurationError(
+            raise GXCloudConfigurationError(  # noqa: TRY003
                 "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"  # noqa: E501
             )
 
