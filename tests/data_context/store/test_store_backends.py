@@ -1325,28 +1325,6 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     inline_store_backend.remove_key(tuple_)
 
 
-def _create_datasource_config(regex_pattern: str = "(.+)\\.csv") -> dict:
-    datasource_config_string = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: my/base/dir/
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: {regex_pattern}
-                    group_names:
-                        - name
-        """
-    datasource_config: dict = yaml.load(datasource_config_string)
-    return datasource_config
-
-
 @pytest.mark.filesystem
 def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
     path_to_great_expectations_yml: str = os.path.join(  # noqa: PTH118
@@ -1388,12 +1366,27 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
 
     assert config_commented_map_from_yaml["datasources"] == {}
 
+    datasource_config_string: str = """
+        class_name: Datasource
+        execution_engine:
+            class_name: PandasExecutionEngine
+        data_connectors:
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: my/base/dir/
+                glob_directive: "*.csv"
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+        """
+    datasource_config: dict = yaml.load(datasource_config_string)
+
     key = DataContextVariableKey(
         resource_name="my_datasource",
     )
     tuple_ = key.to_tuple()
 
-    datasource_config = _create_datasource_config()
     inline_store_backend.set(tuple_, datasource_config)
 
     with open(path_to_great_expectations_yml) as data:
@@ -1411,8 +1404,8 @@ def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
         resource_type=DataContextVariableSchema.DATASOURCES,
     )
 
-    datasource_config_a = _create_datasource_config("a")
-    datasource_config_b = _create_datasource_config("b")
+    datasource_config_a = empty_data_context.sources.add_pandas(name="a")
+    datasource_config_b = empty_data_context.sources.add_pandas(name="b")
 
     inline_store_backend.set(DataContextVariableKey("a").to_tuple(), datasource_config_a)
     inline_store_backend.set(DataContextVariableKey("b").to_tuple(), datasource_config_b)
