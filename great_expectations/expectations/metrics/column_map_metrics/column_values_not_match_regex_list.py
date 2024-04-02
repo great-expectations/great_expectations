@@ -35,7 +35,7 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, regex_list, _dialect, **kwargs):
         if len(regex_list) == 0:
-            raise ValueError("At least one regex must be supplied in the regex_list.")
+            raise ValueError("At least one regex must be supplied in the regex_list.")  # noqa: TRY003
 
         regex_expression = get_dialect_regex_expression(
             column, regex_list[0], _dialect, positive=False
