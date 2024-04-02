@@ -48,11 +48,33 @@ Use the information provided here to configure a new storage location for Valida
 - Permissions to install boto3 in your local environment.
 - An S3 bucket and prefix for the Validation Results.
 
-### Install boto3 in your local environment
-<ConfigureBotoToConnectToTheAmazonSBucketWhereValidationResultsWillBeStored />
+### Install boto3 with pip
 
-### Verify your AWS credentials are properly configured
-<VerifyYourAwsCredentials />
+Python interacts with AWS through the boto3 library. Great Expectations makes use of this library in the background when working with AWS. Although you won't use boto3 directly, you'll need to install it in your virtual environment.
+
+To set up boto3 with AWS, and use boto3 within Python, see the [Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html).
+
+Run one of the following pip commands to install boto3 in your virtual environment:
+
+```bash title="Terminal input"
+python -m pip install boto3
+```
+
+or
+
+```bash title="Terminal input"
+python3 -m pip install boto3
+```
+
+### Verify your AWS credentials
+
+Run the following command in the AWS CLI to verify that your AWS credentials are properly configured:
+
+```bash title="Terminal input"
+aws sts get-caller-identity
+```
+
+When your credentials are properly configured, your UserId, Account, and Arn are returned. If your credentials are not configured correctly, an error message appears. If you received an error message, or you couldn't verify your credentials, see Configuring the AWS CLI.
 
 ### Identify your Data Context Validation Results Store
 
@@ -348,7 +370,7 @@ stores:
            base_directory: uncommitted/shared_validations/
 ```
 
-## Confirm that the Validation Results Store has been correctly configured
+### Confirm that the Validation Results Store has been correctly configured
 
 Run a [Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building Data Docs.
 
@@ -453,7 +475,7 @@ store_backend:
       username: '<your_username>'
 ```
 
-## Confirm the Validation Results Store is configured correctly
+### Confirm the Validation Results Store is configured correctly
 
 [Run a Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by re-building Data Docs.
 
@@ -856,7 +878,7 @@ stores:
 ```
 This configuration tells Great Expectations to look for Expectations in the ``expectations_store`` Store. The default ``base_directory`` for ``expectations_store`` is ``expectations/``.
 
-## Update your configuration file to include a new Store for Expectations results
+### Update your configuration file to include a new Store for Expectations results
 
 In the following example, `expectations_store_name` is set to ``shared_expectations_filesystem_store``, but it can be personalized.  Also, ``base_directory`` is set to ``shared_expectations/``, but you can set it to another path that is accessible by Great Expectations.
 
