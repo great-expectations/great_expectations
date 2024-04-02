@@ -1368,13 +1368,16 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
 
     datasource_config_string: str = """
         class_name: Datasource
+
         execution_engine:
             class_name: PandasExecutionEngine
+
         data_connectors:
             my_other_data_connector:
                 class_name: ConfiguredAssetFilesystemDataConnector
                 base_directory: my/base/dir/
                 glob_directive: "*.csv"
+
                 default_regex:
                     pattern: (.+)\\.csv
                     group_names:
