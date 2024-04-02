@@ -931,10 +931,12 @@ class UpdateDataDocsAction(DataDocsAction):
     site_names: List[str] = []
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> dict[ValidationResultIdentifier, dict]:
+    def v1_run(self, checkpoint_result: CheckpointResult) -> dict[ValidationResultIdentifier, dict]:  # type: ignore[override] # signature does not match parent
         action_results: dict[ValidationResultIdentifier, dict] = {}
         for result_identifier, result in checkpoint_result.run_results.items():
             suite_name = result.suite_name
+
+            expectation_suite_identifier: ExpectationSuiteIdentifier | GXCloudIdentifier
             if self._using_cloud_context:
                 expectation_suite_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.EXPECTATION_SUITE, resource_name=suite_name
