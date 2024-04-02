@@ -933,7 +933,9 @@ class TestV1ActionRun:
         res = action.v1_run(checkpoint_result=checkpoint_result)
 
         # Assert
-        validation_identifer_a, validation_identifer_b = tuple(checkpoint_result.run_results.keys())
+        validation_identifier_a, validation_identifier_b = tuple(
+            checkpoint_result.run_results.keys()
+        )
         assert (
             context.build_data_docs.call_count == 2
         ), "Data Docs should be incrementally built (once per validation result)"
@@ -943,7 +945,7 @@ class TestV1ActionRun:
                     build_index=True,
                     dry_run=False,
                     resource_identifiers=[
-                        validation_identifer_a,
+                        validation_identifier_a,
                         ExpectationSuiteIdentifier(name=self.suite_a),
                     ],
                     site_names=site_names,
@@ -952,7 +954,7 @@ class TestV1ActionRun:
                     build_index=True,
                     dry_run=False,
                     resource_identifiers=[
-                        validation_identifer_b,
+                        validation_identifier_b,
                         ExpectationSuiteIdentifier(name=self.suite_b),
                     ],
                     site_names=site_names,
@@ -960,11 +962,11 @@ class TestV1ActionRun:
             ]
         )
         assert res == {
-            validation_identifer_a: {
+            validation_identifier_a: {
                 site_names[0]: site_urls[0],
                 site_names[1]: site_urls[1],
             },
-            validation_identifer_b: {
+            validation_identifier_b: {
                 site_names[0]: site_urls[0],
                 site_names[1]: site_urls[1],
             },
