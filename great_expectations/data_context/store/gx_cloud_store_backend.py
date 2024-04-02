@@ -206,7 +206,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # We need to validate that even if we have a 200, there are contents to support existence
         response_has_data = bool(payload.get("data"))
         if not response_has_data:
-            raise StoreBackendError( # noqa: TRY003
+            raise StoreBackendError(  # noqa: TRY003
                 "Unable to get object in GX Cloud Store Backend: Object does not exist."
             )
 
