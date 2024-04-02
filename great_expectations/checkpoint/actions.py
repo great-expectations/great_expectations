@@ -1102,7 +1102,7 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+    def v1_run(self, checkpoint_result: CheckpointResult) -> str:  # type: ignore[override] # signature does not match parent
         aggregate_payload = []
         for run_id, run_result in checkpoint_result.run_results.items():
             suite_name = run_result.suite_name
