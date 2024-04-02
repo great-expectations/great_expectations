@@ -29,7 +29,6 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
-from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
@@ -1051,6 +1050,17 @@ class SNSNotificationAction(ValidationAction):
 
     sns_topic_arn: str
     sns_message_subject: Optional[str]
+
+    @override
+    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+        return send_sns_notification(
+            sns_topic_arn=self.sns_topic_arn,
+            sns_subject=self.sns_message_subject or checkpoint_result.name,
+            validation_results=json.dumps(
+                [result.to_json_dict() for result in checkpoint_result.run_results.values()],
+                indent=4,
+            ),
+        )
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent

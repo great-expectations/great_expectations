@@ -821,7 +821,7 @@ class TestV1ActionRun:
     @pytest.fixture
     def checkpoint_result(self, mocker: MockerFixture):
         return CheckpointResult(
-            run_id=mocker.Mock(spec=RunIdentifier),
+            run_id=RunIdentifier(run_time="2024-04-01T20:51:18.077262"),
             run_results={
                 ValidationResultIdentifier(
                     expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -829,8 +829,11 @@ class TestV1ActionRun:
                     ),
                     run_id=RunIdentifier(run_name="prod_20240401"),
                     batch_identifier="1234",
-                ): mocker.Mock(
-                    spec=ExpectationSuiteValidationResult, suite_name=self.suite_a, success=True
+                ): ExpectationSuiteValidationResult(
+                    success=True,
+                    statistics={},
+                    results=[],
+                    suite_name=self.suite_a,
                 ),
                 ValidationResultIdentifier(
                     expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -838,8 +841,11 @@ class TestV1ActionRun:
                     ),
                     run_id=RunIdentifier(run_name="prod_20240402"),
                     batch_identifier="5678",
-                ): mocker.Mock(
-                    spec=ExpectationSuiteValidationResult, suite_name=self.suite_b, success=False
+                ): ExpectationSuiteValidationResult(
+                    success=True,
+                    statistics={},
+                    results=[],
+                    suite_name=self.suite_b,
                 ),
             },
             checkpoint_config=mocker.Mock(spec=Checkpoint, name="my_checkpoint"),
@@ -958,12 +964,16 @@ class TestV1ActionRun:
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
-    def test_SNSNotificationAction_run(self, checkpoint_result: CheckpointResult):
-        action = SNSNotificationAction(sns_topic_arn="test")
-        action.v1_run(checkpoint_result=checkpoint_result)
+    def test_SNSNotificationAction_run(self, sns, checkpoint_result: CheckpointResult):
+        subj_topic = "test-subj"
+        created_subj = sns.create_topic(Name=subj_topic)
+        arn = created_subj.get("TopicArn")
+        action = SNSNotificationAction(
+            sns_topic_arn=arn,
+            sns_message_subject="Subject",
+        )
+
+        assert "Successfully posted results" in action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
     def test_UpdateDataDocsAction_run(
