@@ -1045,6 +1045,48 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
     )
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google.cloud"),
+    reason="google is not installed",
+)
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google"),
+    reason="google is not installed",
+)
+@pytest.mark.big
+def test_TupleGCSStoreBackend_get_all():
+    """
+    What does this test and why?
+
+    the base_public_path parameter allows users to point to a custom DNS when hosting Data docs.
+
+    This test will exercise the get_url_for_key method twice to see that we are getting the expected url,
+    with or without base_public_path
+    """  # noqa: E501
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+    project = "dummy-project"
+    base_public_path = "http://www.test.com/"
+    val_a = b"aaa"
+    val_b = b"bbb"
+
+    with mock.patch("google.cloud.storage.Client", autospec=True):
+        my_store = TupleGCSStoreBackend(
+            filepath_template=None,
+            bucket=bucket,
+            prefix=prefix,
+            project=project,
+            base_public_path=base_public_path,
+        )
+
+        my_store.set(("AAA",), val_a, content_encoding=None, content_type="image/png")
+        my_store.set(("BBB",), val_b, content_encoding=None, content_type="image/png")
+
+        result = my_store.get_all()
+
+        assert sorted(result) == [val_a, val_b]
+
+
 @pytest.mark.unit
 def test_TupleAzureBlobStoreBackend_credential():
     pytest.importorskip("azure.storage.blob")
