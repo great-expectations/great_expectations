@@ -51,7 +51,7 @@ class ColumnSectionRenderer(Renderer):
             elif isinstance(candidate_object, ExpectationValidationResult):
                 return candidate_object.expectation_config.kwargs["column"]
             else:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     "Provide a column section renderer an expectation, list of expectations, evr, or list of evrs."  # noqa: E501
                 )
         except KeyError:
@@ -117,7 +117,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 exception_message += (
                     f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                logger.error(exception_message)  # noqa: TRY400
 
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))

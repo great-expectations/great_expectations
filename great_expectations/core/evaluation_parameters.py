@@ -236,7 +236,7 @@ class EvaluationParameterParser:
                         logger.info("Evaluation parameter operand successfully parsed as datetime.")
                     except ValueError as e:
                         logger.info("Parsing evaluation parameter operand as datetime failed.")
-                        raise e
+                        raise e  # noqa: TRY201
             return evaluated
 
 
@@ -307,11 +307,11 @@ def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
     try:
         _ = parser.parseString(parameter_expression, parseAll=True)
     except ParseException as err:
-        raise EvaluationParameterError(
+        raise EvaluationParameterError(  # noqa: TRY003
             f"Unable to parse evaluation parameter: {err!s} at line {err.line}, column {err.column}"
         )
     except AttributeError as err:
-        raise EvaluationParameterError(f"Unable to parse evaluation parameter: {err!s}")
+        raise EvaluationParameterError(f"Unable to parse evaluation parameter: {err!s}")  # noqa: TRY003
 
     for word in expr.exprStack:
         if isinstance(word, (int, float)):
@@ -390,17 +390,17 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
                 logger.error(
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
-                raise EvaluationParameterError(
+                raise EvaluationParameterError(  # noqa: TRY003
                     f"No value found for $PARAMETER {parse_results[0]!s}"
                 )
         except ParseException as e:
             logger.debug(f"Parse exception while parsing evaluation parameter: {e!s}")
-            raise EvaluationParameterError(
+            raise EvaluationParameterError(  # noqa: TRY003
                 f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e
         except AttributeError as e:
             logger.warning("Unable to get store for store-type valuation parameter.")
-            raise EvaluationParameterError(
+            raise EvaluationParameterError(  # noqa: TRY003
                 f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e
 
@@ -440,7 +440,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
 
     else:
         err_str, err_line, err_col = parse_results[-1]
-        raise EvaluationParameterError(
+        raise EvaluationParameterError(  # noqa: TRY003
             f"Parse Failure: {err_str}\nStatement: {err_line}\nColumn: {err_col}"
         )
 
@@ -451,7 +451,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
         exception_traceback = traceback.format_exc()
         exception_message = f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
         logger.debug(exception_message, e, exc_info=True)
-        raise EvaluationParameterError(
+        raise EvaluationParameterError(  # noqa: TRY003
             f"Error while evaluating evaluation parameter expression: {e!s}"
         ) from e
 

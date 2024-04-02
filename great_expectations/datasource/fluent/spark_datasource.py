@@ -177,7 +177,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     @pydantic.validator("dataframe")
     def _validate_dataframe(cls, dataframe: DataFrame) -> DataFrame:
         if not (DataFrame and isinstance(dataframe, DataFrame)):  # type: ignore[truthy-function]
-            raise ValueError("dataframe must be of type pyspark.sql.DataFrame")
+            raise ValueError("dataframe must be of type pyspark.sql.DataFrame")  # noqa: TRY003
 
         return dataframe
 
@@ -227,17 +227,17 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             get_batch_list_from_batch_request method.
         """  # noqa: E501
         if options:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "options is not currently supported for this DataAssets and must be None or {}."
             )
 
         if batch_slice is not None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "batch_slice is not currently supported and must be None for this DataAsset."
             )
 
         if partitioner is not None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
 
@@ -247,7 +247,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             df = dataframe
 
         if df is None:
-            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")
+            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")  # noqa: TRY003
 
         self.dataframe = df
 
@@ -275,7 +275,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
                 options={},
                 batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
             )
-            raise gx_exceptions.InvalidBatchRequestError(
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "BatchRequest should have form:\n"
                 f"{pf(expect_batch_request_form.dict())}\n"
                 f"but actually has form:\n{pf(batch_request.dict())}\n"

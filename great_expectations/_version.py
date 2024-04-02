@@ -132,7 +132,7 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
 
     if verbose:
         print(f"Tried directories {rootdirs!s} but none started with prefix {parentdir_prefix}")
-    raise NotThisMethod("rootdir doesn't start with parentdir_prefix")
+    raise NotThisMethod("rootdir doesn't start with parentdir_prefix")  # noqa: TRY003
 
 
 @register_vcs_handler("git", "get_keywords")
@@ -168,7 +168,7 @@ def git_get_keywords(versionfile_abs):  # noqa: C901 - too complex
 def git_versions_from_keywords(keywords, tag_prefix, verbose):  # noqa: C901 - too complex
     """Get version information from git keywords."""
     if not keywords:
-        raise NotThisMethod("no keywords at all, weird")
+        raise NotThisMethod("no keywords at all, weird")  # noqa: TRY003
     date = keywords.get("date")
     if date is not None:
         # git-2.2.0 added "%cI", which expands to an ISO-8601 -compliant
@@ -182,7 +182,7 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):  # noqa: C901 - t
     if refnames.startswith("$Format"):
         if verbose:
             print("keywords are unexpanded, not using")
-        raise NotThisMethod("unexpanded keywords, not a git-archive tarball")
+        raise NotThisMethod("unexpanded keywords, not a git-archive tarball")  # noqa: TRY003
     refs = {r.strip() for r in refnames.strip("()").split(",")}
     # starting in git-1.8.3, tags are listed as "tag: foo-1.0" instead of
     # just "foo-1.0". If we see a "tag: " prefix, prefer those.
@@ -244,7 +244,7 @@ def git_pieces_from_vcs(  # noqa: C901 - 11
     if rc != 0:
         if verbose:
             print(f"Directory {root} not under git control")
-        raise NotThisMethod("'git rev-parse --git-dir' returned error")
+        raise NotThisMethod("'git rev-parse --git-dir' returned error")  # noqa: TRY003
 
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
@@ -263,11 +263,11 @@ def git_pieces_from_vcs(  # noqa: C901 - 11
     )
     # --long was added in git-1.5.5
     if describe_out is None:
-        raise NotThisMethod("'git describe' failed")
+        raise NotThisMethod("'git describe' failed")  # noqa: TRY003
     describe_out = describe_out.strip()
     full_out, rc = run_command(GITS, ["rev-parse", "HEAD"], cwd=root)
     if full_out is None:
-        raise NotThisMethod("'git rev-parse' failed")
+        raise NotThisMethod("'git rev-parse' failed")  # noqa: TRY003
     full_out = full_out.strip()
 
     pieces = {}
@@ -487,7 +487,7 @@ def render(pieces, style):  # noqa: C901 - too complex
     elif style == "git-describe-long":
         rendered = render_git_describe_long(pieces)
     else:
-        raise ValueError(f"unknown style '{style}'")
+        raise ValueError(f"unknown style '{style}'")  # noqa: TRY003
 
     return {
         "version": rendered,

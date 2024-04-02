@@ -291,25 +291,19 @@ def _checkpoint_config(data_file_name, with_slack):
 def _expectation_suite():
     return [
         {
-            "attributes": {
-                "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
-                "organization_id": os.environ["GX_CLOUD_ORGANIZATION_ID"],
-                "suite": {
-                    "name": "single-snippet-suite-2",
-                    "expectations": [
-                        {
-                            "expectation_type": "expect_column_to_exist",
-                            "id": "0571b111-a1d0-4f1a-9c83-6704887de635",
-                            "kwargs": {"column": "passenger_count"},
-                            "meta": {},
-                        }
-                    ],
-                    "id": "1212e79d-f751-4c6e-921d-26de2b1db174",
-                    "meta": {"great_expectations_version": "0.15.43"},
-                },
-            },
+            "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
+            "organization_id": os.environ["GX_CLOUD_ORGANIZATION_ID"],
+            "name": "single-snippet-suite-2",
+            "expectations": [
+                {
+                    "expectation_type": "expect_column_to_exist",
+                    "id": "0571b111-a1d0-4f1a-9c83-6704887de635",
+                    "kwargs": {"column": "passenger_count"},
+                    "meta": {},
+                }
+            ],
             "id": "1212e79d-f751-4c6e-921d-26de2b1db174",
-            "type": "expectation_suite",
+            "meta": {"great_expectations_version": "0.15.43"},
         }
     ]
 

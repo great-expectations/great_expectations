@@ -82,7 +82,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         try:
             self._glue_client: Any = aws.boto3.client("glue", **boto3_options)
         except (TypeError, AttributeError):
-            raise ImportError(
+            raise ImportError(  # noqa: TRY003
                 "Unable to load boto3 (it is required for ConfiguredAssetAWSGlueDataCatalogDataConnector)."  # noqa: E501
             )
 
@@ -190,7 +190,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
                 data_asset_name=batch_request.data_asset_name
             )
         except KeyError:
-            raise KeyError(f"data_asset_name {batch_request.data_asset_name} is not recognized.")
+            raise KeyError(f"data_asset_name {batch_request.data_asset_name} is not recognized.")  # noqa: TRY003
 
         for batch_identifiers in sub_cache:
             batch_definition = LegacyBatchDefinition(
@@ -261,7 +261,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             table = self.glue_client.get_table(**paginator_kwargs)
             return [p["Name"] for p in table["Table"]["PartitionKeys"]]
         except self.glue_client.exceptions.EntityNotFoundException:
-            raise DataConnectorError(
+            raise DataConnectorError(  # noqa: TRY003
                 f"ConfiguredAssetAWSGlueDataCatalogDataConnector could not find a table with name: {database_name}.{table_name}"  # noqa: E501
             )
 

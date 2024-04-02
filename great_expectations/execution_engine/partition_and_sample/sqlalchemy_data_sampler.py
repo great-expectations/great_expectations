@@ -110,11 +110,11 @@ class SqlAlchemyDataSampler(DataSampler):
             None
         """  # noqa: E501
         if not isinstance(n, (str, int)):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 "Please specify your sampling kwargs 'n' parameter as a string or int."
             )
         if isinstance(n, str) and not n.isdigit():
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 "If specifying your sampling kwargs 'n' parameter as a string please ensure it is "
                 "parseable as an integer."
             )
@@ -142,14 +142,14 @@ class SqlAlchemyDataSampler(DataSampler):
         try:
             table_name: str = batch_spec["table_name"]
         except KeyError as e:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "A table name must be specified when using sample_using_random. "
                 "Please update your configuration"
             ) from e
         try:
             p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
         except (KeyError, TypeError) as e:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "To use sample_using_random you must specify the parameter 'p' in "
                 "the 'sampling_kwargs' configuration."
             ) from e

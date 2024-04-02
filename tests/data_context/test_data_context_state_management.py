@@ -98,10 +98,10 @@ class EphemeralDataContextSpy(EphemeralDataContext):
     ) -> None:
         # expectation store is required for initializing the base DataContext
         self._expectations_store = ExpectationsStoreSpy()
+        self._checkpoint_store = CheckpointStoreSpy()
         super().__init__(project_config)
         self.save_count = 0
         self._datasource_store = DatasourceStoreSpy()
-        self._checkpoint_store = CheckpointStoreSpy()
 
     @property
     def datasource_store(self):
