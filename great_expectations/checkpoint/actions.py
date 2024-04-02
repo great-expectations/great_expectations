@@ -29,6 +29,7 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
@@ -412,8 +413,8 @@ class PagerdutyAlertAction(ValidationAction):
         return values
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> dict:
-        success = checkpoint_result.success
+    def v1_run(self, checkpoint_result: CheckpointResult) -> dict:  # type: ignore[override] # signature does not match parent
+        success = checkpoint_result.success or False
         checkpoint_name = checkpoint_result.checkpoint_config.name
         summary = "Great Expectations Checkpoint {name} has "
         if success:
@@ -1050,6 +1051,10 @@ class SNSNotificationAction(ValidationAction):
 
     sns_topic_arn: str
     sns_message_subject: Optional[str]
+
+    @override
+    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+        return super().v1_run(checkpoint_result)
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent
