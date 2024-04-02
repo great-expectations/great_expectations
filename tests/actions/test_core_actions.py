@@ -28,13 +28,16 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
     ExpectationSuiteIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.render.renderer.renderer import Renderer
@@ -970,4 +973,72 @@ class TestV1ActionRun:
                 site_names[0]: site_urls[0],
                 site_names[1]: site_urls[1],
             },
+        }
+
+    @pytest.mark.cloud
+    def test_UpdateDataDocsAction_run_cloud(
+        self, mocker: MockerFixture, checkpoint_result: CheckpointResult
+    ):
+        # Arrange
+        context = mocker.Mock(spec=CloudDataContext)
+        set_context(context)
+
+        site_names = ["site_a", "site_b"]
+        site_urls = [
+            f"http://app.greatexpectations.io/data_docs/{site_names[0]}",
+            f"http://app.greatexpectations.io/data_docs/{site_names[1]}",
+        ]
+        context.get_docs_sites_urls.return_value = [
+            {
+                "site_url": site_urls[0],
+                "site_name": site_names[0],
+            },
+            {
+                "site_url": site_urls[1],
+                "site_name": site_names[1],
+            },
+        ]
+
+        # Act
+        action = UpdateDataDocsAction(site_names=site_names)
+        res = action.v1_run(checkpoint_result=checkpoint_result)
+
+        # Assert
+        validation_identifier_a, validation_identifier_b = tuple(
+            checkpoint_result.run_results.keys()
+        )
+        assert (
+            context.build_data_docs.call_count == 2
+        ), "Data Docs should be incrementally built (once per validation result)"
+        context.build_data_docs.assert_has_calls(
+            [
+                mock.call(
+                    build_index=True,
+                    dry_run=False,
+                    resource_identifiers=[
+                        validation_identifier_a,
+                        GXCloudIdentifier(
+                            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                            resource_name=self.suite_a,
+                        ),
+                    ],
+                    site_names=site_names,
+                ),
+                mock.call(
+                    build_index=True,
+                    dry_run=False,
+                    resource_identifiers=[
+                        validation_identifier_b,
+                        GXCloudIdentifier(
+                            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                            resource_name=self.suite_b,
+                        ),
+                    ],
+                    site_names=site_names,
+                ),
+            ]
+        )
+        assert res == {
+            validation_identifier_a: {},
+            validation_identifier_b: {},
         }
