@@ -124,7 +124,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 3. Select one of the following options:
 
-    - If you're connecting to am org-hosted PostgreSQL Data Asset for the first time, copy the code and see [Connect GX Cloud to PostgreSQL](../connect/connect_postgresql.md).
+    - If you're connecting to an org-hosted PostgreSQL Data Asset for the first time, copy the code and see [Connect GX Cloud to PostgreSQL](../connect/connect_postgresql.md).
 
     - If you're testing GX Cloud features and functionality in a self-hosted environment, click **I have created a GX Cloud user with valid permissions** and then click **Continue**.
 
