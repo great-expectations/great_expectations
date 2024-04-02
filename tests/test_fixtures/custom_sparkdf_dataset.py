@@ -1,6 +1,6 @@
 import numpy as np
 
-from great_expectations.dataset import Dataset, SparkDFDataset
+from great_expectations.dataset import Dataset, SparkDFDataset  # type: ignore[attr-defined]
 
 
 class CustomSparkDFDataset(SparkDFDataset):

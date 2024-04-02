@@ -58,7 +58,7 @@ class DataConnector:
         id: Optional[str] = None,
     ) -> None:
         if execution_engine is None:
-            raise gx_exceptions.DataConnectorError(
+            raise gx_exceptions.DataConnectorError(  # noqa: TRY003
                 "A non-existent/unknown ExecutionEngine instance was referenced."
             )
 
@@ -228,10 +228,10 @@ class DataConnector:
 
         """
         if batch_request.datasource_name != self.datasource_name:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not match DataConnector datasource_name: "{self.datasource_name}"."""  # noqa: E501
             )
         if batch_request.data_connector_name != self.name:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}"."""  # noqa: E501
             )

@@ -193,7 +193,7 @@ def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         return float(test_obj)
 
     else:
-        raise TypeError(
+        raise TypeError(  # noqa: TRY003
             f"{test_obj!s} is of type {type(test_obj).__name__} which cannot be serialized."
         )
 
@@ -211,12 +211,12 @@ def ensure_row_condition_is_correct(row_condition_string) -> None:
         the pandas query string
     """
     if "'" in row_condition_string:
-        raise InvalidExpectationConfigurationError(
+        raise InvalidExpectationConfigurationError(  # noqa: TRY003
             f"{row_condition_string} cannot be serialized to json. "
             "Do not introduce simple quotes in configuration."
             "Use double quotes instead."
         )
     if "\n" in row_condition_string:
-        raise InvalidExpectationConfigurationError(
+        raise InvalidExpectationConfigurationError(  # noqa: TRY003
             f"{row_condition_string!r} cannot be serialized to json. Do not introduce \\n in configuration."  # noqa: E501
         )

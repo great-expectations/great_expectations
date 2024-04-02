@@ -9,9 +9,9 @@ DOCSTRING_PARSER_NOT_IMPORTED = NotImported(
 try:
     import docstring_parser
 except ImportError:
-    docstring_parser = DOCSTRING_PARSER_NOT_IMPORTED
+    docstring_parser = DOCSTRING_PARSER_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from docstring_parser import DocstringStyle
 except ImportError:
-    DocstringStyle = DOCSTRING_PARSER_NOT_IMPORTED
+    DocstringStyle = DOCSTRING_PARSER_NOT_IMPORTED  # type: ignore[assignment,misc]

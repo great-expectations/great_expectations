@@ -22,6 +22,7 @@ from great_expectations.checkpoint.actions import (
     ValidationAction,
 )
 from great_expectations.checkpoint.util import smtplib
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
 from great_expectations.compatibility.pydantic import BaseModel, Field, ValidationError
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -100,8 +101,9 @@ def test_StoreAction(mock_context):
             run_id=RunIdentifier(run_name="prod_20190801"),
             batch_identifier="1234",
         ),
-        validation_result_suite=ExpectationSuiteValidationResult(success=False, results=[]),
-        data_asset=None,
+        validation_result_suite=ExpectationSuiteValidationResult(
+            success=False, results=[], suite_name="empty_suite"
+        ),
     )
 
     expected_run_id = RunIdentifier(run_name="prod_20190801", run_time="20190926T134241.000000Z")
@@ -118,7 +120,7 @@ def test_StoreAction(mock_context):
             run_id=expected_run_id,
             batch_identifier="1234",
         )
-    ) == ExpectationSuiteValidationResult(success=False, results=[])
+    ) == ExpectationSuiteValidationResult(success=False, results=[], suite_name="empty_suite")
 
 
 @pytest.mark.big
@@ -147,7 +149,6 @@ def test_SlackNotificationAction(
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # Test with slack_token and slack_channel set; expect pass
@@ -161,7 +162,6 @@ def test_SlackNotificationAction(
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # test for long text message - should be split into multiple messages
@@ -175,7 +175,6 @@ def test_SlackNotificationAction(
     assert slack_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # Test with just slack_token set; expect fail
@@ -217,12 +216,12 @@ def test_SlackNotificationAction(
         validation_result_suite=ExpectationSuiteValidationResult(
             success=False,
             results=[],
+            suite_name="empty_suite",
             statistics={
                 "successful_expectations": [],
                 "evaluated_expectations": [],
             },
         ),
-        data_asset=None,
     ) == {"slack_notification_result": "Slack notification succeeded."}
 
     # test notify on with successful run; expect pass
@@ -239,12 +238,12 @@ def test_SlackNotificationAction(
         validation_result_suite=ExpectationSuiteValidationResult(
             success=True,
             results=[],
+            suite_name="empty_suite",
             statistics={
                 "successful_expectations": [],
                 "evaluated_expectations": [],
             },
         ),
-        data_asset=None,
     ) == {"slack_notification_result": "none required"}
 
 
@@ -273,7 +272,6 @@ def test_PagerdutyAlertAction(
     assert pagerduty_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"pagerduty_alert_result": "success"}
 
     # Make sure the alert is not sent by default when the validation has success = True
@@ -282,7 +280,6 @@ def test_PagerdutyAlertAction(
     assert pagerduty_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"pagerduty_alert_result": "none sent"}
 
 
@@ -310,7 +307,6 @@ def test_OpsgenieAlertAction(
     assert opsgenie_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"opsgenie_alert_result": "error"}
 
     # Make sure the alert is not sent by default when the validation has success = True
@@ -319,7 +315,6 @@ def test_OpsgenieAlertAction(
     assert opsgenie_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"opsgenie_alert_result": "error"}
 
 
@@ -347,7 +342,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         teams_action.run(
             validation_result_suite_identifier=validation_result_suite_extended_id,
             validation_result_suite=None,
-            data_asset=None,
         )
         is None
     )
@@ -357,13 +351,11 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         teams_action.run(
             validation_result_suite_identifier="i_wont_work",
             validation_result_suite=validation_result_suite,
-            data_asset=None,
         )
 
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on = success will return "Microsoft Teams notification succeeded" message
@@ -378,7 +370,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": None}
 
     validation_result_suite.success = True
@@ -391,7 +382,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     # notify_on failure will return "Microsoft Teams notification succeeded" message
@@ -406,7 +396,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": "Microsoft Teams notification succeeded."}
 
     validation_result_suite.success = True
@@ -419,7 +408,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": None}
 
 
@@ -448,7 +436,6 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
     assert teams_action.run(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
-        data_asset=None,
     ) == {"microsoft_teams_notification_result": None}
 
     assert "Request to Microsoft Teams webhook returned error 400" in caplog.text
@@ -601,7 +588,6 @@ def test_EmailAction(
         assert email_action.run(
             validation_result_suite_identifier=validation_result_suite_id,
             validation_result_suite=validation_result_suite,
-            data_asset=None,
         ) == {"email_result": expected}
 
 
@@ -630,7 +616,8 @@ def test_api_action_run(
     mock_requests.post.return_value = mock_response
     api_notification_action = APINotificationAction(url="http://www.example.com")
     response = api_notification_action.run(
-        validation_result_suite, validation_result_suite_id, data_asset=None
+        validation_result_suite,
+        validation_result_suite_id,
     )
     assert response == "Successfully Posted results to API, status code - 200"
 
@@ -653,7 +640,6 @@ def test_cloud_sns_notification_action(
     assert sns_action.run(
         validation_result_suite=validation_result_suite,
         validation_result_suite_identifier=validation_result_suite_id,
-        data_asset=None,
     ).endswith("Subject")
 
 
@@ -823,3 +809,90 @@ class TestActionSerialization:
         parsed_action = DummyClassWithActionChild.parse_raw(json_dict)
 
         assert isinstance(parsed_action.action, action_class)
+
+
+class TestV1ActionRun:
+    @pytest.fixture
+    def checkpoint_result(self, mocker: MockerFixture):
+        return CheckpointResult(
+            run_id=mocker.Mock(spec=RunIdentifier),
+            run_results={
+                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
+                    spec=ExpectationSuiteValidationResult, success=True
+                ),
+                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
+                    spec=ExpectationSuiteValidationResult, success=False
+                ),
+            },
+            checkpoint_config=mocker.Mock(spec=Checkpoint),
+        )
+
+    @pytest.mark.unit
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
+    def test_APINotificationAction_run(self, checkpoint_result: CheckpointResult):
+        action = APINotificationAction(url="http://www.example.com")
+        action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
+    def test_EmailAction_run(self, checkpoint_result: CheckpointResult):
+        action = EmailAction(
+            smtp_address="test", smtp_port=587, receiver_emails="test1@gmail.com, test2@hotmail.com"
+        )
+        action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
+    def test_MicrosoftTeamsNotificationAction_run(self, checkpoint_result: CheckpointResult):
+        action = MicrosoftTeamsNotificationAction(teams_webhook="test")
+        action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
+    def test_OpsgenieAlertAction_run(self, checkpoint_result: CheckpointResult):
+        action = OpsgenieAlertAction(api_key="test")
+        action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="pypd"),
+        reason="pypd is not installed",
+    )
+    @pytest.mark.unit
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
+    def test_PagerdutyAlertAction_run(self, checkpoint_result: CheckpointResult):
+        action = PagerdutyAlertAction()
+        action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
+    def test_SlackNotificationAction_run(self, checkpoint_result: CheckpointResult):
+        action = SlackNotificationAction(slack_webhook="test")
+        action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
+    def test_SNSNotificationAction_run(self, checkpoint_result: CheckpointResult):
+        action = SNSNotificationAction(sns_topic_arn="test")
+        action.v1_run(checkpoint_result=checkpoint_result)
+
+    @pytest.mark.unit
+    @pytest.mark.xfail(
+        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    )
+    def test_UpdateDataDocsAction_run(self, checkpoint_result: CheckpointResult):
+        action = UpdateDataDocsAction()
+        action.v1_run(checkpoint_result=checkpoint_result)

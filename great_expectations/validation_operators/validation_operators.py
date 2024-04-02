@@ -416,7 +416,6 @@ class ActionListValidationOperator(ValidationOperator):
                 action_result = self.actions[name].run(
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
-                    data_asset=batch,
                     payload=batch_actions_results,
                     expectation_suite_identifier=expectation_suite_identifier,
                     checkpoint_identifier=checkpoint_identifier,
@@ -441,7 +440,7 @@ class ActionListValidationOperator(ValidationOperator):
 
             except Exception as e:
                 logger.exception(f"Error running action with name {action['name']}")
-                raise e
+                raise e  # noqa: TRY201
 
         return batch_actions_results
 
@@ -742,7 +741,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
 
         if base_expectation_suite_name is None:
             if self.base_expectation_suite_name is None:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "base_expectation_suite_name must be configured in the validation operator or passed at runtime"  # noqa: E501
                 )
             base_expectation_suite_name = self.base_expectation_suite_name

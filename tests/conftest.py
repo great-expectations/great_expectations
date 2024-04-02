@@ -518,7 +518,7 @@ def sa(test_backends):
 def spark_session(test_backends) -> pyspark.SparkSession:
     from great_expectations.compatibility import pyspark
 
-    if pyspark.SparkSession:
+    if pyspark.SparkSession:  # type: ignore[truthy-function]
         return SparkDFExecutionEngine.get_or_create_spark_session()
 
     raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -770,7 +770,7 @@ def empty_data_context(
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
     project_manager.set_project(context)
-    return context
+    return context  # type: ignore[return-value]
 
 
 @pytest.fixture(scope="function")
@@ -826,11 +826,11 @@ def data_context_with_connection_to_metrics_db(
                         table_name: multi_column_sums
                         class_name: Asset
     """
-    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
+    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))  # type: ignore[arg-type]
 
     context._save_project_config()
     project_manager.set_project(context)
-    return context
+    return context  # type: ignore[return-value]
 
 
 @pytest.fixture
@@ -3222,7 +3222,7 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
         env_vars.get(GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN),
     )
     cloud_config = GXCloudConfig(
-        base_url=base_url,
+        base_url=base_url,  # type: ignore[arg-type]
         organization_id=organization_id,
         access_token=access_token,
     )
@@ -3242,7 +3242,6 @@ def empty_base_data_context_in_cloud_mode(
 ) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir(exist_ok=True)
-    project_path = str(project_path)
 
     context = CloudDataContext(
         project_config=empty_ge_cloud_data_context_config,
@@ -3264,7 +3263,6 @@ def empty_data_context_in_cloud_mode(
     """This fixture is a DataContext in cloud mode that mocks calls to the cloud backend during setup so that it can be instantiated in tests."""  # noqa: E501
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir(exist_ok=True)
-    project_path_name: str = str(project_path)
 
     def mocked_config(*args, **kwargs) -> DataContextConfig:
         return empty_ge_cloud_data_context_config
@@ -3283,11 +3281,9 @@ def empty_data_context_in_cloud_mode(
         autospec=True,
         side_effect=mocked_get_cloud_config,
     ):
-        context = CloudDataContext(
-            context_root_dir=project_path_name,
-        )
+        context = CloudDataContext(context_root_dir=project_path)
 
-    context._datasources = {}  # Basic in-memory mock for DatasourceDict to avoid HTTP calls
+    context._datasources = {}  # type: ignore[assignment] # Basic in-memory mock for DatasourceDict to avoid HTTP calls
     return context
 
 
@@ -3355,7 +3351,7 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
 ) -> CloudDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    project_path = str(project_path)
+    project_path = str(project_path)  # type: ignore[assignment]
 
     custom_base_url: str = "https://some_url.org"
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
@@ -7556,21 +7552,22 @@ def multibatch_generic_csv_generator():
             5: "category5",
             6: "category6",
         }
-        for batch_num in range(num_event_batches):
+        for batch_num in range(num_event_batches):  # type: ignore[arg-type]
             # generate a dataframe with multiple column types
             batch_start_date = start_date + datetime.timedelta(
-                days=(batch_num * num_events_per_batch)
+                days=(batch_num * num_events_per_batch)  # type: ignore[operator]
             )
             # TODO: AJB 20210416 Add more column types
             df = pd.DataFrame(
                 {
                     "event_date": [
                         (batch_start_date + datetime.timedelta(days=i)).strftime("%Y-%m-%d")
-                        for i in range(num_events_per_batch)
+                        for i in range(num_events_per_batch)  # type: ignore[arg-type]
                     ],
-                    "batch_num": [batch_num + 1 for _ in range(num_events_per_batch)],
+                    "batch_num": [batch_num + 1 for _ in range(num_events_per_batch)],  # type: ignore[arg-type]
                     "string_cardinality_3": [
-                        category_strings[i % 3] for i in range(num_events_per_batch)
+                        category_strings[i % 3]
+                        for i in range(num_events_per_batch)  # type: ignore[arg-type]
                     ],
                 }
             )

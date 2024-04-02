@@ -113,7 +113,7 @@ class BatchRequest(pydantic.BaseModel):
         try:
             parse_batch_slice(batch_slice=value)
         except (TypeError, ValueError) as e:
-            raise ValueError(f"Failed to parse BatchSlice to slice: {e}")
+            raise ValueError(f"Failed to parse BatchSlice to slice: {e}")  # noqa: TRY003
         self._batch_slice_input = value
 
     class Config:
@@ -133,9 +133,9 @@ class BatchRequest(pydantic.BaseModel):
         if options is None:
             return {}
         if not isinstance(options, dict):
-            raise TypeError("BatchRequestOptions must take the form of a dictionary.")
+            raise TypeError("BatchRequestOptions must take the form of a dictionary.")  # noqa: TRY003
         if any(not isinstance(key, str) for key in options):
-            raise TypeError("BatchRequestOptions keys must all be strings.")
+            raise TypeError("BatchRequestOptions keys must all be strings.")  # noqa: TRY003
         return options
 
     @public_api

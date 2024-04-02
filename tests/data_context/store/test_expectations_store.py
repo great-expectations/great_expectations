@@ -265,7 +265,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
     ],
 )
 def test_gx_cloud_response_json_to_object_dict(
-    response_json: dict, expected: dict | None, error_type: Exception | None
+    response_json: dict, expected: dict | None, error_type: type[Exception] | None
 ) -> None:
     if error_type:
         with pytest.raises(error_type):

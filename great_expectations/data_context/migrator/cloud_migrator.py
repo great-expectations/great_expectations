@@ -78,7 +78,7 @@ class CloudMigrator:
 
         # Invariant due to `get_cloud_config` raising an error if any config values are missing
         if not cloud_organization_id:
-            raise ValueError("An organization id must be present when performing a migration")
+            raise ValueError("An organization id must be present when performing a migration")  # noqa: TRY003
 
         self._cloud_base_url = cloud_base_url
         self._cloud_access_token = cloud_access_token
@@ -123,7 +123,7 @@ class CloudMigrator:
             cloud_migrator._migrate_to_cloud(test_migrate)
             return cloud_migrator
         except Exception as e:
-            raise gx_exceptions.MigrationError(
+            raise gx_exceptions.MigrationError(  # noqa: TRY003
                 "Migration failed. Please check the error message for more details."
             ) from e
 

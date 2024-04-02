@@ -329,7 +329,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     rule_state.exception_traceback = exception_info
                     self.rule_states.append(rule_state)
                 else:
-                    raise err
+                    raise err  # noqa: TRY201
 
         return RuleBasedProfilerResult(
             fully_qualified_parameter_names_by_domain=self.get_fully_qualified_parameter_names_by_domain(),
@@ -1191,7 +1191,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
         if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(config=config):
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 "batch_data found in batch_request cannot be saved to ProfilerStore"
             )
 
@@ -1223,7 +1223,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         try:
             response = persistence_fn(key=key, value=config)
         except gx_exceptions.StoreBackendError as e:
-            raise gx_exceptions.ProfilerError(f"{e.message}; could not persist profiler") from e
+            raise gx_exceptions.ProfilerError(f"{e.message}; could not persist profiler") from e  # noqa: TRY003
 
         if isinstance(response, GXCloudResourceRef):
             new_profiler.id = response.id
@@ -1240,7 +1240,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfilerConfig:
         if not ((profiler is None) ^ all(arg is None for arg in (name, config_version, rules))):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "Must either pass in an existing 'profiler' or individual constructor arguments (but not both)"  # noqa: E501
             )
 
@@ -1563,6 +1563,6 @@ def _validate_builder_override_config(builder_config: dict) -> None:
             "module_name" in builder_config,
         )
     ):
-        raise gx_exceptions.ProfilerConfigurationError(
+        raise gx_exceptions.ProfilerConfigurationError(  # noqa: TRY003
             'Both "class_name" and "module_name" must be specified.'
         )

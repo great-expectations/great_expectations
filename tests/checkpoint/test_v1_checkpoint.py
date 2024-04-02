@@ -3,12 +3,14 @@ from __future__ import annotations
 import json
 import pathlib
 import uuid
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
 
 import great_expectations as gx
 from great_expectations import expectations as gxe
+from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     SlackNotificationAction,
@@ -25,6 +27,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -34,6 +37,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 from tests.test_utils import working_directory
 
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
 
 @pytest.mark.unit
 def test_checkpoint_no_validation_definitions_raises_error():
@@ -41,6 +47,22 @@ def test_checkpoint_no_validation_definitions_raises_error():
         Checkpoint(name="my_checkpoint", validation_definitions=[], actions=[])
 
     assert "Checkpoint must contain at least one validation definition" in str(e.value)
+
+
+@pytest.mark.unit
+def test_checkpoint_save_success(mocker: MockerFixture):
+    context = mocker.Mock(spec=AbstractDataContext)
+    set_context(project=context)
+
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        validation_definitions=[mocker.Mock(spec=ValidationDefinition)],
+        actions=[],
+    )
+    store_key = context.v1_checkpoint_store.get_key.return_value
+    checkpoint.save()
+
+    context.v1_checkpoint_store.update.assert_called_once_with(key=store_key, value=checkpoint)
 
 
 @pytest.fixture
@@ -72,7 +94,7 @@ class TestCheckpointSerialization:
 
     @pytest.fixture
     def validation_definition_1(
-        self, in_memory_context: EphemeralDataContext, mocker: pytest.MockFixture
+        self, in_memory_context: EphemeralDataContext, mocker: MockerFixture
     ):
         name = "my_first_validation"
         vc = ValidationDefinition(
@@ -89,7 +111,7 @@ class TestCheckpointSerialization:
 
     @pytest.fixture
     def validation_definition_2(
-        self, in_memory_context: EphemeralDataContext, mocker: pytest.MockFixture
+        self, in_memory_context: EphemeralDataContext, mocker: MockerFixture
     ):
         name = "my_second_validation"
         vc = ValidationDefinition(
@@ -203,7 +225,7 @@ class TestCheckpointSerialization:
         cp_name = "my_checkpoint"
 
         ds = context.sources.add_pandas(ds_name)
-        asset = ds.add_csv_asset(asset_name, "my_file.csv")
+        asset = ds.add_csv_asset(asset_name, "my_file.csv")  # type: ignore[arg-type]
 
         bc1 = asset.add_batch_definition(batch_definition_name_1)
         suite1 = ExpectationSuite(suite_name_1)
@@ -356,19 +378,17 @@ class TestCheckpointResult:
     checkpoint_name: str = "my_checkpoint"
 
     @pytest.fixture
-    def mock_suite(self, mocker: pytest.MockFixture):
+    def mock_suite(self, mocker: MockerFixture):
         suite = mocker.Mock(spec=ExpectationSuite)
         suite.name = self.suite_name
         return suite
 
     @pytest.fixture
-    def mock_batch_def(self, mocker: pytest.MockFixture):
+    def mock_batch_def(self, mocker: MockerFixture):
         return mocker.Mock(spec=BatchDefinition)
 
     @pytest.fixture
-    def validation_definition(
-        self, mock_suite: pytest.MockFixture, mock_batch_def: pytest.MockFixture
-    ):
+    def validation_definition(self, mock_suite: MockerFixture, mock_batch_def: MockerFixture):
         validation_definition = ValidationDefinition(
             name=self.validation_definition_name,
             data=mock_batch_def,
@@ -403,6 +423,7 @@ class TestCheckpointResult:
                     },
                 ),
             ],
+            suite_name=self.suite_name,
             statistics={
                 "evaluated_expectations": 1,
                 "successful_expectations": 1,
@@ -443,10 +464,11 @@ class TestCheckpointResult:
             actions=actions,
         )
 
-        with mock.patch.object(ValidationAction, "run") as mock_run:
-            _ = checkpoint.run()
+        with mock.patch.object(ValidationAction, "v1_run") as mock_run:
+            result = checkpoint.run()
 
         assert mock_run.call_count == len(actions)
+        mock_run.assert_called_with(checkpoint_result=result)
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(
@@ -461,14 +483,14 @@ class TestCheckpointResult:
             batch_parameters=batch_parameters, expectation_parameters=expectation_parameters
         )
 
-        validation_definition.run.assert_called_with(
+        validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
             batch_parameters=batch_parameters,
             evaluation_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
         )
 
     @pytest.mark.unit
-    def test_result_init_no_run_results_raises_error(self, mocker: pytest.MockFixture):
+    def test_result_init_no_run_results_raises_error(self, mocker: MockerFixture):
         with pytest.raises(ValueError) as e:
             CheckpointResult(
                 run_id=mocker.Mock(spec=RunIdentifier),
@@ -479,7 +501,7 @@ class TestCheckpointResult:
         assert "CheckpointResult must contain at least one run result" in str(e.value)
 
     @pytest.mark.unit
-    def test_result_describe(self, mocker: pytest.MockFixture):
+    def test_result_describe(self, mocker: MockerFixture):
         result = CheckpointResult(
             run_id=mocker.Mock(spec=RunIdentifier),
             run_results={
@@ -529,7 +551,7 @@ class TestCheckpointResult:
         ):
             actual = result.describe_dict()
 
-        validation_results = actual.pop("validation_results")
+        validation_results = actual.pop("validation_results")  # type: ignore[misc] # key is required
         assert len(validation_results) == 1
 
         expected = {

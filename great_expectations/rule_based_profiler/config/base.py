@@ -534,7 +534,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
 
             return config
         except ValidationError:
-            logger.error(
+            logger.error(  # noqa: TRY400
                 "Encountered errors during loading config.  See ValidationError for more details."
             )
             raise
