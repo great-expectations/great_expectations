@@ -496,7 +496,7 @@ def test_TupleFilesystemStoreBackend_get_all(tmp_path_factory):
 
     all_values = my_store.get_all()
 
-    assert all_values == [value_a, value_b]
+    assert sorted(all_values) == [value_a, value_b]
 
 
 @pytest.mark.filesystem
