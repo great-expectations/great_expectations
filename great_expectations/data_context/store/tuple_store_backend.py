@@ -551,6 +551,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _get_all(self) -> list[Any]:
         """Get all objects from the store.
         NOTE: This is non-performant because we download each object separately.
+        See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/bucket/objects.html#objects
+        for the docs.
         """
         client = self._create_client()
         keys = self.list_keys()
