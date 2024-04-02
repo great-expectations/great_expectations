@@ -84,15 +84,15 @@ module.exports = {
           label: 'Manage Metadata Stores',
           link: {type: 'doc', id: 'core/installation_and_setup/manage_metadata_stores'},
           items: [
+          {
+              type: 'link',
+              label: 'Configure Expectation Stores',
+              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_metadata_stores#configure-expectation-stores',
+            },
             {
               type: 'link',
               label: 'Configure Validation Result Stores',
               href: '/docs/1.0-prerelease/core/installation_and_setup/manage_metadata_stores#configure-validation-result-stores',
-            },
-            {
-              type: 'link',
-              label: 'Configure Expectation Stores',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_metadata_stores#configure-expectation-stores',
             },
           ]
         },
