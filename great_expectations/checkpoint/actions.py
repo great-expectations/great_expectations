@@ -29,6 +29,7 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
@@ -38,6 +39,7 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
@@ -930,6 +932,27 @@ class UpdateDataDocsAction(DataDocsAction):
     site_names: List[str] = []
 
     @override
+    def v1_run(self, checkpoint_result: CheckpointResult) -> dict[ValidationResultIdentifier, dict]:
+        action_results: dict[ValidationResultIdentifier, dict] = {}
+        for result_identifier, result in checkpoint_result.run_results.items():
+            suite_name = result.suite_name
+            if self._using_cloud_context:
+                expectation_suite_identifier = GXCloudIdentifier(
+                    resource_type=GXCloudRESTResource.EXPECTATION_SUITE, resource_name=suite_name
+                )
+            else:
+                expectation_suite_identifier = ExpectationSuiteIdentifier(name=suite_name)
+
+            action_result = self._run(
+                validation_result_suite=result,
+                validation_result_suite_identifier=result_identifier,
+                expectation_suite_identifier=expectation_suite_identifier,
+            )
+            action_results[result_identifier] = action_result
+
+        return action_results
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -977,6 +1000,7 @@ class UpdateDataDocsAction(DataDocsAction):
         # process payload
         for sites in docs_site_urls_list:
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
+
         return data_docs_validation_results
 
 
