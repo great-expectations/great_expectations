@@ -842,7 +842,7 @@ class TestV1ActionRun:
                     spec=ExpectationSuiteValidationResult, suite_name=self.suite_b, success=False
                 ),
             },
-            checkpoint_config=mocker.Mock(spec=Checkpoint),
+            checkpoint_config=mocker.Mock(spec=Checkpoint, name="my_checkpoint"),
         )
 
     @pytest.mark.unit
@@ -883,13 +883,71 @@ class TestV1ActionRun:
         not is_library_loadable(library_name="pypd"),
         reason="pypd is not installed",
     )
+    @mock.patch("pypd.EventV2.create")
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    def test_PagerdutyAlertAction_run_emits_events(
+        self, mock_pypd_event, checkpoint_result: CheckpointResult
+    ):
+        action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="all")
+        checkpoint_name = checkpoint_result.checkpoint_config.name
+
+        checkpoint_result.success = True
+        assert action.v1_run(checkpoint_result=checkpoint_result) == {
+            "pagerduty_alert_result": "success"
+        }
+
+        checkpoint_result.success = False
+        assert action.v1_run(checkpoint_result=checkpoint_result) == {
+            "pagerduty_alert_result": "success"
+        }
+
+        assert mock_pypd_event.call_count == 2
+        mock_pypd_event.assert_has_calls(
+            [
+                mock.call(
+                    data={
+                        "dedup_key": checkpoint_name,
+                        "event_action": "trigger",
+                        "payload": {
+                            "severity": "critical",
+                            "source": "Great Expectations",
+                            "summary": f"Great Expectations Checkpoint {checkpoint_name} has succeeded",  # noqa: E501
+                        },
+                        "routing_key": "test",
+                    }
+                ),
+                mock.call(
+                    data={
+                        "dedup_key": checkpoint_name,
+                        "event_action": "trigger",
+                        "payload": {
+                            "severity": "critical",
+                            "source": "Great Expectations",
+                            "summary": f"Great Expectations Checkpoint {checkpoint_name} has failed",  # noqa: E501
+                        },
+                        "routing_key": "test",
+                    }
+                ),
+            ]
+        )
+
+    @pytest.mark.skipif(
+        not is_library_loadable(library_name="pypd"),
+        reason="pypd is not installed",
     )
-    def test_PagerdutyAlertAction_run(self, checkpoint_result: CheckpointResult):
-        action = PagerdutyAlertAction()
-        action.v1_run(checkpoint_result=checkpoint_result)
+    @mock.patch("pypd.EventV2.create")
+    @pytest.mark.unit
+    def test_PagerdutyAlertAction_run_does_not_emit_events(
+        self, mock_pypd_event, checkpoint_result: CheckpointResult
+    ):
+        action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="failure")
+
+        checkpoint_result.success = True
+        assert action.v1_run(checkpoint_result=checkpoint_result) == {
+            "pagerduty_alert_result": "none sent"
+        }
+
+        mock_pypd_event.assert_not_called()
 
     @pytest.mark.unit
     @pytest.mark.xfail(

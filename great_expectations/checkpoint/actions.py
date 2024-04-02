@@ -412,6 +412,18 @@ class PagerdutyAlertAction(ValidationAction):
         return values
 
     @override
+    def v1_run(self, checkpoint_result: CheckpointResult) -> dict:
+        success = checkpoint_result.success
+        checkpoint_name = checkpoint_result.checkpoint_config.name
+        summary = "Great Expectations Checkpoint {name} has "
+        if success:
+            summary += "succeeded"
+        else:
+            summary += "failed"
+
+        return self._run_pypd_alert(name=checkpoint_name, template=summary, success=success)
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -420,8 +432,6 @@ class PagerdutyAlertAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        import pypd
-
         logger.debug("PagerdutyAlertAction.run")
 
         if validation_result_suite is None:
@@ -440,25 +450,34 @@ class PagerdutyAlertAction(ValidationAction):
             )
 
         validation_success = validation_result_suite.success
+        expectation_suite_name = validation_result_suite.meta.get(
+            "expectation_suite_name", "__no_expectation_suite_name__"
+        )
+
+        return self._run_pypd_alert(
+            name=expectation_suite_name,
+            template="Great Expectations suite check {name} has failed",
+            success=validation_success,
+        )
+
+    def _run_pypd_alert(self, name: str, template: str, success: bool):
+        import pypd
 
         if (
             self.notify_on == "all"
             or self.notify_on == "success"
-            and validation_success
+            and success
             or self.notify_on == "failure"
-            and not validation_success
+            and not success
         ):
-            expectation_suite_name = validation_result_suite.meta.get(
-                "expectation_suite_name", "__no_expectation_suite_name__"
-            )
             pypd.api_key = self.api_key
             pypd.EventV2.create(
                 data={
                     "routing_key": self.routing_key,
-                    "dedup_key": expectation_suite_name,
+                    "dedup_key": name,
                     "event_action": "trigger",
                     "payload": {
-                        "summary": f"Great Expectations suite check {expectation_suite_name} has failed",  # noqa: E501
+                        "summary": template.format(name=name),
                         "severity": self.severity,
                         "source": "Great Expectations",
                     },
@@ -466,6 +485,7 @@ class PagerdutyAlertAction(ValidationAction):
             )
 
             return {"pagerduty_alert_result": "success"}
+
         return {"pagerduty_alert_result": "none sent"}
 
 
