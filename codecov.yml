@@ -1,5 +1,6 @@
 flag_management:
   default_rules: # the rules that will be followed for any flag added, generally
+    after_n_builds: 10
     carryforward: false
     statuses:
       - type: project
