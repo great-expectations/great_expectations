@@ -21,7 +21,7 @@ class NumericSorter(Sorter):
         batch_identifiers: dict = batch_definition.batch_identifiers
         batch_value: Any = batch_identifiers[self.name]
         if not is_numeric(value=batch_value):
-            raise gx_exceptions.SorterError(
+            raise gx_exceptions.SorterError(  # noqa: TRY003
                 # what is the identifying characteristic of batch_definition?
                 f"""BatchDefinition with IDDict "{self.name}" with value "{batch_value}" has value
 "{batch_value}" which cannot be part of numeric sort.

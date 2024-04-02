@@ -61,7 +61,7 @@ def _pandas_column_pair_map_condition_values(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column_A" and "column_B" found in provided metric_domain_kwargs, but it is required for a column pair map metric
 (_pandas_column_pair_map_condition_values).
 """  # noqa: E501
@@ -121,7 +121,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if not ("column_A" in domain_kwargs and "column_B" in domain_kwargs):
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column_A" and "column_B" found in provided metric_domain_kwargs, but it is required for a column pair map metric
 (_pandas_column_pair_map_condition_filtered_row_count).
 """  # noqa: E501

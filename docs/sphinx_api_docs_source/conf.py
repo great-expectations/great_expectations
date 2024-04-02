@@ -178,7 +178,7 @@ def convert_code_blocks(lines: list[str], name: str) -> None:  # noqa: C901
                 code_snippet_end = None
 
     if not num_triple_quotes % 2 == 0:
-        raise ValueError(f"Triple quotes for code blocks in {name} must be matched.")
+        raise ValueError(f"Triple quotes for code blocks in {name} must be matched.")  # noqa: TRY003
 
     # Replace code snippets with CodeBlock components
     for _ in range(len(code_snippet_indices)):

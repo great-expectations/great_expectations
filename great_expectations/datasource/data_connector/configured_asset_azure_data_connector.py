@@ -101,7 +101,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 ).group(1)
                 self._azure = azure.BlobServiceClient(**azure_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
-            raise ImportError(
+            raise ImportError(  # noqa: TRY003
                 "Unable to load Azure BlobServiceClient"
                 " (it is required for ConfiguredAssetAzureDataConnector)."
                 "Please ensure that you have provided the appropriate keys to `azure_options`"

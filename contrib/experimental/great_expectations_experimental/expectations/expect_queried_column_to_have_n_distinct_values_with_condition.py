@@ -72,7 +72,7 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
     def validate_template_dict(self, configuration):
         template_dict = configuration.kwargs.get("template_dict")
         if not isinstance(template_dict, dict):
-            raise TypeError("template_dict must be supplied as a dict")
+            raise TypeError("template_dict must be supplied as a dict")  # noqa: TRY003
         if not all(
             [
                 "column_to_check" in template_dict,
@@ -80,7 +80,7 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
                 "num_of_distinct_values" in template_dict,
             ]
         ):
-            raise KeyError(
+            raise KeyError(  # noqa: TRY003
                 "The following keys have to be in the template dict: column_to_check, condition, num_of_distinct_values  "
             )
         return template_dict

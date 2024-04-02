@@ -192,7 +192,7 @@ class DocsExampleParser:
         names = []
         for import_ in imports:
             if not isinstance(import_, (ast.Import, ast.ImportFrom)):
-                raise TypeError(
+                raise TypeError(  # noqa: TRY003
                     f"`imports` should only contain ast.Import, ast.ImportFrom types, you provided {type(import_)}"
                 )
 

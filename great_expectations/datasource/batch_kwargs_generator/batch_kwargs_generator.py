@@ -163,7 +163,7 @@ class BatchKwargsGenerator:
         self._generator_config = {"class_name": self.__class__.__name__}
         self._data_asset_iterators: Dict = {}
         if datasource is None:
-            raise ValueError("datasource must be provided for a BatchKwargsGenerator")
+            raise ValueError("datasource must be provided for a BatchKwargsGenerator")  # noqa: TRY003
         self._datasource = datasource
 
     @property

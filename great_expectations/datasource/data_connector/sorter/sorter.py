@@ -21,7 +21,7 @@ class Sorter:
         elif orderby == "desc":
             reverse = True
         else:
-            raise gx_exceptions.SorterError(
+            raise gx_exceptions.SorterError(  # noqa: TRY003
                 f'Illegal sort order "{orderby}" for attribute "{name}".'
             )
         self._reverse = reverse
