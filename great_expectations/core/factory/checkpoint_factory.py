@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Iterable
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
@@ -86,7 +86,7 @@ class CheckpointFactory(Factory[Checkpoint]):
 
     @public_api
     @override
-    def all(self) -> List[Checkpoint]:
+    def all(self) -> Iterable[Checkpoint]:
         """Get all Checkpoints."""
         return self._store.get_all()
 

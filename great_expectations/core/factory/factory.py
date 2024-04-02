@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, List, TypeVar
+from typing import Generic, Iterable, TypeVar
 
 T = TypeVar("T")
 
@@ -22,5 +22,5 @@ class Factory(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    def all(self) -> List[T]:
+    def all(self) -> Iterable[T]:
         pass

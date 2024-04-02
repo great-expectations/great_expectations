@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, cast
+from typing import TYPE_CHECKING, Iterable, cast
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
@@ -78,6 +78,6 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
 
     @public_api
     @override
-    def all(self) -> List[ValidationDefinition]:
+    def all(self) -> Iterable[ValidationDefinition]:
         """Get all ValidationDefinitions."""
         return []
