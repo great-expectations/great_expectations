@@ -543,13 +543,24 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return s3_object_key
 
     def _get(self, key):
+        client = self._create_client()
         s3_object_key = self._build_s3_object_key(key)
+        return self._get_by_s3_object_key(client, s3_object_key)
 
-        s3 = self._create_client()
+    @override
+    def _get_all(self) -> list[Any]:
+        client = self._create_client()
+        keys = self.list_keys()
+        keys = [k for k in keys if k != StoreBackend.STORE_BACKEND_ID_KEY]
 
+        s3_object_keys = [self._build_s3_object_key(key) for key in keys]
+
+        return [self._get_by_s3_object_key(client, key) for key in s3_object_keys]
+
+    def _get_by_s3_object_key(self, s3_client, s3_object_key):
         try:
-            s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
-        except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
+            s3_response_object = s3_client.get_object(Bucket=self.bucket, Key=s3_object_key)
+        except (s3_client.exceptions.NoSuchKey, s3_client.exceptions.NoSuchBucket):
             raise InvalidKeyError(  # noqa: TRY003
                 f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"  # noqa: E501
             )
@@ -559,10 +570,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
             .read()
             .decode(s3_response_object.get("ContentEncoding", "utf-8"))
         )
-
-    @override
-    def _get_all(self) -> list[Any]:
-        raise NotImplementedError
 
     def _set(
         self,
@@ -636,17 +643,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             key = self._convert_filepath_to_key(s3_object_key)
             if key:
                 key_list.append(key)
-
         return key_list
-
-    def _get_s3_objects(self):
-        s3r = self._create_resource()
-        bucket = s3r.Bucket(self.bucket)
-
-        if self.prefix:
-            return bucket.objects.filter(Prefix=self.prefix)
-        else:
-            return bucket.objects.all()
 
     def get_url_for_key(self, key, protocol=None):
         location = None

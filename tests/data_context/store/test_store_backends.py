@@ -646,7 +646,6 @@ def test_TupleS3StoreBackend_get_all(aws_credentials):
     my_store.set(("AAA",), val_a, content_type="text/html; charset=utf-8")
     my_store.set(("BBB",), val_b, content_type="text/html; charset=utf-8")
 
-    my_store.list_keys()
     result = my_store.get_all()
 
     assert sorted(result) == [val_a, val_b]
