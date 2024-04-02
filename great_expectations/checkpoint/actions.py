@@ -29,7 +29,6 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
-from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
