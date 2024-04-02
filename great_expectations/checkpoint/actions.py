@@ -1052,7 +1052,7 @@ class SNSNotificationAction(ValidationAction):
     sns_message_subject: Optional[str]
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+    def v1_run(self, checkpoint_result: CheckpointResult) -> str:  # type: ignore[override] # signature does not match parent
         return send_sns_notification(
             sns_topic_arn=self.sns_topic_arn,
             sns_subject=self.sns_message_subject or checkpoint_result.name,
