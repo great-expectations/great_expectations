@@ -33,7 +33,7 @@ Define the data you want GX Cloud to access within Snowflake.
 
 - You have a [GX Cloud account](https://greatexpectations.io/cloud).
 
-- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
+- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
 
 - You have a Snowflake database, schema, and table.
 
@@ -47,11 +47,17 @@ Define the data you want GX Cloud to access within Snowflake.
 
 2. Click the **New Data Source** tab and then select **Snowflake**.
 
-3. Enter a meaningful name for the Data Asset in the **Data Source name** field.
+3. Select one of the following options:
 
-4. Optional. To use a connection string to connect to a Data Source, click the **Use connection string** selector, enter a connection string, and then move to step 6. The connection string format is: `snowflake://<user_login_name>:<password>@<accountname>`.
+    - If you're connecting to an org-hosted Snowflake Data Asset for the first time, copy the code and see [Connect GX Cloud to Snowflake](../connect/connect_snowflake.md).
 
-5. Complete the following fields:
+    - If you're testing GX Cloud features and functionality in a self-hosted environment, click **I have created a GX Cloud user with valid permissions** and then click **Continue**.
+
+4. Enter a meaningful name for the Data Asset in the **Data Source name** field.
+
+5. Optional. To use a connection string to connect to a Data Source, click the **Use connection string** selector, enter a connection string, and then move to step 6. The connection string format is: `snowflake://<user_login_name>:<password>@<accountname>`.
+
+6. Complete the following fields:
 
     - **Username**: Enter the username you use to access Snowflake.
 
@@ -69,6 +75,63 @@ Define the data you want GX Cloud to access within Snowflake.
 
     - **Role**: Enter your Snowflake role.
 
+7. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+
+8. Click **Continue**.
+
+9. Select **Table Asset** or **Query Asset** and complete the following fields:
+
+    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
+
+    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
+
+10. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+
+    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
+
+    - **Column of datetime type** - Enter the name of the column containing the date and time data.
+
+11. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+
+12. Click **Finish**.
+
+13. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+
+</TabItem>
+<TabItem value="PostgreSQL">
+
+Define the data you want GX Cloud to access within PostgreSQL.
+
+### Prerequisites
+
+- You have a [GX Cloud account](https://greatexpectations.io/cloud).
+
+- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
+
+- You have a PostgreSQL database, schema, and table.
+
+- You have a [PostgreSQL instance](https://www.postgresql.org/download/). To improve data security, GX recommends using a separate user service account to connect to GX Cloud.
+
+- You know your PostgreSQL access credentials.
+
+### Connect to a PostgreSQL Data Asset 
+
+1. In GX Cloud, click **Data Assets** > **New Data Asset**.
+
+2. Click the **New Data Source** tab and then select **PostgreSQL**.
+
+3. Select one of the following options:
+
+    - If you're connecting to am org-hosted PostgreSQL Data Asset for the first time, copy the code and see [Connect GX Cloud to PostgreSQL](../connect/connect_postgresql.md).
+
+    - If you're testing GX Cloud features and functionality in a self-hosted environment, click **I have created a GX Cloud user with valid permissions** and then click **Continue**.
+
+4. Enter a meaningful name for the Data Asset in the **Data Source name** field.
+
+5. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
+
 6. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
 7. Click **Continue**.
@@ -77,7 +140,7 @@ Define the data you want GX Cloud to access within Snowflake.
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
     
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique across all Data Sources in GX Cloud.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
@@ -92,57 +155,6 @@ Define the data you want GX Cloud to access within Snowflake.
 11. Click **Finish**.
 
 12. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
-
-</TabItem>
-<TabItem value="PostgreSQL">
-
-Define the data you want GX Cloud to access within PostgreSQL.
-
-### Prerequisites
-
-- You have a [GX Cloud account](https://greatexpectations.io/cloud).
-
-- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
-
-- You have a PostgreSQL database, schema, and table.
-
-- You have a [PostgreSQL instance](https://www.postgresql.org/download/). To improve data security, GX recommends using a separate user service account to connect to GX Cloud.
-
-- You know your PostgreSQL access credentials.
-
-### Connect to a PostgreSQL Data Asset 
-
-1. In GX Cloud, click **Data Assets** > **New Data Asset**.
-
-2. Click the **New Data Source** tab and then select **PostgreSQL**.
-
-3. Enter a meaningful name for the Data Asset in the **Data Source name** field.
-
-4. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
-
-5. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
-
-6. Click **Continue**.
-
-7. Select **Table Asset** or **Query Asset** and complete the following fields:
-
-    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
-    
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique across all Data Sources in GX Cloud.
-
-    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
-
-8. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
-
-    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
-
-    - **Column of datetime type** - Enter the name of the column containing the date and time data.
-
-9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
-
-10. Click **Finish**.
-
-11. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 </TabItem>
 </Tabs>
