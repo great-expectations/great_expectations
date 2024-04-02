@@ -106,7 +106,7 @@ class InlineStoreBackend(StoreBackend):
         if isinstance(variable_config, dict):
             return list(variable_config.values())
         else:
-            raise StoreBackendUnsupportedResourceTypeError(self._resource_type)
+            raise StoreBackendUnsupportedResourceTypeError(self._resource_type.value)
 
     @override
     def _set(self, key: tuple[str, ...], value: Any, **kwargs: dict) -> None:

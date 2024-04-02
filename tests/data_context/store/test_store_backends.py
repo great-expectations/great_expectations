@@ -1425,7 +1425,7 @@ def test_InlineStoreBackend_get_all_invalid_resource_type(empty_data_context) ->
         resource_type=DataContextVariableSchema.ALL_VARIABLES,
     )
 
-    expected_error = "Unsupported resource type: DataContextVariableSchema.ALL_VARIABLES"
+    expected_error = "Unsupported resource type: data_context_variables"
     with pytest.raises(StoreBackendError, match=expected_error):
         inline_store_backend.get_all()
 
