@@ -10,7 +10,7 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 ## Prerequisites
 
-- The GX Agent is running. See [Try GX Cloud](../try_gx_cloud.md) or [Connect GX Cloud](../connect/connect_lp.md).
+- You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
 
 - You have a [Data Asset](/cloud/data_assets/manage_data_assets.md#create-a-data-asset).
 
