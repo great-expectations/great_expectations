@@ -908,6 +908,7 @@ class TestV1ActionRun:
     def test_UpdateDataDocsAction_run(
         self, mocker: MockerFixture, checkpoint_result: CheckpointResult
     ):
+        # Arrange
         context = mocker.Mock(spec=AbstractDataContext)
         set_context(context)
 
@@ -916,7 +917,6 @@ class TestV1ActionRun:
             f"/gx/uncommitted/data_docs/{site_names[0]}/index.html",
             f"/gx/uncommitted/data_docs/{site_names[1]}/index.html",
         ]
-
         context.get_docs_sites_urls.return_value = [
             {
                 "site_url": site_urls[0],
@@ -928,11 +928,37 @@ class TestV1ActionRun:
             },
         ]
 
+        # Act
         action = UpdateDataDocsAction(site_names=site_names)
         res = action.v1_run(checkpoint_result=checkpoint_result)
 
+        # Assert
         validation_identifer_a, validation_identifer_b = tuple(checkpoint_result.run_results.keys())
-        assert context.build_data_docs.call_count == 2
+        assert (
+            context.build_data_docs.call_count == 2
+        ), "Data Docs should be incrementally built (once per validation result)"
+        context.build_data_docs.assert_has_calls(
+            [
+                mock.call(
+                    build_index=True,
+                    dry_run=False,
+                    resource_identifiers=[
+                        validation_identifer_a,
+                        ExpectationSuiteIdentifier(name=self.suite_a),
+                    ],
+                    site_names=site_names,
+                ),
+                mock.call(
+                    build_index=True,
+                    dry_run=False,
+                    resource_identifiers=[
+                        validation_identifer_b,
+                        ExpectationSuiteIdentifier(name=self.suite_b),
+                    ],
+                    site_names=site_names,
+                ),
+            ]
+        )
         assert res == {
             validation_identifer_a: {
                 site_names[0]: site_urls[0],
