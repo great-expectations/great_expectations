@@ -1053,10 +1053,6 @@ class SNSNotificationAction(ValidationAction):
     sns_message_subject: Optional[str]
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
-        return super().v1_run(checkpoint_result)
-
-    @override
     def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
