@@ -4,6 +4,7 @@ from typing import Type, Union
 from unittest import mock
 
 import pytest
+import requests
 from freezegun import freeze_time
 from pytest_mock import MockerFixture
 from requests import Session
@@ -597,7 +598,11 @@ def test_EmailAction(
 @pytest.mark.unit
 def test_api_action_create_payload(mock_context):
     mock_validation_results = []
-    expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'  # noqa: E501
+    expected_payload = {
+        "test_suite_name": "my_suite",
+        "data_asset_name": "my_schema.my_table",
+        "validation_results": [],
+    }
     api_notification_action = APINotificationAction(url="http://www.example.com")
     payload = api_notification_action.create_payload(
         "my_schema.my_table", "my_suite", mock_validation_results
@@ -817,6 +822,8 @@ class TestActionSerialization:
 class TestV1ActionRun:
     suite_a: str = "suite_a"
     suite_b: str = "suite_b"
+    batch_id_a: str = "my_datasource-my_first_asset"
+    batch_id_b: str = "my_datasource-my_second_asset"
 
     @pytest.fixture
     def checkpoint_result(self, mocker: MockerFixture):
@@ -828,7 +835,7 @@ class TestV1ActionRun:
                         name=self.suite_a,
                     ),
                     run_id=RunIdentifier(run_name="prod_20240401"),
-                    batch_identifier="1234",
+                    batch_identifier=self.batch_id_a,
                 ): ExpectationSuiteValidationResult(
                     success=True,
                     statistics={},
@@ -840,7 +847,7 @@ class TestV1ActionRun:
                         name=self.suite_b,
                     ),
                     run_id=RunIdentifier(run_name="prod_20240402"),
-                    batch_identifier="5678",
+                    batch_identifier=self.batch_id_b,
                 ): ExpectationSuiteValidationResult(
                     success=True,
                     statistics={},
@@ -852,12 +859,29 @@ class TestV1ActionRun:
         )
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
     def test_APINotificationAction_run(self, checkpoint_result: CheckpointResult):
-        action = APINotificationAction(url="http://www.example.com")
-        action.v1_run(checkpoint_result=checkpoint_result)
+        url = "http://www.example.com"
+        action = APINotificationAction(url=url)
+
+        with mock.patch.object(requests, "post") as mock_post:
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+        mock_post.assert_called_once_with(
+            url,
+            headers={"Content-Type": "application/json"},
+            data=[
+                {
+                    "data_asset_name": self.batch_id_a,
+                    "test_suite_name": self.suite_a,
+                    "validation_results": [],
+                },
+                {
+                    "data_asset_name": self.batch_id_b,
+                    "test_suite_name": self.suite_b,
+                    "validation_results": [],
+                },
+            ],
+        )
 
     @pytest.mark.unit
     @pytest.mark.xfail(

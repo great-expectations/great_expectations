@@ -604,6 +604,10 @@ class TestCheckpointResult:
         )
         result = checkpoint.run()
 
+        from pprint import pprint
+
+        pprint(result)
+
         assert result.success is False
         assert result.describe_dict() == {
             "success": False,

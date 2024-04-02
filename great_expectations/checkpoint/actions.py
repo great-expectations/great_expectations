@@ -1102,6 +1102,24 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
+    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+        aggregate_payload = []
+        for run_id, run_result in checkpoint_result.run_results.items():
+            suite_name = run_result.suite_name
+            serializable_results = convert_to_json_serializable(run_result.results)
+            batch_identifier = run_id.batch_identifier
+
+            payload = self.create_payload(
+                data_asset_name=batch_identifier,
+                suite_name=suite_name,
+                validation_results_serializable=serializable_results,
+            )
+            aggregate_payload.append(payload)
+
+        response = self.send_results(aggregate_payload)
+        return f"Successfully Posted results to API, status code - {response.status_code}"
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -1124,10 +1142,14 @@ class APINotificationAction(ValidationAction):
         else:
             data_asset_name = "__no_data_asset_name__"
 
-        validation_results: list = validation_result_suite.get("results")
+        validation_results: list = validation_result_suite.results
         validation_results_serializable: list = convert_to_json_serializable(validation_results)
 
-        payload = self.create_payload(data_asset_name, suite_name, validation_results_serializable)
+        payload = self.create_payload(
+            data_asset_name=data_asset_name,
+            suite_name=suite_name,
+            validation_results_serializable=validation_results_serializable,
+        )
 
         response = self.send_results(payload)
         return f"Successfully Posted results to API, status code - {response.status_code}"
@@ -1141,12 +1163,9 @@ class APINotificationAction(ValidationAction):
             raise e  # noqa: TRY201
 
     @staticmethod
-    def create_payload(data_asset_name, suite_name, validation_results_serializable) -> str:
-        payload = json.dumps(
-            {
-                "test_suite_name": suite_name,
-                "data_asset_name": data_asset_name,
-                "validation_results": validation_results_serializable,
-            }
-        )
-        return payload
+    def create_payload(data_asset_name, suite_name, validation_results_serializable) -> dict:
+        return {
+            "test_suite_name": suite_name,
+            "data_asset_name": data_asset_name,
+            "validation_results": validation_results_serializable,
+        }
