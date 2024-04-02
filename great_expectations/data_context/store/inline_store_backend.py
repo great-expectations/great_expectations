@@ -12,7 +12,10 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.exceptions.exceptions import StoreBackendError
+from great_expectations.exceptions.exceptions import (
+    StoreBackendError,
+    StoreBackendUnsupportedResourceTypeError,
+)
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -103,7 +106,7 @@ class InlineStoreBackend(StoreBackend):
         if isinstance(variable_config, dict):
             return list(variable_config.values())
         else:
-            raise StoreBackendError(f"Unsupported resource type: {self._resource_type}")
+            raise StoreBackendUnsupportedResourceTypeError(self._resource_type)
 
     @override
     def _set(self, key: tuple[str, ...], value: Any, **kwargs: dict) -> None:
