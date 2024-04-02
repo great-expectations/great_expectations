@@ -61,7 +61,7 @@ def _pandas_multicolumn_map_condition_values(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_pandas_multicolumn_map_condition_values).
 """  # noqa: E501
@@ -107,7 +107,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_pandas_multicolumn_map_condition_filtered_row_count).
 """  # noqa: E501
@@ -144,7 +144,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_sqlalchemy_multicolumn_map_condition_values).
 """  # noqa: E501
@@ -189,7 +189,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_sqlalchemy_multicolumn_map_condition_filtered_row_count).
 """  # noqa: E501
@@ -230,7 +230,7 @@ def _spark_multicolumn_map_condition_values(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_spark_multicolumn_map_condition_values).
 """  # noqa: E501
@@ -288,7 +288,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column_list" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column_list" found in provided metric_domain_kwargs, but it is required for a multicolumn map metric
 (_spark_multicolumn_map_condition_filtered_row_count).
 """  # noqa: E501

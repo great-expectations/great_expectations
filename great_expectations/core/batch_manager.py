@@ -149,7 +149,7 @@ class BatchManager:
                     batch, (Batch, _get_fluent_batch_class())
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."  # noqa: E501
             except AssertionError as e:
-                logger.error(str(e))
+                logger.error(str(e))  # noqa: TRY400
 
             self._execution_engine.load_batch_data(
                 batch_id=batch.id,

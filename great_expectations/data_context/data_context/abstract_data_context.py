@@ -325,16 +325,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         self._checkpoints: CheckpointFactory | None = None
-        if checkpoint_store := self.stores.get(self.checkpoint_store_name):
+        if self.stores.get(self.checkpoint_store_name):
             # NOTE: Currently in an intermediate state where both the legacy and V1 stores exist.
             #       Upon the deletion of the old checkpoint store, the new one will be promoted.
-            v1_checkpoint_store = V1CheckpointStore()
-            v1_checkpoint_store._store_backend = (
-                checkpoint_store.store_backend
-            )  # Leverage same backend as what was configured for the old store
             self._checkpoints = CheckpointFactory(
-                store=v1_checkpoint_store,
-                context=self,
+                store=self.v1_checkpoint_store,
             )
 
         self._validation_definitions: ValidationDefinitionFactory = ValidationDefinitionFactory(
@@ -546,7 +541,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def suites(self) -> SuiteFactory:
         if not self._suites:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "DataContext requires a configured ExpectationsStore to persist ExpectationSuites."
             )
         return self._suites
@@ -554,7 +549,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def checkpoints(self) -> CheckpointFactory:
         if not self._checkpoints:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "DataContext requires a configured CheckpointStore to persist Checkpoints."
             )
         return self._checkpoints
@@ -562,7 +557,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def validation_definitions(self) -> ValidationDefinitionFactory:
         if not self._validation_definitions:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "DataContext requires a configured ValidationDefinitionStore to persist "
                 "Validations."
             )
@@ -655,6 +650,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.checkpoint_store_name]
 
     @property
+    def v1_checkpoint_store(self) -> V1CheckpointStore:
+        # Temporary property until the legacy checkpoint store is removed
+        # and the new checkpoint store is promoted to the old namespace
+        legacy_checkpoint_store = self.checkpoint_store
+        store = V1CheckpointStore()
+
+        # Leverage same backend as what was configured for the old store
+        store._store_backend = legacy_checkpoint_store.store_backend
+
+        return store
+
+    @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
 
@@ -671,13 +678,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "Can not write the fluent datasource, because no name was provided."
             )
 
         # We currently don't allow one to overwrite a datasource with this internal method
         if datasource_name in self.datasources:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"Can not write the fluent datasource {datasource_name} because a datasource of that "  # noqa: E501
                 "name already exists in the data context."
             )
@@ -703,7 +710,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "Can not write the fluent datasource, because no name was provided."
             )
 
@@ -822,7 +829,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # "type" is only used in FDS so we check for its existence (equivalent for block-style would be "class_name" and "module_name")  # noqa: E501
         if "type" in kwargs:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "Creation of fluent-datasources with individual arguments is not supported and should be done through the `context.sources` API."  # noqa: E501
             )
 
@@ -1077,7 +1084,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: The input `datasource_name` is None.
         """
         if datasource_name is None:
-            raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")
+            raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")  # noqa: TRY003
 
         try:
             datasource: BaseDatasource | LegacyDatasource | FluentDatasource = self.datasources[
@@ -1141,7 +1148,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         if self.config.data_docs_sites is not None:
             if site_name in self.config.data_docs_sites:
-                raise gx_exceptions.InvalidKeyError(
+                raise gx_exceptions.InvalidKeyError(  # noqa: TRY003
                     f"Data Docs Site `{site_name}` already exists in the Data Context."
                 )
 
@@ -1177,7 +1184,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         if self.config.data_docs_sites is not None:
             if site_name not in self.config.data_docs_sites:
-                raise gx_exceptions.InvalidKeyError(
+                raise gx_exceptions.InvalidKeyError(  # noqa: TRY003
                     f"Data Docs Site `{site_name}` does not already exist in the Data Context."
                 )
 
@@ -1196,7 +1203,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         if self.config.data_docs_sites is not None:
             if site_name not in self.config.data_docs_sites:
-                raise gx_exceptions.InvalidKeyError(
+                raise gx_exceptions.InvalidKeyError(  # noqa: TRY003
                     f"Data Docs Site `{site_name}` does not already exist in the Data Context."
                 )
 
@@ -1217,7 +1224,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             StoreConfigurationError if the target Store is not found.
         """
         if store_name not in self.config.stores and store_name not in self._stores:
-            raise gx_exceptions.StoreConfigurationError(
+            raise gx_exceptions.StoreConfigurationError(  # noqa: TRY003
                 f'Attempted to delete a store named: "{store_name}". It is not a configured store.'
             )
 
@@ -1275,7 +1282,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
 
         if not datasource_name:
-            raise ValueError("Datasource names must be a datasource name")
+            raise ValueError("Datasource names must be a datasource name")  # noqa: TRY003
 
         datasource = self.get_datasource(datasource_name=datasource_name)
 
@@ -1617,7 +1624,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             CheckpointNotFoundError: If the requested Checkpoint does not exist.
         """
         if not name and not id:
-            raise ValueError("name and id cannot both be None")
+            raise ValueError("name and id cannot both be None")  # noqa: TRY003
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
@@ -1682,7 +1689,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         try:
             keys = self.expectations_store.list_keys()
         except KeyError as e:
-            raise gx_exceptions.InvalidConfigError(f"Unable to find configured store: {e!s}")
+            raise gx_exceptions.InvalidConfigError(f"Unable to find configured store: {e!s}")  # noqa: TRY003
         return keys  # type: ignore[return-value]
 
     @public_api
@@ -1852,7 +1859,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
             > 1
         ):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified"  # noqa: E501
             )
 
@@ -1931,7 +1938,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
             > 1
         ):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "No more than one of expectation_suite_name, "
                 f"{'expectation_suite_id, ' if expectation_suite_id else ''}"
                 "expectation_suite, or create_expectation_suite_with_name can be specified"
@@ -1973,7 +1980,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         """
         if len(batch_list) == 0:
-            raise gx_exceptions.InvalidBatchRequestError(
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 """Validator could not be created because BatchRequest returned an empty batch_list.
                 Please check your parameters and try again."""
             )
@@ -2280,7 +2287,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs,
     ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("overwrite_existing must be of type bool.")
+            raise ValueError("overwrite_existing must be of type bool.")  # noqa: TRY003, TRY004
 
         self._validate_expectation_suite_xor_expectation_suite_name(
             expectation_suite, expectation_suite_name
@@ -2466,7 +2473,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name)  # type: ignore[arg-type]
         if not self.expectations_store.has_key(key):
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"expectation_suite with name {expectation_suite_name} does not exist."
             )
         self.expectations_store.remove_key(key)
@@ -2503,7 +2510,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if expectation_suite_name:
             key = ExpectationSuiteIdentifier(name=expectation_suite_name)
         else:
-            raise ValueError("expectation_suite_name must be provided")
+            raise ValueError("expectation_suite_name must be provided")  # noqa: TRY003
 
         if include_rendered_content is None:
             include_rendered_content = (
@@ -2519,7 +2526,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             return expectation_suite
 
         else:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"expectation_suite {expectation_suite_name} not found"
             )
 
@@ -2611,19 +2618,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         result_format = result_format or {"result_format": "SUMMARY"}
 
         if not assets_to_validate:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "No batches of data were passed in. These are required"
             )
 
         for batch in assets_to_validate:
             if not isinstance(batch, (tuple, Validator)):
-                raise gx_exceptions.DataContextError(
+                raise gx_exceptions.DataContextError(  # noqa: TRY003
                     "Batches are required to be of type tuple or Validator"
                 )
         try:
             validation_operator = self.validation_operators[validation_operator_name]
         except KeyError:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml"  # noqa: E501
             )
 
@@ -2678,7 +2685,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         elif isinstance(datasource_names, str):
             datasource_names = [datasource_names]
         elif not isinstance(datasource_names, list):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "Datasource names must be a datasource name, list of datasource names or None (to list all datasources)"  # noqa: E501
             )
         return datasource_names
@@ -2740,7 +2747,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     )
 
             else:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "If providing batch kwargs generator, you must either specify one for each datasource or only "  # noqa: E501
                     "one datasource."
                 )
@@ -2886,7 +2893,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         if site_name:
             if site_name not in sites.keys():
-                raise gx_exceptions.DataContextError(
+                raise gx_exceptions.DataContextError(  # noqa: TRY003
                     f"Could not find site named {site_name}. Please check your configurations"
                 )
             site = sites[site_name]
@@ -2936,14 +2943,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         data_docs_sites = self.variables.data_docs_sites
         if not data_docs_sites:
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",  # noqa: E501
             )
 
         data_docs_site_names = list(data_docs_sites.keys())
         if site_name:
             if site_name not in data_docs_site_names:
-                raise gx_exceptions.DataContextError(
+                raise gx_exceptions.DataContextError(  # noqa: TRY003
                     f"The specified site name `{site_name}` does not exist in this project."
                 )
             return self._clean_data_docs_site(site_name)
@@ -3019,7 +3026,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         metric_configurations_list = []
         for kwarg_name in metric_configuration.keys():
             if not isinstance(metric_configuration[kwarg_name], dict):
-                raise gx_exceptions.DataContextError(
+                raise gx_exceptions.DataContextError(  # noqa: TRY003
                     "Invalid metric_configuration: each key must contain a " "dictionary."
                 )
             if (
@@ -3027,12 +3034,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             ):  # this special case allows a hash of multiple kwargs
                 for metric_kwargs_id in metric_configuration[kwarg_name].keys():
                     if base_kwargs != {}:
-                        raise gx_exceptions.DataContextError(
+                        raise gx_exceptions.DataContextError(  # noqa: TRY003
                             "Invalid metric_configuration: when specifying "
                             "metric_kwargs_id, no other keys or values may be defined."
                         )
                     if not isinstance(metric_configuration[kwarg_name][metric_kwargs_id], list):
-                        raise gx_exceptions.DataContextError(
+                        raise gx_exceptions.DataContextError(  # noqa: TRY003
                             "Invalid metric_configuration: each value must contain a " "list."
                         )
                     metric_configurations_list += [
@@ -3043,7 +3050,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 for kwarg_value in metric_configuration[kwarg_name].keys():
                     base_kwargs.update({kwarg_name: kwarg_value})
                     if not isinstance(metric_configuration[kwarg_name][kwarg_value], list):
-                        raise gx_exceptions.DataContextError(
+                        raise gx_exceptions.DataContextError(  # noqa: TRY003
                             "Invalid metric_configuration: each value must contain a " "list."
                         )
                     for nested_configuration in metric_configuration[kwarg_name][kwarg_value]:
@@ -3080,7 +3087,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             project_config_dict = dataContextConfigSchema.load(project_config_dict)
             context_config: DataContextConfig = DataContextConfig(**project_config_dict)
             return context_config
-        except ValidationError:
+        except ValidationError:  # noqa: TRY302
             raise
 
     @overload
@@ -3585,7 +3592,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 self.datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 self._datasource_store.delete(config)
-                raise e
+                raise e  # noqa: TRY201
 
         self.config.datasources[name] = config  # type: ignore[index,assignment]
 
@@ -3777,7 +3784,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 continue
 
             if not isinstance(metrics_list, list):
-                raise gx_exceptions.DataContextError(
+                raise gx_exceptions.DataContextError(  # noqa: TRY003
                     "Invalid requested_metrics configuration: metrics requested for "
                     "each expectation suite must be a list."
                 )
@@ -4085,7 +4092,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         config = self._variables.config
         config_variables_filepath = config.config_variables_file_path
         if not config_variables_filepath:
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 "'config_variables_file_path' property is not found in config - setting it is required to use this feature"  # noqa: E501
             )
 
@@ -4146,8 +4153,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: Invalid arguments.
         """
         if expectation_suite_name is not None and expectation_suite is not None:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "Only one of expectation_suite_name or expectation_suite may be specified."
             )
         if expectation_suite_name is None and expectation_suite is None:
-            raise TypeError("One of expectation_suite_name or expectation_suite must be specified.")
+            raise TypeError("One of expectation_suite_name or expectation_suite must be specified.")  # noqa: TRY003

@@ -164,7 +164,7 @@ def map_batch_definition_to_data_reference_string_using_regex(
     group_names: List[str],
 ) -> str:
     if not isinstance(batch_definition, LegacyBatchDefinition):
-        raise TypeError("batch_definition is not of an instance of type BatchDefinition")
+        raise TypeError("batch_definition is not of an instance of type BatchDefinition")  # noqa: TRY003
 
     data_asset_name: str = batch_definition.data_asset_name
     batch_identifiers: IDDict = batch_definition.batch_identifiers
@@ -185,7 +185,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
     data_asset_name: Optional[str] = None,
 ) -> str:
     if not isinstance(batch_identifiers, IDDict):
-        raise TypeError("batch_identifiers is not " "an instance of type IDDict")
+        raise TypeError("batch_identifiers is not " "an instance of type IDDict")  # noqa: TRY003
 
     template_arguments: dict = copy.deepcopy(batch_identifiers)
     # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>  # noqa: E501
@@ -269,7 +269,7 @@ def _invert_regex_to_data_reference_template(  # noqa: C901 - too complex
         ]:
             pass
         else:
-            raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")
+            raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")  # noqa: TRY003
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)  # type: ignore[no-redef]
@@ -484,7 +484,7 @@ def list_s3_keys(  # noqa: C901 - too complex
     s3_objects_info: dict = s3.list_objects_v2(**query_options)
 
     if not any(key in s3_objects_info for key in ["Contents", "CommonPrefixes"]):
-        raise ValueError("S3 query may not have been configured correctly.")
+        raise ValueError("S3 query may not have been configured correctly.")  # noqa: TRY003
 
     if "Contents" in s3_objects_info:
         keys: List[str] = [item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0]
@@ -531,7 +531,7 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
                 return None
 
             if "name" not in sorter_config:
-                raise ValueError("Sorter config should have a name")
+                raise ValueError("Sorter config should have a name")  # noqa: TRY003
 
             sorter_name: str = sorter_config["name"]
             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)

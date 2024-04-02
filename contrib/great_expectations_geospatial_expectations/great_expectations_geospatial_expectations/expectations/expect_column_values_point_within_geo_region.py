@@ -47,11 +47,11 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
             country_shapes.reset_index(drop=True, inplace=True)
 
             if country_shapes.empty:
-                raise Exception("This ISO country code is not supported.")
+                raise Exception("This ISO country code is not supported.")  # noqa: TRY002, TRY003
 
             polygon = country_shapes["geometry"][0]
         else:
-            raise Exception("Specify country_iso_a3 or polygon_points")
+            raise Exception("Specify country_iso_a3 or polygon_points")  # noqa: TRY002, TRY003
 
         points = geopandas.GeoSeries(column.apply(Point))
 

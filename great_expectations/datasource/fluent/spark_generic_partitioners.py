@@ -101,7 +101,7 @@ class _PartitionerDatetime(FluentBaseModel):
         identifiers: Dict = {}
         for part in self.param_names:
             if part not in options:
-                raise ValueError(f"'{part}' must be specified in the batch request options")
+                raise ValueError(f"'{part}' must be specified in the batch request options")  # noqa: TRY003
             identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
@@ -220,7 +220,7 @@ class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "quotient" not in options:
-            raise ValueError("'quotient' must be specified in the batch request options")
+            raise ValueError("'quotient' must be specified in the batch request options")  # noqa: TRY003
         return {self.column_name: options["quotient"]}
 
 
@@ -243,7 +243,7 @@ class SparkPartitionerModInteger(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "remainder" not in options:
-            raise ValueError("'remainder' must be specified in the batch request options")
+            raise ValueError("'remainder' must be specified in the batch request options")  # noqa: TRY003
         return {self.column_name: options["remainder"]}
 
 
@@ -265,7 +265,7 @@ class SparkPartitionerColumnValue(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if self.column_name not in options:
-            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")
+            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")  # noqa: TRY003
         return {self.column_name: options[self.column_name]}
 
 
@@ -288,7 +288,7 @@ class SparkPartitionerMultiColumnValue(FluentBaseModel):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"All column names, {self.column_names}, must be specified in the batch request options. "  # noqa: E501
                 f" The options provided were f{options}."
             )
