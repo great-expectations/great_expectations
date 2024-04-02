@@ -549,12 +549,13 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
+        """Get all objects from the store.
+        NOTE: This is non-performant because we download each object separately.
+        """
         client = self._create_client()
         keys = self.list_keys()
         keys = [k for k in keys if k != StoreBackend.STORE_BACKEND_ID_KEY]
-
         s3_object_keys = [self._build_s3_object_key(key) for key in keys]
-
         return [self._get_by_s3_object_key(client, key) for key in s3_object_keys]
 
     def _get_by_s3_object_key(self, s3_client, s3_object_key):
