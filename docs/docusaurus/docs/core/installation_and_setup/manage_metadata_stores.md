@@ -29,8 +29,8 @@ By default, new Expectations are stored as Expectation Suites in JSON format in 
   {label: 'Microsoft Azure Blob Storage', value:'azure'},
   {label: 'Google Cloud Service', value:'gcs'},
   {label: 'Filesystem', value:'filesystem'},
-  {label: 'PostgreSQL', value:'postgresql'},
   ]}>
+
 <TabItem value="amazon">
 
 Use the information provided here to configure a new storage location for Expectations in Amazon S3.
@@ -92,7 +92,7 @@ This configuration tells GX Core to look for Expectations in a Store named `expe
 
 1. Add the following configuration to the `stores` section of your `great_expectations.yml` file:
 
-    ```yaml
+  ```yaml
     stores:
       expectations_S3_store:
         class_name: ExpectationsStore
@@ -102,11 +102,11 @@ This configuration tells GX Core to look for Expectations in a Store named `expe
           prefix: '<your>'  # Bucket and prefix in combination must be unique across all stores
 
     expectations_store_name: expectations_S3_store
-    ```
+  ```
 
 2. Change the default `store_backend` settings to make the Store work with S3. The `class_name` is set to `TupleS3StoreBackend`, `bucket` is the address of your S3 bucket, and `prefix` is the folder in your S3 bucket where Expectations are located. The following example shows the additional options that are available to customize `TupleS3StoreBackend`:
 
-    ```yaml
+  ```yaml
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleS3StoreBackend
@@ -115,19 +115,19 @@ This configuration tells GX Core to look for Expectations in a Store named `expe
       boto3_options:
         endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
         region_name: '<your_aws_region_name>'
-    ```
+  ```
 
-    In the previous example, the Store name is `expectations_S3_store`. If you use a personalized Store name, you must also update the value of the `expectations_store_name` key to match the Store name. For example:
+  In the previous example, the Store name is `expectations_S3_store`. If you use a personalized Store name, you must also update the value of the `expectations_store_name` key to match the Store name. For example:
 
-    ```yaml
+  ```yaml
     expectations_store_name: expectations_S3_store
-    ```
+  ```
 
-    When you update the `expectations_store_name` key value, GX uses the new Store for Validation Results.
+  When you update the `expectations_store_name` key value, GX uses the new Store for Validation Results.
 
 3. Add the following code to `great_expectations.yml` to configure the IAM user:
 
-    ```yaml
+  ```yaml
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleS3StoreBackend
@@ -137,11 +137,11 @@ This configuration tells GX Core to look for Expectations in a Store named `expe
         aws_access_key_id: ${AWS_ACCESS_KEY_ID} # Uses the AWS_ACCESS_KEY_ID environment variable to get aws_access_key_id.
         aws_secret_access_key: ${AWS_ACCESS_KEY_ID}
         aws_session_token: ${AWS_ACCESS_KEY_ID}
-    ```
+  ```
 
 4. Add the following code to `great_expectations.yml` to configure the IAM Assume Role:
 
-    ```yaml
+  ```yaml
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleS3StoreBackend
@@ -151,9 +151,9 @@ This configuration tells GX Core to look for Expectations in a Store named `expe
         assume_role_arn: '<your_role_to_assume>'
         region_name: '<your_aws_region_name>'
         assume_role_duration: session_duration_in_seconds
-    ```
+  ```
 
-    If you're storing Validations in S3 or DataDocs in S3, make sure that the prefix values are disjoint and one is not a substring of the other.
+  If you're storing Validations in S3 or DataDocs in S3, make sure that the prefix values are disjoint and one is not a substring of the other.
 
 ### Copy existing Expectation JSON files to the S3 bucket (Optional)
 
@@ -473,66 +473,7 @@ diff --git a/gx/expectations/npi_expectations.json b/great_expectations/expectat
 ```
 
 </TabItem>
-<TabItem value="postgresql">
 
-Use the information provided here to configure an Expectations store in a PostgreSQL database.
-
-### Prerequisites
-
-- [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
-- A [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
-
-### Configure the `config_variables.yml` file with your database credentials
-
-GX recommends storing database credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and not part of source control. 
-
-To add database credentials, open ``config_variables.yml`` and add the following entry below the ``db_creds`` key: 
-
-```yaml
-    db_creds:
-      drivername: postgresql
-      host: '<your_host_name>'
-      port: '<your_port>'
-      username: '<your_username>'
-      password: '<your_password>'
-      database: '<your_database_name>'
-```
-To configure the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](../installation_and_setup/manage_credentials.md).
-
-### Identify your Data Context Expectations Store
-
-Open ``great_expectations.yml``and find the following entry:
-
-```yaml
-expectations_store_name: expectations_store
-
-stores:
-  expectations_store:
-      class_name: ExpectationsStore
-      store_backend:
-          class_name: TupleFilesystemStoreBackend
-          base_directory: expectations/
-```
-
-This configuration tells GX Core to look for Expectations in the ``expectations_store`` Store. The default ``base_directory`` for ``expectations_store`` is ``expectations/``.
-
-### Update your configuration file to include a new Store for Expectations
-
-In the following example, `expectations_store_name` is set to ``expectations_postgres_store``, but it can be personalized. You also need to make some changes to the ``store_backend`` settings.  The ``class_name`` is ``DatabaseStoreBackend``, and ``credentials`` is ``${db_creds}`` to reference the corresponding key in the ``config_variables.yml`` file.
-
-```yaml
-expectations_store_name: expectations_postgres_store
-
-stores:
-  expectations_postgres_store:
-      class_name: ExpectationsStore
-      store_backend:
-          class_name: DatabaseStoreBackend
-          credentials: ${db_creds}
-```
-
-</TabItem>
 </Tabs>
 
 ## Configure Validation Result Stores
@@ -554,8 +495,8 @@ Validation Results can include sensitive or regulated data that should not be co
   {label: 'Microsoft Azure Blob Storage', value:'azure'},
   {label: 'Google Cloud Service', value:'gcs'},
   {label: 'Filesystem', value:'filesystem'},
-  {label: 'PostgreSQL', value:'postgresql'},
   ]}>
+
 <TabItem value="amazon">
 
 Use the information provided here to configure a new storage location for Validation Results in Amazon S3.
@@ -616,7 +557,7 @@ These parameters tell GX Core to look for Validation Results in a Store named `v
 
 1. To manually add a Validation Results Store, add the following configuration to the `stores` section of your `great_expectations.yml` file:
 
-    ```yaml
+  ```yaml
     stores:
     validations_S3_store:
         class_name: ValidationsStore
@@ -624,13 +565,13 @@ These parameters tell GX Core to look for Validation Results in a Store named `v
         class_name: TupleS3StoreBackend
         bucket: '<your>'
         prefix: '<your>'  # Bucket and prefix in combination must be unique across all stores
-    ```
+  ```
 
 2. Change the default store_backend settings to make the Store work with S3. The `class_name` is set to `TupleS3StoreBackend`, `bucket` is the address of your S3 bucket, and `prefix` is the folder in your S3 bucket where Validation Results are located.
 
     The following example shows the additional options that are available to customize TupleS3StoreBackend:
 
-    ```yaml
+  ```yaml
     class_name: ValidationsStore
     store_backend:
     class_name: TupleS3StoreBackend
@@ -639,17 +580,17 @@ These parameters tell GX Core to look for Validation Results in a Store named `v
     boto3_options:
         endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
         region_name: '<your_aws_region_name>'
-    ```
+  ```
 3. Optional. To use a personalized Store name, update the validations_store_name key value to match the Store name. For example:
 
-    ```yaml
+  ```yaml
     validations_store_name: validations_S3_store
-    ```
+  ```
     When you update the validations_store_name key value, GX Core uses the new Store for Validation Results.
 
 4. Add the following code to `great_expectations.yml` to configure the IAM user:
     
-    ```yaml
+  ```yaml
     class_name: ValidationsStore
     store_backend:
     class_name: TupleS3StoreBackend
@@ -659,10 +600,10 @@ These parameters tell GX Core to look for Validation Results in a Store named `v
         aws_access_key_id: ${AWS_ACCESS_KEY_ID} # Uses the AWS_ACCESS_KEY_ID environment variable to get aws_access_key_id.
         aws_secret_access_key: ${AWS_ACCESS_KEY_ID}
         aws_session_token: ${AWS_ACCESS_KEY_ID}
-    ```
+  ```
 5. Add the following code to `great_expectations.yml` to configure the IAM Assume Role:
 
-    ```yaml
+  ```yaml
     class_name: ValidationsStore
     store_backend:
     class_name: TupleS3StoreBackend
@@ -672,7 +613,7 @@ These parameters tell GX Core to look for Validation Results in a Store named `v
         assume_role_arn: '<your_role_to_assume>'
         region_name: '<your_aws_region_name>'
         assume_role_duration: session_duration_in_seconds
-    ```
+  ```
     If you are also storing Expectations or Data Docs in S3, make sure the `prefix` values are disjoint and one is not a substring of the other.
 
 ### Copy existing Validation results to the S3 bucket (Optional)
@@ -908,111 +849,5 @@ stores:
 Run a [Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building Data Docs.
 
 </TabItem>
-<TabItem value="postgresql">
 
-Use the information provided here to configure GX Core to store Validation Results in a PostgreSQL database.
-
-### Prerequisites
-
-- [A Data Context](./manage_data_contexts.md).
-- [An Expectations Suite](../create_expectations/expectation_suites/manage_expectation_suites.md).
-- [A Checkpoint](../validate_data/checkpoints/manage_checkpoints.md).
-- [A PostgreSQL database](https://www.postgresql.org/) with appropriate credentials.
-
-### Configure the ``config_variables.yml`` file with your database credentials
-
-GX recommends storing database credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and not part of source control. 
-
-1. To add database credentials, open ``config_variables.yml`` and add the following entry below the ``db_creds`` key: 
-
-    ```yaml
-    db_creds:
-      drivername: postgresql
-      host: '<your_host_name>'
-      port: '<your_port>'
-      username: '<your_username>'
-      password: '<your_password>'
-      database: '<your_database_name>'
-    ```
-    To configure the ``config_variables.yml`` file, or additional environment variables, see [Manage credentials](../installation_and_setup/manage_credentials.md).
-
-2. Optional. To use a specific schema as the backend, specify `schema` as an additional keyword argument. For example:
-
-    ```yaml
-    db_creds:
-      drivername: postgresql
-      host: '<your_host_name>'
-      port: '<your_port>'
-      username: '<your_username>'
-      password: '<your_password>'
-      database: '<your_database_name>'
-      schema: '<your_schema_name>'
-    ```
-
-### Identify your Data Context Validation Results Store
-
-The configuration for your Validation Results Store is available in your Data Context.  Open ``great_expectations.yml``and find the following entry:
-
-```yaml
-validations_store_name: validations_store
-
-stores:
-  validations_store:
-      class_name: ValidationsStore
-      store_backend:
-          class_name: TupleFilesystemStoreBackend
-          base_directory: uncommitted/validations/
-```
-This configuration tells GX Core to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
-
-### Update your configuration file to include a new Validation Results Store
-
-Add the following entry to your ``great_expectations.yml``: 
-
-```yaml
-validations_store_name: validations_postgres_store
-
-stores:
-  validations_postgres_store:
-      class_name: ValidationsStore
-      store_backend:
-          class_name: DatabaseStoreBackend
-          credentials: ${db_creds}
-```
-
-In the previous example, `validations_store_name` is set to ``validations_postgres_store``, but it can be personalized.  Also, ``class_name`` is set to ``DatabaseStoreBackend``, and ``credentials`` is set to ``${db_creds}``, which references the corresponding key in the ``config_variables.yml`` file.  
-
-### Confirm the addition of the new Validation Results Store
-
-In the previous example, a ``validations_store`` on the local filesystem and a ``validations_postgres_store`` are configured.  GX Core looks for Validation Results in PostgreSQL when the ``validations_store_name`` variable is set to ``validations_postgres_store``. Run the following command to remove ``validations_store`` and confirm the ``validations_postgres_store`` configuration:
-
-```bash
-great_expectations store list
-
-- name: validations_store
-class_name: ValidationsStore
-store_backend:
-  class_name: TupleFilesystemStoreBackend
-  base_directory: uncommitted/validations/
-
-- name: validations_postgres_store
-class_name: ValidationsStore
-store_backend:
-  class_name: DatabaseStoreBackend
-  credentials:
-      database: '<your_db_name>'
-      drivername: postgresql
-      host: '<your_host_name>'
-      password: ******
-      port: '<your_port>'
-      username: '<your_username>'
-```
-
-### Confirm the Validation Results Store is configured correctly
-
-[Run a Checkpoint](../validate_data/checkpoints/manage_checkpoints.md) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by re-building Data Docs.
-
-GX Core creates a new table in your database named ``ge_validations_store``, and populates the fields with information from the Validation Results.
-
-</TabItem>
 </Tabs>
