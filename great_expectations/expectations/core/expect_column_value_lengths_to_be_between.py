@@ -55,6 +55,10 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     expect_column_value_lengths_to_be_between is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
+    Column Map Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column and ask a yes/no question for every row in that column.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+
     Args:
         column (str): \
             The column name.
@@ -62,13 +66,15 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             The minimum value for a column entry length.
         max_value (int or None): \
             The maximum value for a column entry length.
-
-    Keyword Args:
-        mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
-            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+        strict_min (boolean): \
+            If True, values must be strictly larger than min_value, default=False
+        strict_max (boolean): \
+            If True, values must be strictly smaller than max_value, default=False
 
     Other Parameters:
+        mostly (None or a float between 0 and 1): \
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -93,6 +99,84 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Numerical Data
+
+    Example Data:
+                test 	test2
+            0 	"12345" "A"
+            1 	"abcde" "13579"
+            2 	"1b3d5" "24680"
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnValueLengthsToBeBetween(
+                    column="test2",
+                    min_value=1,
+                    max_value=5
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnValueLengthsToBeBetween(
+                    column="test",
+                    min_value=5,
+                    max_value=5,
+                    strict_min=True,
+                    strict_max=True
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 3,
+                    "unexpected_percent": 100.0,
+                    "partial_unexpected_list": [
+                        "12345",
+                        "abcde",
+                        "1b3d5"
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 100.0,
+                    "unexpected_percent_nonmissing": 100.0
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     min_value: Union[int, EvaluationParameterDict, datetime, None] = None

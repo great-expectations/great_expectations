@@ -37,16 +37,18 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     expect_column_most_common_value_to_be_in_set is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
+    Column Aggregate Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
+    If that Metric meets the conditions you set, the Expectation considers that data valid.
+
     Args:
         column (str): \
             The column name
         value_set (set-like): \
             A list of potential values to match
-
-    Keyword Args:
         ties_okay (boolean or None): \
             If True, then the expectation will still succeed if values outside the designated set are as common \
-            (but not more common) than designated values
+            (but not more common) than designated values. Default False.
 
     Other Parameters:
         result_format (str or None): \
@@ -69,6 +71,69 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
           representing the most common values in the column, which is often a single element... if there \
           is a tie for most common among multiple values, observed_value will contain a single copy of each \
           most common value
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Sets
+
+    Example Data:
+                test 	test2
+            0 	1       1
+            1 	2       1
+            2 	4       1
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnMostCommonValueToBeInSet(
+                    column="test2",
+                    value_set=[1, 2, 4],
+                    ties_okay=True
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": [
+                      1
+                    ]
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnMostCommonValueToBeInSet(
+                    column="test",
+                    value_set=[1, 2, 4]
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": [
+                      1,
+                      2,
+                      4
+                    ]
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     value_set: Union[list, set, EvaluationParameterDict, None]
