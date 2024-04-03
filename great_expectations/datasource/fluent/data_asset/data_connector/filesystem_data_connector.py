@@ -39,10 +39,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         base_directory: Relative path to subdirectory containing files of interest
         glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         data_context_root_directory: Optional GreatExpectations root directory (if installed on filesystem)
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # sorters (list): Optional list if you want to sort the data_references
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on filesystem (optional)
     """  # noqa: E501
 
@@ -57,10 +53,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
             [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
@@ -74,10 +66,6 @@ class FilesystemDataConnector(FilePathDataConnector):
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
             batching_regex=batching_regex,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
             get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
@@ -102,10 +90,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
             [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
@@ -120,10 +104,6 @@ class FilesystemDataConnector(FilePathDataConnector):
             base_directory: Relative path to subdirectory containing files of interest
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             data_context_root_directory: Optional GreatExpectations root directory (if installed on filesystem)
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # sorters: optional list of sorters for sorting data_references
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on filesystem (optional)
             get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
 
@@ -137,10 +117,6 @@ class FilesystemDataConnector(FilePathDataConnector):
             base_directory=base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
             get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
