@@ -36,7 +36,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         column (str): \
             The column name.
         like_pattern (str): \
-            The like pattern expression the column entries should NOT match.
+            The SQL like pattern expression the column entries should NOT match.
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
