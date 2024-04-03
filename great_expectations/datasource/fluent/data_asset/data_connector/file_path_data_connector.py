@@ -25,11 +25,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
     RegExParser,
 )
 
-# TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.datasource.fluent.data_asset.data_connector.sorter import Sorter
-# TODO: <Alex>ALEX</Alex>
-
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.datasource.fluent import BatchRequest
@@ -98,10 +93,6 @@ class FilePathDataConnector(DataConnector):
     """The base class for Data Connectors designed to access filesystem-like data.
 
     This can include traditional, disk-based filesystems or object stores such as S3, GCS, or ABS.
-    # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # This class supports a regular expression and sorters for filtering and sorting data references.
-    # TODO: <Alex>ALEX</Alex>
 
     See the `DataConnector` base class for more information on the role of Data Connectors.
 
@@ -111,12 +102,7 @@ class FilePathDataConnector(DataConnector):
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
         batching_regex: A regex pattern for partitioning data references
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: A list of sorters for sorting data references.
-        file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
-        # TODO: <Alex>ALEX</Alex>
-    """  # noqa: E501
+    """
 
     FILE_PATH_BATCH_SPEC_KEY = "path"
 
@@ -126,10 +112,6 @@ class FilePathDataConnector(DataConnector):
         data_asset_name: str,
         batching_regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
             [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
@@ -156,13 +138,6 @@ class FilePathDataConnector(DataConnector):
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict[str, List[LegacyBatchDefinition] | None] = {}
 
-    # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-    # TODO: <Alex>ALEX</Alex>
-    # @property
-    # def sorters(self) -> Optional[dict]:
-    #     return self._sorters
-    # TODO: <Alex>ALEX</Alex>
-
     # Interface Method
     @override
     def get_batch_definition_list(self, batch_request: BatchRequest) -> List[LegacyBatchDefinition]:
@@ -171,10 +146,6 @@ class FilePathDataConnector(DataConnector):
 
         First retrieves all batch_definitions that match batch_request
             - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # - if data_connector has sorters configured, then sort the batch_definition list before returning.
-            # TODO: <Alex>ALEX</Alex>
 
         Args:
             batch_request (BatchRequest): BatchRequest (containing previously validated attributes) to process
@@ -186,14 +157,6 @@ class FilePathDataConnector(DataConnector):
         batch_definition_list: List[LegacyBatchDefinition] = (
             self._get_unfiltered_batch_definition_list_fn(self, batch_request)
         )
-
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # if self.sorters:
-        #     batch_definition_list = self._sort_batch_definition_list(
-        #         batch_definition_list=batch_definition_list
-        #     )
-        # TODO: <Alex>ALEX</Alex>
 
         data_connector_query_dict: dict[str, dict | slice] = {}
         if batch_request.options:
@@ -397,30 +360,6 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
                 self._data_references_cache[data_reference] = mapped_batch_definition_list
 
         return self._data_references_cache
-
-    # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-    # TODO: <Alex>ALEX</Alex>
-    # def _sort_batch_definition_list(
-    #     self, batch_definition_list: List[BatchDefinition]
-    # ) -> List[BatchDefinition]:
-    #     """
-    #     Use configured sorters to sort batch_definition
-    #
-    #     Args:
-    #         batch_definition_list (list): list of batch_definitions to sort
-    #
-    #     Returns:
-    #         sorted list of batch_definitions
-    #
-    #     """
-    #     sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
-    #     for sorter in sorters:
-    #         batch_definition_list = sorter.get_sorted_batch_definitions(
-    #             batch_definitions=batch_definition_list
-    #         )
-    #
-    #     return batch_definition_list
-    # TODO: <Alex>ALEX</Alex>
 
     def _get_batch_definition_list_from_data_references_cache(
         self,
