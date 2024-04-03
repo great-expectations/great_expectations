@@ -162,7 +162,7 @@ class ValidationAction(BaseModel):
         """  # noqa: E501
 
     # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
-    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+    def v1_run(self, checkpoint_result: CheckpointResult) -> str | dict:
         raise NotImplementedError
 
 
@@ -412,7 +412,7 @@ class PagerdutyAlertAction(ValidationAction):
         return values
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> dict:  # type: ignore[override] # signature does not match parent
+    def v1_run(self, checkpoint_result: CheckpointResult) -> dict:
         success = checkpoint_result.success or False
         checkpoint_name = checkpoint_result.checkpoint_config.name
         summary = "Great Expectations Checkpoint {name} has "
@@ -951,7 +951,7 @@ class UpdateDataDocsAction(DataDocsAction):
     site_names: List[str] = []
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> dict[ValidationResultIdentifier, dict]:  # type: ignore[override] # signature does not match parent
+    def v1_run(self, checkpoint_result: CheckpointResult) -> dict:
         action_results: dict[ValidationResultIdentifier, dict] = {}
         for result_identifier, result in checkpoint_result.run_results.items():
             suite_name = result.suite_name
@@ -1052,7 +1052,7 @@ class SNSNotificationAction(ValidationAction):
     sns_message_subject: Optional[str]
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> str:  # type: ignore[override] # signature does not match parent
+    def v1_run(self, checkpoint_result: CheckpointResult) -> str:
         return send_sns_notification(
             sns_topic_arn=self.sns_topic_arn,
             sns_subject=self.sns_message_subject or checkpoint_result.name,
@@ -1102,7 +1102,7 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> str:  # type: ignore[override] # signature does not match parent
+    def v1_run(self, checkpoint_result: CheckpointResult) -> str:
         aggregate_payload = []
         for run_id, run_result in checkpoint_result.run_results.items():
             suite_name = run_result.suite_name
