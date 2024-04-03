@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
 
+    import re
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants as returned. The keys represent dimensions one can filter the data along
@@ -84,7 +85,7 @@ class BatchRequest(pydantic.BaseModel):
         ),
     )
     partitioner: Optional[Partitioner] = None
-    batching_regex: str | None = None
+    batching_regex: re.Pattern | None = None
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
     )
