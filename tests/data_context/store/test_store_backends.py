@@ -1100,22 +1100,42 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
 )
 @pytest.mark.big
 def test_TupleGCSStoreBackend_get_all():
-    """
-    What does this test and why?
-
-    the base_public_path parameter allows users to point to a custom DNS when hosting Data docs.
-
-    This test will exercise the get_url_for_key method twice to see that we are getting the expected url,
-    with or without base_public_path
-    """  # noqa: E501
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
     base_public_path = "http://www.test.com/"
-    val_a = b"aaa"
-    val_b = b"bbb"
+    val_a = "aaa"
+    val_b = "bbb"
 
-    with mock.patch("google.cloud.storage.Client", autospec=True):
+    # setup mocks
+    from great_expectations.compatibility import google
+
+    def _create_mock_blob(name: str):
+        output = mock.Mock()
+        output.name = name
+        return output
+
+    def mock_get_blob(gcs_object_key):
+        key_to_return_val = {
+            f"{prefix}/blob_a": val_a,
+            f"{prefix}/blob_b": val_b,
+        }
+        return mock.Mock(
+            download_as_bytes=mock.Mock(
+                return_value=key_to_return_val[gcs_object_key].encode("utf-8")
+            )
+        )
+
+    mock_gcs_client = mock.MagicMock(spec=google.storage.Client)
+    mock_gcs_client.list_blobs.return_value = [
+        _create_mock_blob(name=f"{prefix}/{StoreBackend.STORE_BACKEND_ID_KEY[0]}"),
+        _create_mock_blob(name=f"{prefix}/blob_a"),
+        _create_mock_blob(name=f"{prefix}/blob_b"),
+    ]
+
+    mock_gcs_client.bucket.return_value = mock.Mock(get_blob=mock.Mock(side_effect=mock_get_blob))
+
+    with mock.patch("google.cloud.storage.Client", return_value=mock_gcs_client):
         my_store = TupleGCSStoreBackend(
             filepath_template=None,
             bucket=bucket,
@@ -1123,9 +1143,6 @@ def test_TupleGCSStoreBackend_get_all():
             project=project,
             base_public_path=base_public_path,
         )
-
-        my_store.set(("AAA",), val_a, content_encoding=None, content_type="image/png")
-        my_store.set(("BBB",), val_b, content_encoding=None, content_type="image/png")
 
         result = my_store.get_all()
 
