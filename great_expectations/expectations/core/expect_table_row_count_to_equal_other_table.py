@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
 
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
-    """Expect the number of rows to equal the number in another table.
+    """Expect the number of rows to equal the number in another table within the same database.
 
     expect_table_row_count_to_equal_other_table is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
@@ -45,7 +45,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
 
     Args:
         other_table_name (str): \
-            The name of the other table.
+            The name of the other table. Other table must be located within the same database.
 
     Other Parameters:
         result_format (str or None): \
