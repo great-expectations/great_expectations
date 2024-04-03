@@ -353,15 +353,8 @@ def test_validation_definition_factory_round_trip(
     )
 
     # Assert
-    assert (
-        retrieved_validation_definition.suite.to_json_dict()
-        == persisted_validation_definition.suite.to_json_dict()
-    )
-    assert (
-        retrieved_validation_definition.batch_definition
-        == persisted_validation_definition.batch_definition
-    )
-    assert retrieved_validation_definition.id == persisted_validation_definition.id
+    # Suite equality is a bit finnicky, so we just check the JSON representation
+    assert persisted_validation_definition.json() == retrieved_validation_definition.json()
 
 
 class TestValidationDefinitionFactoryAnalytics:
