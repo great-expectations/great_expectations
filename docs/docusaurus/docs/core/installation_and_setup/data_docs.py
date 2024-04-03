@@ -26,12 +26,12 @@ checkpoint = context.add_or_update_checkpoint(
 )
 checkpoint.run()
 
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/data_docs.py data_docs">
 context.build_data_docs()
 context.open_data_docs()
 # </snippet>
 
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py data_docs_site">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/data_docs.py data_docs_site">
 site_name = "new_site_name"
 context.build_data_docs(site_names=site_name)
 context.open_data_docs(site_name=site_name)
