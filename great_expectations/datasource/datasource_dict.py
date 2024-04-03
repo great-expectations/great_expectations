@@ -137,7 +137,7 @@ class DatasourceDict(UserDict):
         try:
             return self._datasource_store.retrieve_by_name(name)
         except ValueError:
-            raise KeyError(f"Could not find a datasource named '{name}'")
+            raise KeyError(f"Could not find a datasource named '{name}'")  # noqa: TRY003
 
     @override
     def __delitem__(self, name: str) -> None:

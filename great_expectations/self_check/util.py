@@ -492,7 +492,7 @@ def get_test_validator_with_data(  # noqa: PLR0913
             pk_column=pk_column,
         )
     else:
-        raise ValueError(f"Unknown dataset_type {execution_engine!s}")
+        raise ValueError(f"Unknown dataset_type {execution_engine!s}")  # noqa: TRY003
 
 
 def _get_test_validator_with_data_pandas(  # noqa: C901
@@ -564,7 +564,7 @@ def _get_test_validator_with_data_sqlalchemy(  # noqa: PLR0913
         return None
 
     if table_name is None:
-        raise ExecutionEngineError(
+        raise ExecutionEngineError(  # noqa: TRY003
             "Initializing a Validator for SqlAlchemyExecutionEngine in tests requires `table_name` to be defined. Please check your configuration"  # noqa: E501
         )
     return build_sa_validator_with_data(
@@ -979,7 +979,7 @@ def modify_locale(func: Callable[P, None]) -> Callable[P, None]:
             new_locale = locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
             assert new_locale == "en_US.UTF-8"
             func(*args, **kwargs)
-        except Exception:
+        except Exception:  # noqa: TRY302
             raise
         finally:
             locale.setlocale(locale.LC_TIME, old_locale)
@@ -1088,7 +1088,7 @@ def build_spark_engine(
         )
         != 1
     ):
-        raise ValueError("Exactly one of batch_id or batch_definition must be specified.")
+        raise ValueError("Exactly one of batch_id or batch_definition must be specified.")  # noqa: TRY003
 
     if batch_id is None:
         batch_id = cast(LegacyBatchDefinition, batch_definition).id
@@ -1359,7 +1359,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
         if not pyspark.pyspark:
             if raise_exceptions_for_backends is True:
-                raise ValueError("spark tests are requested, but pyspark is not installed")
+                raise ValueError("spark tests are requested, but pyspark is not installed")  # noqa: TRY003
             else:
                 logger.warning("spark tests are requested, but pyspark is not installed")
         else:
@@ -1370,7 +1370,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
         sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
         if sa is None:
             if raise_exceptions_for_backends is True:
-                raise ImportError("sqlalchemy tests are requested, but sqlalchemy in not installed")
+                raise ImportError("sqlalchemy tests are requested, but sqlalchemy in not installed")  # noqa: TRY003
             else:
                 logger.warning("sqlalchemy tests are requested, but sqlalchemy in not installed")
             return test_backends
@@ -1393,7 +1393,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 test_backends += ["postgresql"]
             else:  # noqa: PLR5501
                 if raise_exceptions_for_backends is True:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"backend-specific tests are requested, but unable to connect to the database at "  # noqa: E501
                         f"{connection_string}"
                     )
@@ -1410,7 +1410,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, SQLAlchemyError):
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
+                    raise ImportError(  # noqa: TRY003
                         "mysql tests are requested, but unable to connect to the mysql database at "
                         f"'mysql+pymysql://root@{db_hostname}/test_ci'"
                     )
@@ -1434,7 +1434,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
+                    raise ImportError(  # noqa: TRY003
                         "mssql tests are requested, but unable to connect to the mssql database at "
                         f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
                         "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
@@ -1456,7 +1456,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError("bigquery tests are requested, but unable to connect") from e
+                    raise ImportError("bigquery tests are requested, but unable to connect") from e  # noqa: TRY003
                 else:
                     logger.warning(f"bigquery tests are requested, but unable to connect; {e!r}")
             else:
@@ -1479,7 +1479,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 and not aws_config_file
             ):
                 if raise_exceptions_for_backends is True:
-                    raise ImportError("AWS tests are requested, but credentials were not set up")
+                    raise ImportError("AWS tests are requested, but credentials were not set up")  # noqa: TRY003
                 else:
                     logger.warning("AWS tests are requested, but credentials were not set up")
 
@@ -1491,7 +1491,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError(
+                    raise ImportError(  # noqa: TRY003
                         "clickhouse tests are requested, but unable to connect"
                     ) from e
                 else:
@@ -1507,7 +1507,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError("trino tests are requested, but unable to connect") from e
+                    raise ImportError("trino tests are requested, but unable to connect") from e  # noqa: TRY003
                 else:
                     logger.warning(f"trino tests are requested, but unable to connect; {e!r}")
             else:
@@ -1519,7 +1519,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
             azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
             if not azure_access_key and not azure_connection_string and not azure_credential:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError("Azure tests are requested, but credentials were not set up")
+                    raise ImportError("Azure tests are requested, but credentials were not set up")  # noqa: TRY003
                 else:
                     logger.warning("Azure tests are requested, but credentials were not set up")
             test_backends += ["azure"]
@@ -1532,7 +1532,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError("redshift tests are requested, but unable to connect") from e
+                    raise ImportError("redshift tests are requested, but unable to connect") from e  # noqa: TRY003
                 else:
                     logger.warning(f"redshift tests are requested, but unable to connect; {e!r}")
             else:
@@ -1546,7 +1546,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError("athena tests are requested, but unable to connect") from e
+                    raise ImportError("athena tests are requested, but unable to connect") from e  # noqa: TRY003
                 else:
                     logger.warning(f"athena tests are requested, but unable to connect; {e!r}")
             else:
@@ -1560,7 +1560,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 conn.close()
             except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
-                    raise ImportError("snowflake tests are requested, but unable to connect") from e
+                    raise ImportError("snowflake tests are requested, but unable to connect") from e  # noqa: TRY003
                 else:
                     logger.warning(f"snowflake tests are requested, but unable to connect; {e!r}")
             else:
@@ -1995,22 +1995,22 @@ def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
 
     if "title" not in test:
-        raise ValueError("Invalid test configuration detected: 'title' is required.")
+        raise ValueError("Invalid test configuration detected: 'title' is required.")  # noqa: TRY003
 
     if "exact_match_out" not in test:
-        raise ValueError("Invalid test configuration detected: 'exact_match_out' is required.")
+        raise ValueError("Invalid test configuration detected: 'exact_match_out' is required.")  # noqa: TRY003
 
     if "input" not in test:
         if "in" in test:
             test["input"] = test["in"]
         else:
-            raise ValueError("Invalid test configuration detected: 'input' is required.")
+            raise ValueError("Invalid test configuration detected: 'input' is required.")  # noqa: TRY003
 
     if "output" not in test:
         if "out" in test:
             test["output"] = test["out"]
         else:
-            raise ValueError("Invalid test configuration detected: 'output' is required.")
+            raise ValueError("Invalid test configuration detected: 'output' is required.")  # noqa: TRY003
 
     kwargs = copy.deepcopy(test["input"])
     error_message = None
@@ -2051,7 +2051,6 @@ def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
             check_json_test_result(
                 test=test,
                 result=result,
-                data_asset=validator.execution_engine.batch_manager.active_batch_data,
                 pk_column=pk_column,
             )
         except Exception as e:
@@ -2065,7 +2064,7 @@ def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
 
 
 def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
-    test, result, data_asset=None, pk_column=False
+    test, result, pk_column=False
 ) -> None:
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists  # noqa: E501
     # this will work for testing since result_format is COMPLETE
@@ -2263,7 +2262,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     else:
                         assert result["result"]["details"]["observed_cdf"]["x"][0] == value
                 else:
-                    raise ValueError(f"Invalid test specification: unknown key {key} in 'out'")
+                    raise ValueError(f"Invalid test specification: unknown key {key} in 'out'")  # noqa: TRY003
 
             elif key == "traceback_substring":
                 if "raised_exception" not in result["exception_info"]:
@@ -2316,7 +2315,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     )
 
             else:
-                raise ValueError(f"Invalid test specification: unknown key {key} in 'out'")
+                raise ValueError(f"Invalid test specification: unknown key {key} in 'out'")  # noqa: TRY003
 
 
 def generate_test_table_name(
@@ -2372,7 +2371,7 @@ def _check_if_valid_dataset_name(dataset_name: str) -> str:
 
     """  # noqa: E501
     if not re.match(r"^[A-Za-z0-9_]+$", dataset_name):
-        raise ExecutionEngineError(
+        raise ExecutionEngineError(  # noqa: TRY003
             f"dataset_name: {dataset_name} is not valid, because it contains non-alphanumeric and _ characters."  # noqa: E501
             f"Please check your configuration."
         )
@@ -2398,7 +2397,7 @@ def _create_bigquery_engine() -> sqlalchemy.Engine:
 def _get_bigquery_connection_string() -> str:
     gcp_project = os.getenv("GE_TEST_GCP_PROJECT")
     if not gcp_project:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery expectation tests"
         )
 
@@ -2408,7 +2407,7 @@ def _get_bigquery_connection_string() -> str:
 def _bigquery_dataset() -> str:
     dataset = os.getenv("GE_TEST_BIGQUERY_DATASET")
     if not dataset:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"  # noqa: E501
         )
     return dataset
@@ -2509,27 +2508,27 @@ def _get_redshift_connection_string() -> str:
     ssl = os.environ.get("REDSHIFT_SSLMODE")  # noqa: TID251
 
     if not host:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Environment Variable REDSHIFT_HOST is required to run integration tests against Redshift"  # noqa: E501
         )
     if not port:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Environment Variable REDSHIFT_PORT is required to run integration tests against Redshift"  # noqa: E501
         )
     if not user:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Environment Variable REDSHIFT_USERNAME is required to run integration tests against Redshift"  # noqa: E501
         )
     if not pswd:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Environment Variable REDSHIFT_PASSWORD is required to run integration tests against Redshift"  # noqa: E501
         )
     if not db:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Environment Variable REDSHIFT_DATABASE is required to run integration tests against Redshift"  # noqa: E501
         )
     if not ssl:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Environment Variable REDSHIFT_SSLMODE is required to run integration tests against Redshift"  # noqa: E501
         )
 
@@ -2553,12 +2552,12 @@ def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> st
     ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
 
     if not ATHENA_DB_NAME:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             f"Environment Variable {db_name_env_var} is required to run integration tests against AWS Athena"  # noqa: E501
         )
 
     if not ATHENA_STAGING_S3:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"  # noqa: E501
         )
 

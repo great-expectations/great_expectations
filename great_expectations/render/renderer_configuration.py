@@ -170,7 +170,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         if ("configuration" not in values or values["configuration"] is None) and (
             "result" not in values or values["result"] is None
         ):
-            raise RendererConfigurationError(
+            raise RendererConfigurationError(  # noqa: TRY003
                 "RendererConfiguration must be passed either configuration or result."
             )
         return values
@@ -219,7 +219,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
                 try:
                     str(value)
                 except Exception as e:
-                    raise RendererConfigurationError(
+                    raise RendererConfigurationError(  # noqa: TRY003
                         f"Value was unable to be represented as a string: {e!s}"
                     )
             else:
@@ -504,7 +504,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             except ValidationError:
                 pass
 
-        raise RendererConfigurationError(
+        raise RendererConfigurationError(  # noqa: TRY003
             f"None of the param_types: {[param_type.value for param_type in param_types]} match the value: {value}"  # noqa: E501
         )
 

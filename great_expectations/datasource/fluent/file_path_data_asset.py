@@ -160,7 +160,7 @@ class _FilePathDataAsset(DataAsset):
     def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SparkPartitioner:
         PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
         if PartitionerClass is None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "  # noqa: E501
             )
         return PartitionerClass(**abstract_partitioner.dict())
@@ -210,7 +210,7 @@ class _FilePathDataAsset(DataAsset):
                     and value
                     and not isinstance(value, str)
                 ):
-                    raise gx_exceptions.InvalidBatchRequestError(
+                    raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                         f"All batching_regex matching options must be strings. The value of '{option}' is "  # noqa: E501
                         f"not a string: {value}"
                     )
@@ -221,7 +221,7 @@ class _FilePathDataAsset(DataAsset):
         ):
             allowed_keys = set(self.get_batch_request_options_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
-            raise gx_exceptions.InvalidBatchRequestError(
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "Batch request options should only contain keys from the following set:\n"
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
@@ -259,7 +259,7 @@ class _FilePathDataAsset(DataAsset):
                 options=options,
                 batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
             )
-            raise gx_exceptions.InvalidBatchRequestError(
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "BatchRequest should have form:\n"
                 f"{pf(expect_batch_request_form.dict())}\n"
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
@@ -309,8 +309,6 @@ class _FilePathDataAsset(DataAsset):
             )
             batch_list.append(batch)
 
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX-MOVE_SORTING_INTO_FILE_PATH_DATA_CONNECTOR_ON_BATCH_DEFINITION_OBJECTS</Alex>  # noqa: E501
         self.sort_batches(batch_list)
 
         return batch_list
@@ -399,7 +397,7 @@ class _FilePathDataAsset(DataAsset):
             if self._data_connector.test_connection():
                 return None
         except Exception as e:
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 f"Could not connect to asset using {type(self._data_connector).__name__}: Got {type(e).__name__}"  # noqa: E501
             ) from e
         raise TestConnectionError(self._test_connection_error_message)

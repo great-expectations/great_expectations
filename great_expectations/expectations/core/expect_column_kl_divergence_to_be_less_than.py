@@ -430,7 +430,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 bins is None
             ):  # if the user did not supply a partition_object, so we just computed it
                 if not is_valid_partition_object(partition_object):
-                    raise ValueError("Invalid partition_object provided")
+                    raise ValueError("Invalid partition_object provided")  # noqa: TRY003
                 bins = partition_object["bins"]
 
             hist_metric_configuration = MetricConfiguration(
@@ -516,34 +516,34 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 }
 
         if not is_valid_partition_object(partition_object):
-            raise ValueError("Invalid partition object.")
+            raise ValueError("Invalid partition object.")  # noqa: TRY003
 
         if threshold is not None and ((not isinstance(threshold, (int, float))) or (threshold < 0)):
-            raise ValueError("Threshold must be specified, greater than or equal to zero.")
+            raise ValueError("Threshold must be specified, greater than or equal to zero.")  # noqa: TRY003
 
         if (
             (not isinstance(tail_weight_holdout, (int, float)))
             or (tail_weight_holdout < 0)
             or (tail_weight_holdout > 1)
         ):
-            raise ValueError("tail_weight_holdout must be between zero and one.")
+            raise ValueError("tail_weight_holdout must be between zero and one.")  # noqa: TRY003
 
         if (
             (not isinstance(internal_weight_holdout, (int, float)))
             or (internal_weight_holdout < 0)
             or (internal_weight_holdout > 1)
         ):
-            raise ValueError("internal_weight_holdout must be between zero and one.")
+            raise ValueError("internal_weight_holdout must be between zero and one.")  # noqa: TRY003
 
         if tail_weight_holdout != 0 and "tail_weights" in partition_object:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "tail_weight_holdout must be 0 when using tail_weights in partition object"
             )
 
         # TODO: add checks for duplicate values in is_valid_categorical_partition_object
         if is_valid_categorical_partition_object(partition_object):
             if internal_weight_holdout > 0:
-                raise ValueError("Internal weight holdout cannot be used for discrete data.")
+                raise ValueError("Internal weight holdout cannot be used for discrete data.")  # noqa: TRY003
 
             # Data are expected to be discrete, use value_counts
             observed_weights = (
@@ -604,7 +604,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         else:
             # Data are expected to be continuous; discretize first
             if bucketize_data is False:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "KL Divergence cannot be computed with a continuous partition object and the bucketize_data "  # noqa: E501
                     "parameter set to false."
                 )
@@ -643,11 +643,11 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 partition_object["bins"][-1]
             ) == np.inf:
                 if tail_weight_holdout > 0:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "tail_weight_holdout cannot be used for partitions with infinite endpoints."
                     )
                 if "tail_weights" in partition_object:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
@@ -672,7 +672,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
             elif partition_object["bins"][0] == -np.inf:
                 if "tail_weights" in partition_object:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
@@ -705,7 +705,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
             elif partition_object["bins"][-1] == np.inf:
                 if "tail_weights" in partition_object:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 

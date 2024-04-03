@@ -50,7 +50,7 @@ class ConfigurationStore(Store):
         runtime_environment: Optional[dict] = None,
     ) -> None:
         if not issubclass(self._configuration_class, BaseYamlConfig):
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."  # noqa: E501
             )
 
@@ -104,7 +104,7 @@ class ConfigurationStore(Store):
             # Just to be explicit about what we intended to catch
             raise
         except marshmallow.ValidationError as e:
-            raise gx_exceptions.InvalidBaseYamlConfigError(
+            raise gx_exceptions.InvalidBaseYamlConfigError(  # noqa: TRY003
                 f"Deserialized configuration failed validation: {e}"
             )
 

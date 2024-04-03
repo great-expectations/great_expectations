@@ -222,7 +222,7 @@ class _YamlConfigValidator:
             if shorten_tracebacks:
                 traceback.print_exc(limit=1)
             else:
-                raise e
+                raise e  # noqa: TRY201
 
     def _test_yaml_config_prepare_config(self, yaml_config: str) -> CommentedMap:
         config = self._load_config_string_as_commented_map(
@@ -329,7 +329,7 @@ class _YamlConfigValidator:
                 data_context=self._data_context, **checkpoint_class_args
             )
         else:
-            raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
+            raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')  # noqa: TRY003
 
         return instantiated_class
 

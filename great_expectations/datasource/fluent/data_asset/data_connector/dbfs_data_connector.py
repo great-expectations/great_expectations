@@ -31,10 +31,6 @@ class DBFSDataConnector(FilesystemDataConnector):
         base_directory: Relative path to subdirectory containing files of interest
         glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         data_context_root_directory: Optional GreatExpectations root directory (if installed on DBFS)
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # sorters (list): Optional list if you want to sort the data_references
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on DBFS
         get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
     """  # noqa: E501
@@ -47,10 +43,6 @@ class DBFSDataConnector(FilesystemDataConnector):
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
             [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
@@ -63,10 +55,6 @@ class DBFSDataConnector(FilesystemDataConnector):
             base_directory=base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
             get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
@@ -81,10 +69,6 @@ class DBFSDataConnector(FilesystemDataConnector):
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
         get_unfiltered_batch_definition_list_fn: Callable[
             [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
@@ -99,10 +83,6 @@ class DBFSDataConnector(FilesystemDataConnector):
             base_directory: Relative path to subdirectory containing files of interest
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             data_context_root_directory: Optional GreatExpectations root directory (if installed on DBFS)
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # sorters: optional list of sorters for sorting data_references
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on DBFS
             get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
 
@@ -116,10 +96,6 @@ class DBFSDataConnector(FilesystemDataConnector):
             base_directory=base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
             get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
@@ -128,7 +104,7 @@ class DBFSDataConnector(FilesystemDataConnector):
     @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""Converting file paths to fully-qualified object references for "{self.__class__.__name__}" \
 requires "file_path_template_map_fn: Callable" to be set.
 """  # noqa: E501

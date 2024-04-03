@@ -179,7 +179,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
         if not configuration:
-            raise ValueError("configuration is required for prescriptive renderer")
+            raise ValueError("configuration is required for prescriptive renderer")  # noqa: TRY003
         params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
 
