@@ -6,7 +6,16 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, c
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
-from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
+from great_expectations.checkpoint.actions import (
+    EmailAction,  # noqa: TCH001
+    MicrosoftTeamsNotificationAction,  # noqa: TCH001
+    OpsgenieAlertAction,  # noqa: TCH001
+    PagerdutyAlertAction,  # noqa: TCH001
+    SlackNotificationAction,  # noqa: TCH001
+    SNSNotificationAction,  # noqa: TCH001
+    StoreValidationResultAction,  # noqa: TCH001
+    UpdateDataDocsAction,  # noqa: TCH001
+)
 from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
@@ -45,7 +54,18 @@ class Checkpoint(BaseModel):
 
     name: str
     validation_definitions: List[ValidationDefinition]
-    actions: List[ValidationAction]
+    actions: List[
+        Union[
+            EmailAction,
+            MicrosoftTeamsNotificationAction,
+            OpsgenieAlertAction,
+            PagerdutyAlertAction,
+            SlackNotificationAction,
+            SNSNotificationAction,
+            StoreValidationResultAction,
+            UpdateDataDocsAction,
+        ]
+    ]
     result_format: ResultFormat = ResultFormat.SUMMARY
     id: Union[str, None] = None
 

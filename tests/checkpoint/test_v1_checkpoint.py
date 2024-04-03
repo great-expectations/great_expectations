@@ -14,6 +14,7 @@ from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     SlackNotificationAction,
+    UpdateDataDocsAction,
     ValidationAction,
 )
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
@@ -366,6 +367,37 @@ class TestCheckpointSerialization:
             Checkpoint.parse_obj(serialized_checkpoint)
 
         assert expected_error in str(e.value)
+
+    @pytest.mark.unit
+    def test_checkpoint_deserialization_with_actions(self, mocker: MockerFixture):
+        # Arrange
+        context = mocker.Mock(spec=AbstractDataContext)
+        context.validation_definition_store.get.return_value = mocker.Mock(
+            spec=ValidationDefinition
+        )
+        set_context(context)
+
+        # Act
+        serialized_checkpoint = {
+            "actions": [
+                {"site_names": [], "type": "update_data_docs"},
+                {"slack_webhook": "test", "type": "slack"},
+                {"teams_webhook": "test", "type": "microsoft"},
+            ],
+            "id": "e7d1f462-821b-429c-8086-cca80eeea5e9",
+            "name": "my_checkpoint",
+            "result_format": "SUMMARY",
+            "validation_definitions": [
+                {"id": "3fb9ce09-a8fb-44d6-8abd-7d699443f6a1", "name": "my_validation_def"}
+            ],
+        }
+        checkpoint = Checkpoint.parse_obj(serialized_checkpoint)
+
+        # Assert
+        assert len(checkpoint.actions) == 3
+        assert isinstance(checkpoint.actions[0], UpdateDataDocsAction)
+        assert isinstance(checkpoint.actions[1], SlackNotificationAction)
+        assert isinstance(checkpoint.actions[2], MicrosoftTeamsNotificationAction)
 
 
 class TestCheckpointResult:
