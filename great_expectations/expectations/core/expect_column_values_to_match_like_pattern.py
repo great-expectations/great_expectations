@@ -40,7 +40,7 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         column (str): \
             The column name.
         like_pattern (str): \
-            The like pattern expression the column entries should match.
+            The SQL like pattern expression the column entries should match.
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
