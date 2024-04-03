@@ -224,8 +224,8 @@ class SerializableDataContext(AbstractDataContext):
 
         uncommitted_dir = gx_dir / cls.GX_UNCOMMITTED_DIR
         if pathlib.Path.is_file(uncommitted_dir.joinpath(cls.GX_CONFIG_VARIABLES)):
-            message = f"""Warning. An existing `config_variables.yml` was found here: {uncommitted_dir}.
-    - No action was taken."""
+            message = f"""Warning. An existing `config_variables.yml` was found here:
+            {uncommitted_dir}. - No action was taken."""
             warnings.warn(message)
         else:
             cls._write_config_variables_template_to_disk(uncommitted_dir)
@@ -394,13 +394,13 @@ class SerializableDataContext(AbstractDataContext):
         if validate_config_version:
             if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
                 raise gx_exceptions.UnsupportedConfigVersionError(
-                    "Invalid config version ({}).\n    The version number must be at least {}. ".format(  # noqa: E501
-                        config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
-                    ),
+                    f"""Invalid config version ({config_version})\n
+                                                                  The version number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}"""  # noqa: E501
                 )
             elif config_version > CURRENT_GX_CONFIG_VERSION:
                 raise gx_exceptions.UnsupportedConfigVersionError(
-                    f"Invalid config version ({config_version}).\n    The maximum valid version is {CURRENT_GX_CONFIG_VERSION}.",
+                    f"""Invalid config version ({config_version}).\n
+                                                                  The maximum valid version is {CURRENT_GX_CONFIG_VERSION}."""  # noqa: E501
                 )
 
         yml_path = cls._find_context_yml_file(search_start_dir=context_root_dir)

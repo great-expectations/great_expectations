@@ -183,7 +183,7 @@ class StoreBackend(metaclass=ABCMeta):
 
     def get_url_for_key(self, key, protocol=None) -> None:
         raise StoreError(
-            f"Store backend of type {type(self).__name__:s} does not have an implementation of get_url_for_key"
+            f"Store backend of type {type(self).__name__:s} does not have an implementation of get_url_for_key"  # noqa: E501
         )
 
     def _validate_key(self, key) -> None:
@@ -191,11 +191,7 @@ class StoreBackend(metaclass=ABCMeta):
             for key_element in key:
                 if not isinstance(key_element, str):
                     raise TypeError(
-                        "Elements within tuples passed as keys to {} must be instances of {}, not {}".format(  # noqa: E501
-                            self.__class__.__name__,
-                            str,
-                            type(key_element),
-                        )
+                        f"""Elements within tuples passed as keys to {self.__class__.__name___} must be instances of {str}, not {type(key_element)}"""  # noqa: E501
                     )
         else:
             raise TypeError(

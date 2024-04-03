@@ -3159,10 +3159,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
             logger.warning(
-                "The following globally-defined config variables failed validation:\n{}\n\n"
-                "Please fix the variables if you would like to apply global values to project_config.".format(  # noqa: E501
-                    json.dumps(validation_errors, indent=2)
-                )
+                f"The following globally-defined config variables failed validation:\n{json.dumps(validation_errors, indent=2)}\n\n"  # noqa: E501
+                "Please fix the variables if you would like to apply global values to project_config."  # noqa: E501
             )
 
         return config_with_global_config_overrides
@@ -3195,7 +3193,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 usage_statistics_enabled = False
             else:
                 logger.warning(
-                    f"GE_USAGE_STATS environment variable must be one of: {AbstractDataContext.FALSEY_STRINGS}"
+                    f"GE_USAGE_STATS environment variable must be one of: {AbstractDataContext.FALSEY_STRINGS}"  # noqa: E501
                 )
         for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()

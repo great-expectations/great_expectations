@@ -1627,7 +1627,7 @@ class Validator:
             if expectation_suite_name is not None:
                 if self._expectation_suite.name != expectation_suite_name:
                     logger.warning(
-                        f"Overriding existing expectation_suite_name {self._expectation_suite.name} with new name {expectation_suite_name}"
+                        f"Overriding existing expectation_suite_name {self._expectation_suite.name} with new name {expectation_suite_name}"  # noqa: E501
                     )
                 self._expectation_suite.name = expectation_suite_name
 
