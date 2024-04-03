@@ -1117,6 +1117,7 @@ def test_TupleGCSStoreBackend_get_all(mocker: MockerFixture):
         return output
 
     def mock_get_blob(gcs_object_key):
+        """Test double for bucket::get_blob."""
         key_to_return_val = {
             f"{prefix}/blob_a": val_a,
             f"{prefix}/blob_b": val_b,
