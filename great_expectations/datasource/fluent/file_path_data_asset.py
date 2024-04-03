@@ -283,6 +283,7 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchMetadata
         batch: Batch
         for batch_definition in batch_definition_list:
+            # todo: batching_regex needs to be in batch_definition here
             batch_spec = self._data_connector.build_batch_spec(batch_definition=batch_definition)
             batch_spec_options = self._batch_spec_options_from_batch_request(batch_request)
             batch_spec.update(batch_spec_options)
@@ -396,6 +397,7 @@ class _FilePathDataAsset(DataAsset):
             TestConnectionError: If the connection test fails.
         """
         try:
+            # todo: this won't work without batching_regex
             if self._data_connector.test_connection():
                 return None
         except Exception as e:

@@ -183,6 +183,7 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """  # noqa: E501
+        # todo: primary entrypoint for batching_regex is in this method via batch_request
         batch_definition_list: List[LegacyBatchDefinition] = (
             self._get_unfiltered_batch_definition_list_fn(self, batch_request)
         )
@@ -229,6 +230,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
+        # todo: batching_regex needs to be available in batch_definition by this point
         batch_spec: BatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return PathBatchSpec(batch_spec)
 
@@ -337,6 +339,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             dict -- dictionary of "BatchSpec" properties
         """  # noqa: E501
+        # todo: make sure batching regex is available here via the batch_definition
         group_names: List[str] = self._regex_parser.get_all_group_names()
         path: str = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
@@ -459,6 +462,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self, data_reference: str
     ) -> Optional[IDDict]:
         # noinspection PyUnresolvedReferences
+        # todo: make sure batching regex is available here
         matches: Optional[re.Match] = self._regex_parser.get_matches(target=data_reference)
         if matches is None:
             return None
