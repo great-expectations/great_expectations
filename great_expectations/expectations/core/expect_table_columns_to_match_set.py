@@ -34,12 +34,15 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     expect_table_columns_to_match_set is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
+    BatchExpectations are one of the most common types of Expectation.
+    They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
+
     Args:
         column_set (list of str): \
             The column names, in any order.
         exact_match (boolean): \
             If True, the list of columns must exactly match the observed columns. \
-            If False, observed columns must include column_set but additional columns will pass.
+            If False, observed columns must include column_set but additional columns will pass. Default True.
 
     Other Parameters:
         result_format (str or None): \
@@ -56,6 +59,85 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Schema
+
+    Example Data:
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+            2 	4.33 	0
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectTableColumnsToMatchSet(
+                    column_set=["test"],
+                    exact_match=False
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": [
+                      "test",
+                      "test2"
+                    ],
+                    "details": {
+                      "mismatched": {
+                        "unexpected": [
+                          "test2"
+                        ]
+                      }
+                    }
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectTableColumnsToMatchSet(
+                    column_set=["test2", "test3"],
+                    exact_match=True
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": [
+                      "test",
+                      "test2"
+                    ],
+                    "details": {
+                      "mismatched": {
+                        "unexpected": [
+                          "test"
+                        ],
+                        "missing": [
+                          "test3"
+                        ]
+                      }
+                    }
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     column_set: Union[list, set, EvaluationParameterDict, None]

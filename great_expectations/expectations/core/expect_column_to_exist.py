@@ -30,26 +30,28 @@ if TYPE_CHECKING:
 
 
 class ExpectColumnToExist(BatchExpectation):
-    """Expect the specified column to exist.
+    """Checks for the existence of a specified column within a table.
 
     expect_column_to_exist is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
+
+    BatchExpectations are one of the most common types of Expectation. They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
 
     Args:
         column (str): \
             The column name.
 
     Other Parameters:
-        column_index (int or None): \
+        column_index (int or None, optional): \
             If not None, checks the order of the columns. The expectation will fail if the \
             column is not in location column_index (zero-indexed).
-        result_format (str or None): \
+        result_format (str or None, optional): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
-        catch_exceptions (boolean or None): \
+        catch_exceptions (boolean or None, optional): \
             If True, then catch exceptions and include them as part of the result object. \
             For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
-        meta (dict or None): \
+        meta (dict or None, optional): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
             modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
@@ -57,6 +59,56 @@ class ExpectColumnToExist(BatchExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Schema
+
+    Example Data:
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+            2 	4.33 	0
+
+    Passing Case:
+        Input:
+            ExpectColumnToExist(
+                column="test",
+                column_index=0
+        )
+
+        Output:
+            {
+              "exception_info": {
+                "raised_exception": false,
+                "exception_traceback": null,
+                "exception_message": null
+              },
+              "meta": {},
+              "success": true,
+              "result": {}
+            }
+
+    Failing Case:
+        Input:
+            ExpectColumnToExist(
+                column="missing_column",
+            )
+
+        Output:
+            {
+              "exception_info": {
+                "raised_exception": false,
+                "exception_traceback": null,
+                "exception_message": null
+              },
+              "meta": {},
+              "success": false,
+              "result": {}
+            }
     """  # noqa: E501
 
     column: str
