@@ -320,10 +320,7 @@ def test_validation_definition_factory_round_trip(
 
     ds = context.sources.add_pandas("my_ds")
     csv_path = (
-        pathlib.Path(__file__).parent.parent.parent
-        / "test_sets"
-        / "quickstart"
-        / "yellow_tripdata_sample_2022-01.csv"
+        pathlib.Path(__file__, "..", "..", "..", "test_sets", "quickstart" ,"yellow_tripdata_sample_2022-01.csv").resolve()
     )
     assert csv_path.exists()
     asset = ds.add_csv_asset("my_asset", filepath_or_buffer=csv_path)
