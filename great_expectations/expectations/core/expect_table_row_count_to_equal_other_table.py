@@ -35,14 +35,17 @@ if TYPE_CHECKING:
 
 
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
-    """Expect the number of rows to equal the number in another table.
+    """Expect the number of rows to equal the number in another table within the same database.
 
     expect_table_row_count_to_equal_other_table is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
 
+    BatchExpectations are one of the most common types of Expectation.
+    They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
+
     Args:
         other_table_name (str): \
-            The name of the other table.
+            The name of the other table. Other table must be located within the same database.
 
     Other Parameters:
         result_format (str or None): \
@@ -63,6 +66,72 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     See Also:
         [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Volume
+
+    Example Data:
+            test_table
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+            2 	4.33 	0
+
+            test_table_two
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+            2 	4.33 	0
+
+            test_table_three
+                test 	test2
+            0 	1.00 	2
+            1 	2.30 	5
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectTableRowCountToEqualOtherTable(
+                    other_table_name=test_table_two
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 3
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectTableRowCountToEqualOtherTable(
+                    other_table_name=test_table_three
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 2
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     other_table_name: str
