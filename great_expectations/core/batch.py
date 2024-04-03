@@ -225,7 +225,7 @@ class LegacyBatchDefinition(SerializableDictDot):
         return IDDict(self.to_json_dict()).to_id()
 
     @property
-    def batching_regex(self) -> str:
+    def batching_regex(self) -> str | None:
         return self._batching_regex
 
     def __eq__(self, other):
