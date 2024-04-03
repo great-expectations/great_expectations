@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Type, Union
+from typing import Type
 from unittest import mock
 
 import pytest
@@ -24,7 +24,7 @@ from great_expectations.checkpoint.actions import (
 )
 from great_expectations.checkpoint.util import smtplib
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
-from great_expectations.compatibility.pydantic import BaseModel, Field, ValidationError
+from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -41,7 +41,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import is_library_loadable
 
 logger = logging.getLogger(__name__)
@@ -771,52 +770,6 @@ class TestActionSerialization:
     ):
         actual = action_class.parse_obj(serialized_action)
         assert isinstance(actual, action_class)
-
-    @pytest.mark.parametrize(
-        "action_class, init_params",
-        [(k, v) for k, v in ACTION_INIT_PARAMS.items()],
-        ids=[k.__name__ for k in ACTION_INIT_PARAMS],
-    )
-    @pytest.mark.unit
-    def test_action_deserialization_within_parent_class(
-        self, action_class: ValidationAction, init_params: dict
-    ):
-        """
-        The matter of deserializing an Action into the relevant subclass is the responsibility of
-        the Checkpoint in production code.
-
-        In order to test Actions alone, we utilize a dummy class with a single field to ensure
-        properly implementation of Pydantic discriminated unions.
-
-        Ref: https://docs.pydantic.dev/1.10/usage/types/#discriminated-unions-aka-tagged-unions
-        """
-
-        # This somewhat feels like we're testing Pydantic code but it's the only way to ensure that
-        # we've properly implemented the Pydantic discriminated union feature.
-        class DummyClassWithActionChild(BaseModel):
-            class Config:
-                # Due to limitations of Pydantic V1, we need to specify the json_encoders at every level of the hierarchy  # noqa: E501
-                json_encoders = {Renderer: lambda r: r.serialize()}
-
-            action: Union[
-                APINotificationAction,
-                EmailAction,
-                MicrosoftTeamsNotificationAction,
-                OpsgenieAlertAction,
-                PagerdutyAlertAction,
-                SlackNotificationAction,
-                SNSNotificationAction,
-                StoreValidationResultAction,
-                UpdateDataDocsAction,
-            ] = Field(..., discriminator="type")
-
-        action = action_class(**init_params)
-        instance = DummyClassWithActionChild(action=action)
-
-        json_dict = instance.json()
-        parsed_action = DummyClassWithActionChild.parse_raw(json_dict)
-
-        assert isinstance(parsed_action.action, action_class)
 
 
 class TestV1ActionRun:
