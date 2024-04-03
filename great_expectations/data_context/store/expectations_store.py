@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Dict, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, TypeVar, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
@@ -30,6 +31,31 @@ if TYPE_CHECKING:
     _TExpectation = TypeVar("_TExpectation", bound=Expectation)
 
 
+class ExpectationConfigurationDTO(pydantic.BaseModel):
+    class Config:
+        extra = pydantic.Extra.ignore
+
+    id: str
+    expectation_type: str
+    rendered_content: List[dict] = pydantic.Field(default_factory=list)
+    kwargs: dict
+    meta: Union[dict, None]
+    expectation_context: Union[dict, None]
+
+
+class ExpectationSuiteDTO(pydantic.BaseModel):
+    """Capture known fields from a serialized ExpectationSuite."""
+
+    class Config:
+        extra = pydantic.Extra.ignore
+
+    name: str
+    id: str
+    expectations: List[ExpectationConfigurationDTO]
+    meta: Union[dict, None]
+    notes: Union[str, None]
+
+
 class ExpectationsStore(Store):
     """
     An Expectations Store provides a way to store Expectation Suites accessible to a Data Context.
@@ -45,7 +71,6 @@ class ExpectationsStore(Store):
         data_context=None,
     ) -> None:
         self._expectationSuiteSchema = ExpectationSuiteSchema()
-        # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.  # noqa: E501
         self._data_context = data_context
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
@@ -87,7 +112,7 @@ class ExpectationsStore(Store):
 
     @override
     @staticmethod
-    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
+    def gx_cloud_response_json_to_object_dict(response_json: dict) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
@@ -103,14 +128,15 @@ class ExpectationsStore(Store):
                 )
         else:
             suite_data = response_json["data"]
-        ge_cloud_suite_id: str = suite_data["id"]
-        suite_dict: Dict = suite_data["attributes"]["suite"]
-        suite_dict["id"] = ge_cloud_suite_id
 
-        # Temporary fork to account for pre-V1 configs
-        suite_dict.pop("ge_cloud_id", None)
+        # Cloud backend adds a default result format type of None, so ensure we remove it:
+        for expectation in suite_data.get("expectations", []):
+            kwargs = expectation["kwargs"]
+            if "result_format" in kwargs and kwargs["result_format"] is None:
+                kwargs.pop("result_format")
 
-        return suite_dict
+        suite_dto = ExpectationSuiteDTO.parse_obj(suite_data)
+        return suite_dto.dict()
 
     def add_expectation(self, suite: ExpectationSuite, expectation: _TExpectation) -> _TExpectation:
         suite_identifier, fetched_suite = self._refresh_suite(suite)
@@ -196,41 +222,35 @@ class ExpectationsStore(Store):
             result = super()._add(key=key, value=value, **kwargs)
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
-                result = cast(GXCloudResourceRef, result)
-
-                suite_kwargs = result.response["data"]["attributes"]["suite"]
-
-                # Temporary fork to account for pre-V1 configs
-                if "ge_cloud_id" in suite_kwargs and "id" not in suite_kwargs:
-                    suite_kwargs["id"] = suite_kwargs.pop("ge_cloud_id")
-
+                assert isinstance(result, GXCloudResourceRef)
+                suite_kwargs = self.deserialize(
+                    self.gx_cloud_response_json_to_object_dict(result.response)
+                )
                 cloud_suite = ExpectationSuite(**suite_kwargs)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
                     cloud_suite=cloud_suite,
                 )
             return result
-        except gx_exceptions.StoreBackendError:
+        except gx_exceptions.StoreBackendError as exc:
             raise gx_exceptions.ExpectationSuiteError(  # noqa: TRY003
                 f"An ExpectationSuite named {value.name} already exists."
-            )
+            ) from exc
 
     def _update(self, key, value, **kwargs):
         if not self.cloud_mode:
             # this logic should move to the store backend, but is implemented here for now
             value: ExpectationSuite = self._add_ids_on_update(value)
         try:
-            # todo: `update` should return the updated object
-            super()._update(key=key, value=value, **kwargs)
+            result = super()._update(key=key, value=value, **kwargs)
 
             if self.cloud_mode:
                 # cloud backend has added IDs, so we update our local state to be in sync
-                # todo: add back this logic when `update` returns the updated object
-                # result = cast(GXCloudResourceRef, result)
-                # cloud_suite = ExpectationSuite(
-                #     **result.response["data"]["attributes"]["suite"]
-                # )
-                _suite_identifier, cloud_suite = self._refresh_suite(value)
+                assert isinstance(result, GXCloudResourceRef)
+                suite_kwargs = self.deserialize(
+                    self.gx_cloud_response_json_to_object_dict(result.response)
+                )
+                cloud_suite = ExpectationSuite(**suite_kwargs)
                 value = self._add_cloud_ids_to_local_suite_and_expectations(
                     local_suite=value,
                     cloud_suite=cloud_suite,
@@ -305,14 +325,17 @@ class ExpectationsStore(Store):
     def serialize(self, value):
         if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
-            return self._expectationSuiteSchema.dump(value)
+            val = self._expectationSuiteSchema.dump(value)
+            return val
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
     def deserialize(self, value):
         if isinstance(value, dict):
             return self._expectationSuiteSchema.load(value)
-        else:
+        elif isinstance(value, str):
             return self._expectationSuiteSchema.loads(value)
+        else:
+            raise TypeError(f"Cannot deserialize value of unknown type: {type(value)}")  # noqa: TRY003
 
     def get_key(
         self, name: str, id: Optional[str] = None
