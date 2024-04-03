@@ -56,7 +56,7 @@ Host and share Data Docs on Azure Blob Storage. Data Docs are served using an Az
 
 ### Prerequisites
 
-- [A working deployment of Great Expectations](/core/installation_and_setup/install_gx.md) [A working deployment of Great Expectations]()[](components_how_to_host_and_share_data_docs_on_amazon_s3/_add_a_new_s3_site_to_the_data_docs_sites_section_of_your_great_expectationsyml.mdx)
+- [A working deployment of Great Expectations](/core/installation_and_setup/install_gx.md)
 - Permissions to create and configure an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage)
 
 ### Install Azure Storage Blobs client library for Python
@@ -83,7 +83,7 @@ pip install azure-storage-blob
 
 GX recommends storing Azure Storage credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.
 
-To review additional options for configuring the ``config_variables.yml`` file or additional environment variables, see [Configure credentials](../../setup/configuring_data_contexts/how_to_configure_credentials.md).
+To review additional options for configuring the ``config_variables.yml`` file or additional environment variables, see [Manage credentials](/core/installation_and_setup/manage_credentials.md).
 
 1. Get the [Connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal) of the storage account you created.
 
@@ -123,7 +123,7 @@ To review additional options for configuring the ``config_variables.yml`` file o
  Since the container is named ``$web``, setting ``container: $web`` in ``great_expectations.yml`` would cause GX to unsuccessfully try to find the ``web`` variable in ``config_variables.yml``. Use an escape char ``\`` before the ``$`` so the [substitute_config_variable](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/util/index.html?highlight=substitute_config_variable#great_expectations.data_context.util.substitute_config_variable) can locate the ``$web`` container.
 :::
 
-You can also configure GX to store your Expectations and Validation Results in the Azure Storage account. See [Configure Expectation Stores](../../setup/configuring_metadata_stores/configure_expectation_stores.md) and [Configure Validation Result Stores](../../setup/configuring_metadata_stores/configure_result_stores.md). Make sure you set ``container: \$web`` correctly.
+You can also configure GX to store your Expectations and Validation Results in the Azure Storage account. See [Configure Expectation Stores](../../setup/configuring_metadata_stores/configure_expectation_stores.md) and [Configure Validation Result Stores](/core/installation_and_setup/manage_metadata_stores.md). Make sure you set ``container: \$web`` correctly.
 
 The following options are available:
 
