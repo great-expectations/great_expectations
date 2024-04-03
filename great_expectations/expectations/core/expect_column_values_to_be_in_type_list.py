@@ -61,10 +61,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     expect_column_values_to_be_in_type_list is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
-    for typed-column backends, and also for PandasDataset where the column dtype provides an \
+    for typed-column backends, and also for Pandas Datasources where the column dtype provides an \
     unambiguous constraints (any dtype except 'object').
 
-    For PandasDataset columns with dtype of 'object' expect_column_values_to_be_in_type_list will \
+    For Pandas columns with dtype of 'object' expect_column_values_to_be_in_type_list will \
     independently check each row's type.
 
     Column Map Expectations are one of the most common types of Expectation.
@@ -77,9 +77,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         type_list (list[str] or None): \
             A list of strings representing the data type that each column should have as entries. Valid types are \
             defined by the current backend implementation and are dynamically loaded. For example, valid types for \
-            PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
-            whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
+            Pandas Datasources include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
+            whereas valid types for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for Spark Datasources include \
             'StringType', 'BooleanType' and other pyspark-defined type names.
 
     Other Parameters:
