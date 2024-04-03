@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import pathlib
 import uuid
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
@@ -17,7 +17,11 @@ from great_expectations.checkpoint.actions import (
     UpdateDataDocsAction,
     ValidationAction,
 )
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
+from great_expectations.checkpoint.v1_checkpoint import (
+    Checkpoint,
+    CheckpointAction,
+    CheckpointResult,
+)
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -212,7 +216,7 @@ class TestCheckpointSerialization:
     def test_checkpoint_filesystem_round_trip_adds_ids(
         self,
         tmp_path: pathlib.Path,
-        actions: list[Union[SlackNotificationAction, MicrosoftTeamsNotificationAction]],
+        actions: list[CheckpointAction],
     ):
         with working_directory(tmp_path):
             context = gx.get_context(mode="file")
@@ -491,7 +495,7 @@ class TestCheckpointResult:
     def test_checkpoint_run_actions(
         self,
         validation_definition: ValidationDefinition,
-        actions: list[Union[SlackNotificationAction, MicrosoftTeamsNotificationAction]],
+        actions: list[CheckpointAction],
     ):
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(

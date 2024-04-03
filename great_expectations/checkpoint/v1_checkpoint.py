@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, c
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import (
-    EmailAction,  # noqa: TCH001
-    MicrosoftTeamsNotificationAction,  # noqa: TCH001
-    OpsgenieAlertAction,  # noqa: TCH001
-    PagerdutyAlertAction,  # noqa: TCH001
-    SlackNotificationAction,  # noqa: TCH001
-    SNSNotificationAction,  # noqa: TCH001
-    StoreValidationResultAction,  # noqa: TCH001
-    UpdateDataDocsAction,  # noqa: TCH001
+    EmailAction,
+    MicrosoftTeamsNotificationAction,
+    OpsgenieAlertAction,
+    PagerdutyAlertAction,
+    SlackNotificationAction,
+    SNSNotificationAction,
+    StoreValidationResultAction,
+    UpdateDataDocsAction,
 )
 from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
 from great_expectations.core.expectation_validation_result import (
@@ -31,9 +31,22 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
+
+CheckpointAction: TypeAlias = Union[
+    EmailAction,
+    MicrosoftTeamsNotificationAction,
+    OpsgenieAlertAction,
+    PagerdutyAlertAction,
+    SlackNotificationAction,
+    SNSNotificationAction,
+    StoreValidationResultAction,
+    UpdateDataDocsAction,
+]
 
 
 class Checkpoint(BaseModel):
@@ -54,18 +67,7 @@ class Checkpoint(BaseModel):
 
     name: str
     validation_definitions: List[ValidationDefinition]
-    actions: List[
-        Union[
-            EmailAction,
-            MicrosoftTeamsNotificationAction,
-            OpsgenieAlertAction,
-            PagerdutyAlertAction,
-            SlackNotificationAction,
-            SNSNotificationAction,
-            StoreValidationResultAction,
-            UpdateDataDocsAction,
-        ]
-    ]
+    actions: List[CheckpointAction]
     result_format: ResultFormat = ResultFormat.SUMMARY
     id: Union[str, None] = None
 
