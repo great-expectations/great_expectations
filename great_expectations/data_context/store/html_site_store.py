@@ -118,7 +118,7 @@ class HtmlSiteStore:
 
         # Store Class was loaded successfully; verify that it is of a correct subclass.
         if not issubclass(store_class, (TupleStoreBackend, GXCloudStoreBackend)):
-            raise DataContextError(
+            raise DataContextError(  # noqa: TRY003
                 f"Invalid configuration: HtmlSiteStore needs a {TupleStoreBackend.__name__} or {GXCloudStoreBackend.__name__}"  # noqa: E501
             )
         if "filepath_template" in store_backend or (
@@ -293,7 +293,7 @@ class HtmlSiteStore:
             key = resource_identifier.to_tuple()
         else:
             # this method does not support getting the URL of static assets
-            raise ValueError(f"Cannot get URL for resource {resource_identifier!s:s}")
+            raise ValueError(f"Cannot get URL for resource {resource_identifier!s:s}")  # noqa: TRY003
 
         # <WILL> : this is a hack for Taylor. Change this back. 20200924
         # if only_if_exists:
@@ -321,7 +321,7 @@ class HtmlSiteStore:
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
-            raise TypeError(f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}")
+            raise TypeError(f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}")  # noqa: TRY003
 
         for key_class in self.store_backends.keys():
             try:

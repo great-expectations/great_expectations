@@ -66,7 +66,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
 
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_SERIES.value}" for \
 "column_condition_partial" "partial_fn_type" property."""  # noqa: E501
             )
@@ -135,7 +135,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN.value}" and \
 "{MetricPartialFunctionTypes.WINDOW_CONDITION_FN.value}" for "column_condition_partial" "partial_fn_type" property."""  # noqa: E501
             )
@@ -222,7 +222,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN.value}" and \
 "{MetricPartialFunctionTypes.WINDOW_CONDITION_FN.value}" for "column_condition_partial" "partial_fn_type" property."""  # noqa: E501
             )
@@ -293,6 +293,6 @@ def column_condition_partial(  # noqa: C901, PLR0915
 
         return wrapper
     else:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003, TRY004
             'Unsupported engine for "column_condition_partial" metric function decorator.'
         )

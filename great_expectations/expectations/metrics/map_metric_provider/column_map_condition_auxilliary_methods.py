@@ -51,7 +51,7 @@ def _pandas_column_map_condition_values(
     ) = metrics["unexpected_condition"]
 
     if "column" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_pandas_column_map_condition_values).
 """  # noqa: E501
@@ -119,7 +119,7 @@ def _pandas_column_map_series_and_domain_values(
     ), "map_series and condition must have the same accessor kwargs"
 
     if "column" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_pandas_column_map_series_and_domain_values).
 """  # noqa: E501
@@ -182,7 +182,7 @@ def _pandas_column_map_condition_value_counts(
     ) = metrics["unexpected_condition"]
 
     if "column" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_pandas_column_map_condition_value_counts).
 """  # noqa: E501
@@ -223,7 +223,7 @@ def _pandas_column_map_condition_value_counts(
             pass
 
     if not value_counts:
-        raise gx_exceptions.MetricComputationError("Unable to compute value counts")
+        raise gx_exceptions.MetricComputationError("Unable to compute value counts")  # noqa: TRY003
 
     if result_format["result_format"] == "COMPLETE":
         return value_counts
@@ -248,7 +248,7 @@ def _sqlalchemy_column_map_condition_values(
     ]
 
     if "column" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_sqlalchemy_column_map_condition_values).
 """  # noqa: E501
@@ -304,7 +304,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     ]
 
     if "column" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_sqlalchemy_column_map_condition_value_counts).
 """  # noqa: E501
@@ -342,7 +342,7 @@ def _spark_column_map_condition_values(
     ]
 
     if "column" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_spark_column_map_condition_values).
 """  # noqa: E501
@@ -393,7 +393,7 @@ def _spark_column_map_condition_value_counts(
     ]
 
     if "column" not in accessor_domain_kwargs:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
 (_spark_column_map_condition_value_counts).
 """  # noqa: E501

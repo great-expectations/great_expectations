@@ -277,7 +277,7 @@ class LegacyDatasource:
                 self._datasource_config["batch_kwargs_generators"][name]
             )
         else:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"Unable to load batch kwargs generator {name} -- no configuration found or invalid configuration."  # noqa: E501
             )
         generator = self._build_batch_kwargs_generator(**generator_config)

@@ -43,6 +43,6 @@ class ColumnValuesInTypeList(ColumnMapMetricProvider):
                 comp_types.extend(native_type)
 
         if len(comp_types) < 1:
-            raise ValueError(f"No recognized numpy/python type in list: {type_list}")
+            raise ValueError(f"No recognized numpy/python type in list: {type_list}")  # noqa: TRY003
 
         return column.map(lambda x: isinstance(x, tuple(comp_types)))

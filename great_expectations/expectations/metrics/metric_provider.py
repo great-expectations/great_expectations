@@ -158,7 +158,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
             if engine := getattr(attr_obj, "metric_engine", None):
                 if not issubclass(engine, ExecutionEngine):
-                    raise ValueError("metric functions must be defined with an Execution Engine")
+                    raise ValueError("metric functions must be defined with an Execution Engine")  # noqa: TRY003
 
                 metric_fn = attr_obj
                 metric_definition_kwargs = getattr(metric_fn, "metric_definition_kwargs", {})
@@ -201,7 +201,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     MetricFunctionTypes.VALUE,
                     MetricPartialFunctionTypes.AGGREGATE_FN,
                 ]:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"""Basic metric implementations (defined by specifying "metric_name" class variable) only \
 support "{MetricFunctionTypes.VALUE.value}" and "{MetricPartialFunctionTypes.AGGREGATE_FN.value}" for "metric_value" \
 "metric_fn_type" property."""  # noqa: E501

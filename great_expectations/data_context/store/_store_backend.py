@@ -128,7 +128,7 @@ class StoreBackend(metaclass=ABCMeta):
             return self._set(key, value, **kwargs)
         except ValueError as e:
             logger.debug(str(e))
-            raise StoreBackendError("ValueError while calling _set on store backend.")
+            raise StoreBackendError("ValueError while calling _set on store backend.")  # noqa: TRY003
 
     def add(self, key, value, **kwargs):
         """
@@ -138,7 +138,7 @@ class StoreBackend(metaclass=ABCMeta):
 
     def _add(self, key, value, **kwargs):
         if self.has_key(key):
-            raise StoreBackendError(f"Store already has the following key: {key}.")
+            raise StoreBackendError(f"Store already has the following key: {key}.")  # noqa: TRY003
         return self.set(key=key, value=value, **kwargs)
 
     def update(self, key, value, **kwargs):
@@ -149,7 +149,7 @@ class StoreBackend(metaclass=ABCMeta):
 
     def _update(self, key, value, **kwargs):
         if not self.has_key(key):
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 f"Store does not have a value associated the following key: {key}."
             )
         return self.set(key=key, value=value, **kwargs)
@@ -194,7 +194,7 @@ class StoreBackend(metaclass=ABCMeta):
                         f"""Elements within tuples passed as keys to {self.__class__.__name___} must be instances of {str}, not {type(key_element)}"""  # noqa: E501
                     )
         else:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"Keys in {self.__class__.__name__} must be instances of {tuple}, not {type(key)}"
             )
 

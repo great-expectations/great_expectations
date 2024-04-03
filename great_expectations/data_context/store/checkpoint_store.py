@@ -53,7 +53,7 @@ class CheckpointStore(ConfigurationStore):
         cp_data: Dict
         if isinstance(response_data, list):
             if len(response_data) == 0:
-                raise ValueError(f"Cannot parse empty data from GX Cloud payload: {response_json}")
+                raise ValueError(f"Cannot parse empty data from GX Cloud payload: {response_json}")  # noqa: TRY003
             cp_data = response_data[0]
         else:
             cp_data = response_data
@@ -137,7 +137,7 @@ class CheckpointStore(ConfigurationStore):
         try:
             return self._persist_checkpoint(key=key, checkpoint=checkpoint, persistence_fn=self.add)
         except gx_exceptions.StoreBackendError:
-            raise gx_exceptions.CheckpointError(
+            raise gx_exceptions.CheckpointError(  # noqa: TRY003
                 f"A Checkpoint named {checkpoint.name} already exists."
             )
 
@@ -159,7 +159,7 @@ class CheckpointStore(ConfigurationStore):
                 key=key, checkpoint=checkpoint, persistence_fn=self.update
             )
         except gx_exceptions.StoreBackendError:
-            raise gx_exceptions.CheckpointNotFoundError(
+            raise gx_exceptions.CheckpointNotFoundError(  # noqa: TRY003
                 f"Could not find an existing Checkpoint named {checkpoint.name}."
             )
 
@@ -300,4 +300,4 @@ class V1CheckpointStore(Store):
             super()._update(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError as e:
             name = key.to_tuple()[0]
-            raise ValueError(f"Could not update Checkpoint '{name}'") from e
+            raise ValueError(f"Could not update Checkpoint '{name}'") from e  # noqa: TRY003

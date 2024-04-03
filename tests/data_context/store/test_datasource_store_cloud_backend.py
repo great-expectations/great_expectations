@@ -172,13 +172,6 @@ def test_datasource_store_delete_by_id(
         mock_delete.assert_called_once_with(
             mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id}",
-            json={
-                "data": {
-                    "type": "datasource",
-                    "id": id,
-                    "attributes": {"deleted": True},
-                }
-            },
         )
 
 

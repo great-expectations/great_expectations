@@ -55,7 +55,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
 
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
 "column_pair_function_partial" "partial_fn_type" property."""  # noqa: E501
             )
@@ -115,7 +115,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
 
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
 "column_pair_function_partial" "partial_fn_type" property."""  # noqa: E501
             )
@@ -179,7 +179,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
 
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
 "column_pair_function_partial" "partial_fn_type" property."""  # noqa: E501
             )
@@ -236,6 +236,6 @@ def column_pair_function_partial(  # noqa: C901 - 16
         return wrapper
 
     else:
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003, TRY004
             'Unsupported engine for "column_pair_function_partial" metric function decorator.'
         )
