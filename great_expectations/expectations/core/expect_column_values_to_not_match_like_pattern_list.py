@@ -39,7 +39,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         column (str): \
             The column name.
         like_pattern_list (List[str]): \
-            The list of like pattern expressions the column entries should NOT match.
+            The list of SQL like pattern expressions the column entries should NOT match.
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
