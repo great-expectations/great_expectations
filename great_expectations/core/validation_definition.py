@@ -150,7 +150,7 @@ class ValidationDefinition(BaseModel):
         key = expectation_store.get_key(name=name, id=id)
 
         try:
-            config = expectation_store.get(key)
+            config: dict = expectation_store.get(key)
         except gx_exceptions.InvalidKeyError as e:
             raise ValueError(f"Could not find suite with name: {name} and id: {id}") from e  # noqa: TRY003
 
