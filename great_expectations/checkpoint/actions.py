@@ -36,6 +36,7 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
+from great_expectations.compatibility.pypd import pypd
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -461,8 +462,6 @@ class PagerdutyAlertAction(ValidationAction):
         )
 
     def _run_pypd_alert(self, name: str, template: str, success: bool):
-        import pypd
-
         if (
             self.notify_on == "all"
             or self.notify_on == "success"
@@ -1117,7 +1116,7 @@ class APINotificationAction(ValidationAction):
             aggregate_payload.append(payload)
 
         response = self.send_results(aggregate_payload)
-        return f"Successfully Posted results to API, status code - {response.status_code}"
+        return f"Posted results to API, status code - {response.status_code}"
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent
