@@ -44,6 +44,10 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
     expect_column_min_to_be_between is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
+    Column Aggregate Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
+    If that Metric meets the conditions you set, the Expectation considers that data valid.
+
     Args:
         column (str): \
             The column name
@@ -81,6 +85,67 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
 
     See Also:
         [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Numerical Data
+
+    Example Data:
+                test 	test2
+            0 	1       1
+            1 	1.3     7
+            2 	.8      2.5
+            3   2       3
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnMinToBeBetween(
+                    column="test",
+                    min_value=.5,
+                    max_value=1
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": .8
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnMedianToBeBetween(
+                    column="test2",
+                    min_value=1,
+                    max_value=3,
+                    strict_min=True,
+                    strict_max=True
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 1
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     min_value: Union[float, EvaluationParameterDict, datetime, None] = None
