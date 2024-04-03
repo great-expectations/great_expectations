@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import pathlib
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 from unittest import mock
 
 import pytest
@@ -210,7 +210,9 @@ class TestCheckpointSerialization:
 
     @pytest.mark.filesystem
     def test_checkpoint_filesystem_round_trip_adds_ids(
-        self, tmp_path: pathlib.Path, actions: list[ValidationAction]
+        self,
+        tmp_path: pathlib.Path,
+        actions: list[Union[SlackNotificationAction, MicrosoftTeamsNotificationAction]],
     ):
         with working_directory(tmp_path):
             context = gx.get_context(mode="file")
@@ -487,7 +489,9 @@ class TestCheckpointResult:
 
     @pytest.mark.unit
     def test_checkpoint_run_actions(
-        self, validation_definition: ValidationDefinition, actions: list[ValidationAction]
+        self,
+        validation_definition: ValidationDefinition,
+        actions: list[Union[SlackNotificationAction, MicrosoftTeamsNotificationAction]],
     ):
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(
