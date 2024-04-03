@@ -43,7 +43,7 @@ For more information, see [The GX API reference](/reference/api_reference.md).
 
 Stores contain the metadata GX uses.  This includes configurations for GX objects, information that is recorded when GX validates data, and credentials used for accessing data sources or remote environments.  GX utilizes one Store for each type of metadata, and the Data Context contains the settings that tell GX where that Store should reside and how to access it.
 
-For more information, see [Manage Metadata Stores](/core/installation_and_setup/manage_metadata_stores.md).
+For more information, see [Manage Metadata Stores](/core/installation_and_setup/manage_metadata_stores/manage_metadata_stores.md).
 
 ### Data Docs
 
