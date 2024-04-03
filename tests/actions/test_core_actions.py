@@ -961,10 +961,6 @@ class TestV1ActionRun:
             ]
         )
 
-    @pytest.mark.skipif(
-        not is_library_loadable(library_name="pypd"),
-        reason="pypd is not installed",
-    )
     @mock.patch("pypd.EventV2.create")
     @pytest.mark.unit
     def test_PagerdutyAlertAction_run_does_not_emit_events(
