@@ -84,6 +84,7 @@ class BatchRequest(pydantic.BaseModel):
         ),
     )
     partitioner: Optional[Partitioner] = None
+    batching_regex: str | None = None
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
     )
