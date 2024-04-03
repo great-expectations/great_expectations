@@ -39,7 +39,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         column (str): \
             The column name.
         like_pattern_list (List[str]): \
-            The list of like pattern expressions the column entries should match.
+            The list of SQL like pattern expressions the column entries should match.
         match_on (string): \
             "any" or "all". \
             Use "any" if the value should match at least one like pattern in the list. \
