@@ -109,6 +109,7 @@ class LegacyBatchDefinition(SerializableDictDot):
         data_asset_name: str,
         batch_identifiers: IDDict,
         batch_spec_passthrough: dict | None = None,
+        batching_regex: str | None = None,
     ) -> None:
         self._validate_batch_definition(
             datasource_name=datasource_name,
@@ -124,6 +125,7 @@ class LegacyBatchDefinition(SerializableDictDot):
         self._data_asset_name = data_asset_name
         self._batch_identifiers = batch_identifiers
         self._batch_spec_passthrough = batch_spec_passthrough
+        self._batching_regex = batching_regex
 
     @public_api
     @override
@@ -141,6 +143,8 @@ class LegacyBatchDefinition(SerializableDictDot):
         }
         if self._batch_spec_passthrough:
             fields_dict["batch_spec_passthrough"] = self._batch_spec_passthrough
+        if self._batching_regex:
+            fields_dict["batching_regex"] = self._batching_regex
 
         return convert_to_json_serializable(data=fields_dict)
 
@@ -219,6 +223,10 @@ class LegacyBatchDefinition(SerializableDictDot):
     @property
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
+
+    @property
+    def batching_regex(self) -> str:
+        return self._batching_regex
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
