@@ -136,7 +136,6 @@ class ValidationAction(BaseModel):
             **kwargs,
         )
 
-    @public_api
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -416,13 +415,13 @@ class PagerdutyAlertAction(ValidationAction):
     def v1_run(self, checkpoint_result: CheckpointResult) -> dict:
         success = checkpoint_result.success or False
         checkpoint_name = checkpoint_result.checkpoint_config.name
-        summary = "Great Expectations Checkpoint {name} has "
+        summary = f"Great Expectations Checkpoint {checkpoint_name} has "
         if success:
             summary += "succeeded"
         else:
             summary += "failed"
 
-        return self._run_pypd_alert(name=checkpoint_name, template=summary, success=success)
+        return self._run_pypd_alert(dedup_key=checkpoint_name, message=summary, success=success)
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -456,12 +455,12 @@ class PagerdutyAlertAction(ValidationAction):
         )
 
         return self._run_pypd_alert(
-            name=expectation_suite_name,
-            template="Great Expectations suite check {name} has failed",
+            dedup_key=expectation_suite_name,
+            message=f"Great Expectations suite check {expectation_suite_name} has failed",
             success=validation_success,
         )
 
-    def _run_pypd_alert(self, name: str, template: str, success: bool):
+    def _run_pypd_alert(self, dedup_key: str, message: str, success: bool):
         if (
             self.notify_on == "all"
             or self.notify_on == "success"
@@ -473,10 +472,10 @@ class PagerdutyAlertAction(ValidationAction):
             pypd.EventV2.create(
                 data={
                     "routing_key": self.routing_key,
-                    "dedup_key": name,
+                    "dedup_key": dedup_key,
                     "event_action": "trigger",
                     "payload": {
-                        "summary": template.format(name=name),
+                        "summary": message,
                         "severity": self.severity,
                         "source": "Great Expectations",
                     },
