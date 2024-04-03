@@ -43,10 +43,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         delimiter (str): GCS delimiter
         max_results (int): max blob filepaths to return
         recursive_file_discovery (bool): Flag to indicate if files should be searched recursively from subfolders
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # sorters (list): optional list of sorters for sorting data_references
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on GCS
     """  # noqa: E501
 
@@ -63,17 +59,12 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         datasource_name: str,
         data_asset_name: str,
         batching_regex: re.Pattern,
-        # TODO: <Alex>ALEX</Alex>
         gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
         max_results: Optional[int] = None,
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
         self._gcs_client: google.Client = gcs_client
@@ -94,10 +85,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             batching_regex=re.compile(
                 f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
             ),
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -113,10 +100,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         delimiter: str = "/",
         max_results: Optional[int] = None,
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> GoogleCloudStorageDataConnector:
         """Builds "GoogleCloudStorageDataConnector", which links named DataAsset to Google Cloud Storage.
@@ -131,10 +114,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             delimiter: GCS delimiter
             recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
             max_results: max blob filepaths to return
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # sorters: optional list of sorters for sorting data_references
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on GCS
 
         Returns:
@@ -150,10 +129,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             delimiter=delimiter,
             max_results=max_results,
             recursive_file_discovery=recursive_file_discovery,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
