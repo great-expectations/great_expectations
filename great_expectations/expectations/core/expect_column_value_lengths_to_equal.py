@@ -36,21 +36,23 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
-    expect_column_values_to_be_between is a \
+    expect_column_value_lengths_to_equal is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+
+    Column Map Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column and ask a yes/no question for every row in that column.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
     Args:
         column (str): \
             The column name.
-        value (int or None): \
+        value (int): \
             The expected value for a column entry length.
 
-    Keyword Args:
+    Other Parameters:
         mostly (None or a float between 0 and 1): \
             Successful if at least mostly fraction of values match the expectation. \
-            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
-
-    Other Parameters:
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -68,6 +70,78 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     See Also:
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Pattern Matching
+
+    Example Data:
+                test 	test2
+            0 	"12345" "A"
+            1 	"abcde" "13579"
+            2 	"1b3d5" "24680"
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnValueLengthsToEqual(
+                    column="test",
+                    value=5
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnValueLengthsToEqual(
+                    column="test2",
+                    value=5
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 1,
+                    "unexpected_percent": 33.33333333333333,
+                    "partial_unexpected_list": [
+                      "A"
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 33.33333333333333,
+                    "unexpected_percent_nonmissing": 33.33333333333333
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     value: Union[float, EvaluationParameterDict]

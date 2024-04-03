@@ -62,33 +62,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     expect_column_quantile_values_to_be_between is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
-    For example:
-    ::
-
-        # my_df.my_col = [1,2,2,3,3,3,4]
-        >>> my_df.expect_column_quantile_values_to_be_between(
-            "my_col",
-            {
-                "quantiles": [0., 0.333, 0.6667, 1.],
-                "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
-            }
-        )
-        {
-          "success": True,
-            "result": {
-              "observed_value": {
-                "quantiles: [0., 0.333, 0.6667, 1.],
-                "values": [1, 2, 3, 4],
-              }
-              "element_count": 7,
-              "missing_count": 0,
-              "missing_percent": 0.0,
-              "details": {
-                "success_details": [true, true, true, true]
-              }
-            }
-          }
-        }
+    Column Aggregate Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
+    If that Metric meets the conditions you set, the Expectation considers that data valid.
 
     expect_column_quantile_values_to_be_between can be computationally intensive for large datasets.
 
@@ -129,6 +105,114 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
         [expect_column_max_to_be_between](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Numerical Data
+
+    Example Data:
+                test
+            0 	1       1
+            1 	2       7
+            2 	2       2.5
+            3   3       3
+            4   3       2
+            5   3       5
+            6   4       6
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnQuantileValuesToBeBetween(
+                    column="test",
+                    quantile_ranges={
+                        "quantiles": [0, .333, .667, 1],
+                        "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
+                    }
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": {
+                      "quantiles": [
+                        0,
+                        0.333,
+                        0.6667,
+                        1
+                      ],
+                      "values": [
+                        1,
+                        2,
+                        3,
+                        4
+                      ]
+                    },
+                    "details": {
+                      "success_details": [
+                        true,
+                        true,
+                        true,
+                        true
+                      ]
+                    }
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnQuantileValuesToBeBetween(
+                    column="test2",
+                    quantile_ranges={
+                        "quantiles": [0, .333, .667, 1],
+                        "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
+                    }
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": {
+                      "quantiles": [
+                        0,
+                        0.333,
+                        0.6667,
+                        1
+                      ],
+                      "values": [
+                        1.0,
+                        2.5,
+                        5.0,
+                        7.0
+                      ]
+                    },
+                    "details": {
+                      "success_details": [
+                        true,
+                        true,
+                        false,
+                        false
+                      ]
+                    }
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     quantile_ranges: QuantileRange

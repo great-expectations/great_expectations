@@ -1445,6 +1445,36 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
     assert datasources["my_datasource"] == datasource_config
 
 
+@pytest.mark.filesystem
+def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.DATASOURCES,
+    )
+
+    datasource_config_a = empty_data_context.sources.add_pandas(name="a")
+    datasource_config_b = empty_data_context.sources.add_pandas(name="b")
+
+    inline_store_backend.set(DataContextVariableKey("a").to_tuple(), datasource_config_a)
+    inline_store_backend.set(DataContextVariableKey("b").to_tuple(), datasource_config_b)
+
+    all_of_em = inline_store_backend.get_all()
+
+    assert all_of_em == [datasource_config_a, datasource_config_b]
+
+
+@pytest.mark.filesystem
+def test_InlineStoreBackend_get_all_invalid_resource_type(empty_data_context) -> None:
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.ALL_VARIABLES,
+    )
+
+    expected_error = "Unsupported resource type: data_context_variables"
+    with pytest.raises(StoreBackendError, match=expected_error):
+        inline_store_backend.get_all()
+
+
 @pytest.mark.unit
 def test_InMemoryStoreBackend_move_overwrites_key() -> None:
     store_backend = InMemoryStoreBackend()
