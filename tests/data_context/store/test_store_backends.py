@@ -8,6 +8,7 @@ import boto3
 import pyparsing as pp
 import pytest
 from moto import mock_s3
+from pytest_mock import MockerFixture
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -1099,7 +1100,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
     reason="google is not installed",
 )
 @pytest.mark.big
-def test_TupleGCSStoreBackend_get_all():
+def test_TupleGCSStoreBackend_get_all(mocker: MockerFixture):
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
@@ -1111,7 +1112,7 @@ def test_TupleGCSStoreBackend_get_all():
     from great_expectations.compatibility import google
 
     def _create_mock_blob(name: str):
-        output = mock.Mock()
+        output = mocker.Mock()
         output.name = name
         return output
 
@@ -1120,22 +1121,24 @@ def test_TupleGCSStoreBackend_get_all():
             f"{prefix}/blob_a": val_a,
             f"{prefix}/blob_b": val_b,
         }
-        return mock.Mock(
-            download_as_bytes=mock.Mock(
+        return mocker.Mock(
+            download_as_bytes=mocker.Mock(
                 return_value=key_to_return_val[gcs_object_key].encode("utf-8")
             )
         )
 
-    mock_gcs_client = mock.MagicMock(spec=google.storage.Client)
+    mock_gcs_client = mocker.MagicMock(spec=google.storage.Client)
     mock_gcs_client.list_blobs.return_value = [
         _create_mock_blob(name=f"{prefix}/{StoreBackend.STORE_BACKEND_ID_KEY[0]}"),
         _create_mock_blob(name=f"{prefix}/blob_a"),
         _create_mock_blob(name=f"{prefix}/blob_b"),
     ]
 
-    mock_gcs_client.bucket.return_value = mock.Mock(get_blob=mock.Mock(side_effect=mock_get_blob))
+    mock_gcs_client.bucket.return_value = mocker.Mock(
+        get_blob=mocker.Mock(side_effect=mock_get_blob)
+    )
 
-    with mock.patch("google.cloud.storage.Client", return_value=mock_gcs_client):
+    with mocker.patch("google.cloud.storage.Client", return_value=mock_gcs_client):
         my_store = TupleGCSStoreBackend(
             filepath_template=None,
             bucket=bucket,
