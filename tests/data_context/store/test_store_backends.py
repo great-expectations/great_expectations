@@ -654,6 +654,28 @@ def test_TupleS3StoreBackend_with_prefix(aws_credentials):
 
 @mock_s3
 @pytest.mark.aws_deps
+def test_TupleS3StoreBackend_get_all(aws_credentials):
+    bucket = "leakybucket"
+
+    # create a bucket in Moto's mock AWS environment
+    conn = boto3.resource("s3", region_name="us-east-1")
+    conn.create_bucket(Bucket=bucket)
+
+    my_store = TupleS3StoreBackend(filepath_template="my_file_{0}", bucket=bucket)
+
+    val_a = "aaa"
+    val_b = "bbb"
+
+    my_store.set(("AAA",), val_a, content_type="text/html; charset=utf-8")
+    my_store.set(("BBB",), val_b, content_type="text/html; charset=utf-8")
+
+    result = my_store.get_all()
+
+    assert sorted(result) == [val_a, val_b]
+
+
+@mock_s3
+@pytest.mark.aws_deps
 def test_tuple_s3_store_backend_slash_conditions(aws_credentials):  # noqa: PLR0915
     bucket = "my_bucket"
     prefix = None
@@ -1421,6 +1443,36 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
     datasources: dict = config_commented_map_from_yaml["datasources"]
     assert len(datasources) == 1
     assert datasources["my_datasource"] == datasource_config
+
+
+@pytest.mark.filesystem
+def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.DATASOURCES,
+    )
+
+    datasource_config_a = empty_data_context.sources.add_pandas(name="a")
+    datasource_config_b = empty_data_context.sources.add_pandas(name="b")
+
+    inline_store_backend.set(DataContextVariableKey("a").to_tuple(), datasource_config_a)
+    inline_store_backend.set(DataContextVariableKey("b").to_tuple(), datasource_config_b)
+
+    all_of_em = inline_store_backend.get_all()
+
+    assert all_of_em == [datasource_config_a, datasource_config_b]
+
+
+@pytest.mark.filesystem
+def test_InlineStoreBackend_get_all_invalid_resource_type(empty_data_context) -> None:
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.ALL_VARIABLES,
+    )
+
+    expected_error = "Unsupported resource type: data_context_variables"
+    with pytest.raises(StoreBackendError, match=expected_error):
+        inline_store_backend.get_all()
 
 
 @pytest.mark.unit

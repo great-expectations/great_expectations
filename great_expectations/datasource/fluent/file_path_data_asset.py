@@ -310,8 +310,6 @@ class _FilePathDataAsset(DataAsset):
             )
             batch_list.append(batch)
 
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX-MOVE_SORTING_INTO_FILE_PATH_DATA_CONNECTOR_ON_BATCH_DEFINITION_OBJECTS</Alex>  # noqa: E501
         self.sort_batches(batch_list)
 
         return batch_list
