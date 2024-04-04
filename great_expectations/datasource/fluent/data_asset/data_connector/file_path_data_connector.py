@@ -113,9 +113,7 @@ class FilePathDataConnector(DataConnector):
         batching_regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         file_path_template_map_fn: Optional[Callable] = None,
-        get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
-        ] = file_get_unfiltered_batch_definition_list_fn,
+        whole_directory_path_override: str | None = None,
     ) -> None:
         super().__init__(
             datasource_name=datasource_name,
@@ -133,7 +131,8 @@ class FilePathDataConnector(DataConnector):
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
-        self._get_unfiltered_batch_definition_list_fn = get_unfiltered_batch_definition_list_fn
+        # allow callers to always treat entire directory as single asset
+        self._whole_directory_path_override = whole_directory_path_override
 
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict[str, List[LegacyBatchDefinition] | None] = {}
@@ -155,7 +154,7 @@ class FilePathDataConnector(DataConnector):
 
         """  # noqa: E501
         batch_definition_list: List[LegacyBatchDefinition] = (
-            self._get_unfiltered_batch_definition_list_fn(self, batch_request)
+            self._get_unfiltered_batch_definition_list(batch_request=batch_request)
         )
 
         data_connector_query_dict: dict[str, dict | slice] = {}
@@ -252,6 +251,37 @@ class FilePathDataConnector(DataConnector):
             number of unmached data_references known by this DataConnector.
         """  # noqa: E501
         return len(self.get_unmatched_data_references())
+
+    def _get_unfiltered_batch_definition_list(
+        self, batch_request: BatchRequest
+    ) -> list[LegacyBatchDefinition]:
+        """Get all batch definitions for all files from a data connector using the supplied batch request.
+
+        Args:
+            batch_request: Specifies which batch definitions to get from data connector.
+
+        Returns:
+            A list of batch definitions from the data connector based on the batch request.
+        """  # noqa: E501
+
+        if self._get_unfiltered_batch_definition_override:
+            # some implementations use
+            return self._get_unfiltered_batch_definition_override(self, batch_request)
+
+        # Use a combination of a list and set to preserve iteration order
+        batch_definition_list: list[LegacyBatchDefinition] = list()
+        batch_definition_set = set()
+        for batch_definition in self._get_batch_definition_list_from_data_references_cache():
+            if (
+                self._batch_definition_matches_batch_request(
+                    batch_definition=batch_definition, batch_request=batch_request
+                )
+                and batch_definition not in batch_definition_set
+            ):
+                batch_definition_list.append(batch_definition)
+                batch_definition_set.add(batch_definition)
+
+        return batch_definition_list
 
     def _get_data_references(self, matched: bool) -> List[str]:
         """
