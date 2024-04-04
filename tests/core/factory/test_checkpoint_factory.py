@@ -5,6 +5,7 @@ from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
 from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.store.checkpoint_store import (
     V1CheckpointStore as CheckpointStore,
 )
@@ -226,7 +227,7 @@ def _test_checkpoint_factory_delete_success(context):
 @pytest.mark.parametrize(
     "context_fixture_name",
     [
-        pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.unit),
+        pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.cloud),
         pytest.param("ephemeral_data_context", id="ephemeral", marks=pytest.mark.unit),
         pytest.param("empty_data_context", id="filesystem", marks=pytest.mark.filesystem),
     ],
@@ -261,6 +262,7 @@ def test_checkpoint_factory_get_all(context_fixture_name: str, request: pytest.F
 
     # Act
     result = context.checkpoints.all()
+    result = sorted(result, key=lambda x: x.name)
 
     # Assert
     assert [r.name for r in result] == [checkpoint_a.name, checkpoint_b.name]
