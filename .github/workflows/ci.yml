@@ -509,7 +509,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.9"
           cache: "pip"
           cache-dependency-path: reqs/requirements-dev-test.txt
       - name: Install dependencies
