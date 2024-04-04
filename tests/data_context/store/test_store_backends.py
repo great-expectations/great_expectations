@@ -1101,6 +1101,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
 )
 @pytest.mark.big
 def test_TupleGCSStoreBackend_get_all(mocker: MockerFixture):
+    # Note: it would be nice to inject the gcs client so we could pass in the mock.
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
