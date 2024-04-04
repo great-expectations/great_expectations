@@ -8,6 +8,7 @@ from great_expectations.compatibility import pydantic
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
@@ -290,195 +291,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         )
     )
     assert expected[2:3] == unsorted_batch_definition_list
-
-
-# TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
-# TODO: <Alex>ALEX</Alex>
-# @pytest.mark.big
-# @pytest.mark.slow  # creating small number of`file handles in temporary file system
-# def test_return_all_batch_definitions_sorted(tmp_path_factory):
-#     base_directory = str(
-#         tmp_path_factory.mktemp("test_return_all_batch_definitions_sorted")
-#     )
-#     create_files_in_directory(
-#         directory=base_directory,
-#         file_name_list=[
-#             "alex_20200809_1000.csv",
-#             "eugene_20200809_1500.csv",
-#             "james_20200811_1009.csv",
-#             "abe_20200809_1040.csv",
-#             "will_20200809_1002.csv",
-#             "james_20200713_1567.csv",
-#             "eugene_20201129_1900.csv",
-#             "will_20200810_1001.csv",
-#             "james_20200810_1003.csv",
-#             "alex_20200819_1300.csv",
-#         ],
-#     )
-#
-#     my_data_connector: DataConnector = FilesystemDataConnector(
-#         datasource_name="my_file_path_datasource",
-#         data_asset_name="my_filesystem_data_asset",
-#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
-#         base_directory=pathlib.Path(base_directory),
-#         glob_directive="*.csv",
-#     )
-#     assert my_data_connector.get_data_reference_count() == 3
-#     assert my_data_connector._get_data_reference_list()[:3] == [
-#         "alpha-1.csv",
-#         "alpha-2.csv",
-#         "alpha-3.csv",
-#     ]
-#     assert my_data_connector.get_unmatched_data_references()[:3] == [
-#         "alpha-1.csv",
-#         "alpha-2.csv",
-#         "alpha-3.csv",
-#     ]
-#     assert len(my_data_connector.get_unmatched_data_references()) == 3
-#
-#     sorted_batch_definition_list: List[BatchDefinition] = (
-#         my_data_connector.get_batch_definition_list(
-#             BatchRequest(
-#                 datasource_name="my_file_path_datasource",
-#                 data_asset_name="my_filesystem_data_asset",
-#                 options={},
-#             )
-#         )
-#     )
-#
-#     expected: List[BatchDefinition] = [
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "james", "timestamp": "20200811", "price": "1009"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "james", "timestamp": "20200810", "price": "1003"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "james", "timestamp": "20200713", "price": "1567"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "will", "timestamp": "20200810", "price": "1001"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_filesystem_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "will", "timestamp": "20200809", "price": "1002"}
-#             ),
-#         ),
-#     ]
-#
-#     # TEST 1: Sorting works
-#     assert expected == sorted_batch_definition_list
-#
-#     my_batch_request: BatchRequest = BatchRequest(
-#         datasource_name="my_file_path_datasource",
-#         data_asset_name="my_filesystem_data_asset",
-#         options={
-#             "name": "james",
-#             "timestamp": "20200713",
-#             "price": "1567",
-#         },
-#     )
-#
-#     my_batch_definition_list: List[BatchDefinition]
-#     my_batch_definition: BatchDefinition
-#
-#     # TEST 2: Should only return the specified partition
-#     my_batch_definition_list = (
-#         my_data_connector.get_batch_definition_list(
-#             batch_request=my_batch_request
-#         )
-#     )
-#     assert len(my_batch_definition_list) == 1
-#     my_batch_definition = my_batch_definition_list[0]
-#
-#     expected_batch_definition = BatchDefinition(
-#         datasource_name="my_file_path_datasource",
-#         data_asset_name="my_filesystem_data_asset",
-#         batch_identifiers={
-#             "name": "james",
-#             "timestamp": "20200713",
-#             "price": "1567",
-#         },
-#     )
-#     assert my_batch_definition == expected_batch_definition
-#
-#     # TEST 3: Without BatchRequest (query) options, should return all 10
-#     my_batch_request: BatchRequest = BatchRequest(
-#         datasource_name="my_file_path_datasource",
-#         data_asset_name="my_filesystem_data_asset",
-#         options={},
-#     )
-#     # should return 10
-#     my_batch_definition_list = (
-#         my_data_connector.get_batch_definition_list(
-#             batch_request=my_batch_request
-#         )
-#     )
-#     assert len(my_batch_definition_list) == 10
-# TODO: <Alex>ALEX</Alex>
 
 
 @pytest.mark.filesystem
@@ -832,73 +644,40 @@ def test_relative_base_directory_path(tmp_path_factory):
     assert len(my_batch_definition_list) == 1
 
 
-# TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
-# TODO: <Alex>ALEX</Alex>
-# def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
-#     tmp_path_factory,
-# ):
-#     base_directory = str(
-#         tmp_path_factory.mktemp(
-#             "test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group"
-#         )
-#     )
-#     create_files_in_directory(
-#         directory=base_directory,
-#         file_name_list=[
-#             "alex_20200809_1000.csv",
-#             "eugene_20200809_1500.csv",
-#             "james_20200811_1009.csv",
-#             "abe_20200809_1040.csv",
-#             "will_20200809_1002.csv",
-#             "james_20200713_1567.csv",
-#             "eugene_20201129_1900.csv",
-#             "will_20200810_1001.csv",
-#             "james_20200810_1003.csv",
-#             "alex_20200819_1300.csv",
-#         ],
-#     )
-#     my_data_connector_yaml = yaml.load(
-#         f"""
-#         class_name: FilesystemDataConnector
-#         datasource_name: test_environment
-#         base_directory: {base_directory}
-#         glob_directive: "*.csv"
-#         assets:
-#             my_filesystem_data_asset:
-#                 pattern: (.+)_(.+)_(.+)\\.csv
-#                 group_names:
-#                     - name
-#                     - timestamp
-#                     - price
-#         default_regex:
-#             pattern: (.+)_.+_.+\\.csv
-#             group_names:
-#                 - name
-#         sorters:
-#             - orderby: asc
-#               class_name: LexicographicSorter
-#               name: name
-#             - datetime_format: "%Y%m%d"
-#               orderby: desc
-#               class_name: DateTimeSorter
-#               name: timestamp
-#             - orderby: desc
-#               class_name: NumericSorter
-#               name: for_me_Me_Me
-#     """,
-#     )
-#     with pytest.raises(gx_exceptions.DataConnectorError):
-#         # noinspection PyUnusedLocal
-#         my_data_connector: FilesystemDataConnector = (
-#             instantiate_class_from_config(
-#                 config=my_data_connector_yaml,
-#                 runtime_environment={
-#                     "name": "fluent",
-#                     "execution_engine": PandasExecutionEngine(),
-#                 },
-#                 config_defaults={
-#                     "module_name": "great_expectations.datasource.data_connector"
-#                 },
-#             )
-#         )
-# TODO: <Alex>ALEX</Alex>
+@pytest.mark.filesystem
+def test_filesystem_data_connector_uses_batching_regex_from_batch_request(tmp_path_factory):
+    # arrange
+    base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "alpha-1.csv",
+            "alpha-2.csv",
+            "alpha-3.csv",
+            "dont-match.csv",
+            "this-either.csv",
+        ],
+    )
+
+    my_data_connector: DataConnector = FilesystemDataConnector(
+        datasource_name="my_file_path_datasource",
+        data_asset_name="my_filesystem_data_asset",
+        batching_regex=MATCH_ALL_PATTERN,  # this pattern will match all 5 files
+        base_directory=pathlib.Path(base_directory),
+        glob_directive="*.csv",
+    )
+
+    # act
+    # provide a batching regex which should match 3 of the 5 files
+    batching_regex = re.compile(r"alpha-(.*)\.csv")
+    batch_definitions = my_data_connector.get_batch_definition_list(
+        BatchRequest(
+            datasource_name="my_file_path_datasource",
+            data_asset_name="my_filesystem_data_asset",
+            options={},
+            batching_regex=batching_regex,
+        )
+    )
+
+    # assert
+    assert len(batch_definitions) == 3
