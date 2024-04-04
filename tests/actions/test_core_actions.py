@@ -1,6 +1,8 @@
 import json
 import logging
-from typing import Type
+from contextlib import contextmanager
+from types import ModuleType
+from typing import Iterator, Type
 from unittest import mock
 
 import pytest
@@ -8,6 +10,7 @@ import requests
 from freezegun import freeze_time
 from pytest_mock import MockerFixture
 from requests import Session
+from typing_extensions import Never
 
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
@@ -772,6 +775,18 @@ class TestActionSerialization:
         assert isinstance(actual, action_class)
 
 
+@contextmanager
+def mock_not_imported_module(
+    parent_module: ModuleType, target_name: str, mocker: MockerFixture
+) -> Iterator[Never]:
+    original = getattr(parent_module, target_name)
+    try:
+        setattr(parent_module, target_name, mocker.Mock())
+        yield getattr(parent_module, target_name)
+    finally:
+        setattr(parent_module, target_name, original)
+
+
 class TestV1ActionRun:
     suite_a: str = "suite_a"
     suite_b: str = "suite_b"
@@ -862,57 +877,56 @@ class TestV1ActionRun:
         action = OpsgenieAlertAction(api_key="test")
         action.v1_run(checkpoint_result=checkpoint_result)
 
-    @pytest.mark.skipif(
-        not is_library_loadable(library_name="pypd"),
-        reason="pypd is not installed",
-    )
-    @mock.patch("pypd.EventV2.create")
     @pytest.mark.unit
     def test_PagerdutyAlertAction_run_emits_events(
-        self, mock_pypd_event, checkpoint_result: CheckpointResult
+        self, checkpoint_result: CheckpointResult, mocker: MockerFixture
     ):
-        action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="all")
-        checkpoint_name = checkpoint_result.checkpoint_config.name
+        from great_expectations.checkpoint import actions
 
-        checkpoint_result.success = True
-        assert action.v1_run(checkpoint_result=checkpoint_result) == {
-            "pagerduty_alert_result": "success"
-        }
+        with mock_not_imported_module(actions, "pypd", mocker):
+            mock_pypd_event = actions.pypd.EventV2.create
+            action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="all")
+            checkpoint_name = checkpoint_result.checkpoint_config.name
 
-        checkpoint_result.success = False
-        assert action.v1_run(checkpoint_result=checkpoint_result) == {
-            "pagerduty_alert_result": "success"
-        }
+            checkpoint_result.success = True
+            assert action.v1_run(checkpoint_result=checkpoint_result) == {
+                "pagerduty_alert_result": "success"
+            }
 
-        assert mock_pypd_event.call_count == 2
-        mock_pypd_event.assert_has_calls(
-            [
-                mock.call(
-                    data={
-                        "dedup_key": checkpoint_name,
-                        "event_action": "trigger",
-                        "payload": {
-                            "severity": "critical",
-                            "source": "Great Expectations",
-                            "summary": f"Great Expectations Checkpoint {checkpoint_name} has succeeded",  # noqa: E501
-                        },
-                        "routing_key": "test",
-                    }
-                ),
-                mock.call(
-                    data={
-                        "dedup_key": checkpoint_name,
-                        "event_action": "trigger",
-                        "payload": {
-                            "severity": "critical",
-                            "source": "Great Expectations",
-                            "summary": f"Great Expectations Checkpoint {checkpoint_name} has failed",  # noqa: E501
-                        },
-                        "routing_key": "test",
-                    }
-                ),
-            ]
-        )
+            checkpoint_result.success = False
+            assert action.v1_run(checkpoint_result=checkpoint_result) == {
+                "pagerduty_alert_result": "success"
+            }
+
+            assert mock_pypd_event.call_count == 2
+            mock_pypd_event.assert_has_calls(
+                [
+                    mock.call(
+                        data={
+                            "dedup_key": checkpoint_name,
+                            "event_action": "trigger",
+                            "payload": {
+                                "severity": "critical",
+                                "source": "Great Expectations",
+                                "summary": f"Great Expectations Checkpoint {checkpoint_name} has succeeded",  # noqa: E501
+                            },
+                            "routing_key": "test",
+                        }
+                    ),
+                    mock.call(
+                        data={
+                            "dedup_key": checkpoint_name,
+                            "event_action": "trigger",
+                            "payload": {
+                                "severity": "critical",
+                                "source": "Great Expectations",
+                                "summary": f"Great Expectations Checkpoint {checkpoint_name} has failed",  # noqa: E501
+                            },
+                            "routing_key": "test",
+                        }
+                    ),
+                ]
+            )
 
     @pytest.mark.skipif(
         not is_library_loadable(library_name="pypd"),
