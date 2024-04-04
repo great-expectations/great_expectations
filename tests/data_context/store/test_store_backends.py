@@ -1,13 +1,14 @@
 import datetime
 import json
 import os
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 from unittest import mock
 
 import boto3
 import pyparsing as pp
 import pytest
 from moto import mock_s3
+from pytest_mock import MockerFixture
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -41,9 +42,6 @@ from great_expectations.util import (
     is_library_loadable,
 )
 from tests import test_utils
-
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
 
 yaml = YAMLHandler()
 
