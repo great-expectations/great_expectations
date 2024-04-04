@@ -356,7 +356,10 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             batch_definition = self._build_batch_definition(
                 data_reference=data_reference, regex_parser=regex_parser
             )
-            batch_definitions[data_reference] = [batch_definition]
+            if batch_definition:
+                batch_definitions[data_reference] = [batch_definition]
+            else:
+                batch_definitions[data_reference] = None
 
         return batch_definitions
 
