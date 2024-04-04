@@ -357,6 +357,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
                 data_reference=data_reference, regex_parser=regex_parser
             )
             if batch_definition:
+                # storing these as a list seems unnecessary; in this implementation
+                # there can only be one or zero BatchDefinitions per data reference
                 batch_definitions[data_reference] = [batch_definition]
             else:
                 batch_definitions[data_reference] = None
