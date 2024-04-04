@@ -8,7 +8,6 @@ import boto3
 import pyparsing as pp
 import pytest
 from moto import mock_s3
-from pytest_mock import MockerFixture
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
