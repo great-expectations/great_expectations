@@ -35,63 +35,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def file_get_unfiltered_batch_definition_list_fn(
-    data_connector: FilePathDataConnector, batch_request: BatchRequest
-) -> list[LegacyBatchDefinition]:
-    """Get all batch definitions for all files from a data connector using the supplied batch request.
-
-    Args:
-        data_connector: Used to get batch definitions.
-        batch_request: Specifies which batch definitions to get from data connector.
-
-    Returns:
-        A list of batch definitions from the data connector based on the batch request.
-    """  # noqa: E501
-
-    # Use a combination of a list and set to preserve iteration order
-    batch_definition_list: list[LegacyBatchDefinition] = list()
-    batch_definition_set = set()
-    for batch_definition in data_connector._get_batch_definitions():
-        if (
-            data_connector._batch_definition_matches_batch_request(
-                batch_definition=batch_definition, batch_request=batch_request
-            )
-            and batch_definition not in batch_definition_set
-        ):
-            batch_definition_list.append(batch_definition)
-            batch_definition_set.add(batch_definition)
-
-    return batch_definition_list
-
-
-def make_directory_get_unfiltered_batch_definition_list_fn(
-    data_directory: PathStr,
-) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
-    def directory_get_unfiltered_batch_definition_list_fn(
-        data_connector: FilePathDataConnector,
-        batch_request: BatchRequest,
-    ) -> list[LegacyBatchDefinition]:
-        """Get a single batch definition for the directory supplied in data_directory.
-
-        Args:
-            data_connector: Data connector containing information for the batch definition.
-            batch_request: Unused, but included for consistency.
-            data_directory: Directory pointing to data to reference in the batch definition.
-
-        Returns:
-            List containing a single batch definition referencing the directory of interest.
-        """
-        batch_definition = LegacyBatchDefinition(
-            datasource_name=data_connector.datasource_name,
-            data_connector_name=_DATA_CONNECTOR_NAME,
-            data_asset_name=data_connector.data_asset_name,
-            batch_identifiers=IDDict({"path": data_directory}),
-        )
-        return [batch_definition]
-
-    return directory_get_unfiltered_batch_definition_list_fn
-
-
 class FilePathDataConnector(DataConnector):
     """The base class for Data Connectors designed to access filesystem-like data.
 
@@ -116,7 +59,7 @@ class FilePathDataConnector(DataConnector):
         batching_regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         file_path_template_map_fn: Optional[Callable] = None,
-        whole_directory_path_override: str | None = None,
+        whole_directory_path_override: PathStr | None = None,
     ) -> None:
         super().__init__(
             datasource_name=datasource_name,
@@ -260,15 +203,17 @@ class FilePathDataConnector(DataConnector):
         Returns:
             A list of batch definitions from the data connector based on the batch request.
         """  # noqa: E501
-
-        if self._get_unfiltered_batch_definition_override:
-            # some implementations use
-            return self._get_unfiltered_batch_definition_override(self, batch_request)
+        if self._whole_directory_path_override:
+            # if the override is present, we don't build BatchDefinitions based on a regex,
+            # we just make a single BatchDefinition to capture the entire directory
+            return self._get_whole_directory_batch_definition_list(
+                batch_request=batch_request, data_directory=self._whole_directory_path_override
+            )
 
         # Use a combination of a list and set to preserve iteration order
         batch_definition_list: list[LegacyBatchDefinition] = list()
         batch_definition_set = set()
-        for batch_definition in self._get_batch_definition_list_from_data_references_cache():
+        for batch_definition in self._get_batch_definitions():
             if (
                 self._batch_definition_matches_batch_request(
                     batch_definition=batch_definition, batch_request=batch_request
@@ -279,6 +224,17 @@ class FilePathDataConnector(DataConnector):
                 batch_definition_set.add(batch_definition)
 
         return batch_definition_list
+
+    def _get_whole_directory_batch_definition_list(
+        self, batch_request: BatchRequest, data_directory: PathStr
+    ) -> list[LegacyBatchDefinition]:
+        batch_definition = LegacyBatchDefinition(
+            datasource_name=self._datasource_name,
+            data_connector_name=_DATA_CONNECTOR_NAME,
+            data_asset_name=self._data_asset_name,
+            batch_identifiers=IDDict({"path": data_directory}),
+        )
+        return [batch_definition]
 
     def _get_data_references(self, matched: bool) -> List[str]:
         """
@@ -400,7 +356,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     def _build_batch_definition(
         self, data_reference: str, regex_parser: RegExParser
     ) -> LegacyBatchDefinition | None:
-        batch_identifiers: Optional[IDDict] = self._build_batch_identifiers(
+        batch_identifiers = self._build_batch_identifiers(
             data_reference=data_reference, regex_parser=regex_parser
         )
         if batch_identifiers is None:
@@ -412,10 +368,21 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             datasource_name=self._datasource_name,
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self._data_asset_name,
-            batch_identifiers=IDDict(batch_identifiers),
+            batch_identifiers=batch_identifiers,
         )
 
     def _build_batch_identifiers(
+        self, data_reference: str, regex_parser: RegExParser
+    ) -> Optional[IDDict]:
+        if self._whole_directory_path_override:
+            return self._build_batch_identifiers_whole_directory(
+                self._whole_directory_path_override
+            )
+        return self._build_batch_identifiers_from_data_reference(
+            data_reference=data_reference, regex_parser=regex_parser
+        )
+
+    def _build_batch_identifiers_from_data_reference(
         self, data_reference: str, regex_parser: RegExParser
     ) -> Optional[IDDict]:
         matches: Optional[re.Match] = regex_parser.get_matches(target=data_reference)
@@ -453,6 +420,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         batch_identifiers = IDDict(group_name_to_group_value_mapping)
 
         return batch_identifiers
+
+    def _build_batch_identifiers_whole_directory(self, data_directory: str) -> IDDict:
+        return IDDict({"path": data_directory})
 
     @abstractmethod
     def _get_full_file_path(self, path: str) -> str:
