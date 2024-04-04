@@ -237,7 +237,7 @@ def test_checkpoint_factory_get_all(context_fixture_name: str, request: pytest.F
 
     # Arrange
     ds = context.sources.add_pandas("my_datasource")
-    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
     batch_def = asset.add_batch_definition("my_batch_definition")
     suite = ExpectationSuite(name="my_suite")
 
