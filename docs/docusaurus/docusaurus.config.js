@@ -125,7 +125,7 @@ module.exports = {
           label: 'Home',
           to: '/docs/home',
           position: 'right',
-          className: 'non-versioned-section',
+          className: 'non-versioned-section home',
         },
         {
           label: 'GX Cloud',

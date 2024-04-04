@@ -23,7 +23,7 @@ export default function GithubNavbarItem({ owner, repository, className }) {
         } else {
             setShowGithubBadgeInfo(false)
         }
-    }, []);
+    }, [window.innerWidth]);
 
     function formatCompactNumber(number) {
         const formatter = Intl.NumberFormat("en", { notation: "compact" });
