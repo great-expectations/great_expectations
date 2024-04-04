@@ -5,7 +5,7 @@ import logging
 import re
 from abc import abstractmethod
 from collections import defaultdict
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Callable, DefaultDict, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
@@ -137,7 +137,7 @@ class FilePathDataConnector(DataConnector):
         self._get_unfiltered_batch_definition_list_fn = get_unfiltered_batch_definition_list_fn
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache: Dict[
+        self._data_references_cache: DefaultDict[
             re.Pattern, Dict[str, List[LegacyBatchDefinition] | None]
         ] = defaultdict(dict)
 
