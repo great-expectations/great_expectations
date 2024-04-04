@@ -126,9 +126,7 @@ class FilePathDataConnector(DataConnector):
         )
 
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
-        self._batching_regex: re.Pattern = self._ensure_regex_groups_include_data_reference_key(
-            regex=batching_regex
-        )
+        self._batching_regex: re.Pattern = self._preprocess_batching_regex(regex=batching_regex)
         self._regex_parser: RegExParser = RegExParser(
             regex_pattern=self._batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
@@ -317,15 +315,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
-    def _ensure_regex_groups_include_data_reference_key(self, regex: re.Pattern) -> re.Pattern:
-        """
-        Args:
-            regex: regex pattern for filtering data references; if reserved group name "path" (FILE_PATH_BATCH_SPEC_KEY)
-            is absent, then it is added to enclose original regex pattern, supplied on input.
-
-        Returns:
-            Potentially modified Regular Expression pattern (with enclosing FILE_PATH_BATCH_SPEC_KEY reserved group)
-        """  # noqa: E501
+    def _preprocess_batching_regex(self, regex: re.Pattern) -> re.Pattern:
+        """Add the FILE_PATH_BATCH_SPEC_KEY group to regex in case it is not already present."""
         regex_parser = RegExParser(
             regex_pattern=regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
@@ -342,7 +333,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self, batching_regex: re.Pattern
     ) -> Dict[str, List[LegacyBatchDefinition] | None]:
         """Access a map where keys are data references and values are LegacyBatchDefinitions."""
-
+        batching_regex = self._preprocess_batching_regex(regex=batching_regex)
         batch_definitions = self._data_references_cache[batching_regex]
         if batch_definitions:
             return batch_definitions
