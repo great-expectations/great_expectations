@@ -195,14 +195,15 @@ class FilePathDataConnector(DataConnector):
     def _get_unfiltered_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[LegacyBatchDefinition]:
-        """Get all batch definitions for all files from a data connector using the supplied batch request.
+        """Get all batch definitions for all files from a data connector
+         using the supplied batch request.
 
         Args:
             batch_request: Specifies which batch definitions to get from data connector.
 
         Returns:
             A list of batch definitions from the data connector based on the batch request.
-        """  # noqa: E501
+        """
         if self._whole_directory_path_override:
             # if the override is present, we don't build BatchDefinitions based on a regex,
             # we just make a single BatchDefinition to capture the entire directory
@@ -374,17 +375,6 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     def _build_batch_identifiers(
         self, data_reference: str, regex_parser: RegExParser
     ) -> Optional[IDDict]:
-        if self._whole_directory_path_override:
-            return self._build_batch_identifiers_whole_directory(
-                self._whole_directory_path_override
-            )
-        return self._build_batch_identifiers_from_data_reference(
-            data_reference=data_reference, regex_parser=regex_parser
-        )
-
-    def _build_batch_identifiers_from_data_reference(
-        self, data_reference: str, regex_parser: RegExParser
-    ) -> Optional[IDDict]:
         matches: Optional[re.Match] = regex_parser.get_matches(target=data_reference)
         if matches is None:
             return None
@@ -420,9 +410,6 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         batch_identifiers = IDDict(group_name_to_group_value_mapping)
 
         return batch_identifiers
-
-    def _build_batch_identifiers_whole_directory(self, data_directory: str) -> IDDict:
-        return IDDict({"path": data_directory})
 
     @abstractmethod
     def _get_full_file_path(self, path: str) -> str:
