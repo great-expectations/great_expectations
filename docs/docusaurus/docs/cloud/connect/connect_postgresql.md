@@ -25,7 +25,7 @@ To validate data stored in a PostgreSQL database from GX Cloud, you must add the
 
 ## Connect to a PostgreSQL Data Asset
 
-1. In GX Cloud, click **Data Assets** > **New Data Asset**.
+1. In GX Cloud, click **Data Assets** > **New Data Asset** > **PostgreSQL**.
 
 2. Copy the code in the code pane.
 
@@ -41,9 +41,9 @@ To validate data stored in a PostgreSQL database from GX Cloud, you must add the
 
     - Click **Execute/Refresh**.
 
-4.  In GX Cloud, click **I have created a GX Cloud user with valid permissions** and then click **Continue**.
+4. In GX Cloud, click **I have created a GX Cloud user with valid permissions** and then click **Continue**.
 
-5. Enter a meaningful name for the Data Asset in the **Data Source name** field.
+5. Enter a meaningful name for the Data Source in the **Data Source name** field.
 
 6. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
 
@@ -53,11 +53,11 @@ To validate data stored in a PostgreSQL database from GX Cloud, you must add the
 
 9. Select **Table Asset** or **Query Asset** and complete the following fields:
 
-    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    - **Table name**: When **Table Asset** is selected, enter the name of the Data Source table you're connecting to.
     
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique across all Data Sources in GX Cloud.
 
-    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
+    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the Data Asset. 
 
 10. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
