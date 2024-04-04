@@ -1,17 +1,65 @@
 from __future__ import annotations
 
+import logging
+from dataclasses import dataclass
 from textwrap import dedent
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 from typing_extensions import ParamSpec
 
 from great_expectations.compatibility import docstring_parser
+
+logger = logging.getLogger(__name__)
 
 WHITELISTED_TAG = "--Public API--"
 
 P = ParamSpec("P")
 T = TypeVar("T")
 F = TypeVar("F", bound=Callable[..., Any])
+
+
+@dataclass(frozen=True)
+class _PublicApiInfo:
+    type: str
+    name: str
+    qualname: str
+    module: Optional[str]
+
+
+class _PublicApiIntrospector:
+    _public_api: dict[str, list[_PublicApiInfo]] = {}
+
+    def add(self, func: F) -> None:
+        try:
+            f = func if func.__class__ is not classmethod else func.__func__
+            info = _PublicApiInfo(
+                name=f.__name__,
+                qualname=f.__qualname__,
+                type=f.__class__.__name__,
+                module=f.__module__ if hasattr(func, "__module__") else None,
+            )
+            if info.type not in self._public_api:
+                self._public_api[info.type] = []
+            self._public_api[info.type].append(info)
+        except Exception:
+            logger.exception(f"Could not add this function to the public API list: {func}")
+            raise
+
+    def __str__(self) -> str:
+        out = []
+        for t in sorted(list(self._public_api.keys())):
+            out.append(f"{t}")
+            for info in sorted(self._public_api[t], key=lambda info: info.qualname):
+                supporting_info = ""
+                if info.name != info.qualname:
+                    supporting_info = info.qualname.removesuffix("." + info.name)
+                elif info.module is not None:
+                    supporting_info = info.module
+                out.append(f"    {info.name}, {supporting_info}")
+        return "\n".join(out)
+
+
+public_api_introspector = _PublicApiIntrospector()
 
 
 def public_api(func: F) -> F:
@@ -25,11 +73,9 @@ def public_api(func: F) -> F:
 
     This tag is added at import time.
     """
-
+    public_api_introspector.add(func)
     existing_docstring = func.__doc__ if func.__doc__ else ""
-
     func.__doc__ = WHITELISTED_TAG + existing_docstring
-
     return func
 
 
