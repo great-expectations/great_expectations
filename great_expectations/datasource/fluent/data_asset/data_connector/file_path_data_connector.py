@@ -5,7 +5,7 @@ import logging
 import re
 from abc import abstractmethod
 from collections import defaultdict
-from typing import TYPE_CHECKING, Callable, DefaultDict, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
@@ -27,6 +27,8 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 )
 
 if TYPE_CHECKING:
+    from typing import DefaultDict
+
     from great_expectations.alias_types import PathStr
     from great_expectations.datasource.fluent import BatchRequest
 
@@ -340,21 +342,21 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self, batching_regex: re.Pattern
     ) -> Dict[str, List[LegacyBatchDefinition] | None]:
         """Access a map where keys are data references and values are LegacyBatchDefinitions."""
-        regex_parser = RegExParser(
-            regex_pattern=batching_regex,
-            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
-        )
-        batch_definitions = self._data_references_cache.get(batching_regex)
+
+        batch_definitions = self._data_references_cache[batching_regex]
         if batch_definitions:
             return batch_definitions
 
         # Cache was empty so we need to calculate BatchDefinitions
+        regex_parser = RegExParser(
+            regex_pattern=batching_regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
+        )
         for data_reference in self.get_data_references():
             batch_definition = self._build_batch_definition(
                 data_reference=data_reference, regex_parser=regex_parser
             )
             batch_definitions[data_reference] = [batch_definition]
-        self._data_references_cache[batching_regex] = batch_definitions
 
         return batch_definitions
 
