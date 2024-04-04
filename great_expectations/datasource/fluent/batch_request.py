@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import (
     TYPE_CHECKING,
     AbstractSet,
@@ -84,6 +85,7 @@ class BatchRequest(pydantic.BaseModel):
         ),
     )
     partitioner: Optional[Partitioner] = None
+    batching_regex: re.Pattern | None = None
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
     )

@@ -214,7 +214,9 @@ class FilePathDataConnector(DataConnector):
         # Use a combination of a list and set to preserve iteration order
         batch_definition_list: list[LegacyBatchDefinition] = list()
         batch_definition_set = set()
-        for batch_definition in self._get_batch_definitions():
+        # if the batch request hasn't specified a batching_regex, fallback to a default
+        batching_regex = batch_request.batching_regex or self._batching_regex
+        for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
             if (
                 self._batch_definition_matches_batch_request(
                     batch_definition=batch_definition, batch_request=batch_request
@@ -343,10 +345,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return batch_definitions
 
-    def _get_batch_definitions(
-        self,
-    ) -> List[LegacyBatchDefinition]:
-        batch_definition_map = self._get_data_references_cache(batching_regex=self._batching_regex)
+    def _get_batch_definitions(self, batching_regex: re.Pattern) -> List[LegacyBatchDefinition]:
+        batch_definition_map = self._get_data_references_cache(batching_regex=batching_regex)
         batch_definitions = [
             batch_definitions[0]
             for batch_definitions in batch_definition_map.values()
