@@ -6,7 +6,6 @@ The only requirement from an action is for it to have a take_action method.
 
 from __future__ import annotations
 
-import importlib
 import json
 import logging
 from typing import (
@@ -46,7 +45,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.renderer import (
     EmailRenderer,
     MicrosoftTeamsRenderer,
@@ -400,15 +399,6 @@ class PagerdutyAlertAction(ValidationAction):
     routing_key: str
     notify_on: Literal["all", "failure", "success"] = "failure"
     severity: Literal["critical", "error", "warning", "info"] = "critical"
-
-    @root_validator
-    def _root_validate_deps(cls, values: dict) -> dict:
-        if not importlib.util.find_spec("pypd"):
-            raise DataContextError(  # noqa: TRY003
-                'ModuleNotFoundError: No module named "pypd". "pypd" is required for PageDuty notification actions.'  # noqa: E501
-            )
-
-        return values
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913

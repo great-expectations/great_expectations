@@ -8,6 +8,7 @@ import boto3
 import pyparsing as pp
 import pytest
 from moto import mock_s3
+from pytest_mock import MockerFixture
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -1090,6 +1091,69 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
     )
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google.cloud"),
+    reason="google is not installed",
+)
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google"),
+    reason="google is not installed",
+)
+@pytest.mark.big
+def test_TupleGCSStoreBackend_get_all(mocker: MockerFixture):
+    # Note: it would be nice to inject the gcs client so we could pass in the mock.
+    bucket = "leakybucket"
+    prefix = "this_is_a_test_prefix"
+    project = "dummy-project"
+    base_public_path = "http://www.test.com/"
+    val_a = "aaa"
+    val_b = "bbb"
+
+    # setup mocks
+    from great_expectations.compatibility import google
+
+    def _create_mock_blob(name: str):
+        output = mocker.Mock()
+        output.name = name
+        return output
+
+    def mock_get_blob(gcs_object_key):
+        """Test double for bucket::get_blob."""
+        key_to_return_val = {
+            f"{prefix}/blob_a": val_a,
+            f"{prefix}/blob_b": val_b,
+        }
+        return mocker.Mock(
+            download_as_bytes=mocker.Mock(
+                return_value=key_to_return_val[gcs_object_key].encode("utf-8")
+            )
+        )
+
+    mock_gcs_client = mocker.MagicMock(spec=google.storage.Client)
+    mock_gcs_client.list_blobs.return_value = [
+        _create_mock_blob(name=f"{prefix}/{StoreBackend.STORE_BACKEND_ID_KEY[0]}"),
+        _create_mock_blob(name=f"{prefix}/blob_a"),
+        _create_mock_blob(name=f"{prefix}/blob_b"),
+    ]
+
+    mock_gcs_client.bucket.return_value = mocker.Mock(
+        get_blob=mocker.Mock(side_effect=mock_get_blob)
+    )
+
+    with mocker.patch("google.cloud.storage.Client", return_value=mock_gcs_client):
+        my_store = TupleGCSStoreBackend(
+            filepath_template=None,
+            bucket=bucket,
+            prefix=prefix,
+            project=project,
+            base_public_path=base_public_path,
+        )
+
+        result = my_store.get_all()
+
+        assert sorted(result) == [val_a, val_b]
+
+
 @pytest.mark.unit
 def test_TupleAzureBlobStoreBackend_credential():
     pytest.importorskip("azure.storage.blob")
@@ -1443,6 +1507,36 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
     datasources: dict = config_commented_map_from_yaml["datasources"]
     assert len(datasources) == 1
     assert datasources["my_datasource"] == datasource_config
+
+
+@pytest.mark.filesystem
+def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.DATASOURCES,
+    )
+
+    datasource_config_a = empty_data_context.sources.add_pandas(name="a")
+    datasource_config_b = empty_data_context.sources.add_pandas(name="b")
+
+    inline_store_backend.set(DataContextVariableKey("a").to_tuple(), datasource_config_a)
+    inline_store_backend.set(DataContextVariableKey("b").to_tuple(), datasource_config_b)
+
+    all_of_em = inline_store_backend.get_all()
+
+    assert all_of_em == [datasource_config_a, datasource_config_b]
+
+
+@pytest.mark.filesystem
+def test_InlineStoreBackend_get_all_invalid_resource_type(empty_data_context) -> None:
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.ALL_VARIABLES,
+    )
+
+    expected_error = "Unsupported resource type: data_context_variables"
+    with pytest.raises(StoreBackendError, match=expected_error):
+        inline_store_backend.get_all()
 
 
 @pytest.mark.unit
