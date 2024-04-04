@@ -867,9 +867,9 @@ class TestV1ActionRun:
         not is_library_loadable(library_name="pypd"),
         reason="pypd is not installed",
     )
-    @mock.patch("pypd.EventV2.create")
+    @mock.patch("pypd")
     def test_PagerdutyAlertAction_run_emits_events(
-        self, mock_pypd_event, checkpoint_result: CheckpointResult
+        self, mock_pypd, checkpoint_result: CheckpointResult
     ):
         action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="all")
         checkpoint_name = checkpoint_result.checkpoint_config.name
@@ -884,6 +884,7 @@ class TestV1ActionRun:
             "pagerduty_alert_result": "success"
         }
 
+        mock_pypd_event = mock_pypd.EventV2.create
         assert mock_pypd_event.call_count == 2
         mock_pypd_event.assert_has_calls(
             [
