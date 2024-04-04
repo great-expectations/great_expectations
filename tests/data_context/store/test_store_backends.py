@@ -1265,6 +1265,61 @@ def test_TupleAzureBlobStoreBackend_account_url():
             mock_azure_credential.assert_called_once()
 
 
+@pytest.mark.unit
+def test_TupleAzureBlobStoreBackend_get_all(mocker: MockerFixture):
+    pytest.importorskip("azure.storage.blob")
+    pytest.importorskip("azure.identity")
+    """
+    What does this test test and why?
+    Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
+    and assert that the store backend makes the right calls for set, get, and list.
+    """
+    credential = "this_is_a_test_credential_string"
+    account_url = "this_is_a_test_account_url"
+    prefix = "this_is_a_test_prefix"
+    suffix = ".json"
+    container = "dummy-container"
+    val_a = "aaa"
+    val_b = "bbb"
+    key_a = f"{prefix}/foo.json"
+    key_b = f"{prefix}/bar.json"
+
+    def _create_mock_blob(name: str):
+        output = mocker.Mock()
+        output.name = name
+        return output
+
+    def mock_get_blob(object_key):
+        """Test double for BlobServiceClient::download_blob."""
+        key_to_return_val = {
+            key_a: val_a,
+            key_b: val_b,
+        }
+        return mocker.Mock(
+            readall=mocker.Mock(return_value=key_to_return_val[object_key].encode("utf-8"))
+        )
+
+    my_store = TupleAzureBlobStoreBackend(
+        credential=credential,
+        account_url=account_url,
+        prefix=prefix,
+        filepath_suffix=suffix,
+        container=container,
+    )
+
+    with mock.patch("great_expectations.compatibility.azure.BlobServiceClient", autospec=True):
+        mock_container_client = my_store._container_client
+        mock_container_client.list_blobs.return_value = [
+            _create_mock_blob(key_a),
+            _create_mock_blob(key_b),
+        ]
+        mock_container_client.download_blob.side_effect = mock_get_blob
+
+        result = my_store.get_all()
+
+        assert sorted(result) == [val_a, val_b]
+
+
 @mock_s3
 @pytest.mark.slow  # 14.36s
 @pytest.mark.aws_deps
