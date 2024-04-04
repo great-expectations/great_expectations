@@ -9,6 +9,11 @@ def apply_markdown_adjustments(soup, html_file_path, html_file_contents):  # noq
             item.string.replaceWith(item.get_text(strip=True))
         if lengthChildren > 1:
             item.append("\r\n")
+        if (
+            "DataContext" in str(html_file_path)
+            and "Relevant Documentation Links" in item.get_text()
+        ):
+            item.string.replaceWith(item.get_text().replace('-', '').strip())
 
     # Add newline before closing th, td and li tags
     for item in soup.find_all(["th", "td", "li"]):
