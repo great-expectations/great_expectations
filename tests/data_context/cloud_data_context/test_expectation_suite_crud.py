@@ -1,4 +1,7 @@
-from typing import Callable, NamedTuple
+from __future__ import annotations
+
+from collections.abc import Generator
+from typing import TYPE_CHECKING, Callable, NamedTuple
 from unittest import mock
 
 import pytest
@@ -19,6 +22,9 @@ from great_expectations.expectations.expectation_configuration import (
 )
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from tests.data_context.conftest import MockResponse
+
+if TYPE_CHECKING:
+    from pytest_mock import MockType
 
 
 class SuiteIdentifierTuple(NamedTuple):
@@ -48,58 +54,33 @@ def mock_get_all_suites_json(
     mock_json = {
         "data": [
             {
-                "attributes": {
-                    "clause_id": None,
-                    "created_at": "2022-03-02T19:34:00.687921",
-                    "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
-                    "deleted": False,
-                    "deleted_at": None,
-                    "organization_id": "77eb8b08-f2f4-40b1-8b41-50e7fbedcda3",
-                    "rendered_data_doc_id": None,
-                    "suite": {
-                        "name": suite_1.name,
-                        "expectations": [
-                            {
-                                "expectation_type": "expect_column_to_exist",
-                                "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
-                                "kwargs": {"column": "infinities"},
-                                "meta": {},
-                            },
-                        ],
-                        "id": suite_1.id,
-                        "meta": {"great_expectations_version": "0.15.19"},
+                "organization_id": "77eb8b08-f2f4-40b1-8b41-50e7fbedcda3",
+                "name": suite_1.name,
+                "expectations": [
+                    {
+                        "expectation_type": "expect_column_to_exist",
+                        "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
+                        "kwargs": {"column": "infinities"},
+                        "meta": {},
                     },
-                    "updated_at": "2022-08-18T18:34:17.561984",
-                },
+                ],
                 "id": suite_1.id,
-                "type": "expectation_suite",
+                "meta": {"great_expectations_version": "0.15.19"},
+                "updated_at": "2022-08-18T18:34:17.561984",
             },
             {
-                "attributes": {
-                    "clause_id": None,
-                    "created_at": "2022-03-02T19:34:00.687921",
-                    "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
-                    "deleted": False,
-                    "deleted_at": None,
-                    "organization_id": "77eb8b08-f2f4-40b1-8b41-50e7fbedcda3",
-                    "rendered_data_doc_id": None,
-                    "suite": {
-                        "name": suite_2.name,
-                        "expectations": [
-                            {
-                                "expectation_type": "expect_column_to_exist",
-                                "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
-                                "kwargs": {"column": "infinities"},
-                                "meta": {},
-                            },
-                        ],
-                        "id": suite_2.id,
-                        "meta": {"great_expectations_version": "0.15.19"},
+                "organization_id": "77eb8b08-f2f4-40b1-8b41-50e7fbedcda3",
+                "name": suite_2.name,
+                "expectations": [
+                    {
+                        "expectation_type": "expect_column_to_exist",
+                        "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
+                        "kwargs": {"column": "infinities"},
+                        "meta": {},
                     },
-                    "updated_at": "2022-08-18T18:34:17.561984",
-                },
+                ],
                 "id": suite_2.id,
-                "type": "expectation_suite",
+                "meta": {"great_expectations_version": "0.15.19"},
             },
         ]
     }
@@ -137,24 +118,18 @@ def mocked_get_response(
         return mock_response_factory(
             {
                 "data": {
-                    "attributes": {
-                        "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
-                        "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
-                        "suite": {
-                            "name": "my_mock_suite",
-                            "expectations": [
-                                {
-                                    "expectation_type": "expect_column_to_exist",
-                                    "id": "869771ee-a728-413d-96a6-8efc4dc70318",
-                                    "kwargs": {"column": "infinities"},
-                                    "meta": {},
-                                },
-                            ],
-                            "id": suite_id,
+                    "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
+                    "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
+                    "name": "my_mock_suite",
+                    "expectations": [
+                        {
+                            "expectation_type": "expect_column_to_exist",
+                            "id": "869771ee-a728-413d-96a6-8efc4dc70318",
+                            "kwargs": {"column": "infinities"},
+                            "meta": {},
                         },
-                    },
+                    ],
                     "id": suite_id,
-                    "type": "expectation_suite",
                 }
             },
             200,
@@ -188,24 +163,19 @@ def mocked_get_by_name_response(
             {
                 "data": [
                     {
-                        "attributes": {
-                            "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
-                            "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
-                            "suite": {
-                                "name": "my_mock_suite",
-                                "expectations": [
-                                    {
-                                        "expectation_type": "expect_column_to_exist",
-                                        "id": "869771ee-a728-413d-96a6-8efc4dc70318",
-                                        "kwargs": {"column": "infinities"},
-                                        "meta": {},
-                                    },
-                                ],
-                                "id": suite_id,
+                        "created_by_id": "67dce9ed-9c41-4607-9f22-15c14cc82ac0",
+                        "organization_id": "c8f9f2d0-fb5c-464b-bcc9-8a45b8144f44",
+                        "name": "my_mock_suite",
+                        "expectations": [
+                            {
+                                "expectation_type": "expect_column_to_exist",
+                                "id": "869771ee-a728-413d-96a6-8efc4dc70318",
+                                "kwargs": {"column": "infinities"},
+                                "meta": {},
                             },
-                        },
+                        ],
                         "id": suite_id,
-                        "type": "expectation_suite",
+                        "meta": {},
                     }
                 ]
             },
@@ -216,7 +186,7 @@ def mocked_get_by_name_response(
 
 
 @pytest.fixture
-def mock_list_expectation_suite_names() -> mock.MagicMock:  # noqa: TID251
+def mock_list_expectation_suite_names() -> Generator[MockType, None, None]:
     """
     Expects a return value to be set within the test function.
     """
@@ -227,7 +197,7 @@ def mock_list_expectation_suite_names() -> mock.MagicMock:  # noqa: TID251
 
 
 @pytest.fixture
-def mock_list_expectation_suites() -> mock.MagicMock:  # noqa: TID251
+def mock_list_expectation_suites() -> Generator[MockType, None, None]:
     """
     Expects a return value to be set within the test function.
     """
@@ -238,7 +208,7 @@ def mock_list_expectation_suites() -> mock.MagicMock:  # noqa: TID251
 
 
 @pytest.fixture
-def mock_expectations_store_has_key() -> mock.MagicMock:  # noqa: TID251
+def mock_expectations_store_has_key() -> Generator[MockType, None, None]:
     """
     Expects a return value to be set within the test function.
     """
@@ -291,12 +261,12 @@ def test_list_expectation_suites(
 def test_create_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
-    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suite_names: MockType,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
     suite_name = "my_suite"
-    existing_suite_names = []
+    existing_suite_names: list[str] = []
 
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
@@ -310,8 +280,8 @@ def test_create_expectation_suite_saves_suite_to_cloud(
 @pytest.mark.cloud
 def test_create_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
-    mock_list_expectation_suites: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suite_names: MockType,
+    mock_list_expectation_suites: MockType,
     suite_1: SuiteIdentifierTuple,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
@@ -341,7 +311,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
 @pytest.mark.cloud
 def test_create_expectation_suite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
+    mock_list_expectation_suite_names: MockType,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -366,13 +336,10 @@ def test_delete_expectation_suite_by_id_deletes_suite_in_cloud(
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         context.delete_expectation_suite(id=suite_id)
 
-    assert mock_delete.call_args[1]["json"] == {
-        "data": {
-            "type": GXCloudRESTResource.EXPECTATION_SUITE,
-            "id": suite_id,
-            "attributes": {"deleted": True},
-        }
-    }
+    assert (
+        mock_delete.call_args[0][1]
+        == "https://app.greatexpectations.fake.io/api/v1/organizations/12345678-1234-5678-1234-567812345678/expectation-suites/9db8721d-52e3-4263-90b3-ddb83a7aca04"
+    )
 
 
 @pytest.mark.cloud
@@ -388,7 +355,8 @@ def test_delete_expectation_suite_by_name_deletes_suite_in_cloud(
 
     assert (
         mock_delete.call_args[0][1]
-        == "https://app.greatexpectations.fake.io/organizations/12345678-1234-5678-1234-567812345678/expectation-suites"
+        == "https://app.greatexpectations.fake.io/"
+        + "api/v1/organizations/12345678-1234-5678-1234-567812345678/expectation-suites"
     )
     assert mock_delete.call_args[1]["params"] == {"name": suite_name}
 
@@ -424,7 +392,7 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
         suite = context.suites.get(name=suite_1.name)
         mock_get.assert_called_with(
             mock.ANY,
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/expectation-suites",
+            f"{ge_cloud_base_url}/api/v1/organizations/{ge_cloud_organization_id}/expectation-suites",
             params={"name": suite_1.name},
         )
 
@@ -493,20 +461,20 @@ def test_save_expectation_suite_overwrites_existing_suite(
         "id": suite_id,
     }
 
-    actual_put_suite_json = mock_put.call_args[1]["json"]["data"]["attributes"]["suite"]
+    actual_put_suite_json = mock_put.call_args[1]["json"]["data"]
     for attr in ("meta", "notes"):
         actual_put_suite_json.pop(attr)
     assert actual_put_suite_json == expected_suite_json
 
-    actual_patch_suite_json = mock_patch.call_args[1]["json"]["data"]["attributes"]["suite"]
+    actual_patch_suite_json = mock_patch.call_args[1]["json"]["data"]
     assert actual_patch_suite_json == expected_suite_json
 
 
 @pytest.mark.cloud
 def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
-    mock_expectations_store_has_key: mock.MagicMock,  # noqa: TID251
-    mock_list_expectation_suite_names: mock.MagicMock,  # noqa: TID251
+    mock_expectations_store_has_key: MockType,
+    mock_list_expectation_suite_names: MockType,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
@@ -528,7 +496,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
-    mock_expectations_store_has_key: mock.MagicMock,  # noqa: TID251
+    mock_expectations_store_has_key: MockType,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 

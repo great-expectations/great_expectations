@@ -80,12 +80,16 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     expect_column_values_to_be_of_type is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
-    for typed-column backends, and also for PandasDataset where the column dtype and provided \
+    for typed-column backends, and also for Pandas Datasources where the column dtype and provided \
     type_ are unambiguous constraints (any dtype except 'object' or dtype of 'object' with \
     type_ specified as 'object').
 
-    For PandasDataset columns with dtype of 'object' expect_column_values_to_be_of_type will
+    For Pandas columns with dtype of 'object' expect_column_values_to_be_of_type will
     independently check each row's type.
+
+    Column Map Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column and ask a yes/no question for every row in that column.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
     Args:
         column (str): \
@@ -93,19 +97,17 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         type\\_ (str): \
             A string representing the data type that each column should have as entries. Valid types are defined \
             by the current backend implementation and are dynamically loaded. For example, valid types for \
-            PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
-            whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
+            Pandas Datasources include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
+            whereas valid types for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for Spark Datasources include \
             'StringType', 'BooleanType' and other pyspark-defined type names. Note that the strings representing these \
             types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` will be unrecognized and
             fail the expectation, while `Timestamp` would pass with valid data.
 
-    Keyword Args:
+    Other Parameters:
         mostly (None or a float between 0 and 1): \
             Successful if at least mostly fraction of values match the expectation. \
-            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
-
-    Other Parameters:
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -123,6 +125,80 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     See also:
         [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Schema
+
+    Example Data:
+                test 	test2
+            0 	"12345" 1
+            1 	"abcde" 2
+            2 	"1b3d5" 3
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnValuesToBeOfType(
+                    column="test2",
+                    type_="NUMBER"
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnValuesToBeOfType(
+                    column="test",
+                    type_="DOUBLE"
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 3,
+                    "unexpected_percent": 100.0,
+                    "partial_unexpected_list": [
+                        "12345",
+                        "abcde",
+                        "1b3d5"
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 100.0,
+                    "unexpected_percent_nonmissing": 100.0
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     type_: str
@@ -348,7 +424,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             except AttributeError:
                 logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
-                raise ValueError("No recognized spark types in expected_types_list")
+                raise ValueError("No recognized spark types in expected_types_list")  # noqa: TRY003
             types = tuple(types)
             success = isinstance(actual_column_type, types)
         return {

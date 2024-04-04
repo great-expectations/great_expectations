@@ -43,7 +43,7 @@ class DictionarySorter(Sorter):
         elif order_keys_by == "desc":
             reverse_keys = True
         else:
-            raise gx_exceptions.SorterError(
+            raise gx_exceptions.SorterError(  # noqa: TRY003
                 f'Illegal key sort order "{order_keys_by}" for attribute "{name}".'
             )
         self._reverse_keys = reverse_keys

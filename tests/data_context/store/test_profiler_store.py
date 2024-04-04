@@ -16,7 +16,7 @@ def test_profiler_store_raises_error_with_invalid_value(
     empty_profiler_store: ProfilerStore,
 ):
     with pytest.raises(TypeError):
-        empty_profiler_store.set(key="my_first_profiler", value="this is not a profiler")
+        empty_profiler_store.set(key="my_first_profiler", value="this is not a profiler")  # type: ignore[arg-type]
 
 
 @pytest.mark.unit

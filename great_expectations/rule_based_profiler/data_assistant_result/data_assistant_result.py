@@ -386,7 +386,7 @@ class DataAssistantResult(SerializableDictDot):
             ]
             for metric_names in self.metric_expectation_map.keys()
         ):
-            raise gx_exceptions.DataAssistantResultExecutionError(
+            raise gx_exceptions.DataAssistantResultExecutionError(  # noqa: TRY003
                 "All metric_expectation_map keys must be of type str or tuple."
             )
 
@@ -567,7 +567,7 @@ class DataAssistantResult(SerializableDictDot):
             A PlotResult object consisting of an individual chart for each metric-domain/expectation-domain
         """  # noqa: E501
         if include_column_names is not None and exclude_column_names is not None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "You may either use `include_column_names` or `exclude_column_names` (but not both)."  # noqa: E501
             )
 
@@ -789,7 +789,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         for chart in charts:
             chart_title = DataAssistantResult._get_chart_layer_title(layer=chart)
             if chart_title is None:
-                raise gx_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(  # noqa: TRY003
                     "All DataAssistantResult charts must have a title."
                 )
 
@@ -1714,7 +1714,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             df = pd.concat([df, column_df[df_columns]], axis=0)
 
         if df is None:
-            raise ValueError(f"There is no data to plot for this expectation: {expectation_type}")
+            raise ValueError(f"There is no data to plot for this expectation: {expectation_type}")  # noqa: TRY003
 
         strict_min_predicate: bool = False
         if strict_min in df.columns:
@@ -3317,7 +3317,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             ):
                 expectation_plot_impl = self._get_expect_domain_values_temporal_chart
             else:
-                raise gx_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(  # noqa: TRY003
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."  # noqa: E501
                 )
 
@@ -3356,7 +3356,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             ):
                 metric_plot_impl = self._get_temporal_metrics_chart
             else:
-                raise gx_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(  # noqa: TRY003
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."  # noqa: E501
                 )
 
@@ -3515,7 +3515,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             ):
                 expectation_plot_impl = self._get_interactive_expect_column_values_temporal_chart
             else:
-                raise gx_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(  # noqa: TRY003
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."  # noqa: E501
                 )
 
@@ -3554,7 +3554,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             ):
                 plot_impl = self._get_interactive_temporal_metrics_chart
             else:
-                raise gx_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(  # noqa: TRY003
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."  # noqa: E501
                 )
 

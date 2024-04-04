@@ -64,7 +64,7 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
         }
     else:
         if "include_unexpected_rows" in result_format and "result_format" not in result_format:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "When using `include_unexpected_rows`, `result_format` must be explicitly specified"
             )
 
@@ -139,10 +139,10 @@ class ExpectationConfiguration(SerializableDictDot):
         rendered_content: Optional[List[RenderedAtomicContent]] = None,
     ) -> None:
         if not isinstance(expectation_type, str):
-            raise InvalidExpectationConfigurationError("expectation_type must be a string")
+            raise InvalidExpectationConfigurationError("expectation_type must be a string")  # noqa: TRY003
         self._expectation_type = expectation_type
         if not isinstance(kwargs, dict):
-            raise InvalidExpectationConfigurationError(
+            raise InvalidExpectationConfigurationError(  # noqa: TRY003
                 "expectation configuration kwargs must be a dict."
             )
         self._kwargs = kwargs
@@ -279,7 +279,7 @@ class ExpectationConfiguration(SerializableDictDot):
         }
         missing_kwargs = set(domain_keys) - set(domain_kwargs.keys())
         if missing_kwargs:
-            raise InvalidExpectationKwargsError(f"Missing domain kwargs: {list(missing_kwargs)}")
+            raise InvalidExpectationKwargsError(f"Missing domain kwargs: {list(missing_kwargs)}")  # noqa: TRY003
 
         return domain_kwargs
 
@@ -518,7 +518,7 @@ class ExpectationConfiguration(SerializableDictDot):
         if "column_list" in self.kwargs:
             return MetricDomainTypes.MULTICOLUMN
 
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             'Unable to determine "domain_type" of this "ExpectationConfiguration" object from "kwargs" and heuristics.'  # noqa: E501
         )
 

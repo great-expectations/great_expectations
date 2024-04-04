@@ -139,7 +139,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
             ]["test_variable_sub2"]
             == value_from_runtime_override
         )
-    except Exception:
+    except Exception:  # noqa: TRY302
         raise
     finally:
         del os.environ["replace_me"]

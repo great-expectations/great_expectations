@@ -215,13 +215,13 @@ class PasswordMasker:
         try:
             matched: re.Match[str] | None = azure_conn_str_re.match(url)
             if not matched:
-                raise StoreConfigurationError(
+                raise StoreConfigurationError(  # noqa: TRY003, TRY301
                     f"The URL for the Azure connection-string, was not configured properly. Please check and try again: {url} "  # noqa: E501
                 )
             res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"  # noqa: E501
             return res
         except Exception as e:
-            raise StoreConfigurationError(
+            raise StoreConfigurationError(  # noqa: TRY003
                 f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"  # noqa: E501
             )
 

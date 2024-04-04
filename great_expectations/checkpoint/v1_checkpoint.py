@@ -6,7 +6,16 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, c
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
-from great_expectations.checkpoint.actions import ValidationAction  # noqa: TCH001
+from great_expectations.checkpoint.actions import (
+    EmailAction,
+    MicrosoftTeamsNotificationAction,
+    OpsgenieAlertAction,
+    PagerdutyAlertAction,
+    SlackNotificationAction,
+    SNSNotificationAction,
+    StoreValidationResultAction,
+    UpdateDataDocsAction,
+)
 from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
@@ -22,9 +31,22 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
+
+CheckpointAction: TypeAlias = Union[
+    EmailAction,
+    MicrosoftTeamsNotificationAction,
+    OpsgenieAlertAction,
+    PagerdutyAlertAction,
+    SlackNotificationAction,
+    SNSNotificationAction,
+    StoreValidationResultAction,
+    UpdateDataDocsAction,
+]
 
 
 class Checkpoint(BaseModel):
@@ -45,7 +67,7 @@ class Checkpoint(BaseModel):
 
     name: str
     validation_definitions: List[ValidationDefinition]
-    actions: List[ValidationAction]
+    actions: List[CheckpointAction]
     result_format: ResultFormat = ResultFormat.SUMMARY
     id: Union[str, None] = None
 
@@ -98,7 +120,7 @@ class Checkpoint(BaseModel):
         from great_expectations import project_manager
 
         if len(validation_definitions) == 0:
-            raise ValueError("Checkpoint must contain at least one validation definition")
+            raise ValueError("Checkpoint must contain at least one validation definition")  # noqa: TRY003
 
         if isinstance(validation_definitions[0], dict):
             validation_definition_store = project_manager.get_validation_definition_store()
@@ -123,10 +145,10 @@ class Checkpoint(BaseModel):
             try:
                 validation_definition = store.get(key=key)
             except (KeyError, gx_exceptions.InvalidKeyError):
-                raise ValueError(f"Unable to retrieve validation definition {id_bundle} from store")
+                raise ValueError(f"Unable to retrieve validation definition {id_bundle} from store")  # noqa: TRY003
 
             if not validation_definition:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "ValidationDefinitionStore did not retrieve a validation definition"
                 )
             validation_definitions.append(validation_definition)
@@ -146,13 +168,15 @@ class Checkpoint(BaseModel):
             result_format=self.result_format,
             run_id=run_id,
         )
-        self._run_actions(run_results=run_results)
 
-        return CheckpointResult(
+        checkpoint_result = CheckpointResult(
             run_id=run_id,
             run_results=run_results,
             checkpoint_config=self,
         )
+        self._run_actions(checkpoint_result=checkpoint_result)
+
+        return checkpoint_result
 
     def _run_validation_definitions(
         self,
@@ -192,19 +216,22 @@ class Checkpoint(BaseModel):
         )
 
     def _run_actions(
-        self, run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
+        self,
+        checkpoint_result: CheckpointResult,
     ) -> None:
-        # NOTE: Currently runs each action for each result (currently v0.18 checkpoint behavior)
-        #       This will be changed to run on the aggregate result in v1.0.
-        for identifier, result in run_results.items():
-            for action in self.actions:
-                action.run(
-                    validation_result_suite_identifier=identifier, validation_result_suite=result
-                )
+        for action in self.actions:
+            action.v1_run(
+                checkpoint_result=checkpoint_result,
+            )
 
     @public_api
     def save(self) -> None:
-        raise NotImplementedError
+        from great_expectations import project_manager
+
+        store = project_manager.get_checkpoints_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        store.update(key=key, value=self)
 
 
 class CheckpointResult(BaseModel):
@@ -220,7 +247,7 @@ class CheckpointResult(BaseModel):
     def _root_validate_result(cls, values: dict) -> dict:
         run_results = values["run_results"]
         if len(run_results) == 0:
-            raise ValueError("CheckpointResult must contain at least one run result")
+            raise ValueError("CheckpointResult must contain at least one run result")  # noqa: TRY003
 
         values["success"] = all(result.success for result in run_results.values())
         return values

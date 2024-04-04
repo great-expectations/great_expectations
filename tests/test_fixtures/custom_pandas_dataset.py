@@ -1,4 +1,7 @@
-from great_expectations.dataset import MetaPandasDataset, PandasDataset
+from great_expectations.dataset import (  # type: ignore[attr-defined]
+    MetaPandasDataset,
+    PandasDataset,
+)
 
 
 class CustomPandasDataset(PandasDataset):

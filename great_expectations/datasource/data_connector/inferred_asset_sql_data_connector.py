@@ -167,7 +167,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     continue
                 else:
                     # We're being strict. Crash now.
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"Couldn't execute a query against table {metadata['table_name']} in schema {metadata['schema_name']}"  # noqa: E501
                     ) from e
 
@@ -266,6 +266,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this  # noqa: E501
             # exception is highly unlikely to fire.
             if "UndefinedTable" not in str(e):
-                raise e
+                raise e  # noqa: TRY201
 
         return tables

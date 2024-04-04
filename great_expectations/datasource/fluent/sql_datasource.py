@@ -200,7 +200,7 @@ class _PartitionerDatetime(FluentBaseModel):
         identifiers: Dict = {}
         for part in self.param_names:
             if part not in options:
-                raise ValueError(f"'{part}' must be specified in the batch request options")
+                raise ValueError(f"'{part}' must be specified in the batch request options")  # noqa: TRY003
             identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
@@ -328,7 +328,7 @@ class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "quotient" not in options:
-            raise ValueError("'quotient' must be specified in the batch request options")
+            raise ValueError("'quotient' must be specified in the batch request options")  # noqa: TRY003
         return {self.column_name: options["quotient"]}
 
 
@@ -351,7 +351,7 @@ class SqlPartitionerModInteger(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "remainder" not in options:
-            raise ValueError("'remainder' must be specified in the batch request options")
+            raise ValueError("'remainder' must be specified in the batch request options")  # noqa: TRY003
         return {self.column_name: options["remainder"]}
 
 
@@ -373,7 +373,7 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if self.column_name not in options:
-            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")
+            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")  # noqa: TRY003
         return {self.column_name: options[self.column_name]}
 
     @override
@@ -404,7 +404,7 @@ class SqlPartitionerMultiColumnValue(FluentBaseModel):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"All column names, {self.column_names}, must be specified in the batch request options. "  # noqa: E501
                 f" The options provided were f{options}."
             )
@@ -450,7 +450,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "datetime" not in options:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "'datetime' must be specified in the batch request options to create a batch identifier"  # noqa: E501
             )
         return {self.column_name: options["datetime"]}
@@ -503,7 +503,7 @@ class _SQLAsset(DataAsset):
     def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SqlPartitioner:
         PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
         if not PartitionerClass:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "  # noqa: E501
             )
         assert PartitionerClass is not None
@@ -665,7 +665,7 @@ class _SQLAsset(DataAsset):
         ):
             allowed_keys = set(self.get_batch_request_options_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
-            raise gx_exceptions.InvalidBatchRequestError(
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "Batch request options should only contain keys from the following set:\n"
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
@@ -707,7 +707,7 @@ class _SQLAsset(DataAsset):
                 batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
                 partitioner=batch_request.partitioner,
             )
-            raise gx_exceptions.InvalidBatchRequestError(
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "BatchRequest should have form:\n"
                 f"{pf(expect_batch_request_form.dict())}\n"
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
@@ -748,7 +748,7 @@ class QueryAsset(_SQLAsset):
     def query_must_start_with_select(cls, v: str):
         query = v.lstrip()
         if not (query.upper().startswith("SELECT") and query[6].isspace()):
-            raise ValueError("query must start with 'SELECT' followed by a whitespace.")
+            raise ValueError("query must start with 'SELECT' followed by a whitespace.")  # noqa: TRY003
         return v
 
     @override
@@ -791,7 +791,7 @@ class TableAsset(_SQLAsset):
     @pydantic.validator("table_name", pre=True, always=True)
     def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
         if not (validated_table_name := table_name or values.get("name")):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "table_name cannot be empty and should default to name if not provided"
             )
 
@@ -832,7 +832,7 @@ class TableAsset(_SQLAsset):
         inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 f'Attempt to connect to table: "{self.qualified_name}" failed because the schema '
                 f'"{self.schema_name}" does not exist.'
             )
@@ -844,7 +844,7 @@ class TableAsset(_SQLAsset):
                 connection.execute(sa.select(1, table).limit(1))
         except Exception as query_error:
             LOGGER.info(f"{self.name} `.test_connection()` query failed: {query_error!r}")
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 f"Attempt to connect to table: {self.qualified_name} failed because the test query "
                 f"failed. Ensure the table exists and the user has access to select data from the table: {query_error}"  # noqa: E501
             ) from query_error
@@ -977,7 +977,7 @@ class SQLDatasource(Datasource):
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine  # noqa: E501
                 # one possible case is a missing plugin (e.g. psycopg2)
-                raise SQLDatasourceError(
+                raise SQLDatasourceError(  # noqa: TRY003
                     "Unable to create a SQLAlchemy engine due to the " f"following exception: {e!s}"
                 ) from e
             self._cached_connection_string = self.connection_string
@@ -1036,7 +1036,7 @@ class SQLDatasource(Datasource):
             engine: sqlalchemy.Engine = self.get_engine()
             engine.connect()
         except Exception as e:
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
