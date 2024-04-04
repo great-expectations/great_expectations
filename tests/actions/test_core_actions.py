@@ -862,12 +862,12 @@ class TestV1ActionRun:
         action = OpsgenieAlertAction(api_key="test")
         action.v1_run(checkpoint_result=checkpoint_result)
 
+    @pytest.mark.unit
     @pytest.mark.skipif(
         not is_library_loadable(library_name="pypd"),
         reason="pypd is not installed",
     )
     @mock.patch("pypd.EventV2.create")
-    @pytest.mark.unit
     def test_PagerdutyAlertAction_run_emits_events(
         self, mock_pypd_event, checkpoint_result: CheckpointResult
     ):
