@@ -61,7 +61,7 @@ Host and share Data Docs on Azure Blob Storage. Data Docs are served using an Az
 
 ### Install Azure Storage Blobs client library for Python
 
-Run the following pip command in a terminal to install Azure Storage Blobs client library and its dependencies:
+Run the following pip command in a terminal to install the Azure Storage Blobs client library and its dependencies:
 
 ```markup title="Terminal command:"
 pip install azure-storage-blob
