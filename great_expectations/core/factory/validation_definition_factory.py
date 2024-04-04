@@ -80,4 +80,4 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
     @override
     def all(self) -> Iterable[ValidationDefinition]:
         """Get all ValidationDefinitions."""
-        return []
+        return self._store.get_all()

@@ -99,4 +99,4 @@ class SuiteFactory(Factory[ExpectationSuite]):
     @override
     def all(self) -> Iterable[ExpectationSuite]:
         """Get all ExpectationSuites."""
-        return []
+        return self._store.get_all()

@@ -1,7 +1,7 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations import get_context, set_context
+from great_expectations import set_context
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
@@ -237,23 +237,17 @@ def _test_checkpoint_factory_delete_success(context):
         context.checkpoints.get(name)
 
 
-@pytest.mark.unit
-def test_checkpoint_factory_get_all_ephemeral():
-    context = get_context(mode="ephemeral")
-    _test_checkpoint_factory_get_all(context)
+@pytest.mark.parametrize(
+    "context_fixture_name",
+    [
+        pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.unit),
+        pytest.param("ephemeral_data_context", id="ephemeral", marks=pytest.mark.unit),
+        pytest.param("empty_data_context", id="filesystem", marks=pytest.mark.filesystem),
+    ],
+)
+def test_checkpoint_factory_get_all(context_fixture_name: str, request: pytest.FixtureRequest):
+    context: AbstractDataContext = request.getfixturevalue(context_fixture_name)
 
-
-@pytest.mark.filesystem
-def test_checkpoint_factory_get_all_filesystem(empty_data_context):
-    _test_checkpoint_factory_get_all(empty_data_context)
-
-
-@pytest.mark.cloud
-def test_checkpoint_factory_get_all_cloud(empty_cloud_context_fluent):
-    _test_checkpoint_factory_get_all(empty_cloud_context_fluent)
-
-
-def _test_checkpoint_factory_get_all(context: AbstractDataContext):
     # Arrange
     ds = context.sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore
