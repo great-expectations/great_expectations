@@ -668,9 +668,20 @@ def test_filesystem_data_connector_uses_batching_regex_from_batch_request(tmp_pa
     )
 
     # act
+
+    # establish a baseline without a batching_regex
+    all_batch_definitions = my_data_connector.get_batch_definition_list(
+        BatchRequest(
+            datasource_name="my_file_path_datasource",
+            data_asset_name="my_filesystem_data_asset",
+            options={},
+            batching_regex=None,
+        )
+    )
+
     # provide a batching regex which should match 3 of the 5 files
     batching_regex = re.compile(r"alpha-(.*)\.csv")
-    batch_definitions = my_data_connector.get_batch_definition_list(
+    filtered_batch_definitions = my_data_connector.get_batch_definition_list(
         BatchRequest(
             datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
@@ -680,4 +691,5 @@ def test_filesystem_data_connector_uses_batching_regex_from_batch_request(tmp_pa
     )
 
     # assert
-    assert len(batch_definitions) == 3
+    assert len(all_batch_definitions) == 5
+    assert len(filtered_batch_definitions) == 3
