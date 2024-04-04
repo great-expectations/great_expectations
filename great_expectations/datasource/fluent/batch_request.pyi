@@ -15,7 +15,7 @@ class BatchRequest(pydantic.BaseModel):
     data_asset_name: StrictStr
     options: BatchRequestOptions
     partitioner: Optional[Partitioner] = None
-    batching_regex: re.Pattern | None = None
+    batching_regex: Optional[re.Pattern] = None
 
     def __init__(  # noqa: PLR0913
         self,
