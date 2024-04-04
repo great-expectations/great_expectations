@@ -316,7 +316,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
     def _preprocess_batching_regex(self, regex: re.Pattern) -> re.Pattern:
-        """Add the FILE_PATH_BATCH_SPEC_KEY group to regex in case it is not already present."""
+        """Add the FILE_PATH_BATCH_SPEC_KEY group to regex if not already present."""
         regex_parser = RegExParser(
             regex_pattern=regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
