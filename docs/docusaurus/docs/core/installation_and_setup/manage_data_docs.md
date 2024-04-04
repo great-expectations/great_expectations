@@ -31,6 +31,11 @@ Data Docs translate Expectations, Validation Results, and other metadata into hu
 
 Host and share Data Docs on AWS S3.
 
+### Prerequisites
+
+- [A working deployment of Great Expectations](/core/installation_and_setup/install_gx.md)
+- [The AWS Command Line Interface (CLI)](https://aws.amazon.com/cli/)
+
 ### Create an S3 bucket
 <CreateAnS3Bucket />
 
