@@ -13,55 +13,22 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     expect_column_pair_values_to_be_in_set is a \
     [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
 
-    For example:
-    ::
-        >>> d = {'fruit': ['appple','apple','apple','banana','banana'],
-                'color': ['red','green','yellow','yellow','red']}
-        >>> my_df = pd.DataFrame(data=d)
-        >>> my_df.expect_column_pair_values_to_be_in_set(
-                'fruit',
-                'color',
-                [
-                    ('apple','red'),
-                    ('apple','green'),
-                    ('apple','yellow'),
-                    ('banana','yellow'),
-                ]
-        )
-        {
-            "success": false,
-            "meta": {},
-            "exception_info": {
-                "raised_exception": false,
-                "exception_traceback": null,
-                "exception_message": null
-            },
-            "result": {
-                "element_count": 5,
-                "unexpected_count": 1,
-                "unexpected_percent": 20.0,
-                "partial_unexpected_list": [
-                    [
-                        "banana",
-                        "red"
-                    ]
-                ],
-                "missing_count": 0,
-                "missing_percent": 0.0,
-                "unexpected_percent_total": 20.0,
-                "unexpected_percent_nonmissing": 20.0
-            }
-        }
+    Column Pair Map Expectations are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer.
+    If the percentage is high enough, the Expectation considers that data valid.
 
     Args:
         column_A (str): The first column name
         column_B (str): The second column name
         value_pairs_set (list of tuples): All the valid pairs to be matched
 
-    Keyword Args:
-        ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither"
-
     Other Parameters:
+        ignore_row_if (str): \
+            "both_values_are_missing", "either_value_is_missing", "neither" \
+            If specified, sets the condition on which a given row is to be ignored. Default "neither".
+        mostly (None or a float between 0 and 1): \
+            Successful if at least `mostly` fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
             For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
@@ -76,6 +43,93 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Sets
+
+    Example Data:
+                test 	test2
+            0 	1       1
+            1 	2       1
+            2 	4   	1
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnPairValuesToBeInSet(
+                    column_A="test",
+                    column_B="test2",
+                    value_pairs_set=[(2,1), (1,1)],
+                    mostly=.5
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 1,
+                    "unexpected_percent": 33.33333333333333,
+                    "partial_unexpected_list": [
+                      [
+                        4,
+                        1
+                      ]
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 33.33333333333333,
+                    "unexpected_percent_nonmissing": 33.33333333333333
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnPairValuesToBeInSet(
+                    column_A="test",
+                    column_B="test2",
+                    value_pairs_set=[(1,2) (4,1)],
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "element_count": 3,
+                    "unexpected_count": 2,
+                    "unexpected_percent": 66.66666666666666,
+                    "partial_unexpected_list": [
+                      [
+                        1,
+                        1
+                      ],
+                      [
+                        2,
+                        1
+                      ]
+                    ],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 66.66666666666666,
+                    "unexpected_percent_nonmissing": 66.66666666666666
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     value_pairs_set: List[Tuple[Any, Any]]

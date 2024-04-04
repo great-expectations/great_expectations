@@ -12,6 +12,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
+from great_expectations import set_context
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_batch_request
@@ -2295,6 +2296,7 @@ def fake_cloud_context_basic(_fake_cloud_context_setup, monkeypatch):
         cloud_config.make_store_get(data_file_name=data_file, data_dir=data_dir, with_slack=False),
     )
     context = gx.data_context.CloudDataContext()
+    set_context(context)
     yield context
 
 
@@ -2313,6 +2315,7 @@ def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
         cloud_config.make_send_slack_notifications(slack_counter),
     )
     context = gx.data_context.CloudDataContext()
+    set_context(context)
     yield context, slack_counter
 
 

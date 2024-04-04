@@ -1,12 +1,10 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations import set_context
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
 from great_expectations.core.validation_definition import ValidationDefinition
-from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.store.checkpoint_store import (
     V1CheckpointStore as CheckpointStore,
 )
@@ -24,9 +22,7 @@ def test_checkpoint_factory_get_uses_store_get(mocker: MockerFixture):
         name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
     )
     store.get.return_value = checkpoint
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
+    factory = CheckpointFactory(store=store)
 
     # Act
     result = factory.get(name=name)
@@ -47,9 +43,7 @@ def test_checkpoint_factory_get_raises_error_on_missing_key(mocker: MockerFixtur
         name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
     )
     store.get.return_value = checkpoint
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
+    factory = CheckpointFactory(store=store)
 
     # Act
     with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
@@ -67,9 +61,7 @@ def test_checkpoint_factory_add_uses_store_add(mocker: MockerFixture):
     store.has_key.return_value = False
     key = store.get_key.return_value
     store.get.return_value = None
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    set_context(context)
-    factory = CheckpointFactory(store=store, context=context)
+    factory = CheckpointFactory(store=store)
     checkpoint = Checkpoint(
         name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
     )
@@ -88,9 +80,7 @@ def test_checkpoint_factory_add_raises_for_duplicate_key(mocker: MockerFixture):
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
+    factory = CheckpointFactory(store=store)
     checkpoint = Checkpoint(
         name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
     )
@@ -113,9 +103,7 @@ def test_checkpoint_factory_delete_uses_store_remove_key(mocker: MockerFixture):
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
+    factory = CheckpointFactory(store=store)
     checkpoint = Checkpoint(
         name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
     )
@@ -135,9 +123,7 @@ def test_checkpoint_factory_delete_raises_for_missing_checkpoint(mocker: MockerF
     name = "test-checkpoint"
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
-    context = mocker.MagicMock(spec=AbstractDataContext)
-    factory = CheckpointFactory(store=store, context=context)
-    set_context(context)
+    factory = CheckpointFactory(store=store)
     checkpoint = Checkpoint(
         name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
     )
@@ -164,16 +150,16 @@ def test_checkpoint_factory_is_initialized_with_context_cloud(empty_cloud_data_c
 
 
 @pytest.mark.filesystem
-def test_checkpoint_factory_add_success_filesystem(empty_data_context, mocker: MockerFixture):
-    _test_checkpoint_factory_add_success(empty_data_context, mocker)
+def test_checkpoint_factory_add_success_filesystem(empty_data_context):
+    _test_checkpoint_factory_add_success(empty_data_context)
 
 
 @pytest.mark.cloud
-def test_checkpoint_factory_add_success_cloud(empty_cloud_context_fluent, mocker: MockerFixture):
-    _test_checkpoint_factory_add_success(empty_cloud_context_fluent, mocker)
+def test_checkpoint_factory_add_success_cloud(empty_cloud_context_fluent):
+    _test_checkpoint_factory_add_success(empty_cloud_context_fluent)
 
 
-def _test_checkpoint_factory_add_success(context, mocker):
+def _test_checkpoint_factory_add_success(context):
     # Arrange
     name = "test-checkpoint"
     ds = context.sources.add_pandas("my_datasource")

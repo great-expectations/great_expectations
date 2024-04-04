@@ -568,7 +568,7 @@ def get_false_positive_rate_from_rule_state(
         parameters=parameters,
     )
     if not (0.0 <= false_positive_rate <= 1.0):
-        raise gx_exceptions.ProfilerExecutionError(
+        raise gx_exceptions.ProfilerExecutionError(  # noqa: TRY003
             f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
 {false_positive_rate} was provided.
 """  # noqa: E501
@@ -1010,7 +1010,7 @@ def get_or_create_expectation_suite(  # noqa: C901
 
     if expectation_suite is not None and expectation_suite_name is not None:
         if expectation_suite.name != expectation_suite_name:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 'Mutually inconsistent "expectation_suite" and "expectation_suite_name" were specified.'  # noqa: E501
             )
 

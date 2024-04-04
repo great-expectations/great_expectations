@@ -21,7 +21,7 @@ class DateTimeSorter(Sorter):
         super().__init__(name=name, orderby=orderby)
 
         if datetime_format and not isinstance(datetime_format, str):
-            raise gx_exceptions.SorterError(
+            raise gx_exceptions.SorterError(  # noqa: TRY003
                 f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
         "{type(datetime_format)!s}").
                     """  # noqa: E501

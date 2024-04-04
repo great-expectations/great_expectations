@@ -45,10 +45,6 @@ class S3DataConnector(FilePathDataConnector):
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)
         recursive_file_discovery (bool): Flag to indicate if files should be searched recursively from subfolders
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # sorters (list): optional list of sorters for sorting data_references
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on S3
     """  # noqa: E501
 
@@ -71,10 +67,6 @@ class S3DataConnector(FilePathDataConnector):
         delimiter: str = "/",
         max_keys: int = 1000,
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
         self._s3_client: BaseClient = s3_client
@@ -95,10 +87,6 @@ class S3DataConnector(FilePathDataConnector):
             batching_regex=re.compile(
                 f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
             ),
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -114,10 +102,6 @@ class S3DataConnector(FilePathDataConnector):
         delimiter: str = "/",
         max_keys: int = 1000,
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> S3DataConnector:
         """Builds "S3DataConnector", which links named DataAsset to AWS S3.
@@ -132,10 +116,6 @@ class S3DataConnector(FilePathDataConnector):
             delimiter: S3 delimiter
             max_keys: S3 max_keys (default is 1000)
             recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # sorters: optional list of sorters for sorting data_references
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on S3
 
         Returns:
@@ -151,10 +131,6 @@ class S3DataConnector(FilePathDataConnector):
             delimiter=delimiter,
             max_keys=max_keys,
             recursive_file_discovery=recursive_file_discovery,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -230,7 +206,7 @@ class S3DataConnector(FilePathDataConnector):
     @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""Converting file paths to fully-qualified object references for "{self.__class__.__name__}" \
 requires "file_path_template_map_fn: Callable" to be set.
 """  # noqa: E501

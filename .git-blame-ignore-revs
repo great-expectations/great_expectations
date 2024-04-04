@@ -47,3 +47,6 @@ edf5dbdc77b418d659dc9d87462cd6df9a85436c
 # Change line-length from 88 -> 100
 # https://github.com/great-expectations/great_expectations/pull/9584
 d170c89167a96b702edc02b16dbf5984619d0e8f
+# enable TRYceratops linting; add noqa comments
+# https://github.com/great-expectations/great_expectations/pull/9684
+2bbfb50a6458f09ef197ee1174666a4c4726a850

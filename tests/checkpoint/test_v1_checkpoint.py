@@ -10,12 +10,18 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import expectations as gxe
+from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     SlackNotificationAction,
+    UpdateDataDocsAction,
     ValidationAction,
 )
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
+from great_expectations.checkpoint.v1_checkpoint import (
+    Checkpoint,
+    CheckpointAction,
+    CheckpointResult,
+)
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -26,6 +32,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -45,6 +52,22 @@ def test_checkpoint_no_validation_definitions_raises_error():
         Checkpoint(name="my_checkpoint", validation_definitions=[], actions=[])
 
     assert "Checkpoint must contain at least one validation definition" in str(e.value)
+
+
+@pytest.mark.unit
+def test_checkpoint_save_success(mocker: MockerFixture):
+    context = mocker.Mock(spec=AbstractDataContext)
+    set_context(project=context)
+
+    checkpoint = Checkpoint(
+        name="my_checkpoint",
+        validation_definitions=[mocker.Mock(spec=ValidationDefinition)],
+        actions=[],
+    )
+    store_key = context.v1_checkpoint_store.get_key.return_value
+    checkpoint.save()
+
+    context.v1_checkpoint_store.update.assert_called_once_with(key=store_key, value=checkpoint)
 
 
 @pytest.fixture
@@ -191,7 +214,9 @@ class TestCheckpointSerialization:
 
     @pytest.mark.filesystem
     def test_checkpoint_filesystem_round_trip_adds_ids(
-        self, tmp_path: pathlib.Path, actions: list[ValidationAction]
+        self,
+        tmp_path: pathlib.Path,
+        actions: list[CheckpointAction],
     ):
         with working_directory(tmp_path):
             context = gx.get_context(mode="file")
@@ -349,6 +374,37 @@ class TestCheckpointSerialization:
 
         assert expected_error in str(e.value)
 
+    @pytest.mark.unit
+    def test_checkpoint_deserialization_with_actions(self, mocker: MockerFixture):
+        # Arrange
+        context = mocker.Mock(spec=AbstractDataContext)
+        context.validation_definition_store.get.return_value = mocker.Mock(
+            spec=ValidationDefinition
+        )
+        set_context(context)
+
+        # Act
+        serialized_checkpoint = {
+            "actions": [
+                {"site_names": [], "type": "update_data_docs"},
+                {"slack_webhook": "test", "type": "slack"},
+                {"teams_webhook": "test", "type": "microsoft"},
+            ],
+            "id": "e7d1f462-821b-429c-8086-cca80eeea5e9",
+            "name": "my_checkpoint",
+            "result_format": "SUMMARY",
+            "validation_definitions": [
+                {"id": "3fb9ce09-a8fb-44d6-8abd-7d699443f6a1", "name": "my_validation_def"}
+            ],
+        }
+        checkpoint = Checkpoint.parse_obj(serialized_checkpoint)
+
+        # Assert
+        assert len(checkpoint.actions) == 3
+        assert isinstance(checkpoint.actions[0], UpdateDataDocsAction)
+        assert isinstance(checkpoint.actions[1], SlackNotificationAction)
+        assert isinstance(checkpoint.actions[2], MicrosoftTeamsNotificationAction)
+
 
 class TestCheckpointResult:
     suite_name: str = "my_suite"
@@ -437,7 +493,9 @@ class TestCheckpointResult:
 
     @pytest.mark.unit
     def test_checkpoint_run_actions(
-        self, validation_definition: ValidationDefinition, actions: list[ValidationAction]
+        self,
+        validation_definition: ValidationDefinition,
+        actions: list[CheckpointAction],
     ):
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(
@@ -446,10 +504,11 @@ class TestCheckpointResult:
             actions=actions,
         )
 
-        with mock.patch.object(ValidationAction, "run") as mock_run:
-            _ = checkpoint.run()
+        with mock.patch.object(ValidationAction, "v1_run") as mock_run:
+            result = checkpoint.run()
 
         assert mock_run.call_count == len(actions)
+        mock_run.assert_called_with(checkpoint_result=result)
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(

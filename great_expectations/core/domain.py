@@ -68,13 +68,13 @@ class Domain(SerializableDotDict):
             try:
                 domain_type = MetricDomainTypes(domain_type.lower())
             except (TypeError, KeyError) as e:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     f""" {e}: Cannot instantiate Domain (domain_type "{domain_type!s}" of type \
 "{type(domain_type)!s}" is not supported).
 """
                 )
         elif not isinstance(domain_type, MetricDomainTypes):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003, TRY004
                 f"""Cannot instantiate Domain (domain_type "{domain_type!s}" of type "{type(domain_type)!s}" is \
 not supported).
 """  # noqa: E501
@@ -114,7 +114,7 @@ not supported).
                         break
 
                 if not is_consistent:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         f"""Cannot instantiate Domain (domain_type "{domain_type!s}" of type \
 "{type(domain_type)!s}" -- key "{semantic_domain_key}", detected in "{INFERRED_SEMANTIC_TYPE_KEY}" dictionary, does \
 not exist as value of appropriate key in "domain_kwargs" dictionary.

@@ -6,7 +6,6 @@ The only requirement from an action is for it to have a take_action method.
 
 from __future__ import annotations
 
-import importlib
 import json
 import logging
 from typing import (
@@ -46,7 +45,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.renderer import (
     EmailRenderer,
     MicrosoftTeamsRenderer,
@@ -56,6 +55,7 @@ from great_expectations.render.renderer import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
@@ -102,11 +102,10 @@ class ValidationAction(BaseModel):
         return project_manager.is_using_cloud()
 
     @public_api
-    def run(  # noqa: PLR0913
+    def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
         **kwargs,
@@ -119,7 +118,6 @@ class ValidationAction(BaseModel):
         Args:
             validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
             validation_result_suite_identifier: an instance of either the ValidationResultIdentifier class (for open source Great Expectations) or the GXCloudIdentifier (from Great Expectations Cloud).
-            data_asset: An instance of the Validator class.
             expectation_suite_identifier: Optionally, an instance of the ExpectationSuiteIdentifier class.
             checkpoint_identifier: Optionally, an Identifier for the Checkpoint.
             kwargs: named parameters that are specific to a given Action, and need to be assigned a value in the Action's configuration in a Checkpoint's action_list.
@@ -130,18 +128,16 @@ class ValidationAction(BaseModel):
         return self._run(
             validation_result_suite=validation_result_suite,
             validation_result_suite_identifier=validation_result_suite_identifier,
-            data_asset=data_asset,
             expectation_suite_identifier=expectation_suite_identifier,
             checkpoint_identifier=checkpoint_identifier,
             **kwargs,
         )
 
     @public_api
-    def _run(  # noqa: PLR0913
+    def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -156,14 +152,16 @@ class ValidationAction(BaseModel):
             validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
             validation_result_suite_identifier: an instance of either the ValidationResultIdentifier
                 class (for open source Great Expectations) or the GeCloudIdentifier (from Great Expectations Cloud).
-            data_asset: An instance of the Validator class.
             expectation_suite_identifier:  Optionally, an instance of the ExpectationSuiteIdentifier class.
             checkpoint_identifier:  Optionally, an Identifier for the Checkpoints.
 
         Returns:
             A Dict describing the result of the Action.
         """  # noqa: E501
-        return NotImplementedError
+
+    # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
+    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+        raise NotImplementedError
 
 
 class DataDocsAction(ValidationAction):
@@ -246,7 +244,7 @@ class SlackNotificationAction(DataDocsAction):
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, SlackRenderer):
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     "renderer must be a SlackRenderer or a valid configuration for one."
                 )
             renderer = _renderer
@@ -264,7 +262,7 @@ class SlackNotificationAction(DataDocsAction):
             else:
                 assert slack_token and slack_channel
         except AssertionError:
-            raise ValueError("Please provide either slack_webhook or slack_token and slack_channel")
+            raise ValueError("Please provide either slack_webhook or slack_token and slack_channel")  # noqa: TRY003
 
         return values
 
@@ -273,7 +271,6 @@ class SlackNotificationAction(DataDocsAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -290,7 +287,7 @@ class SlackNotificationAction(DataDocsAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -403,21 +400,11 @@ class PagerdutyAlertAction(ValidationAction):
     notify_on: Literal["all", "failure", "success"] = "failure"
     severity: Literal["critical", "error", "warning", "info"] = "critical"
 
-    @root_validator
-    def _root_validate_deps(cls, values: dict) -> dict:
-        if not importlib.util.find_spec("pypd"):
-            raise DataContextError(
-                'ModuleNotFoundError: No module named "pypd". "pypd" is required for PageDuty notification actions.'  # noqa: E501
-            )
-
-        return values
-
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -425,6 +412,7 @@ class PagerdutyAlertAction(ValidationAction):
         import pypd
 
         logger.debug("PagerdutyAlertAction.run")
+
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."  # noqa: E501
@@ -435,7 +423,7 @@ class PagerdutyAlertAction(ValidationAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -513,7 +501,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, MicrosoftTeamsRenderer):
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     "renderer must be a MicrosoftTeamsRenderer or a valid configuration for one."
                 )
             renderer = _renderer
@@ -524,7 +512,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -541,7 +528,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -613,7 +600,7 @@ class OpsgenieAlertAction(ValidationAction):
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, OpsgenieRenderer):
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     "renderer must be a OpsgenieRenderer or a valid configuration for one."
                 )
             renderer = _renderer
@@ -624,7 +611,6 @@ class OpsgenieAlertAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -641,7 +627,7 @@ class OpsgenieAlertAction(ValidationAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -742,7 +728,7 @@ class EmailAction(ValidationAction):
         if isinstance(renderer, dict):
             _renderer = _build_renderer(config=renderer)
             if not isinstance(_renderer, EmailRenderer):
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003, TRY004
                     "renderer must be a EmailRenderer or a valid configuration for one."
                 )
             renderer = _renderer
@@ -771,7 +757,6 @@ class EmailAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -788,7 +773,7 @@ class EmailAction(ValidationAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "  # noqa: E501
                 f"not {type(validation_result_suite_identifier)}"
             )
@@ -872,7 +857,7 @@ class StoreValidationResultAction(ValidationAction):
             target_store = data_context.stores[target_store_name]
 
         if not isinstance(target_store, ValidationsStore):
-            raise ValueError("target_store must be a ValidationsStore")
+            raise ValueError("target_store must be a ValidationsStore")  # noqa: TRY003, TRY004
 
         self._target_store = target_store
 
@@ -881,12 +866,12 @@ class StoreValidationResultAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
+
         output = self._target_store.store_validation_results(
             validation_result_suite,
             validation_result_suite_identifier,
@@ -939,7 +924,6 @@ class UpdateDataDocsAction(DataDocsAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        data_asset,
         payload=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -1013,13 +997,12 @@ class SNSNotificationAction(ValidationAction):
     sns_message_subject: Optional[str]
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
-        data_asset=None,
         **kwargs,
     ) -> str:
         logger.debug("SNSNotificationAction.run")
@@ -1053,11 +1036,10 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
-        data_asset,
         expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
         checkpoint_identifier=None,
         **kwargs,
@@ -1090,7 +1072,7 @@ class APINotificationAction(ValidationAction):
             return requests.post(self.url, headers=headers, data=payload)
         except Exception as e:
             print(f"Exception when sending data to API - {e}")
-            raise e
+            raise e  # noqa: TRY201
 
     @staticmethod
     def create_payload(data_asset_name, suite_name, validation_results_serializable) -> str:

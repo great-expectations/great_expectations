@@ -32,7 +32,7 @@ class BatchMarkers(BatchSpec):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "ge_load_time" not in self:
-            raise InvalidBatchIdError("BatchMarkers requires a ge_load_time")
+            raise InvalidBatchIdError("BatchMarkers requires a ge_load_time")  # noqa: TRY003
 
     @property
     def ge_load_time(self):
@@ -90,7 +90,7 @@ class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
             kwargs["reader_options"] = reader_options
         super().__init__(*args, **kwargs)
         if "path" not in self:
-            raise InvalidBatchSpecError("PathBatchSpec requires a path element")
+            raise InvalidBatchSpecError("PathBatchSpec requires a path element")  # noqa: TRY003
 
     @property
     def path(self) -> str:
@@ -143,7 +143,7 @@ class FabricBatchSpec(PandasBatchSpecProtocol):
         try:
             return getattr(fabric, self.reader_method)
         except AttributeError:
-            raise AttributeError(
+            raise AttributeError(  # noqa: TRY003
                 f"FabricBatchSpec reader_method {self.reader_method} not found in sempy.fabric module"  # noqa: E501
             )
 
@@ -181,7 +181,7 @@ class RuntimeDataBatchSpec(BatchSpec):
         super().__init__(*args, **kwargs)
 
         if self.batch_data is None:
-            raise InvalidBatchSpecError("RuntimeDataBatchSpec batch_data cannot be None")
+            raise InvalidBatchSpecError("RuntimeDataBatchSpec batch_data cannot be None")  # noqa: TRY003
 
     @property
     def batch_data(self):
@@ -197,7 +197,7 @@ class RuntimeQueryBatchSpec(BatchSpec):
         super().__init__(*args, **kwargs)
 
         if self.query is None:
-            raise InvalidBatchSpecError("RuntimeQueryBatchSpec query cannot be None")
+            raise InvalidBatchSpecError("RuntimeQueryBatchSpec query cannot be None")  # noqa: TRY003
 
     @property
     def query(self):
@@ -212,9 +212,9 @@ class GlueDataCatalogBatchSpec(BatchSpec):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "database_name" not in self:
-            raise InvalidBatchSpecError("GlueDataCatalogBatchSpec requires a database_name")
+            raise InvalidBatchSpecError("GlueDataCatalogBatchSpec requires a database_name")  # noqa: TRY003
         if "table_name" not in self:
-            raise InvalidBatchSpecError("GlueDataCatalogBatchSpec requires a table_name")
+            raise InvalidBatchSpecError("GlueDataCatalogBatchSpec requires a table_name")  # noqa: TRY003
 
     @property
     def reader_method(self) -> str:

@@ -100,7 +100,7 @@ def _parse_attribute_naming_pattern(name: str) -> ParseResults:
     try:
         return attribute_naming_pattern.parseString(name)
     except ParseException:
-        raise ParameterAttributeNameParserError(
+        raise ParameterAttributeNameParserError(  # noqa: TRY003
             f'Unable to parse Parameter Attribute Name: "{name}".'
         )
 
@@ -525,7 +525,7 @@ def _get_parameter_value_from_parameter_container(
                 name=parameter_name_part
             )
             if len(parsed_attribute_name) < 1:
-                raise KeyError(
+                raise KeyError(  # noqa: TRY003, TRY301
                     f"""Unable to get value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" in fully-qualified parameter name does not represent a valid expression.
 """  # noqa: E501
@@ -542,14 +542,14 @@ def _get_parameter_value_from_parameter_container(
             for attribute_value_accessor in parsed_attribute_name:
                 return_value = return_value[attribute_value_accessor]
     except KeyError:
-        raise KeyError(
+        raise KeyError(  # noqa: TRY003
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" does not exist in fully-qualified parameter name.
 """
         )
 
     if attribute_value_reference not in parent_parameter_node:  # type: ignore[operator] # could be None
-        raise KeyError(
+        raise KeyError(  # noqa: TRY003
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" of fully-qualified parameter name does not exist.
 """
