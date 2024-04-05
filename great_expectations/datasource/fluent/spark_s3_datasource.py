@@ -127,7 +127,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             s3_client=self._get_s3_client(),
-            batching_regex=data_asset.batching_regex,
             bucket=self.bucket,
             prefix=s3_prefix,
             delimiter=s3_delimiter,

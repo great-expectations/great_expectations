@@ -45,7 +45,6 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
             data_asset_name=data_asset.name,
-            batching_regex=data_asset.batching_regex,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
