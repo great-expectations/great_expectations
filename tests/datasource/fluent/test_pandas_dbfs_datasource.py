@@ -145,7 +145,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         batching_regex=batching_regex,  # todo: remove this
     )
 
-    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300")
+    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
