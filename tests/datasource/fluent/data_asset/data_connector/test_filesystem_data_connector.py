@@ -307,7 +307,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-@pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_only_unique_batch_definitions(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_return_only_unique_batch_definitions"))
     create_files_in_directory(
@@ -320,33 +319,6 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
             "B/file_2.csv",
         ],
     )
-
-    my_data_connector: DataConnector
-
-    my_data_connector = FilesystemDataConnector(
-        datasource_name="my_file_path_datasource",
-        data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
-        base_directory=pathlib.Path(base_directory),
-        # glob_directive="*.csv",  # omitting for purposes of this test
-    )
-    assert my_data_connector.get_data_reference_count() == 7
-    assert my_data_connector.get_data_references()[:3] == [
-        "A",
-        "A/file_1.csv",
-        "A/file_2.csv",
-    ]
-    assert my_data_connector.get_matched_data_reference_count() == 5
-    assert my_data_connector.get_matched_data_references()[:3] == [
-        "A/file_1.csv",
-        "A/file_2.csv",
-        "A/file_3.csv",
-    ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == [
-        "A",
-        "B",
-    ]
-    assert my_data_connector.get_unmatched_data_reference_count() == 2
 
     processed_batching_regex = re.compile("(?P<path>(?P<directory>.+)/(?P<filename>.+\\.csv))")
     expected: List[LegacyBatchDefinition] = [
@@ -400,7 +372,6 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         base_directory=pathlib.Path(base_directory),
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
@@ -411,10 +382,60 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_filesystem_data_asset",
                 options={},
+                batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
             )
         )
     )
     assert expected == unsorted_batch_definition_list
+
+
+@pytest.mark.filesystem
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "FilePathDataConnectors now depend on a regex passed through a BatchRequest "
+        "and the test_connection logic does not yet accept a BatchRequest."
+    ),
+)
+def test_get_matched_data_reference_functionality(tmp_path_factory):
+    base_directory = str(tmp_path_factory.mktemp("test_return_only_unique_batch_definitions"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "A/file_1.csv",
+            "A/file_2.csv",
+            "A/file_3.csv",
+            "B/file_1.csv",
+            "B/file_2.csv",
+        ],
+    )
+
+    # this batching_regex needs to be passed through the BatchRequest
+    batching_regex = re.compile(r"(?P<name>.+)/.+\.csv")  # noqa: F841
+
+    my_data_connector = FilesystemDataConnector(
+        datasource_name="my_file_path_datasource",
+        data_asset_name="my_filesystem_data_asset",
+        base_directory=pathlib.Path(base_directory),
+        # glob_directive="*.csv",  # omitting for purposes of this test
+    )
+    assert my_data_connector.get_data_reference_count() == 7
+    assert my_data_connector.get_data_references()[:3] == [
+        "A",
+        "A/file_1.csv",
+        "A/file_2.csv",
+    ]
+    assert my_data_connector.get_matched_data_reference_count() == 5
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "A/file_1.csv",
+        "A/file_2.csv",
+        "A/file_3.csv",
+    ]
+    assert my_data_connector.get_unmatched_data_references()[:3] == [
+        "A",
+        "B",
+    ]
+    assert my_data_connector.get_unmatched_data_reference_count() == 2
 
 
 @pytest.mark.filesystem
