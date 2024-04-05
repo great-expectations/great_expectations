@@ -139,12 +139,13 @@ def test_construct_csv_asset_directly():
 def test_get_batch_list_from_fully_specified_batch_request(
     pandas_dbfs_datasource: PandasDBFSDatasource,
 ):
+    batching_regex = r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
     asset = pandas_dbfs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
+        batching_regex=batching_regex,  # todo: remove this
     )
 
-    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
+    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300")
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -164,7 +165,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     }
     assert batch.id == "pandas_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
 
-    request = asset.build_batch_request({"name": "alex"})
+    request = asset.build_batch_request({"name": "alex", "batching_regex": batching_regex})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 2
 

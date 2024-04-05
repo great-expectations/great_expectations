@@ -15,6 +15,7 @@ import great_expectations as gx
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.datasource.fluent.pandas_datasource import (
@@ -282,6 +283,7 @@ class TestDynamicPandasAssets:
             )
             .build_batch_request()
         )
+        batch_request.batching_regex = MATCH_ALL_PATTERN
         with pytest.raises(SpyInterrupt):
             empty_data_context.get_validator(batch_request=batch_request)
 
