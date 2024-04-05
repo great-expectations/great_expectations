@@ -4,13 +4,14 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 
 export default function GithubNavbarItem({ owner, repository, className }) {
 
-    const [starsCount, setStarsCount] = useState('0')
-    const [forksCount, setForksCount] = useState('0')
-    const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true)
+    const [starsCount, setStarsCount] = useState('0');
+    const [forksCount, setForksCount] = useState('0');
+    const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true);
+    const [innerWidth, setInnerWidth] = useState(0);
     const MOBILE_BREAKPOINT = 996;
 
     useEffect(() => {
-        if(window.innerWidth > MOBILE_BREAKPOINT){
+        if(!innerWidth || innerWidth > MOBILE_BREAKPOINT){
             fetch(`https://api.github.com/repos/${owner}/${repository}`)
                 .then(response => response.json())
                 .then(data => {
@@ -18,12 +19,22 @@ export default function GithubNavbarItem({ owner, repository, className }) {
                     setForksCount(formatCompactNumber(data.forks_count))
                     setShowGithubBadgeInfo(true)
                 }).catch( _ => {
-                    setShowGithubBadgeInfo(false)
-                })
+                setShowGithubBadgeInfo(false)
+            })
         } else {
             setShowGithubBadgeInfo(false)
         }
-    }, [window.innerWidth]);
+    }, [innerWidth]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setInnerWidth(window.innerWidth);
+        };
+
+        window.addEventListener("resize", handleResize);
+
+        return () => window.removeEventListener("resize", handleResize)
+    }, []);
 
     function formatCompactNumber(number) {
         const formatter = Intl.NumberFormat("en", { notation: "compact" });
