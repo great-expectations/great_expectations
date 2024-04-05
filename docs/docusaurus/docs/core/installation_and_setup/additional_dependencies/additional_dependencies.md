@@ -59,13 +59,15 @@ GX Core uses the Python library `boto3` to access objects stored in Amazon S3 bu
   
   :::
 
-  Run the following code to install the optional dependencies required by GX to work with AWS S3:
+  Python interacts with AWS through the `boto3` library. GX makes use of this library in the background when working with AWS. Although you won't use `boto3` directly, you'll need to install it for GX to work with AWS.
+
+  Run the following code to install the dependencies required by GX to work with AWS S3:
 
   ```bash title="Terminal input"
   python -m pip install 'great_expectations[s3]'
   ```
 
-  GX Core and the requirements for the `boto3` Python library are installed.
+  For more information on the `boto3` Python library see the [official Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html).
 
 
 </TabItem>
