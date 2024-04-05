@@ -645,7 +645,17 @@ def test_relative_base_directory_path(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-def test_filesystem_data_connector_uses_batching_regex_from_batch_request(tmp_path_factory):
+@pytest.mark.parametrize(
+    "batching_regex,batch_definition_count",
+    [
+        pytest.param(MATCH_ALL_PATTERN, 6, id="Match All Pattern"),
+        pytest.param(r"alpha-(.*)\.csv", 3, id="Match Alpha CSV with Group"),
+        pytest.param(r"single-match\..*", 1, id="Match a single CSV"),
+    ],
+)
+def test_filesystem_data_connector_uses_batching_regex_from_batch_request(
+    tmp_path_factory, batching_regex, batch_definition_count
+):
     # arrange
     base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
     create_files_in_directory(
@@ -656,32 +666,20 @@ def test_filesystem_data_connector_uses_batching_regex_from_batch_request(tmp_pa
             "alpha-3.csv",
             "dont-match.csv",
             "this-either.csv",
+            "single-match.csv",
         ],
     )
 
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=MATCH_ALL_PATTERN,  # this pattern will match all 5 files
+        batching_regex=MATCH_ALL_PATTERN,  # todo: remove this from signature
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
 
     # act
-
-    # establish a baseline without a batching_regex
-    all_batch_definitions = my_data_connector.get_batch_definition_list(
-        BatchRequest(
-            datasource_name="my_file_path_datasource",
-            data_asset_name="my_filesystem_data_asset",
-            options={},
-            batching_regex=None,
-        )
-    )
-
-    # provide a batching regex which should match 3 of the 5 files
-    batching_regex = re.compile(r"alpha-(.*)\.csv")
-    filtered_batch_definitions = my_data_connector.get_batch_definition_list(
+    batch_definitions = my_data_connector.get_batch_definition_list(
         BatchRequest(
             datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
@@ -691,5 +689,4 @@ def test_filesystem_data_connector_uses_batching_regex_from_batch_request(tmp_pa
     )
 
     # assert
-    assert len(all_batch_definitions) == 5
-    assert len(filtered_batch_definitions) == 3
+    assert len(batch_definitions) == batch_definition_count
