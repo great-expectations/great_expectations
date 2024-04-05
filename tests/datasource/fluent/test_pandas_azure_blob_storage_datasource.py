@@ -446,7 +446,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = AzureBlobStorageDataConnector(
         datasource_name=pandas_abs_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         azure_client=pandas_abs_datasource._azure_client,
         account_name=csv_asset.datasource._account_name,
         container="my_container",

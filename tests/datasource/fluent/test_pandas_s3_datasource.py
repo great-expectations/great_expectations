@@ -360,7 +360,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = S3DataConnector(
         datasource_name=pandas_s3_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         s3_client=s3_mock,
         bucket=pandas_s3_datasource.bucket,
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,

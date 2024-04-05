@@ -1038,7 +1038,6 @@ def datasource_test_connection_error_messages(
     csv_asset._data_connector = FilesystemDataConnector(
         datasource_name=spark_filesystem_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=batching_regex,
         base_directory=spark_filesystem_datasource.base_directory,
         data_context_root_directory=spark_filesystem_datasource.data_context_root_directory,
     )

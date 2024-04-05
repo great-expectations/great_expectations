@@ -413,7 +413,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = AzureBlobStorageDataConnector(
         datasource_name=spark_abs_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         azure_client=spark_abs_datasource._azure_client,  # type: ignore[arg-type] # _azure_client could be None
         account_name=csv_asset.datasource._account_name,
         container="my_container",

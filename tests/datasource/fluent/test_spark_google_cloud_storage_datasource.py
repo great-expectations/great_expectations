@@ -389,7 +389,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = GoogleCloudStorageDataConnector(
         datasource_name=spark_gcs_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         gcs_client=spark_gcs_datasource._gcs_client,
         bucket_or_name=spark_gcs_datasource.bucket_or_name,
         file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,

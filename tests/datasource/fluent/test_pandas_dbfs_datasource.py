@@ -186,7 +186,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = DBFSDataConnector(
         datasource_name=pandas_dbfs_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         base_directory=pandas_dbfs_datasource.base_directory,
         data_context_root_directory=pandas_dbfs_datasource.data_context_root_directory,
         glob_directive="*.csv",

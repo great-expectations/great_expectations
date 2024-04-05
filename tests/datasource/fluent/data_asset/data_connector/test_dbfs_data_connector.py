@@ -60,7 +60,6 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
     my_data_connector: DataConnector = DBFSDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)_(?P<number>\d+)\.csv"),
         base_directory=pathlib.Path(f"{base_directory}/test_dir_0/A/B/C"),
         glob_directive="*.csv",
         file_path_template_map_fn=DBFSPath.convert_to_file_semantics_version,
