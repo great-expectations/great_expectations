@@ -358,13 +358,74 @@ def test_return_only_unique_batch_definitions():
     ]
     for key in keys:
         client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
+    processed_batching_regex = re.compile("(?P<path>B/(?P<filename>.+).*\\.csv)")
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
+            datasource_name="my_file_path_datasource",
+            data_connector_name="fluent",
+            data_asset_name="my_s3_data_asset",
+            batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "file_1"}),
+            batching_regex=processed_batching_regex,
+        ),
+        LegacyBatchDefinition(
+            datasource_name="my_file_path_datasource",
+            data_connector_name="fluent",
+            data_asset_name="my_s3_data_asset",
+            batch_identifiers=IDDict({"path": "B/file_2.csv", "filename": "file_2"}),
+            batching_regex=processed_batching_regex,
+        ),
+    ]
 
-    my_data_connector: DataConnector
-
+    batching_regex = re.compile(r"(?P<filename>.+).*\.csv")
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+).*\.csv"),
+        batching_regex=batching_regex,
+        s3_client=client,
+        bucket=bucket,
+        prefix="B",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
+    )
+
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_data_connector.get_batch_definition_list(
+            BatchRequest(
+                datasource_name="my_file_path_datasource",
+                data_asset_name="my_s3_data_asset",
+                options={},
+                # batching_regex=batching_regex,
+            )
+        )
+    )
+    assert expected == unsorted_batch_definition_list
+
+
+@pytest.mark.big
+@mock_s3
+def test_data_reference_count_methods():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    keys: List[str] = [
+        "A/file_1.csv",
+        "A/file_2.csv",
+        "A/file_3.csv",
+        "B/file_1.csv",
+        "B/file_2.csv",
+    ]
+    for key in keys:
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
+
+    batching_regex = re.compile(r"(?P<name>.+).*\.csv")
+    my_data_connector = S3DataConnector(
+        datasource_name="my_file_path_datasource",
+        data_asset_name="my_s3_data_asset",
+        batching_regex=batching_regex,
         s3_client=client,
         bucket=bucket,
         prefix="A",
@@ -384,42 +445,6 @@ def test_return_only_unique_batch_definitions():
     ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
-
-    expected: List[LegacyBatchDefinition] = [
-        LegacyBatchDefinition(
-            datasource_name="my_file_path_datasource",
-            data_connector_name="fluent",
-            data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "file_1"}),
-        ),
-        LegacyBatchDefinition(
-            datasource_name="my_file_path_datasource",
-            data_connector_name="fluent",
-            data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"path": "B/file_2.csv", "filename": "file_2"}),
-        ),
-    ]
-
-    my_data_connector = S3DataConnector(
-        datasource_name="my_file_path_datasource",
-        data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<filename>.+).*\.csv"),
-        s3_client=client,
-        bucket=bucket,
-        prefix="B",
-        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
-    )
-
-    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="my_file_path_datasource",
-                data_asset_name="my_s3_data_asset",
-                options={},
-            )
-        )
-    )
-    assert expected == unsorted_batch_definition_list
 
 
 @pytest.mark.big
