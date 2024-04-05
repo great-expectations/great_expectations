@@ -221,7 +221,7 @@ _CHECKPOINT_CONFIG = {
 }
 
 
-@pytest.mark.cloud
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "response_json",
     [
