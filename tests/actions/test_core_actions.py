@@ -807,12 +807,11 @@ class TestV1ActionRun:
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
     def test_OpsgenieAlertAction_run(self, checkpoint_result: CheckpointResult):
-        action = OpsgenieAlertAction(api_key="test")
-        action.v1_run(checkpoint_result=checkpoint_result)
+        action = OpsgenieAlertAction(api_key="test", routing_key="test")
+
+        output = action.v1_run(checkpoint_result=checkpoint_result)
+        assert output == {}
 
     @pytest.mark.skipif(
         not is_library_loadable(library_name="pypd"),
