@@ -32,6 +32,30 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _create_checkpoint_config(name: str = "oss_test_checkpoint") -> dict[str, Any]:
+    return {
+        "name": name,
+        "expectation_suite_name": "oss_test_expectation_suite",
+        "validations": [
+            {
+                "expectation_suite_name": "taxi.demo_pass",
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "oss_test_datasource",
+                    "data_connector_name": "oss_test_data_connector",
+                    "data_asset_name": "users",
+                },
+            },
+        ],
+    }
+
+
+_CHECKPOINT_ID = "7b5e962c-3c67-4a6d-b311-b48061d52103"
+_CHECKPOINT_CONFIG = _create_checkpoint_config()
+_ANOTHER_CHECKPOINT_CONFIG = _create_checkpoint_config("other name")
+
+
 @pytest.fixture
 def checkpoint_store_with_mock_backend(
     mocker: MockerFixture,
@@ -206,48 +230,20 @@ def test_checkpoint_store(empty_data_context):
     assert len(checkpoint_store.list_keys()) == 0
 
 
-@pytest.mark.cloud
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "response_json, expected, error_type",
     [
         pytest.param(
             {
                 "data": {
-                    "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
-                    "attributes": {
-                        "checkpoint_config": {
-                            "name": "oss_test_checkpoint",
-                            "expectation_suite_name": "oss_test_expectation_suite",
-                            "validations": [
-                                {
-                                    "expectation_suite_name": "taxi.demo_pass",
-                                },
-                                {
-                                    "batch_request": {
-                                        "datasource_name": "oss_test_datasource",
-                                        "data_connector_name": "oss_test_data_connector",
-                                        "data_asset_name": "users",
-                                    },
-                                },
-                            ],
-                        }
-                    },
+                    "id": _CHECKPOINT_ID,
+                    "attributes": {"checkpoint_config": _CHECKPOINT_CONFIG},
                 }
             },
             {
-                "expectation_suite_name": "oss_test_expectation_suite",
-                "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
-                "name": "oss_test_checkpoint",
-                "validations": [
-                    {"expectation_suite_name": "taxi.demo_pass"},
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "oss_test_data_connector",
-                            "datasource_name": "oss_test_datasource",
-                        },
-                    },
-                ],
+                "id": _CHECKPOINT_ID,
+                **_CHECKPOINT_CONFIG,
             },
             None,
             id="single_config",
@@ -256,43 +252,12 @@ def test_checkpoint_store(empty_data_context):
         pytest.param(
             {
                 "data": [
-                    {
-                        "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
-                        "attributes": {
-                            "checkpoint_config": {
-                                "name": "oss_test_checkpoint",
-                                "expectation_suite_name": "oss_test_expectation_suite",
-                                "validations": [
-                                    {
-                                        "expectation_suite_name": "taxi.demo_pass",
-                                    },
-                                    {
-                                        "batch_request": {
-                                            "datasource_name": "oss_test_datasource",
-                                            "data_connector_name": "oss_test_data_connector",
-                                            "data_asset_name": "users",
-                                        },
-                                    },
-                                ],
-                            }
-                        },
-                    }
+                    {"id": _CHECKPOINT_ID, "attributes": {"checkpoint_config": _CHECKPOINT_CONFIG}}
                 ]
             },
             {
-                "expectation_suite_name": "oss_test_expectation_suite",
-                "id": "7b5e962c-3c67-4a6d-b311-b48061d52103",
-                "name": "oss_test_checkpoint",
-                "validations": [
-                    {"expectation_suite_name": "taxi.demo_pass"},
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "oss_test_data_connector",
-                            "datasource_name": "oss_test_datasource",
-                        },
-                    },
-                ],
+                "id": _CHECKPOINT_ID,
+                **_CHECKPOINT_CONFIG,
             },
             None,
             id="single_config_in_list",
