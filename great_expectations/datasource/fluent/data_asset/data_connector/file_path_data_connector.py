@@ -5,7 +5,7 @@ import logging
 import re
 from abc import abstractmethod
 from collections import defaultdict
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, Final, List, Optional, Set, Tuple, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
@@ -18,7 +18,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
 )
-from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
+from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     DataConnector,
 )
@@ -35,6 +35,15 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class MissingBatchingRegex(Exception):
+    def __init__(self, parent_name: str | None = None):
+        message = "Parameter batching_regex is required but missing"
+        if parent_name:
+            message += f" from {parent_name}"
+        super().__init__(message)
+        self.class_name = parent_name
+
+
 class FilePathDataConnector(DataConnector):
     """The base class for Data Connectors designed to access filesystem-like data.
 
@@ -47,7 +56,6 @@ class FilePathDataConnector(DataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
     """
 
     FILE_PATH_BATCH_SPEC_KEY = "path"
@@ -56,7 +64,6 @@ class FilePathDataConnector(DataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         file_path_template_map_fn: Optional[Callable] = None,
         whole_directory_path_override: PathStr | None = None,
@@ -67,10 +74,10 @@ class FilePathDataConnector(DataConnector):
         )
 
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
-        self._batching_regex: re.Pattern = self._preprocess_batching_regex(regex=batching_regex)
-        self._regex_parser: RegExParser = RegExParser(
-            regex_pattern=self._batching_regex,
-            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
+
+        # todo: remove this when DataConnector.test_connection supports passing in a batch request
+        self._default_batching_regex: Final[re.Pattern] = self._preprocess_batching_regex(
+            regex=MATCH_ALL_PATTERN
         )
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
@@ -143,7 +150,9 @@ class FilePathDataConnector(DataConnector):
     # Interface Method
     @override
     def get_data_reference_count(self) -> int:
-        data_references = self._get_data_references_cache(batching_regex=self._batching_regex)
+        data_references = self._get_data_references_cache(
+            batching_regex=self._default_batching_regex
+        )
         return len(data_references)
 
     # Interface Method
@@ -211,12 +220,14 @@ class FilePathDataConnector(DataConnector):
                 batch_request=batch_request, data_directory=self._whole_directory_path_override
             )
 
+        if not batch_request.batching_regex:
+            raise MissingBatchingRegex(parent_name="BatchRequest")
         # Use a combination of a list and set to preserve iteration order
         batch_definition_list: list[LegacyBatchDefinition] = list()
         batch_definition_set = set()
-        # if the batch request hasn't specified a batching_regex, fallback to a default
-        batching_regex = batch_request.batching_regex or self._batching_regex
-        for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
+        for batch_definition in self._get_batch_definitions(
+            batching_regex=batch_request.batching_regex
+        ):
             if (
                 self._batch_definition_matches_batch_request(
                     batch_definition=batch_definition, batch_request=batch_request
@@ -256,7 +267,9 @@ class FilePathDataConnector(DataConnector):
             )
 
         data_reference_mapped_element: Tuple[str, Union[List[LegacyBatchDefinition], None]]
-        data_references = self._get_data_references_cache(batching_regex=self._batching_regex)
+        data_references = self._get_data_references_cache(
+            batching_regex=self._default_batching_regex
+        )
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
@@ -288,7 +301,7 @@ class FilePathDataConnector(DataConnector):
             dict -- dictionary of "BatchSpec" properties
         """  # noqa: E501
         if not batch_definition.batching_regex:
-            raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
+            raise MissingBatchingRegex(parent_name="LegacyBatchDefinition")
         regex_parser = RegExParser(
             regex_pattern=batch_definition.batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
