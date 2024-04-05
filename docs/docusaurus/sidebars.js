@@ -174,23 +174,28 @@ module.exports = {
         },
         {
           type: 'category',
-          label: '🚧 Manage Batch Requests',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_batch_requests'},
+          label: '🚧 Manage Batch Definitions',
+          link: {type: 'doc', id: 'core/manage_and_access_data/manage_batch_definitions/manage_batch_definitions'},
           items: [
             {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: '🚧 Retrieve all Batches from a Data Asset'
+              type: 'link',
+              label: '🚧 Create a Batch Definition',
+              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_batch_definitions#create-a-batch-definition',
             },
             {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: '🚧 Retrieve specific Batches from a Data Asset'
+              type: 'link',
+              label: '🚧 Get a Batch Definition',
+              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_batch_definitions#get-a-batch-definition',
             },
             {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: '🚧 Iterate retrieved Batches'
+              type: 'link',
+              label: '🚧 Delete a Batch Definition',
+              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_batch_definitions#delete-a-batch-definition',
+            },
+            {
+              type: 'link',
+              label: '🚧 Request data with a Batch Definition',
+              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_batch_definitions#request-data-with-a-batch-definition',
             },
           ]
         },

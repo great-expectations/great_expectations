@@ -79,9 +79,9 @@ Retrieve, view, and delete GX's data objects, or use them to retrieve data for u
 
 <LinkCard 
     topIcon 
-    label="Manage Batch Requests"
+    label="Manage Batch Definitions"
     description="Manage the objects that retrieve data from a Data Asset."
-    to="/core/manage_and_access_data/manage_batch_requests" 
+    to="/core/manage_and_access_data/manage_batch_definitions" 
     icon="/img/expectation_icon.svg" 
   />
 
