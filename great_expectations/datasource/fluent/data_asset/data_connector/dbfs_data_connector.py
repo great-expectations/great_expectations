@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import pathlib
-import re
 from typing import TYPE_CHECKING, Callable, Optional
 
 from great_expectations.compatibility.typing_extensions import override
@@ -22,19 +21,17 @@ class DBFSDataConnector(FilesystemDataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
         base_directory: Relative path to subdirectory containing files of interest
         glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         data_context_root_directory: Optional GreatExpectations root directory (if installed on DBFS)
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on DBFS
-        get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
+        whole_directory_path_override: If provided, DataConnector will treat the whole directory as an Asset
     """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
@@ -44,7 +41,6 @@ class DBFSDataConnector(FilesystemDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             base_directory=base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
@@ -58,7 +54,6 @@ class DBFSDataConnector(FilesystemDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
@@ -70,12 +65,11 @@ class DBFSDataConnector(FilesystemDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "DBFSDataConnector" instance
             data_asset_name: The name of the DataAsset using this "DBFSDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             base_directory: Relative path to subdirectory containing files of interest
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             data_context_root_directory: Optional GreatExpectations root directory (if installed on DBFS)
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on DBFS
-            get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
+            whole_directory_path_override: If provided, DataConnector will treat the whole directory as an Asset
 
         Returns:
             Instantiated "DBFSDataConnector" object
@@ -83,7 +77,6 @@ class DBFSDataConnector(FilesystemDataConnector):
         return DBFSDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             base_directory=base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
@@ -91,7 +84,6 @@ class DBFSDataConnector(FilesystemDataConnector):
             whole_directory_path_override=whole_directory_path_override,
         )
 
-    # Interface Method
     @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:

@@ -36,7 +36,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
         azure_client: Reference to instantiated Microsoft Azure Blob Storage client handle
         account_name (str): account name for Microsoft Azure Blob Storage
         container (str): container name for Microsoft Azure Blob Storage
@@ -58,7 +57,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
@@ -82,9 +80,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=re.compile(
-                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
-            ),
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -93,7 +88,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
@@ -122,7 +116,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         return AzureBlobStorageDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             azure_client=azure_client,
             account_name=account_name,
             container=container,
@@ -184,7 +177,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return AzureBatchSpec(batch_spec)
 
-    # Interface Method
     @override
     def get_data_references(self) -> List[str]:
         query_options: dict = {
@@ -199,7 +191,12 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         )
         return path_list
 
-    # Interface Method
+    @override
+    def _build_batching_regex(self, regex: re.Pattern) -> re.Pattern:
+        # This implementation adds the ABS prefix to the regex, if any
+        regex = re.compile(f"{re.escape(self._sanitized_prefix)}{regex.pattern}")
+        return super()._build_batching_regex(regex=regex)
+
     @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:

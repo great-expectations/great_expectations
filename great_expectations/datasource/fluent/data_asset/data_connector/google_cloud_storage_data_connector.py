@@ -36,7 +36,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
         gcs_client: Reference to instantiated Google Cloud Storage client handle
         bucket_or_name (str): bucket name for Google Cloud Storage
         prefix (str): GCS prefix
@@ -58,7 +57,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
@@ -82,9 +80,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=re.compile(
-                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
-            ),
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -93,7 +88,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
@@ -107,7 +101,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "GoogleCloudStorageDataConnector" instance
             data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             gcs_client: Reference to instantiated Google Cloud Storage client handle
             bucket_or_name: bucket name for Google Cloud Storage
             prefix: GCS prefix
@@ -122,7 +115,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         return GoogleCloudStorageDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             gcs_client=gcs_client,
             bucket_or_name=bucket_or_name,
             prefix=prefix,
@@ -181,7 +173,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         batch_spec: PathBatchSpec = super().build_batch_spec(batch_definition=batch_definition)
         return GCSBatchSpec(batch_spec)
 
-    # Interface Method
     @override
     def get_data_references(self) -> List[str]:
         query_options: dict = {
@@ -197,7 +188,12 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         )
         return path_list
 
-    # Interface Method
+    @override
+    def _build_batching_regex(self, regex: re.Pattern) -> re.Pattern:
+        # This implementation adds the GCS prefix to the regex, if any
+        regex = re.compile(f"{re.escape(self._sanitized_prefix)}{regex.pattern}")
+        return super()._build_batching_regex(regex=regex)
+
     @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:

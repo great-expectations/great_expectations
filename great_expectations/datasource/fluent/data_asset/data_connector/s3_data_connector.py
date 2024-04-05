@@ -60,7 +60,6 @@ class S3DataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         s3_client: BaseClient,
         bucket: str,
         prefix: str = "",
@@ -84,9 +83,6 @@ class S3DataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=re.compile(
-                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
-            ),
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -95,7 +91,6 @@ class S3DataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         s3_client: BaseClient,
         bucket: str,
         prefix: str = "",
@@ -109,7 +104,6 @@ class S3DataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "S3DataConnector" instance
             data_asset_name: The name of the DataAsset using this "S3DataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             s3_client: S3 Client reference handle
             bucket: bucket for S3
             prefix: S3 prefix
@@ -124,7 +118,6 @@ class S3DataConnector(FilePathDataConnector):
         return S3DataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             s3_client=s3_client,
             bucket=bucket,
             prefix=prefix,
@@ -202,7 +195,12 @@ class S3DataConnector(FilePathDataConnector):
         )
         return path_list
 
-    # Interface Method
+    @override
+    def _build_batching_regex(self, regex: re.Pattern) -> re.Pattern:
+        # This implementation adds the S3 prefix to the regex.
+        regex = re.compile(f"{re.escape(self._sanitized_prefix)}{regex.pattern}")
+        return super()._build_batching_regex(regex=regex)
+
     @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:

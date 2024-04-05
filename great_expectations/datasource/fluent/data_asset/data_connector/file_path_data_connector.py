@@ -76,7 +76,7 @@ class FilePathDataConnector(DataConnector):
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
 
         # todo: remove this when DataConnector.test_connection supports passing in a batch request
-        self._default_batching_regex: Final[re.Pattern] = self._preprocess_batching_regex(
+        self._default_batching_regex: Final[re.Pattern] = self._build_batching_regex(
             regex=MATCH_ALL_PATTERN
         )
 
@@ -323,8 +323,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
-    def _preprocess_batching_regex(self, regex: re.Pattern) -> re.Pattern:
-        """Add the FILE_PATH_BATCH_SPEC_KEY group to regex if not already present."""
+    def _build_batching_regex(self, regex: re.Pattern) -> re.Pattern:
+        """Construct the fully qualified regex used to identify Batches."""
+        # This implementation adds the FILE_PATH_BATCH_SPEC_KEY to regex, if not already present
         regex_parser = RegExParser(
             regex_pattern=regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
@@ -341,7 +342,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self, batching_regex: re.Pattern
     ) -> Dict[str, List[LegacyBatchDefinition] | None]:
         """Access a map where keys are data references and values are LegacyBatchDefinitions."""
-        batching_regex = self._preprocess_batching_regex(regex=batching_regex)
+        batching_regex = self._build_batching_regex(regex=batching_regex)
         batch_definitions = self._data_references_cache[batching_regex]
         if batch_definitions:
             return batch_definitions

@@ -31,7 +31,6 @@ class FilesystemDataConnector(FilePathDataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
         base_directory: Relative path to subdirectory containing files of interest
         glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         data_context_root_directory: Optional GreatExpectations root directory (if installed on filesystem)
@@ -45,7 +44,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
@@ -59,7 +57,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             file_path_template_map_fn=file_path_template_map_fn,
             whole_directory_path_override=whole_directory_path_override,
         )
@@ -80,7 +77,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
@@ -92,7 +88,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "FilesystemDataConnector" instance
             data_asset_name: The name of the DataAsset using this "FilesystemDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             base_directory: Relative path to subdirectory containing files of interest
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             data_context_root_directory: Optional GreatExpectations root directory (if installed on filesystem)
@@ -105,7 +100,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         return FilesystemDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             base_directory=base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
