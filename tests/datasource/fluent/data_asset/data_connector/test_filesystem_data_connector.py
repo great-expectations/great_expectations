@@ -129,7 +129,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=batching_regex,
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
@@ -145,6 +144,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_filesystem_data_asset",
                 options={},
+                batching_regex=batching_regex,
             )
         )
     )
@@ -301,6 +301,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={"name": "alex", "timestamp": "20200819", "price": "1300"},
+            batching_regex=batching_regex,
         )
     )
     assert expected[2:3] == unsorted_batch_definition_list
