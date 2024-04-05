@@ -267,6 +267,7 @@ def test_checkpoint_with_validator_workflow(
                     "column_name": "pickup_datetime",
                 },
                 "batch_slice": None,
+                "batching_regex": None,
             },
             "expectation_suite_name": "default",
         },
