@@ -394,6 +394,9 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if isinstance(data, RenderedContent):
         return data.to_json_dict()
 
+    if isinstance(data, re.Pattern):
+        return data.pattern
+
     # Unable to serialize (unrecognized data type).
     raise TypeError(f"{data!s} is of type {type(data).__name__} which cannot be serialized.")  # noqa: TRY003
 
