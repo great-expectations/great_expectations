@@ -19,7 +19,7 @@ def test_checkpoint_factory_get_uses_store_get(mocker: MockerFixture):
     store.has_key.return_value = True
     key = store.get_key.return_value
     checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
     )
     store.get.return_value = checkpoint
     factory = CheckpointFactory(store=store)
@@ -40,7 +40,7 @@ def test_checkpoint_factory_get_raises_error_on_missing_key(mocker: MockerFixtur
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
     checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
     )
     store.get.return_value = checkpoint
     factory = CheckpointFactory(store=store)
@@ -63,7 +63,7 @@ def test_checkpoint_factory_add_uses_store_add(mocker: MockerFixture):
     store.get.return_value = None
     factory = CheckpointFactory(store=store)
     checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
     )
     store.get.return_value = checkpoint
 
@@ -82,7 +82,7 @@ def test_checkpoint_factory_add_raises_for_duplicate_key(mocker: MockerFixture):
     store.has_key.return_value = True
     factory = CheckpointFactory(store=store)
     checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
     )
 
     # Act
@@ -105,7 +105,7 @@ def test_checkpoint_factory_delete_uses_store_remove_key(mocker: MockerFixture):
     key = store.get_key.return_value
     factory = CheckpointFactory(store=store)
     checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
     )
 
     # Act
@@ -125,7 +125,7 @@ def test_checkpoint_factory_delete_raises_for_missing_checkpoint(mocker: MockerF
     store.has_key.return_value = False
     factory = CheckpointFactory(store=store)
     checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)], actions=[]
+        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
     )
 
     # Act
@@ -172,7 +172,6 @@ def _test_checkpoint_factory_add_success(context):
         validation_definitions=[
             ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
         ],
-        actions=[],
     )
     with pytest.raises(DataContextError, match=f"Checkpoint with name {name} was not found."):
         context.checkpoints.get(name)
@@ -208,7 +207,6 @@ def _test_checkpoint_factory_delete_success(context):
             validation_definitions=[
                 ValidationDefinition(name="validation_def", data=batch_def, suite=suite)
             ],
-            actions=[],
         )
     )
 
