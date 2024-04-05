@@ -64,7 +64,7 @@ def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack
 
 
 # noinspection SpellCheckingInspection
-def send_opsgenie_alert(query, suite_name, settings):
+def send_opsgenie_alert(query: str, message: str, settings: dict) -> bool:
     """Creates an alert in Opsgenie."""
     if settings["region"] is not None:
         url = (
@@ -75,7 +75,7 @@ def send_opsgenie_alert(query, suite_name, settings):
 
     headers = {"Authorization": f"GenieKey {settings['api_key']}"}
     payload = {
-        "message": f"Great Expectations suite {suite_name} failed",
+        "message": message,
         "description": query,
         "priority": settings["priority"],  # allow this to be modified in settings
         "tags": settings["tags"],
@@ -95,8 +95,8 @@ def send_opsgenie_alert(query, suite_name, settings):
                 "Request to Opsgenie API " f"returned error {response.status_code}: {response.text}"
             )
         else:
-            return "success"
-    return "error"
+            return False
+    return True
 
 
 def send_microsoft_teams_notifications(query, microsoft_teams_webhook):

@@ -1,9 +1,13 @@
 import pytest
+from pytest_mock import MockerFixture
 
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
 from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.render.renderer import OpsgenieRenderer
 
 # module level markers
@@ -102,3 +106,59 @@ def test_OpsgenieRenderer_validation_results_failure():
     expected_output = "Batch Validation Status: Failed ❌\nExpectation suite name: default\nData asset name: x/y/z\nRun ID: 2021-01-01T000000.000000Z\nBatch ID: data_asset_name=x/y/z\nSummary: 0 of 1 expectations were met"  # noqa: E501
 
     assert rendered_output == expected_output
+
+
+@pytest.mark.unit
+def test_OpsgenieRenderer_v1_render(mocker: MockerFixture):
+    # Arrange
+    checkpoint_result = CheckpointResult(
+        run_id=RunIdentifier(run_name="my_run_id"),
+        run_results={
+            mocker.MagicMock(spec=ValidationResultIdentifier): mocker.MagicMock(
+                spec=ExpectationSuiteValidationResult,
+                suite_name="my_bad_suite",
+                meta={
+                    "active_batch_definition": mocker.Mock(
+                        spec=LegacyBatchDefinition, data_asset_name="my_first_asset"
+                    )
+                },
+                statistics={"successful_expectations": 3, "evaluated_expectations": 5},
+                success=False,
+            ),
+            mocker.MagicMock(spec=ValidationResultIdentifier): mocker.MagicMock(
+                spec=ExpectationSuiteValidationResult,
+                suite_name="my_good_suite",
+                meta={"run_id": "my_run_id"},
+                statistics={"successful_expectations": 1, "evaluated_expectations": 1},
+                success=True,
+            ),
+        },
+        checkpoint_config=mocker.MagicMock(spec=Checkpoint, name="my_checkpoint"),
+        success=False,
+    )
+
+    # Act
+    renderer = OpsgenieRenderer()
+    raw_output = renderer.v1_render(checkpoint_result=checkpoint_result)
+    parts = raw_output.split("\n")
+
+    # Assert
+    header = parts.pop(0)  # Separately evaluate header due to dynamic content
+    assert "Checkpoint:" in header and "Run ID:" in header
+    assert parts == [
+        "Status: Failed ❌",
+        "",
+        "Batch Validation Status: Failed ❌",
+        "Expectation Suite Name: my_bad_suite",
+        "Data Asset Name: my_first_asset",
+        "Run ID: __no_run_id__",
+        "Batch ID: ()",
+        "Summary: 3 of 5 expectations were met",
+        "",
+        "Batch Validation Status: Success 🎉",
+        "Expectation Suite Name: my_good_suite",
+        "Data Asset Name: __no_data_asset_name__",
+        "Run ID: my_run_id",
+        "Batch ID: ()",
+        "Summary: 1 of 1 expectations were met",
+    ]

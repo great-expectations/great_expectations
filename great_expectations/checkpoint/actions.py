@@ -607,6 +607,41 @@ class OpsgenieAlertAction(ValidationAction):
         return renderer
 
     @override
+    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+        validation_success = checkpoint_result.success
+        checkpoint_name = checkpoint_result.checkpoint_config.name
+
+        if (
+            self.notify_on == "all"
+            or self.notify_on == "success"
+            and validation_success
+            or self.notify_on == "failure"
+            and not validation_success
+        ):
+            settings = {
+                "api_key": self.api_key,
+                "region": self.region,
+                "priority": self.priority,
+                "tags": self.tags,
+            }
+
+            description = self.renderer.v1_render(checkpoint_result=checkpoint_result)
+
+            message = (f"Great Expectations Checkpoint {checkpoint_name} ",)
+            if checkpoint_result.success:
+                message += "succeeded!"
+            else:
+                message += "failed!"
+
+            alert_result = send_opsgenie_alert(
+                query=description, message=message, settings=settings
+            )
+
+            return {"opsgenie_alert_result": alert_result}
+        else:
+            return {"opsgenie_alert_result": "No alert sent"}
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -654,7 +689,8 @@ class OpsgenieAlertAction(ValidationAction):
 
             description = self.renderer.render(validation_result_suite, None, None)
 
-            alert_result = send_opsgenie_alert(description, expectation_suite_name, settings)
+            message = f"Great Expectations suite {expectation_suite_name} failed"
+            alert_result = send_opsgenie_alert(description, message, settings)
 
             return {"opsgenie_alert_result": alert_result}
         else:
