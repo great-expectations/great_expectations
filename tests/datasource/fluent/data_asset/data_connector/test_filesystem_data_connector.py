@@ -125,11 +125,11 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             "alex_20200819_1300.csv",
         ],
     )
-
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv")
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        batching_regex=batching_regex,
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
@@ -148,6 +148,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             )
         )
     )
+    processed_batching_regex = re.compile('(?P<path>(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\\.csv)')
     expected: List[LegacyBatchDefinition] = [
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -161,6 +162,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1040",
                 }
             ),
+            batching_regex=processed_batching_regex
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -174,6 +176,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1000",
                 }
             ),
+            batching_regex=processed_batching_regex
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -187,6 +190,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1300",
                 }
             ),
+            batching_regex=processed_batching_regex
+
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -200,6 +205,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1500",
                 }
             ),
+            batching_regex=processed_batching_regex
+
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -213,6 +220,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1900",
                 }
             ),
+            batching_regex=processed_batching_regex
+
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -226,6 +235,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1567",
                 }
             ),
+            batching_regex=processed_batching_regex
+
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -239,6 +250,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1003",
                 }
             ),
+            batching_regex=processed_batching_regex
+
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -252,6 +265,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1009",
                 }
             ),
+            batching_regex=processed_batching_regex
+
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -265,6 +280,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1002",
                 }
             ),
+            batching_regex=processed_batching_regex
+
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -278,6 +295,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                     "price": "1001",
                 }
             ),
+            batching_regex=processed_batching_regex
+
         ),
     ]
     assert expected == unsorted_batch_definition_list
