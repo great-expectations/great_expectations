@@ -153,10 +153,11 @@ def test_return_all_batch_definitions_unsorted():
     for key in keys:
         client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv")
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv"),
+        batching_regex=batching_regex,
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -174,8 +175,12 @@ def test_return_all_batch_definitions_unsorted():
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_s3_data_asset",
                 options={},
+                batching_regex=batching_regex,
             )
         )
+    )
+    processed_batching_regex = re.compile(
+        "(?P<path>(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\\.csv)"
     )
     expected: List[LegacyBatchDefinition] = [
         LegacyBatchDefinition(
@@ -190,6 +195,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1040",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -203,6 +209,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1000",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -216,6 +223,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1300",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -229,6 +237,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1500",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -242,6 +251,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1900",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -255,6 +265,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1567",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -268,6 +279,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1003",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -281,6 +293,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1009",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -294,6 +307,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1002",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -307,6 +321,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1001",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
     ]
     assert expected == unsorted_batch_definition_list
@@ -317,6 +332,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="my_file_path_datasource",
             data_asset_name="my_s3_data_asset",
             options={"name": "alex", "timestamp": "20200819", "price": "1300"},
+            batching_regex=batching_regex,
         )
     )
     assert expected[2:3] == unsorted_batch_definition_list
