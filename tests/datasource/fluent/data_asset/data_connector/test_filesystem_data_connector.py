@@ -651,6 +651,7 @@ def test_relative_base_directory_path(tmp_path_factory):
         pytest.param(MATCH_ALL_PATTERN, 6, id="Match All Pattern"),
         pytest.param(r"alpha-(.*)\.csv", 3, id="Match Alpha CSV with Group"),
         pytest.param(r"single-match\..*", 1, id="Match a single CSV"),
+        pytest.param(r"mismatch", 0, id="Match nothing"),
     ],
 )
 def test_filesystem_data_connector_uses_batching_regex_from_batch_request(
