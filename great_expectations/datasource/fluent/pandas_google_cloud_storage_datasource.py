@@ -141,7 +141,6 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             gcs_client=self._get_gcs_client(),
-            batching_regex=data_asset.batching_regex,
             bucket_or_name=self.bucket_or_name,
             prefix=gcs_prefix,
             delimiter=gcs_delimiter,
