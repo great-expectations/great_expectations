@@ -110,13 +110,16 @@ class Store:
         """
         return response_json
 
-    @staticmethod
-    def gx_cloud_response_json_to_object_collection(response_json: Dict) -> List[Dict]:
+    @classmethod
+    def gx_cloud_response_json_to_object_collection(cls, response_json: Dict) -> List[Dict]:
         """
         This method takes full json response from GX cloud and outputs a list of dicts appropriate for
         deserialization into a collection of GX objects
         """  # noqa: E501
-        raise NotImplementedError
+        object_list = response_json["data"]
+        if not isinstance(object_list, list):
+            raise TypeError("GX Cloud did not return a collection when expected")  # noqa: TRY003
+        return [cls.gx_cloud_response_json_to_object_dict({"data": obj}) for obj in object_list]
 
     def _validate_key(self, key: DataContextKey) -> None:
         # STORE_BACKEND_ID_KEY always validated

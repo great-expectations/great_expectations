@@ -156,22 +156,6 @@ class DatasourceStore(Store):
 
         return DatasourceStore._convert_raw_json_to_object_dict(data)
 
-    @override
-    @staticmethod
-    def gx_cloud_response_json_to_object_collection(
-        response_json: CloudResponsePayloadTD,  # type: ignore[override]
-    ) -> list[dict]:
-        """
-        This method takes full json response from GX cloud and outputs a list of dicts appropriate for
-        deserialization into a collection of GX objects
-        """  # noqa: E501
-        logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
-        data = response_json["data"]
-        if not isinstance(data, list):
-            raise TypeError("GX Cloud did not return a collection of Datasources when expected")  # noqa: TRY003
-
-        return [DatasourceStore._convert_raw_json_to_object_dict(d) for d in data]
-
     @staticmethod
     def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:
         datasource_id: str = data["id"]
