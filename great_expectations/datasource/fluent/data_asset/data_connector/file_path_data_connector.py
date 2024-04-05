@@ -287,10 +287,16 @@ class FilePathDataConnector(DataConnector):
         Returns:
             dict -- dictionary of "BatchSpec" properties
         """  # noqa: E501
-        group_names: List[str] = self._regex_parser.get_all_group_names()
+        if not batch_definition.batching_regex:
+            raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
+        regex_parser = RegExParser(
+            regex_pattern=batch_definition.batching_regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
+        )
+        group_names: List[str] = regex_parser.get_all_group_names()
         path: str = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
-            regex_pattern=self._batching_regex,
+            regex_pattern=batch_definition.batching_regex,
             group_names=group_names,
         )
         if not path:
