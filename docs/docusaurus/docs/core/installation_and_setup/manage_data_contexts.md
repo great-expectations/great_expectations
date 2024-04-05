@@ -181,7 +181,7 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 ### Prerequisites
 
-- A Great Expectations instance.
+- [A Great Expectations instance](/core/installation_and_setup/install_gx.md).
 - A previously initialized Filesystem Data Context.
 
 ### Import GX
