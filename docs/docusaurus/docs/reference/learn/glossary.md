@@ -3,7 +3,7 @@ id: glossary
 title: "Glossary"
 ---
 
-[Action](/core/validate_data/checkpoints/manage_checkpoints.md): A Python class with a `run` method that takes a Validation Result and does something based on its contents.
+[Action](/core/validate_data/checkpoints/manage_checkpoints.md): A component that integrates Great Expectations with other tools based on a Validation Result, like sending notifications based on the validation's outcomes.
 
 [Batch](/core/manage_and_access_data/manage_batches.md): A selection of records retrieved from a Data Asset according to the parameters passed to a Batch Definition.
 
