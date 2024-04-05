@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -28,7 +29,7 @@ from great_expectations.util import deep_filter_properties_iterable, load_class
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, TypeAlias
 
-    from great_expectations.alias_types import JSONValues, PathStr
+    from great_expectations.alias_types import JSONValues
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import (
         Batch as FluentBatch,
@@ -109,7 +110,7 @@ class LegacyBatchDefinition(SerializableDictDot):
         data_asset_name: str,
         batch_identifiers: IDDict,
         batch_spec_passthrough: dict | None = None,
-        batching_regex: PathStr | None = None,
+        batching_regex: re.Pattern | None = None,
     ) -> None:
         self._validate_batch_definition(
             datasource_name=datasource_name,
@@ -225,7 +226,7 @@ class LegacyBatchDefinition(SerializableDictDot):
         return IDDict(self.to_json_dict()).to_id()
 
     @property
-    def batching_regex(self) -> PathStr | None:
+    def batching_regex(self) -> re.Pattern | None:
         return self._batching_regex
 
     def __eq__(self, other):

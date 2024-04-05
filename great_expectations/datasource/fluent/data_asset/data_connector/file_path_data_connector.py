@@ -328,13 +328,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             return batch_definitions
 
         # Cache was empty so we need to calculate BatchDefinitions
-        regex_parser = RegExParser(
-            regex_pattern=batching_regex,
-            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
-        )
         for data_reference in self.get_data_references():
             batch_definition = self._build_batch_definition(
-                data_reference=data_reference, regex_parser=regex_parser
+                data_reference=data_reference, batching_regex=batching_regex
             )
             if batch_definition:
                 # storing these as a list seems unnecessary; in this implementation
@@ -355,10 +351,10 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         return batch_definitions
 
     def _build_batch_definition(
-        self, data_reference: str, regex_parser: RegExParser
+        self, data_reference: str, batching_regex: re.Pattern
     ) -> LegacyBatchDefinition | None:
         batch_identifiers = self._build_batch_identifiers(
-            data_reference=data_reference, regex_parser=regex_parser
+            data_reference=data_reference, batching_regex=batching_regex
         )
         if batch_identifiers is None:
             return None
@@ -370,11 +366,16 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self._data_asset_name,
             batch_identifiers=batch_identifiers,
+            batching_regex=batching_regex,
         )
 
     def _build_batch_identifiers(
-        self, data_reference: str, regex_parser: RegExParser
+        self, data_reference: str, batching_regex: re.Pattern
     ) -> Optional[IDDict]:
+        regex_parser = RegExParser(
+            regex_pattern=batching_regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
+        )
         matches: Optional[re.Match] = regex_parser.get_matches(target=data_reference)
         if matches is None:
             return None
