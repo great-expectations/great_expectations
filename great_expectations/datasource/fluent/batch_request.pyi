@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, Optional
 
 from typing_extensions import TypeAlias
@@ -14,6 +15,7 @@ class BatchRequest(pydantic.BaseModel):
     data_asset_name: StrictStr
     options: BatchRequestOptions
     partitioner: Optional[Partitioner] = None
+    batching_regex: Optional[re.Pattern] = None
 
     def __init__(  # noqa: PLR0913
         self,

@@ -99,7 +99,7 @@ module.exports = {
         {
           type: 'doc',
           id: 'core/installation_and_setup/manage_data_docs',
-          label: '🚧 Manage Data Docs'
+          label: 'Manage Data Docs'
         },
       ]
     },
