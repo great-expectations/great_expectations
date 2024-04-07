@@ -254,39 +254,53 @@ def test_SlackNotificationAction(
 
 
 @pytest.mark.big
-@pytest.mark.skipif(
-    not is_library_loadable(library_name="pypd"),
-    reason="pypd is not installed",
-)
-@mock.patch("pypd.EventV2")
 def test_PagerdutyAlertAction(
     validation_result_suite,
     validation_result_suite_id,
     mock_context,
+    mocker,
 ):
     api_key = "test"
     routing_key = "test"
 
-    pagerduty_action = PagerdutyAlertAction(
-        api_key=api_key,
-        routing_key=routing_key,
-    )
+    from great_expectations.checkpoint import actions
 
-    # Make sure the alert is sent by default when the validation has success = False
-    validation_result_suite.success = False
+    with mock_not_imported_module(actions, "pypd", mocker):
+        mock_pypd_event = actions.pypd.EventV2.create
 
-    assert pagerduty_action.run(
-        validation_result_suite_identifier=validation_result_suite_id,
-        validation_result_suite=validation_result_suite,
-    ) == {"pagerduty_alert_result": "success"}
+        pagerduty_action = PagerdutyAlertAction(
+            api_key=api_key,
+            routing_key=routing_key,
+        )
 
-    # Make sure the alert is not sent by default when the validation has success = True
-    validation_result_suite.success = True
+        # Make sure the alert is sent by default when the validation has success = False
+        validation_result_suite.success = False
 
-    assert pagerduty_action.run(
-        validation_result_suite_identifier=validation_result_suite_id,
-        validation_result_suite=validation_result_suite,
-    ) == {"pagerduty_alert_result": "none sent"}
+        assert pagerduty_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+        ) == {"pagerduty_alert_result": "success"}
+
+        # Make sure the alert is not sent by default when the validation has success = True
+        validation_result_suite.success = True
+
+        assert pagerduty_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+        ) == {"pagerduty_alert_result": "none sent"}
+
+        mock_pypd_event.assert_called_once_with(
+            data={
+                "dedup_key": "asset.default",
+                "event_action": "trigger",
+                "payload": {
+                    "severity": "critical",
+                    "source": "Great Expectations",
+                    "summary": "Great Expectations suite check asset.default has failed",
+                },
+                "routing_key": "test",
+            },
+        )
 
 
 @pytest.mark.big
