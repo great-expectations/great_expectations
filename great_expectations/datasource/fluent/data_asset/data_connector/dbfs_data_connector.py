@@ -9,14 +9,9 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (  # noqa: E501
-    FilePathDataConnector,
-    file_get_unfiltered_batch_definition_list_fn,
-)
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import LegacyBatchDefinition
-    from great_expectations.datasource.fluent import BatchRequest
+    from great_expectations.alias_types import PathStr
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +39,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
         file_path_template_map_fn: Optional[Callable] = None,
-        get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
-        ] = file_get_unfiltered_batch_definition_list_fn,
+        whole_directory_path_override: PathStr | None = None,
     ) -> None:
         super().__init__(
             datasource_name=datasource_name,
@@ -56,7 +49,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
             file_path_template_map_fn=file_path_template_map_fn,
-            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
+            whole_directory_path_override=whole_directory_path_override,
         )
 
     @classmethod
@@ -70,9 +63,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
         file_path_template_map_fn: Optional[Callable] = None,
-        get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
-        ] = file_get_unfiltered_batch_definition_list_fn,
+        whole_directory_path_override: PathStr | None = None,
     ) -> DBFSDataConnector:
         """Builds "DBFSDataConnector", which links named DataAsset to DBFS.
 
@@ -97,7 +88,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
             file_path_template_map_fn=file_path_template_map_fn,
-            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
+            whole_directory_path_override=whole_directory_path_override,
         )
 
     # Interface Method
