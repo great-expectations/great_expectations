@@ -13,25 +13,20 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.data_context.types.resource_identifiers import (
-        ValidationResultIdentifier,
-    )
 
 
 class OpsgenieRenderer(Renderer):
     def v1_render(self, checkpoint_result: CheckpointResult):
         text_blocks: list[str] = []
-        for run_id, run_result in checkpoint_result.run_results.items():
-            text_block = self._v1_render(run_id=run_id, run_result=run_result)
+        for run_result in checkpoint_result.run_results.values():
+            text_block = self._v1_render(run_result=run_result)
             text_blocks.append(text_block)
 
         return self._concatenate_text_blocks(
             checkpoint_result=checkpoint_result, text_blocks=text_blocks
         )
 
-    def _v1_render(
-        self, run_id: ValidationResultIdentifier, run_result: ExpectationSuiteValidationResult
-    ) -> str:
+    def _v1_render(self, run_result: ExpectationSuiteValidationResult) -> str:
         suite_name = run_result.suite_name
 
         data_asset_name: str = "__no_data_asset_name__"

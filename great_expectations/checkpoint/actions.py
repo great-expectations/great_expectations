@@ -627,7 +627,7 @@ class OpsgenieAlertAction(ValidationAction):
 
             description = self.renderer.v1_render(checkpoint_result=checkpoint_result)
 
-            message = (f"Great Expectations Checkpoint {checkpoint_name} ",)
+            message = f"Great Expectations Checkpoint {checkpoint_name} "
             if checkpoint_result.success:
                 message += "succeeded!"
             else:
