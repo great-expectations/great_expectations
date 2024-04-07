@@ -765,19 +765,42 @@ class TestActionSerialization:
 
 
 class TestV1ActionRun:
+    suite_a: str = "suite_a"
+    suite_b: str = "suite_b"
+    batch_id_a: str = "my_datasource-my_first_asset"
+    batch_id_b: str = "my_datasource-my_second_asset"
+
     @pytest.fixture
     def checkpoint_result(self, mocker: MockerFixture):
         return CheckpointResult(
-            run_id=mocker.Mock(spec=RunIdentifier),
+            run_id=RunIdentifier(run_time="2024-04-01T20:51:18.077262"),
             run_results={
-                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
-                    spec=ExpectationSuiteValidationResult, success=True
+                ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(
+                        name=self.suite_a,
+                    ),
+                    run_id=RunIdentifier(run_name="prod_20240401"),
+                    batch_identifier=self.batch_id_a,
+                ): ExpectationSuiteValidationResult(
+                    success=True,
+                    statistics={"successful_expectations": 3, "evaluated_expectations": 3},
+                    results=[],
+                    suite_name=self.suite_a,
                 ),
-                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
-                    spec=ExpectationSuiteValidationResult, success=False
+                ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(
+                        name=self.suite_b,
+                    ),
+                    run_id=RunIdentifier(run_name="prod_20240402"),
+                    batch_identifier=self.batch_id_b,
+                ): ExpectationSuiteValidationResult(
+                    success=True,
+                    statistics={"successful_expectations": 2, "evaluated_expectations": 2},
+                    results=[],
+                    suite_name=self.suite_b,
                 ),
             },
-            checkpoint_config=mocker.Mock(spec=Checkpoint),
+            checkpoint_config=mocker.Mock(spec=Checkpoint, name="my_checkpoint"),
         )
 
     @pytest.mark.unit
@@ -808,10 +831,14 @@ class TestV1ActionRun:
 
     @pytest.mark.unit
     def test_OpsgenieAlertAction_run(self, checkpoint_result: CheckpointResult):
-        action = OpsgenieAlertAction(api_key="test", routing_key="test")
+        action = OpsgenieAlertAction(api_key="test", routing_key="test", notify_on="all")
 
-        output = action.v1_run(checkpoint_result=checkpoint_result)
-        assert output == {}
+        with mock.patch.object(Session, "post") as mock_post:
+            output = action.v1_run(checkpoint_result=checkpoint_result)
+
+        mock_post.assert_called_once()
+        assert "succeeded!" in mock_post.call_args.kwargs["json"]["message"]
+        assert output == {"opsgenie_alert_result": True}
 
     @pytest.mark.skipif(
         not is_library_loadable(library_name="pypd"),

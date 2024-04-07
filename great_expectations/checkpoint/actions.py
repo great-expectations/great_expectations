@@ -160,7 +160,7 @@ class ValidationAction(BaseModel):
         """  # noqa: E501
 
     # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
-    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+    def v1_run(self, checkpoint_result: CheckpointResult) -> dict | str:
         raise NotImplementedError
 
 
@@ -607,7 +607,7 @@ class OpsgenieAlertAction(ValidationAction):
         return renderer
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+    def v1_run(self, checkpoint_result: CheckpointResult) -> dict:
         validation_success = checkpoint_result.success
         checkpoint_name = checkpoint_result.checkpoint_config.name
 
@@ -1082,7 +1082,7 @@ class APINotificationAction(ValidationAction):
     ):
         suite_name: str = validation_result_suite.meta["expectation_suite_name"]
         if "batch_kwargs" in validation_result_suite.meta:
-            data_asset_name = validation_result_suite.meta["batch_kwargs"].get(
+            data_asset_name = validation_result_suite.meta.get("batch_kwargs", {}).get(
                 "data_asset_name", "__no_data_asset_name__"
             )
         elif "active_batch_definition" in validation_result_suite.meta:
