@@ -12,7 +12,7 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const MOBILE_BREAKPOINT = 996;
 
     useEffect(() => {
-        if(innerWidth > MOBILE_BREAKPOINT || outerWidth > MOBILE_BREAKPOINT){
+        if(isDesktopScreenSize()){
             fetch(`https://api.github.com/repos/${owner}/${repository}`)
                 .then(response => response.json())
                 .then(data => {
@@ -37,6 +37,10 @@ export default function GithubNavbarItem({ owner, repository, className }) {
 
         return () => window.removeEventListener("resize", handleResize)
     }, []);
+
+    function isDesktopScreenSize() {
+        return !(innerWidth || outerWidth) || innerWidth > MOBILE_BREAKPOINT || outerWidth > MOBILE_BREAKPOINT;
+    }
 
     function formatCompactNumber(number) {
         const formatter = Intl.NumberFormat("en", { notation: "compact" });
