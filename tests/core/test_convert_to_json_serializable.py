@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pytest
 
@@ -54,3 +56,10 @@ def test_serialization_numpy_datetime():
     datetime_to_test = "2022-12-08T12:56:23.423"
     data = np.datetime64(datetime_to_test)
     assert convert_to_json_serializable(data) == datetime_to_test
+
+
+@pytest.mark.unit
+def test_serialization_of_pattern():
+    pattern_to_test = r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+    data = re.compile(pattern_to_test)
+    assert convert_to_json_serializable(data) == pattern_to_test
