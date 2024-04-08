@@ -56,7 +56,7 @@ except Exception:
     pass
 
 create_data_docs_directory = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket command">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py create bucket command">
 gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
 # </snippet>
 """
@@ -80,7 +80,7 @@ result = subprocess.run(
 stderr = result.stderr.decode("utf-8")
 
 create_data_docs_directory_output = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket output">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py create bucket output">
 Creating gs://<YOUR GCS BUCKET NAME>/...
 # </snippet>
 """
@@ -96,7 +96,7 @@ create_data_docs_directory_output = create_data_docs_directory_output.replace(
 assert create_data_docs_directory_output.strip() in stderr
 
 app_yaml = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py app yaml">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py app yaml">
 runtime: python37
 env_variables:
   CLOUD_STORAGE_BUCKET: <YOUR GCS BUCKET NAME>
@@ -121,7 +121,7 @@ with open(app_yaml_file_path, "w") as f:
     yaml.dump(app_yaml, f)
 
 requirements_txt = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py requirements.txt">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py requirements.txt">
 flask>=1.1.0
 google-cloud-storage
 # </snippet>
@@ -138,7 +138,7 @@ with open(requirements_txt_file_path, "w") as f:
     f.write(requirements_txt)
 
 main_py = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py imports">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py imports">
 import logging
 import os
 from flask import Flask, request
@@ -177,7 +177,7 @@ with open(main_py_file_path, "w") as f:
     f.write(main_py)
 
 gcloud_login_command = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud login and set project">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py gcloud login and set project">
 gcloud auth login && gcloud config set project <YOUR GCP PROJECT NAME>
 # </snippet>
 """
@@ -188,7 +188,7 @@ gcloud auth login && gcloud config set project <YOUR GCP PROJECT NAME>
 """
 
 gcloud_app_deploy_command = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy">
 gcloud app deploy
 # </snippet>
 """
@@ -206,7 +206,7 @@ with subprocess.Popen(
 
 
 data_docs_site_yaml = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py data docs sites yaml">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py data docs sites yaml">
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -244,7 +244,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 build_data_docs_command = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs command">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py build data docs command">
 great_expectations docs build --site-name new_site_name
 # </snippet>
 """
@@ -262,7 +262,7 @@ with subprocess.Popen(
     result.kill()
 
 build_data_docs_output = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs output">
+# <snippet name="docs/docusaurus/docs/core/installation_and_setup/how_to_host_and_share_data_docs_on_gcs.py build data docs output">
 The following Data Docs sites will be built:
 
  - new_site_name: https://storage.googleapis.com/<YOUR GCS BUCKET NAME>/index.html
