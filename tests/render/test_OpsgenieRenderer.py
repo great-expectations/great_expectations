@@ -10,10 +10,8 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.render.renderer import OpsgenieRenderer
 
-# module level markers
-pytestmark = pytest.mark.big
 
-
+@pytest.mark.big
 def test_OpsgenieRenderer_validation_results_success():
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
@@ -45,6 +43,7 @@ def test_OpsgenieRenderer_validation_results_success():
     assert rendered_output == expected_output
 
 
+@pytest.mark.big
 def test_OpsgenieRenderer_checkpoint_validation_results_success():
     batch_definition = LegacyBatchDefinition(
         datasource_name="test_datasource",
@@ -77,6 +76,7 @@ def test_OpsgenieRenderer_checkpoint_validation_results_success():
     assert rendered_output == expected_output
 
 
+@pytest.mark.big
 def test_OpsgenieRenderer_validation_results_failure():
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
