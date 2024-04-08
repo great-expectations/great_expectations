@@ -8,7 +8,6 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Dict,
     List,
@@ -40,10 +39,6 @@ from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (  # noqa: E501
-    FilePathDataConnector,
-    file_get_unfiltered_batch_definition_list_fn,
-)
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
@@ -65,6 +60,7 @@ from great_expectations.datasource.fluent.spark_generic_partitioners import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.core.partitioners import Partitioner
@@ -402,11 +398,13 @@ class _FilePathDataAsset(DataAsset):
             ) from e
         raise TestConnectionError(self._test_connection_error_message)
 
-    def get_unfiltered_batch_definition_list_fn(
+    def get_whole_directory_path_override(
         self,
-    ) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
-        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""  # noqa: E501
-        return file_get_unfiltered_batch_definition_list_fn
+    ) -> PathStr | None:
+        """If present, override DataConnector behavior in order to
+        treat an entire directory as a single Asset.
+        """
+        return None
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
