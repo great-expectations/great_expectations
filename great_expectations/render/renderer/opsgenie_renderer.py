@@ -19,23 +19,23 @@ class OpsgenieRenderer(Renderer):
     def v1_render(self, checkpoint_result: CheckpointResult):
         text_blocks: list[str] = []
         for run_result in checkpoint_result.run_results.values():
-            text_block = self._v1_render(run_result=run_result)
+            text_block = self._render_validation_result(run_result=run_result)
             text_blocks.append(text_block)
 
         return self._concatenate_text_blocks(
             checkpoint_result=checkpoint_result, text_blocks=text_blocks
         )
 
-    def _v1_render(self, run_result: ExpectationSuiteValidationResult) -> str:
-        suite_name = run_result.suite_name
-        data_asset_name = run_result.asset_name or "__no_data_asset_name__"
-        n_checks_succeeded = run_result.statistics["successful_expectations"]
-        n_checks = run_result.statistics["evaluated_expectations"]
-        run_id = run_result.meta.get("run_id", "__no_run_id__")
-        batch_id = run_result.batch_id or "__no_batch_id__"
+    def _render_validation_result(self, result: ExpectationSuiteValidationResult) -> str:
+        suite_name = result.suite_name
+        data_asset_name = result.asset_name or "__no_data_asset_name__"
+        n_checks_succeeded = result.statistics["successful_expectations"]
+        n_checks = result.statistics["evaluated_expectations"]
+        run_id = result.meta.get("run_id", "__no_run_id__")
+        batch_id = result.batch_id or "__no_batch_id__"
         check_details_text = f"{n_checks_succeeded} of {n_checks} expectations were met"
 
-        if run_result.success:
+        if result.success:
             status = "Success 🎉"
         else:
             status = "Failed ❌"
