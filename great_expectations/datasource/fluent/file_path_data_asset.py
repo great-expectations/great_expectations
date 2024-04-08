@@ -306,7 +306,9 @@ class _FilePathDataAsset(DataAsset):
             )
             batch_list.append(batch)
 
-        self.sort_batches(batch_list)
+        if batch_request.partitioner:
+            spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
+            spark_partitioner.sort_batches(batch_list)
 
         return batch_list
 

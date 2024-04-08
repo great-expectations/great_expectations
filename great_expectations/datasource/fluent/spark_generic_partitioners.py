@@ -21,6 +21,7 @@ from great_expectations.execution_engine.partition_and_sample.data_partitioner i
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 class _Partitioner(Protocol):  # noqa: PYI046
@@ -101,10 +102,16 @@ class _PartitionerDatetime(FluentBaseModel):
         """Validates all the datetime parameters for this partitioner exist in `options`."""
         identifiers: Dict = {}
         for part in self.param_names:
-            if part not in options:
-                raise ValueError(f"'{part}' must be specified in the batch request options")  # noqa: TRY003
-            identifiers[part] = options[part]
+            if part in options:
+                identifiers[part] = options[part]
         return {self.column_name: identifiers}
+
+    def sort_batches(self, batches: list[Batch]) -> None:
+        reverse = not self.sort_batches_ascending
+        batches.sort(key=lambda batch: self._get_concrete_values_from_batch(batch), reverse=reverse)
+
+    def _get_concrete_values_from_batch(self, batch: Batch) -> tuple[int]:
+        return tuple(batch.metadata[param] for param in self.param_names)
 
     @property
     def param_names(self) -> list[str]:
