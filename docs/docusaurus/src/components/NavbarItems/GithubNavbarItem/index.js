@@ -7,8 +7,8 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const [starsCount, setStarsCount] = useState('0');
     const [forksCount, setForksCount] = useState('0');
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true);
-    const [innerWidth, setInnerWidth] = useState(0);
-    const [outerWidth, setOuterWidth] = useState(0);
+    const [innerWidth, setInnerWidth] = useState(undefined);
+    const [outerWidth, setOuterWidth] = useState(undefined);
     const MOBILE_BREAKPOINT = 996;
 
     useEffect(() => {
