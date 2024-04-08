@@ -514,7 +514,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         suite_name: str,
         evaluation_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
-        meta: Optional[ExpectationSuiteValidationResult | dict] = None,
+        meta: Optional[ExpectationSuiteValidationResultMeta | dict] = None,
         batch_id: Optional[str] = None,
         result_url: Optional[str] = None,
         id: Optional[str] = None,
