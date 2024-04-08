@@ -35,12 +35,14 @@ from great_expectations.datasource.fluent.sql_datasource import (
 if TYPE_CHECKING:
     # min version of typing_extension missing `Self`, so it can't be imported at runtime
 
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchRequestOptions,
         DataAsset,
         SortersDefinition,
     )
+
 
 # This module serves as an example of how to extend _SQLAssets for specific backends. The steps are:
 # 1. Create a plain class with the extensions necessary for the specific backend.
@@ -109,6 +111,18 @@ class SqliteTableAsset(SqlTableAsset):
         )
 
     type: Literal["table"] = "table"
+
+    @public_api
+    def add_batch_definition_converted_datetime(
+        self, name: str, column: str, date_format_string: str
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerConvertedDatetime(
+                column_name=column, date_format_string=date_format_string
+            ),
+            batching_regex=None,
+        )
 
 
 class SqliteQueryAsset(SqlQueryAsset):
