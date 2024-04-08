@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import sqlite3
 import uuid
 from pprint import pformat as pf
@@ -22,7 +23,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    re,
 )
 
 import pandas as pd
@@ -384,7 +384,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         version="0.16.15",
     )
     @override
-    def build_batch_request(  # type: ignore[override]  # noqa: PLR0913
+    def build_batch_request(  # noqa: PLR0913 # type: ignore[override]
         self,
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchRequestOptions] = None,
