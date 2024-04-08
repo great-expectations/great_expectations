@@ -178,6 +178,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -185,6 +186,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
             partitioner: This is not currently supported and must be None for this data asset.
+            batching_regex: A Regular Expression used to create batches in FilePath-based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -209,6 +211,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options={},
+            batching_regex=batching_regex,
         )
 
     @override
