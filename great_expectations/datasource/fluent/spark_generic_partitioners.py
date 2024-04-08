@@ -89,6 +89,7 @@ class _Partitioner(Protocol):  # noqa: PYI046
 class _PartitionerDatetime(FluentBaseModel):
     column_name: str
     method_name: str
+    sort_batches_ascending: bool = True
 
     @property
     def columns(self) -> list[str]:
@@ -115,6 +116,7 @@ class _PartitionerDatetime(FluentBaseModel):
 
 class SparkPartitionerYear(_PartitionerDatetime):
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_year"] = "partition_on_year"
 
     @property
@@ -129,6 +131,7 @@ class SparkPartitionerYear(_PartitionerDatetime):
 
 class SparkPartitionerYearAndMonth(_PartitionerDatetime):
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
     @property
@@ -143,6 +146,7 @@ class SparkPartitionerYearAndMonth(_PartitionerDatetime):
 
 class SparkPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_year_and_month_and_day"] = (
         "partition_on_year_and_month_and_day"
     )
@@ -160,6 +164,7 @@ class SparkPartitionerYearAndMonthAndDay(_PartitionerDatetime):
 class SparkPartitionerDatetimePart(_PartitionerDatetime):
     datetime_parts: List[str]
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
 
     @property
