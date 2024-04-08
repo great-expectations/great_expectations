@@ -28,11 +28,7 @@ class OpsgenieRenderer(Renderer):
 
     def _v1_render(self, run_result: ExpectationSuiteValidationResult) -> str:
         suite_name = run_result.suite_name
-
-        data_asset_name: str = "__no_data_asset_name__"
-        if run_result.meta and "active_batch_definition" in run_result.meta:
-            data_asset_name = run_result.asset_name
-
+        data_asset_name = run_result.asset_name or "__no_data_asset_name__"
         n_checks_succeeded = run_result.statistics["successful_expectations"]
         n_checks = run_result.statistics["evaluated_expectations"]
         run_id = run_result.meta.get("run_id", "__no_run_id__")

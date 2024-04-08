@@ -111,29 +111,30 @@ def test_OpsgenieRenderer_validation_results_failure():
 @pytest.mark.unit
 def test_OpsgenieRenderer_v1_render(mocker: MockerFixture):
     # Arrange
+    result_a = mocker.MagicMock(
+        spec=ExpectationSuiteValidationResult,
+        suite_name="my_bad_suite",
+        meta={},
+        statistics={"successful_expectations": 3, "evaluated_expectations": 5},
+        batch_id="my_batch",
+        success=False,
+    )
+    result_a.asset_name = "my_first_asset"
+    result_b = mocker.MagicMock(
+        spec=ExpectationSuiteValidationResult,
+        suite_name="my_good_suite",
+        meta={"run_id": "my_run_id"},
+        statistics={"successful_expectations": 1, "evaluated_expectations": 1},
+        batch_id="my_other_batch",
+        success=True,
+    )
+    result_b.asset_name = None
+
     checkpoint_result = CheckpointResult(
         run_id=RunIdentifier(run_name="my_run_id"),
         run_results={
-            mocker.MagicMock(spec=ValidationResultIdentifier): mocker.MagicMock(
-                spec=ExpectationSuiteValidationResult,
-                suite_name="my_bad_suite",
-                meta={
-                    "active_batch_definition": mocker.Mock(
-                        spec=LegacyBatchDefinition, data_asset_name="my_first_asset"
-                    )
-                },
-                statistics={"successful_expectations": 3, "evaluated_expectations": 5},
-                batch_id="my_batch",
-                success=False,
-            ),
-            mocker.MagicMock(spec=ValidationResultIdentifier): mocker.MagicMock(
-                spec=ExpectationSuiteValidationResult,
-                suite_name="my_good_suite",
-                meta={"run_id": "my_run_id"},
-                statistics={"successful_expectations": 1, "evaluated_expectations": 1},
-                batch_id="my_other_batch",
-                success=True,
-            ),
+            mocker.MagicMock(spec=ValidationResultIdentifier): result_a,
+            mocker.MagicMock(spec=ValidationResultIdentifier): result_b,
         },
         checkpoint_config=mocker.MagicMock(spec=Checkpoint, name="my_checkpoint"),
         success=False,
@@ -154,13 +155,13 @@ def test_OpsgenieRenderer_v1_render(mocker: MockerFixture):
         "Expectation Suite Name: my_bad_suite",
         "Data Asset Name: my_first_asset",
         "Run ID: __no_run_id__",
-        "Batch ID: ()",
+        "Batch ID: my_batch",
         "Summary: 3 of 5 expectations were met",
         "",
         "Batch Validation Status: Success 🎉",
         "Expectation Suite Name: my_good_suite",
         "Data Asset Name: __no_data_asset_name__",
         "Run ID: my_run_id",
-        "Batch ID: ()",
+        "Batch ID: my_other_batch",
         "Summary: 1 of 1 expectations were met",
     ]
