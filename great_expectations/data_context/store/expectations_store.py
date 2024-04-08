@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Dict, List, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pydantic
@@ -111,8 +111,8 @@ class ExpectationsStore(Store):
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     @override
-    @staticmethod
-    def gx_cloud_response_json_to_object_dict(response_json: dict) -> dict:
+    @classmethod
+    def gx_cloud_response_json_to_object_dict(cls, response_json: dict) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
@@ -129,13 +129,18 @@ class ExpectationsStore(Store):
         else:
             suite_data = response_json["data"]
 
+        return cls._convert_raw_json_to_object_dict(suite_data)
+
+    @override
+    @staticmethod
+    def _convert_raw_json_to_object_dict(data: dict[str, Any]) -> dict[str, Any]:
         # Cloud backend adds a default result format type of None, so ensure we remove it:
-        for expectation in suite_data.get("expectations", []):
+        for expectation in data.get("expectations", []):
             kwargs = expectation["kwargs"]
             if "result_format" in kwargs and kwargs["result_format"] is None:
                 kwargs.pop("result_format")
 
-        suite_dto = ExpectationSuiteDTO.parse_obj(suite_data)
+        suite_dto = ExpectationSuiteDTO.parse_obj(data)
         return suite_dto.dict()
 
     def add_expectation(self, suite: ExpectationSuite, expectation: _TExpectation) -> _TExpectation:
