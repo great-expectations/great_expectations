@@ -31,7 +31,7 @@ class OpsgenieRenderer(Renderer):
 
         data_asset_name: str = "__no_data_asset_name__"
         if run_result.meta and "active_batch_definition" in run_result.meta:
-            data_asset_name = run_result.meta["active_batch_definition"].data_asset_name
+            data_asset_name = run_result.asset_name
 
         n_checks_succeeded = run_result.statistics["successful_expectations"]
         n_checks = run_result.statistics["evaluated_expectations"]

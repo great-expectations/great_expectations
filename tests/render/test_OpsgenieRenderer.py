@@ -123,6 +123,7 @@ def test_OpsgenieRenderer_v1_render(mocker: MockerFixture):
                     )
                 },
                 statistics={"successful_expectations": 3, "evaluated_expectations": 5},
+                batch_id="my_batch",
                 success=False,
             ),
             mocker.MagicMock(spec=ValidationResultIdentifier): mocker.MagicMock(
@@ -130,6 +131,7 @@ def test_OpsgenieRenderer_v1_render(mocker: MockerFixture):
                 suite_name="my_good_suite",
                 meta={"run_id": "my_run_id"},
                 statistics={"successful_expectations": 1, "evaluated_expectations": 1},
+                batch_id="my_other_batch",
                 success=True,
             ),
         },

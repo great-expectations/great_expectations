@@ -1080,19 +1080,8 @@ class APINotificationAction(ValidationAction):
         checkpoint_identifier=None,
         **kwargs,
     ):
-        suite_name: str = validation_result_suite.meta["expectation_suite_name"]
-        if "batch_kwargs" in validation_result_suite.meta:
-            data_asset_name = validation_result_suite.meta.get("batch_kwargs", {}).get(
-                "data_asset_name", "__no_data_asset_name__"
-            )
-        elif "active_batch_definition" in validation_result_suite.meta:
-            data_asset_name = (
-                validation_result_suite.meta["active_batch_definition"].data_asset_name
-                if validation_result_suite.meta["active_batch_definition"].data_asset_name
-                else "__no_data_asset_name__"
-            )
-        else:
-            data_asset_name = "__no_data_asset_name__"
+        suite_name: str = validation_result_suite.suite_name
+        data_asset_name: str = validation_result_suite.asset_name or "__no_data_asset_name__"
 
         validation_results: list = validation_result_suite.get("results")
         validation_results_serializable: list = convert_to_json_serializable(validation_results)
