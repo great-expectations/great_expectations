@@ -19,7 +19,7 @@ class OpsgenieRenderer(Renderer):
     def v1_render(self, checkpoint_result: CheckpointResult):
         text_blocks: list[str] = []
         for run_result in checkpoint_result.run_results.values():
-            text_block = self._render_validation_result(run_result=run_result)
+            text_block = self._render_validation_result(result=run_result)
             text_blocks.append(text_block)
 
         return self._concatenate_text_blocks(

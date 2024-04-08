@@ -745,15 +745,17 @@ class TestActionSerialization:
             "use_tls": None,
         },
         UpdateDataDocsAction: {
+            "notify_on": "all",
             "site_names": EXAMPLE_SITE_NAMES,
             "type": "update_data_docs",
         },
         SNSNotificationAction: {
+            "notify_on": "all",
             "sns_message_subject": None,
             "sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN,
             "type": "sns",
         },
-        APINotificationAction: {"type": "api", "url": EXAMPLE_URL},
+        APINotificationAction: {"type": "api", "notify_on": "all", "url": EXAMPLE_URL},
     }
 
     @pytest.mark.parametrize(

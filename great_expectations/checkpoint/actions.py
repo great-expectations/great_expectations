@@ -96,6 +96,7 @@ class ValidationAction(BaseModel):
         json_encoders = {Renderer: lambda r: r.serialize()}
 
     type: str
+    notify_on: Literal["all", "failure", "success"] = "all"
 
     @property
     def _using_cloud_context(self) -> bool:
