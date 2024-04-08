@@ -70,10 +70,10 @@ if TYPE_CHECKING:
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import PandasExecutionEngine
-
 
 logger = logging.getLogger(__name__)
 
@@ -285,6 +285,14 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             encoder=encoder,
             models_as_dict=models_as_dict,
             **dumps_kwargs,
+        )
+
+    @public_api
+    def add_batch_definition_whole_asset(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=None,
         )
 
 
