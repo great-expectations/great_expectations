@@ -197,6 +197,33 @@ def _test_suite_factory_delete_success(context):
         context.suites.get(name)
 
 
+@pytest.mark.parametrize(
+    "context_fixture_name",
+    [
+        pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.cloud),
+        pytest.param("ephemeral_data_context", id="ephemeral", marks=pytest.mark.unit),
+        pytest.param("empty_data_context", id="filesystem", marks=pytest.mark.filesystem),
+    ],
+)
+def test_suite_factory_all(context_fixture_name: str, request: pytest.FixtureRequest):
+    context: AbstractDataContext = request.getfixturevalue(context_fixture_name)
+
+    # Arrange
+    suite_a = ExpectationSuite(name="a suite")
+    suite_b = ExpectationSuite(name="b suite")
+
+    context.suites.add(suite=suite_a)
+    context.suites.add(suite=suite_b)
+
+    # Act
+    result = context.suites.all()
+    result = sorted(result, key=lambda x: x.name)
+
+    # Assert
+    assert [r.name for r in result] == [suite_a.name, suite_b.name]
+    assert result == [suite_a, suite_b]
+
+
 class TestSuiteFactoryAnalytics:
     @pytest.mark.filesystem
     def test_suite_factory_add_emits_event_filesystem(self, empty_data_context):

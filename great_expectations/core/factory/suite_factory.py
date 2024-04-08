@@ -90,13 +90,18 @@ class SuiteFactory(Factory[ExpectationSuite]):
         if not self._store.has_key(key=key):
             raise DataContextError(f"ExpectationSuite with name {name} was not found.")  # noqa: TRY003
         suite_dict = self._store.get(key=key)
-        suite = ExpectationSuite(**suite_dict)
-        if self._include_rendered_content:
-            suite.render()
-        return suite
+        return self._deserialize(suite_dict)
 
     @public_api
     @override
     def all(self) -> Iterable[ExpectationSuite]:
         """Get all ExpectationSuites."""
-        return self._store.get_all()
+        dicts = self._store.get_all()
+        return [self._deserialize(suite_dict) for suite_dict in dicts]
+
+    def _deserialize(self, suite_dict: dict) -> ExpectationSuite:
+        # TODO: Move this logic to the store
+        suite = ExpectationSuite(**suite_dict)
+        if self._include_rendered_content:
+            suite.render()
+        return suite
