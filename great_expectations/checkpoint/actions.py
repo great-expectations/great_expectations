@@ -619,7 +619,7 @@ class OpsgenieAlertAction(ValidationAction):
 
     @override
     def v1_run(self, checkpoint_result: CheckpointResult) -> dict:
-        validation_success = checkpoint_result.success
+        validation_success = checkpoint_result.success or False
         checkpoint_name = checkpoint_result.checkpoint_config.name
 
         if self._is_enabled(success=validation_success):
