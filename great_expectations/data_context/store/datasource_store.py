@@ -138,8 +138,9 @@ class DatasourceStore(Store):
             return self._schema.loads(value)
 
     @override
-    @staticmethod
+    @classmethod
     def gx_cloud_response_json_to_object_dict(
+        cls,
         response_json: CloudResponsePayloadTD,  # type: ignore[override]
     ) -> dict:
         """
