@@ -85,17 +85,13 @@ def send_opsgenie_alert(query: str, message: str, settings: dict) -> bool:
 
     try:
         response = session.post(url, headers=headers, json=payload)
-    except requests.ConnectionError:
-        logger.warning("Failed to connect to Opsgenie")
-    except Exception as e:
-        logger.error(str(e))  # noqa: TRY400
-    else:
-        if response.status_code != 202:  # noqa: PLR2004
-            logger.warning(
-                "Request to Opsgenie API " f"returned error {response.status_code}: {response.text}"
-            )
-        else:
-            return False
+        response.raise_for_status()
+    except requests.ConnectionError as e:
+        logger.warning(f"Failed to connect to Opsgenie: {e}")
+        return False
+    except requests.HTTPError as e:
+        logger.warning(f"Request to Opsgenie API returned error {response.status_code}: {e}")
+        return False
     return True
 
 

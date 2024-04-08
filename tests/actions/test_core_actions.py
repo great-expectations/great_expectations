@@ -830,14 +830,24 @@ class TestV1ActionRun:
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    def test_OpsgenieAlertAction_run(self, checkpoint_result: CheckpointResult):
+    @pytest.mark.parametrize(
+        "success, message",
+        [
+            pytest.param(True, "succeeded!", id="success"),
+            pytest.param(False, "failed!", id="failure"),
+        ],
+    )
+    def test_OpsgenieAlertAction_run(
+        self, checkpoint_result: CheckpointResult, success: bool, message: str
+    ):
         action = OpsgenieAlertAction(api_key="test", routing_key="test", notify_on="all")
+        checkpoint_result.success = success
 
         with mock.patch.object(Session, "post") as mock_post:
             output = action.v1_run(checkpoint_result=checkpoint_result)
 
         mock_post.assert_called_once()
-        assert "succeeded!" in mock_post.call_args.kwargs["json"]["message"]
+        assert message in mock_post.call_args.kwargs["json"]["message"]
         assert output == {"opsgenie_alert_result": True}
 
     @pytest.mark.skipif(
