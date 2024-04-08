@@ -310,6 +310,44 @@ def _test_validation_definition_factory_delete_success(
         context.validation_definitions.get(name)
 
 
+@pytest.mark.parametrize(
+    "context_fixture_name",
+    [
+        pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.cloud),
+        pytest.param("ephemeral_data_context", id="ephemeral", marks=pytest.mark.unit),
+        pytest.param("empty_data_context", id="filesystem", marks=pytest.mark.filesystem),
+    ],
+)
+def test_suite_factory_all(context_fixture_name: str, request: pytest.FixtureRequest):
+    context: AbstractDataContext = request.getfixturevalue(context_fixture_name)
+
+    # Arrange
+    ds = context.sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
+    suite = ExpectationSuite(name="my_suite")
+    validation_definition_a = ValidationDefinition(
+        name="validation definition a",
+        data=asset.add_batch_definition("a"),
+        suite=suite,
+    )
+    validation_definition_b = ValidationDefinition(
+        name="validation definition b",
+        data=asset.add_batch_definition("b"),
+        suite=suite,
+    )
+
+    context.validation_definitions.add(validation=validation_definition_a)
+    context.validation_definitions.add(validation=validation_definition_b)
+
+    # Act
+    result = context.validation_definitions.all()
+    result = sorted(result, key=lambda x: x.name)
+
+    # Assert
+    assert [r.name for r in result] == [validation_definition_a.name, validation_definition_b.name]
+    assert result == [validation_definition_a, validation_definition_b]
+
+
 @pytest.mark.filesystem
 def test_validation_definition_factory_round_trip(
     empty_data_context: FileDataContext,
