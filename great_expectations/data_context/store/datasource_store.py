@@ -157,8 +157,9 @@ class DatasourceStore(Store):
 
         return DatasourceStore._convert_raw_json_to_object_dict(data)
 
+    @override
     @staticmethod
-    def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:
+    def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:  # type: ignore[override]
         datasource_id: str = data["id"]
         datasource_config_dict: dict = data["attributes"]["datasource_config"]
         datasource_config_dict["id"] = datasource_id
