@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import re
 from typing import Optional
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
 from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 from great_expectations.datasource.fluent.interfaces import DataAsset
@@ -43,7 +45,11 @@ def test_build_batch_request(
     batch_request_options: Optional[BatchRequestOptions],
     mock_data_asset: DataAsset,
 ):
-    batch_definition = BatchDefinition(name="test_batch_definition")
+    partitioner = PartitionerYear(column_name="foo")
+    batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    batch_definition = BatchDefinition(
+        name="test_batch_definition", partitioner=partitioner, batching_regex=batching_regex
+    )
     batch_definition.set_data_asset(mock_data_asset)
 
     batch_definition.build_batch_request(batch_request_options=batch_request_options)
@@ -51,7 +57,9 @@ def test_build_batch_request(
     mock_build_batch_request = batch_definition.data_asset.build_batch_request
     assert isinstance(mock_build_batch_request, Mock)
     mock_build_batch_request.assert_called_once_with(
-        options=batch_request_options, partitioner=None
+        options=batch_request_options,
+        partitioner=partitioner,
+        batching_regex=batching_regex,
     )
 
 

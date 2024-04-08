@@ -4,6 +4,7 @@ import copy
 import inspect
 import logging
 import pathlib
+import re
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
@@ -125,6 +126,7 @@ class DummyDataAsset(DataAsset):
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 
