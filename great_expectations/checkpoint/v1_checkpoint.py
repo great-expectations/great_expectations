@@ -249,7 +249,8 @@ class CheckpointResult(BaseModel):
         if len(run_results) == 0:
             raise ValueError("CheckpointResult must contain at least one run result")  # noqa: TRY003
 
-        values["success"] = all(result.success for result in run_results.values())
+        if values["success"] is None:
+            values["success"] = all(result.success for result in run_results.values())
         return values
 
     @property

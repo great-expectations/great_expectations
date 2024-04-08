@@ -1,12 +1,16 @@
 import json
 import logging
-from typing import Type
+from contextlib import contextmanager
+from types import ModuleType
+from typing import Iterator, Type
 from unittest import mock
 
 import pytest
+import requests
 from freezegun import freeze_time
 from pytest_mock import MockerFixture
 from requests import Session
+from typing_extensions import Never
 
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
@@ -28,13 +32,16 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
+from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
     ExpectationSuiteIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.util import is_library_loadable
@@ -247,39 +254,53 @@ def test_SlackNotificationAction(
 
 
 @pytest.mark.big
-@pytest.mark.skipif(
-    not is_library_loadable(library_name="pypd"),
-    reason="pypd is not installed",
-)
-@mock.patch("pypd.EventV2")
 def test_PagerdutyAlertAction(
     validation_result_suite,
     validation_result_suite_id,
     mock_context,
+    mocker,
 ):
     api_key = "test"
     routing_key = "test"
 
-    pagerduty_action = PagerdutyAlertAction(
-        api_key=api_key,
-        routing_key=routing_key,
-    )
+    from great_expectations.checkpoint import actions
 
-    # Make sure the alert is sent by default when the validation has success = False
-    validation_result_suite.success = False
+    with mock_not_imported_module(actions, "pypd", mocker):
+        mock_pypd_event = actions.pypd.EventV2.create
 
-    assert pagerduty_action.run(
-        validation_result_suite_identifier=validation_result_suite_id,
-        validation_result_suite=validation_result_suite,
-    ) == {"pagerduty_alert_result": "success"}
+        pagerduty_action = PagerdutyAlertAction(
+            api_key=api_key,
+            routing_key=routing_key,
+        )
 
-    # Make sure the alert is not sent by default when the validation has success = True
-    validation_result_suite.success = True
+        # Make sure the alert is sent by default when the validation has success = False
+        validation_result_suite.success = False
 
-    assert pagerduty_action.run(
-        validation_result_suite_identifier=validation_result_suite_id,
-        validation_result_suite=validation_result_suite,
-    ) == {"pagerduty_alert_result": "none sent"}
+        assert pagerduty_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+        ) == {"pagerduty_alert_result": "success"}
+
+        # Make sure the alert is not sent by default when the validation has success = True
+        validation_result_suite.success = True
+
+        assert pagerduty_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+        ) == {"pagerduty_alert_result": "none sent"}
+
+        mock_pypd_event.assert_called_once_with(
+            data={
+                "dedup_key": "asset.default",
+                "event_action": "trigger",
+                "payload": {
+                    "severity": "critical",
+                    "source": "Great Expectations",
+                    "summary": "Great Expectations suite check asset.default has failed",
+                },
+                "routing_key": "test",
+            },
+        )
 
 
 @pytest.mark.big
@@ -306,7 +327,7 @@ def test_OpsgenieAlertAction(
     assert opsgenie_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-    ) == {"opsgenie_alert_result": "error"}
+    ) == {"opsgenie_alert_result": False}
 
     # Make sure the alert is not sent by default when the validation has success = True
     validation_result_suite.success = True
@@ -314,7 +335,7 @@ def test_OpsgenieAlertAction(
     assert opsgenie_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-    ) == {"opsgenie_alert_result": "error"}
+    ) == {"opsgenie_alert_result": False}
 
 
 @pytest.mark.big
@@ -593,7 +614,11 @@ def test_EmailAction(
 @pytest.mark.unit
 def test_api_action_create_payload(mock_context):
     mock_validation_results = []
-    expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'  # noqa: E501
+    expected_payload = {
+        "test_suite_name": "my_suite",
+        "data_asset_name": "my_schema.my_table",
+        "validation_results": [],
+    }
     api_notification_action = APINotificationAction(url="http://www.example.com")
     payload = api_notification_action.create_payload(
         "my_schema.my_table", "my_suite", mock_validation_results
@@ -720,15 +745,17 @@ class TestActionSerialization:
             "use_tls": None,
         },
         UpdateDataDocsAction: {
+            "notify_on": "all",
             "site_names": EXAMPLE_SITE_NAMES,
             "type": "update_data_docs",
         },
         SNSNotificationAction: {
+            "notify_on": "all",
             "sns_message_subject": None,
             "sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN,
             "type": "sns",
         },
-        APINotificationAction: {"type": "api", "url": EXAMPLE_URL},
+        APINotificationAction: {"type": "api", "notify_on": "all", "url": EXAMPLE_URL},
     }
 
     @pytest.mark.parametrize(
@@ -764,29 +791,81 @@ class TestActionSerialization:
         assert isinstance(actual, action_class)
 
 
+@contextmanager
+def mock_not_imported_module(
+    parent_module: ModuleType, target_name: str, mocker: MockerFixture
+) -> Iterator[Never]:
+    original = getattr(parent_module, target_name)
+    try:
+        setattr(parent_module, target_name, mocker.Mock())
+        yield getattr(parent_module, target_name)
+    finally:
+        setattr(parent_module, target_name, original)
+
+
 class TestV1ActionRun:
+    suite_a: str = "suite_a"
+    suite_b: str = "suite_b"
+    batch_id_a: str = "my_datasource-my_first_asset"
+    batch_id_b: str = "my_datasource-my_second_asset"
+
     @pytest.fixture
     def checkpoint_result(self, mocker: MockerFixture):
         return CheckpointResult(
-            run_id=mocker.Mock(spec=RunIdentifier),
+            run_id=RunIdentifier(run_time="2024-04-01T20:51:18.077262"),
             run_results={
-                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
-                    spec=ExpectationSuiteValidationResult, success=True
+                ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(
+                        name=self.suite_a,
+                    ),
+                    run_id=RunIdentifier(run_name="prod_20240401"),
+                    batch_identifier=self.batch_id_a,
+                ): ExpectationSuiteValidationResult(
+                    success=True,
+                    statistics={"successful_expectations": 3, "evaluated_expectations": 3},
+                    results=[],
+                    suite_name=self.suite_a,
                 ),
-                mocker.Mock(spec=ValidationResultIdentifier): mocker.Mock(
-                    spec=ExpectationSuiteValidationResult, success=False
+                ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(
+                        name=self.suite_b,
+                    ),
+                    run_id=RunIdentifier(run_name="prod_20240402"),
+                    batch_identifier=self.batch_id_b,
+                ): ExpectationSuiteValidationResult(
+                    success=True,
+                    statistics={"successful_expectations": 2, "evaluated_expectations": 2},
+                    results=[],
+                    suite_name=self.suite_b,
                 ),
             },
-            checkpoint_config=mocker.Mock(spec=Checkpoint),
+            checkpoint_config=mocker.Mock(spec=Checkpoint, name="my_checkpoint"),
         )
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
     def test_APINotificationAction_run(self, checkpoint_result: CheckpointResult):
-        action = APINotificationAction(url="http://www.example.com")
-        action.v1_run(checkpoint_result=checkpoint_result)
+        url = "http://www.example.com"
+        action = APINotificationAction(url=url)
+
+        with mock.patch.object(requests, "post") as mock_post:
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+        mock_post.assert_called_once_with(
+            url,
+            headers={"Content-Type": "application/json"},
+            data=[
+                {
+                    "data_asset_name": self.batch_id_a,
+                    "test_suite_name": self.suite_a,
+                    "validation_results": [],
+                },
+                {
+                    "data_asset_name": self.batch_id_b,
+                    "test_suite_name": self.suite_b,
+                    "validation_results": [],
+                },
+            ],
+        )
 
     @pytest.mark.unit
     @pytest.mark.xfail(
@@ -807,24 +886,94 @@ class TestV1ActionRun:
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    @pytest.mark.parametrize(
+        "success, message",
+        [
+            pytest.param(True, "succeeded!", id="success"),
+            pytest.param(False, "failed!", id="failure"),
+        ],
     )
-    def test_OpsgenieAlertAction_run(self, checkpoint_result: CheckpointResult):
-        action = OpsgenieAlertAction(api_key="test")
-        action.v1_run(checkpoint_result=checkpoint_result)
+    def test_OpsgenieAlertAction_run(
+        self, checkpoint_result: CheckpointResult, success: bool, message: str
+    ):
+        action = OpsgenieAlertAction(api_key="test", routing_key="test", notify_on="all")
+        checkpoint_result.success = success
+
+        with mock.patch.object(Session, "post") as mock_post:
+            output = action.v1_run(checkpoint_result=checkpoint_result)
+
+        mock_post.assert_called_once()
+        assert message in mock_post.call_args.kwargs["json"]["message"]
+        assert output == {"opsgenie_alert_result": True}
+
+    @pytest.mark.unit
+    def test_PagerdutyAlertAction_run_emits_events(
+        self, checkpoint_result: CheckpointResult, mocker: MockerFixture
+    ):
+        from great_expectations.checkpoint import actions
+
+        with mock_not_imported_module(actions, "pypd", mocker):
+            mock_pypd_event = actions.pypd.EventV2.create
+            action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="all")
+            checkpoint_name = checkpoint_result.checkpoint_config.name
+
+            checkpoint_result.success = True
+            assert action.v1_run(checkpoint_result=checkpoint_result) == {
+                "pagerduty_alert_result": "success"
+            }
+
+            checkpoint_result.success = False
+            assert action.v1_run(checkpoint_result=checkpoint_result) == {
+                "pagerduty_alert_result": "success"
+            }
+
+            assert mock_pypd_event.call_count == 2
+            mock_pypd_event.assert_has_calls(
+                [
+                    mock.call(
+                        data={
+                            "dedup_key": checkpoint_name,
+                            "event_action": "trigger",
+                            "payload": {
+                                "severity": "critical",
+                                "source": "Great Expectations",
+                                "summary": f"Great Expectations Checkpoint {checkpoint_name} has succeeded",  # noqa: E501
+                            },
+                            "routing_key": "test",
+                        }
+                    ),
+                    mock.call(
+                        data={
+                            "dedup_key": checkpoint_name,
+                            "event_action": "trigger",
+                            "payload": {
+                                "severity": "critical",
+                                "source": "Great Expectations",
+                                "summary": f"Great Expectations Checkpoint {checkpoint_name} has failed",  # noqa: E501
+                            },
+                            "routing_key": "test",
+                        }
+                    ),
+                ]
+            )
 
     @pytest.mark.skipif(
         not is_library_loadable(library_name="pypd"),
         reason="pypd is not installed",
     )
+    @mock.patch("pypd.EventV2.create")
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
-    def test_PagerdutyAlertAction_run(self, checkpoint_result: CheckpointResult):
-        action = PagerdutyAlertAction()
-        action.v1_run(checkpoint_result=checkpoint_result)
+    def test_PagerdutyAlertAction_run_does_not_emit_events(
+        self, mock_pypd_event, checkpoint_result: CheckpointResult
+    ):
+        action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="failure")
+
+        checkpoint_result.success = True
+        assert action.v1_run(checkpoint_result=checkpoint_result) == {
+            "pagerduty_alert_result": "none sent"
+        }
+
+        mock_pypd_event.assert_not_called()
 
     @pytest.mark.unit
     @pytest.mark.xfail(
@@ -835,17 +984,149 @@ class TestV1ActionRun:
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
-    def test_SNSNotificationAction_run(self, checkpoint_result: CheckpointResult):
-        action = SNSNotificationAction(sns_topic_arn="test")
-        action.v1_run(checkpoint_result=checkpoint_result)
+    def test_SNSNotificationAction_run(self, sns, checkpoint_result: CheckpointResult):
+        subj_topic = "test-subj"
+        created_subj = sns.create_topic(Name=subj_topic)
+        arn = created_subj.get("TopicArn")
+        action = SNSNotificationAction(
+            sns_topic_arn=arn,
+            sns_message_subject="Subject",
+        )
+
+        assert "Successfully posted results" in action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
-    def test_UpdateDataDocsAction_run(self, checkpoint_result: CheckpointResult):
-        action = UpdateDataDocsAction()
-        action.v1_run(checkpoint_result=checkpoint_result)
+    def test_UpdateDataDocsAction_run(
+        self, mocker: MockerFixture, checkpoint_result: CheckpointResult
+    ):
+        # Arrange
+        context = mocker.Mock(spec=AbstractDataContext)
+        set_context(context)
+
+        site_names = ["site_a", "site_b"]
+        site_urls = [
+            f"/gx/uncommitted/data_docs/{site_names[0]}/index.html",
+            f"/gx/uncommitted/data_docs/{site_names[1]}/index.html",
+        ]
+        context.get_docs_sites_urls.return_value = [
+            {
+                "site_url": site_urls[0],
+                "site_name": site_names[0],
+            },
+            {
+                "site_url": site_urls[1],
+                "site_name": site_names[1],
+            },
+        ]
+
+        # Act
+        action = UpdateDataDocsAction(site_names=site_names)
+        res = action.v1_run(checkpoint_result=checkpoint_result)
+
+        # Assert
+        validation_identifier_a, validation_identifier_b = tuple(
+            checkpoint_result.run_results.keys()
+        )
+        assert (
+            context.build_data_docs.call_count == 2
+        ), "Data Docs should be incrementally built (once per validation result)"
+        context.build_data_docs.assert_has_calls(
+            [
+                mock.call(
+                    build_index=True,
+                    dry_run=False,
+                    resource_identifiers=[
+                        validation_identifier_a,
+                        ExpectationSuiteIdentifier(name=self.suite_a),
+                    ],
+                    site_names=site_names,
+                ),
+                mock.call(
+                    build_index=True,
+                    dry_run=False,
+                    resource_identifiers=[
+                        validation_identifier_b,
+                        ExpectationSuiteIdentifier(name=self.suite_b),
+                    ],
+                    site_names=site_names,
+                ),
+            ]
+        )
+        assert res == {
+            validation_identifier_a: {
+                site_names[0]: site_urls[0],
+                site_names[1]: site_urls[1],
+            },
+            validation_identifier_b: {
+                site_names[0]: site_urls[0],
+                site_names[1]: site_urls[1],
+            },
+        }
+
+    @pytest.mark.cloud
+    def test_UpdateDataDocsAction_run_cloud(
+        self, mocker: MockerFixture, checkpoint_result: CheckpointResult
+    ):
+        # Arrange
+        context = mocker.Mock(spec=CloudDataContext)
+        set_context(context)
+
+        site_names = ["site_a", "site_b"]
+        site_urls = [
+            f"http://app.greatexpectations.io/data_docs/{site_names[0]}",
+            f"http://app.greatexpectations.io/data_docs/{site_names[1]}",
+        ]
+        context.get_docs_sites_urls.return_value = [
+            {
+                "site_url": site_urls[0],
+                "site_name": site_names[0],
+            },
+            {
+                "site_url": site_urls[1],
+                "site_name": site_names[1],
+            },
+        ]
+
+        # Act
+        action = UpdateDataDocsAction(site_names=site_names)
+        res = action.v1_run(checkpoint_result=checkpoint_result)
+
+        # Assert
+        validation_identifier_a, validation_identifier_b = tuple(
+            checkpoint_result.run_results.keys()
+        )
+        assert (
+            context.build_data_docs.call_count == 2
+        ), "Data Docs should be incrementally built (once per validation result)"
+        context.build_data_docs.assert_has_calls(
+            [
+                mock.call(
+                    build_index=True,
+                    dry_run=False,
+                    resource_identifiers=[
+                        validation_identifier_a,
+                        GXCloudIdentifier(
+                            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                            resource_name=self.suite_a,
+                        ),
+                    ],
+                    site_names=site_names,
+                ),
+                mock.call(
+                    build_index=True,
+                    dry_run=False,
+                    resource_identifiers=[
+                        validation_identifier_b,
+                        GXCloudIdentifier(
+                            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                            resource_name=self.suite_b,
+                        ),
+                    ],
+                    site_names=site_names,
+                ),
+            ]
+        )
+        assert res == {
+            validation_identifier_a: {},
+            validation_identifier_b: {},
+        }

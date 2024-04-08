@@ -514,7 +514,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         suite_name: str,
         evaluation_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
-        meta: Optional[ExpectationSuiteValidationResult | dict] = None,
+        meta: Optional[ExpectationSuiteValidationResultMeta | dict] = None,
         batch_id: Optional[str] = None,
         result_url: Optional[str] = None,
         id: Optional[str] = None,
@@ -531,6 +531,12 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         self.result_url = result_url
         self.id = id
         self._metrics: dict = {}
+
+    @property
+    def asset_name(self) -> str | None:
+        if "active_batch_definition" in self.meta:
+            return self.meta["active_batch_definition"].data_asset_name
+        return None
 
     def __eq__(self, other):
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""  # noqa: E501
