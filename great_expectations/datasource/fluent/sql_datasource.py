@@ -756,10 +756,12 @@ class _SQLAsset(DataAsset):
         )
 
     @public_api
-    def add_batch_definition_datetime_part(self, name: str, column: str) -> BatchDefinition:
+    def add_batch_definition_datetime_part(
+        self, name: str, column: str, datetime_parts: list[str]
+    ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerDatetimePart(column_name=column),
+            partitioner=PartitionerDatetimePart(column_name=column, datetime_parts=datetime_parts),
             batching_regex=None,
         )
 
