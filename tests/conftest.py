@@ -3327,11 +3327,6 @@ def cloud_api_fake(cloud_details: CloudDetails):
 
 
 @pytest.fixture
-def ephemeral_data_context() -> EphemeralDataContext:
-    return get_context(mode="ephemeral")
-
-
-@pytest.fixture
 def empty_cloud_context_fluent(cloud_api_fake, cloud_details: CloudDetails) -> CloudDataContext:
     context = gx.get_context(
         cloud_access_token=cloud_details.access_token,

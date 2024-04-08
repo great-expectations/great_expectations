@@ -201,7 +201,7 @@ def _test_suite_factory_delete_success(context):
     "context_fixture_name",
     [
         pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.cloud),
-        pytest.param("ephemeral_data_context", id="ephemeral", marks=pytest.mark.unit),
+        pytest.param("in_memory_runtime_context", id="ephemeral", marks=pytest.mark.big),
         pytest.param("empty_data_context", id="filesystem", marks=pytest.mark.filesystem),
     ],
 )
