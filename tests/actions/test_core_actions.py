@@ -327,7 +327,7 @@ def test_OpsgenieAlertAction(
     assert opsgenie_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-    ) == {"opsgenie_alert_result": "error"}
+    ) == {"opsgenie_alert_result": False}
 
     # Make sure the alert is not sent by default when the validation has success = True
     validation_result_suite.success = True
@@ -335,7 +335,7 @@ def test_OpsgenieAlertAction(
     assert opsgenie_action.run(
         validation_result_suite_identifier=validation_result_suite_id,
         validation_result_suite=validation_result_suite,
-    ) == {"opsgenie_alert_result": "error"}
+    ) == {"opsgenie_alert_result": False}
 
 
 @pytest.mark.big
@@ -745,15 +745,17 @@ class TestActionSerialization:
             "use_tls": None,
         },
         UpdateDataDocsAction: {
+            "notify_on": "all",
             "site_names": EXAMPLE_SITE_NAMES,
             "type": "update_data_docs",
         },
         SNSNotificationAction: {
+            "notify_on": "all",
             "sns_message_subject": None,
             "sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN,
             "type": "sns",
         },
-        APINotificationAction: {"type": "api", "url": EXAMPLE_URL},
+        APINotificationAction: {"type": "api", "notify_on": "all", "url": EXAMPLE_URL},
     }
 
     @pytest.mark.parametrize(
@@ -820,7 +822,7 @@ class TestV1ActionRun:
                     batch_identifier=self.batch_id_a,
                 ): ExpectationSuiteValidationResult(
                     success=True,
-                    statistics={},
+                    statistics={"successful_expectations": 3, "evaluated_expectations": 3},
                     results=[],
                     suite_name=self.suite_a,
                 ),
@@ -832,7 +834,7 @@ class TestV1ActionRun:
                     batch_identifier=self.batch_id_b,
                 ): ExpectationSuiteValidationResult(
                     success=True,
-                    statistics={},
+                    statistics={"successful_expectations": 2, "evaluated_expectations": 2},
                     results=[],
                     suite_name=self.suite_b,
                 ),
@@ -884,12 +886,25 @@ class TestV1ActionRun:
         action.v1_run(checkpoint_result=checkpoint_result)
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    @pytest.mark.parametrize(
+        "success, message",
+        [
+            pytest.param(True, "succeeded!", id="success"),
+            pytest.param(False, "failed!", id="failure"),
+        ],
     )
-    def test_OpsgenieAlertAction_run(self, checkpoint_result: CheckpointResult):
-        action = OpsgenieAlertAction(api_key="test")
-        action.v1_run(checkpoint_result=checkpoint_result)
+    def test_OpsgenieAlertAction_run(
+        self, checkpoint_result: CheckpointResult, success: bool, message: str
+    ):
+        action = OpsgenieAlertAction(api_key="test", routing_key="test", notify_on="all")
+        checkpoint_result.success = success
+
+        with mock.patch.object(Session, "post") as mock_post:
+            output = action.v1_run(checkpoint_result=checkpoint_result)
+
+        mock_post.assert_called_once()
+        assert message in mock_post.call_args.kwargs["json"]["message"]
+        assert output == {"opsgenie_alert_result": True}
 
     @pytest.mark.unit
     def test_PagerdutyAlertAction_run_emits_events(
