@@ -25,7 +25,7 @@ export default function GithubNavbarItem({ owner, repository, className }) {
         } else {
             setShowGithubBadgeInfo(false)
         }
-    }, [outerWidth]);
+    }, [innerWidth,outerWidth]);
 
     useEffect(() => {
         const handleResize = () => {
