@@ -247,8 +247,8 @@ class V1CheckpointStore(Store):
         return self._key_class(key=name)
 
     @override
-    @staticmethod
-    def gx_cloud_response_json_to_object_dict(response_json: dict) -> dict:
+    @classmethod
+    def gx_cloud_response_json_to_object_dict(cls, response_json: dict) -> dict:
         response_data = response_json["data"]
 
         checkpoint_data: dict
@@ -263,8 +263,13 @@ class V1CheckpointStore(Store):
         else:
             checkpoint_data = response_data
 
-        id: str = checkpoint_data["id"]
-        checkpoint_config_dict: dict = checkpoint_data["attributes"]["checkpoint_config"]
+        return cls._convert_raw_json_to_object_dict(checkpoint_data)
+
+    @override
+    @staticmethod
+    def _convert_raw_json_to_object_dict(data: dict) -> dict:
+        id: str = data["id"]
+        checkpoint_config_dict: dict = data["attributes"]["checkpoint_config"]
         checkpoint_config_dict["id"] = id
 
         return checkpoint_config_dict
