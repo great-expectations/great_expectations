@@ -7,11 +7,12 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const [starsCount, setStarsCount] = useState('0');
     const [forksCount, setForksCount] = useState('0');
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true);
+    const [innerWidth, setInnerWidth] = useState(0);
     const [outerWidth, setOuterWidth] = useState(0);
     const MOBILE_BREAKPOINT = 996;
 
     useEffect(() => {
-        if(outerWidth > MOBILE_BREAKPOINT){
+        if(innerWidth > MOBILE_BREAKPOINT || outerWidth > MOBILE_BREAKPOINT){
             fetch(`https://api.github.com/repos/${owner}/${repository}`)
                 .then(response => response.json())
                 .then(data => {
@@ -28,6 +29,7 @@ export default function GithubNavbarItem({ owner, repository, className }) {
 
     useEffect(() => {
         const handleResize = () => {
+            setInnerWidth(window.innerWidth);
             setOuterWidth(window.outerWidth);
         };
 
