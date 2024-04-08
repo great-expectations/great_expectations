@@ -257,7 +257,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     @public_api
     def add_batch_definition(
-        self, name: str, partitioner: Optional[Partitioner] = None, batching_regex: Optional[re.Pattern] = None
+        self,
+        name: str,
+        partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchDefinition:
         """Add a BatchDefinition to this DataAsset.
         BatchDefinition names must be unique within a DataAsset.
@@ -281,7 +284,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
-        batch_definition = BatchDefinition(name=name, partitioner=partitioner, batching_regex=batching_regex)
+        batch_definition = BatchDefinition(
+            name=name, partitioner=partitioner, batching_regex=batching_regex
+        )
         batch_definition.set_data_asset(self)
         self.batch_definitions.append(batch_definition)
         self.update_batch_definition_field_set()
