@@ -1,13 +1,10 @@
 import pytest
-from pytest_mock import MockerFixture
 
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
+from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
 from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
-from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 from great_expectations.render.renderer import OpsgenieRenderer
 
 
@@ -109,40 +106,10 @@ def test_OpsgenieRenderer_validation_results_failure():
 
 
 @pytest.mark.unit
-def test_OpsgenieRenderer_v1_render(mocker: MockerFixture):
-    # Arrange
-    result_a = mocker.MagicMock(
-        spec=ExpectationSuiteValidationResult,
-        suite_name="my_bad_suite",
-        meta={},
-        statistics={"successful_expectations": 3, "evaluated_expectations": 5},
-        batch_id="my_batch",
-        success=False,
-    )
-    result_a.asset_name = "my_first_asset"
-    result_b = mocker.MagicMock(
-        spec=ExpectationSuiteValidationResult,
-        suite_name="my_good_suite",
-        meta={"run_id": "my_run_id"},
-        statistics={"successful_expectations": 1, "evaluated_expectations": 1},
-        batch_id="my_other_batch",
-        success=True,
-    )
-    result_b.asset_name = None
-
-    checkpoint_result = CheckpointResult(
-        run_id=RunIdentifier(run_name="my_run_id"),
-        run_results={
-            mocker.MagicMock(spec=ValidationResultIdentifier): result_a,
-            mocker.MagicMock(spec=ValidationResultIdentifier): result_b,
-        },
-        checkpoint_config=mocker.MagicMock(spec=Checkpoint, name="my_checkpoint"),
-        success=False,
-    )
-
+def test_OpsgenieRenderer_v1_render(v1_checkpoint_result: CheckpointResult):
     # Act
     renderer = OpsgenieRenderer()
-    raw_output = renderer.v1_render(checkpoint_result=checkpoint_result)
+    raw_output = renderer.v1_render(checkpoint_result=v1_checkpoint_result)
     parts = raw_output.split("\n")
 
     # Assert
