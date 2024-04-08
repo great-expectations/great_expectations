@@ -63,6 +63,7 @@ from great_expectations.datasource.fluent.spark_generic_partitioners import (
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -312,6 +313,56 @@ class _FilePathDataAsset(DataAsset):
         self.sort_batches(batch_list)
 
         return batch_list
+
+    @public_api
+    def add_batch_definition_whole_asset(
+        self, name: str, batching_regex: re.Pattern | None
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=batching_regex,
+        )
+
+    @public_api
+    def add_batch_definition_yearly(
+        self, name: str, column: str, batching_regex: re.Pattern | None
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYear(column_name=column),
+            batching_regex=batching_regex,
+        )
+
+    @public_api
+    def add_batch_definition_monthly(
+        self, name: str, column: str, batching_regex: re.Pattern | None
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonth(column_name=column),
+            batching_regex=batching_regex,
+        )
+
+    @public_api
+    def add_batch_definition_date(
+        self, name: str, column: str, batching_regex: re.Pattern | None
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonthAndDay(column_name=column),
+            batching_regex=batching_regex,
+        )
+
+    @public_api
+    def add_batch_definition_datetime_part(
+        self, name: str, column: str, datetime_parts: list[str], batching_regex: re.Pattern | None
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerDatetimePart(column_name=column, datetime_parts=datetime_parts),
+            batching_regex=batching_regex,
+        )
 
     def _get_batch_definition_list(
         self, batch_request: BatchRequest

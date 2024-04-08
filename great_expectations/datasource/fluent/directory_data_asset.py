@@ -4,9 +4,16 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.partitioners import (
+    PartitionerDatetimePart,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
+)
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
@@ -14,6 +21,7 @@ from great_expectations.datasource.fluent.file_path_data_asset import _FilePathD
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest,
     )
@@ -76,3 +84,50 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         return {
             "data_directory",
         }
+
+    @public_api
+    @override
+    def add_batch_definition_whole_asset(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=None,
+        )
+
+    @public_api
+    @override
+    def add_batch_definition_yearly(self, name: str, column: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYear(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    @override
+    def add_batch_definition_monthly(self, name: str, column: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonth(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    @override
+    def add_batch_definition_date(self, name: str, column: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonthAndDay(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    @override
+    def add_batch_definition_datetime_part(
+        self, name: str, column: str, datetime_parts: list[str]
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerDatetimePart(column_name=column, datetime_parts=datetime_parts),
+            batching_regex=None,
+        )
