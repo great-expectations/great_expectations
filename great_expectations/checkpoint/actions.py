@@ -611,20 +611,18 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         session = requests.Session()
         try:
             response = session.post(url=microsoft_teams_webhook, json=query)
+            response.raise_for_status()
         except requests.ConnectionError:
             logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
+            return None
+        except requests.HTTPError:
+            logger.warning(
+                "Request to Microsoft Teams webhook "
+                f"returned error {response.status_code}: {response.text}"
+            )
+            return None
 
-        except Exception as e:
-            logger.error(str(e))  # noqa: TRY400
-        else:
-            if response.status_code != 200:  # noqa: PLR2004
-                logger.warning(
-                    "Request to Microsoft Teams webhook "
-                    f"returned error {response.status_code}: {response.text}"
-                )
-                return
-            else:
-                return "Microsoft Teams notification succeeded."
+        return "Microsoft Teams notification succeeded."
 
 
 @public_api
@@ -977,8 +975,8 @@ class EmailAction(ValidationAction):
             logger.error(f"Failed to authenticate to the SMTP server at address: {smtp_address}")  # noqa: TRY400
         except Exception as e:
             logger.error(str(e))  # noqa: TRY400
-        else:
-            return "success"
+
+        return "success"
 
 
 # TODO: This action is slated for deletion in favor of using ValidationResult.run()
