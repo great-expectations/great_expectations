@@ -534,7 +534,9 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     @property
     def asset_name(self) -> str | None:
-        return self.meta.get("active_batch_definition", {}).get("data_asset_name")
+        if "active_batch_definition" in self.meta:
+            return self.meta["active_batch_definition"].data_asset_name
+        return None
 
     def __eq__(self, other):
         """ExpectationSuiteValidationResult equality ignores instance identity, relying only on properties."""  # noqa: E501
