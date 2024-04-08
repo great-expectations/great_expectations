@@ -39,7 +39,7 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     }, []);
 
     function isMobileScreen() {
-        return (innerWidth || outerWidth) && (innerWidth > MOBILE_BREAKPOINT || outerWidth > MOBILE_BREAKPOINT);
+        return (innerWidth || outerWidth) && (innerWidth < MOBILE_BREAKPOINT || outerWidth < MOBILE_BREAKPOINT);
     }
 
     function formatCompactNumber(number) {
