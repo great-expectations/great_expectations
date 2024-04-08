@@ -18,7 +18,7 @@ Named snippets are defined with the following syntax:
     # </snippet>
 ```
 */
-const visit = require('unist-util-visit')
+const { visit } = require('unist-util-visit')
 const path = require('path')
 const constructSnippetMap = require('./snippet')
 const { getDirs } = require('./common')
