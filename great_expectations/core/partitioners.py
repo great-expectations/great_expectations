@@ -7,18 +7,21 @@ from great_expectations.compatibility import pydantic
 @public_api
 class PartitionerYear(pydantic.BaseModel):
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_year"] = "partition_on_year"
 
 
 @public_api
 class PartitionerYearAndMonth(pydantic.BaseModel):
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
 
 @public_api
 class PartitionerYearAndMonthAndDay(pydantic.BaseModel):
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_year_and_month_and_day"] = (
         "partition_on_year_and_month_and_day"
     )
@@ -28,6 +31,7 @@ class PartitionerYearAndMonthAndDay(pydantic.BaseModel):
 class PartitionerDatetimePart(pydantic.BaseModel):
     datetime_parts: List[str]
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
 
 
@@ -60,6 +64,7 @@ class PartitionerMultiColumnValue(pydantic.BaseModel):
 @public_api
 class PartitionerConvertedDatetime(pydantic.BaseModel):
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
     date_format_string: str
 
