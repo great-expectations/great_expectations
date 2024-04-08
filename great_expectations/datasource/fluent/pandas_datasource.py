@@ -387,7 +387,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         version="0.16.15",
     )
     @override
-    def build_batch_request(  # noqa: PLR0913 # type: ignore[override]
+    def build_batch_request(  # type: ignore[override]  # noqa: PLR0913
         self,
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchRequestOptions] = None,
