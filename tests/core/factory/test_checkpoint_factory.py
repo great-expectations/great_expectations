@@ -245,7 +245,6 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
             validation_definitions=[
                 ValidationDefinition(name="val def a", data=batch_def, suite=suite)
             ],
-            actions=[],
         )
     )
     checkpoint_b = context.checkpoints.add(
@@ -254,7 +253,15 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
             validation_definitions=[
                 ValidationDefinition(name="val def b", data=batch_def, suite=suite)
             ],
-            actions=[],
+        )
+    )
+
+    checkpoint_c = context.checkpoints.add(
+        Checkpoint(
+            name="c",
+            validation_definitions=[
+                ValidationDefinition(name="val def c", data=batch_def, suite=suite)
+            ],
         )
     )
 
@@ -263,8 +270,8 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
     result = sorted(result, key=lambda x: x.name)
 
     # Assert
-    assert [r.name for r in result] == [checkpoint_a.name, checkpoint_b.name]
-    assert result == [checkpoint_a, checkpoint_b]
+    assert [r.name for r in result] == [checkpoint_a.name, checkpoint_b.name, checkpoint_c.name]
+    assert result == [checkpoint_a, checkpoint_b, checkpoint_c]
 
 
 class TestCheckpointFactoryAnalytics:
