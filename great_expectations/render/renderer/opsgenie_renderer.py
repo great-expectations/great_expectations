@@ -36,7 +36,7 @@ class OpsgenieRenderer(Renderer):
         n_checks_succeeded = run_result.statistics["successful_expectations"]
         n_checks = run_result.statistics["evaluated_expectations"]
         run_id = run_result.meta.get("run_id", "__no_run_id__")
-        batch_id = BatchKwargs(run_result.meta.get("batch_kwargs", {})).to_id()
+        batch_id = run_result.batch_id or "__no_batch_id__"
         check_details_text = f"{n_checks_succeeded} of {n_checks} expectations were met"
 
         if run_result.success:
