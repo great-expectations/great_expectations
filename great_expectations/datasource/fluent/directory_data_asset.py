@@ -87,7 +87,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
     @public_api
     @override
-    def add_batch_definition_whole_asset(self, name: str) -> BatchDefinition:
+    def add_batch_definition_whole_asset(self, name: str) -> BatchDefinition:  # type: ignore[override]
         return self.add_batch_definition(
             name=name,
             partitioner=None,
@@ -96,7 +96,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
     @public_api
     @override
-    def add_batch_definition_yearly(self, name: str, column: str) -> BatchDefinition:
+    def add_batch_definition_yearly(self, name: str, column: str) -> BatchDefinition:  # type: ignore[override]
         return self.add_batch_definition(
             name=name,
             partitioner=PartitionerYear(column_name=column),
@@ -105,7 +105,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
     @public_api
     @override
-    def add_batch_definition_monthly(self, name: str, column: str) -> BatchDefinition:
+    def add_batch_definition_monthly(self, name: str, column: str) -> BatchDefinition:  # type: ignore[override]
         return self.add_batch_definition(
             name=name,
             partitioner=PartitionerYearAndMonth(column_name=column),
@@ -114,7 +114,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
     @public_api
     @override
-    def add_batch_definition_date(self, name: str, column: str) -> BatchDefinition:
+    def add_batch_definition_date(self, name: str, column: str) -> BatchDefinition:  # type: ignore[override]
         return self.add_batch_definition(
             name=name,
             partitioner=PartitionerYearAndMonthAndDay(column_name=column),
@@ -123,7 +123,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
     @public_api
     @override
-    def add_batch_definition_datetime_part(
+    def add_batch_definition_datetime_part(  # type: ignore[override]
         self, name: str, column: str, datetime_parts: list[str]
     ) -> BatchDefinition:
         return self.add_batch_definition(
