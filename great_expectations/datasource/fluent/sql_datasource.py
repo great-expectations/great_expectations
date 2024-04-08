@@ -77,6 +77,7 @@ if TYPE_CHECKING:
     from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
 
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.fluent import BatchRequestOptions
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -721,6 +722,46 @@ class _SQLAsset(DataAsset):
                 f"{pf(expect_batch_request_form.dict())}\n"
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
+
+    @public_api
+    def add_batch_definition_whole_asset(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_yearly(self, name: str, column: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYear(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_monthly(self, name: str, column: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonth(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_date(self, name: str, column: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonthAndDay(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_datetime_part(self, name: str, column: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerDatetimePart(column_name=column),
+            batching_regex=None,
+        )
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec or RuntimeQueryBatchSpec
