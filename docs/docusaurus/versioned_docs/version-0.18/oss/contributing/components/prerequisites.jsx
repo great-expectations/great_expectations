@@ -18,19 +18,6 @@ import VersionedLink from '@site/src/components/VersionedLink';
  * </Prerequisites>
  */
 export default class Prerequisites extends React.Component {
-  extractMarkdownListItems () {
-    try {
-      const children = React.Children.toArray(this.props.children).map((item) => (item.props.children))
-      const listItems = React.Children.toArray(children).map((item) => (item.props.children))
-      return listItems
-    } catch (error) {
-      const message = '🚨 The Prerequisites component only accepts markdown list items 🚨'
-      console.error(message, error)
-      window.alert(message)
-      return [message]
-    }
-  }
-
   defaultPrerequisiteItems () {
     return [
       <li key={0.1}>
@@ -52,8 +39,8 @@ export default class Prerequisites extends React.Component {
         <div className='admonition-content'>
           <ul>
             {this.defaultPrerequisiteItems()}
-            {this.extractMarkdownListItems().map((prereq, i) => (<li key={i}>{prereq}</li>))}
           </ul>
+          {this.props.children}
         </div>
       </div>
     )
