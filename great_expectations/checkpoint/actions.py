@@ -789,7 +789,7 @@ class EmailAction(ValidationAction):
 
     @override
     def v1_run(self, checkpoint_result: CheckpointResult) -> str | dict:
-        success = checkpoint_result.success
+        success = checkpoint_result.success or False
         if not self._is_enabled(success=success):
             return {"email_result": ""}
 
