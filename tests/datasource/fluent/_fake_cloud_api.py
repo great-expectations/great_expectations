@@ -470,9 +470,9 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
 
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
-    exp_suite_list: list[dict] = list(exp_suites.values())
+    exp_suite_list: list[dict] = [d["data"] for d in exp_suites.values()]
     if queried_names:
-        exp_suite_list = [d["data"] for d in exp_suite_list if d["data"]["name"] in queried_names]
+        exp_suite_list = [d for d in exp_suite_list if d["name"] in queried_names]
 
     resp_body = {"data": exp_suite_list}
 
@@ -526,7 +526,7 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
             ).json(),
         )
     else:
-        suite_id = FAKE_EXPECTATION_SUITE_ID
+        suite_id = str(uuid.uuid4())
         payload["data"]["id"] = suite_id
         payload["data"]["id"] = suite_id
         for expectation_configuration in payload["data"]["expectations"]:
