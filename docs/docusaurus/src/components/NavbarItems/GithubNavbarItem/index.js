@@ -7,8 +7,8 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const [starsCount, setStarsCount] = useState('0');
     const [forksCount, setForksCount] = useState('0');
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true);
-    let innerWidth = window.innerWidth;
-    let outerWidth = window.outerWidth;
+    let innerWidth = undefined;
+    let outerWidth = undefined;
     const MOBILE_BREAKPOINT = 996;
 
     useEffect(() => {
@@ -26,6 +26,11 @@ export default function GithubNavbarItem({ owner, repository, className }) {
             setShowGithubBadgeInfo(false)
         }
     }, [innerWidth,outerWidth]);
+
+    useEffect( () => {
+        innerWidth = window.innerWidth;
+        outerWidth = window.outerWidth;
+    }, [])
 
 
     function isMobileScreen() {
