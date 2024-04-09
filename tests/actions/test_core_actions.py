@@ -136,10 +136,6 @@ def test_SlackNotificationAction(
     validation_result_suite_id,
     mock_context,
 ):
-    renderer = {
-        "module_name": "great_expectations.render.renderer.slack_renderer",
-        "class_name": "SlackRenderer",
-    }
     slack_webhook = "https://hooks.slack.com/services/test/slack/webhook"
     slack_token = "test"
     slack_channel = "test"
@@ -147,7 +143,6 @@ def test_SlackNotificationAction(
 
     # test with just web_hook set; expect pass
     slack_action = SlackNotificationAction(
-        renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
     )
@@ -159,7 +154,6 @@ def test_SlackNotificationAction(
 
     # Test with slack_token and slack_channel set; expect pass
     slack_action = SlackNotificationAction(
-        renderer=renderer,
         slack_token=slack_token,
         slack_channel=slack_channel,
         notify_on=notify_on,
@@ -186,7 +180,6 @@ def test_SlackNotificationAction(
     # Test with just slack_token set; expect fail
     with pytest.raises(ValidationError):
         SlackNotificationAction(
-            renderer=renderer,
             slack_token=slack_token,
             notify_on=notify_on,
         )
@@ -194,7 +187,6 @@ def test_SlackNotificationAction(
     # Test with just slack_channel set; expect fail
     with pytest.raises(ValidationError):
         slack_action = SlackNotificationAction(
-            renderer=renderer,
             slack_channel=slack_channel,
             notify_on=notify_on,
         )
@@ -202,7 +194,6 @@ def test_SlackNotificationAction(
     # Test with slack_channel, slack_token, and slack_webhook set; expect fail
     with pytest.raises(ValidationError):
         SlackNotificationAction(
-            renderer=renderer,
             slack_channel=slack_channel,
             slack_token=slack_token,
             slack_webhook=slack_webhook,
@@ -212,7 +203,6 @@ def test_SlackNotificationAction(
     # test notify on with failed run; expect pass
     notify_on = "failure"
     slack_action = SlackNotificationAction(
-        renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
     )
@@ -234,7 +224,6 @@ def test_SlackNotificationAction(
     notify_on = "failure"
     validation_result_suite.success = False
     slack_action = SlackNotificationAction(
-        renderer=renderer,
         slack_webhook=slack_webhook,
         notify_on=notify_on,
     )
@@ -309,12 +298,7 @@ def test_OpsgenieAlertAction(
     validation_result_suite_id,
     mock_context,
 ):
-    renderer = {
-        "module_name": "great_expectations.render.renderer.opsgenie_renderer",
-        "class_name": "OpsgenieRenderer",
-    }
     opsgenie_action = OpsgenieAlertAction(
-        renderer=renderer,
         api_key="testapikey",
         region=None,
         priority="P3",
@@ -345,14 +329,9 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite_extended_id,
     mock_context,
 ):
-    renderer = {
-        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
-        "class_name": "MicrosoftTeamsRenderer",
-    }
     teams_webhook = "http://testing"
     notify_on = "all"
     teams_action = MicrosoftTeamsNotificationAction(
-        renderer=renderer,
         teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
@@ -383,7 +362,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite.success = False
     notify_on = "success"
     teams_action = MicrosoftTeamsNotificationAction(
-        renderer=renderer,
         teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
@@ -395,7 +373,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite.success = True
     notify_on = "success"
     teams_action = MicrosoftTeamsNotificationAction(
-        renderer=renderer,
         teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
@@ -409,7 +386,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite.success = False
     notify_on = "failure"
     teams_action = MicrosoftTeamsNotificationAction(
-        renderer=renderer,
         teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
@@ -421,7 +397,6 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     validation_result_suite.success = True
     notify_on = "failure"
     teams_action = MicrosoftTeamsNotificationAction(
-        renderer=renderer,
         teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
@@ -440,16 +415,11 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
     mock_context,
 ):
     caplog.set_level(logging.WARNING)
-    renderer = {
-        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
-        "class_name": "MicrosoftTeamsRenderer",
-    }
     teams_webhook = "http://testing"
 
     # notify : all
     notify_on = "all"
     teams_action = MicrosoftTeamsNotificationAction(
-        renderer=renderer,
         teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
@@ -583,17 +553,12 @@ def test_EmailAction(
         class_to_patch,
         new=MockSMTPServer(raise_on=raise_on, exception=exception),
     ):
-        renderer = {
-            "module_name": "great_expectations.render.renderer.email_renderer",
-            "class_name": "EmailRenderer",
-        }
         smtp_address = "test"
         smtp_port = 999
         sender_alias = "other"
         receiver_emails = "test"
         notify_on = "all"
         email_action = EmailAction(
-            renderer=renderer,
             smtp_address=smtp_address,
             smtp_port=smtp_port,
             sender_login=sender_login,
@@ -696,10 +661,6 @@ class TestActionSerialization:
         SlackNotificationAction: {
             "notify_on": "all",
             "notify_with": None,
-            "renderer": {
-                "class_name": "SlackRenderer",
-                "module_name": "great_expectations.render.renderer.slack_renderer",
-            },
             "show_failed_expectations": False,
             "slack_channel": None,
             "slack_token": None,
@@ -708,10 +669,6 @@ class TestActionSerialization:
         },
         MicrosoftTeamsNotificationAction: {
             "notify_on": "all",
-            "renderer": {
-                "class_name": "MicrosoftTeamsRenderer",
-                "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
-            },
             "teams_webhook": EXAMPLE_TEAMS_WEBHOOK,
             "type": "microsoft",
         },
@@ -720,10 +677,6 @@ class TestActionSerialization:
             "notify_on": "failure",
             "priority": "P3",
             "region": None,
-            "renderer": {
-                "class_name": "OpsgenieRenderer",
-                "module_name": "great_expectations.render.renderer.opsgenie_renderer",
-            },
             "tags": None,
             "type": "opsgenie",
         },
@@ -731,10 +684,6 @@ class TestActionSerialization:
             "notify_on": "all",
             "notify_with": None,
             "receiver_emails": EXAMPLE_EMAILS,
-            "renderer": {
-                "class_name": "EmailRenderer",
-                "module_name": "great_expectations.render.renderer.email_renderer",
-            },
             "sender_alias": None,
             "sender_login": None,
             "sender_password": None,

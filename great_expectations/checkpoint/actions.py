@@ -30,10 +30,8 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.compatibility.pydantic import (
     BaseModel,
-    Field,
     PrivateAttr,
     root_validator,
-    validator,
 )
 from great_expectations.compatibility.pypd import pypd
 from great_expectations.compatibility.typing_extensions import override
@@ -46,15 +44,12 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.renderer import (
     EmailRenderer,
     MicrosoftTeamsRenderer,
     OpsgenieRenderer,
     SlackRenderer,
 )
-from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
@@ -64,21 +59,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
-
-
-def _build_renderer(config: dict) -> Renderer:
-    renderer = instantiate_class_from_config(
-        config=config,
-        runtime_environment={},
-        config_defaults={"module_name": "great_expectations.render.renderer"},
-    )
-    if not renderer:
-        raise ClassInstantiationError(
-            module_name=config.get("module_name"),
-            package_name=None,
-            class_name=config.get("class_name"),
-        )
-    return renderer
 
 
 @public_api
@@ -92,8 +72,6 @@ class ValidationAction(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        # Due to legacy pattern of instantiate_class_from_config, we need a custom serializer
-        json_encoders = {Renderer: lambda r: r.serialize()}
 
     type: str
     notify_on: Literal["all", "failure", "success"] = "all"
@@ -215,23 +193,10 @@ class SlackNotificationAction(DataDocsAction):
       slack_channel:
       notify_on: all
       notify_with:
-      renderer:
-        # the class that implements the message to be sent
-        # this is the default implementation, but you can
-        # implement a custom one
-        module_name: great_expectations.render.renderer.slack_renderer
-        class_name: SlackRenderer
       show_failed_expectations: True
     ```
 
     Args:
-        renderer: Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
-            ```python
-            {
-               "module_name": "great_expectations.render.renderer.slack_renderer",
-               "class_name": "SlackRenderer",
-           }
-           ```
         slack_webhook: The incoming Slack webhook to which to send notification.
         slack_token: Token from Slack app. Used when not using slack_webhook.
         slack_channel: Slack channel to receive notification. Used when not using slack_webhook.
@@ -248,18 +213,6 @@ class SlackNotificationAction(DataDocsAction):
     notify_on: Literal["all", "failure", "success"] = "all"
     notify_with: Optional[List[str]] = None
     show_failed_expectations: bool = False
-    renderer: SlackRenderer = Field(default_factory=SlackRenderer)
-
-    @validator("renderer", pre=True)
-    def _validate_renderer(cls, renderer: dict | SlackRenderer) -> SlackRenderer:
-        if isinstance(renderer, dict):
-            _renderer = _build_renderer(config=renderer)
-            if not isinstance(_renderer, SlackRenderer):
-                raise ValueError(  # noqa: TRY003, TRY004
-                    "renderer must be a SlackRenderer or a valid configuration for one."
-                )
-            renderer = _renderer
-        return renderer
 
     @root_validator
     def _root_validate_slack_params(cls, values: dict) -> dict:
@@ -337,7 +290,7 @@ class SlackNotificationAction(DataDocsAction):
                 )
         result = {"slack_notification_result": "none required"}
         if self._is_enabled(success=validation_success):
-            query: Dict = self.renderer.render(
+            query: Dict = SlackRenderer().render(
                 validation_result_suite,
                 data_docs_pages,
                 self.notify_with,
@@ -487,22 +440,9 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
       # or pass in as environment variable
       microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
       notify_on: all
-      renderer:
-        # the class that implements the message to be sent
-        # this is the default implementation, but you can
-        # implement a custom one
-        module_name: great_expectations.render.renderer.microsoft_teams_renderer
-        class_name: MicrosoftTeamsRenderer
     ```
 
     Args:
-        renderer: Specifies the renderer used to generate a query consumable by teams API, e.g.:
-            ```python
-            {
-               "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
-               "class_name": "MicrosoftTeamsRenderer",
-            }
-            ```
         microsoft_teams_webhook: Incoming Microsoft Teams webhook to which to send notifications.
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """  # noqa: E501
@@ -511,18 +451,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     teams_webhook: str
     notify_on: Literal["all", "failure", "success"] = "all"
-    renderer: MicrosoftTeamsRenderer = Field(default_factory=MicrosoftTeamsRenderer)
-
-    @validator("renderer", pre=True)
-    def _validate_renderer(cls, renderer: dict | MicrosoftTeamsRenderer) -> MicrosoftTeamsRenderer:
-        if isinstance(renderer, dict):
-            _renderer = _build_renderer(config=renderer)
-            if not isinstance(_renderer, MicrosoftTeamsRenderer):
-                raise ValueError(  # noqa: TRY003, TRY004
-                    "renderer must be a MicrosoftTeamsRenderer or a valid configuration for one."
-                )
-            renderer = _renderer
-        return renderer
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
@@ -559,7 +487,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         if self._is_enabled(success=validation_success):
-            query = self.renderer.render(
+            query = MicrosoftTeamsRenderer().render(
                 validation_result_suite,
                 validation_result_suite_identifier,
                 data_docs_pages,
@@ -604,18 +532,6 @@ class OpsgenieAlertAction(ValidationAction):
     priority: Literal["P1", "P2", "P3", "P4", "P5"] = "P3"
     notify_on: Literal["all", "failure", "success"] = "failure"
     tags: Optional[List[str]] = None
-    renderer: OpsgenieRenderer = Field(default_factory=OpsgenieRenderer)
-
-    @validator("renderer", pre=True)
-    def _validate_renderer(cls, renderer: dict | OpsgenieRenderer) -> OpsgenieRenderer:
-        if isinstance(renderer, dict):
-            _renderer = _build_renderer(config=renderer)
-            if not isinstance(_renderer, OpsgenieRenderer):
-                raise ValueError(  # noqa: TRY003, TRY004
-                    "renderer must be a OpsgenieRenderer or a valid configuration for one."
-                )
-            renderer = _renderer
-        return renderer
 
     @override
     def v1_run(self, checkpoint_result: CheckpointResult) -> dict:
@@ -630,7 +546,7 @@ class OpsgenieAlertAction(ValidationAction):
                 "tags": self.tags,
             }
 
-            description = self.renderer.v1_render(checkpoint_result=checkpoint_result)
+            description = OpsgenieRenderer().v1_render(checkpoint_result=checkpoint_result)
 
             message = f"Great Expectations Checkpoint {checkpoint_name} "
             if checkpoint_result.success:
@@ -686,7 +602,7 @@ class OpsgenieAlertAction(ValidationAction):
                 "tags": self.tags,
             }
 
-            description = self.renderer.render(validation_result_suite, None, None)
+            description = OpsgenieRenderer().render(validation_result_suite, None, None)
 
             message = f"Great Expectations suite {expectation_suite_name} failed"
             alert_result = send_opsgenie_alert(description, message, settings)
@@ -706,12 +622,6 @@ class EmailAction(ValidationAction):
       class_name: EmailAction
       notify_on: all # possible values: "all", "failure", "success"
       notify_with:
-      renderer:
-        # the class that implements the message to be sent
-        # this is the default implementation, but you can
-        # implement a custom one
-        module_name: great_expectations.render.renderer.email_renderer
-        class_name: EmailRenderer
       # put the actual following information in the uncommitted/config_variables.yml file
       # or pass in as environment variable
       smtp_address: ${smtp_address}
@@ -725,13 +635,6 @@ class EmailAction(ValidationAction):
     ```
 
     Args:
-        renderer: Specifies the renderer used to generate an email, for example:
-            ```python
-            {
-               "module_name": "great_expectations.render.renderer.email_renderer",
-               "class_name": "EmailRenderer",
-            }
-            ```
         smtp_address: Address of the SMTP server used to send the email.
         smtp_address: Port of the SMTP server used to send the email.
         sender_login: Login used send the email.
@@ -756,18 +659,6 @@ class EmailAction(ValidationAction):
     use_ssl: Optional[bool] = None
     notify_on: Literal["all", "failure", "success"] = "all"
     notify_with: Optional[List[str]] = None
-    renderer: EmailRenderer = Field(default_factory=EmailRenderer)
-
-    @validator("renderer", pre=True)
-    def _validate_renderer(cls, renderer: dict | EmailRenderer) -> EmailRenderer:
-        if isinstance(renderer, dict):
-            _renderer = _build_renderer(config=renderer)
-            if not isinstance(_renderer, EmailRenderer):
-                raise ValueError(  # noqa: TRY003, TRY004
-                    "renderer must be a EmailRenderer or a valid configuration for one."
-                )
-            renderer = _renderer
-        return renderer
 
     @root_validator
     def _root_validate_email_params(cls, values: dict) -> dict:
@@ -823,7 +714,7 @@ class EmailAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         if self._is_enabled(success=validation_success):
-            title, html = self.renderer.render(
+            title, html = EmailRenderer().render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
 

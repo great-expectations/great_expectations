@@ -148,10 +148,6 @@ class TestCheckpointSerialization:
                     {
                         "notify_on": "all",
                         "notify_with": None,
-                        "renderer": {
-                            "class_name": "SlackRenderer",
-                            "module_name": "great_expectations.render.renderer.slack_renderer",
-                        },
                         "show_failed_expectations": False,
                         "slack_channel": None,
                         "slack_token": None,
@@ -160,10 +156,6 @@ class TestCheckpointSerialization:
                     },
                     {
                         "notify_on": "all",
-                        "renderer": {
-                            "class_name": "MicrosoftTeamsRenderer",
-                            "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",  # noqa: E501
-                        },
                         "teams_webhook": "teams_webhook",
                         "type": "microsoft",
                     },
@@ -265,10 +257,6 @@ class TestCheckpointSerialization:
                 {
                     "notify_on": "all",
                     "notify_with": None,
-                    "renderer": {
-                        "class_name": "SlackRenderer",
-                        "module_name": "great_expectations.render.renderer.slack_renderer",
-                    },
                     "show_failed_expectations": False,
                     "slack_channel": None,
                     "slack_token": None,
@@ -277,10 +265,6 @@ class TestCheckpointSerialization:
                 },
                 {
                     "notify_on": "all",
-                    "renderer": {
-                        "class_name": "MicrosoftTeamsRenderer",
-                        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",  # noqa: E501
-                    },
                     "teams_webhook": "teams_webhook",
                     "type": "microsoft",
                 },
