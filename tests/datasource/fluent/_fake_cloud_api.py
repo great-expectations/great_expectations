@@ -52,8 +52,6 @@ DUMMY_JWT_TOKEN: Final[str] = (
 FAKE_USER_ID: Final[str] = "00000000-0000-0000-0000-000000000000"
 FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
-FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
-FAKE_CHECKPOINT_ID: Final[str] = str(uuid.uuid4())
 UUID_REGEX: Final[str] = r"[a-f0-9-]{36}"
 
 DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
@@ -828,7 +826,7 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}",
+            re.compile(f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}"),
             get_expectation_suite_by_id_cb,
         )
         resp_mocker.add_callback(
@@ -838,12 +836,12 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.PUT,
-            f"{org_url_base_V1}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            re.compile(f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}"),
             put_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            f"{org_url_base_V1}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            re.compile(f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}"),
             delete_expectation_suites_cb,
         )
         resp_mocker.add_callback(
@@ -863,7 +861,7 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base_V0}/checkpoints/{FAKE_CHECKPOINT_ID}",
+            re.compile(f"{org_url_base_V0}/checkpoints/{UUID_REGEX}"),
             get_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
