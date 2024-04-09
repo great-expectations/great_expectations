@@ -11,14 +11,6 @@ import TechnicalTag from '../../reference/learn/term_tags/_tag.mdx';
 
 Use this quickstart to install GX OSS, connect to sample data, build your first Expectation, validate data, and review the validation results. This is a great place to start if you're new to GX OSS and aren't sure if it's the right solution for you or your organization. If you're using Databricks or SQL to store data, see [Get Started with GX and Databricks](/oss/get_started/get_started_with_gx_and_databricks.md) or [Get Started with GX and SQL](/oss/get_started/get_started_with_gx_and_sql.md).
 
-:::note GX Cloud
-
-You can use this quickstart with the open source Python version of GX OSS or with GX Cloud.
-
-If you don't have a GX Cloud account, [sign up here](https://greatexpectations.io/cloud).
-
-:::
-
 :::info Windows Support
 
 Windows support for the open source Python version of GX OSS is currently unavailable. If you’re using GX OSS in a Windows environment, you might experience errors or performance issues.
