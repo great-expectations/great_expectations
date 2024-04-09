@@ -828,7 +828,7 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base_V1}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}",
             get_expectation_suite_by_id_cb,
         )
         resp_mocker.add_callback(
