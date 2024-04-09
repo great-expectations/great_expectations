@@ -158,7 +158,11 @@ Data Asset metrics provide you with insight into the data you can use for your d
 
     When you select a new Data Asset, abbreviated Data Asset metrics are automatically generated.
 
-3. Optional. Click **Profile Data** to refresh the Data Asset metrics or return all available metrics for a Data Asset.
+3. Optional. Select one of the following options:
+
+    - Click **Profile Data** if you have not previously returned all available metrics for a Data Asset.
+
+    - Click **Refresh** to refresh the Data Asset metrics.
 
 ### Available Data Asset metrics
 
@@ -185,7 +189,11 @@ When you create an Expectation after fetching metrics for a Data Asset, the colu
 
     When you select a new Data Asset, abbreviated Data Asset metrics are automatically generated.
 
-3. Optional. Click **Profile Data** to refresh the Data Asset metrics or return all available metrics for a Data Asset.
+3. Optional. Select one of the following options:
+
+    - Click **Profile Data** if you have not previously returned all available metrics for a Data Asset.
+
+    - Click **Refresh** to refresh the Data Asset metrics.
 
 4. Click **New Expectation**.
 
