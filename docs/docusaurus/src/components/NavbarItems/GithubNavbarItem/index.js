@@ -7,8 +7,8 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const [starsCount, setStarsCount] = useState('0');
     const [forksCount, setForksCount] = useState('0');
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true);
-    const [innerWidth, setInnerWidth] = useState(undefined);
-    const [outerWidth, setOuterWidth] = useState(undefined);
+    let innerWidth = window.innerWidth;
+    let outerWidth = window.outerWidth;
     const MOBILE_BREAKPOINT = 996;
 
     useEffect(() => {
@@ -27,19 +27,9 @@ export default function GithubNavbarItem({ owner, repository, className }) {
         }
     }, [innerWidth,outerWidth]);
 
-    useEffect(() => {
-        const handleResize = () => {
-            setInnerWidth(window.innerWidth);
-            setOuterWidth(window.outerWidth);
-        };
-
-        window.addEventListener("resize", handleResize);
-
-        return () => window.removeEventListener("resize", handleResize)
-    }, []);
 
     function isMobileScreen() {
-        return (innerWidth || outerWidth) && (innerWidth < MOBILE_BREAKPOINT || outerWidth < MOBILE_BREAKPOINT);
+        return !!(innerWidth || outerWidth) && (innerWidth < MOBILE_BREAKPOINT || outerWidth < MOBILE_BREAKPOINT);
     }
 
     function formatCompactNumber(number) {
