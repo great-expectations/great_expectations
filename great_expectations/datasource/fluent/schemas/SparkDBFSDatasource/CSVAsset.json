@@ -591,6 +591,11 @@
                             "$ref": "#/definitions/PartitionerConvertedDatetime"
                         }
                     ]
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [

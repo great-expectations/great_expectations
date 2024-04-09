@@ -50,6 +50,11 @@
                 }
             ]
         },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "type": "string",
+            "format": "regex"
+        },
         "batch_slice": {
             "title": "Batch Slice",
             "anyOf": [

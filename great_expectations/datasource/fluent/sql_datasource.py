@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import re
 import warnings
 from datetime import date, datetime
 from pprint import pformat as pf
@@ -645,6 +646,7 @@ class _SQLAsset(DataAsset):
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -655,6 +657,7 @@ class _SQLAsset(DataAsset):
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
+            batching_regex: Parameter batching_regex is not supported by this Asset type and must be None.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -671,12 +674,18 @@ class _SQLAsset(DataAsset):
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
 
+        if batching_regex is not None:
+            raise ValueError(  # noqa: TRY003
+                "batching_regex is not currently supported and must be None for this DataAsset."
+            )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
+            batching_regex=None,
         )
 
     @override
