@@ -212,6 +212,10 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
     ) -> Dict[str, Any]:
         raise NotImplementedError
 
+    def sort_batches(self, batches: list[Batch]) -> None:
+        # no op for non-date-time
+        ...
+
 
 class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
     divisor: int
@@ -305,6 +309,10 @@ class SparkPartitionerMultiColumnValue(FluentBaseModel):
                 f" The options provided were f{options}."
             )
         return {col: options[col] for col in self.column_names}
+
+    def sort_batches(self, batches: list[Batch]) -> None:
+        # no op for non-date-time
+        ...
 
 
 # We create this type instead of using _Partitioner so pydantic can use to this to
