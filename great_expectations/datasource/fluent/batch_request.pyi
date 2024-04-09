@@ -24,6 +24,7 @@ class BatchRequest(pydantic.BaseModel):
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> None: ...
     @property
     def batch_slice(self) -> slice: ...

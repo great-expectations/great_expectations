@@ -1,4 +1,5 @@
 import os
+import re
 import sqlite3
 import typing
 from logging import Logger
@@ -78,6 +79,7 @@ class _PandasDataAsset(DataAsset):
         options: Optional[BatchRequestOptions] = ...,
         batch_slice: Optional[BatchSlice] = ...,
         partitioner: Optional[Partitioner] = ...,
+        batching_regex: Optional[re.Pattern] = ...,
     ) -> BatchRequest: ...
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...

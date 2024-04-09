@@ -90,6 +90,7 @@ class InvalidAsset(DataAsset):
         options: dict | None = None,
         batch_slice: Any = None,
         partitioner: Any = None,
+        batching_regex: Any = None,
     ) -> NoReturn:
         self._raise_type_error()
 
