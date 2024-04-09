@@ -788,6 +788,32 @@ class EmailAction(ValidationAction):
         return values
 
     @override
+    def v1_run(self, checkpoint_result: CheckpointResult) -> str | dict:
+        success = checkpoint_result.success or False
+        if not self._is_enabled(success=success):
+            return {"email_result": ""}
+
+        title, html = self.renderer.v1_render(checkpoint_result=checkpoint_result)
+        receiver_emails_list = list(map(lambda x: x.strip(), self.receiver_emails.split(",")))
+
+        # this will actually send the email
+        email_result = send_email(
+            title=title,
+            html=html,
+            smtp_address=self.smtp_address,
+            smtp_port=self.smtp_port,
+            sender_login=self.sender_login,
+            sender_password=self.sender_password,
+            sender_alias=self.sender_alias,
+            receiver_emails_list=receiver_emails_list,
+            use_tls=self.use_tls,
+            use_ssl=self.use_ssl,
+        )
+
+        # sending payload back as dictionary
+        return {"email_result": email_result}
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
