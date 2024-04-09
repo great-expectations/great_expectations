@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Iterable, cast
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
@@ -75,3 +75,9 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
             raise DataContextError(f"ValidationDefinition with name {name} was not found.")  # noqa: TRY003
 
         return cast(ValidationDefinition, self._store.get(key=key))
+
+    @public_api
+    @override
+    def all(self) -> Iterable[ValidationDefinition]:
+        """Get all ValidationDefinitions."""
+        return self._store.get_all()
