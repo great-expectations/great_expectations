@@ -950,9 +950,9 @@ class EmailAction(ValidationAction):
                 if use_tls:
                     logger.warning("Please choose between SSL or TLS, will default to SSL")
                 context = ssl.create_default_context()
-                mailserver = smtplib.SMTP_SSL(smtp_address, smtp_port, context=context)
+                mailserver = smtplib.SMTP_SSL(host=smtp_address, port=smtp_port, context=context)
             elif use_tls:
-                mailserver = smtplib.SMTP(smtp_address, smtp_port)
+                mailserver = smtplib.SMTP(host=smtp_address, port=smtp_port)
                 context = ssl.create_default_context()
                 mailserver.starttls(context=context)
             else:
@@ -964,7 +964,9 @@ class EmailAction(ValidationAction):
                 logger.error(
                     "Please specify both sender_login and sender_password or specify both as None"
                 )
-            mailserver.sendmail(sender_alias, receiver_emails_list, msg.as_string())
+            mailserver.sendmail(
+                from_addr=sender_alias, to_addrs=receiver_emails_list, msg=msg.as_string()
+            )
             mailserver.quit()
         except smtplib.SMTPConnectError:
             logger.error(f"Failed to connect to the SMTP server at address: {smtp_address}")  # noqa: TRY400

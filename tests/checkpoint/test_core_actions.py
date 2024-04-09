@@ -1,5 +1,6 @@
 import json
 import logging
+import smtplib
 from contextlib import contextmanager
 from types import ModuleType
 from typing import Iterator, Type
@@ -25,7 +26,6 @@ from great_expectations.checkpoint.actions import (
     UpdateDataDocsAction,
     ValidationAction,
 )
-from great_expectations.checkpoint.util import smtplib
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.expectation_validation_result import (
@@ -873,7 +873,9 @@ class TestV1ActionRun:
     )
     def test_EmailAction_run(self, checkpoint_result: CheckpointResult):
         action = EmailAction(
-            smtp_address="test", smtp_port=587, receiver_emails="test1@gmail.com, test2@hotmail.com"
+            smtp_address="test",
+            smtp_port="587",
+            receiver_emails="test1@gmail.com, test2@hotmail.com",
         )
         action.v1_run(checkpoint_result=checkpoint_result)
 
@@ -896,7 +898,7 @@ class TestV1ActionRun:
     def test_OpsgenieAlertAction_run(
         self, checkpoint_result: CheckpointResult, success: bool, message: str
     ):
-        action = OpsgenieAlertAction(api_key="test", routing_key="test", notify_on="all")
+        action = OpsgenieAlertAction(api_key="test", notify_on="all")
         checkpoint_result.success = success
 
         with mock.patch.object(Session, "post") as mock_post:
