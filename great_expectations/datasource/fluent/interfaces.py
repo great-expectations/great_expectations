@@ -22,6 +22,7 @@ from typing import (
     MutableMapping,
     MutableSequence,
     Optional,
+    Protocol,
     Sequence,
     Set,
     Type,
@@ -93,6 +94,13 @@ if TYPE_CHECKING:
     from great_expectations.validator.v1_validator import (
         Validator as V1Validator,
     )
+
+
+class _PartitionerProtocol(Protocol):
+    sort_batches_ascending: bool
+
+    @property
+    def param_names(self) -> List[str]: ...
 
 
 class TestConnectionError(Exception):
@@ -400,23 +408,12 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         self.order_by = _sorter_from_list(sorters)
         return self
 
-    def sort_batches(self, batch_list: List[Batch]) -> None:
-        """Sorts batch_list in place in the order configured in this DataAsset.
+    def sort_batches(self, batches: list[Batch], partitioner: _PartitionerProtocol) -> None:
+        def _get_concrete_values_from_batch(batch: Batch) -> tuple[int]:
+            return tuple(batch.metadata[param] for param in partitioner.param_names)
 
-        Args:
-            batch_list: The list of batches to sort in place.
-        """
-        for sorter in reversed(self.order_by):
-            try:
-                batch_list.sort(
-                    key=functools.cmp_to_key(_sort_batches_with_none_metadata_values(sorter.key)),
-                    reverse=sorter.reverse,
-                )
-            except KeyError as e:
-                raise KeyError(  # noqa: TRY003
-                    f"Trying to sort {self.name} table asset batches on key {sorter.key} "
-                    "which isn't available on all batches."
-                ) from e
+        reverse = not partitioner.sort_batches_ascending
+        batches.sort(key=_get_concrete_values_from_batch, reverse=reverse)
 
 
 def _sort_batches_with_none_metadata_values(

@@ -99,7 +99,7 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def sort_batches(self, batch_list: List[Batch]) -> None:
+    def sort_batches(self, batch_list: List[Batch], partitioner) -> None:
         self._raise_type_error()
 
     @override

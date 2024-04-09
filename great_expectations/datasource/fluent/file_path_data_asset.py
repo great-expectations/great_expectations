@@ -312,7 +312,7 @@ class _FilePathDataAsset(DataAsset):
 
         if batch_request.partitioner:
             spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
-            spark_partitioner.sort_batches(batch_list)
+            self.sort_batches(batch_list, spark_partitioner)
 
         return batch_list
 

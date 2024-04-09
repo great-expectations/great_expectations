@@ -206,13 +206,6 @@ class _PartitionerDatetime(FluentBaseModel):
             identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
-    def sort_batches(self, batches: list[Batch]) -> None:
-        reverse = not self.sort_batches_ascending
-        batches.sort(key=lambda batch: self._get_concrete_values_from_batch(batch), reverse=reverse)
-
-    def _get_concrete_values_from_batch(self, batch: Batch) -> tuple[int]:
-        return tuple(batch.metadata[param] for param in self.param_names)
-
     @property
     def param_names(self) -> list[str]:
         raise NotImplementedError
@@ -295,6 +288,7 @@ class SqlPartitionerDatetimePart(_PartitionerDatetime):
 class _PartitionerOneColumnOneParam(FluentBaseModel):
     column_name: str
     method_name: str
+    sort_batches_ascending: bool = True
 
     @property
     def columns(self) -> list[str]:
@@ -315,10 +309,6 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
 
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         raise NotImplementedError
-
-    def sort_batches(self, batches: list[Batch]) -> None:
-        # no op for non-date-time
-        ...
 
     def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
@@ -404,6 +394,7 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
 
 class SqlPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
     @property
@@ -431,10 +422,6 @@ class SqlPartitionerMultiColumnValue(FluentBaseModel):
         return _partitioner_and_sql_asset_to_batch_identifier_data(
             partitioner=self, asset=sql_asset
         )
-
-    def sort_batches(self, batches: list[Batch]) -> None:
-        # no op for non-date-time
-        ...
 
 
 class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
@@ -658,7 +645,7 @@ class _SQLAsset(DataAsset):
                 )
             )
         if sql_partitioner:
-            sql_partitioner.sort_batches(batch_list)
+            self.sort_batches(batch_list, sql_partitioner)
         return batch_list[batch_request.batch_slice]
 
     @public_api

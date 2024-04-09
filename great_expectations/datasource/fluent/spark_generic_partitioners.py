@@ -106,10 +106,6 @@ class _PartitionerDatetime(FluentBaseModel):
                 identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
-    def sort_batches(self, batches: list[Batch]) -> None:
-        reverse = not self.sort_batches_ascending
-        batches.sort(key=lambda batch: self._get_concrete_values_from_batch(batch), reverse=reverse)
-
     def _get_concrete_values_from_batch(self, batch: Batch) -> tuple[int]:
         return tuple(batch.metadata[param] for param in self.param_names)
 
@@ -195,6 +191,7 @@ class SparkPartitionerDatetimePart(_PartitionerDatetime):
 class _PartitionerOneColumnOneParam(FluentBaseModel):
     column_name: str
     method_name: str
+    sort_batches_ascending: bool = True
 
     @property
     def columns(self) -> list[str]:
@@ -211,10 +208,6 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         raise NotImplementedError
-
-    def sort_batches(self, batches: list[Batch]) -> None:
-        # no op for non-date-time
-        ...
 
 
 class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
@@ -243,6 +236,7 @@ class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
 class SparkPartitionerModInteger(_PartitionerOneColumnOneParam):
     mod: int
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_mod_integer"] = "partition_on_mod_integer"
 
     @property
@@ -287,6 +281,7 @@ class SparkPartitionerColumnValue(_PartitionerOneColumnOneParam):
 
 class SparkPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
     @property
@@ -309,10 +304,6 @@ class SparkPartitionerMultiColumnValue(FluentBaseModel):
                 f" The options provided were f{options}."
             )
         return {col: options[col] for col in self.column_names}
-
-    def sort_batches(self, batches: list[Batch]) -> None:
-        # no op for non-date-time
-        ...
 
 
 # We create this type instead of using _Partitioner so pydantic can use to this to

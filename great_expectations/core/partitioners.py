@@ -39,6 +39,7 @@ class PartitionerDatetimePart(pydantic.BaseModel):
 class PartitionerDividedInteger(pydantic.BaseModel):
     divisor: int
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_divided_integer"] = "partition_on_divided_integer"
 
 
@@ -46,18 +47,21 @@ class PartitionerDividedInteger(pydantic.BaseModel):
 class PartitionerModInteger(pydantic.BaseModel):
     mod: int
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_mod_integer"] = "partition_on_mod_integer"
 
 
 @public_api
 class PartitionerColumnValue(pydantic.BaseModel):
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_column_value"] = "partition_on_column_value"
 
 
 @public_api
 class PartitionerMultiColumnValue(pydantic.BaseModel):
     column_names: List[str]
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
 
