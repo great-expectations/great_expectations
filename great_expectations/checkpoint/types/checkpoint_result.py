@@ -288,10 +288,10 @@ class CheckpointResult(SerializableDictDot):
                         "expectation_suite_names": [expectation_suite_name],
                     }
                 else:
-                    assets_validated_by_batch_id[batch_id]["validation_results"].append(
+                    assets_validated_by_batch_id[batch_id]["validation_results"].append(  # type: ignore[union-attr]
                         validation_result
                     )
-                    assets_validated_by_batch_id[batch_id]["expectation_suite_names"].append(
+                    assets_validated_by_batch_id[batch_id]["expectation_suite_names"].append(  # type: ignore[union-attr]
                         expectation_suite_name
                     )
             self._data_assets_validated_by_batch_id = assets_validated_by_batch_id

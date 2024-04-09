@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import LegacyBatchDefinition
@@ -10,13 +10,10 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (  # noqa: E501
-    FilePathDataConnector,
-    make_directory_get_unfiltered_batch_definition_list_fn,
-)
 from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest,
     )
@@ -62,11 +59,10 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
         return batch_definition_list
 
     @override
-    def get_unfiltered_batch_definition_list_fn(
+    def get_whole_directory_path_override(
         self,
-    ) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
-        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""  # noqa: E501
-        return make_directory_get_unfiltered_batch_definition_list_fn(self.data_directory)
+    ) -> PathStr:
+        return self.data_directory
 
     @override
     def _get_reader_method(self) -> str:

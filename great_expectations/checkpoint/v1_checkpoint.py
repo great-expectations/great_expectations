@@ -16,7 +16,7 @@ from great_expectations.checkpoint.actions import (
     StoreValidationResultAction,
     UpdateDataDocsAction,
 )
-from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
+from great_expectations.compatibility.pydantic import BaseModel, Field, root_validator, validator
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -67,7 +67,7 @@ class Checkpoint(BaseModel):
 
     name: str
     validation_definitions: List[ValidationDefinition]
-    actions: List[CheckpointAction]
+    actions: List[CheckpointAction] = Field(default_factory=list)
     result_format: ResultFormat = ResultFormat.SUMMARY
     id: Union[str, None] = None
 
@@ -249,7 +249,8 @@ class CheckpointResult(BaseModel):
         if len(run_results) == 0:
             raise ValueError("CheckpointResult must contain at least one run result")  # noqa: TRY003
 
-        values["success"] = all(result.success for result in run_results.values())
+        if values["success"] is None:
+            values["success"] = all(result.success for result in run_results.values())
         return values
 
     @property

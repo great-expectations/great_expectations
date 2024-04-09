@@ -14,13 +14,9 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilePathDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (  # noqa: E501
-    file_get_unfiltered_batch_definition_list_fn,
-)
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import LegacyBatchDefinition
-    from great_expectations.datasource.fluent import BatchRequest
+    from great_expectations.alias_types import PathStr
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +35,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         base_directory: Relative path to subdirectory containing files of interest
         glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         data_context_root_directory: Optional GreatExpectations root directory (if installed on filesystem)
-        file_path_template_map_fn: Format function mapping path to fully-qualified resource on filesystem (optional)
+        whole_directory_path_override: Treat an entire directory as a single Asset
     """  # noqa: E501
 
     asset_level_option_keys: ClassVar[tuple[str, ...]] = ("glob_directive",)
@@ -54,9 +50,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
         file_path_template_map_fn: Optional[Callable] = None,
-        get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
-        ] = file_get_unfiltered_batch_definition_list_fn,
+        whole_directory_path_override: PathStr | None = None,
     ) -> None:
         self._base_directory = base_directory
         self._glob_directive: str = glob_directive
@@ -67,7 +61,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             data_asset_name=data_asset_name,
             batching_regex=batching_regex,
             file_path_template_map_fn=file_path_template_map_fn,
-            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
+            whole_directory_path_override=whole_directory_path_override,
         )
 
     @property
@@ -91,9 +85,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
         file_path_template_map_fn: Optional[Callable] = None,
-        get_unfiltered_batch_definition_list_fn: Callable[
-            [FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]
-        ] = file_get_unfiltered_batch_definition_list_fn,
+        whole_directory_path_override: PathStr | None = None,
     ) -> FilesystemDataConnector:
         """Builds "FilesystemDataConnector", which links named DataAsset to filesystem.
 
@@ -118,7 +110,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             glob_directive=glob_directive,
             data_context_root_directory=data_context_root_directory,
             file_path_template_map_fn=file_path_template_map_fn,
-            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
+            whole_directory_path_override=whole_directory_path_override,
         )
 
     @classmethod
