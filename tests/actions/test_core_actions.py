@@ -868,14 +868,29 @@ class TestV1ActionRun:
         )
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
     def test_EmailAction_run(self, checkpoint_result: CheckpointResult):
         action = EmailAction(
-            smtp_address="test", smtp_port=587, receiver_emails="test1@gmail.com, test2@hotmail.com"
+            smtp_address="test",
+            smtp_port="587",
+            receiver_emails="test1@gmail.com, test2@hotmail.com",
         )
-        action.v1_run(checkpoint_result=checkpoint_result)
+
+        with mock.patch("great_expectations.checkpoint.actions.send_email") as mock_send_email:
+            out = action.v1_run(checkpoint_result=checkpoint_result)
+
+        mock_send_email.assert_called_once_with(
+            title=mock.ANY,
+            html=mock.ANY,
+            receiver_emails_list=["test1@gmail.com", "test2@hotmail.com"],
+            sender_alias=None,
+            sender_login=None,
+            sender_password=None,
+            smtp_address="test",
+            smtp_port="587",
+            use_ssl=None,
+            use_tls=None,
+        )
+        assert out == {"email_result": mock_send_email()}
 
     @pytest.mark.unit
     @pytest.mark.xfail(
