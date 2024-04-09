@@ -449,6 +449,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
+    sort_batches_ascending: bool = True
     method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
 
     @property
