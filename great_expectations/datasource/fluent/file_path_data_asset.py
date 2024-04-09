@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import re
 import warnings
 from collections import Counter
 from pprint import pformat as pf
@@ -179,6 +180,7 @@ class _FilePathDataAsset(DataAsset):
         options: Optional[BatchRequestOptions] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -189,6 +191,7 @@ class _FilePathDataAsset(DataAsset):
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
+            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -229,6 +232,7 @@ class _FilePathDataAsset(DataAsset):
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
+            batching_regex=batching_regex,
         )
 
     @override
