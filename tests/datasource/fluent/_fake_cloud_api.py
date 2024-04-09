@@ -691,7 +691,7 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
             ).json(),
         )
     else:
-        id_ = FAKE_CHECKPOINT_ID
+        id_ = str(uuid.uuid4())
         payload["data"]["id"] = id_
         checkpoints[id_] = payload["data"]
         checkpoint_names.add(name)
