@@ -64,7 +64,7 @@ def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack
 
 
 # noinspection SpellCheckingInspection
-def send_opsgenie_alert(query, suite_name, settings):
+def send_opsgenie_alert(query: str, message: str, settings: dict) -> bool:
     """Creates an alert in Opsgenie."""
     if settings["region"] is not None:
         url = (
@@ -75,7 +75,7 @@ def send_opsgenie_alert(query, suite_name, settings):
 
     headers = {"Authorization": f"GenieKey {settings['api_key']}"}
     payload = {
-        "message": f"Great Expectations suite {suite_name} failed",
+        "message": message,
         "description": query,
         "priority": settings["priority"],  # allow this to be modified in settings
         "tags": settings["tags"],
@@ -85,18 +85,14 @@ def send_opsgenie_alert(query, suite_name, settings):
 
     try:
         response = session.post(url, headers=headers, json=payload)
-    except requests.ConnectionError:
-        logger.warning("Failed to connect to Opsgenie")
-    except Exception as e:
-        logger.error(str(e))  # noqa: TRY400
-    else:
-        if response.status_code != 202:  # noqa: PLR2004
-            logger.warning(
-                "Request to Opsgenie API " f"returned error {response.status_code}: {response.text}"
-            )
-        else:
-            return "success"
-    return "error"
+        response.raise_for_status()
+    except requests.ConnectionError as e:
+        logger.warning(f"Failed to connect to Opsgenie: {e}")
+        return False
+    except requests.HTTPError as e:
+        logger.warning(f"Request to Opsgenie API returned error {response.status_code}: {e}")
+        return False
+    return True
 
 
 def send_microsoft_teams_notifications(query, microsoft_teams_webhook):

@@ -96,6 +96,7 @@ class ValidationAction(BaseModel):
         json_encoders = {Renderer: lambda r: r.serialize()}
 
     type: str
+    notify_on: Literal["all", "failure", "success"] = "all"
 
     @property
     def _using_cloud_context(self) -> bool:
@@ -163,6 +164,15 @@ class ValidationAction(BaseModel):
     # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
     def v1_run(self, checkpoint_result: CheckpointResult) -> str | dict:
         raise NotImplementedError
+
+    def _is_enabled(self, success: bool) -> bool:
+        return (
+            self.notify_on == "all"
+            or self.notify_on == "success"
+            and success
+            or self.notify_on == "failure"
+            and not success
+        )
 
 
 class DataDocsAction(ValidationAction):
@@ -326,13 +336,7 @@ class SlackNotificationAction(DataDocsAction):
                     payload["store_validation_result"]["validation_result_url"]
                 )
         result = {"slack_notification_result": "none required"}
-        if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
-        ):
+        if self._is_enabled(success=validation_success):
             query: Dict = self.renderer.render(
                 validation_result_suite,
                 data_docs_pages,
@@ -451,13 +455,7 @@ class PagerdutyAlertAction(ValidationAction):
         )
 
     def _run_pypd_alert(self, dedup_key: str, message: str, success: bool):
-        if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and success
-            or self.notify_on == "failure"
-            and not success
-        ):
+        if self._is_enabled(success=success):
             pypd.api_key = self.api_key
             pypd.EventV2.create(
                 data={
@@ -560,13 +558,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
                 if payload[action_names]["class"] == "UpdateDataDocsAction":
                     data_docs_pages = payload[action_names]
 
-        if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
-        ):
+        if self._is_enabled(success=validation_success):
             query = self.renderer.render(
                 validation_result_suite,
                 validation_result_suite_identifier,
@@ -626,6 +618,35 @@ class OpsgenieAlertAction(ValidationAction):
         return renderer
 
     @override
+    def v1_run(self, checkpoint_result: CheckpointResult) -> dict:
+        validation_success = checkpoint_result.success or False
+        checkpoint_name = checkpoint_result.checkpoint_config.name
+
+        if self._is_enabled(success=validation_success):
+            settings = {
+                "api_key": self.api_key,
+                "region": self.region,
+                "priority": self.priority,
+                "tags": self.tags,
+            }
+
+            description = self.renderer.v1_render(checkpoint_result=checkpoint_result)
+
+            message = f"Great Expectations Checkpoint {checkpoint_name} "
+            if checkpoint_result.success:
+                message += "succeeded!"
+            else:
+                message += "failed!"
+
+            alert_result = send_opsgenie_alert(
+                query=description, message=message, settings=settings
+            )
+
+            return {"opsgenie_alert_result": alert_result}
+        else:
+            return {"opsgenie_alert_result": "No alert sent"}
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -653,13 +674,7 @@ class OpsgenieAlertAction(ValidationAction):
 
         validation_success = validation_result_suite.success
 
-        if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
-        ):
+        if self._is_enabled(success=validation_success):
             expectation_suite_name = validation_result_suite.meta.get(
                 "expectation_suite_name", "__no_expectation_suite_name__"
             )
@@ -673,7 +688,8 @@ class OpsgenieAlertAction(ValidationAction):
 
             description = self.renderer.render(validation_result_suite, None, None)
 
-            alert_result = send_opsgenie_alert(description, expectation_suite_name, settings)
+            message = f"Great Expectations suite {expectation_suite_name} failed"
+            alert_result = send_opsgenie_alert(description, message, settings)
 
             return {"opsgenie_alert_result": alert_result}
         else:
@@ -806,11 +822,7 @@ class EmailAction(ValidationAction):
                 if payload[action_names]["class"] == "UpdateDataDocsAction":
                     data_docs_pages = payload[action_names]
 
-        if (
-            (self.notify_on == "all")
-            or (self.notify_on == "success" and validation_success)
-            or (self.notify_on == "failure" and not validation_success)
-        ):
+        if self._is_enabled(success=validation_success):
             title, html = self.renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
@@ -1116,19 +1128,8 @@ class APINotificationAction(ValidationAction):
         checkpoint_identifier=None,
         **kwargs,
     ):
-        suite_name: str = validation_result_suite.meta["expectation_suite_name"]
-        if "batch_kwargs" in validation_result_suite.meta:
-            data_asset_name = validation_result_suite.meta["batch_kwargs"].get(
-                "data_asset_name", "__no_data_asset_name__"
-            )
-        elif "active_batch_definition" in validation_result_suite.meta:
-            data_asset_name = (
-                validation_result_suite.meta["active_batch_definition"].data_asset_name
-                if validation_result_suite.meta["active_batch_definition"].data_asset_name
-                else "__no_data_asset_name__"
-            )
-        else:
-            data_asset_name = "__no_data_asset_name__"
+        suite_name: str = validation_result_suite.suite_name
+        data_asset_name: str = validation_result_suite.asset_name or "__no_data_asset_name__"
 
         validation_results: list = validation_result_suite.results
         validation_results_serializable: list = convert_to_json_serializable(validation_results)
