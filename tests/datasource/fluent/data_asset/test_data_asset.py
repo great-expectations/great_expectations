@@ -398,6 +398,7 @@ def metadata_none_none(mocker):
     return mocker.MagicMock(spec=Batch, metadata={"a": None, "b": None})
 
 
+@pytest.mark.unit
 def test_sort_batches__ascending(
     empty_data_asset,
     metadata_1_1,
@@ -432,6 +433,7 @@ def test_sort_batches__ascending(
     ]
 
 
+@pytest.mark.unit
 def test_sort_batches__descending(
     empty_data_asset,
     metadata_1_1,
