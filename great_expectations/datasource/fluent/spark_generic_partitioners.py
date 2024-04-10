@@ -55,7 +55,7 @@ class _Partitioner(Protocol):  # noqa: PYI046
         Look at Partitioner* classes for concrete examples.
         """
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         """Translates `options` to the execution engine batch spec kwarg identifiers
@@ -94,7 +94,7 @@ class _PartitionerDatetime(FluentBaseModel):
     def columns(self) -> list[str]:
         return [self.column_name]
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         """Validates all the datetime parameters for this partitioner exist in `options`."""
@@ -195,7 +195,7 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         raise NotImplementedError
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         raise NotImplementedError
@@ -216,7 +216,7 @@ class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name, "divisor": self.divisor}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "quotient" not in options:
@@ -239,7 +239,7 @@ class SparkPartitionerModInteger(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name, "mod": self.mod}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "remainder" not in options:
@@ -261,7 +261,7 @@ class SparkPartitionerColumnValue(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         if self.column_name not in options:
@@ -284,7 +284,7 @@ class SparkPartitionerMultiColumnValue(FluentBaseModel):
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_names": self.column_names}
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):

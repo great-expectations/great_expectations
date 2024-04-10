@@ -48,8 +48,8 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchMetadata,
-    BatchRequest,
     BatchParameters,
+    BatchRequest,
     DataAsset,
     Datasource,
 )
@@ -70,7 +70,7 @@ class _PandasDataAsset(DataAsset):
     def _get_reader_method(self) -> str: ...
     @override
     def test_connection(self) -> None: ...
-    def batch_request_options_template(self) -> BatchParameters: ...
+    def batch_parameters_template(self) -> BatchParameters: ...
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
     @override

@@ -204,7 +204,7 @@ class ValidationDefinition(BaseModel):
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(
             batch_definition=self.batch_definition,
-            batch_request_options=batch_parameters,
+            batch_parameters=batch_parameters,
             result_format=result_format,
         )
         results = validator.validate_expectation_suite(self.suite, evaluation_parameters)
