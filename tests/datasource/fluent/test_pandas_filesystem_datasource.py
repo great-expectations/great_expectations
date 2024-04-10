@@ -590,6 +590,7 @@ def validated_pandas_filesystem_datasource(
     return pandas_filesystem_datasource
 
 
+@pytest.mark.filesystem
 def test_pandas_sort_ascending(
     validated_pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
@@ -616,6 +617,7 @@ def test_pandas_sort_ascending(
         assert batch.metadata["month"] == str(expected_months[i])
 
 
+@pytest.mark.filesystem
 def test_pandas_sort_descending(
     validated_pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
