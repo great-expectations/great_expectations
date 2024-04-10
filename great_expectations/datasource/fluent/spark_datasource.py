@@ -33,7 +33,7 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.compatibility.pyspark import DataFrame, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
-from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
+from great_expectations.datasource.fluent import BatchRequest, BatchParameters
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
@@ -211,7 +211,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def build_batch_request(  # type: ignore[override]   # noqa: PLR0913
         self,
         dataframe: Optional[_SparkDataFrameT] = None,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
         batching_regex: Optional[re.Pattern] = None,

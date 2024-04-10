@@ -9,7 +9,7 @@ import pytest
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
-from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import DataAsset
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
@@ -42,7 +42,7 @@ def test_save(mock_data_asset):
 )
 @pytest.mark.unit
 def test_build_batch_request(
-    batch_request_options: Optional[BatchRequestOptions],
+    batch_request_options: Optional[BatchParameters],
     mock_data_asset: DataAsset,
 ):
     partitioner = PartitionerYear(column_name="foo")

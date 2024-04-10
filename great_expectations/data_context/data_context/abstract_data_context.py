@@ -160,7 +160,7 @@ if TYPE_CHECKING:
         BatchRequest as FluentBatchRequest,
     )
     from great_expectations.datasource.fluent.interfaces import (
-        BatchRequestOptions,
+        BatchParameters,
     )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation_configuration import (
@@ -2043,7 +2043,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
+        batch_request_options: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -2140,7 +2140,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
+        batch_request_options: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         result = get_batch_request_from_acceptable_arguments(

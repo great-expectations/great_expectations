@@ -77,7 +77,7 @@ if TYPE_CHECKING:
     from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.datasource.fluent import BatchRequestOptions
+    from great_expectations.datasource.fluent import BatchParameters
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -123,7 +123,7 @@ class _Partitioner(Protocol):
         """
 
     def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         """Translates `options` to the execution engine batch spec kwarg identifiers
 
@@ -195,7 +195,7 @@ class _PartitionerDatetime(FluentBaseModel):
         return params
 
     def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         """Validates all the datetime parameters for this partitioner exist in `options`."""
         identifiers: Dict = {}
@@ -305,7 +305,7 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
         raise NotImplementedError
 
     def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         raise NotImplementedError
 
@@ -326,7 +326,7 @@ class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
 
     @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "quotient" not in options:
             raise ValueError("'quotient' must be specified in the batch request options")  # noqa: TRY003
@@ -349,7 +349,7 @@ class SqlPartitionerModInteger(_PartitionerOneColumnOneParam):
 
     @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "remainder" not in options:
             raise ValueError("'remainder' must be specified in the batch request options")  # noqa: TRY003
@@ -371,7 +371,7 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
 
     @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if self.column_name not in options:
             raise ValueError(f"'{self.column_name}' must be specified in the batch request options")  # noqa: TRY003
@@ -402,7 +402,7 @@ class SqlPartitionerMultiColumnValue(FluentBaseModel):
         return {"column_names": self.column_names}
 
     def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
             raise ValueError(  # noqa: TRY003
@@ -448,7 +448,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
 
     @override
     def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "datetime" not in options:
             raise ValueError(  # noqa: TRY003
@@ -526,7 +526,7 @@ class _SQLAsset(DataAsset):
         pass
 
     @staticmethod
-    def _matches_request_options(candidate: Dict, requested_options: BatchRequestOptions) -> bool:
+    def _matches_request_options(candidate: Dict, requested_options: BatchParameters) -> bool:
         for k, v in requested_options.items():
             if isinstance(candidate[k], (datetime, date)):
                 candidate[k] = str(candidate[k])
@@ -643,7 +643,7 @@ class _SQLAsset(DataAsset):
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
         batching_regex: Optional[re.Pattern] = None,

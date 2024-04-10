@@ -34,7 +34,7 @@ from great_expectations.core.partitioners import (
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
-    BatchRequestOptions,
+    BatchParameters,
 )
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -178,7 +178,7 @@ class _FilePathDataAsset(DataAsset):
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
         batching_regex: Optional[re.Pattern] = None,

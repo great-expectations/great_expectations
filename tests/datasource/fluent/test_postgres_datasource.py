@@ -41,7 +41,7 @@ from great_expectations.data_context.data_context.file_data_context import (
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
-    BatchRequestOptions,
+    BatchParameters,
 )
 from great_expectations.datasource.fluent.interfaces import (
     Sorter,
@@ -160,7 +160,7 @@ def assert_table_asset(
 
 
 def assert_batch_request(
-    batch_request, source_name: str, asset_name: str, options: BatchRequestOptions
+    batch_request, source_name: str, asset_name: str, options: BatchParameters
 ):
     assert batch_request.datasource_name == source_name
     assert batch_request.data_asset_name == asset_name

@@ -38,7 +38,7 @@ if TYPE_CHECKING:
         BatchRequest as FluentBatchRequest,
     )
     from great_expectations.datasource.fluent.interfaces import (
-        BatchRequestOptions,
+        BatchParameters,
     )
     from great_expectations.validator.metrics_calculator import MetricsCalculator
 
@@ -1189,7 +1189,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     query: str | None = None,
     path: str | None = None,
     batch_filter_parameters: dict | None = None,
-    batch_request_options: dict | BatchRequestOptions | None = None,
+    batch_request_options: dict | BatchParameters | None = None,
     **kwargs,
 ) -> BatchRequest | RuntimeBatchRequest | FluentBatchRequest:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
