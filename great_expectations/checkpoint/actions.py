@@ -91,7 +91,7 @@ class ActionContext:
     def __init__(self) -> None:
         self._data: list[tuple[ValidationAction, dict]] = []
 
-    def update(self, action: ValidationAction, action_result: dict) -> None:
+    def update(self, action: ValidationAction, action_result: str | dict) -> None:
         self._data.append((action, action_result))
 
     def filter_results_by_class(self, class_: Type[ValidationAction]) -> list[dict]:
@@ -187,7 +187,7 @@ class ValidationAction(BaseModel):
 
     # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
     def v1_run(
-        self, checkpoint_result: CheckpointResult, action_context: ActionContext
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> str | dict:
         raise NotImplementedError
 
@@ -432,7 +432,9 @@ class PagerdutyAlertAction(ValidationAction):
     severity: Literal["critical", "error", "warning", "info"] = "critical"
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult, action_context: ActionContext) -> dict:
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
         success = checkpoint_result.success or False
         checkpoint_name = checkpoint_result.checkpoint_config.name
         summary = f"Great Expectations Checkpoint {checkpoint_name} has "
@@ -641,7 +643,9 @@ class OpsgenieAlertAction(ValidationAction):
         return renderer
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult, action_context: ActionContext) -> dict:
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
         validation_success = checkpoint_result.success or False
         checkpoint_name = checkpoint_result.checkpoint_config.name
 
@@ -812,7 +816,9 @@ class EmailAction(ValidationAction):
 
     @override
     def v1_run(
-        self, checkpoint_result: CheckpointResult, action_context: ActionContext
+        self,
+        checkpoint_result: CheckpointResult,
+        action_context: ActionContext | None = None,
     ) -> str | dict:
         success = checkpoint_result.success or False
         if not self._is_enabled(success=success):
@@ -999,7 +1005,9 @@ class UpdateDataDocsAction(DataDocsAction):
     site_names: List[str] = []
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult, action_context: ActionContext) -> dict:
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
         action_results: dict[ValidationResultIdentifier, dict] = {}
         for result_identifier, result in checkpoint_result.run_results.items():
             suite_name = result.suite_name
@@ -1100,7 +1108,9 @@ class SNSNotificationAction(ValidationAction):
     sns_message_subject: Optional[str]
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult, action_context: ActionContext) -> str:
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> str:
         return send_sns_notification(
             sns_topic_arn=self.sns_topic_arn,
             sns_subject=self.sns_message_subject or checkpoint_result.name,
@@ -1150,7 +1160,9 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
-    def v1_run(self, checkpoint_result: CheckpointResult, action_context: ActionContext) -> str:
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> str:
         aggregate_payload = []
         for run_id, run_result in checkpoint_result.run_results.items():
             suite_name = run_result.suite_name
