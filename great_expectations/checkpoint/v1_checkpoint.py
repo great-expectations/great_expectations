@@ -221,7 +221,9 @@ class Checkpoint(BaseModel):
         checkpoint_result: CheckpointResult,
     ) -> None:
         action_context = ActionContext()
-        for action in self.actions:
+        actions = sorted(self.actions)
+
+        for action in actions:
             action_result = action.v1_run(
                 checkpoint_result=checkpoint_result,
                 action_context=action_context,

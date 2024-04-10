@@ -1178,3 +1178,12 @@ class TestV1ActionRun:
             validation_identifier_a: {},
             validation_identifier_b: {},
         }
+
+
+class test_action_sorting:
+    slack_action = SlackNotificationAction(slack_webhook="my_webhook")
+    teams_action = MicrosoftTeamsNotificationAction(teams_webhook="my_other_webhook")
+    update_data_docs_action = UpdateDataDocsAction(site_names=["site_a", "site_b"])
+    actions = [slack_action, teams_action, update_data_docs_action]
+
+    assert sorted(actions) == [update_data_docs_action, slack_action, teams_action]
