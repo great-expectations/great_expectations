@@ -507,7 +507,7 @@ class TestCheckpointResult:
             result = checkpoint.run()
 
         assert mock_run.call_count == len(actions)
-        mock_run.assert_called_with(checkpoint_result=result)
+        mock_run.assert_called_with(checkpoint_result=result, action_context=mock.ANY)
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(

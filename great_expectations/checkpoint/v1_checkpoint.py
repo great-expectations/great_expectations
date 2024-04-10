@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, c
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import (
+    ActionContext,
     EmailAction,
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -219,10 +220,13 @@ class Checkpoint(BaseModel):
         self,
         checkpoint_result: CheckpointResult,
     ) -> None:
+        action_context = ActionContext()
         for action in self.actions:
-            action.v1_run(
+            action_result = action.v1_run(
                 checkpoint_result=checkpoint_result,
+                action_context=action_context,
             )
+            action_context.update(action=action, action_result=action_result)
 
     @public_api
     def save(self) -> None:
