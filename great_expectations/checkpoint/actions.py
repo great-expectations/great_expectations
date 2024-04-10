@@ -15,6 +15,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Type,
     Union,
 )
 
@@ -79,6 +80,22 @@ def _build_renderer(config: dict) -> Renderer:
             class_name=config.get("class_name"),
         )
     return renderer
+
+
+class ActionContext:
+    """
+    Shared context for all actions in a checkpoint run.
+    Note that order matters in the action list, as the context is updated with each action's result.
+    """
+
+    def __init__(self) -> None:
+        self._data: list[tuple[Type[ValidationAction], dict]] = []
+
+    def update(self, action: ValidationAction, action_result: dict) -> None:
+        self._data.append((action.__class__, action_result))
+
+    def filter_results_by_class(self, class_: Type[ValidationAction]) -> list[dict]:
+        return [payload for action_class, payload in self._data if action_class is class_]
 
 
 @public_api
@@ -282,7 +299,7 @@ class SlackNotificationAction(DataDocsAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context: ActionContext | None = None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -305,11 +322,8 @@ class SlackNotificationAction(DataDocsAction):
 
         validation_success = validation_result_suite.success
         data_docs_pages = None
-        if payload:
-            # process the payload
-            for action_names in payload.keys():
-                if payload[action_names]["class"] == "UpdateDataDocsAction":
-                    data_docs_pages = payload[action_names]
+        if action_context:
+            data_docs_pages = action_context.filter_results_by_class(UpdateDataDocsAction)
 
         # Assemble complete GX Cloud URL for a specific validation result
         data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
@@ -328,13 +342,16 @@ class SlackNotificationAction(DataDocsAction):
             # To send a notification with a link to the validation result, we need to have created the validation  # noqa: E501
             # result in cloud. If the user has configured the store action after the notification action, they will  # noqa: E501
             # get a warning that no link will be provided. See the __init__ method for ActionListValidationOperator.  # noqa: E501
-            if (
-                "store_validation_result" in payload
-                and "validation_result_url" in payload["store_validation_result"]
-            ):
-                validation_result_urls.append(
-                    payload["store_validation_result"]["validation_result_url"]
-                )
+            store_validation_results = action_context.filter_results_by_class(
+                StoreValidationResultAction
+            )
+            if store_validation_results:
+                for payload in store_validation_results:
+                    if "validation_result_url" in payload:
+                        validation_result_urls.append(
+                            payload["store_validation_result"]["validation_result_url"]
+                        )
+
         result = {"slack_notification_result": "none required"}
         if self._is_enabled(success=validation_success):
             query: Dict = self.renderer.render(
@@ -422,7 +439,7 @@ class PagerdutyAlertAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -529,7 +546,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -550,13 +567,10 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
                 f"not {type(validation_result_suite_identifier)}"
             )
         validation_success = validation_result_suite.success
-        data_docs_pages = None
 
-        if payload:
-            # process the payload
-            for action_names in payload.keys():
-                if payload[action_names]["class"] == "UpdateDataDocsAction":
-                    data_docs_pages = payload[action_names]
+        data_docs_pages = None
+        if action_context:
+            data_docs_pages = action_context.filter_results_by_class(UpdateDataDocsAction)
 
         if self._is_enabled(success=validation_success):
             query = self.renderer.render(
@@ -651,7 +665,7 @@ class OpsgenieAlertAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -818,7 +832,7 @@ class EmailAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -840,13 +854,10 @@ class EmailAction(ValidationAction):
             )
 
         validation_success = validation_result_suite.success
-        data_docs_pages = None
 
-        if payload:
-            # process the payload
-            for action_names in payload.keys():
-                if payload[action_names]["class"] == "UpdateDataDocsAction":
-                    data_docs_pages = payload[action_names]
+        data_docs_pages = None
+        if action_context:
+            data_docs_pages = action_context.filter_results_by_class(UpdateDataDocsAction)
 
         if self._is_enabled(success=validation_success):
             title, html = self.renderer.render(
@@ -923,7 +934,7 @@ class StoreValidationResultAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
@@ -1004,7 +1015,7 @@ class UpdateDataDocsAction(DataDocsAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
