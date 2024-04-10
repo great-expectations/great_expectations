@@ -98,10 +98,11 @@ class ActionContext:
         return [action_result for action, action_result in self._data if action.__class__ is class_]
 
     def dict(self) -> dict:
+        # Method is only used in legacy Checkpoint and should be removed
         data = {}
         for action, action_result in self._data:
-            data[action["name"]] = action_result
-            data[action["name"]]["class"] = action["action"]["class_name"]
+            data[action["name"]] = action_result  # type: ignore[index]
+            data[action["name"]]["class"] = action["action"]["class_name"]  # type: ignore[index]
         return data
 
 
@@ -351,6 +352,7 @@ class SlackNotificationAction(DataDocsAction):
             # To send a notification with a link to the validation result, we need to have created the validation  # noqa: E501
             # result in cloud. If the user has configured the store action after the notification action, they will  # noqa: E501
             # get a warning that no link will be provided. See the __init__ method for ActionListValidationOperator.  # noqa: E501
+            action_context = action_context or ActionContext()
             store_validation_results = action_context.filter_results_by_class(
                 StoreValidationResultAction
             )
