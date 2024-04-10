@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
@@ -37,6 +38,8 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
+
+logger = logging.getLogger(__name__)
 
 CheckpointAction: TypeAlias = Union[
     EmailAction,
@@ -221,9 +224,10 @@ class Checkpoint(BaseModel):
         checkpoint_result: CheckpointResult,
     ) -> None:
         action_context = ActionContext()
-        actions = sorted(self.actions)
 
-        for action in actions:
+        # UpdateDataDocs action should always go first due to downstream dependencies
+        sorted_actions = sorted(self.actions)
+        for action in sorted_actions:
             action_result = action.v1_run(
                 checkpoint_result=checkpoint_result,
                 action_context=action_context,
