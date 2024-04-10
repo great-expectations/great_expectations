@@ -1,16 +1,16 @@
+from __future__ import annotations
+
 import json
 import logging
 from contextlib import contextmanager
 from types import ModuleType
-from typing import Iterator, Type
+from typing import TYPE_CHECKING, Iterator, Type
 from unittest import mock
 
 import pytest
 import requests
 from freezegun import freeze_time
-from pytest_mock import MockerFixture
 from requests import Session
-from typing_extensions import Never
 
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
@@ -45,6 +45,10 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.util import is_library_loadable
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+    from typing_extensions import Never
 
 logger = logging.getLogger(__name__)
 
@@ -868,14 +872,57 @@ class TestV1ActionRun:
         )
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
+    @pytest.mark.parametrize(
+        "emails, expected_email_list",
+        [
+            pytest.param("test1@gmail.com", ["test1@gmail.com"], id="single_email"),
+            pytest.param(
+                "test1@gmail.com, test2@hotmail.com",
+                ["test1@gmail.com", "test2@hotmail.com"],
+                id="multiple_emails",
+            ),
+            pytest.param(
+                "test1@gmail.com,test2@hotmail.com",
+                ["test1@gmail.com", "test2@hotmail.com"],
+                id="multiple_emails_no_space",
+            ),
+        ],
     )
-    def test_EmailAction_run(self, checkpoint_result: CheckpointResult):
+    def test_EmailAction_run(
+        self, checkpoint_result: CheckpointResult, emails: str, expected_email_list: list[str]
+    ):
         action = EmailAction(
-            smtp_address="test", smtp_port=587, receiver_emails="test1@gmail.com, test2@hotmail.com"
+            smtp_address="test",
+            smtp_port="587",
+            receiver_emails=emails,
         )
-        action.v1_run(checkpoint_result=checkpoint_result)
+
+        with mock.patch("great_expectations.checkpoint.actions.send_email") as mock_send_email:
+            out = action.v1_run(checkpoint_result=checkpoint_result)
+
+        # Should contain success/failure in title
+        assert "True" in mock_send_email.call_args.kwargs["title"]
+
+        # Should contain suite names and other relevant domain object identifiers in the body
+        run_results = tuple(checkpoint_result.run_results.values())
+        suite_a = run_results[0].suite_name
+        suite_b = run_results[1].suite_name
+        mock_html = mock_send_email.call_args.kwargs["html"]
+        assert suite_a in mock_html and suite_b in mock_html
+
+        mock_send_email.assert_called_once_with(
+            title=mock.ANY,
+            html=mock.ANY,
+            receiver_emails_list=expected_email_list,
+            sender_alias=None,
+            sender_login=None,
+            sender_password=None,
+            smtp_address="test",
+            smtp_port="587",
+            use_ssl=None,
+            use_tls=None,
+        )
+        assert out == {"email_result": mock_send_email()}
 
     @pytest.mark.unit
     @pytest.mark.xfail(
