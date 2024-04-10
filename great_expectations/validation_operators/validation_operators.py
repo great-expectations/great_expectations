@@ -442,7 +442,12 @@ class ActionListValidationOperator(ValidationOperator):
                 logger.exception(f"Error running action with name {action['name']}")
                 raise e  # noqa: TRY201
 
-        return action_context.dict()
+        action_data = {}
+        for action, action_result in action_context.data:
+            action_data[action["name"]] = action_result
+            action_data[action["name"]]["class"] = action["action"]["class_name"]
+
+        return action_data
 
 
 class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationOperator):
