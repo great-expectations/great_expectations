@@ -112,6 +112,7 @@ class ValidationAction(BaseModel):
     and other actions to take place after the validation result is produced.
     """  # noqa: E501
 
+    # Order of priority for sorting actions in a Checkpoint (lower values come first)
     _sorting_priority: ClassVar[int] = 2
 
     class Config:
