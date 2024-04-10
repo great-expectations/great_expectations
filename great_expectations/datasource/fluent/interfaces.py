@@ -408,12 +408,23 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         self.order_by = _sorter_from_list(sorters)
         return self
 
-    def sort_batches(self, batches: list[Batch], partitioner: _PartitionerProtocol) -> None:
-        def _get_concrete_values_from_batch(batch: Batch) -> tuple[int]:
-            return tuple(batch.metadata[param] for param in partitioner.param_names)
-
+    def sort_batches(self, batch_list: List[Batch], partitioner: _PartitionerProtocol) -> None:
+        """Sorts batch_list in place in the order configured in this DataAsset.
+        Args:
+            batch_list: The list of batches to sort in place.
+        """
         reverse = not partitioner.sort_batches_ascending
-        batches.sort(key=_get_concrete_values_from_batch, reverse=reverse)
+        for key in reversed(partitioner.param_names):
+            try:
+                batch_list.sort(
+                    key=functools.cmp_to_key(_sort_batches_with_none_metadata_values(key)),
+                    reverse=reverse,
+                )
+            except KeyError as e:
+                raise KeyError(  # noqa: TRY003
+                    f"Trying to sort {self.name} table asset batches on key {key} "
+                    "which isn't available on all batches."
+                ) from e
 
 
 def _sort_batches_with_none_metadata_values(
