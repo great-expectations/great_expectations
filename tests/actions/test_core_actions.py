@@ -1180,7 +1180,10 @@ class TestV1ActionRun:
         }
 
 
-class test_action_sorting:
+def test_action_sorting():
+    """
+    UpdateDataDocsAction should be sorted first due to dependencies within other actions
+    """
     slack_action = SlackNotificationAction(slack_webhook="my_webhook")
     teams_action = MicrosoftTeamsNotificationAction(teams_webhook="my_other_webhook")
     update_data_docs_action = UpdateDataDocsAction(site_names=["site_a", "site_b"])
