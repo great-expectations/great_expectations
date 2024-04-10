@@ -94,7 +94,7 @@ class ActionContext:
     def update(self, action: ValidationAction, action_result: dict) -> None:
         self._data.append((action, action_result))
 
-    def filter_results_by_class(self, class_: Type[ValidationAction]) -> list[dict]:
+    def filter_results(self, class_: Type[ValidationAction]) -> list[dict]:
         return [action_result for action, action_result in self._data if action.__class__ is class_]
 
     def dict(self) -> dict:
@@ -333,7 +333,7 @@ class SlackNotificationAction(DataDocsAction):
         validation_success = validation_result_suite.success
         data_docs_pages = None
         if action_context:
-            data_docs_pages = action_context.filter_results_by_class(UpdateDataDocsAction)
+            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
 
         # Assemble complete GX Cloud URL for a specific validation result
         data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
@@ -353,8 +353,8 @@ class SlackNotificationAction(DataDocsAction):
             # result in cloud. If the user has configured the store action after the notification action, they will  # noqa: E501
             # get a warning that no link will be provided. See the __init__ method for ActionListValidationOperator.  # noqa: E501
             action_context = action_context or ActionContext()
-            store_validation_results = action_context.filter_results_by_class(
-                StoreValidationResultAction
+            store_validation_results = action_context.filter_results(
+                class_=StoreValidationResultAction
             )
             if store_validation_results:
                 for payload in store_validation_results:
@@ -583,7 +583,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
         data_docs_pages = None
         if action_context:
-            data_docs_pages = action_context.filter_results_by_class(UpdateDataDocsAction)
+            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
 
         if self._is_enabled(success=validation_success):
             query = self.renderer.render(
@@ -876,7 +876,7 @@ class EmailAction(ValidationAction):
 
         data_docs_pages = None
         if action_context:
-            data_docs_pages = action_context.filter_results_by_class(UpdateDataDocsAction)
+            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
 
         if self._is_enabled(success=validation_success):
             title, html = self.renderer.render(
