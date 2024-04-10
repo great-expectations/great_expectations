@@ -2,14 +2,60 @@ from __future__ import annotations
 
 import logging
 import textwrap
+from typing import TYPE_CHECKING
 
 logger = logging.getLogger(__name__)
 
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
 
+if TYPE_CHECKING:
+    from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
+
 
 class EmailRenderer(Renderer):
+    def v1_render(self, checkpoint_result: CheckpointResult) -> tuple[str, str]:
+        checkpoint_name = checkpoint_result.checkpoint_config.name
+        status = checkpoint_result.success
+        title = f"{checkpoint_name}: {status}"
+
+        text_blocks: list[str] = []
+        for result in checkpoint_result.run_results.values():
+            html = self._render_validation_result(result=result)
+            text_blocks.append(html)
+
+        return title, self._concatenate_blocks(text_blocks=text_blocks)
+
+    def _render_validation_result(self, result: ExpectationSuiteValidationResult) -> str:
+        suite_name = result.suite_name
+        asset_name = result.asset_name or "__no_asset_name__"
+        n_checks_succeeded = result.statistics["successful_expectations"]
+        n_checks = result.statistics["evaluated_expectations"]
+        run_id = result.meta.get("run_id", "__no_run_id__")
+        batch_id = result.batch_id
+        check_details_text = f"<strong>{n_checks_succeeded}</strong> of <strong>{n_checks}</strong> expectations were met"  # noqa: E501
+        status = "Success 🎉" if result.success else "Failed ❌"
+
+        title = f"<h3><u>{suite_name}</u></h3>"
+        html = textwrap.dedent(
+            f"""\
+            <p><strong>{title}</strong></p>
+            <p><strong>Batch Validation Status</strong>: {status}</p>
+            <p><strong>Expectation Suite Name</strong>: {suite_name}</p>
+            <p><strong>Data Asset Name</strong>: {asset_name}</p>
+            <p><strong>Run ID</strong>: {run_id}</p>
+            <p><strong>Batch ID</strong>: {batch_id}</p>
+            <p><strong>Summary</strong>: {check_details_text}</p>"""
+        )
+
+        return html
+
+    def _concatenate_blocks(self, text_blocks: list[str]) -> str:
+        return "<br>".join(text_blocks)
+
     def render(  # noqa: C901, PLR0912
         self, validation_result=None, data_docs_pages=None, notify_with=None
     ):
