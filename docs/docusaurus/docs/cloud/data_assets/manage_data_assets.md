@@ -156,7 +156,7 @@ Data Asset metrics provide you with insight into the data you can use for your d
 
 2. Click the **Overview** tab.
 
-    When you select a new Data Asset, abbreviated Data Asset metrics are automatically generated.
+    When you select a new Data Asset, schema data is automatically fetched.
 
 3. Optional. Select one of the following options:
 
@@ -187,7 +187,7 @@ When you create an Expectation after fetching metrics for a Data Asset, the colu
 
 2. Click the **Overview** tab.
 
-    When you select a new Data Asset, abbreviated Data Asset metrics are automatically generated.
+    When you select a new Data Asset, schema data is automatically fetched.
 
 3. Optional. Select one of the following options:
 
