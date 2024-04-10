@@ -347,7 +347,7 @@ def _test_delete_batch_definition__does_not_clobber_other_assets(
 class _MyPartitioner(FluentBaseModel):
     """Partitioner that adhere's to the expected protocol."""
 
-    sort_batches_ascending: bool
+    sort_batches_ascending: bool = True
 
     @property
     def param_names(self) -> List[str]:
@@ -466,3 +466,16 @@ def test_sort_batches__descending(
         metadata_none_2,
         metadata_none_none,
     ]
+
+
+@pytest.mark.unit
+def test_sort_batches__requires_keys(empty_data_asset, mocker):
+    partitioner = _MyPartitioner()
+
+    wheres_my_b = mocker.MagicMock(spec=Batch, metadata={"a": 1})
+    i_have_a_b = mocker.MagicMock(spec=Batch, metadata={"a": 1, "b": 2})
+
+    expected_error = "Trying to sort my data asset for batch configs table asset batches on key b"
+
+    with pytest.raises(KeyError, match=expected_error):
+        empty_data_asset.sort_batches([wheres_my_b, i_have_a_b], partitioner)
