@@ -1040,7 +1040,8 @@ class TestV1ActionRun:
             sns_message_subject="Subject",
         )
 
-        assert "Successfully posted results" in action.v1_run(checkpoint_result=checkpoint_result)
+        result = action.v1_run(checkpoint_result=checkpoint_result)
+        assert "Successfully posted results" in result["result"]
 
     @pytest.mark.unit
     def test_UpdateDataDocsAction_run(
