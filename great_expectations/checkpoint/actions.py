@@ -89,13 +89,20 @@ class ActionContext:
     """
 
     def __init__(self) -> None:
-        self._data: list[tuple[Type[ValidationAction], dict]] = []
+        self._data: list[tuple[ValidationAction, dict]] = []
 
     def update(self, action: ValidationAction, action_result: dict) -> None:
-        self._data.append((action.__class__, action_result))
+        self._data.append((action, action_result))
 
     def filter_results_by_class(self, class_: Type[ValidationAction]) -> list[dict]:
-        return [payload for action_class, payload in self._data if action_class is class_]
+        return [payload for action, payload in self._data if action.__class__ is class_]
+
+    def dict(self) -> dict:
+        data = {}
+        for action, action_result in self._data:
+            data[action["name"]] = action_result
+            data[action["name"]]["class"] = action["action"]["class_name"]
+        return data
 
 
 @public_api
