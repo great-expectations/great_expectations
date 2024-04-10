@@ -338,6 +338,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_batches_ascending": {
+                    "title": "Sort Batches Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_column_value",
@@ -362,6 +367,11 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "sort_batches_ascending": {
+                    "title": "Sort Batches Ascending",
+                    "default": true,
+                    "type": "boolean"
                 },
                 "method_name": {
                     "title": "Method Name",
@@ -388,6 +398,11 @@
                 "column_name": {
                     "title": "Column Name",
                     "type": "string"
+                },
+                "sort_batches_ascending": {
+                    "title": "Sort Batches Ascending",
+                    "default": true,
+                    "type": "boolean"
                 },
                 "method_name": {
                     "title": "Method Name",
@@ -416,6 +431,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_batches_ascending": {
+                    "title": "Sort Batches Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_mod_integer",
@@ -439,6 +459,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_batches_ascending": {
+                    "title": "Sort Batches Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_year",
@@ -461,6 +486,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_batches_ascending": {
+                    "title": "Sort Batches Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_year_and_month",
@@ -482,6 +512,11 @@
                 "column_name": {
                     "title": "Column Name",
                     "type": "string"
+                },
+                "sort_batches_ascending": {
+                    "title": "Sort Batches Ascending",
+                    "default": true,
+                    "type": "boolean"
                 },
                 "method_name": {
                     "title": "Method Name",
@@ -512,6 +547,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_batches_ascending": {
+                    "title": "Sort Batches Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_date_parts",
@@ -534,6 +574,11 @@
                 "column_name": {
                     "title": "Column Name",
                     "type": "string"
+                },
+                "sort_batches_ascending": {
+                    "title": "Sort Batches Ascending",
+                    "default": true,
+                    "type": "boolean"
                 },
                 "method_name": {
                     "title": "Method Name",
