@@ -95,7 +95,7 @@ class ActionContext:
         self._data.append((action, action_result))
 
     def filter_results_by_class(self, class_: Type[ValidationAction]) -> list[dict]:
-        return [payload for action, payload in self._data if action.__class__ is class_]
+        return [action_result for action, action_result in self._data if action.__class__ is class_]
 
     def dict(self) -> dict:
         data = {}
