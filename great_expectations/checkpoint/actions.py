@@ -99,7 +99,7 @@ class ActionContext:
         self._data.append((action, action_result))
 
     def filter_results(self, class_: Type[ValidationAction]) -> list[dict]:
-        return [action_result for action, action_result in self._data if action.__class__ is class_]
+        return [action_result for action, action_result in self._data if isinstance(action, class_)]
 
 
 @public_api
@@ -352,12 +352,11 @@ class SlackNotificationAction(DataDocsAction):
             store_validation_results = action_context.filter_results(
                 class_=StoreValidationResultAction
             )
-            if store_validation_results:
-                for payload in store_validation_results:
-                    if "validation_result_url" in payload:
-                        validation_result_urls.append(
-                            payload["store_validation_result"]["validation_result_url"]
-                        )
+            for payload in store_validation_results:
+                if "validation_result_url" in payload:
+                    validation_result_urls.append(
+                        payload["store_validation_result"]["validation_result_url"]
+                    )
 
         result = {"slack_notification_result": "none required"}
         if self._is_enabled(success=validation_success):
