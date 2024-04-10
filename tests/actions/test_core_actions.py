@@ -1180,6 +1180,7 @@ class TestV1ActionRun:
         }
 
 
+@pytest.mark.unit
 def test_action_sorting():
     """
     UpdateDataDocsAction should be sorted first due to dependencies within other actions
