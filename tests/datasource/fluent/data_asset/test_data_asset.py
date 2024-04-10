@@ -354,15 +354,6 @@ class _MyPartitioner(FluentBaseModel):
         return ["a", "b"]
 
 
-METADATA_1_1 = {"a": 1, "b": 1}
-METADATA_1_2 = {"a": 1, "b": 2}
-METADATA_2_1 = {"a": 2, "b": 1}
-METADATA_2_2 = {"a": 2, "b": 2}
-METADATA_NONE_2 = {"a": None, "b": 2}
-METADATA_2_NONE = {"a": 2, "b": None}
-METADATA_NONE_NONE = {"a": None, "b": None}
-
-
 @pytest.fixture
 def metadata_1_1(mocker):
     return mocker.MagicMock(spec=Batch, metadata={"a": 1, "b": 1})
