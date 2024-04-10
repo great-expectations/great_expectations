@@ -48,8 +48,8 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchMetadata,
-    BatchRequest,
     BatchParameters,
+    BatchRequest,
     DataAsset,
     Datasource,
 )
