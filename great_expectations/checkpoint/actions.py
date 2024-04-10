@@ -29,6 +29,7 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
 from great_expectations.compatibility.pydantic import (
     BaseModel,
     Field,
@@ -299,6 +300,71 @@ class SlackNotificationAction(DataDocsAction):
             raise ValueError("Please provide either slack_webhook or slack_token and slack_channel")  # noqa: TRY003
 
         return values
+
+    @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
+        success = checkpoint_result.success or False
+        result = {"slack_notification_result": "none required"}
+        if not self._is_enabled(success=success):
+            return result
+
+        text_blocks: list[dict] = []
+        for (
+            validation_result_suite_identifier,
+            validation_result_suite,
+        ) in checkpoint_result.run_results.items():
+            blocks = self._render_validation_result(
+                result_identifier=validation_result_suite_identifier,
+                result=validation_result_suite,
+                action_context=action_context,
+            )
+            text_blocks.extend(blocks)
+
+        query = self.renderer.build_query(blocks=text_blocks)
+        blocks = query.get("blocks")
+        if blocks:
+            if len(blocks) >= 1:
+                if blocks[0].get("text"):
+                    result = self._send_notifications_in_batches(
+                        blocks=blocks, query=query, result=result
+                    )
+                else:
+                    result = self._get_slack_result(query=query)
+
+        return result
+
+    def _render_validation_result(
+        self,
+        result_identifier: ValidationResultIdentifier,
+        result: ExpectationSuiteValidationResult,
+        action_context: ActionContext,
+    ) -> dict:
+        data_docs_pages = None
+        if action_context:
+            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+
+        # Assemble complete GX Cloud URL for a specific validation result
+        data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
+            resource_identifier=result_identifier
+        )
+
+        validation_result_urls: list[str] = [
+            data_docs_url["site_url"]
+            for data_docs_url in data_docs_urls
+            if data_docs_url["site_url"]
+        ]
+        if result.result_url:
+            validation_result_urls.append(result.result_url)
+
+        return self.renderer.v1_render(
+            result,
+            data_docs_pages,
+            self.notify_with,
+            self.show_failed_expectations,
+            validation_result_urls,
+        )
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
