@@ -718,22 +718,12 @@ class _SQLAsset(DataAsset):
         )
 
     @public_api
-    def add_batch_definition_date(
+    def add_batch_definition_daily(
         self, name: str, column: str, sort_asc: bool = True
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
             partitioner=PartitionerYearAndMonthAndDay(column_name=column),
-            batching_regex=None,
-        )
-
-    @public_api
-    def add_batch_definition_datetime_part(
-        self, name: str, column: str, datetime_parts: list[str], sort_asc: bool = True
-    ) -> BatchDefinition:
-        return self.add_batch_definition(
-            name=name,
-            partitioner=PartitionerDatetimePart(column_name=column, datetime_parts=datetime_parts),
             batching_regex=None,
         )
 
