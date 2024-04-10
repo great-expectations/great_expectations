@@ -10,7 +10,8 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
+from great_expectations.datasource.fluent.interfaces import Batch, DataAsset, Datasource
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
 DATASOURCE_NAME = "my datasource for batch configs"
@@ -341,3 +342,116 @@ def _test_delete_batch_definition__does_not_clobber_other_assets(
     # ensure neither call to delete_batch_definition() didn't clobber each other
     for asset_name in asset_names:
         assert loaded_datasource.get_asset(asset_name).batch_definitions == []
+
+
+class _MyPartitioner(FluentBaseModel):
+    """Partitioner that adhere's to the expected protocol."""
+
+    sort_batches_ascending: bool
+
+    @property
+    def param_names(self) -> List[str]:
+        return ["a", "b"]
+
+
+METADATA_1_1 = {"a": 1, "b": 1}
+METADATA_1_2 = {"a": 1, "b": 2}
+METADATA_2_1 = {"a": 2, "b": 1}
+METADATA_2_2 = {"a": 2, "b": 2}
+METADATA_NONE_2 = {"a": None, "b": 2}
+METADATA_2_NONE = {"a": 2, "b": None}
+METADATA_NONE_NONE = {"a": None, "b": None}
+
+
+# @pytest.mark.unit
+# @pytest.mark.parametrize(
+#     ("partitioner", "input_metadata", "expected_metadata"),
+#     [
+#         pytest.param(
+#             _MyPartitioner(sort_batches_ascending=True),
+#             [METADATA_1_1, METADATA_1_2, METADATA_2_1, METADATA_2_2],
+#             [METADATA_1_1, METADATA_1_2, METADATA_2_1, METADATA_2_2],
+#             id="ascending with no nones"
+#         ),
+#         pytest.param(
+#             _MyPartitioner(sort_batches_ascending=True),
+#             [METADATA_1_1, METADATA_1_2, METADATA_NONE_2],
+#             [METADATA_NONE_2, METADATA_1_1], METADATA_1_2,
+#             id="ascending missing first param"
+#         ),
+#         pytest.param(
+#             _MyPartitioner(sort_batches_ascending=True),
+#             [METADATA_1_1, METADATA_1_2, METADATA_2_NONE],
+#             [METADATA_1_1, METADATA_2_NONE, METADATA_1_2],
+#             id="ascending missing latter param"
+#         ),
+#         pytest.param(
+#             _MyPartitioner(sort_batches_ascending=False),
+#             [METADATA_1_1, METADATA_1_2, METADATA_2_1, METADATA_2_2],
+#             [METADATA_2_2, METADATA_2_1, METADATA_1_2, METADATA_1_1],
+#             id="descending with no nones"
+#         ),
+#     ],
+# )
+# def test_sort_batches(partitioner, input_metadata, expected_metadata, empty_data_asset, mocker):
+#     # build batches with the required metadata
+#     batches = [mocker.MagicMock(spec=Batch, metadata=x) for x in input_metadata]
+
+#     empty_data_asset.sort_batches(batches, partitioner)
+
+#     sorted_metadata = [b.metadata for b in batches]
+#     assert sorted_metadata == expected_metadata
+
+
+def test_sort_batches__ascending(empty_data_asset, mocker):
+    partitioner = _MyPartitioner(sort_batches_ascending=True)
+    batches = [
+        mocker.MagicMock(spec=Batch, metadata=METADATA_1_1),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_1_2),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_2_1),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_2_2),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_2_NONE),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_NONE_2),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_NONE_NONE),
+    ]
+
+    empty_data_asset.sort_batches(batches, partitioner)
+
+    sorted_metadata = [b.metadata for b in batches]
+
+    assert sorted_metadata == [
+        METADATA_NONE_NONE,
+        METADATA_NONE_2,
+        METADATA_1_1,
+        METADATA_1_2,
+        METADATA_2_NONE,
+        METADATA_2_1,
+        METADATA_2_2,
+    ]
+
+
+def test_sort_batches__descending(empty_data_asset, mocker):
+    partitioner = _MyPartitioner(sort_batches_ascending=False)
+    batches = [
+        mocker.MagicMock(spec=Batch, metadata=METADATA_1_1),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_1_2),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_2_1),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_2_2),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_2_NONE),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_NONE_2),
+        mocker.MagicMock(spec=Batch, metadata=METADATA_NONE_NONE),
+    ]
+
+    empty_data_asset.sort_batches(batches, partitioner)
+
+    sorted_metadata = [b.metadata for b in batches]
+
+    assert sorted_metadata == [
+        METADATA_2_2,
+        METADATA_2_1,
+        METADATA_2_NONE,
+        METADATA_1_2,
+        METADATA_1_1,
+        METADATA_NONE_2,
+        METADATA_NONE_NONE,
+    ]
