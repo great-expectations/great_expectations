@@ -7,35 +7,18 @@ export default function GithubNavbarItem({ owner, repository, className }) {
     const [starsCount, setStarsCount] = useState('0');
     const [forksCount, setForksCount] = useState('0');
     const [showGithubBadgeInfo, setShowGithubBadgeInfo] = useState(true);
-    let innerWidth = undefined;
-    let outerWidth = undefined;
-    const MOBILE_BREAKPOINT = 996;
 
     useEffect(() => {
-        if(!isMobileScreen()){
-            fetch(`https://api.github.com/repos/${owner}/${repository}`)
-                .then(response => response.json())
-                .then(data => {
-                    setStarsCount(formatCompactNumber(data.stargazers_count))
-                    setForksCount(formatCompactNumber(data.forks_count))
-                    setShowGithubBadgeInfo(true)
-                }).catch( _ => {
-                setShowGithubBadgeInfo(false)
-            })
-        } else {
+        fetch(`https://api.github.com/repos/${owner}/${repository}`)
+            .then(response => response.json())
+            .then(data => {
+                setStarsCount(formatCompactNumber(data.stargazers_count))
+                setForksCount(formatCompactNumber(data.forks_count))
+                setShowGithubBadgeInfo(true)
+            }).catch( _ => {
             setShowGithubBadgeInfo(false)
-        }
-    }, [innerWidth,outerWidth]);
-
-    useEffect( () => {
-        innerWidth = window.innerWidth;
-        outerWidth = window.outerWidth;
-    }, [])
-
-
-    function isMobileScreen() {
-        return !!(innerWidth || outerWidth) && (innerWidth < MOBILE_BREAKPOINT || outerWidth < MOBILE_BREAKPOINT);
-    }
+        })
+    }, []);
 
     function formatCompactNumber(number) {
         const formatter = Intl.NumberFormat("en", { notation: "compact" });

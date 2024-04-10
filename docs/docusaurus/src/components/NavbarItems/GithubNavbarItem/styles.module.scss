@@ -53,4 +53,12 @@ a:hover {
         right: calc(var(--ifm-navbar-padding-horizontal) + 2.5rem);
         padding-right: 0;
     }
+
+    .githubBadgeNoErrors {
+        min-width: 2.5rem;
+    }
+
+    .githubBadgeInfo {
+        display: none;
+    }
 }
