@@ -5,6 +5,7 @@ from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
 from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.store.checkpoint_store import (
     V1CheckpointStore as CheckpointStore,
 )
@@ -219,6 +220,49 @@ def _test_checkpoint_factory_delete_success(context):
         match=f"Checkpoint with name {name} was not found.",
     ):
         context.checkpoints.get(name)
+
+
+@pytest.mark.parametrize(
+    "context_fixture_name",
+    [
+        pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.unit),
+        pytest.param("in_memory_runtime_context", id="ephemeral", marks=pytest.mark.unit),
+        pytest.param("empty_data_context", id="filesystem", marks=pytest.mark.filesystem),
+    ],
+)
+def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.FixtureRequest):
+    context: AbstractDataContext = request.getfixturevalue(context_fixture_name)
+
+    # Arrange
+    ds = context.sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
+    batch_def = asset.add_batch_definition("my_batch_definition")
+    suite = ExpectationSuite(name="my_suite")
+
+    checkpoint_a = context.checkpoints.add(
+        Checkpoint(
+            name="a",
+            validation_definitions=[
+                ValidationDefinition(name="val def a", data=batch_def, suite=suite)
+            ],
+        )
+    )
+    checkpoint_b = context.checkpoints.add(
+        Checkpoint(
+            name="b",
+            validation_definitions=[
+                ValidationDefinition(name="val def b", data=batch_def, suite=suite)
+            ],
+        )
+    )
+
+    # Act
+    result = context.checkpoints.all()
+    result = sorted(result, key=lambda x: x.name)
+
+    # Assert
+    assert [r.name for r in result] == [checkpoint_a.name, checkpoint_b.name]
+    assert result == [checkpoint_a, checkpoint_b]
 
 
 class TestCheckpointFactoryAnalytics:
