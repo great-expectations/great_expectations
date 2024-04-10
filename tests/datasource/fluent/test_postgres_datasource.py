@@ -657,31 +657,6 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
 
 
 @pytest.mark.postgresql
-def test_sort_batch_list_by_unknown_key(empty_data_context, create_source: CreateSourceFixture):
-    with create_source(
-        validate_batch_spec=lambda _: None,
-        dialect="postgresql",
-        data_context=empty_data_context,
-    ) as source:
-        (
-            source,  # noqa: PLW2901
-            asset,
-        ) = create_and_add_table_asset_without_testing_connection(
-            source=source, name="my_asset", table_name="my_table"
-        )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
-        asset.add_sorters(["yr", "month"])
-        batch_request = BatchRequest(
-            datasource_name=source.name,
-            data_asset_name=asset.name,
-            options={},
-            partitioner=partitioner,
-        )
-        with pytest.raises(KeyError):
-            source.get_batch_list_from_batch_request(batch_request)
-
-
-@pytest.mark.postgresql
 @pytest.mark.parametrize(
     "order_by",
     [
@@ -1350,10 +1325,8 @@ def test_sorting_none_in_metadata(
     ) as source:
         # We use a query asset because then we don't have to mock out db connection tests
         # in this unit test.
-        asset = source.add_query_asset(
-            name="my_asset", query="select * from table", order_by=["-year"]
-        )
-        partitioner = PartitionerYear(column_name="my_col")
+        asset = source.add_query_asset(name="my_asset", query="select * from table")
+        partitioner = PartitionerYear(column_name="my_col", sort_batches_ascending=False)
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
         )
