@@ -12,8 +12,8 @@ from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBu
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import (
+        BatchParameters,
         BatchRequest,
-        BatchRequestOptions,
     )
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
@@ -41,7 +41,7 @@ class BatchDefinition(pydantic.BaseModel):
         self._data_asset = data_asset
 
     def build_batch_request(
-        self, batch_request_options: Optional[BatchRequestOptions] = None
+        self, batch_request_options: Optional[BatchParameters] = None
     ) -> BatchRequest:
         """Build a BatchRequest from the asset and batch request options."""
         return self.data_asset.build_batch_request(

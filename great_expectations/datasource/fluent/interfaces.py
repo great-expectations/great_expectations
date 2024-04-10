@@ -80,8 +80,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import (
+        BatchParameters,
         BatchRequest,
-        BatchRequestOptions,
     )
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
@@ -216,7 +216,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
         batching_regex: Optional[re.Pattern] = None,
@@ -342,7 +342,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         return batch_definitions[0]
 
     def _batch_request_options_are_valid(
-        self, options: BatchRequestOptions, partitioner: Optional[Partitioner]
+        self, options: BatchParameters, partitioner: Optional[Partitioner]
     ) -> bool:
         valid_options = self.get_batch_request_options_keys(partitioner=partitioner)
         return set(options.keys()).issubset(set(valid_options))

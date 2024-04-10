@@ -14,7 +14,7 @@ from great_expectations.validator.validator import calc_validation_statistics
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
     from great_expectations.core.batch_definition import BatchDefinition
-    from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+    from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.expectations.expectation import (
         Expectation,
         ExpectationConfiguration,
@@ -31,7 +31,7 @@ class Validator:
         self,
         batch_definition: BatchDefinition,
         result_format: ResultFormat = ResultFormat.SUMMARY,
-        batch_request_options: Optional[BatchRequestOptions] = None,
+        batch_request_options: Optional[BatchParameters] = None,
     ) -> None:
         self._batch_definition = batch_definition
         self._batch_request_options = batch_request_options
