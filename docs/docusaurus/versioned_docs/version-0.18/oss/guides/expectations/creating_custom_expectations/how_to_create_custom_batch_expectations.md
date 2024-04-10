@@ -29,13 +29,13 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-Download the custom [BatchExpectation template](/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py) and then run the following code to rename it and save it to a directory:
+Download the custom [BatchExpectation template](batch_expectation_template.py) and then run the following code to rename it and save it to a directory:
 
 ```bash 
 cp batch_expectation_template.py /SOME_DIRECTORY/expect_batch_columns_to_be_unique.py
 ```
 
-### Storing Expectation files
+### Store Expectation files
 
 During development, you don't need to store Expectation files in a specific location. Expectation files are self-contained and can be executed anywhere as long as GX is installed However, to use your new Expectation with other GX components, you'll need to make sure the file is stored one of the following locations:
 
