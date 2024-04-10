@@ -2043,7 +2043,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        batch_request_options: Optional[Union[dict, BatchParameters]] = None,
+        batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -2081,7 +2081,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             partitioner_method: The method used to partition the Data Asset into Batches
             partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
-            batch_request_options: Options for `FluentBatchRequest`
+            batch_parameters: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
@@ -2115,7 +2115,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
-            batch_request_options=batch_request_options,
+            batch_parameters=batch_parameters,
             **kwargs,
         )
 
@@ -2140,7 +2140,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        batch_request_options: Optional[Union[dict, BatchParameters]] = None,
+        batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         result = get_batch_request_from_acceptable_arguments(
@@ -2163,7 +2163,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
-            batch_request_options=batch_request_options,
+            batch_parameters=batch_parameters,
             **kwargs,
         )
         datasource_name = result.datasource_name

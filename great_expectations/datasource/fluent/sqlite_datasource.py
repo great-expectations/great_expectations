@@ -80,7 +80,7 @@ class PartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
         }
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "datetime" not in options:

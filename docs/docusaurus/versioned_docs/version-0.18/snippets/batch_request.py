@@ -39,7 +39,7 @@ assert batch_request.data_asset_name == "csv_asset"
 assert batch_request.options == {"year": "2019", "month": "02"}
 
 # <snippet name="docs/docusaurus/docs/snippets/batch_request options">
-options = asset.batch_request_options
+options = asset.batch_parameters
 print(options)
 # </snippet>
 

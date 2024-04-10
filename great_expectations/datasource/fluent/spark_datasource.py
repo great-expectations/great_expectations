@@ -186,7 +186,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def test_connection(self) -> None: ...
 
     @override
-    def get_batch_request_options_keys(
+    def get_batch_parameters_keys(
         self, partitioner: Optional[Partitioner] = None
     ) -> tuple[str, ...]:
         return tuple()

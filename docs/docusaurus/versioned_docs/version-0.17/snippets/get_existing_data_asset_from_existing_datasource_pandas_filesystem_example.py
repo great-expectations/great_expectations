@@ -49,11 +49,11 @@ my_asset = context.get_datasource("my_datasource").get_asset("my_asset")
 # </snippet>
 
 # Python
-# <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request_options">
-print(my_asset.batch_request_options)
+# <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_parameters">
+print(my_asset.batch_parameters)
 # </snippet>
 
-assert my_asset.batch_request_options == ("year", "month", "path")
+assert my_asset.batch_parameters == ("year", "month", "path")
 
 # Python
 # <snippet name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request">

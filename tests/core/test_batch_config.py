@@ -34,7 +34,7 @@ def test_save(mock_data_asset):
 
 
 @pytest.mark.parametrize(
-    "batch_request_options",
+    "batch_parameters",
     [
         (None,),
         ({"foo": "bar"},),
@@ -42,7 +42,7 @@ def test_save(mock_data_asset):
 )
 @pytest.mark.unit
 def test_build_batch_request(
-    batch_request_options: Optional[BatchParameters],
+    batch_parameters: Optional[BatchParameters],
     mock_data_asset: DataAsset,
 ):
     partitioner = PartitionerYear(column_name="foo")
@@ -52,12 +52,12 @@ def test_build_batch_request(
     )
     batch_definition.set_data_asset(mock_data_asset)
 
-    batch_definition.build_batch_request(batch_request_options=batch_request_options)
+    batch_definition.build_batch_request(batch_parameters=batch_parameters)
 
     mock_build_batch_request = batch_definition.data_asset.build_batch_request
     assert isinstance(mock_build_batch_request, Mock)
     mock_build_batch_request.assert_called_once_with(
-        options=batch_request_options,
+        options=batch_parameters,
         partitioner=partitioner,
         batching_regex=batching_regex,
     )

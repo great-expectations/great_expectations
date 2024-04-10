@@ -53,7 +53,7 @@ assert len(batches) == 12
 my_asset = my_table_asset.add_sorters(["+year", "-month"])
 # </snippet>
 
-assert my_asset.batch_request_options == ("year", "month")
+assert my_asset.batch_parameters == ("year", "month")
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py my_batch_list">

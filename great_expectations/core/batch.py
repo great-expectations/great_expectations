@@ -1189,7 +1189,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     query: str | None = None,
     path: str | None = None,
     batch_filter_parameters: dict | None = None,
-    batch_request_options: dict | BatchParameters | None = None,
+    batch_parameters: dict | BatchParameters | None = None,
     **kwargs,
 ) -> BatchRequest | RuntimeBatchRequest | FluentBatchRequest:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
@@ -1221,7 +1221,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
 
         batch_spec_passthrough
 
-        batch_request_options
+        batch_parameters
 
         **kwargs
 
@@ -1300,7 +1300,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         result = _get_fluent_batch_request_class()(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            options=batch_request_options,
+            options=batch_parameters,
         )
         return result
 
