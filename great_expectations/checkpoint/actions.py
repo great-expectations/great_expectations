@@ -91,7 +91,7 @@ class ActionContext:
     def __init__(self) -> None:
         self._data: list[tuple[ValidationAction, dict]] = []
 
-    def update(self, action: ValidationAction, action_result: str | dict) -> None:
+    def update(self, action: ValidationAction, action_result: dict) -> None:
         self._data.append((action, action_result))
 
     def filter_results_by_class(self, class_: Type[ValidationAction]) -> list[dict]:
@@ -189,7 +189,7 @@ class ValidationAction(BaseModel):
     # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
     def v1_run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
-    ) -> str | dict:
+    ) -> dict:
         raise NotImplementedError
 
     def _is_enabled(self, success: bool) -> bool:
@@ -821,7 +821,7 @@ class EmailAction(ValidationAction):
         self,
         checkpoint_result: CheckpointResult,
         action_context: ActionContext | None = None,
-    ) -> str | dict:
+    ) -> dict:
         success = checkpoint_result.success or False
         if not self._is_enabled(success=success):
             return {"email_result": ""}
@@ -1112,8 +1112,8 @@ class SNSNotificationAction(ValidationAction):
     @override
     def v1_run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
-    ) -> str:
-        return send_sns_notification(
+    ) -> dict:
+        msg = send_sns_notification(
             sns_topic_arn=self.sns_topic_arn,
             sns_subject=self.sns_message_subject or checkpoint_result.name,
             validation_results=json.dumps(
@@ -1121,6 +1121,7 @@ class SNSNotificationAction(ValidationAction):
                 indent=4,
             ),
         )
+        return {"result": msg}
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent
@@ -1164,7 +1165,7 @@ class APINotificationAction(ValidationAction):
     @override
     def v1_run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
-    ) -> str:
+    ) -> dict:
         aggregate_payload = []
         for run_id, run_result in checkpoint_result.run_results.items():
             suite_name = run_result.suite_name
@@ -1179,7 +1180,7 @@ class APINotificationAction(ValidationAction):
             aggregate_payload.append(payload)
 
         response = self.send_results(aggregate_payload)
-        return f"Posted results to API, status code - {response.status_code}"
+        return {"result": f"Posted results to API, status code - {response.status_code}"}
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent
