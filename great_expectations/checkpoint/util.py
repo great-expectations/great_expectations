@@ -44,23 +44,17 @@ def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack
 
     try:
         response = session.post(url=url, headers=headers, json=query)
-        if slack_webhook:
-            ok_status = response.text == "ok"
-        else:
-            ok_status = response.json()["ok"]
+        response.raise_for_status()
     except requests.ConnectionError:
         logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
-    except Exception as e:
-        logger.error(str(e))  # noqa: TRY400
-    else:
-        if response.status_code != 200 or not ok_status:  # noqa: PLR2004
-            logger.warning(
-                "Request to Slack webhook "
-                f"returned error {response.status_code}: {response.text}"
-            )
+        return None
+    except requests.HTTPError:
+        logger.warning(
+            "Request to Slack webhook " f"returned error {response.status_code}: {response.text}"
+        )
+        return None
 
-        else:
-            return "Slack notification succeeded."
+    return "Slack notification succeeded."
 
 
 # noinspection SpellCheckingInspection

@@ -37,7 +37,9 @@ class SlackRenderer(Renderer):
         )
         blocks.append(title_block)
 
-        report_element_block = self._process_data_docs_pages(data_docs_pages, notify_with)
+        report_element_block = self._build_report_element_block(
+            data_docs_pages=data_docs_pages, notify_with=notify_with
+        )
         if report_element_block:
             blocks.append(report_element_block)
 
@@ -56,6 +58,8 @@ class SlackRenderer(Renderer):
         run_id = validation_result.meta.get("run_id", "__no_run_id__")
         batch_id = validation_result.batch_id
         check_details_text = f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
+
+        failed_expectations_text = ""
 
         status = "Failed :x:"
         if validation_result.success:
