@@ -222,7 +222,7 @@ class _FilePathDataAsset(DataAsset):
             allowed_keys = set(self.get_batch_parameters_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
-                "Batch request options should only contain keys from the following set:\n"
+                "Batch parameters should only contain keys from the following set:\n"
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )

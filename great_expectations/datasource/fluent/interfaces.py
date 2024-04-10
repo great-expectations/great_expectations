@@ -348,7 +348,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         return set(options.keys()).issubset(set(valid_options))
 
     def _get_batch_metadata_from_batch_request(self, batch_request: BatchRequest) -> BatchMetadata:
-        """Performs config variable substitution and populates batch request options for
+        """Performs config variable substitution and populates batch parameters for
         Batch.metadata at runtime.
         """
         batch_metadata = copy.deepcopy(self.batch_metadata)

@@ -201,7 +201,7 @@ class _PartitionerDatetime(FluentBaseModel):
         identifiers: Dict = {}
         for part in self.param_names:
             if part not in options:
-                raise ValueError(f"'{part}' must be specified in the batch request options")  # noqa: TRY003
+                raise ValueError(f"'{part}' must be specified in the batch parameters")  # noqa: TRY003
             identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
@@ -329,7 +329,7 @@ class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "quotient" not in options:
-            raise ValueError("'quotient' must be specified in the batch request options")  # noqa: TRY003
+            raise ValueError("'quotient' must be specified in the batch parameters")  # noqa: TRY003
         return {self.column_name: options["quotient"]}
 
 
@@ -352,7 +352,7 @@ class SqlPartitionerModInteger(_PartitionerOneColumnOneParam):
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "remainder" not in options:
-            raise ValueError("'remainder' must be specified in the batch request options")  # noqa: TRY003
+            raise ValueError("'remainder' must be specified in the batch parameters")  # noqa: TRY003
         return {self.column_name: options["remainder"]}
 
 
@@ -374,7 +374,7 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
         self, options: BatchParameters
     ) -> Dict[str, Any]:
         if self.column_name not in options:
-            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")  # noqa: TRY003
+            raise ValueError(f"'{self.column_name}' must be specified in the batch parameters")  # noqa: TRY003
         return {self.column_name: options[self.column_name]}
 
     @override
@@ -406,7 +406,7 @@ class SqlPartitionerMultiColumnValue(FluentBaseModel):
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
             raise ValueError(  # noqa: TRY003
-                f"All column names, {self.column_names}, must be specified in the batch request options. "  # noqa: E501
+                f"All column names, {self.column_names}, must be specified in the batch parameters. "  # noqa: E501
                 f" The options provided were f{options}."
             )
         return {col: options[col] for col in self.column_names}
@@ -452,7 +452,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     ) -> Dict[str, Any]:
         if "datetime" not in options:
             raise ValueError(  # noqa: TRY003
-                "'datetime' must be specified in the batch request options to create a batch identifier"  # noqa: E501
+                "'datetime' must be specified in the batch parameters to create a batch identifier"  # noqa: E501
             )
         return {self.column_name: options["datetime"]}
 
@@ -552,7 +552,7 @@ class _SQLAsset(DataAsset):
         batch_requests: List[BatchRequest] = []
         # We iterate through all possible batches as determined by the partitioner
         for params in sql_partitioner.param_defaults(self):
-            # If the params from the partitioner don't match the batch request options
+            # If the params from the partitioner don't match the batch parameters
             # we don't create this batch.
             if not _SQLAsset._matches_request_options(params, batch_request.options):
                 continue
@@ -669,7 +669,7 @@ class _SQLAsset(DataAsset):
             allowed_keys = set(self.get_batch_parameters_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
-                "Batch request options should only contain keys from the following set:\n"
+                "batch parameters should only contain keys from the following set:\n"
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
