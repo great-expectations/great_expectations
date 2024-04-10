@@ -18,7 +18,7 @@ This guide will walk you through the process of creating your own custom `BatchE
 ## Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `BatchExpectations` always start with `expect_table_`. 
-For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
+For more on Expectation naming conventions, see the [Expectations section](/oss/contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
@@ -29,8 +29,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [BatchExpectation here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/batch_expectation_template.py).
-Download the file, place it in the appropriate directory, and rename it to the appropriate name.
+Download the custom [BatchExpectation template](/oss/guides/expectations/creating_custom_expectations/batch_expectation_template.py) and then run the following code to rename it and save it to a directory:
 
 ```bash 
 cp batch_expectation_template.py /SOME_DIRECTORY/expect_batch_columns_to_be_unique.py
