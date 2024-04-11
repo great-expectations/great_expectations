@@ -32,6 +32,10 @@ def validated_pandas_filesystem_datasource(
 def test_get_batch_list_from_batch_request__sort_ascending(
     validated_pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
+    """Verify that get_batch_list_from_batch_request respects a partitioner's ascending sort order.
+
+    NOTE: we just happen to be using pandas as the concrete class.
+    """
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
@@ -59,6 +63,10 @@ def test_get_batch_list_from_batch_request__sort_ascending(
 def test_get_batch_list_from_batch_request__sort_descending(
     validated_pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
+    """Verify that get_batch_list_from_batch_request respects a partitioner's descending sort order.
+
+    NOTE: we just happen to be using pandas as the concrete class.
+    """
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
