@@ -48,7 +48,7 @@ def send_slack_notification(
         headers = {"Authorization": f"Bearer {slack_token}"}
 
     if not url:
-        raise ValueError("")
+        raise ValueError("No Slack webhook URL provided.")  # noqa: TRY003
 
     try:
         response = session.post(url=url, headers=headers, json=payload)
