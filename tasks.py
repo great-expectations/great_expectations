@@ -8,6 +8,7 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+
 from __future__ import annotations
 
 import logging
@@ -277,7 +278,7 @@ def type_check(  # noqa: PLR0913, PLR0912
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
-            print("✅"),
+            print("✅")
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
@@ -995,7 +996,11 @@ def docs_snippet_tests(
 
 
 @invoke.task(
-    help={"pty": _PTY_HELP_DESC},
+    help={
+        "pty": _PTY_HELP_DESC,
+        "reports": "Generate coverage reports to be uploaded to codecov",
+        "W": "Warnings control",
+    },
     iterable=["service_names", "up_services", "verbose"],
 )
 def ci_tests(  # noqa: PLR0913
@@ -1008,6 +1013,7 @@ def ci_tests(  # noqa: PLR0913
     slowest: int = 5,
     timeout: float = 0.0,  # 0 indicates no timeout
     xdist: bool = False,
+    W: str | None = None,
     pty: bool = True,
 ):
     """
@@ -1037,6 +1043,10 @@ def ci_tests(  # noqa: PLR0913
 
     if verbose:
         pytest_options.append("-vv")
+
+    if W:
+        # https://docs.python.org/3/library/warnings.html#describing-warning-filters
+        pytest_options.append(f"-W={W}")
 
     for test_deps in _get_marker_dependencies(marker):
         if restart_services or up_services:

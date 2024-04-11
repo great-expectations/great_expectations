@@ -1,4 +1,5 @@
 """POC for loading config."""
+
 from __future__ import annotations
 
 import logging
@@ -13,6 +14,7 @@ from typing import (
     Dict,
     Final,
     List,
+    Mapping,
     Set,
     Tuple,
     Type,
@@ -146,7 +148,7 @@ class GxConfig(FluentBaseModel):
                 f"'{datasource_name}' not found. Available datasources are {self.get_datasource_names()}"
             ) from exc
 
-    def update_datasources(self, datasources: Dict[str, Datasource]) -> None:
+    def update_datasources(self, datasources: Mapping[str, Datasource]) -> None:
         """
         Updates internal list of datasources using supplied datasources dictionary.
 
