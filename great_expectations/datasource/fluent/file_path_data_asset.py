@@ -171,7 +171,7 @@ class _FilePathDataAsset(DataAsset):
         if partitioner:
             spark_partitioner = self.get_partitioner_implementation(partitioner)
             option_keys += tuple(spark_partitioner.param_names)
-        return tuple(option_keys)
+        return option_keys
 
     @public_api
     @override
