@@ -27,7 +27,12 @@ from great_expectations.types import DictDot
 logger = logging.getLogger(__name__)
 
 
-def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack_token=None):
+def send_slack_notification(
+    payload: dict,
+    slack_webhook: str | None = None,
+    slack_channel: str | None = None,
+    slack_token: str | None = None,
+) -> str | None:
     session = requests.Session()
     url = slack_webhook
     headers = None
@@ -36,14 +41,14 @@ def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack
     # https://api.slack.com/legacy/custom-integrations/messaging/webhooks
     # ** Since it is legacy, it could be deprecated or removed in the future **
     if slack_channel:
-        query["channel"] = slack_channel
+        payload["channel"] = slack_channel
 
     if not slack_webhook:
         url = "https://slack.com/api/chat.postMessage"
         headers = {"Authorization": f"Bearer {slack_token}"}
 
     try:
-        response = session.post(url=url, headers=headers, json=query)
+        response = session.post(url=url, headers=headers, json=payload)
         response.raise_for_status()
     except requests.ConnectionError:
         logger.warning(f"Failed to connect to Slack webhook after {10} retries.")

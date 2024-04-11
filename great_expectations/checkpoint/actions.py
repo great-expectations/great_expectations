@@ -11,7 +11,6 @@ import logging
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     List,
     Literal,
     Optional,
@@ -321,18 +320,22 @@ class SlackNotificationAction(DataDocsAction):
             )
             checkpoint_text_blocks.extend(validation_text_blocks)
 
-        query = self.renderer.build_query(
+        payload = self.renderer.concatenate_text_blocks(
             checkpoint_result=checkpoint_result, text_blocks=checkpoint_text_blocks
         )
-        blocks = query.get("blocks")
+
+        return self._post_slack_payload(payload=payload, result=result)
+
+    def _post_slack_payload(self, payload: dict, result: dict) -> dict:
+        blocks = payload.get("blocks")
         if blocks:
             if len(blocks) >= 1:
                 if blocks[0].get("text"):
                     result = self._send_notifications_in_batches(
-                        blocks=blocks, query=query, result=result
+                        blocks=blocks, payload=payload, result=result
                     )
                 else:
-                    result = self._get_slack_result(query=query)
+                    result = self._get_slack_result(payload=payload)
 
         return result
 
@@ -427,7 +430,7 @@ class SlackNotificationAction(DataDocsAction):
 
         result = {"slack_notification_result": "none required"}
         if self._is_enabled(success=validation_success):
-            query: Dict = self.renderer.render(
+            payload = self.renderer.render(
                 validation_result_suite,
                 data_docs_pages,
                 self.notify_with,
@@ -435,31 +438,31 @@ class SlackNotificationAction(DataDocsAction):
                 validation_result_urls,
             )
 
-            blocks = query.get("blocks")
+            blocks = payload.get("blocks")
             if blocks:
                 if len(blocks) >= 1:
                     if blocks[0].get("text"):
-                        result = self._send_notifications_in_batches(blocks, query, result)
+                        result = self._send_notifications_in_batches(blocks, payload, result)
                     else:
-                        result = self._get_slack_result(query)
+                        result = self._get_slack_result(payload)
 
         return result
 
-    def _send_notifications_in_batches(self, blocks, query, result):
+    def _send_notifications_in_batches(self, blocks, payload, result):
         text = blocks[0]["text"]["text"]
         chunks, chunk_size = len(text), len(text) // 4
         split_text = [
             text[position : position + chunk_size] for position in range(0, chunks, chunk_size)
         ]
         for batch in split_text:
-            query["text"] = batch
-            result = self._get_slack_result(query)
+            payload["text"] = batch
+            result = self._get_slack_result(payload)
         return result
 
-    def _get_slack_result(self, query):
+    def _get_slack_result(self, payload):
         # this will actually send the POST request to the Slack webapp server
         slack_notif_result = send_slack_notification(
-            query,
+            payload=payload,
             slack_webhook=self.slack_webhook,
             slack_token=self.slack_token,
             slack_channel=self.slack_channel,

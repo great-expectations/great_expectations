@@ -146,7 +146,9 @@ class SlackRenderer(Renderer):
     def _build_divider_block(self) -> dict:
         return {"type": "divider"}
 
-    def build_query(self, checkpoint_result: CheckpointResult, text_blocks: list[dict]) -> dict:
+    def concatenate_text_blocks(
+        self, checkpoint_result: CheckpointResult, text_blocks: list[dict]
+    ) -> dict:
         checkpoint_name = checkpoint_result.checkpoint_config.name
         status = checkpoint_result.success or False
 
@@ -160,9 +162,9 @@ class SlackRenderer(Renderer):
                 }
             ],
         }
-        text_blocks.append(footer_section)
 
-        return {"blocks": text_blocks, "text": f"{checkpoint_name}: {status}"}
+        all_blocks = [block for block in text_blocks] + [footer_section]
+        return {"blocks": all_blocks, "text": f"{checkpoint_name}: {status}"}
 
     def render(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
