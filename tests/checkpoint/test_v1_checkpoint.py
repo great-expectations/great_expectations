@@ -513,6 +513,13 @@ class TestCheckpointResult:
 
     @pytest.mark.unit
     def test_checkpoint_sorts_actions(self, validation_definition: ValidationDefinition):
+        """
+        Note that we are directly testing the `_sort_actions()` private method here.
+
+        This was done as a way to expedite the testing process due to some conflicts with
+        Pydantics and mocks.
+        Ideally, this would be tested through the public `run()` method.
+        """
         pd_action = PagerdutyAlertAction(api_key="api_key", routing_key="routing_key")
         og_action = OpsgenieAlertAction(api_key="api_key")
         data_docs_action = UpdateDataDocsAction()
