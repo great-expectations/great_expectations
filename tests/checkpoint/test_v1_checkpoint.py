@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import pathlib
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from unittest import mock
 
 import pytest
@@ -516,7 +516,7 @@ class TestCheckpointResult:
         pd_action = PagerdutyAlertAction(api_key="api_key", routing_key="routing_key")
         og_action = OpsgenieAlertAction(api_key="api_key")
         data_docs_action = UpdateDataDocsAction()
-        actions = [pd_action, og_action, data_docs_action]
+        actions: List[CheckpointAction] = [pd_action, og_action, data_docs_action]
 
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(
