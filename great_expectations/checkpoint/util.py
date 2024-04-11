@@ -47,6 +47,9 @@ def send_slack_notification(
         url = "https://slack.com/api/chat.postMessage"
         headers = {"Authorization": f"Bearer {slack_token}"}
 
+    if not url:
+        raise ValueError("")
+
     try:
         response = session.post(url=url, headers=headers, json=payload)
         response.raise_for_status()
