@@ -39,6 +39,9 @@ from great_expectations.datasource.fluent import (
 )
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
+    PandasFilesystemDatasource,
+)
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -409,3 +412,17 @@ def seeded_contexts(
     """Parametrized fixture for seeded File and Cloud DataContexts."""
     context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(request.param)
     return context_fixture
+
+
+@pytest.fixture
+def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasource:
+    base_directory_rel_path = pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+    base_directory_abs_path = (
+        pathlib.Path(__file__).parent.joinpath(base_directory_rel_path).resolve(strict=True)
+    )
+    pandas_filesystem_datasource = PandasFilesystemDatasource(
+        name="pandas_filesystem_datasource",
+        base_directory=base_directory_abs_path,
+    )
+    pandas_filesystem_datasource._data_context = empty_data_context
+    return pandas_filesystem_datasource
