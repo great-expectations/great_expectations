@@ -1,3 +1,0 @@
-alpha-2020-01-01.csv
-alpha-2020-01-02.csv
-alpha-2020-01-03.csv
