@@ -13,6 +13,8 @@ from great_expectations import expectations as gxe
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
+    OpsgenieAlertAction,
+    PagerdutyAlertAction,
     SlackNotificationAction,
     UpdateDataDocsAction,
     ValidationAction,
@@ -496,9 +498,6 @@ class TestCheckpointResult:
         validation_definition: ValidationDefinition,
         actions: list[CheckpointAction],
     ):
-        update_data_docs_action = UpdateDataDocsAction()
-        actions.append(update_data_docs_action)
-
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(
             name=self.checkpoint_name,
@@ -510,8 +509,23 @@ class TestCheckpointResult:
             result = checkpoint.run()
 
         assert mock_run.call_count == len(actions)
-        assert mock_run.call_args_list == []  # Should have UpdateDataDocs first
         mock_run.assert_called_with(checkpoint_result=result, action_context=mock.ANY)
+
+    @pytest.mark.unit
+    def test_checkpoint_sorts_actions(self, validation_definition: ValidationDefinition):
+        pd_action = PagerdutyAlertAction(api_key="api_key", routing_key="routing_key")
+        og_action = OpsgenieAlertAction(api_key="api_key")
+        data_docs_action = UpdateDataDocsAction()
+        actions = [pd_action, og_action, data_docs_action]
+
+        validation_definitions = [validation_definition]
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name,
+            validation_definitions=validation_definitions,
+            actions=actions,
+        )
+
+        assert checkpoint._sort_actions() == [data_docs_action, pd_action, og_action]
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(
