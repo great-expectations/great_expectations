@@ -51,7 +51,7 @@ def basic_data_context_v013_config():
                 },
                 "evaluation_parameter_store": {
                     "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
+                    "class_name": "SuiteParameterStore",
                 },
                 "checkpoint_store": {
                     "class_name": "CheckpointStore",

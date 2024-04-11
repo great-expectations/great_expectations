@@ -32,4 +32,4 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
   evaluation_parameter_store:
-    class_name: EvaluationParameterStore
+    class_name: SuiteParameterStore

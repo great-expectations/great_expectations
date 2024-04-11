@@ -40,7 +40,7 @@ stores:
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/docs/reference/evaluation_parameters/
-    class_name: EvaluationParameterStore
+    class_name: SuiteParameterStore
 
   checkpoint_store:
     class_name: CheckpointStore

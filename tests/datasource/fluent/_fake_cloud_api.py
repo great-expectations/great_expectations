@@ -167,7 +167,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
             "evaluation_parameter_store_name": "default_evaluation_parameter_store",
             "validations_store_name": "default_validations_store",
             "stores": {
-                "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+                "default_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {

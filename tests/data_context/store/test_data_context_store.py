@@ -46,7 +46,7 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
                 },
             },
             "evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore",
+                "class_name": "SuiteParameterStore",
                 "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {

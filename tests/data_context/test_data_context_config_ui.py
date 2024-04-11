@@ -185,7 +185,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
 
     # Create desired config
     desired_stores_config = {
-        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -320,7 +320,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
 
     # Create desired config
     desired_stores_config = {
-        "custom_evaluation_parameter_store_name": {"class_name": "EvaluationParameterStore"},
+        "custom_evaluation_parameter_store_name": {"class_name": "SuiteParameterStore"},
         "custom_expectations_S3_store_name": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -563,7 +563,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
     # Create desired config
     data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
     desired_stores_config = {
-        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_GCS_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -710,7 +710,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
 
     # Create desired config
     desired_stores_config = {
-        "custom_evaluation_parameter_store_name": {"class_name": "EvaluationParameterStore"},
+        "custom_evaluation_parameter_store_name": {"class_name": "SuiteParameterStore"},
         "custom_expectations_GCS_store_name": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -842,7 +842,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
 
     # Create desired config
     desired_stores_config = {
-        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_database_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -1035,7 +1035,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
 
     # Create desired config
     desired_stores_config = {
-        "custom_evaluation_parameter_store_name": {"class_name": "EvaluationParameterStore"},
+        "custom_evaluation_parameter_store_name": {"class_name": "SuiteParameterStore"},
         "custom_expectations_database_store_name": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -1208,7 +1208,7 @@ def test_override_general_defaults(
                     "prefix": "REPLACE_ME",
                 },
             },
-            "custom_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "custom_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
             "checkpoint_S3_store": {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -1273,7 +1273,7 @@ def test_override_general_defaults(
     )
 
     desired_stores = {
-        "custom_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "custom_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -1431,7 +1431,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     # Create desired config
     desired_stores_config = {
-        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -1561,7 +1561,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
                 "class_name": "ProfilerStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
             "expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},

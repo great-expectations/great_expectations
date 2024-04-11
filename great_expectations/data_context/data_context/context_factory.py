@@ -33,8 +33,8 @@ if TYPE_CHECKING:
         FileDataContext,
     )
     from great_expectations.data_context.store import (
-        EvaluationParameterStore,
         ExpectationsStore,
+        SuiteParameterStore,
         ValidationsStore,
     )
     from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
@@ -106,7 +106,7 @@ class ProjectManager:
     def get_validation_definition_store(self) -> ValidationDefinitionStore:
         return self._project.validation_definition_store
 
-    def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
+    def get_evaluation_parameters_store(self) -> SuiteParameterStore:
         return self._project.evaluation_parameter_store
 
     def get_datasources(self) -> DatasourceDict:

@@ -286,7 +286,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "FixedLengthTupleFilesystemStoreBackend": "TupleFilesystemStoreBackend",
             "FixedLengthTupleS3StoreBackend": "TupleS3StoreBackend",
             "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
-            "InMemoryEvaluationParameterStore": "EvaluationParameterStore",
+            "InMemorySuiteParameterStore": "SuiteParameterStore",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",

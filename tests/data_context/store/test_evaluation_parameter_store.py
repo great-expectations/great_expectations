@@ -11,7 +11,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import (
-    EvaluationParameterStore,
+    SuiteParameterStore,
     TupleAzureBlobStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
@@ -29,7 +29,7 @@ from tests import test_utils
 @pytest.fixture(
     params=[
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
@@ -43,7 +43,7 @@ from tests import test_utils
             },
         },
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "module_name": "great_expectations.data_context.store",
         },
     ]
@@ -64,13 +64,13 @@ def param_store(request, test_backends):
 @pytest.fixture(
     params=[
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "store_backend": {
                 "class_name": "InMemoryStoreBackend",
             },
         },
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "module_name": "great_expectations.data_context.store",
         },
     ]
@@ -278,10 +278,10 @@ def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     """
     What does this test and why?
 
-    Demonstrate that EvaluationParameterStore works as expected with TupleS3StoreBackend
+    Demonstrate that SuiteParameterStore works as expected with TupleS3StoreBackend
     and that the store backend adheres to the Liskov substitution principle.
     """
-    evaluation_parameter_store = EvaluationParameterStore()
+    evaluation_parameter_store = SuiteParameterStore()
     run_id = RunIdentifier()
     s3_store = TupleS3StoreBackend(bucket="my_bucket")
     evaluation_parameter_store._store_backend = s3_store
@@ -308,10 +308,10 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     """
     What does this test and why?
 
-    Demonstrate that EvaluationParameterStore works as expected with TupleAzureBlobStoreBackend
+    Demonstrate that SuiteParameterStore works as expected with TupleAzureBlobStoreBackend
     and that the store backend adheres to the Liskov substitution principle.
     """
-    evaluation_parameter_store = EvaluationParameterStore()
+    evaluation_parameter_store = SuiteParameterStore()
     run_id = RunIdentifier()
     azure_store = TupleAzureBlobStoreBackend(
         container="my_container", connection_string="my_connection_string"
@@ -340,10 +340,10 @@ def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     """
     What does this test and why?
 
-    Demonstrate that EvaluationParameterStore works as expected with TupleGCSStoreBackend
+    Demonstrate that SuiteParameterStore works as expected with TupleGCSStoreBackend
     and that the store backend adheres to the Liskov substitution principle.
     """
-    evaluation_parameter_store = EvaluationParameterStore()
+    evaluation_parameter_store = SuiteParameterStore()
     run_id = RunIdentifier()
     gcs_store = TupleGCSStoreBackend(bucket="my_bucket", project="my_project")
     evaluation_parameter_store._store_backend = gcs_store

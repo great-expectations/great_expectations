@@ -64,7 +64,7 @@ class MetricStore(Store):
             return json.loads(value)["value"]
 
 
-class EvaluationParameterStore(MetricStore):
+class SuiteParameterStore(MetricStore):
     def __init__(self, store_backend=None, store_name=None) -> None:
         if store_backend is not None:
             store_backend_module_name = store_backend.get(

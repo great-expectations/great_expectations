@@ -3132,7 +3132,7 @@ def empty_ge_cloud_data_context_config(
     config_yaml_str = f"""
 stores:
   default_evaluation_parameter_store:
-    class_name: EvaluationParameterStore
+    class_name: SuiteParameterStore
 
   default_expectations_store:
     class_name: ExpectationsStore

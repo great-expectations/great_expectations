@@ -38,7 +38,7 @@ stores:
       base_directory: fixtures/validations
 
   evaluation_parameter_store:
-    class_name: EvaluationParameterStore
+    class_name: SuiteParameterStore
 
 data_docs_sites:
   local_site: # site name

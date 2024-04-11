@@ -59,7 +59,7 @@ stores:
       base_directory: uncommitted/validations/
 
   evaluation_parameter_store:
-    class_name: EvaluationParameterStore
+    class_name: SuiteParameterStore
   checkpoint_store:
     class_name: CheckpointStore
     store_backend:

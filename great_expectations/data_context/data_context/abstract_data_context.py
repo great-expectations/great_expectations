@@ -137,7 +137,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store import (
         CheckpointStore,
-        EvaluationParameterStore,
+        SuiteParameterStore,
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.expectations_store import (
@@ -589,7 +589,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.variables.evaluation_parameter_store_name
 
     @property
-    def evaluation_parameter_store(self) -> EvaluationParameterStore:
+    def evaluation_parameter_store(self) -> SuiteParameterStore:
         return self.stores[self.evaluation_parameter_store_name]
 
     @property

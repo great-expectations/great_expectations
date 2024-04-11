@@ -57,7 +57,7 @@ def test_base_context(clear_env_vars):
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
             "validation_result_store": {"class_name": "ValidationsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
@@ -88,7 +88,7 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
         stores={
             "new_expectations_store": {"class_name": "ExpectationsStore"},
             "new_checkpoint_store": {"class_name": "CheckpointStore"},
-            "new_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "new_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
             "new_validation_result_store": {"class_name": "ValidationsStore"},
         },
         validations_store_name="new_validation_result_store",
@@ -133,7 +133,7 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
             "validation_result_store": {"class_name": "ValidationsStore"},
         },
         validations_store_name="validation_result_store",
@@ -220,7 +220,7 @@ def test_cloud_context_with_in_memory_config_overrides(
             stores={
                 "new_expectations_store": {"class_name": "ExpectationsStore"},
                 "new_checkpoint_store": {"class_name": "CheckpointStore"},
-                "new_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+                "new_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
                 "new_validation_result_store": {"class_name": "ValidationsStore"},
             },
             validations_store_name="new_validation_result_store",

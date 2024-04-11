@@ -1632,7 +1632,7 @@ class DataContextConfigDefaults(enum.Enum):
             "base_directory": DEFAULT_VALIDATION_DEFINITION_STORE_BASE_DIRECTORY_RELATIVE_NAME,
         },
     }
-    DEFAULT_EVALUATION_PARAMETER_STORE = {"class_name": "EvaluationParameterStore"}
+    DEFAULT_EVALUATION_PARAMETER_STORE = {"class_name": "SuiteParameterStore"}
     DEFAULT_CHECKPOINT_STORE = {
         "class_name": "CheckpointStore",
         "store_backend": {
@@ -1804,7 +1804,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": validation_definition_store_prefix,
                 },
             },
-            evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            evaluation_parameter_store_name: {"class_name": "SuiteParameterStore"},
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -1907,7 +1907,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "InMemoryStoreBackend",
                 },
             },
-            self.evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            self.evaluation_parameter_store_name: {"class_name": "SuiteParameterStore"},
             self.checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -2059,7 +2059,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": validation_definition_store_prefix,
                 },
             },
-            evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            evaluation_parameter_store_name: {"class_name": "SuiteParameterStore"},
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -2170,7 +2170,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                     "credentials": validation_definition_store_credentials,
                 },
             },
-            evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            evaluation_parameter_store_name: {"class_name": "SuiteParameterStore"},
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {

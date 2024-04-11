@@ -53,7 +53,7 @@ def build_in_code_data_context_project_config(
                     "prefix": validations_store_prefix,
                 },
             },
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
         }
     project_config = DataContextConfig(
@@ -380,7 +380,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
                 "prefix": validations_store_prefix,
             },
         },
-        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
         "inactive_expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -397,7 +397,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
                 "prefix": validations_store_prefix,
             },
         },
-        "inactive_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "inactive_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
     }
     in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
@@ -490,7 +490,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
                 "prefix": validations_store_prefix,
             },
         },
-        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
     }
     in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",
@@ -554,7 +554,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
                 "prefix": validations_store_prefix,
             },
         },
-        "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
         "inactive_expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -571,7 +571,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
                 "prefix": validations_store_prefix,
             },
         },
-        "inactive_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+        "inactive_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
     }
     in_code_data_context_project_config = build_in_code_data_context_project_config(
         bucket="leakybucket",

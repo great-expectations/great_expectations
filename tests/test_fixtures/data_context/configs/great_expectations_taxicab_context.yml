@@ -23,7 +23,7 @@ stores:
   validations_store:
     class_name: ValidationsStore
   evaluation_parameter_store:
-    class_name: EvaluationParameterStore
+    class_name: SuiteParameterStore
   checkpoint_store:
     class_name: CheckpointStore
 

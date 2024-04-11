@@ -22,7 +22,7 @@ from tests import test_utils
 @pytest.fixture(
     params=[
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
@@ -36,7 +36,7 @@ from tests import test_utils
             },
         },
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "module_name": "great_expectations.data_context.store",
         },
     ]
@@ -57,13 +57,13 @@ def param_store(request, test_backends):
 @pytest.fixture(
     params=[
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "store_backend": {
                 "class_name": "InMemoryStoreBackend",
             },
         },
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "module_name": "great_expectations.data_context.store",
         },
     ]

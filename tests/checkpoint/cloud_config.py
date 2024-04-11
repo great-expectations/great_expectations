@@ -169,7 +169,7 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "default_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
             "default_expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
@@ -211,7 +211,7 @@ def _cloud_config(data_dir):
                 },
             },
             "evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore",
+                "class_name": "SuiteParameterStore",
                 "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {
