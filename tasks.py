@@ -1003,7 +1003,7 @@ def docs_snippet_tests(
     },
     iterable=["service_names", "up_services", "verbose"],
 )
-def ci_tests(  # noqa: C901 - too complex (9)
+def ci_tests(  # - too complex (9)
     ctx: Context,
     marker: str,
     up_services: bool = False,
@@ -1106,7 +1106,8 @@ def service(
             cmds = []
 
             if (
-                service_name == "mercury" and os.environ.get("CI") != "true"  # noqa: TID251
+                service_name == "mercury"
+                and os.environ.get("CI") != "true"  # noqa: TID251
             ):
                 cmds.extend(
                     [
