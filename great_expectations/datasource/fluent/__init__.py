@@ -25,7 +25,7 @@ BatchDefinition.update_forward_refs(DataAsset=DataAsset)
 
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
-    BatchRequestOptions,
+    BatchParameters,
 )
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,

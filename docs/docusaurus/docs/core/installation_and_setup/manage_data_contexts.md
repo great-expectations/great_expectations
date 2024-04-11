@@ -181,11 +181,8 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 ### Prerequisites
 
-<Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
-
+- [A Great Expectations instance](/core/installation_and_setup/install_gx.md).
 - A previously initialized Filesystem Data Context.
-
-</Prerequisites>
 
 ### Import GX
 

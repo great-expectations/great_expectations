@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import copy
 import logging
+import re
 import warnings
 from collections import Counter
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Dict,
     List,
@@ -33,16 +33,12 @@ from great_expectations.core.partitioners import (
     PartitionerYearAndMonthAndDay,
 )
 from great_expectations.datasource.fluent.batch_request import (
+    BatchParameters,
     BatchRequest,
-    BatchRequestOptions,
 )
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
-)
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (  # noqa: E501
-    FilePathDataConnector,
-    file_get_unfiltered_batch_definition_list_fn,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
@@ -65,6 +61,7 @@ from great_expectations.datasource.fluent.spark_generic_partitioners import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.core.partitioners import Partitioner
@@ -85,6 +82,7 @@ logger = logging.getLogger(__name__)
 
 class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "batch_definitions",
         "type",
         "name",
         "order_by",
@@ -166,7 +164,7 @@ class _FilePathDataAsset(DataAsset):
         return PartitionerClass(**abstract_partitioner.dict())
 
     @override
-    def get_batch_request_options_keys(
+    def get_batch_parameters_keys(
         self,
         partitioner: Optional[Partitioner] = None,
     ) -> tuple[str, ...]:
@@ -180,19 +178,21 @@ class _FilePathDataAsset(DataAsset):
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling get_batch_request_options_keys(...).
+                calling get_batch_parameters_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
+            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -215,14 +215,14 @@ class _FilePathDataAsset(DataAsset):
                         f"not a string: {value}"
                     )
 
-        if options is not None and not self._batch_request_options_are_valid(
+        if options is not None and not self._batch_parameters_are_valid(
             options=options,
             partitioner=partitioner,
         ):
-            allowed_keys = set(self.get_batch_request_options_keys(partitioner=partitioner))
+            allowed_keys = set(self.get_batch_parameters_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
-                "Batch request options should only contain keys from the following set:\n"
+                "Batch parameters should only contain keys from the following set:\n"
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
@@ -233,6 +233,7 @@ class _FilePathDataAsset(DataAsset):
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
+            batching_regex=batching_regex,
         )
 
     @override
@@ -245,13 +246,11 @@ class _FilePathDataAsset(DataAsset):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and self._batch_request_options_are_valid(
+            and self._batch_parameters_are_valid(
                 options=batch_request.options, partitioner=batch_request.partitioner
             )
         ):
-            valid_options = self.get_batch_request_options_keys(
-                partitioner=batch_request.partitioner
-            )
+            valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
@@ -309,8 +308,6 @@ class _FilePathDataAsset(DataAsset):
             )
             batch_list.append(batch)
 
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX-MOVE_SORTING_INTO_FILE_PATH_DATA_CONNECTOR_ON_BATCH_DEFINITION_OBJECTS</Alex>  # noqa: E501
         self.sort_batches(batch_list)
 
         return batch_list
@@ -329,14 +326,12 @@ class _FilePathDataAsset(DataAsset):
         if batch_request.partitioner:
             spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
             # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options  # noqa: E501
-            valid_options = self.get_batch_request_options_keys(
-                partitioner=batch_request.partitioner
-            )
-            batch_request_options_counts = Counter(valid_options)
+            valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
+            batch_parameters_counts = Counter(valid_options)
             batch_request_copy_without_partitioner_kwargs = copy.deepcopy(batch_request)
             for param_name in spark_partitioner.param_names:
                 # If the option appears twice (e.g. from asset regex and from partitioner) then don't remove.  # noqa: E501
-                if batch_request_options_counts[param_name] == 1:
+                if batch_parameters_counts[param_name] == 1:
                     batch_request_copy_without_partitioner_kwargs.options.pop(param_name)
                 else:
                     warnings.warn(
@@ -380,7 +375,7 @@ class _FilePathDataAsset(DataAsset):
             batch_spec_options["partitioner_method"] = spark_partitioner.method_name
             partitioner_kwargs = spark_partitioner.partitioner_method_kwargs()
             partitioner_kwargs["batch_identifiers"] = (
-                spark_partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
+                spark_partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(
                     batch_request.options
                 )
             )
@@ -404,11 +399,13 @@ class _FilePathDataAsset(DataAsset):
             ) from e
         raise TestConnectionError(self._test_connection_error_message)
 
-    def get_unfiltered_batch_definition_list_fn(
+    def get_whole_directory_path_override(
         self,
-    ) -> Callable[[FilePathDataConnector, BatchRequest], list[LegacyBatchDefinition]]:
-        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""  # noqa: E501
-        return file_get_unfiltered_batch_definition_list_fn
+    ) -> PathStr | None:
+        """If present, override DataConnector behavior in order to
+        treat an entire directory as a single Asset.
+        """
+        return None
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(

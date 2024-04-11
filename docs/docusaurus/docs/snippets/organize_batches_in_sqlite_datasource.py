@@ -52,7 +52,7 @@ assert len(batches) == 12
 my_asset = my_table_asset.add_sorters(["+year", "-month"])
 # </snippet>
 
-assert my_asset.get_batch_request_options_keys(partitioner=partitioner) == (
+assert my_asset.get_batch_parameters_keys(partitioner=partitioner) == (
     "year",
     "month",
 )

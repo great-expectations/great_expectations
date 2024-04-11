@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from unittest import mock
 
 import pytest
@@ -198,30 +198,34 @@ def test_get_key_cloud(cloud_backed_store: V1CheckpointStore):
     assert key.resource_name == "my_checkpoint"  # type: ignore[union-attr]
 
 
+def _create_checkpoint_config(name: str, id: str) -> dict[str, Any]:
+    return {
+        "name": name,
+        "validation_definitions": [
+            {"name": "my_first_validation", "id": "a58816-64c8-46cb-8f7e-03c12cea1d67"},
+            {"name": "my_second_validation", "id": "139ab16-64c8-46cb-8f7e-03c12cea1d67"},
+        ],
+        "actions": [
+            {
+                "name": "my_slack_action",
+                "slack_webhook": "https://hooks.slack.com/services/ABC123/DEF456/XYZ789",
+                "notify_on": "all",
+                "notify_with": ["my_data_docs_site"],
+                "renderer": {
+                    "class_name": "SlackRenderer",
+                },
+            }
+        ],
+        "result_format": "SUMMARY",
+        "id": id,
+    }
+
+
 _CHECKPOINT_ID = "a4sdfd-64c8-46cb-8f7e-03c12cea1d67"
-_CHECKPOINT_CONFIG = {
-    "name": "my_checkpoint",
-    "validation_definitions": [
-        {"name": "my_first_validation", "id": "a58816-64c8-46cb-8f7e-03c12cea1d67"},
-        {"name": "my_second_validation", "id": "139ab16-64c8-46cb-8f7e-03c12cea1d67"},
-    ],
-    "actions": [
-        {
-            "name": "my_slack_action",
-            "slack_webhook": "https://hooks.slack.com/services/ABC123/DEF456/XYZ789",
-            "notify_on": "all",
-            "notify_with": ["my_data_docs_site"],
-            "renderer": {
-                "class_name": "SlackRenderer",
-            },
-        }
-    ],
-    "result_format": "SUMMARY",
-    "id": _CHECKPOINT_ID,
-}
+_CHECKPOINT_CONFIG = _create_checkpoint_config("my_checkpoint", _CHECKPOINT_ID)
 
 
-@pytest.mark.cloud
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "response_json",
     [
@@ -255,6 +259,35 @@ def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
     actual = V1CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
     expected = {**_CHECKPOINT_CONFIG, "id": _CHECKPOINT_ID}
     assert actual == expected
+
+
+@pytest.mark.unit
+def test_gx_cloud_response_json_to_object_collection():
+    id_a = "a4sdfd-64c8-46cb-8f7e-03c12cea1d67"
+    id_b = "a4sdfd-64c8-46cb-8f7e-03c12cea1d68"
+    config_a = _create_checkpoint_config("my_checkpoint_a", "something else?")
+    config_b = _create_checkpoint_config("my_checkpoint_b", id_b)
+    response_json = {
+        "data": [
+            {
+                "id": id_a,
+                "attributes": {
+                    "checkpoint_config": config_a,
+                },
+            },
+            {
+                "id": id_b,
+                "attributes": {
+                    "checkpoint_config": config_b,
+                },
+            },
+        ],
+    }
+
+    result = V1CheckpointStore.gx_cloud_response_json_to_object_collection(response_json)
+
+    expected = [{**config_a, "id": id_a}, {**config_b, "id": id_b}]
+    assert result == expected
 
 
 @pytest.mark.cloud

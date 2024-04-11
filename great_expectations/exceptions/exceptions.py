@@ -64,6 +64,11 @@ class GitIgnoreScaffoldingError(GreatExpectationsError):
     pass
 
 
+class StoreBackendUnsupportedResourceTypeError(StoreBackendError):
+    def __init__(self, resource_type: str) -> None:
+        super().__init__(f"Unsupported resource type: {resource_type}")
+
+
 class StoreBackendTransientError(StoreBackendError):
     """The result of a timeout or other networking issues"""
 

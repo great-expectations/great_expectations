@@ -6,6 +6,7 @@ from collections import OrderedDict
 from typing import TYPE_CHECKING, Optional
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.checkpoint.actions import ActionContext
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import parse_result_format
@@ -393,7 +394,7 @@ class ActionListValidationOperator(ValidationOperator):
         :param run_id:
         :return: a dictionary: {action name -> result returned by the action}
         """
-        batch_actions_results = {}
+        action_context = ActionContext()
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
             name = action["name"]
@@ -414,7 +415,7 @@ class ActionListValidationOperator(ValidationOperator):
                 action_result = self.actions[name].run(
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
-                    payload=batch_actions_results,
+                    action_context=action_context,
                     expectation_suite_identifier=expectation_suite_identifier,
                     checkpoint_identifier=checkpoint_identifier,
                 )
@@ -433,14 +434,18 @@ class ActionListValidationOperator(ValidationOperator):
                     transformed_result = action_result
 
                 # add action_result
-                batch_actions_results[action["name"]] = transformed_result
-                batch_actions_results[action["name"]]["class"] = action["action"]["class_name"]
+                action_context.update(action=action, action_result=transformed_result)
 
             except Exception as e:
                 logger.exception(f"Error running action with name {action['name']}")
                 raise e  # noqa: TRY201
 
-        return batch_actions_results
+        action_data = {}
+        for action, action_result in action_context.data:
+            action_data[action["name"]] = action_result
+            action_data[action["name"]]["class"] = action["action"]["class_name"]
+
+        return action_data
 
 
 class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationOperator):

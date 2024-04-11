@@ -15,7 +15,6 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
-    expectationSuiteSchema,
 )
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.run_identifier import RunIdentifier
@@ -38,7 +37,7 @@ if TYPE_CHECKING:
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context.store.validations_store import ValidationsStore
-    from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+    from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
 
@@ -151,11 +150,11 @@ class ValidationDefinition(BaseModel):
         key = expectation_store.get_key(name=name, id=id)
 
         try:
-            config = expectation_store.get(key)
+            config: dict = expectation_store.get(key)
         except gx_exceptions.InvalidKeyError as e:
             raise ValueError(f"Could not find suite with name: {name} and id: {id}") from e  # noqa: TRY003
 
-        return ExpectationSuite(**expectationSuiteSchema.load(config))
+        return ExpectationSuite(**config)
 
     @classmethod
     def _decode_data(cls, data_dict: dict) -> BatchDefinition:
@@ -199,13 +198,13 @@ class ValidationDefinition(BaseModel):
     def run(
         self,
         *,
-        batch_parameters: Optional[BatchRequestOptions] = None,
+        batch_parameters: Optional[BatchParameters] = None,
         evaluation_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(
             batch_definition=self.batch_definition,
-            batch_request_options=batch_parameters,
+            batch_parameters=batch_parameters,
             result_format=result_format,
         )
         results = validator.validate_expectation_suite(self.suite, evaluation_parameters)

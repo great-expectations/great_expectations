@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -34,10 +35,10 @@ if TYPE_CHECKING:
         Batch as FluentBatch,
     )
     from great_expectations.datasource.fluent.interfaces import (
-        BatchRequest as FluentBatchRequest,
+        BatchParameters,
     )
     from great_expectations.datasource.fluent.interfaces import (
-        BatchRequestOptions,
+        BatchRequest as FluentBatchRequest,
     )
     from great_expectations.validator.metrics_calculator import MetricsCalculator
 
@@ -109,6 +110,7 @@ class LegacyBatchDefinition(SerializableDictDot):
         data_asset_name: str,
         batch_identifiers: IDDict,
         batch_spec_passthrough: dict | None = None,
+        batching_regex: re.Pattern | None = None,
     ) -> None:
         self._validate_batch_definition(
             datasource_name=datasource_name,
@@ -124,6 +126,7 @@ class LegacyBatchDefinition(SerializableDictDot):
         self._data_asset_name = data_asset_name
         self._batch_identifiers = batch_identifiers
         self._batch_spec_passthrough = batch_spec_passthrough
+        self._batching_regex = batching_regex
 
     @public_api
     @override
@@ -141,6 +144,8 @@ class LegacyBatchDefinition(SerializableDictDot):
         }
         if self._batch_spec_passthrough:
             fields_dict["batch_spec_passthrough"] = self._batch_spec_passthrough
+        if self._batching_regex:
+            fields_dict["batching_regex"] = self._batching_regex
 
         return convert_to_json_serializable(data=fields_dict)
 
@@ -219,6 +224,10 @@ class LegacyBatchDefinition(SerializableDictDot):
     @property
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
+
+    @property
+    def batching_regex(self) -> re.Pattern | None:
+        return self._batching_regex
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -1180,7 +1189,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     query: str | None = None,
     path: str | None = None,
     batch_filter_parameters: dict | None = None,
-    batch_request_options: dict | BatchRequestOptions | None = None,
+    batch_parameters: dict | BatchParameters | None = None,
     **kwargs,
 ) -> BatchRequest | RuntimeBatchRequest | FluentBatchRequest:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
@@ -1212,7 +1221,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
 
         batch_spec_passthrough
 
-        batch_request_options
+        batch_parameters
 
         **kwargs
 
@@ -1291,7 +1300,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         result = _get_fluent_batch_request_class()(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            options=batch_request_options,
+            options=batch_parameters,
         )
         return result
 
