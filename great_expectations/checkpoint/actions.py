@@ -11,7 +11,6 @@ import logging
 from typing import (
     TYPE_CHECKING,
     Any,
-    ClassVar,
     Dict,
     List,
     Literal,
@@ -112,9 +111,6 @@ class ValidationAction(BaseModel):
     and other actions to take place after the validation result is produced.
     """  # noqa: E501
 
-    # Order of priority for sorting actions in a Checkpoint (lower values come first)
-    _sorting_priority: ClassVar[int] = 2
-
     class Config:
         arbitrary_types_allowed = True
         # Due to legacy pattern of instantiate_class_from_config, we need a custom serializer
@@ -122,9 +118,6 @@ class ValidationAction(BaseModel):
 
     type: str
     notify_on: Literal["all", "failure", "success"] = "all"
-
-    def __lt__(self, other: ValidationAction) -> bool:
-        return self._sorting_priority < other._sorting_priority
 
     @property
     def _using_cloud_context(self) -> bool:
@@ -1003,9 +996,6 @@ class UpdateDataDocsAction(DataDocsAction):
     Args:
         site_names: Optional. A list of the names of sites to update.
     """  # noqa: E501
-
-    # This action is intended to always be run first in the list of actions
-    _sorting_priority: ClassVar[int] = 1
 
     type: Literal["update_data_docs"] = "update_data_docs"
 
