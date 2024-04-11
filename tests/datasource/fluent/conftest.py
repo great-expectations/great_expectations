@@ -17,14 +17,13 @@ from typing import (
     List,
     Optional,
     Type,
-    TypeAlias,
     Union,
 )
 
 import pytest
 from moto import mock_s3
 from pytest import MonkeyPatch
-from typing_extensions import override
+from typing_extensions import TypeAlias, override
 
 import great_expectations as gx
 from great_expectations.compatibility import aws
