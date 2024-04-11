@@ -182,16 +182,22 @@ class StoreBackend(metaclass=ABCMeta):
         return urllib.parse.quote(path)
 
     def get_url_for_key(self, key, protocol=None) -> None:
-        raise StoreError(  # noqa: TRY003
-            f"Store backend of type {type(self).__name__:s} does not have an implementation of get_url_for_key"  # noqa: E501
+        raise StoreError(
+            "Store backend of type {:s} does not have an implementation of get_url_for_key".format(  # noqa: UP032
+                type(self).__name__
+            )
         )
 
     def _validate_key(self, key) -> None:
         if isinstance(key, tuple):
             for key_element in key:
                 if not isinstance(key_element, str):
-                    raise TypeError(  # noqa: TRY003
-                        f"""Elements within tuples passed as keys to {self.__class__.__name___} must be instances of {str}, not {type(key_element)}"""  # noqa: E501
+                    raise TypeError(
+                        "Elements within tuples passed as keys to {} must be instances of {}, not {}".format(  # noqa: E501, UP032
+                            self.__class__.__name__,
+                            str,
+                            type(key_element),
+                        )
                     )
         else:
             raise TypeError(  # noqa: TRY003
