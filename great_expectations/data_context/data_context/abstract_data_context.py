@@ -1654,7 +1654,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None) -> None:
         """
-        Stores ValidationResult EvaluationParameters to defined store
+        Stores ValidationResult Suite Parameters to defined store
         """
         if not self._evaluation_parameter_dependencies_compiled:
             self._compile_evaluation_parameter_dependencies()
