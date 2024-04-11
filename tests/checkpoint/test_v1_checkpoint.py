@@ -496,6 +496,9 @@ class TestCheckpointResult:
         validation_definition: ValidationDefinition,
         actions: list[CheckpointAction],
     ):
+        update_data_docs_action = UpdateDataDocsAction()
+        actions.append(update_data_docs_action)
+
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(
             name=self.checkpoint_name,
@@ -507,6 +510,7 @@ class TestCheckpointResult:
             result = checkpoint.run()
 
         assert mock_run.call_count == len(actions)
+        assert mock_run.call_args_list == []  # Should have UpdateDataDocs first
         mock_run.assert_called_with(checkpoint_result=result, action_context=mock.ANY)
 
     @pytest.mark.unit
