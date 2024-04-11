@@ -293,7 +293,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         abs_container="my_container",
     )
-    options = asset.get_batch_request_options_keys()
+    options = asset.get_batch_parameters_keys()
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -320,7 +320,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         abs_container="my_container",
     )
-    options = asset.get_batch_request_options_keys()
+    options = asset.get_batch_parameters_keys()
     assert options == (
         "name",
         "timestamp",
@@ -347,7 +347,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
         abs_container="my_container",
     )
-    options = asset.get_batch_request_options_keys()
+    options = asset.get_batch_parameters_keys()
     assert options == (
         "name",
         "batch_request_param_2",

@@ -34,8 +34,8 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.datasource.fluent.batch_request import (
+    BatchParameters,
     BatchRequest,
-    BatchRequestOptions,
 )
 from great_expectations.datasource.fluent.interfaces import (
     Sorter,
@@ -97,17 +97,17 @@ def assert_table_asset(
     name: str,
     table_name: str,
     source: PostgresDatasource,
-    batch_request_options: tuple[str, ...],
+    batch_parameters: tuple[str, ...],
     partitioner: Optional[Partitioner] = None,
 ):
     assert asset.name == name
     assert asset.table_name == table_name
     assert asset.datasource == source
-    assert asset.get_batch_request_options_keys(partitioner=partitioner) == batch_request_options
+    assert asset.get_batch_parameters_keys(partitioner=partitioner) == batch_parameters
 
 
 def assert_batch_request(
-    batch_request, source_name: str, asset_name: str, options: BatchRequestOptions
+    batch_request, source_name: str, asset_name: str, options: BatchParameters
 ):
     assert batch_request.datasource_name == source_name
     assert batch_request.data_asset_name == asset_name
@@ -135,7 +135,7 @@ def test_add_table_asset_with_partitioner(mocker, create_source: CreateSourceFix
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_options=("year", "month"),
+            batch_parameters=("year", "month"),
             partitioner=partitioner,
         )
         assert_batch_request(
@@ -163,7 +163,7 @@ def test_add_table_asset_with_no_partitioner(mocker, create_source: CreateSource
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_options=tuple(),
+            batch_parameters=tuple(),
         )
         assert_batch_request(
             batch_request=asset.build_batch_request(),
@@ -229,12 +229,12 @@ def test_construct_table_asset_directly_with_partitioner(create_source):
             ("year", "month"),
             partitioner=partitioner,
         )
-        batch_request_options = {"year": 2022, "month": 10}
+        batch_parameters = {"year": 2022, "month": 10}
         assert_batch_request(
-            asset.build_batch_request(options=batch_request_options, partitioner=partitioner),
+            asset.build_batch_request(options=batch_parameters, partitioner=partitioner),
             "my_datasource",
             "my_asset",
-            batch_request_options,
+            batch_parameters,
         )
 
 
@@ -292,7 +292,7 @@ def assert_batches_correct_with_year_month_partitioner_defaults(batches):
 
 
 @pytest.mark.postgresql
-def test_datasource_gets_batch_list_partitioner_with_unspecified_batch_request_options(
+def test_datasource_gets_batch_list_partitioner_with_unspecified_batch_parameters(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -321,7 +321,7 @@ def test_datasource_gets_batch_list_partitioner_with_unspecified_batch_request_o
 
 
 @pytest.mark.postgresql
-def test_datasource_gets_batch_list_partitioner_with_batch_request_options_set_to_none(
+def test_datasource_gets_batch_list_partitioner_with_batch_parameters_set_to_none(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -342,7 +342,7 @@ def test_datasource_gets_batch_list_partitioner_with_batch_request_options_set_t
             source=source, name="my_asset", table_name="my_table"
         )
         partitioner = PartitionerYearAndMonth(column_name="my_col")
-        assert asset.get_batch_request_options_keys(partitioner=partitioner) == (
+        assert asset.get_batch_parameters_keys(partitioner=partitioner) == (
             "year",
             "month",
         )
@@ -357,7 +357,7 @@ def test_datasource_gets_batch_list_partitioner_with_batch_request_options_set_t
 
 
 @pytest.mark.postgresql
-def test_datasource_gets_batch_list_partitioner_with_partially_specified_batch_request_options(
+def test_datasource_gets_batch_list_partitioner_with_partially_specified_batch_parameters(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -404,7 +404,7 @@ def test_datasource_gets_batch_list_partitioner_with_partially_specified_batch_r
 
 
 @pytest.mark.postgresql
-def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
+def test_datasource_gets_batch_list_with_fully_specified_batch_parameters(
     empty_data_context,
     create_source: CreateSourceFixture,
 ):
@@ -527,13 +527,13 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
 
 @pytest.mark.postgresql
 @pytest.mark.parametrize(
-    "batch_request_options",
+    "batch_parameters",
     [{}, {"year": 2021}, {"year": 2021, "month": 10}, {"year": None, "month": 10}],
 )
 def test_get_batch_list_from_batch_request_with_good_batch_request(
     empty_data_context,
     create_source: CreateSourceFixture,
-    batch_request_options,
+    batch_parameters,
 ):
     with create_source(
         validate_batch_spec=lambda _: None,
@@ -550,7 +550,7 @@ def test_get_batch_list_from_batch_request_with_good_batch_request(
         batch_request = BatchRequest(
             datasource_name=source.name,
             data_asset_name=asset.name,
-            options=batch_request_options,
+            options=batch_parameters,
             partitioner=partitioner,
         )
         # No exception should get thrown

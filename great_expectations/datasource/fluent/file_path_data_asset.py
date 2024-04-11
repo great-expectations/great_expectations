@@ -32,8 +32,8 @@ from great_expectations.core.partitioners import (
     PartitionerYearAndMonthAndDay,
 )
 from great_expectations.datasource.fluent.batch_request import (
+    BatchParameters,
     BatchRequest,
-    BatchRequestOptions,
 )
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -163,7 +163,7 @@ class _FilePathDataAsset(DataAsset):
         return PartitionerClass(**abstract_partitioner.dict())
 
     @override
-    def get_batch_request_options_keys(
+    def get_batch_parameters_keys(
         self,
         partitioner: Optional[Partitioner] = None,
     ) -> tuple[str, ...]:
@@ -177,7 +177,7 @@ class _FilePathDataAsset(DataAsset):
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
         batching_regex: Optional[re.Pattern] = None,
@@ -187,7 +187,7 @@ class _FilePathDataAsset(DataAsset):
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling get_batch_request_options_keys(...).
+                calling get_batch_parameters_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
@@ -214,14 +214,14 @@ class _FilePathDataAsset(DataAsset):
                         f"not a string: {value}"
                     )
 
-        if options is not None and not self._batch_request_options_are_valid(
+        if options is not None and not self._batch_parameters_are_valid(
             options=options,
             partitioner=partitioner,
         ):
-            allowed_keys = set(self.get_batch_request_options_keys(partitioner=partitioner))
+            allowed_keys = set(self.get_batch_parameters_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
-                "Batch request options should only contain keys from the following set:\n"
+                "Batch parameters should only contain keys from the following set:\n"
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
@@ -245,13 +245,11 @@ class _FilePathDataAsset(DataAsset):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and self._batch_request_options_are_valid(
+            and self._batch_parameters_are_valid(
                 options=batch_request.options, partitioner=batch_request.partitioner
             )
         ):
-            valid_options = self.get_batch_request_options_keys(
-                partitioner=batch_request.partitioner
-            )
+            valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
@@ -329,14 +327,12 @@ class _FilePathDataAsset(DataAsset):
         if batch_request.partitioner:
             spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
             # Remove the partitioner kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options  # noqa: E501
-            valid_options = self.get_batch_request_options_keys(
-                partitioner=batch_request.partitioner
-            )
-            batch_request_options_counts = Counter(valid_options)
+            valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
+            batch_parameters_counts = Counter(valid_options)
             batch_request_copy_without_partitioner_kwargs = copy.deepcopy(batch_request)
             for param_name in spark_partitioner.param_names:
                 # If the option appears twice (e.g. from asset regex and from partitioner) then don't remove.  # noqa: E501
-                if batch_request_options_counts[param_name] == 1:
+                if batch_parameters_counts[param_name] == 1:
                     batch_request_copy_without_partitioner_kwargs.options.pop(param_name)
                 else:
                     # TODO: figure out what to do here!
@@ -379,7 +375,7 @@ class _FilePathDataAsset(DataAsset):
             batch_spec_options["partitioner_method"] = spark_partitioner.method_name
             partitioner_kwargs = spark_partitioner.partitioner_method_kwargs()
             partitioner_kwargs["batch_identifiers"] = (
-                spark_partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
+                spark_partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(
                     batch_request.options
                 )
             )
