@@ -360,11 +360,11 @@ class SlackNotificationAction(DataDocsAction):
             validation_result_urls.append(result.result_url)
 
         return self.renderer.v1_render(
-            result,
-            data_docs_pages,
-            self.notify_with,
-            self.show_failed_expectations,
-            validation_result_urls,
+            validation_result=result,
+            data_docs_pages=data_docs_pages,
+            notify_with=self.notify_with,
+            show_failed_expectations=self.show_failed_expectations,
+            validation_result_urls=validation_result_urls,
         )
 
     @override
