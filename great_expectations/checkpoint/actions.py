@@ -309,20 +309,20 @@ class SlackNotificationAction(DataDocsAction):
         if not self._is_enabled(success=success):
             return result
 
-        text_blocks: list[dict] = []
+        checkpoint_text_blocks: list[dict] = []
         for (
             validation_result_suite_identifier,
             validation_result_suite,
         ) in checkpoint_result.run_results.items():
-            blocks = self._render_validation_result(
+            validation_text_blocks = self._render_validation_result(
                 result_identifier=validation_result_suite_identifier,
                 result=validation_result_suite,
                 action_context=action_context,
             )
-            text_blocks.extend(blocks)
+            checkpoint_text_blocks.extend(validation_text_blocks)
 
         query = self.renderer.build_query(
-            checkpoint_result=checkpoint_result, text_blocks=text_blocks
+            checkpoint_result=checkpoint_result, text_blocks=checkpoint_text_blocks
         )
         blocks = query.get("blocks")
         if blocks:
@@ -340,8 +340,8 @@ class SlackNotificationAction(DataDocsAction):
         self,
         result_identifier: ValidationResultIdentifier,
         result: ExpectationSuiteValidationResult,
-        action_context: ActionContext,
-    ) -> dict:
+        action_context: ActionContext | None = None,
+    ) -> list[dict]:
         data_docs_pages = None
         if action_context:
             data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
