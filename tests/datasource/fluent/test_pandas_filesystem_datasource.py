@@ -439,7 +439,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
     )
-    options = asset.get_batch_request_options_keys()
+    options = asset.get_batch_parameters_keys()
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -455,7 +455,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
-    options = asset.get_batch_request_options_keys()
+    options = asset.get_batch_parameters_keys()
     assert options == ("year", "month", "path")
 
 
@@ -467,7 +467,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
     )
-    options = asset.get_batch_request_options_keys()
+    options = asset.get_batch_parameters_keys()
     assert options == ("batch_request_param_1", "month", "path")
 
 

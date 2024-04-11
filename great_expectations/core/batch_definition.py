@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility import pydantic
@@ -11,8 +12,8 @@ from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBu
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.batch_request import (
+        BatchParameters,
         BatchRequest,
-        BatchRequestOptions,
     )
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
@@ -26,6 +27,7 @@ class BatchDefinition(pydantic.BaseModel):
     id: Optional[str] = None
     name: str
     partitioner: Optional[Partitioner] = None
+    batching_regex: Optional[re.Pattern] = None
 
     # private attributes that must be set immediately after instantiation
     _data_asset: DataAsset = pydantic.PrivateAttr()
@@ -39,11 +41,13 @@ class BatchDefinition(pydantic.BaseModel):
         self._data_asset = data_asset
 
     def build_batch_request(
-        self, batch_request_options: Optional[BatchRequestOptions] = None
+        self, batch_parameters: Optional[BatchParameters] = None
     ) -> BatchRequest:
-        """Build a BatchRequest from the asset and batch request options."""
+        """Build a BatchRequest from the asset and batch parameters."""
         return self.data_asset.build_batch_request(
-            options=batch_request_options, partitioner=self.partitioner
+            options=batch_parameters,
+            partitioner=self.partitioner,
+            batching_regex=self.batching_regex,
         )
 
     def save(self) -> None:

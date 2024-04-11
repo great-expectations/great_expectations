@@ -153,10 +153,11 @@ def test_return_all_batch_definitions_unsorted():
     for key in keys:
         client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv")
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv"),
+        batching_regex=batching_regex,
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -174,8 +175,12 @@ def test_return_all_batch_definitions_unsorted():
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_s3_data_asset",
                 options={},
+                batching_regex=batching_regex,
             )
         )
+    )
+    processed_batching_regex = re.compile(
+        "(?P<path>(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\\.csv)"
     )
     expected: List[LegacyBatchDefinition] = [
         LegacyBatchDefinition(
@@ -190,6 +195,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1040",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -203,6 +209,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1000",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -216,6 +223,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1300",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -229,6 +237,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1500",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -242,6 +251,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1900",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -255,6 +265,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1567",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -268,6 +279,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1003",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -281,6 +293,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1009",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -294,6 +307,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1002",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
@@ -307,6 +321,7 @@ def test_return_all_batch_definitions_unsorted():
                     "price": "1001",
                 }
             ),
+            batching_regex=processed_batching_regex,
         ),
     ]
     assert expected == unsorted_batch_definition_list
@@ -317,209 +332,10 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="my_file_path_datasource",
             data_asset_name="my_s3_data_asset",
             options={"name": "alex", "timestamp": "20200819", "price": "1300"},
+            batching_regex=batching_regex,
         )
     )
     assert expected[2:3] == unsorted_batch_definition_list
-
-
-# TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
-# TODO: <Alex>ALEX</Alex>
-# @pytest.mark.big
-# @mock_s3
-# def test_return_all_batch_definitions_sorted():
-#     region_name: str = "us-east-1"
-#     bucket: str = "test_bucket"
-#     conn = boto3.resource("s3", region_name=region_name)
-#     conn.create_bucket(Bucket=bucket)
-#     client: BaseClient = boto3.client("s3", region_name=region_name)
-#
-#     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-#
-#     keys: List[str] = [
-#         "alex_20200809_1000.csv",
-#         "eugene_20200809_1500.csv",
-#         "james_20200811_1009.csv",
-#         "abe_20200809_1040.csv",
-#         "will_20200809_1002.csv",
-#         "james_20200713_1567.csv",
-#         "eugene_20201129_1900.csv",
-#         "will_20200810_1001.csv",
-#         "james_20200810_1003.csv",
-#         "alex_20200819_1300.csv",
-#     ]
-#     for key in keys:
-#         client.put_object(
-#             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#         )
-#
-#     my_data_connector: DataConnector = S3DataConnector(
-#         datasource_name="my_file_path_datasource",
-#         data_asset_name="my_s3_data_asset",
-#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv"),
-#         s3_client=client,
-#         bucket=bucket,
-#         prefix="",
-#         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
-#     )
-#     # noinspection PyProtectedMember
-#     my_data_connector._get_data_references_cache()
-#
-#     assert my_data_connector.get_data_reference_count() == 3
-#     assert my_data_connector._get_data_reference_list()[:3] == [
-#         "alpha-1.csv",
-#         "alpha-2.csv",
-#         "alpha-3.csv",
-#     ]
-#     assert my_data_connector.get_unmatched_data_references()[:3] == [
-#         "alpha-1.csv",
-#         "alpha-2.csv",
-#         "alpha-3.csv",
-#     ]
-#     assert len(my_data_connector.get_unmatched_data_references()) == 3
-#
-#     sorted_batch_definition_list: List[BatchDefinition] = (
-#         my_data_connector.get_batch_definition_list(
-#             BatchRequest(
-#                 datasource_name="my_file_path_datasource",
-#                 data_asset_name="my_s3_data_asset",
-#                 options={},
-#             )
-#         )
-#     )
-#
-#     expected: List[BatchDefinition] = [
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "james", "timestamp": "20200811", "price": "1009"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "james", "timestamp": "20200810", "price": "1003"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "james", "timestamp": "20200713", "price": "1567"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "will", "timestamp": "20200810", "price": "1001"}
-#             ),
-#         ),
-#         BatchDefinition(
-#             datasource_name="my_file_path_datasource",
-#             data_connector_name="fluent",
-#             data_asset_name="my_s3_data_asset",
-#             batch_identifiers=IDDict(
-#                 {"name": "will", "timestamp": "20200809", "price": "1002"}
-#             ),
-#         ),
-#     ]
-#
-#     # TEST 1: Sorting works
-#     assert expected == sorted_batch_definition_list
-#
-#     my_batch_request: BatchRequest = BatchRequest(
-#         datasource_name="my_file_path_datasource",
-#         data_asset_name="my_s3_data_asset",
-#         options={
-#             "name": "james",
-#             "timestamp": "20200713",
-#             "price": "1567",
-#         },
-#     )
-#
-#     my_batch_definition_list: List[BatchDefinition]
-#     my_batch_definition: BatchDefinition
-#
-#     # TEST 2: Should only return the specified partition
-#     my_batch_definition_list = (
-#         my_data_connector.get_batch_definition_list(
-#             batch_request=my_batch_request
-#         )
-#     )
-#     assert len(my_batch_definition_list) == 1
-#     my_batch_definition = my_batch_definition_list[0]
-#
-#     expected_batch_definition = BatchDefinition(
-#         datasource_name="my_file_path_datasource",
-#         data_asset_name="my_s3_data_asset",
-#         batch_identifiers={
-#             "name": "james",
-#             "timestamp": "20200713",
-#             "price": "1567",
-#         },
-#     )
-#     assert my_batch_definition == expected_batch_definition
-#
-#     # TEST 3: Without BatchRequest (query) options, should return all 10
-#     my_batch_request: BatchRequest = BatchRequest(
-#         datasource_name="my_file_path_datasource",
-#         data_asset_name="my_s3_data_asset",
-#         options={},
-#     )
-#     # should return 10
-#     my_batch_definition_list = (
-#         my_data_connector.get_batch_definition_list(
-#             batch_request=my_batch_request
-#         )
-#     )
-#     assert len(my_batch_definition_list) == 10
-# TODO: <Alex>ALEX</Alex>
 
 
 @pytest.mark.big
@@ -542,13 +358,74 @@ def test_return_only_unique_batch_definitions():
     ]
     for key in keys:
         client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
+    processed_batching_regex = re.compile("(?P<path>B/(?P<filename>.+).*\\.csv)")
+    expected: List[LegacyBatchDefinition] = [
+        LegacyBatchDefinition(
+            datasource_name="my_file_path_datasource",
+            data_connector_name="fluent",
+            data_asset_name="my_s3_data_asset",
+            batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "file_1"}),
+            batching_regex=processed_batching_regex,
+        ),
+        LegacyBatchDefinition(
+            datasource_name="my_file_path_datasource",
+            data_connector_name="fluent",
+            data_asset_name="my_s3_data_asset",
+            batch_identifiers=IDDict({"path": "B/file_2.csv", "filename": "file_2"}),
+            batching_regex=processed_batching_regex,
+        ),
+    ]
 
-    my_data_connector: DataConnector
-
+    batching_regex = re.compile(r"(?P<filename>.+).*\.csv")
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+).*\.csv"),
+        batching_regex=batching_regex,
+        s3_client=client,
+        bucket=bucket,
+        prefix="B",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
+    )
+
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_data_connector.get_batch_definition_list(
+            BatchRequest(
+                datasource_name="my_file_path_datasource",
+                data_asset_name="my_s3_data_asset",
+                options={},
+                # batching_regex=batching_regex,
+            )
+        )
+    )
+    assert expected == unsorted_batch_definition_list
+
+
+@pytest.mark.big
+@mock_s3
+def test_data_reference_count_methods():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    keys: List[str] = [
+        "A/file_1.csv",
+        "A/file_2.csv",
+        "A/file_3.csv",
+        "B/file_1.csv",
+        "B/file_2.csv",
+    ]
+    for key in keys:
+        client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
+
+    batching_regex = re.compile(r"(?P<name>.+).*\.csv")
+    my_data_connector = S3DataConnector(
+        datasource_name="my_file_path_datasource",
+        data_asset_name="my_s3_data_asset",
+        batching_regex=batching_regex,
         s3_client=client,
         bucket=bucket,
         prefix="A",
@@ -568,42 +445,6 @@ def test_return_only_unique_batch_definitions():
     ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
-
-    expected: List[LegacyBatchDefinition] = [
-        LegacyBatchDefinition(
-            datasource_name="my_file_path_datasource",
-            data_connector_name="fluent",
-            data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "file_1"}),
-        ),
-        LegacyBatchDefinition(
-            datasource_name="my_file_path_datasource",
-            data_connector_name="fluent",
-            data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"path": "B/file_2.csv", "filename": "file_2"}),
-        ),
-    ]
-
-    my_data_connector = S3DataConnector(
-        datasource_name="my_file_path_datasource",
-        data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<filename>.+).*\.csv"),
-        s3_client=client,
-        bucket=bucket,
-        prefix="B",
-        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
-    )
-
-    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="my_file_path_datasource",
-                data_asset_name="my_s3_data_asset",
-                options={},
-            )
-        )
-    )
-    assert expected == unsorted_batch_definition_list
 
 
 @pytest.mark.big

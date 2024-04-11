@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, c
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import (
+    ActionContext,
     EmailAction,
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -16,7 +17,7 @@ from great_expectations.checkpoint.actions import (
     StoreValidationResultAction,
     UpdateDataDocsAction,
 )
-from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
+from great_expectations.compatibility.pydantic import BaseModel, Field, root_validator, validator
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -67,7 +68,7 @@ class Checkpoint(BaseModel):
 
     name: str
     validation_definitions: List[ValidationDefinition]
-    actions: List[CheckpointAction]
+    actions: List[CheckpointAction] = Field(default_factory=list)
     result_format: ResultFormat = ResultFormat.SUMMARY
     id: Union[str, None] = None
 
@@ -219,10 +220,13 @@ class Checkpoint(BaseModel):
         self,
         checkpoint_result: CheckpointResult,
     ) -> None:
+        action_context = ActionContext()
         for action in self.actions:
-            action.v1_run(
+            action_result = action.v1_run(
                 checkpoint_result=checkpoint_result,
+                action_context=action_context,
             )
+            action_context.update(action=action, action_result=action_result)
 
     @public_api
     def save(self) -> None:
@@ -249,7 +253,8 @@ class CheckpointResult(BaseModel):
         if len(run_results) == 0:
             raise ValueError("CheckpointResult must contain at least one run result")  # noqa: TRY003
 
-        values["success"] = all(result.success for result in run_results.values())
+        if values["success"] is None:
+            values["success"] = all(result.success for result in run_results.values())
         return values
 
     @property

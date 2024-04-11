@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 @pytest.mark.unit
 def test_checkpoint_no_validation_definitions_raises_error():
     with pytest.raises(ValueError) as e:
-        Checkpoint(name="my_checkpoint", validation_definitions=[], actions=[])
+        Checkpoint(name="my_checkpoint", validation_definitions=[])
 
     assert "Checkpoint must contain at least one validation definition" in str(e.value)
 
@@ -62,7 +62,6 @@ def test_checkpoint_save_success(mocker: MockerFixture):
     checkpoint = Checkpoint(
         name="my_checkpoint",
         validation_definitions=[mocker.Mock(spec=ValidationDefinition)],
-        actions=[],
     )
     store_key = context.v1_checkpoint_store.get_key.return_value
     checkpoint.save()
@@ -477,7 +476,7 @@ class TestCheckpointResult:
     @pytest.mark.unit
     def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
         checkpoint = Checkpoint(
-            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+            name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
         result = checkpoint.run()
 
@@ -508,14 +507,14 @@ class TestCheckpointResult:
             result = checkpoint.run()
 
         assert mock_run.call_count == len(actions)
-        mock_run.assert_called_with(checkpoint_result=result)
+        mock_run.assert_called_with(checkpoint_result=result, action_context=mock.ANY)
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(
         self, validation_definition: ValidationDefinition
     ):
         checkpoint = Checkpoint(
-            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+            name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
         batch_parameters = {"my_param": "my_value"}
         expectation_parameters = {"my_other_param": "my_other_value"}
@@ -640,7 +639,7 @@ class TestCheckpointResult:
         )
 
         checkpoint = Checkpoint(
-            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+            name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
         result = checkpoint.run()
 
