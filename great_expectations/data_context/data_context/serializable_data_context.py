@@ -393,12 +393,12 @@ class SerializableDataContext(AbstractDataContext):
 
         if validate_config_version:
             if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-                raise gx_exceptions.UnsupportedConfigVersionError(
+                raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
                     f"""Invalid config version ({config_version})\n
                                                                   The version number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}"""  # noqa: E501
                 )
             elif config_version > CURRENT_GX_CONFIG_VERSION:
-                raise gx_exceptions.UnsupportedConfigVersionError(
+                raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
                     f"""Invalid config version ({config_version}).\n
                                                                   The maximum valid version is {CURRENT_GX_CONFIG_VERSION}."""  # noqa: E501
                 )

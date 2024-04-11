@@ -462,7 +462,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite.name = expectation_suite_name
             key = ExpectationSuiteIdentifier(name=expectation_suite_name)
         if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
-            raise gx_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"expectation_suite with name {expectation_suite_name} already exists. If you would like to overwrite this "  # noqa: E501
                 "expectation_suite, set overwrite_existing=True."
             )

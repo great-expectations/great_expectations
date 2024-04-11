@@ -217,7 +217,7 @@ class ActionListValidationOperator(ValidationOperator):
             assert isinstance(action_config, dict)
             # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
             if not set(action_config.keys()) == {"name", "action"}:
-                raise KeyError(
+                raise KeyError(  # noqa: TRY003
                     f'Action config keys must be ("name", "action"). Instead got {action_config.keys()}'  # noqa: E501
                 )
 

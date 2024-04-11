@@ -41,7 +41,7 @@ def instantiate_class_from_config(  # noqa: C901, PLR0912
         try:
             module_name = config_defaults.pop("module_name")
         except KeyError:
-            raise KeyError(
+            raise KeyError(  # noqa: TRY003
                 f"Neither config : {config} nor config_defaults : {config_defaults} contains a module_name key."  # noqa: E501
             )
     else:
@@ -60,7 +60,7 @@ def instantiate_class_from_config(  # noqa: C901, PLR0912
         try:
             class_name = config_defaults.pop("class_name")
         except KeyError:
-            raise KeyError(
+            raise KeyError(  # noqa: TRY003
                 f"Neither config : {config} nor config_defaults : {config_defaults} contains a class_name key."  # noqa: E501
             )
     else:

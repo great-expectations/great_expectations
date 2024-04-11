@@ -1047,7 +1047,7 @@ class UpdateDataDocsAction(DataDocsAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 "validation_result_id must be of type ValidationResultIdentifier or"
                 f" GeCloudIdentifier, not {type(validation_result_suite_identifier)}"
             )
