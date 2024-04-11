@@ -1048,9 +1048,8 @@ class UpdateDataDocsAction(DataDocsAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(  # noqa: E501
-                    type(validation_result_suite_identifier)
-                )
+                "validation_result_id must be of type ValidationResultIdentifier or"
+                f" GeCloudIdentifier, not {type(validation_result_suite_identifier)}"
             )
 
         # TODO Update for RenderedDataDocs
