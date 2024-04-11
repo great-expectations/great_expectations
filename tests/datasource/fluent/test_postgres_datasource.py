@@ -3,16 +3,10 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from contextlib import contextmanager
 from pprint import pprint
 from typing import (
     TYPE_CHECKING,
-    Any,
-    Callable,
-    ContextManager,
-    Dict,
     Generator,
-    List,
     Literal,
     Optional,
     Tuple,
@@ -55,73 +49,26 @@ from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
+from tests.datasource.fluent.conftest import (
+    _DEFAULT_TEST_MONTHS,
+    _DEFAULT_TEST_YEARS,
+    CreateSourceFixture,
+)
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 if TYPE_CHECKING:
     from unittest.mock import Mock  # noqa: TID251
 
     from pytest_mock import MockFixture
-    from typing_extensions import TypeAlias
 
-    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
     )
 
 # We set a default time range that we use for testing.
-_DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
-_DEFAULT_TEST_MONTHS = list(range(1, 13))
 
 LOGGER = logging.getLogger(__name__)
-
-
-@contextmanager
-def _source(
-    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
-    dialect: str,
-    connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
-    data_context: Optional[AbstractDataContext] = None,
-    partitioner_query_response: Optional[List[Dict[str, Any]]] = None,
-    create_temp_table: bool = True,
-) -> Generator[PostgresDatasource, None, None]:
-    partitioner_response = partitioner_query_response or (
-        [
-            {"year": year, "month": month}
-            for year in _DEFAULT_TEST_YEARS
-            for month in _DEFAULT_TEST_MONTHS
-        ]
-    )
-
-    execution_eng_cls = sqlachemy_execution_engine_mock_cls(
-        validate_batch_spec=validate_batch_spec,
-        dialect=dialect,
-        partitioner_query_response=partitioner_response,
-    )
-    original_override = PostgresDatasource.execution_engine_override  # type: ignore[misc]
-    try:
-        PostgresDatasource.execution_engine_override = execution_eng_cls  # type: ignore[misc]
-        postgres_datasource = PostgresDatasource(
-            name="my_datasource",
-            connection_string=connection_string,
-            create_temp_table=create_temp_table,
-        )
-        if data_context:
-            postgres_datasource._data_context = data_context
-        yield postgres_datasource
-    finally:
-        PostgresDatasource.execution_engine_override = original_override  # type: ignore[misc]
-
-
-# We may be able to parameterize this fixture so we can instantiate _source in the fixture.
-# This would reduce the `with ...` boilerplate in the individual tests.
-@pytest.fixture
-def create_source() -> ContextManager:
-    return _source  # type: ignore[return-value]
-
-
-CreateSourceFixture: TypeAlias = Callable[..., ContextManager[PostgresDatasource]]
 
 
 @pytest.fixture

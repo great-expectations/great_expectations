@@ -4,17 +4,20 @@ import functools
 import logging
 import pathlib
 import warnings
+from contextlib import contextmanager
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ContextManager,
     Dict,
     Final,
     Generator,
     List,
     Optional,
     Type,
+    TypeAlias,
     Union,
 )
 
@@ -31,6 +34,7 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import FileDataContext
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
@@ -42,6 +46,7 @@ from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )
+from great_expectations.datasource.fluent.postgres_datasource import PostgresDatasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -63,9 +68,11 @@ if TYPE_CHECKING:
 
     from great_expectations.data_context import CloudDataContext
 
+CreateSourceFixture: TypeAlias = Callable[..., ContextManager[PostgresDatasource]]
 FLUENT_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
 PG_CONFIG_YAML_FILE: Final = FLUENT_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
-
+_DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
+_DEFAULT_TEST_MONTHS = list(range(1, 13))
 
 logger = logging.getLogger(__name__)
 
@@ -426,3 +433,47 @@ def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasour
     )
     pandas_filesystem_datasource._data_context = empty_data_context
     return pandas_filesystem_datasource
+
+
+@contextmanager
+def _source(
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
+    dialect: str,
+    connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
+    data_context: Optional[AbstractDataContext] = None,
+    partitioner_query_response: Optional[List[Dict[str, Any]]] = None,
+    create_temp_table: bool = True,
+) -> Generator[PostgresDatasource, None, None]:
+    partitioner_response = partitioner_query_response or (
+        [
+            {"year": year, "month": month}
+            for year in _DEFAULT_TEST_YEARS
+            for month in _DEFAULT_TEST_MONTHS
+        ]
+    )
+
+    execution_eng_cls = sqlachemy_execution_engine_mock_cls(
+        validate_batch_spec=validate_batch_spec,
+        dialect=dialect,
+        partitioner_query_response=partitioner_response,
+    )
+    original_override = PostgresDatasource.execution_engine_override  # type: ignore[misc]
+    try:
+        PostgresDatasource.execution_engine_override = execution_eng_cls  # type: ignore[misc]
+        postgres_datasource = PostgresDatasource(
+            name="my_datasource",
+            connection_string=connection_string,
+            create_temp_table=create_temp_table,
+        )
+        if data_context:
+            postgres_datasource._data_context = data_context
+        yield postgres_datasource
+    finally:
+        PostgresDatasource.execution_engine_override = original_override  # type: ignore[misc]
+
+
+# We may be able to parameterize this fixture so we can instantiate _source in the fixture.
+# This would reduce the `with ...` boilerplate in the individual tests.
+@pytest.fixture
+def create_source() -> ContextManager:
+    return _source  # type: ignore[return-value]
