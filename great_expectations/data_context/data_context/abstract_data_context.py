@@ -4373,7 +4373,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self._datasources
 
     @property
-    def fluent_datasources(self) -> Dict[str, FluentDatasource]:
+    def fluent_datasources(self) -> Mapping[str, FluentDatasource]:
         return {
             name: ds
             for (name, ds) in self.datasources.items()
