@@ -437,7 +437,7 @@ class Validator:
 
     def __getattr__(self, name):
         if self.active_batch is None:
-            raise TypeError("active_batch cannot be None")
+            raise TypeError("active_batch cannot be None")  # noqa: TRY003
         name = name.lower()
         if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
@@ -448,7 +448,7 @@ class Validator:
         ):
             return getattr(self.active_batch.data.dataframe, name)
         else:
-            raise AttributeError(f"'{type(self).__name__}'  object has no attribute '{name}'")
+            raise AttributeError(f"'{type(self).__name__}'  object has no attribute '{name}'")  # noqa: TRY003
 
     def validate_expectation(self, name: str) -> Callable:  # noqa: C901, PLR0915
         """
@@ -502,7 +502,7 @@ class Validator:
                         )
                         meta = arg
                 except IndexError:
-                    raise InvalidExpectationConfigurationError(
+                    raise InvalidExpectationConfigurationError(  # noqa: TRY003
                         f"Invalid positional argument: {arg}"
                     )
 
@@ -568,7 +568,7 @@ class Validator:
                         expectation_config=configuration,
                     )
                 else:
-                    raise err
+                    raise err  # noqa: TRY201
 
             if self._include_rendered_content:
                 validation_result.render()
@@ -674,10 +674,10 @@ class Validator:
         }
 
         if not rule.domain_builder:
-            raise TypeError("Rule must include domain_builder.")
+            raise TypeError("Rule must include domain_builder.")  # noqa: TRY003
         domain_type: MetricDomainTypes = rule.domain_builder.domain_type
         if domain_type not in MetricDomainTypes:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f'Domain type declaration "{domain_type}" in "MetricDomainTypes" does not exist.'
             )
 
@@ -825,7 +825,7 @@ class Validator:
                 )
                 return evrs
             else:
-                raise err
+                raise err  # noqa: TRY201
 
         configuration: ExpectationConfiguration
         result: ExpectationValidationResult
@@ -850,7 +850,7 @@ class Validator:
                         evrs=evrs,
                     )
                 else:
-                    raise err
+                    raise err  # noqa: TRY201
 
         return evrs
 
@@ -920,7 +920,7 @@ class Validator:
                     )
                     evrs.append(result)
                 else:
-                    raise err
+                    raise err  # noqa: TRY201
 
         return expectation_validation_graphs, evrs, processed_configurations
 
@@ -1066,8 +1066,13 @@ class Validator:
         res = self.validate(only_return_failures=True).results  # type: ignore[union-attr] # ExpectationValidationResult has no `.results` attr
         if any(res):
             for item in res:
+                config = item.expectation_config
+                if not config:
+                    raise ValueError(  # noqa: TRY003
+                        "ExpectationValidationResult does not have an expectation_config"
+                    )
                 self.remove_expectation(
-                    expectation_configuration=item.expectation_config,
+                    expectation_configuration=config,
                     match_type="runtime",
                 )
             warnings.warn(f"Removed {len(res)} expectations that were 'False'")
@@ -1266,7 +1271,7 @@ class Validator:
                     sort_keys=True,
                 )
         else:
-            raise ValueError("Unable to save config: filepath or data_context must be available.")
+            raise ValueError("Unable to save config: filepath or data_context must be available.")  # noqa: TRY003
 
     @public_api
     @deprecated_argument(
@@ -1348,7 +1353,7 @@ class Validator:
                 except ValidationError:
                     raise
                 except OSError:
-                    raise GreatExpectationsError(
+                    raise GreatExpectationsError(  # noqa: TRY003
                         f"Unable to load expectation suite: IO error while reading {expectation_suite}"  # noqa: E501
                     )
 
@@ -1417,6 +1422,7 @@ class Validator:
             result = ExpectationSuiteValidationResult(
                 results=results,
                 success=statistics.success,
+                suite_name=expectation_suite_name,
                 statistics={
                     "evaluated_expectations": statistics.evaluated_expectations,
                     "successful_expectations": statistics.successful_expectations,
@@ -1438,7 +1444,7 @@ class Validator:
             )
 
             self._data_context = validation_data_context
-        except Exception:
+        except Exception:  # noqa: TRY302
             raise
         finally:
             self._active_validation = False
@@ -1607,7 +1613,7 @@ class Validator:
         # Checking type of expectation_suite.
         # Check for expectation_suite_name is already done by ExpectationSuiteIdentifier
         if expectation_suite and not isinstance(expectation_suite, ExpectationSuite):
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"expectation_suite must be of type ExpectationSuite, not {type(expectation_suite)}"
             )
         if expectation_suite is not None:
@@ -1621,10 +1627,7 @@ class Validator:
             if expectation_suite_name is not None:
                 if self._expectation_suite.name != expectation_suite_name:
                     logger.warning(
-                        "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
-                            n1=self._expectation_suite.name,
-                            n2=expectation_suite_name,
-                        )
+                        f"Overriding existing expectation_suite_name {self._expectation_suite.name} with new name {expectation_suite_name}"  # noqa: E501
                     )
                 self._expectation_suite.name = expectation_suite_name
 

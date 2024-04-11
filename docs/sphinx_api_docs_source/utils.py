@@ -1,14 +1,11 @@
-def apply_markdown_adjustments(soup, html_file_path, html_file_contents):
+def apply_markdown_adjustments(soup, html_file_path, html_file_contents):  # noqa: C901
     # Add newline before closing dt tags when they have more than one child
     for item in soup.find_all("dt"):
         lengthChildren = len(item.findChildren())
-        if (
-            "expectation" in str(html_file_path)
-            and "Relevant Documentation Links" in item.get_text()
-        ):
-            item.string.replaceWith(item.get_text(strip=True))
         if lengthChildren > 1:
             item.append("\r\n")
+        if "Relevant Documentation Links" in item.get_text():
+            item.string.replaceWith(item.get_text().replace("-", "").strip())
 
     # Add newline before closing th, td and li tags
     for item in soup.find_all(["th", "td", "li"]):

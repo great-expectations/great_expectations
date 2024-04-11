@@ -148,7 +148,7 @@ class GxConfig(FluentBaseModel):
                 )
             )[0]
         except IndexError as exc:
-            raise LookupError(
+            raise LookupError(  # noqa: TRY003
                 f"'{datasource_name}' not found. Available datasources are {self.get_datasource_names()}"  # noqa: E501
             ) from exc
 
@@ -197,13 +197,13 @@ class GxConfig(FluentBaseModel):
             if not ds_type_name:
                 # TODO: (kilo59 122222) ideally this would be raised by `Datasource` validation
                 # https://github.com/pydantic/pydantic/issues/734
-                raise ValueError(f"'{ds_name}' is missing a 'type' entry")
+                raise ValueError(f"'{ds_name}' is missing a 'type' entry")  # noqa: TRY003
 
             try:
                 ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_type_name]
                 logger.debug(f"Instantiating '{ds_name}' as {ds_type}")
             except KeyError as type_lookup_err:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     f"'{ds_name}' has unsupported 'type' - {type_lookup_err}"
                 ) from type_lookup_err
 

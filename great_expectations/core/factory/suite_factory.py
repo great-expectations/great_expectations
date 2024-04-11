@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.analytics.client import submit as submit_event
@@ -35,7 +35,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
         """
         key = self._store.get_key(name=suite.name, id=None)
         if self._store.has_key(key=key):
-            raise DataContextError(
+            raise DataContextError(  # noqa: TRY003
                 f"Cannot add ExpectationSuite with name {suite.name} because it already exists."
             )
         self._store.add(key=key, value=suite)
@@ -61,7 +61,7 @@ class SuiteFactory(Factory[ExpectationSuite]):
         """
         key = self._store.get_key(name=suite.name, id=suite.id)
         if not self._store.has_key(key=key):
-            raise DataContextError(
+            raise DataContextError(  # noqa: TRY003
                 f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found."
             )
         self._store.remove_key(key=key)
@@ -88,8 +88,19 @@ class SuiteFactory(Factory[ExpectationSuite]):
 
         key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
-            raise DataContextError(f"ExpectationSuite with name {name} was not found.")
+            raise DataContextError(f"ExpectationSuite with name {name} was not found.")  # noqa: TRY003
         suite_dict = self._store.get(key=key)
+        return self._deserialize(suite_dict)
+
+    @public_api
+    @override
+    def all(self) -> Iterable[ExpectationSuite]:
+        """Get all ExpectationSuites."""
+        dicts = self._store.get_all()
+        return [self._deserialize(suite_dict) for suite_dict in dicts]
+
+    def _deserialize(self, suite_dict: dict) -> ExpectationSuite:
+        # TODO: Move this logic to the store
         suite = ExpectationSuite(**suite_dict)
         if self._include_rendered_content:
             suite.render()

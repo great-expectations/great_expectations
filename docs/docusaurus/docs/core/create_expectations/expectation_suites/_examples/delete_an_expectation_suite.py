@@ -6,9 +6,11 @@ The <snippet> tags are used to insert the corresponding code into the
  Great Expectations documentation.  They can be disregarded by anyone
  reviewing this script.
 """
+
 # <snippet name="core/expectation_suites/_examples/delete_an_expectation_suite.py full example code">
 import great_expectations as gx
 from great_expectations.core.expectation_suite import ExpectationSuite
+
 context = gx.get_context()
 
 new_suite_name = "my_deletable_expectation_suite"
@@ -29,4 +31,3 @@ context.suites.delete(suite=suite)
 # </snippet>
 # highlight-end
 # </snippet>
-

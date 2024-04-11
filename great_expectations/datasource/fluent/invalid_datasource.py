@@ -68,11 +68,11 @@ class InvalidAsset(DataAsset):
     @override
     def test_connection(self) -> None:
         if datasource := getattr(self, "datasource", None):
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 f"The Datasource configuration for {self.name} is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
             ) from datasource.config_error
         # the asset should always have a datasource, but if it doesn't, we should still raise an error  # noqa: E501
-        raise TestConnectionError(
+        raise TestConnectionError(  # noqa: TRY003
             "This Asset configuration is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
         )
 
@@ -90,6 +90,7 @@ class InvalidAsset(DataAsset):
         options: dict | None = None,
         batch_slice: Any = None,
         partitioner: Any = None,
+        batching_regex: Any = None,
     ) -> NoReturn:
         self._raise_type_error()
 
@@ -102,7 +103,7 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_request_options_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
+    def get_batch_parameters_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
         self._raise_type_error()
 
 
@@ -159,7 +160,7 @@ class InvalidDatasource(Datasource):
 
     @override
     def test_connection(self, test_assets: bool = True) -> None:
-        raise TestConnectionError(
+        raise TestConnectionError(  # noqa: TRY003
             "This Datasource configuration is invalid and cannot be used. Please fix the error and try again"  # noqa: E501
         ) from self.config_error
 

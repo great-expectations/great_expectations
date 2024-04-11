@@ -5,7 +5,6 @@ import zipfile
 from contextlib import contextmanager
 from functools import cached_property
 from io import BytesIO
-from packaging import version
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator, Optional
 
@@ -13,6 +12,7 @@ from docs.logging import Logger
 
 if TYPE_CHECKING:
     from invoke.context import Context
+    from packaging import version
 
 
 class DocsBuilder:
@@ -83,7 +83,7 @@ class DocsBuilder:
         self._run("(cd ../../; invoke api-docs)")
 
     def _read_prior_release_version_file(self) -> str:
-        with open(self._release_version_file, "r") as file:
+        with open(self._release_version_file) as file:
             return file.read()
 
     def _write_release_version(self, content: str) -> None:
@@ -95,7 +95,7 @@ class DocsBuilder:
         if not result:
             return None
         elif not result.ok:
-            raise Exception(f"Failed to run command: {command}")
+            raise Exception(f"Failed to run command: {command}")  # noqa: TRY002, TRY003
         return result.stdout.strip()
 
     def _run_and_get_output(self, command: str) -> str:

@@ -394,8 +394,11 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if isinstance(data, RenderedContent):
         return data.to_json_dict()
 
+    if isinstance(data, re.Pattern):
+        return data.pattern
+
     # Unable to serialize (unrecognized data type).
-    raise TypeError(f"{data!s} is of type {type(data).__name__} which cannot be serialized.")
+    raise TypeError(f"{data!s} is of type {type(data).__name__} which cannot be serialized.")  # noqa: TRY003
 
 
 def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
@@ -505,7 +508,7 @@ def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
         # Connection module is handled manually by convert_to_json_serializable()
         return
 
-    raise InvalidExpectationConfigurationError(
+    raise InvalidExpectationConfigurationError(  # noqa: TRY003
         f"{data!s} is of type {type(data).__name__} which cannot be serialized to json"
     )
 
@@ -538,7 +541,7 @@ def parse_string_to_datetime(
     datetime_string: str, datetime_format_string: Optional[str] = None
 ) -> datetime.datetime:
     if not isinstance(datetime_string, str):
-        raise gx_exceptions.SorterError(
+        raise gx_exceptions.SorterError(  # noqa: TRY003
             f"""Source "datetime_string" must have string type (actual type is "{type(datetime_string)!s}").
             """  # noqa: E501
         )
@@ -547,7 +550,7 @@ def parse_string_to_datetime(
         return dateutil.parser.parse(timestr=datetime_string)
 
     if datetime_format_string and not isinstance(datetime_format_string, str):
-        raise gx_exceptions.SorterError(
+        raise gx_exceptions.SorterError(  # noqa: TRY003
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{type(datetime_format_string)!s}").
             """  # noqa: E501
@@ -732,7 +735,7 @@ class DBFSPath:
         if re.search("^/dbfs", path):
             return path
 
-        raise ValueError("Path should start with either /dbfs or dbfs:")
+        raise ValueError("Path should start with either /dbfs or dbfs:")  # noqa: TRY003
 
     @staticmethod
     def convert_to_protocol_version(path: str) -> str:
@@ -751,7 +754,7 @@ class DBFSPath:
 
             return path
 
-        raise ValueError("Path should start with either /dbfs or dbfs:")
+        raise ValueError("Path should start with either /dbfs or dbfs:")  # noqa: TRY003
 
 
 def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:

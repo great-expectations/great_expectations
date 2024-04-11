@@ -4,18 +4,22 @@ import copy
 import inspect
 import logging
 import pathlib
+import re
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
 
 from great_expectations.compatibility.pydantic import DirectoryPath, validate_arguments
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import Partitioner
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context import get_context as get_gx_context
+from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.batch_request import (
+    BatchParameters,
     BatchRequest,
-    BatchRequestOptions,
 )
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import (
@@ -66,21 +70,12 @@ class DataContext:
             cls._context = DataContext(context_root_dir=context_root_dir)
 
         assert cls._context
-        if cls._context.root_directory:
-            # load config and add/instantiate Datasources & Assets
-            config_path = pathlib.Path(cls._context.root_directory) / _config_file
-            cls._config = GxConfig.parse_yaml(config_path)
-            for ds_name, datasource in cls._config.datasources.items():
-                logger.info(f"Loaded '{ds_name}' from config")
-                cls._context._add_fluent_datasource(datasource)
-                # TODO: add assets?
-
         return cls._context
 
     @validate_arguments
     def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
         self.root_directory = context_root_dir
-        self._sources: _SourceFactories = _SourceFactories(self)
+        self._sources: _SourceFactories = _SourceFactories(self)  # type: ignore[arg-type]
         self._datasources: Dict[str, Datasource] = {}
         self.config_provider: _ConfigurationProvider | None = None
         logger.info(f"Available Factories - {self._sources.factories}")
@@ -92,7 +87,7 @@ class DataContext:
 
     @property
     def datasources(self) -> DatasourceDict:
-        return self._datasources
+        return self._datasources  # type: ignore[return-value]
 
     def _add_fluent_datasource(self, datasource: Datasource) -> Datasource:
         self._datasources[datasource.name] = datasource
@@ -125,7 +120,14 @@ def get_context(context_root_dir: Optional[DirectoryPath] = None, **kwargs):
 class DummyDataAsset(DataAsset):
     """Minimal Concrete DataAsset Implementation"""
 
-    def build_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
+    @override
+    def build_batch_request(
+        self,
+        options: Optional[BatchParameters] = None,
+        batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
+    ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 

@@ -68,7 +68,7 @@ def sort(
 ):
     """Sort module imports."""
     if ruff and isort:
-        raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)
+        raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)  # noqa: TRY003
     if not isort:
         cmds = [
             "ruff",
@@ -89,15 +89,16 @@ def sort(
 
 
 @invoke.task(
+    aliases=("fmt",),
     help={
         "check": _CHECK_HELP_DESC,
         "exclude": _EXCLUDE_HELP_DESC,
         "path": _PATH_HELP_DESC,
         "sort": "Disable import sorting. Runs by default.",
         "pty": _PTY_HELP_DESC,
-    }
+    },
 )
-def fmt(
+def format(
     ctx: Context,
     path: str = ".",
     sort_: bool = True,
@@ -138,7 +139,7 @@ def lint(
 ):
     """Run formatter (ruff format) and linter (ruff)"""
     if fmt_:
-        fmt(ctx, path, check=not fix, pty=pty)
+        format(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
     cmds = ["ruff", "check", path]
@@ -153,7 +154,7 @@ def lint(
 def fix(ctx: Context, path: str = "."):
     """Automatically fix all possible code issues."""
     lint(ctx, path=path, fix=True)
-    fmt(ctx, path=path, sort_=True)
+    format(ctx, path=path, sort_=True)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
@@ -496,6 +497,7 @@ def type_schema(  # noqa: C901 - too complex
     from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
         BatchRequest,
+        DataAsset,
         Datasource,
     )
     from great_expectations.datasource.fluent.sources import (
@@ -515,7 +517,7 @@ def type_schema(  # noqa: C901 - too complex
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    name_model = [
+    name_model: list[tuple[str, type[Datasource | BatchRequest | DataAsset]]] = [
         ("BatchRequest", BatchRequest),
         (Datasource.__name__, Datasource),
         *_iter_all_registered_types(),
@@ -626,7 +628,7 @@ def docs(
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
-        docs_builder.create_version(version=parse_version(version))
+        docs_builder.create_version(version=parse_version(version))  # type: ignore[arg-type]
     elif start:
         ctx.run(" ".join(["yarn start"]), echo=True)
     elif clear:
@@ -694,9 +696,9 @@ def link_checker(ctx: Context, skip_external: bool = True):
     """Checks the Docusaurus docs for broken links"""
     import docs.checks.docs_link_checker as checker
 
-    path: str = "docs/docusaurus/docs"
-    docs_root: str = "docs/docusaurus/docs"
-    static_root: str = "docs/docusaurus/static"
+    path = pathlib.Path("docs/docusaurus/docs")
+    docs_root = pathlib.Path("docs/docusaurus/docs")
+    static_root = pathlib.Path("docs/docusaurus/static")
     site_prefix: str = "docs"
     static_prefix: str = "static"
 
@@ -721,7 +723,7 @@ def show_automerges(ctx: Context):
     url = "https://api.github.com/repos/great-expectations/great_expectations/pulls"
     response = requests.get(
         url,
-        params={
+        params={  # type: ignore[arg-type]
             "state": "open",
             "sort": "updated",
             "direction": "desc",
@@ -888,7 +890,7 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         yield "project"
         yield "sqlite"
     else:
-        raise ValueError(f"Unable to tokenize marker string: {marker_string}")
+        raise ValueError(f"Unable to tokenize marker string: {marker_string}")  # noqa: TRY003
 
 
 def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependencies]:
@@ -1099,9 +1101,7 @@ def service(
         for service_name in service_names:
             cmds = []
 
-            if (
-                service_name == "mercury" and os.environ.get("CI") != "true"  # noqa: TID251
-            ):
+            if service_name == "mercury" and os.environ.get("CI") != "true":
                 cmds.extend(
                     [
                         "FORCE_NO_ALIAS=true",

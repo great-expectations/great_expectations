@@ -12,7 +12,10 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.exceptions.exceptions import StoreBackendError
+from great_expectations.exceptions.exceptions import (
+    StoreBackendError,
+    StoreBackendUnsupportedResourceTypeError,
+)
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -98,7 +101,12 @@ class InlineStoreBackend(StoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        project_config = self._data_context.config
+        variable_config = project_config.get(self._resource_type)
+        if isinstance(variable_config, dict):
+            return list(variable_config.values())
+        else:
+            raise StoreBackendUnsupportedResourceTypeError(self._resource_type.value)
 
     @override
     def _set(self, key: tuple[str, ...], value: Any, **kwargs: dict) -> None:
@@ -125,7 +133,7 @@ class InlineStoreBackend(StoreBackend):
 
     @override
     def _move(self, source_key: tuple[str, ...], dest_key: tuple[str, ...], **kwargs: dict) -> None:
-        raise StoreBackendError(
+        raise StoreBackendError(  # noqa: TRY003
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"  # noqa: E501
         )
 
@@ -154,7 +162,7 @@ class InlineStoreBackend(StoreBackend):
         else:
             config_values: dict = config_dict[config_section]
             if not isinstance(config_values, dict):
-                raise StoreBackendError(
+                raise StoreBackendError(  # noqa: TRY003
                     "Cannot list keys in a non-iterable section of a project config"
                 )
             keys = list((key,) for key in config_values.keys())
@@ -170,15 +178,15 @@ class InlineStoreBackend(StoreBackend):
         resource_type = self._resource_type
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 "InlineStoreBackend does not support the deletion of the overall DataContext project config"  # noqa: E501
             )
         if resource_name is None:
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 "InlineStoreBackend does not support the deletion of top level keys; the DataContext's config variables schema is immutable"  # noqa: E501
             )
         elif not self._has_key(key):
-            raise StoreBackendError(f"Could not find a value associated with key `{key}`")
+            raise StoreBackendError(f"Could not find a value associated with key `{key}`")  # noqa: TRY003
 
         del self._data_context.config[resource_type][resource_name]
 

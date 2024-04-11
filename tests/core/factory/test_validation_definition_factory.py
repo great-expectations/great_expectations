@@ -1,8 +1,10 @@
 import json
+import pathlib
 
 import pytest
 from pytest_mock import MockerFixture
 
+import great_expectations.expectations as gxe
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.validation_definition_factory import (
@@ -306,6 +308,90 @@ def _test_validation_definition_factory_delete_success(
         match=f"ValidationDefinition with name {name} was not found.",
     ):
         context.validation_definitions.get(name)
+
+
+@pytest.mark.parametrize(
+    "context_fixture_name",
+    [
+        pytest.param("empty_cloud_context_fluent", id="cloud", marks=pytest.mark.cloud),
+        pytest.param("in_memory_runtime_context", id="ephemeral", marks=pytest.mark.big),
+        pytest.param("empty_data_context", id="filesystem", marks=pytest.mark.filesystem),
+    ],
+)
+def test_validation_definition_factory_all(
+    context_fixture_name: str, request: pytest.FixtureRequest
+):
+    context: AbstractDataContext = request.getfixturevalue(context_fixture_name)
+
+    # Arrange
+    ds = context.sources.add_pandas("my_datasource")
+    asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
+    suite = ExpectationSuite(name="my_suite")
+    validation_definition_a = ValidationDefinition(
+        name="validation definition a",
+        data=asset.add_batch_definition("a"),
+        suite=suite,
+    )
+    validation_definition_b = ValidationDefinition(
+        name="validation definition b",
+        data=asset.add_batch_definition("b"),
+        suite=suite,
+    )
+
+    context.validation_definitions.add(validation=validation_definition_a)
+    context.validation_definitions.add(validation=validation_definition_b)
+
+    # Act
+    result = context.validation_definitions.all()
+    result = sorted(result, key=lambda x: x.name)
+
+    # Assert
+    assert [r.name for r in result] == [validation_definition_a.name, validation_definition_b.name]
+    assert result == [validation_definition_a, validation_definition_b]
+
+
+@pytest.mark.filesystem
+def test_validation_definition_factory_round_trip(
+    empty_data_context: FileDataContext,
+    validation_definition: ValidationDefinition,
+):
+    # Arrange
+    context = empty_data_context
+
+    ds = context.sources.add_pandas("my_ds")
+    csv_path = pathlib.Path(
+        __file__, "..", "..", "..", "test_sets", "quickstart", "yellow_tripdata_sample_2022-01.csv"
+    ).resolve()
+    assert csv_path.exists()
+    asset = ds.add_csv_asset("my_asset", filepath_or_buffer=csv_path)
+
+    batch_definition = asset.add_batch_definition("my_batch_def")
+    suite = ExpectationSuite(
+        name="my_suite",
+        expectations=[
+            gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=0, max_value=10),
+            gxe.ExpectColumnMeanToBeBetween(
+                column="passenger_count",
+                min_value=0,
+                max_value=1,
+            ),
+        ],
+    )
+
+    # Act
+    validation_definition = ValidationDefinition(
+        name="my_validation_def", data=batch_definition, suite=suite
+    )
+    persisted_validation_definition = context.validation_definitions.add(
+        validation=validation_definition
+    )
+    retrieved_validation_definition = context.validation_definitions.get(
+        name=validation_definition.name
+    )
+
+    # Assert
+    # Suite equality is a bit finnicky, so we just check the JSON representation
+    assert persisted_validation_definition.json() == retrieved_validation_definition.json()
 
 
 class TestValidationDefinitionFactoryAnalytics:

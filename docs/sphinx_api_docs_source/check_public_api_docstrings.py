@@ -6,6 +6,7 @@ Typical usage example:
 
   main() method provided with typical usage.
 """
+
 from __future__ import annotations
 
 import datetime
@@ -111,6 +112,7 @@ def run_ruff(paths: List[pathlib.Path]) -> List[str]:
         cmds,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     # Check to make sure `ruff` actually ran
@@ -124,7 +126,7 @@ def run_ruff(paths: List[pathlib.Path]) -> List[str]:
 
 def _log_with_timestamp(content: str) -> None:
     """Log content with timestamp appended."""
-    timestamp = datetime.datetime.now()
+    timestamp = datetime.datetime.now()  # noqa: DTZ005
     timestamp_str = timestamp.strftime("%H:%M:%S")
     logger.debug(f"{content} Timestamp: {timestamp_str}")
 

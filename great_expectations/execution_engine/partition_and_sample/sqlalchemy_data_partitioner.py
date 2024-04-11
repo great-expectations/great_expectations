@@ -683,7 +683,7 @@ class SqlAlchemyDataPartitioner(DataPartitioner):
                 processed_partitioner_method_name
             ]
         except ValueError:
-            raise gx_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 f"Please provide a supported partitioner method name, you provided: {partitioner_method_name}"  # noqa: E501
             )
 

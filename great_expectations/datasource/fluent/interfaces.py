@@ -4,6 +4,7 @@ import copy
 import dataclasses
 import functools
 import logging
+import re
 import uuid
 import warnings
 from pprint import pformat as pf
@@ -79,8 +80,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import (
+        BatchParameters,
         BatchRequest,
-        BatchRequestOptions,
     )
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
@@ -147,7 +148,7 @@ def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
 
     # This should never be reached because of static typing but is necessary because
     # mypy doesn't know of the if conditions must evaluate to True.
-    raise ValueError(f"sorters is a not a SortersDefinition but is a {type(sorters)}")
+    raise ValueError(f"sorters is a not a SortersDefinition but is a {type(sorters)}")  # noqa: TRY003
 
 
 def _sorter_from_str(sort_key: str) -> Sorter:
@@ -206,28 +207,30 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
-    def get_batch_request_options_keys(
+    def get_batch_parameters_keys(
         self, partitioner: Optional[Partitioner] = None
     ) -> tuple[str, ...]:
         raise NotImplementedError(
-            """One needs to implement "get_batch_request_options_keys" on a DataAsset subclass."""
+            """One needs to implement "get_batch_parameters_keys" on a DataAsset subclass."""
         )
 
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling get_batch_request_options_keys(...).
+                calling get_batch_parameters_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
+            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -270,7 +273,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         """
         batch_definition_names = {bc.name for bc in self.batch_definitions}
         if name in batch_definition_names:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f'"{name}" already exists (all existing batch_definition names are {", ".join(batch_definition_names)})'  # noqa: E501
             )
 
@@ -300,7 +303,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         """
         batch_definition_names = {bc.name for bc in self.batch_definitions}
         if batch_definition not in self.batch_definitions:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f'"{batch_definition.name}" does not exist (all existing batch_definition names are {batch_definition_names})'  # noqa: E501
             )
 
@@ -333,19 +336,19 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             if batch_definition.name == batch_definition_name
         ]
         if len(batch_definitions) == 0:
-            raise KeyError(f"BatchDefinition {batch_definition_name} not found")
+            raise KeyError(f"BatchDefinition {batch_definition_name} not found")  # noqa: TRY003
         elif len(batch_definitions) > 1:
-            raise KeyError(f"Multiple keys for {batch_definition_name} found")
+            raise KeyError(f"Multiple keys for {batch_definition_name} found")  # noqa: TRY003
         return batch_definitions[0]
 
-    def _batch_request_options_are_valid(
-        self, options: BatchRequestOptions, partitioner: Optional[Partitioner]
+    def _batch_parameters_are_valid(
+        self, options: BatchParameters, partitioner: Optional[Partitioner]
     ) -> bool:
-        valid_options = self.get_batch_request_options_keys(partitioner=partitioner)
+        valid_options = self.get_batch_parameters_keys(partitioner=partitioner)
         return set(options.keys()).issubset(set(valid_options))
 
     def _get_batch_metadata_from_batch_request(self, batch_request: BatchRequest) -> BatchMetadata:
-        """Performs config variable substitution and populates batch request options for
+        """Performs config variable substitution and populates batch parameters for
         Batch.metadata at runtime.
         """
         batch_metadata = copy.deepcopy(self.batch_metadata)
@@ -410,7 +413,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
                     reverse=sorter.reverse,
                 )
             except KeyError as e:
-                raise KeyError(
+                raise KeyError(  # noqa: TRY003
                     f"Trying to sort {self.name} table asset batches on key {sorter.key} "
                     "which isn't available on all batches."
                 ) from e
@@ -439,7 +442,7 @@ def _sort_batches_with_none_metadata_values(
             return 1
 
         # This line should never be reached; hence, "ValueError" with corresponding error message is raised.  # noqa: E501
-        raise ValueError(
+        raise ValueError(  # noqa: TRY003
             f'Unexpected Batch metadata key combination, "{a.metadata[key]}" and "{b.metadata[key]}", was encountered.'  # noqa: E501
         )
 
@@ -545,7 +548,7 @@ class Datasource(
     def add_batch_definition(self, batch_definition: BatchDefinition) -> BatchDefinition:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
-            raise DataContextError("Cannot save datasource without a data context.")
+            raise DataContextError("Cannot save datasource without a data context.")  # noqa: TRY003
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
@@ -567,7 +570,7 @@ class Datasource(
     def delete_batch_definition(self, batch_definition: BatchDefinition) -> None:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
-            raise DataContextError("Cannot save datasource without a data context.")
+            raise DataContextError("Cannot save datasource without a data context.")  # noqa: TRY003
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
@@ -648,7 +651,7 @@ class Datasource(
             found_asset._datasource = self
             return found_asset
         except IndexError as exc:
-            raise LookupError(
+            raise LookupError(  # noqa: TRY003
                 f'"{asset_name}" not found. Available assets are ({", ".join(self.get_asset_names())})'  # noqa: E501
             ) from exc
 
@@ -687,7 +690,7 @@ class Datasource(
 
         asset_names: Set[str] = self.get_asset_names()
         if asset.name in asset_names:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f'"{asset.name}" already exists (all existing assets are {", ".join(asset_names)})'
             )
 
@@ -756,7 +759,7 @@ class Datasource(
             for idx, sorter in enumerate(order_by):
                 if isinstance(sorter, str):
                     if not sorter:
-                        raise ValueError('"order_by" list cannot contain an empty string')
+                        raise ValueError('"order_by" list cannot contain an empty string')  # noqa: TRY003
                     order_by_sorters.append(_sorter_from_str(sorter))
                 elif isinstance(sorter, dict):
                     key: Optional[Any] = sorter.get("key")
@@ -766,7 +769,7 @@ class Datasource(
                     elif key:
                         order_by_sorters.append(Sorter(key=key))
                     else:
-                        raise ValueError('"order_by" list dict must have a key named "key"')
+                        raise ValueError('"order_by" list dict must have a key named "key"')  # noqa: TRY003
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
@@ -1014,7 +1017,7 @@ class Batch:
         else:
             # If we are type checking, we should never fall through to this case. However, exploratory  # noqa: E501
             # workflows are not being type checked.
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003, TRY004
                 f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}"  # noqa: E501
             )
 
@@ -1032,7 +1035,7 @@ class Batch:
 
         context = self.datasource.data_context
         if context is None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "We can't validate batches that are attached to datasources without a data context"
             )
         batch_definition = self.data_asset.add_batch_definition(
@@ -1040,5 +1043,5 @@ class Batch:
         )
         return V1Validator(
             batch_definition=batch_definition,
-            batch_request_options=self.batch_request.options,
+            batch_parameters=self.batch_request.options,
         )

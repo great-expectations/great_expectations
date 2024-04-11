@@ -182,6 +182,7 @@ class TestValidationRun:
         assert output == ExpectationSuiteValidationResult(
             results=graph_validate_results,
             success=True,
+            suite_name="empty_suite",
             statistics={
                 "evaluated_expectations": 1,
                 "successful_expectations": 1,

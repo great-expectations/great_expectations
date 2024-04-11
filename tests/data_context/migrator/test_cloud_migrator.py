@@ -203,7 +203,7 @@ def test__migrate_to_cloud_outputs_warnings(
 
     context = StubBaseDataContext(
         anonymized_usage_statistics_config=anonymized_usage_statistics_config,
-        datasource_names=datasource_names,
+        datasource_names=datasource_names,  # type: ignore[arg-type]
     )
 
     migrator = migrator_factory(context=context)

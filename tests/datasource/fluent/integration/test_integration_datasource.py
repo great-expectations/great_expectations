@@ -458,7 +458,7 @@ def test_success_with_partitioners_from_batch_definitions(
     )
     validator = Validator(
         batch_definition=batch_definition,
-        batch_request_options={"year": 2020, "month": month},
+        batch_parameters={"year": 2020, "month": month},
     )
     result = validator.validate_expectation(gxe.ExpectTableRowCountToEqual(value=expected))
     assert result.success

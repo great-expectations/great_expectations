@@ -52,8 +52,6 @@ DUMMY_JWT_TOKEN: Final[str] = (
 FAKE_USER_ID: Final[str] = "00000000-0000-0000-0000-000000000000"
 FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
-FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
-FAKE_CHECKPOINT_ID: Final[str] = str(uuid.uuid4())
 UUID_REGEX: Final[str] = r"[a-f0-9-]{36}"
 
 DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
@@ -382,7 +380,7 @@ def post_datasources_cb(
 
         return result
     except pydantic.ValidationError as val_err:
-        LOGGER.exception(val_err)
+        LOGGER.exception(val_err)  # noqa: TRY401
         return CallbackResult(
             400,
             headers=DEFAULT_HEADERS,
@@ -470,13 +468,9 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
 
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
-    exp_suite_list: list[dict] = list(exp_suites.values())
+    exp_suite_list: list[dict] = [d["data"] for d in exp_suites.values()]
     if queried_names:
-        exp_suite_list = [
-            d["data"]
-            for d in exp_suite_list
-            if d["data"]["attributes"]["suite"]["name"] in queried_names
-        ]
+        exp_suite_list = [d for d in exp_suite_list if d["name"] in queried_names]
 
     resp_body = {"data": exp_suite_list}
 
@@ -510,7 +504,7 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         raise NotImplementedError("Handling missing body")
 
     payload: dict = json.loads(request.body)
-    name = payload["data"]["attributes"]["suite"]["name"]
+    name = payload["data"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
@@ -530,10 +524,10 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
             ).json(),
         )
     else:
-        suite_id = FAKE_EXPECTATION_SUITE_ID
+        suite_id = str(uuid.uuid4())
         payload["data"]["id"] = suite_id
-        payload["data"]["attributes"]["suite"]["id"] = suite_id
-        for expectation_configuration in payload["data"]["attributes"]["suite"]["expectations"]:
+        payload["data"]["id"] = suite_id
+        for expectation_configuration in payload["data"]["expectations"]:
             expectation_configuration["id"] = str(uuid.uuid4())
         exp_suites[suite_id] = payload
         exp_suite_names.add(name)
@@ -557,7 +551,7 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     parsed_url = urllib.parse.urlparse(request.url)
     suite_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    name = payload["data"]["attributes"]["suite"]["name"]
+    name = payload["data"]["name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
@@ -580,8 +574,8 @@ def put_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
         )
     else:
         payload["data"]["id"] = suite_id
-        payload["data"]["attributes"]["suite"]["id"] = suite_id
-        for expectation_configuration in payload["data"]["attributes"]["suite"]["expectations"]:
+        payload["data"]["id"] = suite_id
+        for expectation_configuration in payload["data"]["expectations"]:
             # add IDs to new expectations
             if not expectation_configuration.get("id"):
                 expectation_configuration["id"] = str(uuid.uuid4())
@@ -695,7 +689,7 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
             ).json(),
         )
     else:
-        id_ = FAKE_CHECKPOINT_ID
+        id_ = str(uuid.uuid4())
         payload["data"]["id"] = id_
         checkpoints[id_] = payload["data"]
         checkpoint_names.add(name)
@@ -780,9 +774,10 @@ def gx_cloud_api_fake_ctx(
     assert_all_requests_are_fired: bool = False,
 ) -> Generator[responses.RequestsMock, None, None]:
     """Mock the GX Cloud API for the lifetime of the context manager."""
-    org_url_base = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}"
-    dc_config_url = f"{org_url_base}/data-context-configuration"
-    me_url = f"{org_url_base}/accounts/me"
+    org_url_base_V0 = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}"
+    org_url_base_V1 = f"{cloud_details.base_url}/api/v1/organizations/{cloud_details.org_id}"
+    dc_config_url = f"{org_url_base_V0}/data-context-configuration"
+    me_url = f"{org_url_base_V0}/accounts/me"
 
     assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
     _CLOUD_API_FAKE_DB.update(create_fake_db_seed_data(fds_config))
@@ -796,82 +791,82 @@ def gx_cloud_api_fake_ctx(
         resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base}/datasources",
+            f"{org_url_base_V0}/datasources",
             get_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            f"{org_url_base}/datasources",
+            f"{org_url_base_V0}/datasources",
             post_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(f"{org_url_base}/datasources/{UUID_REGEX}"),
+            re.compile(f"{org_url_base_V0}/datasources/{UUID_REGEX}"),
             get_datasource_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(f"{org_url_base}/datasources/{UUID_REGEX}"),
+            re.compile(f"{org_url_base_V0}/datasources/{UUID_REGEX}"),
             delete_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.PUT,
-            re.compile(f"{org_url_base}/datasources/{UUID_REGEX}"),
+            re.compile(f"{org_url_base_V0}/datasources/{UUID_REGEX}"),
             put_datasource_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(f"{org_url_base}/data-assets/{UUID_REGEX}"),
+            re.compile(f"{org_url_base_V0}/data-assets/{UUID_REGEX}"),
             delete_data_assets_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base}/expectation-suites",
+            f"{org_url_base_V1}/expectation-suites",
             get_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            re.compile(f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}"),
             get_expectation_suite_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            f"{org_url_base}/expectation-suites",
+            f"{org_url_base_V1}/expectation-suites",
             post_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.PUT,
-            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            re.compile(f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}"),
             put_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            re.compile(f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}"),
             delete_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base}/checkpoints",
+            f"{org_url_base_V0}/checkpoints",
             get_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            f"{org_url_base}/checkpoints",
+            f"{org_url_base_V0}/checkpoints",
             post_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            f"{org_url_base}/checkpoints",
+            f"{org_url_base_V0}/checkpoints",
             delete_checkpoint_by_name_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base}/checkpoints/{FAKE_CHECKPOINT_ID}",
+            re.compile(f"{org_url_base_V0}/checkpoints/{UUID_REGEX}"),
             get_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            f"{org_url_base}/validation-results",
+            f"{org_url_base_V0}/validation-results",
             post_validation_results_cb,
         )
 

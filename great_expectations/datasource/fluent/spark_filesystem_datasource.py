@@ -48,7 +48,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         """  # noqa: E501
         # tests Filesystem connection
         if not self.base_directory.exists():
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 f"base_directory path: {self.base_directory.resolve()} does not exist."
             )
 
@@ -68,7 +68,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
     ) -> None:
         """Builds and attaches the `FilesystemDataConnector` to the asset."""
         if kwargs:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
         data_asset._data_connector = self.data_connector_type.build_data_connector(
@@ -78,7 +78,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
-            get_unfiltered_batch_definition_list_fn=data_asset.get_unfiltered_batch_definition_list_fn(),
+            whole_directory_path_override=data_asset.get_whole_directory_path_override(),
         )
 
         # build a more specific `_test_connection_error_message`

@@ -46,7 +46,7 @@ class DataAssistantDispatcher:
 
         # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".  # noqa: E501
         if data_assistant_cls is None:
-            raise AttributeError(f'"{type(self).__name__}" object has no attribute "{name}".')
+            raise AttributeError(f'"{type(self).__name__}" object has no attribute "{name}".')  # noqa: TRY003
 
         data_assistant_name: str = data_assistant_cls.data_assistant_type
         data_assistant_runner: DataAssistantRunner | None = self._data_assistant_runner_cache.get(
@@ -66,7 +66,7 @@ class DataAssistantDispatcher:
         registered_data_assistants = cls._registered_data_assistants
 
         if name in registered_data_assistants:
-            raise ValueError(f'Existing declarations of DataAssistant "{name}" found.')
+            raise ValueError(f'Existing declarations of DataAssistant "{name}" found.')  # noqa: TRY003
 
         logger.debug(f'Registering the declaration of DataAssistant "{name}" took place.')
         registered_data_assistants[name] = data_assistant

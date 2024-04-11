@@ -78,6 +78,10 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     expect_column_kl_divergence_to_be_less_than is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
+    Column Aggregate Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
+    If that Metric meets the conditions you set, the Expectation considers that data valid.
+
     Args:
         column (str): \
             The column name.
@@ -86,8 +90,6 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         threshold (float or None): \
             The maximum KL divergence to for which to return success=True. If KL divergence is larger than the \
             provided threshold, the test will return success=False.
-
-    Keyword Args:
         internal_weight_holdout (float between 0 and 1 or None): \
             The amount of weight to split uniformly among zero-weighted partition bins. internal_weight_holdout \
             provides a mechanisms to make the test less strict by assigning positive weights to values \
@@ -155,6 +157,123 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         If relative entropy/kl divergence goes to infinity for any of the reasons mentioned above, the observed \
         value will be set to None. This is because inf, -inf, Nan, are not json serializable and cause some json \
         parsers to crash when encountered. The python None token will be serialized to null in json.
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Distribution
+
+    Example Data:
+                test
+            0 	"A"
+            1 	"A"
+            2 	"A"
+            3   "A"
+            4   "A"
+            5   "B"
+            6   "B"
+            7   "B"
+            8   "C"
+            9   "C"
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnKLDivergenceToBeLessThan(
+                    column="test",
+                    partition_object={"weights": [0.5, 0.3, 0.2], "values": ["A", "B", "C"]},
+                    threshold=0.1
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 0.0,
+                    "details": {
+                      "observed_partition": {
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.5,
+                          0.3,
+                          0.2
+                        ]
+                      },
+                      "expected_partition": {
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.5,
+                          0.3,
+                          0.2
+                        ]
+                      }
+                    }
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnKLDivergenceToBeLessThan(
+                    column="test",
+                    partition_object={"weights": [0.3333333333333333, 0.3333333333333333, 0.3333333333333333], "values": ["A", "B", "C"]},
+                    threshold=0.01
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": 0.06895927460353621,
+                    "details": {
+                      "observed_partition": {
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.5,
+                          0.3,
+                          0.2
+                        ]
+                      },
+                      "expected_partition": {
+                        "values": [
+                          "A",
+                          "B",
+                          "C"
+                        ],
+                        "weights": [
+                          0.3333333333333333,
+                          0.3333333333333333,
+                          0.3333333333333333
+                        ]
+                      }
+                    }
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     partition_object: Union[dict, None]
@@ -311,7 +430,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 bins is None
             ):  # if the user did not supply a partition_object, so we just computed it
                 if not is_valid_partition_object(partition_object):
-                    raise ValueError("Invalid partition_object provided")
+                    raise ValueError("Invalid partition_object provided")  # noqa: TRY003
                 bins = partition_object["bins"]
 
             hist_metric_configuration = MetricConfiguration(
@@ -397,34 +516,34 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 }
 
         if not is_valid_partition_object(partition_object):
-            raise ValueError("Invalid partition object.")
+            raise ValueError("Invalid partition object.")  # noqa: TRY003
 
         if threshold is not None and ((not isinstance(threshold, (int, float))) or (threshold < 0)):
-            raise ValueError("Threshold must be specified, greater than or equal to zero.")
+            raise ValueError("Threshold must be specified, greater than or equal to zero.")  # noqa: TRY003
 
         if (
             (not isinstance(tail_weight_holdout, (int, float)))
             or (tail_weight_holdout < 0)
             or (tail_weight_holdout > 1)
         ):
-            raise ValueError("tail_weight_holdout must be between zero and one.")
+            raise ValueError("tail_weight_holdout must be between zero and one.")  # noqa: TRY003
 
         if (
             (not isinstance(internal_weight_holdout, (int, float)))
             or (internal_weight_holdout < 0)
             or (internal_weight_holdout > 1)
         ):
-            raise ValueError("internal_weight_holdout must be between zero and one.")
+            raise ValueError("internal_weight_holdout must be between zero and one.")  # noqa: TRY003
 
         if tail_weight_holdout != 0 and "tail_weights" in partition_object:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 "tail_weight_holdout must be 0 when using tail_weights in partition object"
             )
 
         # TODO: add checks for duplicate values in is_valid_categorical_partition_object
         if is_valid_categorical_partition_object(partition_object):
             if internal_weight_holdout > 0:
-                raise ValueError("Internal weight holdout cannot be used for discrete data.")
+                raise ValueError("Internal weight holdout cannot be used for discrete data.")  # noqa: TRY003
 
             # Data are expected to be discrete, use value_counts
             observed_weights = (
@@ -485,7 +604,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         else:
             # Data are expected to be continuous; discretize first
             if bucketize_data is False:
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     "KL Divergence cannot be computed with a continuous partition object and the bucketize_data "  # noqa: E501
                     "parameter set to false."
                 )
@@ -524,11 +643,11 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 partition_object["bins"][-1]
             ) == np.inf:
                 if tail_weight_holdout > 0:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "tail_weight_holdout cannot be used for partitions with infinite endpoints."
                     )
                 if "tail_weights" in partition_object:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
@@ -553,7 +672,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
             elif partition_object["bins"][0] == -np.inf:
                 if "tail_weights" in partition_object:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 
@@ -586,7 +705,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
             elif partition_object["bins"][-1] == np.inf:
                 if "tail_weights" in partition_object:
-                    raise ValueError(
+                    raise ValueError(  # noqa: TRY003
                         "There can be no tail weights for partitions with one or both endpoints at infinity"  # noqa: E501
                     )
 

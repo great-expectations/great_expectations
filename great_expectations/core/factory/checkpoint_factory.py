@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.v1_checkpoint import Checkpoint
@@ -10,9 +10,6 @@ from great_expectations.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.core.data_context_key import StringKey
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
     from great_expectations.data_context.store.checkpoint_store import (
         V1CheckpointStore as CheckpointStore,
     )
@@ -21,9 +18,8 @@ if TYPE_CHECKING:
 
 # TODO: Add analytics as needed
 class CheckpointFactory(Factory[Checkpoint]):
-    def __init__(self, store: CheckpointStore, context: AbstractDataContext):
+    def __init__(self, store: CheckpointStore):
         self._store = store
-        self._context = context
 
     @public_api
     @override
@@ -38,7 +34,7 @@ class CheckpointFactory(Factory[Checkpoint]):
         """
         key = self._store.get_key(name=checkpoint.name, id=None)
         if self._store.has_key(key=key):
-            raise DataContextError(
+            raise DataContextError(  # noqa: TRY003
                 f"Cannot add Checkpoint with name {checkpoint.name} because it already exists."
             )
 
@@ -60,7 +56,7 @@ class CheckpointFactory(Factory[Checkpoint]):
         """
         key = self._store.get_key(name=checkpoint.name, id=None)
         if not self._store.has_key(key=key):
-            raise DataContextError(
+            raise DataContextError(  # noqa: TRY003
                 f"Cannot delete Checkpoint with name {checkpoint.name} because it cannot be found."
             )
 
@@ -80,13 +76,19 @@ class CheckpointFactory(Factory[Checkpoint]):
         """
         key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
-            raise DataContextError(f"Checkpoint with name {name} was not found.")
+            raise DataContextError(f"Checkpoint with name {name} was not found.")  # noqa: TRY003
 
         return self._get(key=key)
+
+    @public_api
+    @override
+    def all(self) -> Iterable[Checkpoint]:
+        """Get all Checkpoints."""
+        return self._store.get_all()
 
     def _get(self, key: GXCloudIdentifier | StringKey) -> Checkpoint:
         checkpoint = self._store.get(key=key)
         if not isinstance(checkpoint, Checkpoint):
-            raise ValueError(f"Object with key {key} was found, but it is not a Checkpoint.")
+            raise ValueError(f"Object with key {key} was found, but it is not a Checkpoint.")  # noqa: TRY003, TRY004
 
         return checkpoint

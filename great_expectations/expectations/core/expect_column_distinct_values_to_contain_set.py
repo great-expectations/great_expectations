@@ -38,6 +38,10 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     expect_column_distinct_values_to_contain_set is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
+    Column Aggregate Expectations are one of the most common types of Expectation.
+    They are evaluated for a single column, and produce an aggregate Metric, such as a mean, standard deviation, number of unique values, column type, etc.
+    If that Metric meets the conditions you set, the Expectation considers that data valid.
+
     Args:
         column (str): \
             The column name.
@@ -63,6 +67,92 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
     See Also:
         [expect_column_distinct_values_to_be_in_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_be_in_set)
         [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
+
+    Supported Datasources:
+        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+
+    Data Quality Category:
+        Sets
+
+    Example Data:
+                test 	test2
+            0 	1       1
+            1 	2       1
+            2 	4       1
+
+    Code Examples:
+        Passing Case:
+            Input:
+                ExpectColumnDistinctValuesToContainSet(
+                    column="test",
+                    value_set=[1, 4]
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": [
+                      1,
+                      2,
+                      4
+                    ],
+                    "details": {
+                      "value_counts": [
+                        {
+                          "value": 1,
+                          "count": 1
+                        },
+                        {
+                          "value": 2,
+                          "count": 1
+                        },
+                        {
+                          "value": 4,
+                          "count": 1
+                        }
+                      ]
+                    }
+                  },
+                  "meta": {},
+                  "success": true
+                }
+
+        Failing Case:
+            Input:
+                ExpectColumnDistinctValuesToContainSet(
+                    column="test2",
+                    value_set=[3, 2, 4]
+            )
+
+            Output:
+                {
+                  "exception_info": {
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                  },
+                  "result": {
+                    "observed_value": [
+                      1
+                    ],
+                    "details": {
+                      "value_counts": [
+                        {
+                          "value": 1,
+                          "count": 3
+                        }
+                      ]
+                    }
+                  },
+                  "meta": {},
+                  "success": false
+                }
     """  # noqa: E501
 
     value_set: Union[list, set, EvaluationParameterDict, None]
@@ -140,7 +230,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
             runtime_configuration=runtime_configuration,
         )
         if renderer_configuration.configuration is None:
-            raise ValueError("renderer_configuration.configuration is None.")
+            raise ValueError("renderer_configuration.configuration is None.")  # noqa: TRY003
         params = substitute_none_for_missing(
             renderer_configuration.configuration.kwargs,
             [
@@ -198,7 +288,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         parsed_value_set = value_set
 
         if observed_value_counts is None:
-            raise ValueError("observed_value_counts None, but is required")
+            raise ValueError("observed_value_counts None, but is required")  # noqa: TRY003
         observed_value_set = set(observed_value_counts.index)
         expected_value_set = set(parsed_value_set)
 

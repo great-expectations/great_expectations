@@ -88,11 +88,11 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                     gcs_client = google.storage.Client(credentials=credentials, **gcs_options)
                 except Exception as e:
                     # Failure to create "gcs_client" is most likely due invalid "gcs_options" dictionary.  # noqa: E501
-                    raise PandasGoogleCloudStorageDatasourceError(
+                    raise PandasGoogleCloudStorageDatasourceError(  # noqa: TRY003
                         f'Due to exception: "{e!r}", "gcs_client" could not be created.'
                     ) from e
             else:
-                raise PandasGoogleCloudStorageDatasourceError(
+                raise PandasGoogleCloudStorageDatasourceError(  # noqa: TRY003
                     'Unable to create "PandasGoogleCloudStorageDatasource" due to missing google dependency.'  # noqa: E501
                 )
 
@@ -113,7 +113,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         try:
             _ = self._get_gcs_client()
         except Exception as e:
-            raise TestConnectionError(
+            raise TestConnectionError(  # noqa: TRY003
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{e!s}"
             ) from e
@@ -134,7 +134,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     ) -> None:
         """Builds and attaches the `GoogleCloudStorageDataConnector` to the asset."""
         if kwargs:
-            raise TypeError(
+            raise TypeError(  # noqa: TRY003
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
         data_asset._data_connector = self.data_connector_type.build_data_connector(

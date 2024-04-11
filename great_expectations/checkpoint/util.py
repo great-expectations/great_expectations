@@ -51,7 +51,7 @@ def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack
     except requests.ConnectionError:
         logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
     except Exception as e:
-        logger.error(str(e))
+        logger.error(str(e))  # noqa: TRY400
     else:
         if response.status_code != 200 or not ok_status:  # noqa: PLR2004
             logger.warning(
@@ -64,7 +64,7 @@ def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack
 
 
 # noinspection SpellCheckingInspection
-def send_opsgenie_alert(query, suite_name, settings):
+def send_opsgenie_alert(query: str, message: str, settings: dict) -> bool:
     """Creates an alert in Opsgenie."""
     if settings["region"] is not None:
         url = (
@@ -75,7 +75,7 @@ def send_opsgenie_alert(query, suite_name, settings):
 
     headers = {"Authorization": f"GenieKey {settings['api_key']}"}
     payload = {
-        "message": f"Great Expectations suite {suite_name} failed",
+        "message": message,
         "description": query,
         "priority": settings["priority"],  # allow this to be modified in settings
         "tags": settings["tags"],
@@ -85,18 +85,14 @@ def send_opsgenie_alert(query, suite_name, settings):
 
     try:
         response = session.post(url, headers=headers, json=payload)
-    except requests.ConnectionError:
-        logger.warning("Failed to connect to Opsgenie")
-    except Exception as e:
-        logger.error(str(e))
-    else:
-        if response.status_code != 202:  # noqa: PLR2004
-            logger.warning(
-                "Request to Opsgenie API " f"returned error {response.status_code}: {response.text}"
-            )
-        else:
-            return "success"
-    return "error"
+        response.raise_for_status()
+    except requests.ConnectionError as e:
+        logger.warning(f"Failed to connect to Opsgenie: {e}")
+        return False
+    except requests.HTTPError as e:
+        logger.warning(f"Request to Opsgenie API returned error {response.status_code}: {e}")
+        return False
+    return True
 
 
 def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
@@ -107,7 +103,7 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
         logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
 
     except Exception as e:
-        logger.error(str(e))
+        logger.error(str(e))  # noqa: TRY400
     else:
         if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
@@ -126,7 +122,7 @@ def send_webhook_notifications(query, webhook, target_platform):
     except requests.ConnectionError:
         logger.warning(f"Failed to connect to {target_platform} webhook after 10 retries.")
     except Exception as e:
-        logger.error(str(e))
+        logger.error(str(e))  # noqa: TRY400
     else:
         if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
@@ -177,11 +173,11 @@ def send_email(  # noqa: C901, PLR0913
         mailserver.sendmail(sender_alias, receiver_emails_list, msg.as_string())
         mailserver.quit()
     except smtplib.SMTPConnectError:
-        logger.error(f"Failed to connect to the SMTP server at address: {smtp_address}")
+        logger.error(f"Failed to connect to the SMTP server at address: {smtp_address}")  # noqa: TRY400
     except smtplib.SMTPAuthenticationError:
-        logger.error(f"Failed to authenticate to the SMTP server at address: {smtp_address}")
+        logger.error(f"Failed to authenticate to the SMTP server at address: {smtp_address}")  # noqa: TRY400
     except Exception as e:
-        logger.error(str(e))
+        logger.error(str(e))  # noqa: TRY400
     else:
         return "success"
 
@@ -248,7 +244,7 @@ def get_substituted_batch_request(
     for key, value in validation_batch_request.items():
         substituted_value = substituted_runtime_batch_request.get(key)
         if value is not None and substituted_value is not None and value != substituted_value:
-            raise gx_exceptions.CheckpointError(
+            raise gx_exceptions.CheckpointError(  # noqa: TRY003
                 f'BatchRequest attribute "{key}" was provided with different values'
             )
 
@@ -405,10 +401,10 @@ def convert_validations_list_to_checkpoint_validation_definitions(
 
 def validate_validation_dict(validation_dict: dict, batch_request_required: bool = True) -> None:
     if batch_request_required and validation_dict.get("batch_request") is None:
-        raise gx_exceptions.CheckpointError("validation batch_request cannot be None")
+        raise gx_exceptions.CheckpointError("validation batch_request cannot be None")  # noqa: TRY003
 
     if not validation_dict.get("expectation_suite_name"):
-        raise gx_exceptions.CheckpointError("validation expectation_suite_name must be specified")
+        raise gx_exceptions.CheckpointError("validation expectation_suite_name must be specified")  # noqa: TRY003
 
 
 def send_sns_notification(
@@ -444,7 +440,7 @@ def send_sns_notification(
         response = sns.publish(**message_dict)
     except sns.exceptions.InvalidParameterException:
         error_msg = f"Received invalid for message: {validation_results}"
-        logger.error(error_msg)
+        logger.error(error_msg)  # noqa: TRY400
         return error_msg
     else:
         return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"

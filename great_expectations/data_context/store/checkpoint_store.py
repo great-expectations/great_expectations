@@ -53,7 +53,7 @@ class CheckpointStore(ConfigurationStore):
         cp_data: Dict
         if isinstance(response_data, list):
             if len(response_data) == 0:
-                raise ValueError(f"Cannot parse empty data from GX Cloud payload: {response_json}")
+                raise ValueError(f"Cannot parse empty data from GX Cloud payload: {response_json}")  # noqa: TRY003
             cp_data = response_data[0]
         else:
             cp_data = response_data
@@ -137,7 +137,7 @@ class CheckpointStore(ConfigurationStore):
         try:
             return self._persist_checkpoint(key=key, checkpoint=checkpoint, persistence_fn=self.add)
         except gx_exceptions.StoreBackendError:
-            raise gx_exceptions.CheckpointError(
+            raise gx_exceptions.CheckpointError(  # noqa: TRY003
                 f"A Checkpoint named {checkpoint.name} already exists."
             )
 
@@ -159,7 +159,7 @@ class CheckpointStore(ConfigurationStore):
                 key=key, checkpoint=checkpoint, persistence_fn=self.update
             )
         except gx_exceptions.StoreBackendError:
-            raise gx_exceptions.CheckpointNotFoundError(
+            raise gx_exceptions.CheckpointNotFoundError(  # noqa: TRY003
                 f"Could not find an existing Checkpoint named {checkpoint.name}."
             )
 
@@ -247,8 +247,8 @@ class V1CheckpointStore(Store):
         return self._key_class(key=name)
 
     @override
-    @staticmethod
-    def gx_cloud_response_json_to_object_dict(response_json: dict) -> dict:
+    @classmethod
+    def gx_cloud_response_json_to_object_dict(cls, response_json: dict) -> dict:
         response_data = response_json["data"]
 
         checkpoint_data: dict
@@ -263,8 +263,13 @@ class V1CheckpointStore(Store):
         else:
             checkpoint_data = response_data
 
-        id: str = checkpoint_data["id"]
-        checkpoint_config_dict: dict = checkpoint_data["attributes"]["checkpoint_config"]
+        return cls._convert_raw_json_to_object_dict(checkpoint_data)
+
+    @override
+    @staticmethod
+    def _convert_raw_json_to_object_dict(data: dict) -> dict:
+        id: str = data["id"]
+        checkpoint_config_dict: dict = data["attributes"]["checkpoint_config"]
         checkpoint_config_dict["id"] = id
 
         return checkpoint_config_dict
@@ -293,3 +298,11 @@ class V1CheckpointStore(Store):
         if not self.cloud_mode:
             value.id = str(uuid.uuid4())
         return super()._add(key=key, value=value, **kwargs)
+
+    @override
+    def _update(self, key: DataContextKey, value: V1Checkpoint, **kwargs):
+        try:
+            super()._update(key=key, value=value, **kwargs)
+        except gx_exceptions.StoreBackendError as e:
+            name = key.to_tuple()[0]
+            raise ValueError(f"Could not update Checkpoint '{name}'") from e  # noqa: TRY003

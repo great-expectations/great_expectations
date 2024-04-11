@@ -43,10 +43,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         name_starts_with (str): Microsoft Azure Blob Storage prefix
         delimiter (str): Microsoft Azure Blob Storage delimiter
         recursive_file_discovery (bool): Flag to indicate if files should be searched recursively from subfolders
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # sorters (list): optional list of sorters for sorting data_references
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on ABS
     """  # noqa: E501
 
@@ -69,10 +65,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         name_starts_with: str = "",
         delimiter: str = "/",
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
         self._azure_client: azure.BlobServiceClient = azure_client
@@ -93,10 +85,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
             batching_regex=re.compile(
                 f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
             ),
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -112,10 +100,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         name_starts_with: str = "",
         delimiter: str = "/",
         recursive_file_discovery: bool = False,
-        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-        # TODO: <Alex>ALEX</Alex>
-        # sorters: Optional[list] = None,
-        # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> AzureBlobStorageDataConnector:
         """Builds "AzureBlobStorageDataConnector", which links named DataAsset to Microsoft Azure Blob Storage.
@@ -130,10 +114,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
             name_starts_with: Microsoft Azure Blob Storage prefix
             delimiter: Microsoft Azure Blob Storage delimiter
             recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # sorters: optional list of sorters for sorting data_references
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on ABS
 
         Returns:
@@ -149,10 +129,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
             name_starts_with=name_starts_with,
             delimiter=delimiter,
             recursive_file_discovery=recursive_file_discovery,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>  # noqa: E501
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -227,7 +203,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
     @override
     def _get_full_file_path(self, path: str) -> str:
         if self._file_path_template_map_fn is None:
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"""Converting file paths to fully-qualified object references for "{self.__class__.__name__}" \
 requires "file_path_template_map_fn: Callable" to be set.
 """  # noqa: E501

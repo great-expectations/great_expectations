@@ -57,7 +57,7 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
     # </snippet>
     # <snippet name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py sql_def">
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs,
@@ -69,7 +69,7 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         # <snippet name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py sql_selectable">
         (
             selectable,
-            compute_domain_kwargs,
+            compute_domain_kwargs,  # noqa: F841 # unused variable
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
@@ -101,6 +101,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     # </snippet>
     # <snippet name="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py docstring">
     """Expect column max to be between a given range."""
+
     # </snippet>
 
     # Defining test cases

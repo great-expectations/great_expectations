@@ -138,8 +138,9 @@ class DatasourceStore(Store):
             return self._schema.loads(value)
 
     @override
-    @staticmethod
+    @classmethod
     def gx_cloud_response_json_to_object_dict(
+        cls,
         response_json: CloudResponsePayloadTD,  # type: ignore[override]
     ) -> dict:
         """
@@ -151,29 +152,14 @@ class DatasourceStore(Store):
         if isinstance(data, list):
             if len(data) > 1:
                 # Larger arrays of datasources should be handled by `gx_cloud_response_json_to_object_collection`  # noqa: E501
-                raise TypeError(f"GX Cloud returned {len(data)} Datasources but expected 1")
+                raise TypeError(f"GX Cloud returned {len(data)} Datasources but expected 1")  # noqa: TRY003
             data = data[0]
 
         return DatasourceStore._convert_raw_json_to_object_dict(data)
 
     @override
     @staticmethod
-    def gx_cloud_response_json_to_object_collection(
-        response_json: CloudResponsePayloadTD,  # type: ignore[override]
-    ) -> list[dict]:
-        """
-        This method takes full json response from GX cloud and outputs a list of dicts appropriate for
-        deserialization into a collection of GX objects
-        """  # noqa: E501
-        logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
-        data = response_json["data"]
-        if not isinstance(data, list):
-            raise TypeError("GX Cloud did not return a collection of Datasources when expected")
-
-        return [DatasourceStore._convert_raw_json_to_object_dict(d) for d in data]
-
-    @staticmethod
-    def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:
+    def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:  # type: ignore[override]
         datasource_id: str = data["id"]
         datasource_config_dict: dict = data["attributes"]["datasource_config"]
         datasource_config_dict["id"] = datasource_id
@@ -196,7 +182,7 @@ class DatasourceStore(Store):
             self.store_backend.build_key(name=datasource_name)
         )
         if not self.has_key(datasource_key):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY003
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."  # noqa: E501
             )
 
@@ -229,7 +215,7 @@ class DatasourceStore(Store):
         )
         datasource = self.get(key)
         if not isinstance(datasource, FluentDatasource):
-            raise ValueError("Datasource is not a FluentDatasource")
+            raise ValueError("Datasource is not a FluentDatasource")  # noqa: TRY003, TRY004
         return datasource
 
     @overload
@@ -321,7 +307,7 @@ class DatasourceStore(Store):
         try:
             self.update(key=datasource_key, value=datasource_config)
         except gx_exceptions.StoreBackendError:
-            raise gx_exceptions.DatasourceNotFoundError(
+            raise gx_exceptions.DatasourceNotFoundError(  # noqa: TRY003
                 f"Could not find an existing Datasource named {datasource_name}."
             )
 
