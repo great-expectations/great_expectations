@@ -11,12 +11,12 @@ import Tabs from '@theme/Tabs';
 
 A Data Asset is a collection of records that you create when you connect to your Data Source. When you connect to your Data Source, you define a minimum of one Data Asset. You use these Data Assets to create the Batch Requests that select the data that is provided to your Expectations.
 
-To learn more about Data Assets, see [Data Asset](/reference/learn/terms/data_asset.md).
+<!-- [//]: # (TODO: To learn more about Data Assets, see Data Asset.) -->
 
 
 ## Create a Data Asset
 
-Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Connect to a Data Source](/oss/guides/connecting_to_your_data/connect_to_data_lp.md) in the GX OSS documentation. 
+Create a Data Asset to define the data you want GX Cloud to access. To connect to Data Assets for a Data Source not currently available in GX Cloud, see [Manage Data Assets](/oss/guides/connecting_to_your_data/manage_data_assets_lp.md). 
 
 <Tabs
   groupId="manage-data-assets"
@@ -53,11 +53,11 @@ Define the data you want GX Cloud to access within Snowflake.
 
 5. Complete the following fields:
 
-    - **Username**: Enter the username you use to access Snowflake.
-
     - **Account identifier**: Enter your Snowflake organization and account name separated by a hyphen (`oraganizationname-accountname`) or your account name and a legacy account locator separated by a period (`accountname.region`). The legacy account locator value must include the geographical region. For example, `us-east-1`. 
     
         To locate your Snowflake organization name, account name, or legacy account locator values see [Finding the Organization and Account Name for an Account](https://docs.snowflake.com/en/user-guide/admin-account-identifier#finding-the-organization-and-account-name-for-an-account) or [Using an Account Locator as an Identifier](https://docs.snowflake.com/en/user-guide/admin-account-identifier#using-an-account-locator-as-an-identifier).
+    
+    - **Username**: Enter the username you use to access Snowflake.
 
     - **Password**: Enter a Snowflake password. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
@@ -118,7 +118,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 3. Enter a meaningful name for the Data Asset in the **Data Source name** field.
 
-4. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
+4. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
 
 5. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
 
@@ -156,11 +156,13 @@ Data Asset metrics provide you with insight into the data you can use for your d
 
 2. Click the **Overview** tab.
 
-3. Select one of the following options: 
+    When you select a new Data Asset, schema data is automatically fetched.
 
-    - If you have not previously generated Data Asset metrics, click **Fetch Metrics**. 
+3. Optional. Select one of the following options:
 
-    - If you previously generated Data Asset metrics, click **Refresh** to refresh the metrics.
+    - Click **Profile Data** if you have not previously returned all available metrics for a Data Asset.
+
+    - Click **Refresh** to refresh the Data Asset metrics.
 
 ### Available Data Asset metrics
 
@@ -185,11 +187,13 @@ When you create an Expectation after fetching metrics for a Data Asset, the colu
 
 2. Click the **Overview** tab.
 
-3. Select one of the following options: 
+    When you select a new Data Asset, schema data is automatically fetched.
 
-    - If you have not previously generated Data Asset metrics, click **Fetch Metrics**. 
+3. Optional. Select one of the following options:
 
-    - If you previously generated Data Asset metrics, click **Refresh** to refresh the metrics.
+    - Click **Profile Data** if you have not previously returned all available metrics for a Data Asset.
+
+    - Click **Refresh** to refresh the Data Asset metrics.
 
 4. Click **New Expectation**.
 
