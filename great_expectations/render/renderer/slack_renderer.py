@@ -163,7 +163,7 @@ class SlackRenderer(Renderer):
             ],
         }
 
-        all_blocks = [block for block in text_blocks] + [footer_section]
+        all_blocks = text_blocks + [footer_section]
         return {"blocks": all_blocks, "text": f"{checkpoint_name}: {status}"}
 
     def render(  # noqa: C901, PLR0912, PLR0913, PLR0915
