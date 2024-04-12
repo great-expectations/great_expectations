@@ -28,7 +28,7 @@ except ImportError:
     pass
 
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
@@ -154,8 +154,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                 }
     """  # noqa: E501
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 

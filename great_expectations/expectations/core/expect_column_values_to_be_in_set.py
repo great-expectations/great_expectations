@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -161,7 +161,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Union[list, set, EvaluationParameterDict] = pydantic.Field([])
+    value_set: Union[list, set, SuiteParameterDict] = pydantic.Field([])
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

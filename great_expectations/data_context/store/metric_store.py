@@ -77,9 +77,7 @@ class SuiteParameterStore(MetricStore):
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
-                store_backend["table_name"] = store_backend.get(
-                    "table_name", "ge_suite_parameters"
-                )
+                store_backend["table_name"] = store_backend.get("table_name", "ge_suite_parameters")
         super().__init__(store_backend=store_backend, store_name=store_name)
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501

@@ -1371,8 +1371,8 @@ class Validator:
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_suite_parameters = (
-                    data_context.evaluation_parameter_store.get_bind_params(run_id)
+                runtime_suite_parameters = data_context.evaluation_parameter_store.get_bind_params(
+                    run_id
                 )
             else:
                 runtime_suite_parameters = {}

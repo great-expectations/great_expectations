@@ -10,11 +10,11 @@ from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
     ExpectationValidationResult,
 )
-from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,
-)
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
+)
+from great_expectations.core.suite_parameters import (
+    EvaluationParameterDict,
 )
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (

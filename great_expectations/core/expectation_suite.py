@@ -119,7 +119,7 @@ class ExpectationSuite(SerializableDictDot):
 
     @property
     def evaluation_parameter_options(self) -> tuple[str, ...]:
-        """EvaluationParameter options for this ExpectationSuite.
+        """SuiteParameter options for this ExpectationSuite.
 
         Returns:
             tuple[str, ...]: The keys of the evaluation parameters used by all Expectations of this suite at runtime.

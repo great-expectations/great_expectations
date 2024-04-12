@@ -1200,7 +1200,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @property
     def evaluation_parameter_options(self) -> tuple[str, ...]:
-        """EvaluationParameter options for this Expectation.
+        """SuiteParameter options for this Expectation.
 
         Returns:
             tuple[str, ...]: The keys of the evaluation parameters used in this Expectation at runtime.

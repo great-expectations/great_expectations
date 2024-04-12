@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -114,7 +114,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
                 }
     """  # noqa: E501
 
-    value: Union[int, EvaluationParameterDict]
+    value: Union[int, SuiteParameterDict]
 
     library_metadata = {
         "maturity": "production",

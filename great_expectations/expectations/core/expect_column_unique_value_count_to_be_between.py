@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
@@ -142,8 +142,8 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                 }
     """  # noqa: E501
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 

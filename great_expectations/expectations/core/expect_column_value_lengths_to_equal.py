@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -144,7 +144,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    value: Union[float, EvaluationParameterDict]
+    value: Union[float, SuiteParameterDict]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

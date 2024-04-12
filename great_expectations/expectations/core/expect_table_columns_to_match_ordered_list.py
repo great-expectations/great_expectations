@@ -4,7 +4,7 @@ from itertools import zip_longest
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
@@ -138,7 +138,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
                 }
     """  # noqa: E501
 
-    column_list: Union[list, set, EvaluationParameterDict, None]
+    column_list: Union[list, set, SuiteParameterDict, None]
 
     library_metadata = {
         "maturity": "production",

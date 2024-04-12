@@ -7,7 +7,7 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
 )
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -179,8 +179,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    min_value: Union[int, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, SuiteParameterDict, datetime, None] = None
+    max_value: Union[int, SuiteParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 

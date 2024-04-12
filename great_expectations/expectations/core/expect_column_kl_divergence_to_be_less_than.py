@@ -11,7 +11,7 @@ from scipy import stats
 
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
@@ -281,8 +281,8 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     internal_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
     tail_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
     bucketize_data: bool = True
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

@@ -143,7 +143,7 @@ class UnsupportedConfigVersionError(DataContextError):
     pass
 
 
-class EvaluationParameterError(GreatExpectationsError):
+class SuiteParameterError(GreatExpectationsError):
     pass
 
 
@@ -288,7 +288,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
             "InMemorySuiteParameterStore": "SuiteParameterStore",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
-            "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
+            "ExtractAndStoreEvaluationParamsAction": "StoreSuiteParametersAction",
             "StoreAction": "StoreValidationResultAction",
             "PartitionDefinitionSubset": "IDDict",
             "PartitionRequest": "IDDict",

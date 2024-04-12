@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -42,7 +42,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-        strftime_format (str or EvaluationParameterDict): \
+        strftime_format (str or SuiteParameterDict): \
             A strftime format string to use for matching
 
     Keyword Args:
@@ -67,12 +67,12 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
     """  # noqa: E501
 
-    strftime_format: Union[str, EvaluationParameterDict]
+    strftime_format: Union[str, SuiteParameterDict]
 
     @pydantic.validator("strftime_format")
     def validate_strftime_format(
-        cls, strftime_format: str | EvaluationParameterDict
-    ) -> str | EvaluationParameterDict:
+        cls, strftime_format: str | SuiteParameterDict
+    ) -> str | SuiteParameterDict:
         if isinstance(strftime_format, str):
             try:
                 datetime.strptime(  # noqa: DTZ007

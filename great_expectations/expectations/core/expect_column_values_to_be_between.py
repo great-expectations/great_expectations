@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 from great_expectations.compatibility.pydantic import root_validator
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (  # noqa: TCH001
-    EvaluationParameterDict,
+    SuiteParameterDict,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -160,8 +160,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 

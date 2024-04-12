@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.core.suite_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -153,7 +153,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    regex: Union[str, EvaluationParameterDict] = "(?s).*"
+    regex: Union[str, SuiteParameterDict] = "(?s).*"
 
     library_metadata = {
         "maturity": "production",
