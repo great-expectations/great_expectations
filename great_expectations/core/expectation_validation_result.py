@@ -500,7 +500,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
     Args:
         success: Boolean indicating the success or failure of this collection of results, or None.
         results: List of ExpectationValidationResults, or None.
-        suite_parameters: Dict of Evaluation Parameters used to produce these results, or None.
+        suite_parameters: Dict of Suite Parameters used to produce these results, or None.
         statistics: Dict of values describing the results.
         meta: Instance of ExpectationSuiteValidationResult, a Dict of meta values, or None.
         batch_id: A unique identifier for the batch of data that was validated.

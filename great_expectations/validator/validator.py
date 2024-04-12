@@ -1364,7 +1364,7 @@ class Validator:
                 )
                 return ExpectationValidationResult(success=False)
 
-            # Evaluation parameter priority is
+            # Suite parameter priority is
             # 1. from provided parameters
             # 2. from expectation configuration
             # 3. from data context

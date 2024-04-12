@@ -2208,7 +2208,7 @@ class DataContextConfig(BaseYamlConfig):
         fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
         expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
         validations_store_name (Optional[str]): name of ValidationsStore to be used by DataContext.
-        suite_parameter_store_name (Optional[str]): name of EvaluationParamterStore to be used by DataContext.
+        suite_parameter_store_name (Optional[str]): name of SuiteParamterStore to be used by DataContext.
         checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
         profiler_store_name (Optional[str]): name of ProfilerStore to be used by DataContext.
         plugins_directory (Optional[str]): the directory in which custom plugin modules should be placed.

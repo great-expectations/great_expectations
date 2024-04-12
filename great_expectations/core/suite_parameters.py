@@ -49,7 +49,7 @@ def is_suite_parameter(value: Any) -> TypeGuard[SuiteParameterDict]:
 
 
 def get_suite_parameter_key(suite_parameter: SuiteParameterDict) -> str:
-    """Get the key of an suite parameter.
+    """Get the key of a suite parameter.
 
     e.g. if the suite parameter is {"$PARAMETER": "foo"}, this function will return "foo".
     When evaluating the runtime configuration of an expectation, we will look for
@@ -66,7 +66,7 @@ def get_suite_parameter_key(suite_parameter: SuiteParameterDict) -> str:
 
 class SuiteParameterParser:
     """
-    This Evaluation Parameter Parser uses pyparsing to provide a basic expression language capable of evaluating
+    This Suite Parameter Parser uses pyparsing to provide a basic expression language capable of evaluating
     parameters using values available only at run time.
 
     expop   :: '^'
@@ -223,17 +223,17 @@ class SuiteParameterParser:
             evaluated: Union[int, float, datetime.datetime]
             try:
                 evaluated = int(op)
-                logger.info("Evaluation parameter operand successfully parsed as integer.")
+                logger.info("Suite parameter operand successfully parsed as integer.")
             except ValueError:
                 logger.info("Parsing suite parameter operand as integer failed.")
                 try:
                     evaluated = float(op)
-                    logger.info("Evaluation parameter operand successfully parsed as float.")
+                    logger.info("Suite parameter operand successfully parsed as float.")
                 except ValueError:
                     logger.info("Parsing suite parameter operand as float failed.")
                     try:
                         evaluated = dateutil.parser.parse(op)
-                        logger.info("Evaluation parameter operand successfully parsed as datetime.")
+                        logger.info("Suite parameter operand successfully parsed as datetime.")
                     except ValueError as e:
                         logger.info("Parsing suite parameter operand as datetime failed.")
                         raise e  # noqa: TRY201

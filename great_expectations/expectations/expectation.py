@@ -113,8 +113,8 @@ T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
 def render_suite_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
     """Decorator for Expectation classes that renders suite parameters as strings.
 
-    allows Expectations that use Evaluation Parameters to render the values
-    of the Evaluation Parameters along with the rest of the output.
+    allows Expectations that use Suite Parameters to render the values
+    of the Suite Parameters along with the rest of the output.
 
     Args:
         render_func: The render method of the Expectation class.

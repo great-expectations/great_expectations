@@ -74,7 +74,7 @@ class ExpectationSuite(SerializableDictDot):
     Args:
         name: Name of the Expectation Suite
         expectations: Expectation Configurations to associate with this Expectation Suite.
-        suite_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+        suite_parameters: Suite parameters to be substituted when evaluating Expectations.
         execution_engine_type: Name of the execution engine type.
         meta: Metadata related to the suite.
         id: Great Expectations Cloud id for this Expectation Suite.

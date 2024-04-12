@@ -125,7 +125,7 @@ class BaseCheckpoint(ConfigPeer):
             batch_request: Batch request describing the batch of data to validate.
             validator: Validator objects, loaded with Batch data samples, can be supplied (in lieu of  "batch_request")
             action_list: A list of actions to perform after each batch is validated.
-            suite_parameters: Evaluation parameters to use in generating this checkpoint.
+            suite_parameters: Suite parameters to use in generating this checkpoint.
             runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
                 (e.g. `result_format`).
             validations: Validations to be executed as part of checkpoint.
@@ -472,7 +472,7 @@ class Checkpoint(BaseCheckpoint):
         expectation_suite_name: Expectation suite associated with checkpoint.
         batch_request: Batch request describing the batch of data to validate.
         action_list: A list of actions to perform after each batch is validated.
-        suite_parameters: Evaluation parameters to use in generating this checkpoint.
+        suite_parameters: Suite parameters to use in generating this checkpoint.
         runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
             (e.g. `result_format`).
         validations: Validations to be executed as part of checkpoint.

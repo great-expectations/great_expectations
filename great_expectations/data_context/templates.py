@@ -118,7 +118,7 @@ stores:
   {EXPECTATIONS_STORE_STRING}
   {VALIDATIONS_STORE_STRING}
   suite_parameter_store:
-    # Evaluation Parameters enable dynamic expectations. Read more here:
+    # Suite Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/docs/reference/suite_parameters/
     {SUITE_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
