@@ -1,5 +1,3 @@
-from unittest.mock import Mock, create_autospec  # noqa: TID251
-
 import pytest
 
 from great_expectations.core.batch_definition import BatchDefinition
@@ -13,8 +11,8 @@ from great_expectations.datasource.fluent.sql_datasource import _SQLAsset
 
 
 @pytest.fixture
-def datasource() -> Mock:
-    return create_autospec(SQLDatasource)
+def datasource(mocker):
+    return mocker.Mock(spec=SQLDatasource)
 
 
 @pytest.fixture
@@ -27,7 +25,7 @@ def asset(datasource) -> _SQLAsset:
 
 
 @pytest.mark.unit
-def test_add_batch_definition_fluent_sql__add_batch_definition_whole_table(datasource: Mock, asset):
+def test_add_batch_definition_fluent_sql__add_batch_definition_whole_table(datasource, asset):
     # arrange
     name = "batch_def_name"
     expected_batch_definition = BatchDefinition(name=name, partitioner=None, batching_regex=None)
@@ -42,7 +40,7 @@ def test_add_batch_definition_fluent_sql__add_batch_definition_whole_table(datas
 
 
 @pytest.mark.unit
-def test_add_batch_definition_fluent_sql__add_batch_definition_yearly(datasource: Mock, asset):
+def test_add_batch_definition_fluent_sql__add_batch_definition_yearly(datasource, asset):
     # arrange
     name = "batch_def_name"
     column = "test_column"
@@ -60,7 +58,7 @@ def test_add_batch_definition_fluent_sql__add_batch_definition_yearly(datasource
 
 
 @pytest.mark.unit
-def test_add_batch_definition_fluent_sql__add_batch_definition_monthly(datasource: Mock, asset):
+def test_add_batch_definition_fluent_sql__add_batch_definition_monthly(datasource, asset):
     # arrange
     name = "batch_def_name"
     column = "test_column"
@@ -78,7 +76,7 @@ def test_add_batch_definition_fluent_sql__add_batch_definition_monthly(datasourc
 
 
 @pytest.mark.unit
-def test_add_batch_definition_fluent_sql__add_batch_definition_daily(datasource: Mock, asset):
+def test_add_batch_definition_fluent_sql__add_batch_definition_daily(datasource, asset):
     # arrange
     name = "batch_def_name"
     column = "test_column"
