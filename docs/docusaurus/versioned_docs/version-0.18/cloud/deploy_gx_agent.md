@@ -12,7 +12,7 @@ import Tabs from '@theme/Tabs';
 
 To use GX Cloud features and functionality, you need to deploy the GX Agent. The GX Agent is an intermediary between GX Cloud and your organization's data stores. GX Cloud does not connect directly to your data, all data access occurs within the GX Agent. GX Cloud sends jobs to the GX Agent, the GX Agent executes these jobs against your data, and then sends the job results to GX Cloud.
 
-The GX Agent is typically deployed in your organization's deployment environment, for example, in a development, staging, or production cloud services environment. The GX Agent serves all GX Cloud users within your organization. It can be run as part of your development or production workflows. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
+To try GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. When you've finished testing GX Cloud, you move to an [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern) and deploy the GX Agent to your organization's development, staging, or production cloud services environment. The GX Agent serves all GX Cloud users within your organization. It can be run as part of your development or production workflows. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
 
 ## Prerequisites
 
@@ -70,10 +70,6 @@ Use the information provided here to view your organization ID or create a new a
 ## Deploy the GX Agent
 
 The GX Agent allows you to securely access your data without connecting to it or interacting with it directly. To learn more about the GX Agent and deployment patterns, see [About GX Cloud](./about_gx.md).
-
-### Self-hosted and org-hosted deployments
-
-To try GX Cloud, you use a [self-hosted deployment](./about_gx#self-hosted-deployment-pattern) to run the GX Agent with Docker, connect the GX Agent to your target Data Sources, and use the GX Cloud web UI to define your Data Assets, create Expectations, and run Validations. A self-hosted deployment is recommended when you want to test GX Cloud features and functionality, and it differs from the recommended [org-hosted deployment](./about_gx.md#org-hosted-deployment-pattern), in which the GX Agent runs in your organization's deployment environment.
 
 ### Prerequisites
 
@@ -234,6 +230,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
 </TabItem>
 </Tabs>
 
+
 ## Next steps
 
 Want to continue testing GX Cloud features and functionality?
@@ -243,6 +240,3 @@ Want to continue testing GX Cloud features and functionality?
 Ready to connect GX Cloud to your deployment environment?
 
 - [Connect GX Cloud](./connect/connect_lp.md)
-
-
-
