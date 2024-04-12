@@ -438,6 +438,8 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/cloud/quickstarts/airflow_quickstart /docs/cloud/connect/connect_airflow
 /docs/cloud/quickstarts/python_quickstart /docs/cloud/connect/connect_python
 /docs/cloud/set_up_gx_cloud#* /docs/cloud/try_gx_cloud#:splat
+/docs/cloud/try_gx_cloud /docs/cloud/deploy_gx_agent
+/versioned_docs/version-0.18/cloud/try_gx_cloud /versioned_docs/version-0.18/cloud/tdeploy_gx_agent
 
 # Broken link redirect
 
