@@ -89,7 +89,7 @@ def in_memory_param_store(request, test_backends):
 
 
 @pytest.mark.filesystem
-def test_evaluation_parameter_store_methods(
+def test_suite_parameter_store_methods(
     data_context_parameterized_expectation_suite,
 ):
     run_id = RunIdentifier(run_name="20191125T000000.000000Z")
@@ -127,7 +127,7 @@ def test_evaluation_parameter_store_methods(
     data_context_parameterized_expectation_suite.store_suite_parameters(source_patient_data_results)
 
     bound_parameters = (
-        data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
+        data_context_parameterized_expectation_suite.suite_parameter_store.get_bind_params(
             run_id
         )
     )
@@ -168,7 +168,7 @@ def test_evaluation_parameter_store_methods(
         source_diabetes_data_results
     )
     bound_parameters = (
-        data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
+        data_context_parameterized_expectation_suite.suite_parameter_store.get_bind_params(
             run_id
         )
     )
@@ -181,7 +181,7 @@ def test_evaluation_parameter_store_methods(
 
 
 @pytest.mark.postgresql
-def test_database_evaluation_parameter_store_basics(param_store):
+def test_database_suite_parameter_store_basics(param_store):
     run_id = RunIdentifier(
         run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
@@ -200,7 +200,7 @@ def test_database_evaluation_parameter_store_basics(param_store):
 
 
 @pytest.mark.postgresql
-def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_store):
+def test_database_suite_parameter_store_store_backend_id(in_memory_param_store):
     """
     What does this test and why?
     A Store should be able to report it's store_backend_id
@@ -214,7 +214,7 @@ def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_st
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.postgresql
-def test_database_evaluation_parameter_store_get_bind_params(param_store):
+def test_database_suite_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
     run_id = RunIdentifier(
@@ -269,7 +269,7 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
 )
 @mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.cloud
-def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
+def test_suite_parameter_store_calls_proper_cloud_tuple_store_methods(
     mock_parent_list_keys,
     mock_s3_list_keys,
 ):
@@ -279,17 +279,17 @@ def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     Demonstrate that SuiteParameterStore works as expected with TupleS3StoreBackend
     and that the store backend adheres to the Liskov substitution principle.
     """
-    evaluation_parameter_store = SuiteParameterStore()
+    suite_parameter_store = SuiteParameterStore()
     run_id = RunIdentifier()
     s3_store = TupleS3StoreBackend(bucket="my_bucket")
-    evaluation_parameter_store._store_backend = s3_store
+    suite_parameter_store._store_backend = s3_store
 
     # Sanity check to ensure neither parent nor child method has been called
     assert not mock_s3_list_keys.called
     assert not mock_parent_list_keys.called
 
     # `get_bind_params` calls the child method due to proper polymorphism
-    evaluation_parameter_store.get_bind_params(run_id=run_id)
+    suite_parameter_store.get_bind_params(run_id=run_id)
     assert mock_s3_list_keys.called
     assert not mock_parent_list_keys.called
 
@@ -299,7 +299,7 @@ def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
 )
 @mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
-def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
+def test_suite_parameter_store_calls_proper_azure_tuple_store_methods(
     mock_parent_list_keys,
     mock_azure_list_keys,
 ):
@@ -309,19 +309,19 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     Demonstrate that SuiteParameterStore works as expected with TupleAzureBlobStoreBackend
     and that the store backend adheres to the Liskov substitution principle.
     """
-    evaluation_parameter_store = SuiteParameterStore()
+    suite_parameter_store = SuiteParameterStore()
     run_id = RunIdentifier()
     azure_store = TupleAzureBlobStoreBackend(
         container="my_container", connection_string="my_connection_string"
     )
-    evaluation_parameter_store._store_backend = azure_store
+    suite_parameter_store._store_backend = azure_store
 
     # Sanity check to ensure neither parent nor child method has been called
     assert not mock_azure_list_keys.called
     assert not mock_parent_list_keys.called
 
     # `get_bind_params` calls the child method due to proper polymorphism
-    evaluation_parameter_store.get_bind_params(run_id=run_id)
+    suite_parameter_store.get_bind_params(run_id=run_id)
     assert mock_azure_list_keys.called
     assert not mock_parent_list_keys.called
 
@@ -331,7 +331,7 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
 )
 @mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
-def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
+def test_suite_parameter_store_calls_proper_gcs_tuple_store_methods(
     mock_parent_list_keys,
     mock_gcs_list_keys,
 ):
@@ -341,16 +341,16 @@ def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     Demonstrate that SuiteParameterStore works as expected with TupleGCSStoreBackend
     and that the store backend adheres to the Liskov substitution principle.
     """
-    evaluation_parameter_store = SuiteParameterStore()
+    suite_parameter_store = SuiteParameterStore()
     run_id = RunIdentifier()
     gcs_store = TupleGCSStoreBackend(bucket="my_bucket", project="my_project")
-    evaluation_parameter_store._store_backend = gcs_store
+    suite_parameter_store._store_backend = gcs_store
 
     # Sanity check to ensure neither parent nor child method has been called
     assert not mock_gcs_list_keys.called
     assert not mock_parent_list_keys.called
 
     # `get_bind_params` calls the child method due to proper polymorphism
-    evaluation_parameter_store.get_bind_params(run_id=run_id)
+    suite_parameter_store.get_bind_params(run_id=run_id)
     assert mock_gcs_list_keys.called
     assert not mock_parent_list_keys.called

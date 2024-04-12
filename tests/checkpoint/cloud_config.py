@@ -141,7 +141,7 @@ def _cloud_config(data_dir):
                 "name": "taxi_datasource",
             }
         },
-        "suite_parameter_store_name": "evaluation_parameter_store",
+        "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "default_expectations_store",
         "include_rendered_content": {
             "expectation_suite": True,
@@ -210,7 +210,7 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "evaluation_parameter_store": {
+            "suite_parameter_store": {
                 "class_name": "SuiteParameterStore",
                 "module_name": "great_expectations.data_context.store",
             },

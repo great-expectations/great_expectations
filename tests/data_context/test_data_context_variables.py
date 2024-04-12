@@ -53,7 +53,7 @@ def data_context_config_dict() -> dict:
     config: dict = {
         "config_version": 3.0,
         "plugins_directory": "plugins/",
-        "suite_parameter_store_name": "evaluation_parameter_store",
+        "suite_parameter_store_name": "suite_parameter_store",
         "validations_store_name": "validations_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
@@ -67,7 +67,7 @@ def data_context_config_dict() -> dict:
                     "base_directory": "expectations/",
                 },
             },
-            "evaluation_parameter_store": {
+            "suite_parameter_store": {
                 "module_name": "great_expectations.data_context.store",
                 "class_name": "SuiteParameterStore",
             },
@@ -248,7 +248,7 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         ),
         pytest.param(
             DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
-            id="evaluation_parameter_store getter",
+            id="suite_parameter_store getter",
         ),
         pytest.param(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
@@ -346,9 +346,9 @@ def test_data_context_variables_get_with_substitutions(
             id="validations_store setter",
         ),
         pytest.param(
-            "my_evaluation_parameter_store",
+            "my_suite_parameter_store",
             DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
-            id="evaluation_parameter_store setter",
+            id="suite_parameter_store setter",
         ),
         pytest.param(
             "my_checkpoint_store",
@@ -453,7 +453,7 @@ def test_data_context_variables_save_config(
                     "base_directory": "expectations/",
                 },
             },
-            "evaluation_parameter_store": {
+            "suite_parameter_store": {
                 "module_name": "great_expectations.data_context.store",
                 "class_name": "SuiteParameterStore",
             },

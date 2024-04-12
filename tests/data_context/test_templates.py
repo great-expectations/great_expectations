@@ -37,7 +37,7 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-  evaluation_parameter_store:
+  suite_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/docs/reference/suite_parameters/
     class_name: SuiteParameterStore
@@ -64,7 +64,7 @@ stores:
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store
-suite_parameter_store_name: evaluation_parameter_store
+suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 
 data_docs_sites:

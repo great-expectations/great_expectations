@@ -49,7 +49,7 @@ stores:
       class_name: ${v}
       base_directory: ${w}
 
-  evaluation_parameter_store:
+  suite_parameter_store:
     module_name: ${x}
     class_name: ${y}
 

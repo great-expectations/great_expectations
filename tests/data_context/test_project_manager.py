@@ -68,7 +68,7 @@ class TestProjectManagerStores:
 
         store = project_manager.get_suite_parameters_store()
 
-        assert store == context.evaluation_parameter_store
+        assert store == context.suite_parameter_store
 
     @pytest.mark.unit
     def test_get_suite_parameters_store_fails_without_context(self):

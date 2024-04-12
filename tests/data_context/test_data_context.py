@@ -1075,9 +1075,9 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     assert sorted(config.keys()) == [
         "action_list",
         "batch_request",
-        "suite_parameters",
         "name",
         "runtime_configuration",
+        "suite_parameters",
         "validations",
     ]
 

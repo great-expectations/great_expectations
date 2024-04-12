@@ -16,7 +16,7 @@ datasources:
 plugins_directory: plugins/
 
 expectations_store_name: expectations_store
-suite_parameter_store_name: evaluation_parameter_store
+suite_parameter_store_name: suite_parameter_store
 validations_store_name: validations_store
 checkpoint_store_name: checkpoint_store
 
@@ -38,7 +38,7 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: fixtures/validations
 
-  evaluation_parameter_store:
+  suite_parameter_store:
     class_name: SuiteParameterStore
 
   checkpoint_store:

@@ -7,7 +7,7 @@ fluent_datasources:
 plugins_directory: plugins/
 
 checkpoint_store_name: checkpoint_store
-suite_parameter_store_name: evaluation_parameter_store
+suite_parameter_store_name: suite_parameter_store
 validations_store_name: validations_store
 expectations_store_name: expectations_store
 
@@ -24,7 +24,7 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-  evaluation_parameter_store:
+  suite_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: SuiteParameterStore
 

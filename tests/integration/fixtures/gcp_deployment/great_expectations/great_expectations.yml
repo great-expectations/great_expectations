@@ -61,7 +61,7 @@ stores:
       prefix: <YOUR GCS PREFIX NAME>
   # </snippet>
 
-  evaluation_parameter_store:
+  suite_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/en/latest/reference/core_concepts/suite_parameters.html
     class_name: SuiteParameterStore
@@ -79,7 +79,7 @@ expectations_store_name: expectations_GCS_store
 # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_store_name">
 validations_store_name: validations_GCS_store
 # </snippet>
-suite_parameter_store_name: evaluation_parameter_store
+suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
