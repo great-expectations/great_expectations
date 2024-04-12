@@ -641,7 +641,7 @@ illegal.  Please check your config."""  # noqa: E501
         This may be caused by it becoming great_expectations.compatibility.not_imported.NotImported when pyspark is not installed.
         </Alex>
         """  # noqa: E501
-        table = domain_kwargs.get("table", None)
+        table = domain_kwargs.get("table")
         if table:
             raise ValueError(  # noqa: TRY003
                 "SparkDFExecutionEngine does not currently support multiple named tables."
@@ -665,9 +665,9 @@ illegal.  Please check your config."""  # noqa: E501
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")  # noqa: TRY003
 
         # Filtering by row condition.
-        row_condition = domain_kwargs.get("row_condition", None)
+        row_condition = domain_kwargs.get("row_condition")
         if row_condition:
-            condition_parser = domain_kwargs.get("condition_parser", None)
+            condition_parser = domain_kwargs.get("condition_parser")
             if condition_parser == "spark":
                 data = data.filter(row_condition)
             elif condition_parser == "great_expectations__experimental__":
@@ -788,7 +788,7 @@ illegal.  Please check your config."""  # noqa: E501
         This may be caused by it becoming great_expectations.compatibility.not_imported.NotImported when pyspark is not installed.
         </Alex>
         """  # noqa: E501
-        table: str = domain_kwargs.get("table", None)
+        table: str = domain_kwargs.get("table")
         if table:
             raise ValueError(  # noqa: TRY003
                 "SparkDFExecutionEngine does not currently support multiple named tables."

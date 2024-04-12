@@ -1105,9 +1105,7 @@ class ExpectationSuiteSchema(Schema):
         elif len(data.evaluation_parameters) == 0:
             del data.evaluation_parameters
 
-        if not hasattr(data, "meta"):
-            pass
-        elif data.meta is None or data.meta == []:
+        if not hasattr(data, "meta") or (data.meta is None or data.meta == []):
             pass
         elif len(data.meta) == 0:
             del data.meta

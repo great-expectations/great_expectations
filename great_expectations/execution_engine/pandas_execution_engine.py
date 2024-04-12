@@ -245,7 +245,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 reader_options: dict = batch_spec.reader_options or {}
                 path: str = batch_spec.path
                 s3_url = S3Url(path)
-                if "compression" not in reader_options.keys():
+                if "compression" not in reader_options:
                     inferred_compression_param = sniff_s3_compression(s3_url)
                     if inferred_compression_param is not None:
                         reader_options["compression"] = inferred_compression_param
@@ -498,7 +498,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
         Returns:
             A DataFrame (the data on which to compute returned in the format of a Pandas DataFrame)
         """  # noqa: E501
-        table = domain_kwargs.get("table", None)
+        table = domain_kwargs.get("table")
         if table:
             raise ValueError(  # noqa: TRY003
                 "PandasExecutionEngine does not currently support multiple named tables."
@@ -524,9 +524,9 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
                 )
 
         # Filtering by row condition.
-        row_condition = domain_kwargs.get("row_condition", None)
+        row_condition = domain_kwargs.get("row_condition")
         if row_condition:
-            condition_parser = domain_kwargs.get("condition_parser", None)
+            condition_parser = domain_kwargs.get("condition_parser")
 
             # Ensuring proper condition parser has been provided
             if condition_parser not in ["python", "pandas"]:
@@ -623,7 +623,7 @@ not {batch_spec.__class__.__name__}"""  # noqa: E501
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the Domain within the compute domain
         """  # noqa: E501
-        table: str = domain_kwargs.get("table", None)
+        table: str = domain_kwargs.get("table")
         if table:
             raise ValueError(  # noqa: TRY003
                 "PandasExecutionEngine does not currently support multiple named tables."

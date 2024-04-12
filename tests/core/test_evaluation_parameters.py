@@ -308,7 +308,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
         deduplicated["profile"][0]["metric_kwargs_id"]["column=norm"]
     )
 
-    assert {
+    assert deduplicated == {
         "profile": [
             {
                 "metric_kwargs_id": {
@@ -319,7 +319,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
                 }
             }
         ]
-    } == deduplicated
+    }
 
 
 @pytest.mark.filesystem

@@ -187,7 +187,7 @@ def _expected_data_connector_types(
     introspection: Dict[str, Any], tables: Dict[str, Dict[str, Any]]
 ) -> Dict[str, SqlDataConnectorType]:
     expected_data_connector_types: Dict[str, SqlDataConnectorType] = {}
-    for key in introspection.keys():
+    for key in introspection:
         expected_data_connector_types[key] = InferredAssetSqlDataConnector
     for _, table_dict in tables.items():
         for key in table_dict["partitioners"].keys():
@@ -199,7 +199,7 @@ def _expected_data_assets_with_types(
     introspection: Dict[str, Any], tables: Dict[str, Dict[str, Any]]
 ) -> Dict[str, List[Tuple[str, str]]]:
     expected_data_assets_with_types: Dict[str, List[Tuple[str, str]]] = {}
-    for key in introspection.keys():
+    for key in introspection:
         expected_data_assets_with_types[key] = []
     for table_name, table_dict in tables.items():
         for key in table_dict["partitioners"].keys():

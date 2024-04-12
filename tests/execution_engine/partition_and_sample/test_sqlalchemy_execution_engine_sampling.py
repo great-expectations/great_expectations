@@ -375,7 +375,7 @@ def test_sample_using_random(sqlite_view_engine, test_df):
 
     assert len(rows_0) == len(rows_1)
 
-    assert not (rows_0 == rows_1)
+    assert rows_0 != rows_1
 
 
 @pytest.mark.unit

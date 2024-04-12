@@ -158,14 +158,14 @@ class InlineStoreBackend(StoreBackend):
         keys: list[tuple]
         config_dict: dict = self._data_context.config.to_dict()
         if config_section is None:
-            keys = list((key,) for key in config_dict.keys())
+            keys = list((key,) for key in config_dict)
         else:
             config_values: dict = config_dict[config_section]
             if not isinstance(config_values, dict):
                 raise StoreBackendError(  # noqa: TRY003
                     "Cannot list keys in a non-iterable section of a project config"
                 )
-            keys = list((key,) for key in config_values.keys())
+            keys = list((key,) for key in config_values)
 
         return keys
 

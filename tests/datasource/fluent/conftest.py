@@ -140,7 +140,7 @@ def inject_engine_lookup_double(
             original_engine_override[key] = key.execution_engine_override
 
     try:
-        for source in original_engine_override.keys():
+        for source in original_engine_override:
             source.execution_engine_override = ExecutionEngineDouble
         yield ExecutionEngineDouble
     finally:

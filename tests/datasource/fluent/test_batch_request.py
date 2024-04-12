@@ -90,7 +90,7 @@ def test_batch_request_config_serialization_round_trips(
     assert batch_request_dict["options"] == batch_request_config.get("options", {})
     # Even though BatchRequest.batch_slice has a slice object,
     # it will serialize to None since batch_slice wasn't passed in.
-    assert batch_request_dict["batch_slice"] == batch_request_config.get("batch_slice", None)
+    assert batch_request_dict["batch_slice"] == batch_request_config.get("batch_slice")
 
     #
     # json
@@ -101,7 +101,7 @@ def test_batch_request_config_serialization_round_trips(
     options_json = json.dumps(batch_request_config.get("options", {}))
 
     # convert batch_slice value to json string
-    batch_slice_json = json.dumps(batch_request_config.get("batch_slice", None))
+    batch_slice_json = json.dumps(batch_request_config.get("batch_slice"))
 
     assert batch_request_json == (
         "{"

@@ -928,8 +928,8 @@ class TestEqDunder:
         assert suite_with_single_expectation == different_but_equivalent_suite
         assert different_but_equivalent_suite == suite_with_single_expectation
 
-        assert not suite_with_single_expectation != different_but_equivalent_suite
-        assert not different_but_equivalent_suite != suite_with_single_expectation
+        assert suite_with_single_expectation == different_but_equivalent_suite
+        assert different_but_equivalent_suite == suite_with_single_expectation
 
     @pytest.mark.parametrize(
         "attribute,new_value",
@@ -978,8 +978,8 @@ class TestEqDunder:
 
         setattr(different_but_equivalent_suite, attribute, new_value)
 
-        assert not suite_with_single_expectation == different_but_equivalent_suite
-        assert not different_but_equivalent_suite == suite_with_single_expectation
+        assert suite_with_single_expectation != different_but_equivalent_suite
+        assert different_but_equivalent_suite != suite_with_single_expectation
         assert suite_with_single_expectation != different_but_equivalent_suite
         assert different_but_equivalent_suite != suite_with_single_expectation
 

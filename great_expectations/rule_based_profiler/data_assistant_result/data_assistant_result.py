@@ -3027,7 +3027,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         ]
 
         table_based_metric_names: Set[tuple[str, ...]] = set()
-        for metrics in metric_expectation_map.keys():
+        for metrics in metric_expectation_map:
             if all(metric.startswith("table") for metric in metrics):
                 table_based_metric_names.add(tuple(metrics))
 
@@ -3124,7 +3124,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             return [], []
 
         column_based_metric_names: Set[tuple[str, ...]] = set()
-        for metrics in metric_expectation_map.keys():
+        for metrics in metric_expectation_map:
             if all(metric.startswith("column") for metric in metrics):
                 if plot_mode == PlotMode.DIAGNOSTIC:
                     column_based_metric_names.add(tuple(metrics))
@@ -3854,7 +3854,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         metric_types: Dict[str, AltairDataTypes] = self.metric_types
         return {
             sanitize_parameter_name(name=metric, suffix=None)
-            for metric in metric_types.keys()
+            for metric in metric_types
             if metric_types[metric] == altair_type
         }
 

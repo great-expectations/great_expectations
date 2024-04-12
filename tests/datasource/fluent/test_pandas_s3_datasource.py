@@ -150,13 +150,13 @@ def test_invalid_connect_options(pandas_s3_datasource: PandasS3Datasource, aws_c
 
     error_dicts = exc_info.value.errors()
     print(pf(error_dicts))
-    assert [
+    assert error_dicts == [
         {
             "loc": ("extra_field",),
             "msg": "extra fields not permitted",
             "type": "value_error.extra",
         }
-    ] == error_dicts
+    ]
 
 
 @pytest.mark.unit

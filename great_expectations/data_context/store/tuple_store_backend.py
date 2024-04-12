@@ -358,9 +358,12 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 else:
                     filepath = os.path.join(relative_path, file_name)  # noqa: PTH118
 
-                if self.filepath_prefix and not filepath.startswith(self.filepath_prefix):
-                    continue
-                elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
+                if (
+                    self.filepath_prefix
+                    and not filepath.startswith(self.filepath_prefix)
+                    or self.filepath_suffix
+                    and not filepath.endswith(self.filepath_suffix)
+                ):
                     continue
                 key = self._convert_filepath_to_key(filepath)
                 if key and not self.is_ignored_key(key):
@@ -627,9 +630,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 else:  # noqa: PLR5501
                     if s3_object_key.startswith(f"{self.prefix}/"):
                         s3_object_key = s3_object_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not s3_object_key.startswith(self.filepath_prefix):
-                continue
-            elif self.filepath_suffix and not s3_object_key.endswith(self.filepath_suffix):
+            if (
+                self.filepath_prefix
+                and not s3_object_key.startswith(self.filepath_prefix)
+                or self.filepath_suffix
+                and not s3_object_key.endswith(self.filepath_suffix)
+            ):
                 continue
             key = self._convert_filepath_to_key(s3_object_key)
             if key:
@@ -898,9 +904,12 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_name,
                 self.prefix,
             )
-            if self.filepath_prefix and not gcs_object_key.startswith(self.filepath_prefix):
-                continue
-            elif self.filepath_suffix and not gcs_object_key.endswith(self.filepath_suffix):
+            if (
+                self.filepath_prefix
+                and not gcs_object_key.startswith(self.filepath_prefix)
+                or self.filepath_suffix
+                and not gcs_object_key.endswith(self.filepath_suffix)
+            ):
                 continue
             key = self._convert_filepath_to_key(gcs_object_key)
             if key:
@@ -1098,9 +1107,12 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             az_blob_key = os.path.relpath(obj.name)
             if az_blob_key.startswith(f"{self.prefix}{os.path.sep}"):
                 az_blob_key = az_blob_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not az_blob_key.startswith(self.filepath_prefix):
-                continue
-            elif self.filepath_suffix and not az_blob_key.endswith(self.filepath_suffix):
+            if (
+                self.filepath_prefix
+                and not az_blob_key.startswith(self.filepath_prefix)
+                or self.filepath_suffix
+                and not az_blob_key.endswith(self.filepath_suffix)
+            ):
                 continue
             key = self._convert_filepath_to_key(az_blob_key)
 

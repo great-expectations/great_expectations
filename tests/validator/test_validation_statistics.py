@@ -18,9 +18,9 @@ def test_stats_no_expectations():
     assert None is actual.success_percent
     assert True is actual.success
     # the rest is boring
-    assert 0 == actual.successful_expectations
-    assert 0 == actual.evaluated_expectations
-    assert 0 == actual.unsuccessful_expectations
+    assert actual.successful_expectations == 0
+    assert actual.evaluated_expectations == 0
+    assert actual.unsuccessful_expectations == 0
 
 
 @pytest.mark.unit

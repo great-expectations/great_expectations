@@ -1623,9 +1623,12 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 if _engine == "sqlalchemy" and "sqlalchemy" in engines_implemented:
                     engines_to_include[_engine] = True
                     dialects_to_include[backend] = True
-                elif _engine == "pandas" and "pandas" in engines_implemented:
-                    engines_to_include[_engine] = True
-                elif _engine == "spark" and "spark" in engines_implemented:
+                elif (
+                    _engine == "pandas"
+                    and "pandas" in engines_implemented
+                    or _engine == "spark"
+                    and "spark" in engines_implemented
+                ):
                     engines_to_include[_engine] = True
     else:
         engines_to_include["pandas"] = execution_engine_diagnostics.PandasExecutionEngine
@@ -1899,7 +1902,7 @@ def should_we_generate_this_test(  # noqa: C901, PLR0911, PLR0912, PLR0913
         if backend not in expectation_test_case.only_for:
             if "sqlalchemy" in expectation_test_case.only_for and backend in SQL_DIALECT_NAMES:
                 return True
-            elif "pandas" == backend:
+            elif backend == "pandas":
                 major, minor, *_ = pd.__version__.split(".")
                 if (
                     "pandas_022" in expectation_test_case.only_for
