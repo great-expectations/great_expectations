@@ -156,7 +156,7 @@ def lint(
 
 @invoke.task(help={"path": _PATH_HELP_DESC, "safe-only": "Only apply 'safe' fixes."})
 def fix(ctx: Context, path: str = ".", safe_only: bool = False):
-    """gikt
+    """
     Automatically fix all possible code issues.
     Applies unsafe fixes by default.
     https://docs.astral.sh/ruff/linter/#fix-safety
