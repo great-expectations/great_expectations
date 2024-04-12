@@ -6,6 +6,7 @@ from typing import (
     Dict,
     List,
     Literal,
+    Protocol,
     Union,
 )
 
@@ -24,7 +25,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import Batch
 
 
-class _Partitioner(PartitionerProtocol): ...
+class _Partitioner(PartitionerProtocol, Protocol): ...  # noqa: PYI046
 
 
 class _PartitionerDatetime(FluentBaseModel):
