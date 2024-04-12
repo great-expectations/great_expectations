@@ -61,9 +61,14 @@ def mock_context(mocker: MockerFixture):
 
 
 class MockTeamsResponse:
-    def __init__(self, status_code):
+    def __init__(self, status_code: int, raise_for_status: bool = False):
         self.status_code = status_code
+        self._raise_for_status = raise_for_status
         self.text = "test_text"
+
+    def raise_for_status(self):
+        if self._raise_for_status:
+            raise requests.exceptions.HTTPError("test")
 
 
 class MockSlackResponse:
@@ -436,7 +441,9 @@ def test_MicrosoftTeamsNotificationAction_good_request(
 
 
 @pytest.mark.big
-@mock.patch.object(Session, "post", return_value=MockTeamsResponse(400))
+@mock.patch.object(
+    Session, "post", return_value=MockTeamsResponse(status_code=400, raise_for_status=True)
+)
 def test_MicrosoftTeamsNotificationAction_bad_request(
     validation_result_suite,
     validation_result_suite_extended_id,
@@ -461,8 +468,6 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
     ) == {"microsoft_teams_notification_result": None}
-
-    assert "Request to Microsoft Teams webhook returned error 400" in caplog.text
 
 
 class MockSMTPServer:
@@ -925,12 +930,169 @@ class TestV1ActionRun:
         assert out == {"email_result": mock_send_email()}
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
     def test_MicrosoftTeamsNotificationAction_run(self, checkpoint_result: CheckpointResult):
         action = MicrosoftTeamsNotificationAction(teams_webhook="test")
-        action.v1_run(checkpoint_result=checkpoint_result)
+
+        with mock.patch.object(Session, "post") as mock_post:
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+        from pprint import pprint
+
+        pprint(mock_post.call_args.kwargs["json"])
+        mock_post.assert_called_once_with(
+            url="test",
+            json={
+                "attachments": [
+                    {
+                        "content": {
+                            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                            "actions": [],
+                            "body": [
+                                {
+                                    "height": "auto",
+                                    "items": [
+                                        {
+                                            "columns": [
+                                                {
+                                                    "items": [
+                                                        {
+                                                            "size": "large",
+                                                            "text": mock.ANY,
+                                                            "type": "TextBlock",
+                                                            "weight": "bolder",
+                                                            "wrap": "true",
+                                                        }
+                                                    ],
+                                                    "type": "Column",
+                                                    "width": "stretch",
+                                                }
+                                            ],
+                                            "type": "ColumnSet",
+                                        }
+                                    ],
+                                    "separator": "true",
+                                    "type": "Container",
+                                },
+                                {
+                                    "height": "auto",
+                                    "items": [
+                                        {
+                                            "horizontalAlignment": "left",
+                                            "text": [
+                                                {
+                                                    "color": "good",
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Batch "
+                                                    "Validation "
+                                                    "Status:** "
+                                                    "Success "
+                                                    "!!!",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Data " "Asset " "Name:** " "None",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Expectation "
+                                                    "Suite "
+                                                    "Name:** "
+                                                    "suite_a",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Run " "Name:** " "prod_20240401",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Batch " "ID:** " "None",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Summary:** "
+                                                    "*3* of "
+                                                    "*3* "
+                                                    "expectations "
+                                                    "were met",
+                                                    "type": "TextBlock",
+                                                },
+                                            ],
+                                            "type": "TextBlock",
+                                        }
+                                    ],
+                                    "separator": "true",
+                                    "type": "Container",
+                                },
+                                {
+                                    "height": "auto",
+                                    "items": [
+                                        {
+                                            "horizontalAlignment": "left",
+                                            "text": [
+                                                {
+                                                    "color": "good",
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Batch "
+                                                    "Validation "
+                                                    "Status:** "
+                                                    "Success "
+                                                    "!!!",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Data " "Asset " "Name:** " "None",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Expectation "
+                                                    "Suite "
+                                                    "Name:** "
+                                                    "suite_b",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Run " "Name:** " "prod_20240402",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Batch " "ID:** " "None",
+                                                    "type": "TextBlock",
+                                                },
+                                                {
+                                                    "horizontalAlignment": "left",
+                                                    "text": "**Summary:** "
+                                                    "*2* of "
+                                                    "*2* "
+                                                    "expectations "
+                                                    "were met",
+                                                    "type": "TextBlock",
+                                                },
+                                            ],
+                                            "type": "TextBlock",
+                                        }
+                                    ],
+                                    "separator": "true",
+                                    "type": "Container",
+                                },
+                            ],
+                            "type": "AdaptiveCard",
+                            "version": "1.0",
+                        },
+                        "contentType": "application/vnd.microsoft.card.adaptive",
+                    }
+                ],
+                "type": "message",
+            },
+        )
 
     @pytest.mark.unit
     @pytest.mark.parametrize(

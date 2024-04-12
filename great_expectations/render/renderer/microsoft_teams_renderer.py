@@ -34,7 +34,9 @@ class MicrosoftTeamsRenderer(Renderer):
 
         data_docs_block = self._render_data_docs_links(data_docs_pages=data_docs_pages)
         return self._build_payload(
-            checkpoint_blocks=checkpoint_blocks, data_docs_block=data_docs_block
+            checkpoint_result=checkpoint_result,
+            checkpoint_blocks=checkpoint_blocks,
+            data_docs_block=data_docs_block,
         )
 
     def _render_validation_result(
