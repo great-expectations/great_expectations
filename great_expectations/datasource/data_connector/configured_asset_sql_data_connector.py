@@ -374,7 +374,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                     partitioner_group_names = [partitioner_kwargs["column_name"]]
 
                 if any(
-                    sorter_name not in partitioner_group_names for sorter_name in sorters.keys()  # noqa: SIM118
+                    sorter_name not in partitioner_group_names
+                    for sorter_name in sorters.keys()  # noqa: SIM118
                 ):
                     raise gx_exceptions.DataConnectorError(  # noqa: TRY003
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
