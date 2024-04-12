@@ -27,7 +27,12 @@ from great_expectations.types import DictDot
 logger = logging.getLogger(__name__)
 
 
-def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack_token=None):
+def send_slack_notification(
+    payload: dict,
+    slack_webhook: str | None = None,
+    slack_channel: str | None = None,
+    slack_token: str | None = None,
+) -> str | None:
     session = requests.Session()
     url = slack_webhook
     headers = None
@@ -36,31 +41,28 @@ def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack
     # https://api.slack.com/legacy/custom-integrations/messaging/webhooks
     # ** Since it is legacy, it could be deprecated or removed in the future **
     if slack_channel:
-        query["channel"] = slack_channel
+        payload["channel"] = slack_channel
 
     if not slack_webhook:
         url = "https://slack.com/api/chat.postMessage"
         headers = {"Authorization": f"Bearer {slack_token}"}
 
+    if not url:
+        raise ValueError("No Slack webhook URL provided.")  # noqa: TRY003
+
     try:
-        response = session.post(url=url, headers=headers, json=query)
-        if slack_webhook:
-            ok_status = response.text == "ok"
-        else:
-            ok_status = response.json()["ok"]
+        response = session.post(url=url, headers=headers, json=payload)
+        response.raise_for_status()
     except requests.ConnectionError:
         logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
-    except Exception as e:
-        logger.error(str(e))  # noqa: TRY400
-    else:
-        if response.status_code != 200 or not ok_status:  # noqa: PLR2004
-            logger.warning(
-                "Request to Slack webhook "
-                f"returned error {response.status_code}: {response.text}"
-            )
+        return None
+    except requests.HTTPError:
+        logger.warning(
+            "Request to Slack webhook " f"returned error {response.status_code}: {response.text}"
+        )
+        return None
 
-        else:
-            return "Slack notification succeeded."
+    return "Slack notification succeeded."
 
 
 # noinspection SpellCheckingInspection
