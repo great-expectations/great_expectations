@@ -333,12 +333,8 @@ class HtmlSiteStore:
                 continue
 
         # The key's resource_identifier didn't match any known key_class
-        raise TypeError(
-            "resource_identifier in key: {!r} must one of {}, not {!r}".format(
-                key,
-                set(self.store_backends.keys()),
-                type(key),
-            )
+        raise TypeError(  # noqa: TRY003
+            f"resource_identifier in key: {key!r} must one of {set(self.store_backends.keys())}, not {type(key)!r}"  # noqa: E501
         )
 
     def list_keys(self):

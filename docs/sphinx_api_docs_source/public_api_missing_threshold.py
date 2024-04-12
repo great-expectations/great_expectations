@@ -62,7 +62,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/datasource/fluent/invalid_datasource.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/datasource/fluent/invalid_datasource.py Name: add_sorters",
     "File: great_expectations/datasource/fluent/invalid_datasource.py Name: build_batch_request",
-    "File: great_expectations/datasource/fluent/invalid_datasource.py Name: get_batch_request_options_keys",
+    "File: great_expectations/datasource/fluent/invalid_datasource.py Name: get_batch_parameters_keys",
     "File: great_expectations/datasource/new_datasource.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/exceptions/exceptions.py Name: InvalidExpectationConfigurationError",
     "File: great_expectations/expectations/expectation.py Name: validate_configuration",

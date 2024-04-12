@@ -8,12 +8,12 @@ from great_expectations.compatibility.pydantic import StrictStr
 from great_expectations.core.partitioners import Partitioner
 from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 
-BatchRequestOptions: TypeAlias = Dict[StrictStr, Any]
+BatchParameters: TypeAlias = Dict[StrictStr, Any]
 
 class BatchRequest(pydantic.BaseModel):
     datasource_name: StrictStr
     data_asset_name: StrictStr
-    options: BatchRequestOptions
+    options: BatchParameters
     partitioner: Optional[Partitioner] = None
     batching_regex: Optional[re.Pattern] = None
 
@@ -21,7 +21,7 @@ class BatchRequest(pydantic.BaseModel):
         self,
         datasource_name: StrictStr,
         data_asset_name: StrictStr,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
         batching_regex: Optional[re.Pattern] = None,

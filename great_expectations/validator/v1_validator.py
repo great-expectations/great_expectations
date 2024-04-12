@@ -14,7 +14,7 @@ from great_expectations.validator.validator import calc_validation_statistics
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
     from great_expectations.core.batch_definition import BatchDefinition
-    from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+    from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.expectations.expectation import (
         Expectation,
         ExpectationConfiguration,
@@ -31,10 +31,10 @@ class Validator:
         self,
         batch_definition: BatchDefinition,
         result_format: ResultFormat = ResultFormat.SUMMARY,
-        batch_request_options: Optional[BatchRequestOptions] = None,
+        batch_parameters: Optional[BatchParameters] = None,
     ) -> None:
         self._batch_definition = batch_definition
-        self._batch_request_options = batch_request_options
+        self._batch_parameters = batch_parameters
         self.result_format = result_format
 
         from great_expectations import project_manager
@@ -85,7 +85,7 @@ class Validator:
     @cached_property
     def _wrapped_validator(self) -> OldValidator:
         batch_request = self._batch_definition.build_batch_request(
-            batch_request_options=self._batch_request_options
+            batch_parameters=self._batch_parameters
         )
         return self._get_validator(batch_request=batch_request)
 

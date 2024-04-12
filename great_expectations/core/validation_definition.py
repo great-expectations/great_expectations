@@ -37,7 +37,7 @@ if TYPE_CHECKING:
         ExpectationSuiteValidationResult,
     )
     from great_expectations.data_context.store.validations_store import ValidationsStore
-    from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+    from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
 
@@ -198,13 +198,13 @@ class ValidationDefinition(BaseModel):
     def run(
         self,
         *,
-        batch_parameters: Optional[BatchRequestOptions] = None,
+        batch_parameters: Optional[BatchParameters] = None,
         suite_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(
             batch_definition=self.batch_definition,
-            batch_request_options=batch_parameters,
+            batch_parameters=batch_parameters,
             result_format=result_format,
         )
         results = validator.validate_expectation_suite(self.suite, suite_parameters)

@@ -20,7 +20,7 @@ from great_expectations.execution_engine.partition_and_sample.data_partitioner i
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
+    from great_expectations.datasource.fluent.batch_request import BatchParameters
 
 
 class _Partitioner(Protocol):  # noqa: PYI046
@@ -55,8 +55,8 @@ class _Partitioner(Protocol):  # noqa: PYI046
         Look at Partitioner* classes for concrete examples.
         """
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         """Translates `options` to the execution engine batch spec kwarg identifiers
 
@@ -94,14 +94,14 @@ class _PartitionerDatetime(FluentBaseModel):
     def columns(self) -> list[str]:
         return [self.column_name]
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         """Validates all the datetime parameters for this partitioner exist in `options`."""
         identifiers: Dict = {}
         for part in self.param_names:
             if part not in options:
-                raise ValueError(f"'{part}' must be specified in the batch request options")  # noqa: TRY003
+                raise ValueError(f"'{part}' must be specified in the batch parameters")  # noqa: TRY003
             identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
@@ -195,8 +195,8 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         raise NotImplementedError
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         raise NotImplementedError
 
@@ -216,11 +216,11 @@ class SparkPartitionerDividedInteger(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name, "divisor": self.divisor}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "quotient" not in options:
-            raise ValueError("'quotient' must be specified in the batch request options")  # noqa: TRY003
+            raise ValueError("'quotient' must be specified in the batch parameters")  # noqa: TRY003
         return {self.column_name: options["quotient"]}
 
 
@@ -239,11 +239,11 @@ class SparkPartitionerModInteger(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name, "mod": self.mod}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "remainder" not in options:
-            raise ValueError("'remainder' must be specified in the batch request options")  # noqa: TRY003
+            raise ValueError("'remainder' must be specified in the batch parameters")  # noqa: TRY003
         return {self.column_name: options["remainder"]}
 
 
@@ -261,11 +261,11 @@ class SparkPartitionerColumnValue(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if self.column_name not in options:
-            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")  # noqa: TRY003
+            raise ValueError(f"'{self.column_name}' must be specified in the batch parameters")  # noqa: TRY003
         return {self.column_name: options[self.column_name]}
 
 
@@ -284,12 +284,12 @@ class SparkPartitionerMultiColumnValue(FluentBaseModel):
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_names": self.column_names}
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
             raise ValueError(  # noqa: TRY003
-                f"All column names, {self.column_names}, must be specified in the batch request options. "  # noqa: E501
+                f"All column names, {self.column_names}, must be specified in the batch parameters. "  # noqa: E501
                 f" The options provided were f{options}."
             )
         return {col: options[col] for col in self.column_names}
