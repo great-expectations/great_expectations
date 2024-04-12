@@ -127,9 +127,7 @@ def test_suite_parameter_store_methods(
     data_context_parameterized_expectation_suite.store_suite_parameters(source_patient_data_results)
 
     bound_parameters = (
-        data_context_parameterized_expectation_suite.suite_parameter_store.get_bind_params(
-            run_id
-        )
+        data_context_parameterized_expectation_suite.suite_parameter_store.get_bind_params(run_id)
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
@@ -168,9 +166,7 @@ def test_suite_parameter_store_methods(
         source_diabetes_data_results
     )
     bound_parameters = (
-        data_context_parameterized_expectation_suite.suite_parameter_store.get_bind_params(
-            run_id
-        )
+        data_context_parameterized_expectation_suite.suite_parameter_store.get_bind_params(run_id)
     )
     assert bound_parameters == {
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
