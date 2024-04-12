@@ -38,7 +38,7 @@ stores:
       base_directory: uncommitted/validations/
 
   suite_parameter_store:
-    # Evaluation Parameters enable dynamic expectations. Read more here:
+    # Suite Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/docs/reference/suite_parameters/
     class_name: SuiteParameterStore
 
