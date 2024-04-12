@@ -247,7 +247,7 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
             id="validations_store getter",
         ),
         pytest.param(
-            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
+            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
             id="suite_parameter_store getter",
         ),
         pytest.param(
@@ -347,7 +347,7 @@ def test_data_context_variables_get_with_substitutions(
         ),
         pytest.param(
             "my_suite_parameter_store",
-            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
+            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
             id="suite_parameter_store setter",
         ),
         pytest.param(
