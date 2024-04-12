@@ -125,6 +125,7 @@ def format(
         "path": _PATH_HELP_DESC,
         "fmt": "Disable formatting. Runs by default.",
         "fix": "Attempt to automatically fix lint violations.",
+        "unsafe-fixes": "Enable potentially unsafe fixes.",
         "watch": "Run in watch mode by re-running whenever files change.",
         "pty": _PTY_HELP_DESC,
     }
@@ -134,6 +135,7 @@ def lint(
     path: str = ".",
     fmt_: bool = True,
     fix: bool = False,
+    unsafe_fixes: bool = False,
     watch: bool = False,
     pty: bool = True,
 ):
@@ -145,15 +147,17 @@ def lint(
     cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
+    if unsafe_fixes:
+        cmds.append("--unsafe-fixes")
     if watch:
         cmds.append("--watch")
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
-@invoke.task(help={"path": _PATH_HELP_DESC})
-def fix(ctx: Context, path: str = "."):
+@invoke.task(help={"path": _PATH_HELP_DESC, "unsafe": "Enable potentially unsafe fixes."})
+def fix(ctx: Context, path: str = ".", unsafe: bool = False):
     """Automatically fix all possible code issues."""
-    lint(ctx, path=path, fix=True)
+    lint(ctx, path=path, unsafe_fixes=unsafe)
     format(ctx, path=path, sort_=True)
 
 
