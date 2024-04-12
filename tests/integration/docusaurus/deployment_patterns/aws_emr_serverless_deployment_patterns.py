@@ -34,7 +34,7 @@ if __name__ == "__main__":
         datasources=config_file["datasources"],
         expectations_store_name=config_file["expectations_store_name"],
         validations_store_name=config_file["validations_store_name"],
-        evaluation_parameter_store_name=config_file["evaluation_parameter_store_name"],
+        suite_parameter_store_name=config_file["suite_parameter_store_name"],
         plugins_directory="/great_expectations/plugins",
         stores=config_file["stores"],
         data_docs_sites=config_file["data_docs_sites"],

@@ -53,7 +53,7 @@ def data_context_config_dict() -> dict:
     config: dict = {
         "config_version": 3.0,
         "plugins_directory": "plugins/",
-        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "suite_parameter_store_name": "evaluation_parameter_store",
         "validations_store_name": "validations_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",

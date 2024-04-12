@@ -3189,7 +3189,7 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
-evaluation_parameter_store_name: default_evaluation_parameter_store
+suite_parameter_store_name: default_evaluation_parameter_store
 expectations_store_name: default_expectations_store
 validations_store_name: default_validations_store
 checkpoint_store_name: default_checkpoint_store

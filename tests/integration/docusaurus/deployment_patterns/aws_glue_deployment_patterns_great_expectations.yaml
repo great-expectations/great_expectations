@@ -52,7 +52,7 @@ stores:
 
 expectations_store_name: expectations_S3_store
 validations_store_name: validations_S3_store
-evaluation_parameter_store_name: evaluation_parameter_store
+suite_parameter_store_name: evaluation_parameter_store
 checkpoint_store_name: checkpoint_S3_store
 
 data_docs_sites:

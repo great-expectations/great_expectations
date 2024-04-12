@@ -141,7 +141,7 @@ def _cloud_config(data_dir):
                 "name": "taxi_datasource",
             }
         },
-        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "suite_parameter_store_name": "evaluation_parameter_store",
         "expectations_store_name": "default_expectations_store",
         "include_rendered_content": {
             "expectation_suite": True,

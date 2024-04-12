@@ -186,7 +186,7 @@ def empty_serialized_configuration_bundle() -> dict:
             "config_variables_file_path": None,
             "config_version": 3.0,
             "data_docs_sites": None,
-            "evaluation_parameter_store_name": None,
+            "suite_parameter_store_name": None,
             "expectations_store_name": None,
             "include_rendered_content": {
                 "expectation_suite": False,
@@ -226,7 +226,7 @@ def serialized_configuration_bundle() -> dict:
             "config_variables_file_path": None,
             "config_version": 3.0,
             "data_docs_sites": None,
-            "evaluation_parameter_store_name": None,
+            "suite_parameter_store_name": None,
             "expectations_store_name": None,
             "checkpoint_store_name": None,
             "profiler_store_name": None,

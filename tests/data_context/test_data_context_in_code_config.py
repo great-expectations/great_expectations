@@ -75,7 +75,7 @@ def build_in_code_data_context_project_config(
         checkpoint_store_name="checkpoint_store",
         expectations_store_name="expectations_S3_store",
         validations_store_name="validations_S3_store",
-        evaluation_parameter_store_name="evaluation_parameter_store",
+        suite_parameter_store_name="evaluation_parameter_store",
         data_docs_sites={
             "s3_site": {
                 "class_name": "SiteBuilder",
@@ -458,7 +458,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
     Trying to create a data context with unreachable ACTIVE stores should show a warning message once per store
     e.g. Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store
     Active stores are those named in:
-    "expectations_store_name", "validations_store_name", "evaluation_parameter_store_name"
+    "expectations_store_name", "validations_store_name", "suite_parameter_store_name"
     """  # noqa: E501
 
     bucket = "leakybucket"
@@ -522,7 +522,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
 
     Trying to create a data context with unreachable INACTIVE stores should show no warning messages
     Inactive stores are those NOT named in:
-    "expectations_store_name", "validations_store_name", "evaluation_parameter_store_name"
+    "expectations_store_name", "validations_store_name", "suite_parameter_store_name"
     """
 
     bucket = "leakybucket"
