@@ -5,74 +5,13 @@ import pytest
 from moto import mock_sns
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
-from great_expectations.data_context import get_context
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-
-
-@pytest.fixture(scope="module")
-def basic_data_context_config_for_validation_operator():
-    return DataContextConfig(
-        config_version=2,
-        plugins_directory=None,
-        evaluation_parameter_store_name="evaluation_parameter_store",
-        expectations_store_name="expectations_store",
-        checkpoint_store_name="checkpoint_store",
-        datasources={},
-        stores={
-            "expectations_store": {"class_name": "ExpectationsStore"},
-            "checkpoint_store": {"class_name": "CheckpointStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
-            "metrics_store": {"class_name": "MetricStore"},
-        },
-        validations_store_name="validation_result_store",
-        data_docs_sites={},
-        validation_operators={
-            "store_val_res_and_extract_eval_params": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-            "errors_and_warnings_validation_operator": {
-                "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-
-@pytest.fixture(scope="module")
-def basic_in_memory_data_context_for_validation_operator(
-    basic_data_context_config_for_validation_operator,
-):
-    return get_context(basic_data_context_config_for_validation_operator)
-
-
-@pytest.fixture(scope="module")
-def checkpoint_ge_cloud_id():
-    return "bfe7dc64-5320-49b0-91c1-2e8029e06c4d"
 
 
 @pytest.fixture(scope="module")
