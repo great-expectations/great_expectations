@@ -33,7 +33,7 @@ class MicrosoftTeamsRenderer(Renderer):
             checkpoint_blocks.append(validation_blocks)
 
         data_docs_block = self._render_data_docs_links(data_docs_pages=data_docs_pages)
-        return self._build_query(
+        return self._build_payload(
             checkpoint_blocks=checkpoint_blocks, data_docs_block=data_docs_block
         )
 
@@ -68,7 +68,7 @@ class MicrosoftTeamsRenderer(Renderer):
     def _render_suite_name(
         self, validation_result: ExpectationSuiteValidationResult
     ) -> dict[str, str]:
-        expectation_suite_name = validation_result.expectation_suite_name
+        expectation_suite_name = validation_result.suite_name
         return self._render_validation_result_element(
             key="Expectation Suite Name", value=expectation_suite_name
         )
@@ -102,12 +102,13 @@ class MicrosoftTeamsRenderer(Renderer):
             return None
 
         elements: list[dict[str, str]] = []
-        for docs_link_key in data_docs_pages.keys():
-            if docs_link_key == "class":
-                continue
-            docs_link = data_docs_pages[docs_link_key]
-            report_element = self._get_report_element(docs_link)
-            elements.append(report_element)
+        for data_docs_page in data_docs_pages:
+            for docs_link_key in data_docs_page:
+                if docs_link_key == "class":
+                    continue
+                docs_link = data_docs_pages[docs_link_key]
+                report_element = self._get_report_element(docs_link)
+                elements.append(report_element)
 
         return elements
 
