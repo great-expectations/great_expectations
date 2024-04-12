@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from great_expectations.compatibility.pydantic import root_validator
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
+from great_expectations.core.suite_parameters import (  # noqa: TCH001
     EvaluationParameterDict,
 )
 from great_expectations.expectations.expectation import (

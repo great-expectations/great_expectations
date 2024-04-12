@@ -10,7 +10,7 @@ import pandas as pd
 from scipy import stats
 
 from great_expectations.compatibility.pydantic import Field
-from great_expectations.core.evaluation_parameters import (
+from great_expectations.core.suite_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.execution_engine.util import (

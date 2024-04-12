@@ -37,10 +37,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (
-    get_evaluation_parameter_key,
-    is_evaluation_parameter,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -49,6 +45,10 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.suite_parameters import (
+    get_evaluation_parameter_key,
+    is_evaluation_parameter,
+)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -120,7 +120,7 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         render_func: The render method of the Expectation class.
 
     Raises:
-        GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
+        GreatExpectationsError: If runtime_configuration with suite_parameters is not provided.
     """
 
     def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:  # noqa: C901 - too complex
@@ -142,7 +142,7 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         ):
             runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")  # type: ignore[assignment] # could be object?
             if runtime_configuration:
-                eval_params = runtime_configuration.get("evaluation_parameters", {})
+                eval_params = runtime_configuration.get("suite_parameters", {})
                 styling = runtime_configuration.get("styling")
                 for key, val in eval_params.items():
                     for param in current_expectation_params:
@@ -1160,7 +1160,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def validate_(  # noqa: PLR0913
         self,
         validator: Validator,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1170,7 +1170,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Args:
             validator: A Validator object that can be used to create Expectations, validate Expectations,
                 and get Metrics for Expectations.
-            evaluation_parameters: Dictionary of dynamic values used during Validation of an Expectation.
+            suite_parameters: Dictionary of dynamic values used during Validation of an Expectation.
             interactive_evaluation: Setting the interactive_evaluation flag on a DataAsset
                 make it possible to declare expectations and store expectations without
                 immediately evaluating them.
@@ -1188,7 +1188,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         self._warn_if_result_format_config_in_expectation_configuration(configuration=configuration)
 
         configuration.process_evaluation_parameters(
-            evaluation_parameters, interactive_evaluation, data_context
+            suite_parameters, interactive_evaluation, data_context
         )
         expectation_validation_result_list: list[ExpectationValidationResult] = (
             validator.graph_validate(

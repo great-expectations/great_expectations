@@ -27,7 +27,7 @@ try:
 except ImportError:
     pass
 
-from great_expectations.core.evaluation_parameters import (
+from great_expectations.core.suite_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation

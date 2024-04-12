@@ -199,7 +199,7 @@ class ValidationDefinition(BaseModel):
         self,
         *,
         batch_parameters: Optional[BatchRequestOptions] = None,
-        evaluation_parameters: Optional[dict[str, Any]] = None,
+        suite_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(
@@ -207,7 +207,7 @@ class ValidationDefinition(BaseModel):
             batch_request_options=batch_parameters,
             result_format=result_format,
         )
-        results = validator.validate_expectation_suite(self.suite, evaluation_parameters)
+        results = validator.validate_expectation_suite(self.suite, suite_parameters)
 
         (
             expectation_suite_identifier,

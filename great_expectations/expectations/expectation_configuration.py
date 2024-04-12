@@ -20,12 +20,12 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load, p
 from typing_extensions import TypedDict
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.suite_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     build_evaluation_parameters,
     find_evaluation_parameter_dependencies,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -161,14 +161,14 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def process_evaluation_parameters(
         self,
-        evaluation_parameters,
+        suite_parameters,
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         if not self._raw_kwargs:
             evaluation_args, _ = build_evaluation_parameters(
                 expectation_args=self._kwargs,
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 interactive_evaluation=interactive_evaluation,
                 data_context=data_context,
             )
@@ -176,7 +176,7 @@ class ExpectationConfiguration(SerializableDictDot):
             self._raw_kwargs = self._kwargs
             self._kwargs = evaluation_args
         else:
-            logger.debug("evaluation_parameters have already been built on this expectation")
+            logger.debug("suite_parameters have already been built on this expectation")
 
     def get_raw_configuration(self) -> ExpectationConfiguration:
         # return configuration without substituted evaluation parameters

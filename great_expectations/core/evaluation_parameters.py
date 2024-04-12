@@ -242,11 +242,11 @@ class EvaluationParameterParser:
 
 def build_evaluation_parameters(
     expectation_args: dict,
-    evaluation_parameters: Optional[dict] = None,
+    suite_parameters: Optional[dict] = None,
     interactive_evaluation: bool = True,
     data_context=None,
 ) -> Tuple[dict, dict]:
-    """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
+    """Build a dictionary of parameters to evaluate, using the provided suite_parameters,
     AND mutate expectation_args by removing any parameter values passed in as temporary values during
     exploratory work.
     """  # noqa: E501
@@ -274,7 +274,7 @@ def build_evaluation_parameters(
                 raw_value = value["$PARAMETER"]
                 parameter_value = parse_evaluation_parameter(
                     raw_value,
-                    evaluation_parameters=evaluation_parameters,
+                    suite_parameters=suite_parameters,
                     data_context=data_context,
                 )
                 evaluation_args[key] = parameter_value
@@ -348,15 +348,15 @@ def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
 
 def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
     parameter_expression: str,
-    evaluation_parameters: Optional[Dict[str, Any]] = None,
+    suite_parameters: Optional[Dict[str, Any]] = None,
     data_context: Optional[AbstractDataContext] = None,
 ) -> Any:
-    """Use the provided evaluation_parameters dict to parse a given parameter expression.
+    """Use the provided suite_parameters dict to parse a given parameter expression.
 
     Args:
         parameter_expression (str): A string, potentially containing basic arithmetic operations and functions,
             and variables to be substituted
-        evaluation_parameters (dict): A dictionary of name-value pairs consisting of values to substitute
+        suite_parameters (dict): A dictionary of name-value pairs consisting of values to substitute
         data_context (DataContext): A data context to use to obtain metrics, if necessary
 
     The parser will allow arithmetic operations +, -, /, *, as well as basic functions, including trunc() and round() to
@@ -364,10 +364,10 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
 
     Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$',
     EXCEPT if they begin with the string "urn:great_expectations" in which case they may also include additional
-    characters to support inclusion of GX URLs (see :ref:`evaluation_parameters` for more information).
+    characters to support inclusion of GX URLs (see :ref:`suite_parameters` for more information).
     """  # noqa: E501
-    if evaluation_parameters is None:
-        evaluation_parameters = {}
+    if suite_parameters is None:
+        suite_parameters = {}
 
     parse_results: Union[ParseResults, list] = _get_parse_results(parameter_expression)
 
@@ -376,7 +376,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
         # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior  # noqa: E501
         pass
 
-    elif len(parse_results) == 1 and parse_results[0] not in evaluation_parameters:
+    elif len(parse_results) == 1 and parse_results[0] not in suite_parameters:
         # In this special case there were no operations to find, so only one value, but we don't have something to  # noqa: E501
         # substitute for that value
         try:
@@ -409,15 +409,15 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
         # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)  # noqa: E501
         # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that  # noqa: E501
         # case here; is the evaluation parameter provided here in fact a metric definition?
-        return evaluation_parameters[parse_results[0]]
+        return suite_parameters[parse_results[0]]
 
     elif len(parse_results) == 0 or parse_results[0] != "Parse Failure":
         # we have a stack to evaluate and there was no parse failure.
         # iterate through values and look for URNs pointing to a store:
         for i, ob in enumerate(EXPR.exprStack):
-            if isinstance(ob, str) and ob in evaluation_parameters:
-                EXPR.exprStack[i] = str(evaluation_parameters[ob])
-            elif isinstance(ob, str) and ob not in evaluation_parameters:
+            if isinstance(ob, str) and ob in suite_parameters:
+                EXPR.exprStack[i] = str(suite_parameters[ob])
+            elif isinstance(ob, str) and ob not in suite_parameters:
                 # try to retrieve this value from a store
                 try:
                     res = ge_urn.parseString(ob)

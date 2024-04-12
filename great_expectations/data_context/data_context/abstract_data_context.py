@@ -1304,7 +1304,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[CheckpointValidationDefinition] | list[dict] | None = ...,
         id: str | None = ...,
@@ -1327,7 +1327,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
-        evaluation_parameters: None = ...,
+        suite_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
         id: None = ...,
@@ -1359,7 +1359,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
         id: str | None = None,
@@ -1378,7 +1378,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
-            evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
+            suite_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             id: The ID to use in generating this checkpoint.
@@ -1398,7 +1398,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
             expectation_suite_id=expectation_suite_id,
@@ -1450,7 +1450,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         expectation_suite_id: str | None = ...,
@@ -1472,7 +1472,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
-        evaluation_parameters: None = ...,
+        suite_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
         expectation_suite_id: None = ...,
@@ -1500,7 +1500,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
         expectation_suite_id: str | None = None,
@@ -1516,7 +1516,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
-            evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
+            suite_parameters: The evaluation parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
@@ -1535,7 +1535,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
             expectation_suite_id=expectation_suite_id,
@@ -1562,7 +1562,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
         expectation_suite_id: str | None = None,
@@ -1593,7 +1593,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
                 action_list=action_list,
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 runtime_configuration=runtime_configuration,
                 validations=validations,
                 id=id,
@@ -2184,7 +2184,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: None = ...,
@@ -2201,7 +2201,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: None = ...,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: ExpectationSuite = ...,
@@ -2219,7 +2219,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         expectation_suite: ExpectationSuite | None = None,
@@ -2252,7 +2252,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The name of the suite to create.
             id: Identifier to associate with this suite.
             expectations: Expectation Configurations to associate with this suite.
-            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+            suite_parameters: Evaluation parameters to be substituted when evaluating Expectations.
             execution_engine_type: Name of the execution engine type.
             meta: Metadata related to the suite.
 
@@ -2267,7 +2267,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name=expectation_suite_name,
             id=id,
             expectations=expectations,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             execution_engine_type=execution_engine_type,
             meta=meta,
             expectation_suite=expectation_suite,
@@ -2279,7 +2279,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: Sequence[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         overwrite_existing: bool = False,
@@ -2303,7 +2303,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 execution_engine_type=execution_engine_type,
                 meta=meta,
             )
@@ -2371,7 +2371,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: None = ...,
@@ -2389,7 +2389,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: None = ...,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: ExpectationSuite = ...,
@@ -2408,7 +2408,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         expectation_suite: ExpectationSuite | None = None,
@@ -2419,7 +2419,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The name of the suite to create or replace.
             id: Identifier to associate with this suite (ignored if updating existing suite).
             expectations: Expectation Configurations to associate with this suite.
-            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+            suite_parameters: Evaluation parameters to be substituted when evaluating Expectations.
             execution_engine_type: Name of the Execution Engine type.
             meta: Metadata related to the suite.
             expectation_suite: The `ExpectationSuite` object you wish to persist.
@@ -2441,7 +2441,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 execution_engine_type=execution_engine_type,
                 meta=meta,
             )
@@ -2568,7 +2568,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         validation_operator_name: str,
         assets_to_validate: List,
         run_id: Optional[Union[str, RunIdentifier]] = None,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
@@ -2583,7 +2583,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
-            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            suite_parameters: $parameter_name syntax references to be evaluated at runtime
             run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
             run_time: The date/time of the run
@@ -2597,7 +2597,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             validation_operator_name=validation_operator_name,
             assets_to_validate=assets_to_validate,
             run_id=run_id,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
@@ -2609,7 +2609,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         validation_operator_name: str,
         assets_to_validate: List,
         run_id: Optional[Union[str, RunIdentifier]] = None,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
@@ -2637,7 +2637,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if run_id is None and run_name is None:
             run_name = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
             logger.info(f"Setting run_name to: {run_name}")
-        if evaluation_parameters is None:
+        if suite_parameters is None:
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
@@ -2650,7 +2650,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 run_name=run_name,
                 run_time=run_time,
                 result_format=result_format,

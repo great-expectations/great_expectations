@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, List, Optional, Union
 from great_expectations.compatibility.pydantic import (
     root_validator,
 )
-from great_expectations.core.evaluation_parameters import (
+from great_expectations.core.suite_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (

@@ -44,7 +44,7 @@ class Validator:
     def validate_expectation(
         self,
         expectation: Expectation,
-        evaluation_parameters: Optional[dict[str, Any]] = None,
+        suite_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationValidationResult:
         """Run a single expectation against the batch definition"""
         results = self._validate_expectation_configs([expectation.configuration])
@@ -55,12 +55,12 @@ class Validator:
     def validate_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
-        evaluation_parameters: Optional[dict[str, Any]] = None,
+        suite_parameters: Optional[dict[str, Any]] = None,
     ) -> ExpectationSuiteValidationResult:
         """Run an expectation suite against the batch definition"""
         results = self._validate_expectation_configs(
             expectation_suite.expectation_configurations,
-            evaluation_parameters,
+            suite_parameters,
         )
         statistics = calc_validation_statistics(results)
 
@@ -92,11 +92,11 @@ class Validator:
     def _validate_expectation_configs(
         self,
         expectation_configs: list[ExpectationConfiguration],
-        evaluation_parameters: Optional[dict[str, Any]] = None,
+        suite_parameters: Optional[dict[str, Any]] = None,
     ) -> list[ExpectationValidationResult]:
         """Run a list of expectation configurations against the batch definition"""
         processed_expectation_configs = self._wrapped_validator.process_expectations_for_validation(
-            expectation_configs, evaluation_parameters
+            expectation_configs, suite_parameters
         )
 
         results = self._wrapped_validator.graph_validate(

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 import altair as alt
 import pandas as pd
 
-from great_expectations.core.evaluation_parameters import (
+from great_expectations.core.suite_parameters import (
     EvaluationParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (

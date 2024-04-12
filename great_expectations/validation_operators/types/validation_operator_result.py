@@ -47,12 +47,12 @@ class ValidationOperatorResult(DictDot):
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
         validation_operator_config: dict,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         success: Optional[bool] = None,
     ) -> None:
         self._run_id = run_id
         self._run_results = run_results
-        self._evaluation_parameters = evaluation_parameters
+        self._evaluation_parameters = suite_parameters
         self._validation_operator_config = validation_operator_config
         if success is None:
             self._success = all(
@@ -92,7 +92,7 @@ class ValidationOperatorResult(DictDot):
         return self._run_id
 
     @property
-    def evaluation_parameters(self) -> Optional[dict]:
+    def suite_parameters(self) -> Optional[dict]:
         return self._evaluation_parameters
 
     @property
@@ -270,7 +270,7 @@ class ValidationOperatorResult(DictDot):
 class ValidationOperatorResultSchema(Schema):
     run_id = fields.Nested(RunIdentifierSchema)
     run_results = fields.Dict()
-    evaluation_parameters = fields.Dict(allow_none=True)
+    suite_parameters = fields.Dict(allow_none=True)
     validation_operator_config = fields.Dict()
     success = fields.Bool()
 

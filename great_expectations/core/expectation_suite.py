@@ -36,11 +36,11 @@ from great_expectations.analytics.events import (
     ExpectationSuiteExpectationUpdatedEvent,
 )
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (
-    _deduplicate_evaluation_parameter_dependencies,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.serdes import _IdentifierBundle
+from great_expectations.core.suite_parameters import (
+    _deduplicate_evaluation_parameter_dependencies,
+)
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -74,7 +74,7 @@ class ExpectationSuite(SerializableDictDot):
     Args:
         name: Name of the Expectation Suite
         expectations: Expectation Configurations to associate with this Expectation Suite.
-        evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+        suite_parameters: Evaluation parameters to be substituted when evaluating Expectations.
         execution_engine_type: Name of the execution engine type.
         meta: Metadata related to the suite.
         id: Great Expectations Cloud id for this Expectation Suite.
@@ -84,7 +84,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         name: Optional[str] = None,
         expectations: Optional[Sequence[Union[dict, ExpectationConfiguration, Expectation]]] = None,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
         notes: str | list[str] | None = None,
@@ -97,9 +97,9 @@ class ExpectationSuite(SerializableDictDot):
 
         self.expectations = [self._process_expectation(exp) for exp in expectations or []]
 
-        if evaluation_parameters is None:
-            evaluation_parameters = {}
-        self.evaluation_parameters = evaluation_parameters
+        if suite_parameters is None:
+            suite_parameters = {}
+        self.suite_parameters = suite_parameters
         self.execution_engine_type = execution_engine_type
         if meta is None:
             meta = {"great_expectations_version": ge_version}
@@ -365,7 +365,7 @@ class ExpectationSuite(SerializableDictDot):
             (
                 self.name == other.name,
                 self.expectations == other.expectations,
-                self.evaluation_parameters == other.evaluation_parameters,
+                self.suite_parameters == other.suite_parameters,
                 self.meta == other.meta,
             )
         )
@@ -406,9 +406,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configurations = [exp.configuration for exp in self.expectations]
         myself["expectations"] = convert_to_json_serializable(expectation_configurations)
         try:
-            myself["evaluation_parameters"] = convert_to_json_serializable(
-                myself["evaluation_parameters"]
-            )
+            myself["suite_parameters"] = convert_to_json_serializable(myself["suite_parameters"])
         except KeyError:
             pass  # Allow evaluation parameters to be missing if empty
         myself["meta"] = convert_to_json_serializable(myself["meta"])
@@ -1083,7 +1081,7 @@ class ExpectationSuiteSchema(Schema):
     name = fields.Str()
     id = fields.UUID(required=False, allow_none=True)
     expectations = fields.List(fields.Nested("ExpectationConfigurationSchema"))
-    evaluation_parameters = fields.Dict(allow_none=True)
+    suite_parameters = fields.Dict(allow_none=True)
     meta = fields.Dict()
     notes = fields.Raw(required=False, allow_none=True)
 
@@ -1100,10 +1098,10 @@ class ExpectationSuiteSchema(Schema):
 
     @staticmethod
     def _clean_empty_suite(data: ExpectationSuite) -> ExpectationSuite:
-        if not hasattr(data, "evaluation_parameters"):
+        if not hasattr(data, "suite_parameters"):
             pass
-        elif len(data.evaluation_parameters) == 0:
-            del data.evaluation_parameters
+        elif len(data.suite_parameters) == 0:
+            del data.suite_parameters
 
         if not hasattr(data, "meta"):
             pass
@@ -1115,8 +1113,8 @@ class ExpectationSuiteSchema(Schema):
 
     @staticmethod
     def _clean_empty_dict(data: dict) -> dict:
-        if "evaluation_parameters" in data and len(data["evaluation_parameters"]) == 0:
-            data.pop("evaluation_parameters")
+        if "suite_parameters" in data and len(data["suite_parameters"]) == 0:
+            data.pop("suite_parameters")
         if "meta" in data and len(data["meta"]) == 0:
             data.pop("meta")
         if "notes" in data and not data.get("notes"):

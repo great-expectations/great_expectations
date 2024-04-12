@@ -514,7 +514,7 @@ class Validator:
 
                 if self.interactive_evaluation:
                     configuration.process_evaluation_parameters(
-                        self._expectation_suite.evaluation_parameters,
+                        self._expectation_suite.suite_parameters,
                         True,
                         self._data_context,
                     )
@@ -528,7 +528,7 @@ class Validator:
                 else:
                     validation_result = expectation.validate_(
                         validator=self,
-                        evaluation_parameters=self._expectation_suite.evaluation_parameters,
+                        suite_parameters=self._expectation_suite.suite_parameters,
                         data_context=self._data_context,
                         runtime_configuration=basic_runtime_configuration,
                     )
@@ -1284,7 +1284,7 @@ class Validator:
         expectation_suite: str | ExpectationSuite | None = None,
         run_id: str | RunIdentifier | Dict[str, str] | None = None,
         data_context: Optional[Any] = None,  # Cannot type DataContext due to circular import
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         catch_exceptions: bool = True,
         result_format: Optional[str] = None,
         only_return_failures: bool = False,
@@ -1301,7 +1301,7 @@ class Validator:
             run_name: Used to identify this validation result as part of a collection of validations. Only used if a `run_id` is not passed. See DataContext for more information.
             run_time: Used to identify this validation result as part of a collection of validations. Only used if a `run_id` is not passed. See DataContext for more information.
             data_context: A datacontext object to use as part of validation for binding evaluation parameters and registering validation results. Overrides the Data Context configured when the Validator is instantiated.
-            evaluation_parameters: If None, uses the evaluation_paramters from the Expectation Suite provided or as part of the Data Asset. If a dict, uses the evaluation parameters in the dictionary.
+            suite_parameters: If None, uses the evaluation_paramters from the Expectation Suite provided or as part of the Data Asset. If a dict, uses the evaluation parameters in the dictionary.
             catch_exceptions: If True, exceptions raised by tests will not end validation and will be described in the returned report.
             result_format: If None, uses the default value ('BASIC' or as specified). If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
             only_return_failures: If True, expectation results are only returned when `success = False`.
@@ -1377,11 +1377,11 @@ class Validator:
             else:
                 runtime_evaluation_parameters = {}
 
-            if expectation_suite.evaluation_parameters:
-                runtime_evaluation_parameters.update(expectation_suite.evaluation_parameters)
+            if expectation_suite.suite_parameters:
+                runtime_evaluation_parameters.update(expectation_suite.suite_parameters)
 
-            if evaluation_parameters is not None:
-                runtime_evaluation_parameters.update(evaluation_parameters)
+            if suite_parameters is not None:
+                runtime_evaluation_parameters.update(suite_parameters)
 
             # Convert evaluation parameters to be json-serializable
             runtime_evaluation_parameters = recursively_convert_to_json_serializable(
@@ -1429,7 +1429,7 @@ class Validator:
                     "unsuccessful_expectations": statistics.unsuccessful_expectations,
                     "success_percent": statistics.success_percent,
                 },
-                evaluation_parameters=runtime_evaluation_parameters,
+                suite_parameters=runtime_evaluation_parameters,
                 meta={
                     "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
@@ -1454,7 +1454,7 @@ class Validator:
     def process_expectations_for_validation(
         self,
         expectation_configurations: list[ExpectationConfiguration],
-        evaluation_parameters: Optional[dict[str, Any]] = None,
+        suite_parameters: Optional[dict[str, Any]] = None,
     ) -> list[ExpectationConfiguration]:
         """Substitute evaluation parameters into the provided expectations and sort by column."""
         NO_COLUMN = "_nocolumn"  # just used to group expectations that don't specify a column
@@ -1462,7 +1462,7 @@ class Validator:
 
         for expectation in expectation_configurations:
             expectation.process_evaluation_parameters(
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 interactive_evaluation=self.interactive_evaluation,
                 data_context=self._data_context,
             )
@@ -1491,21 +1491,21 @@ class Validator:
         Returns:
             The current value of the evaluation parameter.
         """
-        if parameter_name in self._expectation_suite.evaluation_parameters:
-            return self._expectation_suite.evaluation_parameters[parameter_name]
+        if parameter_name in self._expectation_suite.suite_parameters:
+            return self._expectation_suite.suite_parameters[parameter_name]
         else:
             return default_value
 
     def set_evaluation_parameter(self, parameter_name, parameter_value) -> None:
         """
-        Provide a value to be stored in the data_asset evaluation_parameters object and used to evaluate
+        Provide a value to be stored in the data_asset suite_parameters object and used to evaluate
         parameterized expectations.
 
         Args:
             parameter_name (string): The name of the kwarg to be replaced at evaluation time
             parameter_value (any): The value to be used
-        """  # noqa: E501
-        self._expectation_suite.evaluation_parameters.update(
+        """
+        self._expectation_suite.suite_parameters.update(
             {parameter_name: convert_to_json_serializable(parameter_value)}
         )
 

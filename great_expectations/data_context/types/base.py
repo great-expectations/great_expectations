@@ -1570,7 +1570,7 @@ class DataContextConfigDefaults(enum.Enum):
     )
 
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
-    DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = "evaluation_parameters/"
+    DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = "suite_parameters/"
     DATA_DOCS_BASE_DIRECTORY = "data_docs"
     DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
 
@@ -2471,7 +2471,7 @@ class CheckpointConfigSchema(Schema):
             "expectation_suite_name",
             "batch_request",
             "action_list",
-            "evaluation_parameters",
+            "suite_parameters",
             "runtime_configuration",
             "validations",
             "default_validation_id",
@@ -2494,7 +2494,7 @@ class CheckpointConfigSchema(Schema):
     expectation_suite_id = fields.UUID(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
     action_list = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
-    evaluation_parameters = fields.Dict(required=False, allow_none=True)
+    suite_parameters = fields.Dict(required=False, allow_none=True)
     runtime_configuration = fields.Dict(required=False, allow_none=True)
     validations = fields.List(
         cls_or_instance=fields.Nested(CheckpointValidationDefinitionSchema),
@@ -2554,7 +2554,7 @@ class CheckpointConfig(BaseYamlConfig):
         expectation_suite_name: The expectation suite name of your checkpoint
         batch_request: The batch request
         action_list: The action list
-        evaluation_parameters: The evaluation parameters
+        suite_parameters: The evaluation parameters
         runtime_configuration: The runtime configuration for your checkpoint
         validations: An optional list of validations in your checkpoint
         default_validation_id: The default validation id of your checkpoint
@@ -2571,7 +2571,7 @@ class CheckpointConfig(BaseYamlConfig):
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
         action_list: Optional[Sequence[ActionDict]] = None,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[CheckpointValidationDefinition]] = None,
         default_validation_id: Optional[str] = None,
@@ -2584,7 +2584,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_id = expectation_suite_id
         self._batch_request = batch_request or {}
         self._action_list = action_list or []
-        self._evaluation_parameters = evaluation_parameters or {}
+        self._evaluation_parameters = suite_parameters or {}
         self._runtime_configuration = runtime_configuration or {}
         self._validations = validations or []
         self._default_validation_id = default_validation_id
@@ -2666,11 +2666,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._action_list = value
 
     @property
-    def evaluation_parameters(self) -> dict:
+    def suite_parameters(self) -> dict:
         return self._evaluation_parameters
 
-    @evaluation_parameters.setter
-    def evaluation_parameters(self, value: dict) -> None:
+    @suite_parameters.setter
+    def suite_parameters(self, value: dict) -> None:
         self._evaluation_parameters = value
 
     @property
