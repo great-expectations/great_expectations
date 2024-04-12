@@ -105,7 +105,7 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_request_options_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
+    def get_batch_parameters_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
         self._raise_type_error()
 
 

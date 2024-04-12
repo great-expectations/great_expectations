@@ -80,8 +80,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import (
+        BatchParameters,
         BatchRequest,
-        BatchRequestOptions,
     )
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
@@ -207,16 +207,16 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
-    def get_batch_request_options_keys(
+    def get_batch_parameters_keys(
         self, partitioner: Optional[Partitioner] = None
     ) -> tuple[str, ...]:
         raise NotImplementedError(
-            """One needs to implement "get_batch_request_options_keys" on a DataAsset subclass."""
+            """One needs to implement "get_batch_parameters_keys" on a DataAsset subclass."""
         )
 
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
         batching_regex: Optional[re.Pattern] = None,
@@ -226,7 +226,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling get_batch_request_options_keys(...).
+                calling get_batch_parameters_keys(...).
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
@@ -347,14 +347,14 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             raise KeyError(f"Multiple keys for {batch_definition_name} found")  # noqa: TRY003
         return batch_definitions[0]
 
-    def _batch_request_options_are_valid(
-        self, options: BatchRequestOptions, partitioner: Optional[Partitioner]
+    def _batch_parameters_are_valid(
+        self, options: BatchParameters, partitioner: Optional[Partitioner]
     ) -> bool:
-        valid_options = self.get_batch_request_options_keys(partitioner=partitioner)
+        valid_options = self.get_batch_parameters_keys(partitioner=partitioner)
         return set(options.keys()).issubset(set(valid_options))
 
     def _get_batch_metadata_from_batch_request(self, batch_request: BatchRequest) -> BatchMetadata:
-        """Performs config variable substitution and populates batch request options for
+        """Performs config variable substitution and populates batch parameters for
         Batch.metadata at runtime.
         """
         batch_metadata = copy.deepcopy(self.batch_metadata)
@@ -1049,5 +1049,5 @@ class Batch:
         )
         return V1Validator(
             batch_definition=batch_definition,
-            batch_request_options=self.batch_request.options,
+            batch_parameters=self.batch_request.options,
         )

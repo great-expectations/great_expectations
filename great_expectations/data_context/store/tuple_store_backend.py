@@ -83,24 +83,15 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         for key_element in key:
             for substring in self.forbidden_substrings:
                 if substring in key_element:
-                    raise ValueError(
-                        "Keys in {} must not contain substrings in {} : {}".format(
-                            self.__class__.__name__,
-                            self.forbidden_substrings,
-                            key,
-                        )
+                    raise ValueError(  # noqa: TRY003
+                        f"Keys in {self.__class__.__name__} must not contain substrings in {self.forbidden_substrings} : {key}"  # noqa: E501
                     )
 
     @override
     def _validate_value(self, value) -> None:
         if not isinstance(value, str) and not isinstance(value, bytes):
-            raise TypeError(
-                "Values in {} must be instances of {} or {}, not {}".format(
-                    self.__class__.__name__,
-                    str,
-                    bytes,
-                    type(value),
-                )
+            raise TypeError(  # noqa: TRY003
+                f"Values in {self.__class__.__name__} must be instances of {str} or {bytes}, not {type(value)}"  # noqa: E501
             )
 
     def _convert_key_to_filepath(self, key):
@@ -206,13 +197,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         filepath = self._convert_key_to_filepath(key)
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:
-            raise ValueError(
-                "filepath template {} for class {} is not reversible for a tuple of length {}. "
-                "Have you included all elements in the key tuple?".format(
-                    self.filepath_template,
-                    self.__class__.__name__,
-                    self.key_length,
-                )
+            raise ValueError(  # noqa: TRY003
+                f"filepath template {self.filepath_template} for class {self.__class__.__name__} is not reversible for a tuple of length {self.key_length}. "  # noqa: E501
+                "Have you included all elements in the key tuple?"
             )
 
     @property
