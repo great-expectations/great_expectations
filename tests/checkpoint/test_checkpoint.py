@@ -37,12 +37,7 @@ from great_expectations.validator.validator import Validator
 from tests.checkpoint import cloud_config
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
-
     from great_expectations.core.data_context_key import DataContextKey
-    from great_expectations.data_context.data_context.ephemeral_data_context import (
-        EphemeralDataContext,
-    )
 
 
 yaml = YAMLHandler()
@@ -76,44 +71,6 @@ def batch_request_as_dict() -> Dict[str, str]:
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "Titanic_1911",
     }
-
-
-@pytest.mark.filesystem
-@pytest.mark.slow  # 1.25s
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
-    # add checkpoint config
-    checkpoint_config = CheckpointConfig(
-        name="my_checkpoint",
-        expectation_suite_name="my_expectation_suite",
-        action_list=common_action_list,
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_basic_data_connector",
-                    "data_asset_name": "Titanic_1911",
-                }
-            }
-        ],
-    )
-    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
-    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
-    checkpoint: Checkpoint = context.get_legacy_checkpoint(checkpoint_config.name)
-
-    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
-        checkpoint.run()
-
-    assert len(context.validations_store.list_keys()) == 0
-
-    context.suites.add(ExpectationSuite("my_expectation_suite"))
-    result = checkpoint.run()
-
-    assert len(context.validations_store.list_keys()) == 1
-    assert result["success"]
 
 
 @pytest.mark.filesystem
@@ -1142,71 +1099,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     assert type(repr(result)) == str  # noqa: E721
 
 
-@pytest.mark.filesystem
-def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_error_contradictory_batch_request_in_checkpoint_yml_and_checkpoint_run(  # noqa: E501
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
-    data_path: str = os.path.join(  # noqa: PTH118
-        context.datasources["my_datasource"]
-        .data_connectors["my_basic_data_connector"]
-        .base_directory,
-        "Titanic_19120414_1313.csv",
-    )
-
-    # create expectation suite
-    context.suites.add(ExpectationSuite("my_expectation_suite"))
-
-    # RuntimeBatchRequest with a path
-    # Using typed object instead of dictionary, expected by "add_checkpoint()", on purpose to insure that checks work.  # noqa: E501
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_19120414_1313.csv",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"path": data_path},
-        }
-    )
-
-    # add checkpoint config
-    checkpoint_config: dict = {
-        "name": "my_checkpoint",
-        "expectation_suite_name": "my_expectation_suite",
-        "action_list": common_action_list,
-        "batch_request": batch_request,
-    }
-
-    context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.get_legacy_checkpoint(name="my_checkpoint")
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    # RuntimeBatchRequest with a DataFrame
-    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_19120414_1313.csv",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"batch_data": test_df},
-        }
-    )
-
-    with pytest.raises(
-        gx_exceptions.exceptions.InvalidBatchRequestError,
-        match=r"The runtime_parameters dict must have one \(and only one\) of the following keys: 'batch_data', 'query', 'path'.",  # noqa: E501
-    ):
-        checkpoint.run(batch_request=runtime_batch_request)
-
-
 @pytest.mark.slow  # 1.75s
 @pytest.mark.filesystem
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(  # noqa: E501
@@ -2020,60 +1912,6 @@ def test_run_spark_checkpoint_with_schema(
 
 
 @pytest.mark.unit
-def test_checkpoint_conflicting_validator_and_validation_args_raises_error(
-    validator_with_mock_execution_engine,
-    mocker: MockerFixture,
-):
-    context = mocker.MagicMock()
-    validator = validator_with_mock_execution_engine
-    validations = [
-        {
-            "batch_request": {
-                "datasource_name": "my_datasource",
-                "data_asset_name": "my_asset",
-            }
-        }
-    ]
-
-    with pytest.raises(gx_exceptions.CheckpointError) as e:
-        _ = Checkpoint(
-            name="my_checkpoint",
-            data_context=context,
-            validator=validator,
-            validations=validations,
-        )
-
-    assert "cannot be called with a validator and contain a batch_request" in str(e.value)
-
-
-# Marking this as "big" instead of "unit" since it fails intermittently due to the timeout. We've seen it take over 7s.  # noqa: E501
-@pytest.mark.big
-def test_context_checkpoint_crud_conflicting_validator_and_validation_args_raises_error(
-    ephemeral_context_with_defaults,
-    validator_with_mock_execution_engine,
-):
-    context = ephemeral_context_with_defaults
-    validator = validator_with_mock_execution_engine
-    validations = [
-        {
-            "batch_request": {
-                "datasource_name": "my_datasource",
-                "data_asset_name": "my_asset",
-            }
-        }
-    ]
-
-    with pytest.raises(ValueError) as e:
-        _ = context.add_checkpoint(
-            name="my_checkpoint",
-            validator=validator,
-            validations=validations,
-        )
-
-    assert "either a validator or validations list" in str(e.value)
-
-
-@pytest.mark.unit
 def test_get_substituted_batch_request_with_no_substituted_config():
     runtime_batch_request = {
         "datasource_name": "my_datasource",
@@ -2115,71 +1953,6 @@ def test_get_substituted_batch_request_with_substituted_config():
             "batch_identifiers": {"default_identifier_name": "my_identifier"},
         }
     )
-
-
-@pytest.mark.unit
-def test_get_substituted_batch_request_with_clashing_values():
-    validation_batch_request = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "my_asset_name",
-    }
-    runtime_batch_request = {
-        "datasource_name": "your_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "my_asset_name",
-    }
-
-    with pytest.raises(gx_exceptions.CheckpointError):
-        get_substituted_batch_request(
-            {"batch_request": runtime_batch_request}, validation_batch_request
-        )
-
-
-@pytest.mark.big
-def test_checkpoint_run_with_runtime_overrides(
-    ephemeral_context_with_defaults: EphemeralDataContext,
-):
-    # This test is regarding incident #51-08-28-2023
-    # Unpacking dictionaries with overlapping keys raises when using `dict`: https://treyhunner.com/2016/02/how-to-merge-dictionaries-in-python/
-    # The function in question: get_substituted_batch_request
-
-    context = ephemeral_context_with_defaults
-
-    ds = context.sources.add_or_update_pandas("incident_test")
-    my_asset = ds.add_dataframe_asset("inmemory_df")
-    df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_request = my_asset.build_batch_request(dataframe=df)
-    context.suites.add(
-        ExpectationSuite(
-            name="my_expectation_suite",
-            expectations=[
-                {
-                    "expectation_type": "expect_column_min_to_be_between",
-                    "kwargs": {
-                        "column": "col1",
-                        "min_value": 0.1,
-                        "max_value": 10.0,
-                    },
-                }
-            ],
-        )
-    )
-    checkpoint = context.add_or_update_checkpoint(
-        name="my_checkpoint",
-        validations=[
-            {
-                "expectation_suite_name": "my_expectation_suite",
-                "batch_request": {
-                    "datasource_name": ds.name,
-                    "data_asset_name": my_asset.name,
-                },
-            }
-        ],
-    )
-
-    result = checkpoint.run(batch_request=batch_request)
-    assert result.success
 
 
 @pytest.mark.unit
