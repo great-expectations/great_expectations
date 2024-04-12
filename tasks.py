@@ -162,7 +162,7 @@ def fix(ctx: Context, path: str = ".", safe_only: bool = False):
     """
     unsafe_fixes = not safe_only
     lint(ctx, path=path, fmt_=False, fix=True, unsafe_fixes=unsafe_fixes)
-    format(ctx, path=path, check=False, sort_=True)
+    format(ctx, path=path, check=False, sort_=False)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
