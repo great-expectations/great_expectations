@@ -397,7 +397,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
+                "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {

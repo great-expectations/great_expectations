@@ -169,7 +169,7 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
+            "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "default_expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
