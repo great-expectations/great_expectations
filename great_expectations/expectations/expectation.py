@@ -37,10 +37,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (
-    get_evaluation_parameter_key,
-    is_evaluation_parameter,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -49,6 +45,10 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.suite_parameters import (
+    get_suite_parameter_key,
+    is_suite_parameter,
+)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -110,17 +110,17 @@ P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
 
 
-def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
-    """Decorator for Expectation classes that renders evaluation parameters as strings.
+def render_suite_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
+    """Decorator for Expectation classes that renders suite parameters as strings.
 
-    allows Expectations that use Evaluation Parameters to render the values
-    of the Evaluation Parameters along with the rest of the output.
+    allows Expectations that use Suite Parameters to render the values
+    of the Suite Parameters along with the rest of the output.
 
     Args:
         render_func: The render method of the Expectation class.
 
     Raises:
-        GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
+        GreatExpectationsError: If runtime_configuration with suite_parameters is not provided.
     """
 
     def inner_func(*args: P.args, **kwargs: P.kwargs) -> T:  # noqa: C901 - too complex
@@ -131,18 +131,18 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for value in kwargs_dict.values():
-                if is_evaluation_parameter(value):
-                    key = get_evaluation_parameter_key(value)
+                if is_suite_parameter(value):
+                    key = get_suite_parameter_key(value)
                     current_expectation_params.append(key)
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration  # noqa: E501
-        # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support  # noqa: E501
+        # isinstance check should be removed upon implementation of RenderedAtomicContent suite parameter support  # noqa: E501
         if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
             runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")  # type: ignore[assignment] # could be object?
             if runtime_configuration:
-                eval_params = runtime_configuration.get("evaluation_parameters", {})
+                eval_params = runtime_configuration.get("suite_parameters", {})
                 styling = runtime_configuration.get("styling")
                 for key, val in eval_params.items():
                     for param in current_expectation_params:
@@ -164,8 +164,8 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
                             rendered_string_template.append(rendered_content)
             else:
                 raise GreatExpectationsError(  # noqa: TRY003
-                    f"""GX was not able to render the value of evaluation parameters.
-                        Expectation {render_func} had evaluation parameters set, but they were not passed in."""  # noqa: E501
+                    f"""GX was not able to render the value of suite parameters.
+                        Expectation {render_func} had suite parameters set, but they were not passed in."""  # noqa: E501
                 )
         return rendered_string_template
 
@@ -465,7 +465,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_summary(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -1160,7 +1160,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def validate_(  # noqa: PLR0913
         self,
         validator: Validator,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1170,7 +1170,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         Args:
             validator: A Validator object that can be used to create Expectations, validate Expectations,
                 and get Metrics for Expectations.
-            evaluation_parameters: Dictionary of dynamic values used during Validation of an Expectation.
+            suite_parameters: Dictionary of dynamic values used during Validation of an Expectation.
             interactive_evaluation: Setting the interactive_evaluation flag on a DataAsset
                 make it possible to declare expectations and store expectations without
                 immediately evaluating them.
@@ -1187,8 +1187,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
         self._warn_if_result_format_config_in_expectation_configuration(configuration=configuration)
 
-        configuration.process_evaluation_parameters(
-            evaluation_parameters, interactive_evaluation, data_context
+        configuration.process_suite_parameters(
+            suite_parameters, interactive_evaluation, data_context
         )
         expectation_validation_result_list: list[ExpectationValidationResult] = (
             validator.graph_validate(
@@ -1199,17 +1199,17 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return expectation_validation_result_list[0]
 
     @property
-    def evaluation_parameter_options(self) -> tuple[str, ...]:
-        """EvaluationParameter options for this Expectation.
+    def suite_parameter_options(self) -> tuple[str, ...]:
+        """SuiteParameter options for this Expectation.
 
         Returns:
-            tuple[str, ...]: The keys of the evaluation parameters used in this Expectation at runtime.
-        """  # noqa: E501
+            tuple[str, ...]: The keys of the suite parameters used in this Expectation at runtime.
+        """
         output: set[str] = set()
         as_dict = self.dict(exclude_defaults=True)
         for value in as_dict.values():
-            if is_evaluation_parameter(value):
-                output.add(get_evaluation_parameter_key(value))
+            if is_suite_parameter(value):
+                output.add(get_suite_parameter_key(value))
         return tuple(sorted(output))
 
     @property

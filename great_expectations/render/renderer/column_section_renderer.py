@@ -426,20 +426,20 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return validation_results, new_block
 
-    def _render_table(self, validation_results, evaluation_parameters=None):
+    def _render_table(self, validation_results, suite_parameters=None):
         new_block = self._table_renderer.render(
             validation_results,
             include_column_name=False,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
         )
         return [], new_block
 
-    def render(self, validation_results, evaluation_parameters=None):
+    def render(self, validation_results, suite_parameters=None):
         column = self._get_column_name(validation_results)
         content_blocks = []
         remaining_evrs, content_block = self._render_header(validation_results)
         content_blocks.append(content_block)
-        remaining_evrs, content_block = self._render_table(remaining_evrs, evaluation_parameters)
+        remaining_evrs, content_block = self._render_table(remaining_evrs, suite_parameters)
         content_blocks.append(content_block)
         return RenderedSectionContent(**{"section_name": column, "content_blocks": content_blocks})
 

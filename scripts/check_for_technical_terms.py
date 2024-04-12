@@ -38,9 +38,9 @@ PHRASES = [
     Phrase(("datasource",), ()),
     Phrase(
         ("evaluation parameter",),
-        ("evaluation parameter store", "evaluation parameters store"),
+        ("evaluation parameter store", "suite parameters store"),
     ),
-    Phrase(("evaluation parameter store", "evaluation parameters store"), ()),
+    Phrase(("evaluation parameter store", "suite parameters store"), ()),
     Phrase(("execution engine",), ()),
     Phrase(
         ("expectation",),

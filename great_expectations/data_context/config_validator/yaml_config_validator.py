@@ -54,7 +54,7 @@ class _YamlConfigValidator:
         "ExpectationsStore",
         "ValidationsStore",
         "HtmlSiteStore",
-        "EvaluationParameterStore",
+        "SuiteParameterStore",
         "MetricStore",
         "SqlAlchemyQueryStore",
         "CheckpointStore",

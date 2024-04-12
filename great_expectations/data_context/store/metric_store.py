@@ -64,7 +64,7 @@ class MetricStore(Store):
             return json.loads(value)["value"]
 
 
-class EvaluationParameterStore(MetricStore):
+class SuiteParameterStore(MetricStore):
     def __init__(self, store_backend=None, store_name=None) -> None:
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
@@ -77,9 +77,7 @@ class EvaluationParameterStore(MetricStore):
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
-                store_backend["table_name"] = store_backend.get(
-                    "table_name", "ge_evaluation_parameters"
-                )
+                store_backend["table_name"] = store_backend.get("table_name", "ge_suite_parameters")
         super().__init__(store_backend=store_backend, store_name=store_name)
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter  # noqa: E501
@@ -96,7 +94,7 @@ class EvaluationParameterStore(MetricStore):
         params = {}
         for k in self._store_backend.list_keys(run_id.to_tuple()):
             key = self.tuple_to_key(k)
-            params[key.to_evaluation_parameter_urn()] = self.get(key)  # type: ignore[attr-defined]
+            params[key.to_suite_parameter_urn()] = self.get(key)  # type: ignore[attr-defined]
         return params
 
     @property

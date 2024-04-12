@@ -49,11 +49,11 @@ class DummyParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
     ) -> None:
         super().__init__(
             name=name,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=None,
         )
 
@@ -93,7 +93,7 @@ def test_resolve_evaluation_dependencies_no_parameter_builder_dependencies_speci
 
     my_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_parameter_builder",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
 
     my_parameter_builder.resolve_evaluation_dependencies(
@@ -125,14 +125,14 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
 
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_evaluation_dependency_parameter_name_0",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
     my_evaluation_dependency_1_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_evaluation_dependency_parameter_name_1",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
 
-    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+    suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         ParameterBuilderConfig(**my_evaluation_dependency_0_parameter_builder.to_json_dict()),
         ParameterBuilderConfig(
             **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
@@ -140,7 +140,7 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
     ]
     my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_dependent_parameter_builder",
-        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        suite_parameter_builder_configs=suite_parameter_builder_configs,
     )
 
     my_dependent_parameter_builder.resolve_evaluation_dependencies(
@@ -183,16 +183,16 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
 ):
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_evaluation_dependency_parameter_name_0",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
     my_evaluation_dependency_1_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_evaluation_dependency_parameter_name_1",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
 
     my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_dependent_parameter_builder",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
 
     domain = empty_rule_state["domain"]
@@ -255,7 +255,7 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     )
     assert my_dependent_parameter_builder.call_count == 1
 
-    # Assert that precomuted evaluation parameters are not recomputed (call_count for each should remain at 1).  # noqa: E501
+    # Assert that precomuted suite parameters are not recomputed (call_count for each should remain at 1).  # noqa: E501
     assert my_evaluation_dependency_0_parameter_builder.call_count == 1
     assert my_evaluation_dependency_1_parameter_builder.call_count == 1
 
@@ -291,14 +291,14 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
 
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_evaluation_dependency_parameter_name_0",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
     my_evaluation_dependency_1_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_evaluation_dependency_parameter_name_1",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
 
-    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+    suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         ParameterBuilderConfig(**my_evaluation_dependency_0_parameter_builder.to_json_dict()),
         ParameterBuilderConfig(
             **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
@@ -306,7 +306,7 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     ]
     my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_dependent_parameter_builder",
-        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        suite_parameter_builder_configs=suite_parameter_builder_configs,
     )
 
     # Now execute dependent "ParameterBuilder".
@@ -356,21 +356,21 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
 
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_evaluation_dependency_parameter_name_0",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
     my_evaluation_dependency_1_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_evaluation_dependency_parameter_name_1",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
 
-    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+    suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         ParameterBuilderConfig(
             **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
         ),
     ]
     my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
         name="my_dependent_parameter_builder",
-        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        suite_parameter_builder_configs=suite_parameter_builder_configs,
     )
 
     my_evaluation_dependency_0_parameter_builder.build_parameters(
