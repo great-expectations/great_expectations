@@ -956,8 +956,8 @@ def test_validator_include_rendered_content_diagnostic(
     assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
 
     # test suite parameters render
-    validator_include_rendered_content.set_evaluation_parameter("upstream_column_min", 1)
-    validator_include_rendered_content.set_evaluation_parameter("upstream_column_max", 8)
+    validator_include_rendered_content.set_suite_parameter("upstream_column_min", 1)
+    validator_include_rendered_content.set_suite_parameter("upstream_column_max", 8)
 
     validation_result: ExpectationValidationResult = (
         validator_include_rendered_content.expect_column_max_to_be_between(
