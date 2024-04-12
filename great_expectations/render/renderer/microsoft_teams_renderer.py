@@ -116,60 +116,12 @@ class MicrosoftTeamsRenderer(Renderer):
 
         return elements
 
-    def _build_payload(
-        self,
-        checkpoint_result: CheckpointResult,
-        checkpoint_blocks: list[list[dict[str, str]]],
-        data_docs_block: list[dict[str, str]] | None,
-    ) -> dict:
-        checkpoint_name = checkpoint_result.checkpoint_config.name
-        status = "Success !!!" if checkpoint_result.success else "Failure :("
-        data_docs_block = data_docs_block or []
-
-        payload = {
-            "type": "message",
-            "attachments": [
-                {
-                    "contentType": "application/vnd.microsoft.card.adaptive",
-                    "content": {
-                        "$schema": self.MICROSOFT_TEAMS_SCHEMA_URL,
-                        "type": "AdaptiveCard",
-                        "version": "1.0",
-                        "body": [
-                            {
-                                "type": "Container",
-                                "height": "auto",
-                                "separator": "true",
-                                "items": [
-                                    {
-                                        "type": "ColumnSet",
-                                        "columns": [
-                                            {
-                                                "type": "Column",
-                                                "width": "stretch",
-                                                "items": [
-                                                    {
-                                                        "type": "TextBlock",
-                                                        "text": f"Checkpoint Result: {checkpoint_name} ({status})",  # noqa: E501
-                                                        "weight": "bolder",
-                                                        "size": "large",
-                                                        "wrap": "true",
-                                                    },
-                                                ],
-                                            }
-                                        ],
-                                    },
-                                ],
-                            },
-                        ],
-                        "actions": data_docs_block,
-                    },
-                }
-            ],
-        }
-
+    def _concatenate_blocks(
+        self, title_block: dict, checkpoint_blocks: list[list[dict]]
+    ) -> list[dict]:
+        containers: list[dict] = [title_block]
         for block in checkpoint_blocks:
-            container = {
+            validation_container = {
                 "type": "Container",
                 "height": "auto",
                 "separator": "true",
@@ -181,9 +133,62 @@ class MicrosoftTeamsRenderer(Renderer):
                     }
                 ],
             }
-            payload["attachments"][0]["content"]["body"].append(container)
+            containers.append(validation_container)
 
-        return payload
+        return containers
+
+    def _build_payload(
+        self,
+        checkpoint_result: CheckpointResult,
+        checkpoint_blocks: list[list[dict[str, str]]],
+        data_docs_block: list[dict[str, str]] | None,
+    ) -> dict:
+        checkpoint_name = checkpoint_result.checkpoint_config.name
+        status = "Success !!!" if checkpoint_result.success else "Failure :("
+
+        title_block = {
+            "type": "Container",
+            "height": "auto",
+            "separator": "true",
+            "items": [
+                {
+                    "type": "ColumnSet",
+                    "columns": [
+                        {
+                            "type": "Column",
+                            "width": "stretch",
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "text": f"Checkpoint Result: {checkpoint_name} ({status})",
+                                    "weight": "bolder",
+                                    "size": "large",
+                                    "wrap": "true",
+                                },
+                            ],
+                        }
+                    ],
+                },
+            ],
+        }
+
+        return {
+            "type": "message",
+            "attachments": [
+                {
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "content": {
+                        "$schema": self.MICROSOFT_TEAMS_SCHEMA_URL,
+                        "type": "AdaptiveCard",
+                        "version": "1.0",
+                        "body": self._concatenate_blocks(
+                            title_block=title_block, checkpoint_blocks=checkpoint_blocks
+                        ),
+                        "actions": data_docs_block or [],
+                    },
+                }
+            ],
+        }
 
     def render(  # noqa: C901
         self,
