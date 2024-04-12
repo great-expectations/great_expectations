@@ -32,7 +32,7 @@ try:
 except ImportError:
     pass
 from great_expectations.expectations.expectation import (
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 
 if TYPE_CHECKING:
@@ -238,7 +238,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

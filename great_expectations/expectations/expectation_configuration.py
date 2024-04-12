@@ -22,9 +22,9 @@ from typing_extensions import TypedDict
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.suite_parameters import (
-    _deduplicate_evaluation_parameter_dependencies,
+    _deduplicate_suite_parameter_dependencies,
     build_suite_parameters,
-    find_evaluation_parameter_dependencies,
+    find_suite_parameter_dependencies,
 )
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
@@ -444,13 +444,11 @@ class ExpectationConfiguration(SerializableDictDot):
             myself["rendered_content"] = convert_to_json_serializable(myself["rendered_content"])
         return myself
 
-    def get_evaluation_parameter_dependencies(self) -> dict:
+    def get_suite_parameter_dependencies(self) -> dict:
         parsed_dependencies: dict = {}
         for value in self.kwargs.values():
             if isinstance(value, dict) and "$PARAMETER" in value:
-                param_string_dependencies = find_evaluation_parameter_dependencies(
-                    value["$PARAMETER"]
-                )
+                param_string_dependencies = find_suite_parameter_dependencies(value["$PARAMETER"])
                 nested_update(parsed_dependencies, param_string_dependencies)
 
         dependencies: dict = {}
@@ -468,7 +466,7 @@ class ExpectationConfiguration(SerializableDictDot):
             else:
                 self._update_dependencies_with_expectation_suite_urn(dependencies, urn)
 
-        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
+        dependencies = _deduplicate_suite_parameter_dependencies(dependencies)
 
         return dependencies
 

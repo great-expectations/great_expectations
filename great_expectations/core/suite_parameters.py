@@ -43,12 +43,12 @@ _epsilon = 1e-12
 SuiteParameterDict: TypeAlias = dict
 
 
-def is_evaluation_parameter(value: Any) -> TypeGuard[SuiteParameterDict]:
+def is_suite_parameter(value: Any) -> TypeGuard[SuiteParameterDict]:
     """Typeguard to check if a value is an evaluation parameter."""
     return isinstance(value, dict) and "$PARAMETER" in value.keys()
 
 
-def get_evaluation_parameter_key(evaluation_parameter: SuiteParameterDict) -> str:
+def get_suite_parameter_key(suite_parameter: SuiteParameterDict) -> str:
     """Get the key of an evaluation parameter.
 
     e.g. if the evaluation parameter is {"$PARAMETER": "foo"}, this function will return "foo".
@@ -56,12 +56,12 @@ def get_evaluation_parameter_key(evaluation_parameter: SuiteParameterDict) -> st
     a runtime value for "foo".
 
     Args:
-        evaluation_parameter: The evaluation parameter to get the key of
+        suite_parameter: The evaluation parameter to get the key of
 
     Returns:
         The key of the evaluation parameter
     """
-    return evaluation_parameter["$PARAMETER"]
+    return suite_parameter["$PARAMETER"]
 
 
 class SuiteParameterParser:
@@ -218,7 +218,7 @@ class SuiteParameterParser:
                 return self.fn[op](*args)
         else:
             # Require that the *entire* expression evaluates to number or datetime UNLESS there is *exactly one*  # noqa: E501
-            # expression to substitute (see cases where len(parse_results) == 1 in the parse_evaluation_parameter  # noqa: E501
+            # expression to substitute (see cases where len(parse_results) == 1 in the parse_suite_parameter  # noqa: E501
             # method).
             evaluated: Union[int, float, datetime.datetime]
             try:
@@ -272,7 +272,7 @@ def build_suite_parameters(
             # an exception if we do not have a value
             else:
                 raw_value = value["$PARAMETER"]
-                parameter_value = parse_evaluation_parameter(
+                parameter_value = parse_suite_parameter(
                     raw_value,
                     suite_parameters=suite_parameters,
                     data_context=data_context,
@@ -287,7 +287,7 @@ def build_suite_parameters(
 EXPR = SuiteParameterParser()
 
 
-def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
+def find_suite_parameter_dependencies(parameter_expression):  # noqa: C901
     """Parse a parameter expression to identify dependencies including GX URNs.
 
     Args:
@@ -337,7 +337,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
             dependencies["urns"].add(word)
             continue
         except ParseException:
-            # This particular evaluation_parameter or operator is not a valid URN
+            # This particular suite_parameter or operator is not a valid URN
             pass
 
         # If we got this far, it's a legitimate "other" evaluation parameter
@@ -346,7 +346,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
     return dependencies
 
 
-def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
+def parse_suite_parameter(  # noqa: C901, PLR0912, PLR0915
     parameter_expression: str,
     suite_parameters: Optional[Dict[str, Any]] = None,
     data_context: Optional[AbstractDataContext] = None,
@@ -483,7 +483,7 @@ def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> boo
     )
 
 
-def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:  # noqa: C901 - too complex
+def _deduplicate_suite_parameter_dependencies(dependencies: dict) -> dict:  # noqa: C901 - too complex
     deduplicated: dict = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []

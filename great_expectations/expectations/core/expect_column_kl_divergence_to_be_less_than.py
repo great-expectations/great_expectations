@@ -19,7 +19,7 @@ from great_expectations.execution_engine.util import (
 )
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
@@ -1170,7 +1170,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_summary(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -1232,7 +1232,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

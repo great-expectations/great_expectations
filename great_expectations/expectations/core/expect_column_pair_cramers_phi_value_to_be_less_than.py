@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
@@ -93,7 +93,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

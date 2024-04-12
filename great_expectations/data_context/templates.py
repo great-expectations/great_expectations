@@ -82,7 +82,7 @@ VALIDATIONS_STORE_STRING = yaml.dump(
     {"validations_store": DataContextConfigDefaults.DEFAULT_STORES.value["validations_store"]}
 ).replace("\n", "\n  ")[:-2]
 EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
-    DataContextConfigDefaults.DEFAULT_STORES.value["evaluation_parameter_store"]
+    DataContextConfigDefaults.DEFAULT_STORES.value["suite_parameter_store"]
 )
 CHECKPOINT_STORE_STRING = yaml.dump(
     {"checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]}
@@ -117,7 +117,7 @@ stores:
 # stores can be configured for uses such as data_docs, etc.
   {EXPECTATIONS_STORE_STRING}
   {VALIDATIONS_STORE_STRING}
-  evaluation_parameter_store:
+  suite_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/docs/reference/suite_parameters/
     {EVALUATION_PARAMETER_STORE_STRING}
@@ -126,7 +126,7 @@ stores:
   {VALIDATION_DEFINITION_STORE_STRING}
 expectations_store_name: expectations_store
 validations_store_name: validations_store
-evaluation_parameter_store_name: evaluation_parameter_store
+suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 
 data_docs_sites:

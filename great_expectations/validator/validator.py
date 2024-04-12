@@ -734,14 +734,14 @@ class Validator:
             }
             parameter_builder.metric_value_kwargs = parameter_builder_metric_value_kwargs
 
-        evaluation_parameter_builders: List[ParameterBuilder] = (
-            parameter_builder.evaluation_parameter_builders or []
+        suite_parameter_builders: List[ParameterBuilder] = (
+            parameter_builder.suite_parameter_builders or []
         )
 
-        evaluation_parameter_builder: ParameterBuilder
-        for evaluation_parameter_builder in evaluation_parameter_builders:
+        suite_parameter_builder: ParameterBuilder
+        for suite_parameter_builder in suite_parameter_builders:
             self._update_metric_value_kwargs_for_success_keys(
-                parameter_builder=evaluation_parameter_builder,
+                parameter_builder=suite_parameter_builder,
                 metric_value_kwargs=metric_value_kwargs,
             )
 
@@ -1371,7 +1371,7 @@ class Validator:
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_suite_parameters = data_context.evaluation_parameter_store.get_bind_params(
+                runtime_suite_parameters = data_context.suite_parameter_store.get_bind_params(
                     run_id
                 )
             else:
@@ -1480,7 +1480,7 @@ class Validator:
 
         return expectations_to_evaluate
 
-    def get_evaluation_parameter(self, parameter_name, default_value=None):
+    def get_suite_parameter(self, parameter_name, default_value=None):
         """
         Get an evaluation parameter value that has been stored in meta.
 
@@ -1496,7 +1496,7 @@ class Validator:
         else:
             return default_value
 
-    def set_evaluation_parameter(self, parameter_name, parameter_value) -> None:
+    def set_suite_parameter(self, parameter_name, parameter_value) -> None:
         """
         Provide a value to be stored in the data_asset suite_parameters object and used to evaluate
         parameterized expectations.

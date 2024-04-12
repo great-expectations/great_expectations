@@ -107,7 +107,7 @@ class ProjectManager:
         return self._project.validation_definition_store
 
     def get_suite_parameters_store(self) -> SuiteParameterStore:
-        return self._project.evaluation_parameter_store
+        return self._project.suite_parameter_store
 
     def get_datasources(self) -> DatasourceDict:
         return self._project.datasources

@@ -288,8 +288,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Override the project_config data_context_id if an expectations_store was already set up
         self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
 
-        self._evaluation_parameter_dependencies_compiled = False
-        self._evaluation_parameter_dependencies: dict = {}
+        self._suite_parameter_dependencies_compiled = False
+        self._suite_parameter_dependencies: dict = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
@@ -466,7 +466,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "expectation_suite with name {} already exists. If you would like to overwrite this "  # noqa: E501
                 "expectation_suite, set overwrite_existing=True.".format(expectation_suite_name)
             )
-        self._evaluation_parameter_dependencies_compiled = False
+        self._suite_parameter_dependencies_compiled = False
         include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
             include_rendered_content=include_rendered_content
         )
@@ -585,12 +585,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.expectations_store_name]
 
     @property
-    def evaluation_parameter_store_name(self) -> Optional[str]:
-        return self.variables.evaluation_parameter_store_name
+    def suite_parameter_store_name(self) -> Optional[str]:
+        return self.variables.suite_parameter_store_name
 
     @property
-    def evaluation_parameter_store(self) -> SuiteParameterStore:
-        return self.stores[self.evaluation_parameter_store_name]
+    def suite_parameter_store(self) -> SuiteParameterStore:
+        return self.stores[self.suite_parameter_store_name]
 
     @property
     def validations_store_name(self) -> Optional[str]:
@@ -1039,13 +1039,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
             validations_store_name,
-            evaluation_parameter_store_name,
+            suite_parameter_store_name,
             checkpoint_store_name
         """  # noqa: E501
         active_store_names: List[str] = [
             self.expectations_store_name,  # type: ignore[list-item]
             self.validations_store_name,  # type: ignore[list-item]
-            self.evaluation_parameter_store_name,  # type: ignore[list-item]
+            self.suite_parameter_store_name,  # type: ignore[list-item]
         ]
 
         try:
@@ -1656,14 +1656,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         Stores ValidationResult Suite Parameters to defined store
         """
-        if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
+        if not self._suite_parameter_dependencies_compiled:
+            self._compile_suite_parameter_dependencies()
 
         if target_store_name is None:
-            target_store_name = self.evaluation_parameter_store_name
+            target_store_name = self.suite_parameter_store_name
 
         self._store_metrics(
-            self._evaluation_parameter_dependencies,
+            self._suite_parameter_dependencies,
             validation_results,
             target_store_name,
         )
@@ -3647,8 +3647,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _compile_evaluation_parameter_dependencies(self) -> None:
-        self._evaluation_parameter_dependencies = {}
+    def _compile_suite_parameter_dependencies(self) -> None:
+        self._suite_parameter_dependencies = {}
         # we have to iterate through all expectation suites because evaluation parameters
         # can reference metric values from other suites
         for key in self.expectations_store.list_keys():
@@ -3668,11 +3668,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 continue
             expectation_suite = ExpectationSuite(**expectation_suite_dict)
 
-            dependencies: dict = expectation_suite.get_evaluation_parameter_dependencies()
+            dependencies: dict = expectation_suite.get_suite_parameter_dependencies()
             if len(dependencies) > 0:
-                nested_update(self._evaluation_parameter_dependencies, dependencies)
+                nested_update(self._suite_parameter_dependencies, dependencies)
 
-        self._evaluation_parameter_dependencies_compiled = True
+        self._suite_parameter_dependencies_compiled = True
 
     def get_validation_result(  # noqa: C901, PLR0913
         self,

@@ -39,7 +39,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.suite_parameters import (
-    _deduplicate_evaluation_parameter_dependencies,
+    _deduplicate_suite_parameter_dependencies,
 )
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -118,7 +118,7 @@ class ExpectationSuite(SerializableDictDot):
         self._store = project_manager.get_expectations_store()
 
     @property
-    def evaluation_parameter_options(self) -> tuple[str, ...]:
+    def suite_parameter_options(self) -> tuple[str, ...]:
         """SuiteParameter options for this ExpectationSuite.
 
         Returns:
@@ -126,7 +126,7 @@ class ExpectationSuite(SerializableDictDot):
         """  # noqa: E501
         output: set[str] = set()
         for expectation in self.expectations:
-            output.update(expectation.evaluation_parameter_options)
+            output.update(expectation.suite_parameter_options)
         return tuple(sorted(output))
 
     @public_api
@@ -412,13 +412,13 @@ class ExpectationSuite(SerializableDictDot):
         myself["meta"] = convert_to_json_serializable(myself["meta"])
         return myself
 
-    def get_evaluation_parameter_dependencies(self) -> dict:
+    def get_suite_parameter_dependencies(self) -> dict:
         dependencies: dict = {}
         for expectation in self.expectations:
-            t = expectation.configuration.get_evaluation_parameter_dependencies()
+            t = expectation.configuration.get_suite_parameter_dependencies()
             nested_update(dependencies, t)
 
-        dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
+        dependencies = _deduplicate_suite_parameter_dependencies(dependencies)
         return dependencies
 
     def get_citations(

@@ -94,7 +94,7 @@ class SuiteParameterStore(MetricStore):
         params = {}
         for k in self._store_backend.list_keys(run_id.to_tuple()):
             key = self.tuple_to_key(k)
-            params[key.to_evaluation_parameter_urn()] = self.get(key)  # type: ignore[attr-defined]
+            params[key.to_suite_parameter_urn()] = self.get(key)  # type: ignore[attr-defined]
         return params
 
     @property

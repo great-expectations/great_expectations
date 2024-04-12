@@ -41,7 +41,7 @@ class DataContextVariableSchema(str, enum.Enum):
     DATASOURCES = "datasources"
     EXPECTATIONS_STORE_NAME = "expectations_store_name"
     VALIDATIONS_STORE_NAME = "validations_store_name"
-    EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store_name"
+    EVALUATION_PARAMETER_STORE_NAME = "suite_parameter_store_name"
     CHECKPOINT_STORE_NAME = "checkpoint_store_name"
     PROFILER_STORE_NAME = "profiler_store_name"
     PLUGINS_DIRECTORY = "plugins_directory"
@@ -175,14 +175,14 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.VALIDATIONS_STORE_NAME, validations_store_name)
 
     @property
-    def evaluation_parameter_store_name(self) -> Optional[str]:
+    def suite_parameter_store_name(self) -> Optional[str]:
         return self._get(DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME)
 
-    @evaluation_parameter_store_name.setter
-    def evaluation_parameter_store_name(self, evaluation_parameter_store_name: str) -> None:
+    @suite_parameter_store_name.setter
+    def suite_parameter_store_name(self, suite_parameter_store_name: str) -> None:
         self._set(
             DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
-            evaluation_parameter_store_name,
+            suite_parameter_store_name,
         )
 
     @property

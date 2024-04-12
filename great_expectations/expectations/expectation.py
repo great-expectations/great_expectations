@@ -46,8 +46,8 @@ from great_expectations.core.metric_function_types import (
 )
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.suite_parameters import (
-    get_evaluation_parameter_key,
-    is_evaluation_parameter,
+    get_suite_parameter_key,
+    is_suite_parameter,
 )
 from great_expectations.exceptions import (
     GreatExpectationsError,
@@ -110,7 +110,7 @@ P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
 
 
-def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
+def render_suite_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
     """Decorator for Expectation classes that renders evaluation parameters as strings.
 
     allows Expectations that use Evaluation Parameters to render the values
@@ -131,8 +131,8 @@ def render_evaluation_parameter_string(render_func: Callable[P, T]) -> Callable[
         if configuration:
             kwargs_dict: dict = configuration.get("kwargs", {})
             for value in kwargs_dict.values():
-                if is_evaluation_parameter(value):
-                    key = get_evaluation_parameter_key(value)
+                if is_suite_parameter(value):
+                    key = get_suite_parameter_key(value)
                     current_expectation_params.append(key)
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration  # noqa: E501
@@ -465,7 +465,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_summary(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -1199,7 +1199,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         return expectation_validation_result_list[0]
 
     @property
-    def evaluation_parameter_options(self) -> tuple[str, ...]:
+    def suite_parameter_options(self) -> tuple[str, ...]:
         """SuiteParameter options for this Expectation.
 
         Returns:
@@ -1208,8 +1208,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         output: set[str] = set()
         as_dict = self.dict(exclude_defaults=True)
         for value in as_dict.values():
-            if is_evaluation_parameter(value):
-                output.add(get_evaluation_parameter_key(value))
+            if is_suite_parameter(value):
+                output.add(get_suite_parameter_key(value))
         return tuple(sorted(output))
 
     @property
