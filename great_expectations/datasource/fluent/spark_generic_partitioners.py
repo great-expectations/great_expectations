@@ -6,7 +6,6 @@ from typing import (
     Dict,
     List,
     Literal,
-    Protocol,
     Union,
 )
 
@@ -15,6 +14,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
+from great_expectations.datasource.fluent.interfaces import PartitionerProtocol
 from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
 )
@@ -24,67 +24,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import Batch
 
 
-class _Partitioner(Protocol):  # noqa: PYI046
-    @property
-    def columns(self) -> list[str]:
-        """The names of the column used to partition the data"""
-
-    @property
-    def method_name(self) -> str:
-        """Returns a partitioner method name.
-
-        The possible values of partitioner method names are defined in the enum,
-        great_expectations.execution_engine.partition_and_sample.data_partitioner.PartitionerMethod
-        """
-
-    @property
-    def param_names(self) -> List[str]:
-        """Returns the parameter names that specify a batch derived from this partitioner
-
-        For example, for PartitionerYearMonth this returns ["year", "month"]. For more
-        examples, please see Partitioner* classes below.
-        """
-
-    def partitioner_method_kwargs(self) -> Dict[str, Any]:
-        """A shim to our spark execution engine partitioner methods
-
-        We translate any internal _Partitioner state and what is passed in from
-        a batch_request to the partitioner_kwargs required by our execution engine
-        data partitioners defined in:
-        great_expectations.execution_engine.partition_and_sample.sparkdf_data_partitioner
-
-        Look at Partitioner* classes for concrete examples.
-        """
-
-    def batch_parameters_to_batch_spec_kwarg_identifiers(
-        self, options: BatchParameters
-    ) -> Dict[str, Any]:
-        """Translates `options` to the execution engine batch spec kwarg identifiers
-
-        Arguments:
-            options: A BatchRequest.options dictionary that specifies ALL the fields necessary
-                     to specify a batch with respect to this partitioner.
-
-        Returns:
-            A dictionary that can be added to batch_spec_kwargs["batch_identifiers"].
-            This has one of 2 forms:
-              1. This category has many parameters are derived from 1 column.
-                 These only are datetime partitioners and the batch_spec_kwargs["batch_identifiers"]
-                 look like:
-                   {column_name: {datepart_1: value, datepart_2: value, ...}
-                 where datepart_* are strings like "year", "month", "day". The exact
-                 fields depend on the partitioner.
-
-              2. This category has only 1 parameter for each column.
-                 This is used for all other partitioners and the batch_spec_kwargs["batch_identifiers"]
-                 look like:
-                   {column_name_1: value, column_name_2: value, ...}
-                 where value is the value of the column after being processed by the partitioner.
-                 For example, for the PartitionerModInteger where mod = 3,
-                 {"passenger_count": 2}, means the raw passenger count value is in the set:
-                 {2, 5, 8, ...} = {2*n + 1 | n is a nonnegative integer }
-                 This category was only 1 parameter per column.
-        """  # noqa: E501
+class _Partitioner(PartitionerProtocol): ...
 
 
 class _PartitionerDatetime(FluentBaseModel):
