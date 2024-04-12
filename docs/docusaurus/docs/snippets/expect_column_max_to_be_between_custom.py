@@ -3,7 +3,7 @@ from typing import Dict, Optional, Union
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.evaluation_parameters import (
+from great_expectations.core.suite_parameters import (
     EvaluationParameterDict,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes

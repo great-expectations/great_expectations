@@ -10,7 +10,7 @@ from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
     ExpectationValidationResult,
 )
-from great_expectations.core.evaluation_parameters import (
+from great_expectations.core.suite_parameters import (
     EvaluationParameterDict,
 )
 from great_expectations.core.metric_function_types import (

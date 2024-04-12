@@ -12,7 +12,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.evaluation_parameters import (
+from great_expectations.core.suite_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     find_evaluation_parameter_dependencies,
     get_evaluation_parameter_key,

@@ -5,7 +5,7 @@ from typing import Dict, Union
 
 from scipy import stats
 
-from great_expectations.core.evaluation_parameters import (
+from great_expectations.core.suite_parameters import (
     EvaluationParameterDict,
 )
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
