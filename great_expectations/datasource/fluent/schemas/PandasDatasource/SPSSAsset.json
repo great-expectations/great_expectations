@@ -111,8 +111,8 @@
                     "title": "Column Name",
                     "type": "string"
                 },
-                "sort_batches_ascending": {
-                    "title": "Sort Batches Ascending",
+                "sort_ascending": {
+                    "title": "Sort Ascending",
                     "default": true,
                     "type": "boolean"
                 },
@@ -141,8 +141,8 @@
                         "type": "string"
                     }
                 },
-                "sort_batches_ascending": {
-                    "title": "Sort Batches Ascending",
+                "sort_ascending": {
+                    "title": "Sort Ascending",
                     "default": true,
                     "type": "boolean"
                 },
@@ -172,8 +172,8 @@
                     "title": "Column Name",
                     "type": "string"
                 },
-                "sort_batches_ascending": {
-                    "title": "Sort Batches Ascending",
+                "sort_ascending": {
+                    "title": "Sort Ascending",
                     "default": true,
                     "type": "boolean"
                 },
@@ -204,8 +204,8 @@
                     "title": "Column Name",
                     "type": "string"
                 },
-                "sort_batches_ascending": {
-                    "title": "Sort Batches Ascending",
+                "sort_ascending": {
+                    "title": "Sort Ascending",
                     "default": true,
                     "type": "boolean"
                 },
@@ -232,8 +232,8 @@
                     "title": "Column Name",
                     "type": "string"
                 },
-                "sort_batches_ascending": {
-                    "title": "Sort Batches Ascending",
+                "sort_ascending": {
+                    "title": "Sort Ascending",
                     "default": true,
                     "type": "boolean"
                 },
@@ -259,8 +259,8 @@
                     "title": "Column Name",
                     "type": "string"
                 },
-                "sort_batches_ascending": {
-                    "title": "Sort Batches Ascending",
+                "sort_ascending": {
+                    "title": "Sort Ascending",
                     "default": true,
                     "type": "boolean"
                 },
@@ -286,8 +286,8 @@
                     "title": "Column Name",
                     "type": "string"
                 },
-                "sort_batches_ascending": {
-                    "title": "Sort Batches Ascending",
+                "sort_ascending": {
+                    "title": "Sort Ascending",
                     "default": true,
                     "type": "boolean"
                 },
@@ -320,8 +320,8 @@
                     "title": "Column Name",
                     "type": "string"
                 },
-                "sort_batches_ascending": {
-                    "title": "Sort Batches Ascending",
+                "sort_ascending": {
+                    "title": "Sort Ascending",
                     "default": true,
                     "type": "boolean"
                 },
@@ -348,8 +348,8 @@
                     "title": "Column Name",
                     "type": "string"
                 },
-                "sort_batches_ascending": {
-                    "title": "Sort Batches Ascending",
+                "sort_ascending": {
+                    "title": "Sort Ascending",
                     "default": true,
                     "type": "boolean"
                 },
