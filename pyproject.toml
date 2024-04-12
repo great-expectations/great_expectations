@@ -284,6 +284,8 @@ lint.select = [
     "NPY201", # numpy 2.0 compatibility (see https://numpy.org/devdocs/numpy_2_0_migration_guide.html#ruff-plugin) -- Explicitly listed to view preview rule errors
     # https://docs.astral.sh/ruff/rules/#tryceratops-try
     "TRY", # TRYceratops
+    # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+    "SIM", # flake8-simplify
 ]
 lint.ignore = [
     # formatting related ignores
