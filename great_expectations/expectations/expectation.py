@@ -1187,7 +1187,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
         self._warn_if_result_format_config_in_expectation_configuration(configuration=configuration)
 
-        configuration.process_evaluation_parameters(
+        configuration.process_suite_parameters(
             suite_parameters, interactive_evaluation, data_context
         )
         expectation_validation_result_list: list[ExpectationValidationResult] = (

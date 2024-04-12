@@ -23,7 +23,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.suite_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
-    build_evaluation_parameters,
+    build_suite_parameters,
     find_evaluation_parameter_dependencies,
 )
 from great_expectations.core.urn import ge_urn
@@ -159,14 +159,14 @@ class ExpectationConfiguration(SerializableDictDot):
         self._expectation_context = expectation_context
         self._rendered_content = rendered_content
 
-    def process_evaluation_parameters(
+    def process_suite_parameters(
         self,
         suite_parameters,
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         if not self._raw_kwargs:
-            evaluation_args, _ = build_evaluation_parameters(
+            evaluation_args, _ = build_suite_parameters(
                 expectation_args=self._kwargs,
                 suite_parameters=suite_parameters,
                 interactive_evaluation=interactive_evaluation,

@@ -2584,7 +2584,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_id = expectation_suite_id
         self._batch_request = batch_request or {}
         self._action_list = action_list or []
-        self._evaluation_parameters = suite_parameters or {}
+        self._suite_parameters = suite_parameters or {}
         self._runtime_configuration = runtime_configuration or {}
         self._validations = validations or []
         self._default_validation_id = default_validation_id
@@ -2667,11 +2667,11 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def suite_parameters(self) -> dict:
-        return self._evaluation_parameters
+        return self._suite_parameters
 
     @suite_parameters.setter
     def suite_parameters(self, value: dict) -> None:
-        self._evaluation_parameters = value
+        self._suite_parameters = value
 
     @property
     def runtime_configuration(self) -> dict:

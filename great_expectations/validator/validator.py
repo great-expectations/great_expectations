@@ -513,7 +513,7 @@ class Validator:
                 configuration = expectation.configuration
 
                 if self.interactive_evaluation:
-                    configuration.process_evaluation_parameters(
+                    configuration.process_suite_parameters(
                         self._expectation_suite.suite_parameters,
                         True,
                         self._data_context,
@@ -1371,21 +1371,21 @@ class Validator:
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_evaluation_parameters = (
+                runtime_suite_parameters = (
                     data_context.evaluation_parameter_store.get_bind_params(run_id)
                 )
             else:
-                runtime_evaluation_parameters = {}
+                runtime_suite_parameters = {}
 
             if expectation_suite.suite_parameters:
-                runtime_evaluation_parameters.update(expectation_suite.suite_parameters)
+                runtime_suite_parameters.update(expectation_suite.suite_parameters)
 
             if suite_parameters is not None:
-                runtime_evaluation_parameters.update(suite_parameters)
+                runtime_suite_parameters.update(suite_parameters)
 
             # Convert evaluation parameters to be json-serializable
-            runtime_evaluation_parameters = recursively_convert_to_json_serializable(
-                runtime_evaluation_parameters
+            runtime_suite_parameters = recursively_convert_to_json_serializable(
+                runtime_suite_parameters
             )
 
             # Warn if our version is different from the version in the configuration
@@ -1393,7 +1393,7 @@ class Validator:
 
             expectations_to_evaluate = self.process_expectations_for_validation(
                 expectation_suite.expectation_configurations,
-                runtime_evaluation_parameters,
+                runtime_suite_parameters,
             )
 
             runtime_configuration = self._get_runtime_configuration(
@@ -1429,7 +1429,7 @@ class Validator:
                     "unsuccessful_expectations": statistics.unsuccessful_expectations,
                     "success_percent": statistics.success_percent,
                 },
-                suite_parameters=runtime_evaluation_parameters,
+                suite_parameters=runtime_suite_parameters,
                 meta={
                     "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
@@ -1461,7 +1461,7 @@ class Validator:
         columns: dict[str, list[ExpectationConfiguration]] = {}
 
         for expectation in expectation_configurations:
-            expectation.process_evaluation_parameters(
+            expectation.process_suite_parameters(
                 suite_parameters=suite_parameters,
                 interactive_evaluation=self.interactive_evaluation,
                 data_context=self._data_context,

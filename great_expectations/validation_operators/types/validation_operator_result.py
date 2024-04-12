@@ -52,7 +52,7 @@ class ValidationOperatorResult(DictDot):
     ) -> None:
         self._run_id = run_id
         self._run_results = run_results
-        self._evaluation_parameters = suite_parameters
+        self._suite_parameters = suite_parameters
         self._validation_operator_config = validation_operator_config
         if success is None:
             self._success = all(
@@ -93,7 +93,7 @@ class ValidationOperatorResult(DictDot):
 
     @property
     def suite_parameters(self) -> Optional[dict]:
-        return self._evaluation_parameters
+        return self._suite_parameters
 
     @property
     def success(self) -> bool:

@@ -296,12 +296,12 @@ def substitute_runtime_config(  # noqa: C901 - 11
         )
     if runtime_kwargs.get("suite_parameters") is not None:
         suite_parameters = dest_config.get("suite_parameters") or {}
-        updated_evaluation_parameters = nested_update(
+        updated_suite_parameters = nested_update(
             suite_parameters,
             runtime_kwargs["suite_parameters"],
             dedup=True,
         )
-        dest_config["suite_parameters"] = updated_evaluation_parameters
+        dest_config["suite_parameters"] = updated_suite_parameters
     if runtime_kwargs.get("runtime_configuration") is not None:
         runtime_configuration = dest_config.get("runtime_configuration") or {}
         updated_runtime_configuration = nested_update(

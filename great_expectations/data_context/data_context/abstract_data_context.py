@@ -1652,7 +1652,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return self.checkpoint_store.delete_checkpoint(name=name, id=id)
 
-    def store_evaluation_parameters(self, validation_results, target_store_name=None) -> None:
+    def store_suite_parameters(self, validation_results, target_store_name=None) -> None:
         """
         Stores ValidationResult Suite Parameters to defined store
         """

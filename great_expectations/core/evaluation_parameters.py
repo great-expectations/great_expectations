@@ -240,7 +240,7 @@ class EvaluationParameterParser:
             return evaluated
 
 
-def build_evaluation_parameters(
+def build_suite_parameters(
     expectation_args: dict,
     suite_parameters: Optional[dict] = None,
     interactive_evaluation: bool = True,
