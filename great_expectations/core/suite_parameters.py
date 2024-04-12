@@ -250,12 +250,12 @@ def build_suite_parameters(
     AND mutate expectation_args by removing any parameter values passed in as temporary values during
     exploratory work.
     """  # noqa: E501
-    evaluation_args = copy.deepcopy(expectation_args)
+    suite_args = copy.deepcopy(expectation_args)
     substituted_parameters = {}
 
     # Iterate over arguments, and replace $PARAMETER-defined args with their
     # specified parameters.
-    for key, value in evaluation_args.items():
+    for key, value in suite_args.items():
         if isinstance(value, dict) and "$PARAMETER" in value:
             # We do not even need to search for a value if we are not going to do interactive evaluation  # noqa: E501
             if not interactive_evaluation:
@@ -265,7 +265,7 @@ def build_suite_parameters(
             # If it was, use that one, but remove it from the stored config
             param_key = f"$PARAMETER.{value['$PARAMETER']}"
             if param_key in value:
-                evaluation_args[key] = evaluation_args[key][param_key]
+                suite_args[key] = suite_args[key][param_key]
                 del expectation_args[key][param_key]
 
             # If not, try to parse the suite parameter and substitute, which will raise
@@ -277,11 +277,11 @@ def build_suite_parameters(
                     suite_parameters=suite_parameters,
                     data_context=data_context,
                 )
-                evaluation_args[key] = parameter_value
+                suite_args[key] = parameter_value
                 # Once we've substituted, we also track that we did so
                 substituted_parameters[key] = parameter_value
 
-    return evaluation_args, substituted_parameters
+    return suite_args, substituted_parameters
 
 
 EXPR = SuiteParameterParser()

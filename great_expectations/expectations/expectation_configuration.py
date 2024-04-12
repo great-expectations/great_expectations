@@ -166,7 +166,7 @@ class ExpectationConfiguration(SerializableDictDot):
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         if not self._raw_kwargs:
-            evaluation_args, _ = build_suite_parameters(
+            suite_args, _ = build_suite_parameters(
                 expectation_args=self._kwargs,
                 suite_parameters=suite_parameters,
                 interactive_evaluation=interactive_evaluation,
@@ -174,7 +174,7 @@ class ExpectationConfiguration(SerializableDictDot):
             )
 
             self._raw_kwargs = self._kwargs
-            self._kwargs = evaluation_args
+            self._kwargs = suite_args
         else:
             logger.debug("suite_parameters have already been built on this expectation")
 
