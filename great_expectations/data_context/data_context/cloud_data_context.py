@@ -291,6 +291,9 @@ class CloudDataContext(SerializableDataContext):
             if not config.get(V1_STORE_NAME_KEY):
                 config[V1_STORE_NAME_KEY] = value
 
+        if not config.get("stores"):
+            return config  # no store dict to update
+
         store_key_tuples = [
             # (V0 Store Key, V1 Store Key)
             ("default_evaluation_parameter_store", "default_suite_parameter_store"),
