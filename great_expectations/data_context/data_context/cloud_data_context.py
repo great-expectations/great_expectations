@@ -274,6 +274,38 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         config["fluent_datasources"] = _extract_fluent_datasources(config)
 
+        # V1 renamed EvaluationParameters to SuiteParameters, so this is a temporary patch
+        # until Cloud implements a V1 endpoint for DataContextConfig
+        config = cls._replace_evaluation_parameters_with_suite_parameters(config)
+
+        return config
+
+    @classmethod
+    def _replace_evaluation_parameters_with_suite_parameters(cls, config: dict) -> dict:
+        """Ensure cloud config follows V1 conventions for SuiteParameters"""
+        # store name
+        V0_STORE_NAME_KEY = "evaluation_parameter_store_name"
+        V1_STORE_NAME_KEY = "suite_parameter_store_name"
+        if config.get(V0_STORE_NAME_KEY):
+            value = config.pop(V0_STORE_NAME_KEY)
+            if not config.get(V1_STORE_NAME_KEY):
+                config[V1_STORE_NAME_KEY] = value
+
+        store_key_tuples = [
+            # (V0 Store Key, V1 Store Key)
+            ("default_evaluation_parameter_store", "default_suite_parameter_store"),
+            ("evaluation_parameter_store", "suite_parameter_store"),
+        ]
+        for v0_store_key, v1_store_key in store_key_tuples:
+            store_config = config["stores"].pop(v0_store_key, None)
+            if not store_config:
+                continue
+            # replace class name, if its legacy
+            if store_config["class_name"] == "EvaluationParameterStore":
+                store_config["class_name"] = "SuiteParameterStore"
+            # replace the config under the V1 key
+            config["stores"][v1_store_key] = store_config
+
         return config
 
     @classmethod
