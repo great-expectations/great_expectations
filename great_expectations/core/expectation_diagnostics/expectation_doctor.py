@@ -340,7 +340,7 @@ class ExpectationDoctor:
         _total_passed = 0
         _total_failed = 0
         _num_backends = 0
-        _num_engines = sum([x for x in execution_engines.values() if x])
+        _num_engines = sum(x for x in execution_engines.values() if x)
         for result in backend_test_result_counts:
             _num_backends += 1
             _total_passed += result.num_passed
