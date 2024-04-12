@@ -255,7 +255,7 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     )
     assert my_dependent_parameter_builder.call_count == 1
 
-    # Assert that precomuted evaluation parameters are not recomputed (call_count for each should remain at 1).  # noqa: E501
+    # Assert that precomuted suite parameters are not recomputed (call_count for each should remain at 1).  # noqa: E501
     assert my_evaluation_dependency_0_parameter_builder.call_count == 1
     assert my_evaluation_dependency_1_parameter_builder.call_count == 1
 

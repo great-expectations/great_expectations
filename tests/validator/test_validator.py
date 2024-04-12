@@ -955,7 +955,7 @@ def test_validator_include_rendered_content_diagnostic(
     assert len(validation_result.rendered_content) == 1
     assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
 
-    # test evaluation parameters render
+    # test suite parameters render
     validator_include_rendered_content.set_evaluation_parameter("upstream_column_min", 1)
     validator_include_rendered_content.set_evaluation_parameter("upstream_column_max", 8)
 
@@ -1045,7 +1045,7 @@ def test_validator_validate_substitutes_suite_parameters(
     value_set: list[int],
     expected: bool,
 ):
-    """Integration test to ensure evaluation parameters are respected when validating.
+    """Integration test to ensure suite parameters are respected when validating.
     The setup here is to provide very simple data, and a variety of evaluation_parameter inputs,
     just checking for result.success as a proxy for the evaluation_parameter being respected.
     """

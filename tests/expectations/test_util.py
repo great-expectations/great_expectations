@@ -149,7 +149,7 @@ def test_prescriptive_renderer_no_decorator(
         == "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"  # noqa: E501
     )
 
-    # params should contain our evaluation parameters
+    # params should contain our suite parameters
     assert res[0].string_template["params"]["min_value"] == {"$PARAMETER": "MIN_VAL_PARAM"}
     assert res[0].string_template["params"]["max_value"] == {"$PARAMETER": "MAX_VAL_PARAM"}
 
@@ -216,7 +216,7 @@ def test_prescriptive_renderer_with_decorator(
         == "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value"  # noqa: E501
     )
 
-    # params should contain our evaluation parameters
+    # params should contain our suite parameters
     assert res[0].string_template["params"]["min_value"] == {"$PARAMETER": "MIN_VAL_PARAM"}
     assert res[0].string_template["params"]["max_value"] == {"$PARAMETER": "MAX_VAL_PARAM"}
     assert res[0].to_json_dict() == {
@@ -240,7 +240,7 @@ def test_prescriptive_renderer_with_decorator(
         res[1].string_template["template"]
         == "\n - $eval_param = $eval_param_value (at time of validation)."
     )
-    # params should contain our evaluation parameters
+    # params should contain our suite parameters
     assert res[1].string_template["params"]["eval_param"] == "MIN_VAL_PARAM"
     assert res[1].string_template["params"]["eval_param_value"] == 15
     assert res[1].to_json_dict() == {
@@ -259,7 +259,7 @@ def test_prescriptive_renderer_with_decorator(
         res[2].string_template["template"]
         == "\n - $eval_param = $eval_param_value (at time of validation)."
     )
-    # params should contain our evaluation parameters
+    # params should contain our suite parameters
     assert res[2].string_template["params"]["eval_param"] == "MAX_VAL_PARAM"
     assert res[2].string_template["params"]["eval_param_value"] == 20
     assert res[2].to_json_dict() == {
@@ -286,7 +286,7 @@ def test_prescriptive_renderer_with_decorator(
         # noinspection PyUnusedLocal,PyTypeChecker
         res = bare_bones_prescriptive_renderer(configuration={}, runtime_configuration={})
 
-    # extra evaluation parameters will not have an effect
+    # extra suite parameters will not have an effect
     runtime_configuration_with_extra = {
         "styling": {
             "default": {"classes": ["badge", "badge-secondary"]},
