@@ -73,7 +73,7 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
         query_result = metrics.get("query.column_pair")
         query_result = [tuple(element.values()) for element in query_result]
 
-        success = (sum([(abs(x[0]) == diff) for x in query_result]) / len(query_result)) >= mostly
+        success = (sum((abs(x[0]) == diff) for x in query_result) / len(query_result)) >= mostly
 
         return {
             "success": success,
