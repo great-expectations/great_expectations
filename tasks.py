@@ -154,11 +154,15 @@ def lint(
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
-@invoke.task(help={"path": _PATH_HELP_DESC, "unsafe": "Enable potentially unsafe fixes."})
-def fix(ctx: Context, path: str = ".", unsafe: bool = False):
-    """Automatically fix all possible code issues."""
-    lint(ctx, path=path, unsafe_fixes=unsafe)
-    format(ctx, path=path, sort_=True)
+@invoke.task(help={"path": _PATH_HELP_DESC, "safe-only": "Only apply 'safe' fixes."})
+def fix(ctx: Context, path: str = ".", safe_only: bool = False):
+    """
+    Automatically fix all possible code issues.
+    Applies unsafe fixes by default.
+    """
+    unsafe_fixes = not safe_only
+    lint(ctx, path=path, fmt_=False, fix=True, unsafe_fixes=unsafe_fixes)
+    format(ctx, path=path, check=False, sort_=True)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
