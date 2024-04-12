@@ -70,7 +70,7 @@ if TYPE_CHECKING:
 CreateSourceFixture: TypeAlias = Callable[..., ContextManager[PostgresDatasource]]
 FLUENT_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
 PG_CONFIG_YAML_FILE: Final = FLUENT_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
-_DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
+_DEFAULT_TEST_YEARS = list(range(2021, 2023))
 _DEFAULT_TEST_MONTHS = list(range(1, 13))
 
 logger = logging.getLogger(__name__)
