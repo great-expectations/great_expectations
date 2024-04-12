@@ -176,7 +176,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
-                if dialect is None:
+                if dialect is None:  # noqa: SIM102
                     # Trino
                     if hasattr(sqlalchemy_engine, "dialect"):
                         dialect = sqlalchemy_engine.dialect

@@ -106,7 +106,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     monkeypatch.setenv("FOO", "BAR")
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", r"ive_been_\$replaced")
     value_from_environment = "from_environment"
-    os.environ["replace_me"] = value_from_environment
+    os.environ["replace_me"] = value_from_environment  # noqa: SIM112
 
     value_from_runtime_override = "runtime_var"
     runtime_environment = {"replace_me": value_from_runtime_override}
@@ -142,7 +142,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     except Exception:  # noqa: TRY302
         raise
     finally:
-        del os.environ["replace_me"]
+        del os.environ["replace_me"]  # noqa: SIM112
 
 
 @pytest.mark.unit

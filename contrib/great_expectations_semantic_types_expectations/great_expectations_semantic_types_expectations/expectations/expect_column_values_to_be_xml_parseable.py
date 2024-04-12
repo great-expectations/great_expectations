@@ -30,7 +30,7 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 
-try:
+try:  # noqa: SIM105
     pass
 except ImportError:
     pass
@@ -133,7 +133,7 @@ class ExpectColumnValuesToBeXmlParseable(ColumnMapExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+            False if runtime_configuration.get("include_column_name") is False else True  # noqa: SIM211
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

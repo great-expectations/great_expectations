@@ -60,7 +60,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         # The specific way we render the render_object is contingent on the type of the object
         render_fn: Callable
-        if isinstance(render_object, list):
+        if isinstance(render_object, list):  # noqa: SIM108
             render_fn = cls._render_list
         else:
             render_fn = cls._render_other
@@ -279,7 +279,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     runtime_configuration=runtime_configuration,
                     **kwargs,
                 )
-        if result is not None:
+        if result is not None:  # noqa: SIM102
             if isinstance(render_object, ExpectationConfiguration):
                 expectation_notes = cls._render_expectation_notes(render_object)
                 if expectation_notes:

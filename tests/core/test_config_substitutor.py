@@ -86,7 +86,7 @@ class MockedBoto3Session:
 def test_substitute_value_from_aws_secrets_manager(
     config_substitutor, input_value, secret_response, raises, expected
 ):
-    with raises:
+    with raises:  # noqa: SIM117
         with mock.patch(
             "great_expectations.core.config_substitutor.aws.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
@@ -160,7 +160,7 @@ def test_substitute_value_from_aws_secrets_manager(
 def test_substitute_value_from_aws_ssm(
     config_substitutor, input_value, secret_response, raises, expected
 ):
-    with raises:
+    with raises:  # noqa: SIM117
         with mock.patch(
             "great_expectations.core.config_substitutor.aws.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
@@ -230,7 +230,7 @@ class MockedSecretManagerServiceClient:
 def test_substitute_value_from_gcp_secret_manager(
     config_substitutor, input_value, secret_response, raises, expected
 ):
-    with raises:
+    with raises:  # noqa: SIM117
         with mock.patch(
             "great_expectations.core.config_substitutor.google.secretmanager.SecretManagerServiceClient",
             return_value=MockedSecretManagerServiceClient(secret_response),
@@ -304,7 +304,7 @@ class MockedSecretClient:
 def test_substitute_value_from_azure_keyvault(
     config_substitutor, input_value, secret_response, raises, expected
 ):
-    with raises:
+    with raises:  # noqa: SIM117
         with mock.patch(
             "great_expectations.core.config_substitutor.azure.SecretClient",
             return_value=MockedSecretClient(secret_response),

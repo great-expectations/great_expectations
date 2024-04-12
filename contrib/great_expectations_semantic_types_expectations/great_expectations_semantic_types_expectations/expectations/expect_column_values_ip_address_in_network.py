@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_ip_address_in_network(addr: str, ip_network) -> bool:
-    for ipn in ip_network:
+    for ipn in ip_network:  # noqa: SIM110
         if ipaddress.ip_address(addr) in ipaddress.ip_network(ipn):
             return True
     return False

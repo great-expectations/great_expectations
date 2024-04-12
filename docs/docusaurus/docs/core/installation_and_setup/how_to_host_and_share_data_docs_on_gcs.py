@@ -45,7 +45,7 @@ result = subprocess.run(
     stderr=subprocess.PIPE,
 )
 
-try:
+try:  # noqa: SIM105
     # remove this bucket if there was a failure in the script last time
     result = subprocess.run(
         "gsutil rm -r gs://superconductive-integration-tests-data-docs".split(),

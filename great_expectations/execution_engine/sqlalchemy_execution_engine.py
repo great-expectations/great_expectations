@@ -115,7 +115,7 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
-if snowflake.snowflakedialect:
+if snowflake.snowflakedialect:  # noqa: SIM102
     if sa:
         # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.  # noqa: E501
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)

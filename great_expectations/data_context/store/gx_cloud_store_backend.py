@@ -56,7 +56,7 @@ def get_user_friendly_error_message(
 
     try:
         error_json: ErrorPayload = http_exc.response.json()
-        if isinstance(error_json, list):
+        if isinstance(error_json, list):  # noqa: SIM108
             errors = error_json
         else:
             errors = error_json.get("errors")
@@ -479,7 +479,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             key = key.to_tuple()
 
         id = key[1]
-        if len(key) == 3:  # noqa: PLR2004
+        if len(key) == 3:  # noqa: PLR2004, SIM108
             resource_object_name = key[2]
         else:
             resource_object_name = None

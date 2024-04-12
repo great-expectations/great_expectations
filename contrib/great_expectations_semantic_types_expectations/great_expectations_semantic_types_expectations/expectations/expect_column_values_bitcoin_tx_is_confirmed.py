@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics import (
 def is_btc_tx_confirmed(tx: str) -> bool:
     try:
         cnt = blockcypher.get_num_confirmations(tx)
-        if cnt > 0:
+        if cnt > 0:  # noqa: SIM103
             return True
         else:
             return False

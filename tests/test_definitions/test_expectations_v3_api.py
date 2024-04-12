@@ -115,7 +115,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     pk_column: bool = True
 
                                 schemas = (
-                                    test_config["schemas"] if "schemas" in test_config else None
+                                    test_config["schemas"] if "schemas" in test_config else None  # noqa: SIM401
                                 )
                                 dataset = test_config["data"]
                                 dataset_name = generate_dataset_name_from_expectation_name(
@@ -253,7 +253,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                         (major == "0" and int(minor) >= 24) or int(major) >= 1
                                     ):
                                         generate_test = True
-                                elif validator_with_data and isinstance(
+                                elif validator_with_data and isinstance(  # noqa: SIM102
                                     validator_with_data.active_batch_data,
                                     SparkDFBatchData,
                                 ):

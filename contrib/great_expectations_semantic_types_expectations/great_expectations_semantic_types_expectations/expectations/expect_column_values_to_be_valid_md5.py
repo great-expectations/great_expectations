@@ -20,7 +20,7 @@ class ColumnValuesToBeValidMd5(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         def matches_md5_regex(x):
-            if re.match(MD5_REGEX, str(x)):
+            if re.match(MD5_REGEX, str(x)):  # noqa: SIM103
                 return True
             return False
 

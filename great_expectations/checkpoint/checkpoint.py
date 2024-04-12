@@ -261,7 +261,7 @@ class BaseCheckpoint(ConfigPeer):
                 # TODO: We only currently support 1 validation_result_url per checkpoint and use the first one we  # noqa: E501
                 #       encounter. Since checkpoints can have more than 1 validation result, we will need to update  # noqa: E501
                 #       this and the consumers.
-                if not validation_result_url:
+                if not validation_result_url:  # noqa: SIM102
                     if (
                         "actions_results" in run_result
                         and "store_validation_result" in run_result["actions_results"]

@@ -193,7 +193,7 @@ def test_invalid_connection_string_raises_dsn_error(
 
 
 # TODO: Cleanup how we install test dependencies and remove this skipif
-@pytest.mark.skipif(True if not snowflake else False, reason="snowflake is not installed")
+@pytest.mark.skipif(True if not snowflake else False, reason="snowflake is not installed")  # noqa: SIM210
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
     connection_string = "snowflake://my_user:password@my_account"

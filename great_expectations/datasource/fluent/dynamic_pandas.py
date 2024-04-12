@@ -324,7 +324,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
             continue
     if not types:
         return UNSUPPORTED_TYPE
-    if len(types) > 1:
+    if len(types) > 1:  # noqa: SIM108
         str_to_eval = f"Union[{', '.join(types)}]"
     else:
         str_to_eval = types[0]

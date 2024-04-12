@@ -12,9 +12,9 @@ def is_valid_us_county_name(county: str):
     geocache = geonamescache.GeonamesCache()
     dict_of_counties = geocache.get_us_counties()
     list_of_counties = [d["name"] for d in dict_of_counties if "name" in d]
-    if len(county) > 33 or type(county) != str:
+    if len(county) > 33 or type(county) != str:  # noqa: E721
         return False
-    if county in list_of_counties:
+    if county in list_of_counties:  # noqa: SIM103
         return True
     else:
         return False

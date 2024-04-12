@@ -167,7 +167,7 @@ def test_get_non_existent_expectation_suite(
         )
     )
 
-    with pact_test:
+    with pact_test:  # noqa: SIM117
         with pytest.raises(DataContextError):
             cloud_data_context.get_expectation_suite(id=NON_EXISTENT_EXPECTATION_SUITE_ID)
 

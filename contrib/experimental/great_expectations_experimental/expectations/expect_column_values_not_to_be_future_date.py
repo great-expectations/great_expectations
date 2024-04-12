@@ -23,12 +23,12 @@ from great_expectations.expectations.metrics import (
 def is_not_a_future_date(date_in: str) -> bool:
     try:
         today = date.today()
-        if isinstance(date_in, str):
+        if isinstance(date_in, str):  # noqa: SIM108
             d = parse(date_in)
         else:
             d = date_in
         d = d.date()
-        if d > today:
+        if d > today:  # noqa: SIM103
             return False
         else:
             return True

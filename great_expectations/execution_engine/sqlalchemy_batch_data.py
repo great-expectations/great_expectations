@@ -252,7 +252,7 @@ class SqlAlchemyBatchData(BatchData):
             if isinstance(query, sa.dialects.mssql.base.MSSQLCompiler):
                 query = query.string  # extracting string from MSSQLCompiler object
 
-            if "from" in query:
+            if "from" in query:  # noqa: SIM108
                 strsep = "from"
             else:
                 strsep = "FROM"
@@ -262,7 +262,7 @@ class SqlAlchemyBatchData(BatchData):
             )
         # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()  # noqa: E501
         # Similar message may be needed in the future for Trino backend.
-        elif dialect == GXSqlDialect.TRINO or dialect == GXSqlDialect.CLICKHOUSE:
+        elif dialect == GXSqlDialect.TRINO or dialect == GXSqlDialect.CLICKHOUSE:  # noqa: PLR1714
             logger.warning(
                 f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."  # noqa: E501
             )

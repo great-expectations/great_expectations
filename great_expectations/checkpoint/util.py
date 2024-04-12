@@ -353,7 +353,7 @@ def get_updated_action_list(base_action_list: list, other_action_list: list) -> 
 
     for other_action in other_action_list:
         other_action_name = other_action["name"]
-        if other_action_name in base_action_list_dict:
+        if other_action_name in base_action_list_dict:  # noqa: SIM102
             if not other_action["action"]:
                 base_action_list_dict.pop(other_action_name)
 

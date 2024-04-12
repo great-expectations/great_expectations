@@ -238,7 +238,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
                 elif param_type == RendererValueType.BOOLEAN:
                     if value is not True and value is not False:
                         raise renderer_configuration_error
-                elif param_type == RendererValueType.ARRAY:
+                elif param_type == RendererValueType.ARRAY:  # noqa: SIM102
                     if not isinstance(value, Iterable):
                         raise renderer_configuration_error
 
@@ -324,7 +324,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     def _validate_for_include_column_name(cls, values: dict) -> dict:
         if values.get("runtime_configuration"):
             values["include_column_name"] = (
-                False
+                False  # noqa: SIM211
                 if values["runtime_configuration"].get("include_column_name") is False
                 else True
             )

@@ -67,7 +67,7 @@ class DataProfilerProfilePercentDiff(DataProfilerProfileMetricProvider):
                     continue
                 pr_val = pr_stats[dr_stat]
                 percent_change = 0
-                if pr_val == 0:
+                if pr_val == 0:  # noqa: SIM108
                     percent_change = "ERR_divide_by_zero"  # Div by 0 error
                 else:
                     percent_change = dr_val / pr_val

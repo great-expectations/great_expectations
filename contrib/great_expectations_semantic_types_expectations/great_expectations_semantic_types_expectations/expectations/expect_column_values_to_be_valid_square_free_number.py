@@ -15,7 +15,7 @@ def is_valid_square_free_number(num: str) -> bool:
         n = int(num)
         n_sqrt = (int)(math.sqrt(n))
 
-        for root in range(2, n_sqrt + 1):
+        for root in range(2, n_sqrt + 1):  # noqa: SIM110
             if n % (root * root) == 0:
                 return False
         return True

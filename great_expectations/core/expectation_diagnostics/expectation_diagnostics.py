@@ -110,7 +110,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check whether the Expectation has an informative docstring"""
 
         message = 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period'  # noqa: E501
-        if "short_description" in description:
+        if "short_description" in description:  # noqa: SIM401
             short_description = description["short_description"]
         else:
             short_description = None

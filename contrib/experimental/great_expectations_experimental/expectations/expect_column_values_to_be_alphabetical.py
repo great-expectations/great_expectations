@@ -35,7 +35,7 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 
         # choose the operator to use for comparison of consecutive items
         # could be easily adapted for other comparisons, perhaps of custom objects
-        if reverse:
+        if reverse:  # noqa: SIM108
             compare_function = operator.ge
         else:
             compare_function = operator.le

@@ -70,7 +70,7 @@ def is_subset(subset, superset, test_mode=True):
     # superset_items = [_get_items_by_path(superset, key_path) for key_path in key_paths]
 
     # Test that populated subset items correspond to items in the superset
-    if subset_items:
+    if subset_items:  # noqa: SIM108
         items_test = all(item in superset_items for item in subset_items)
     else:
         items_test = True

@@ -215,7 +215,7 @@ def _pandas_column_map_condition_value_counts(
     try:
         value_counts = domain_values[boolean_mapped_unexpected_values].value_counts()
     except ValueError:
-        try:
+        try:  # noqa: SIM105
             value_counts = (
                 domain_values[boolean_mapped_unexpected_values].apply(tuple).value_counts()
             )

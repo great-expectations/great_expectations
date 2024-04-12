@@ -135,7 +135,7 @@ def inject_engine_lookup_double(
     Dynamically create a new subclass so that runtime type validation does not fail.
     """
     original_engine_override: dict[Type[Datasource], Type[ExecutionEngine]] = {}
-    for key in _SourceFactories.type_lookup.keys():
+    for key in _SourceFactories.type_lookup.keys():  # noqa: SIM118
         if issubclass(type(key), Datasource):
             original_engine_override[key] = key.execution_engine_override
 

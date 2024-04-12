@@ -41,7 +41,7 @@ class ColumnSectionRenderer(Renderer):
     @classmethod
     def _get_column_name(cls, ge_object):
         # This is broken out for ease of locating future validation here
-        if isinstance(ge_object, list):
+        if isinstance(ge_object, list):  # noqa: SIM108
             candidate_object = ge_object[0]
         else:
             candidate_object = ge_object
@@ -92,7 +92,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
     # Note: Seems awkward to pass section_name and column_type into this renderer.
     # Can't we figure that out internally?
     def render(self, evrs, section_name=None, column_type=None):
-        if section_name is None:
+        if section_name is None:  # noqa: SIM108
             column = self._get_column_name(evrs)
         else:
             column = section_name

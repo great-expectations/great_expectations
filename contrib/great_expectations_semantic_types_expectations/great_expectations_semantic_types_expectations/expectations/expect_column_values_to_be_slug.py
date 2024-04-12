@@ -16,7 +16,7 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_slug(slug: str) -> bool:
     slug_pattern = re.compile(r"^[-a-zA-Z0-9_]+\Z")
-    if slug_pattern.match(slug):
+    if slug_pattern.match(slug):  # noqa: SIM103
         return True
     else:
         return False

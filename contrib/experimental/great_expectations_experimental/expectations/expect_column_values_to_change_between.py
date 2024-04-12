@@ -37,7 +37,7 @@ class ColumnValuesToChangeBetween(ColumnMapMetricProvider):
         difference = (column - column.shift()).fillna(from_value)
 
         def is_change_rate_compliant(value: int):
-            return True if from_value <= abs(value) <= to_value else False
+            return True if from_value <= abs(value) <= to_value else False  # noqa: SIM210
 
         return difference.map(lambda x: is_change_rate_compliant(x))
 

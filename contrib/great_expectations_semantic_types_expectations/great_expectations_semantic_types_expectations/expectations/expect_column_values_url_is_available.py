@@ -19,7 +19,7 @@ def is_available(url: str) -> bool:
         res_code = urllib.request.urlopen(url).getcode()
     except Exception:
         return False
-    if res_code == 200:
+    if res_code == 200:  # noqa: SIM103
         return True
     else:
         return False

@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_valid_tld(tld: str, valid_tlds) -> bool:
-    if tld.upper() in valid_tlds:
+    if tld.upper() in valid_tlds:  # noqa: SIM103
         return True
     else:
         return False

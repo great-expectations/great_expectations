@@ -73,7 +73,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+            False if runtime_configuration.get("include_column_name") is False else True  # noqa: SIM211
         )
         styling = runtime_configuration.get("styling")
         # Only render EVR objects for which an exception was raised

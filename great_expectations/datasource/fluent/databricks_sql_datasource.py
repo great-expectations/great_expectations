@@ -171,7 +171,7 @@ class DatabricksTableAsset(SqlTableAsset):
             True if the target string is bracketed by quotes.
         """
         # TODO: what todo with regular quotes? Error? Warn? "Fix"?
-        for quote in ["`"]:
+        for quote in ["`"]:  # noqa: SIM110
             if target.startswith(quote) and target.endswith(quote):
                 return True
         return False

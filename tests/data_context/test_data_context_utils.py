@@ -66,7 +66,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     # PostgreSQL (if installed in test environment)
     # default
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url(f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase")
             == f"postgresql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/mydatabase"
@@ -89,7 +89,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     )
 
     # psycopg2 (if installed in test environment)
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url(
                 f"postgresql+psycopg2://scott:tiger@{db_hostname}:65432/mydatabase"
@@ -107,7 +107,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     )
 
     # pg8000 (if installed in test environment)
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url(
                 f"postgresql+pg8000://scott:tiger@{db_hostname}:65432/mydatabase"
@@ -126,7 +126,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
 
     # MySQL
     # default (if installed in test environment)
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url(f"mysql://scott:tiger@{db_hostname}:65432/foo")
             == f"mysql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
@@ -142,7 +142,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     )
 
     # mysqlclient (a maintained fork of MySQL-Python) (if installed in test environment)
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url(f"mysql+mysqldb://scott:tiger@{db_hostname}:65432/foo")
             == f"mysql+mysqldb://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
@@ -157,7 +157,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     )
 
     # PyMySQL (if installed in test environment)
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url(f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo")
             == f"mysql+pymysql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:65432/foo"
@@ -173,7 +173,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
 
     # Oracle (if installed in test environment)
     url_host = os.getenv("GE_TEST_LOCALHOST_URL", "127.0.0.1")
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url(f"oracle://scott:tiger@{url_host}:1521/sidname")
             == f"oracle://scott:***@{url_host}:1521/sidname"
@@ -188,7 +188,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
         == f"oracle://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{url_host}:1521/sidname"
     )
 
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url("oracle+cx_oracle://scott:tiger@tnsname")
             == f"oracle+cx_oracle://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@tnsname"
@@ -202,7 +202,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
 
     # Microsoft SQL Server
     # pyodbc (if installed in test environment)
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url("mssql+pyodbc://scott:tiger@mydsn")
             == "mssql+pyodbc://scott:***@mydsn"
@@ -215,7 +215,7 @@ def test_password_masker_mask_db_url(  # noqa: PLR0912,PLR0915,C901- 11
     )
 
     # pymssql (if installed in test environment)
-    try:
+    try:  # noqa: SIM105
         assert (
             PasswordMasker.mask_db_url(f"mssql+pymssql://scott:tiger@{db_hostname}:12345/dbname")
             == f"mssql+pymssql://scott:{PasswordMasker.MASKED_PASSWORD_STRING}@{db_hostname}:12345/dbname"

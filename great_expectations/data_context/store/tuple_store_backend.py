@@ -57,7 +57,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise ValueError("filepath_suffix may only be used when filepath_template is None")  # noqa: TRY003
 
         self.filepath_template = filepath_template
-        if filepath_prefix and len(filepath_prefix) > 0:
+        if filepath_prefix and len(filepath_prefix) > 0:  # noqa: SIM102
             # Validate that the filepath prefix does not end with a forbidden substring
             if filepath_prefix[-1] in self.forbidden_substrings:
                 raise StoreBackendError(
@@ -945,7 +945,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             path_url = "/".join((self.bucket, self.prefix, path))
         else:  # noqa: PLR5501
             if self.base_public_path:
-                if self.base_public_path[-1] != "/":
+                if self.base_public_path[-1] != "/":  # noqa: SIM108
                     path_url = f"/{path}"
                 else:
                     path_url = path

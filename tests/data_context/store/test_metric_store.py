@@ -32,8 +32,8 @@ from tests import test_utils
 def param_store(request, test_backends):
     # If we have a backend configuration but we do not have postgres configured, skip
     backend_config = request.param.get("store_backend", None)
-    if backend_config:
-        if backend_config.get("credentials", {}).get("drivername", None) == "postgresql":
+    if backend_config:  # noqa: SIM102
+        if backend_config.get("credentials", {}).get("drivername", None) == "postgresql":  # noqa: SIM102
             if "postgresql" not in test_backends:
                 pytest.skip("skipping fixture because postgresql not selected")
 
@@ -63,8 +63,8 @@ def param_store(request, test_backends):
 def in_memory_param_store(request, test_backends):
     # If we have a backend configuration but we do not have postgres configured, skip
     backend_config = request.param.get("store_backend", None)
-    if backend_config:
-        if backend_config.get("credentials", {}).get("drivername", None) == "postgresql":
+    if backend_config:  # noqa: SIM102
+        if backend_config.get("credentials", {}).get("drivername", None) == "postgresql":  # noqa: SIM102
             if "postgresql" not in test_backends:
                 pytest.skip("skipping fixture because postgresql not selected")
 

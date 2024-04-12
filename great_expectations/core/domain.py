@@ -185,7 +185,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
         key: str
         value: Any
         for key, value in self["details"].items():
-            if value:
+            if value:  # noqa: SIM102
                 if key == INFERRED_SEMANTIC_TYPE_KEY:
                     column_name: str
                     semantic_type: Union[str, SemanticDomainTypes]

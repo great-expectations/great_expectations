@@ -927,7 +927,7 @@ class TableAsset(_SQLAsset):
         Returns:
             True if the target string is bracketed by quotes.
         """
-        for quote in ["'", '"']:
+        for quote in ["'", '"']:  # noqa: SIM110
             if target.startswith(quote) and target.endswith(quote):
                 return True
         return False

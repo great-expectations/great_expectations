@@ -381,10 +381,10 @@ class DataAssistantResult(SerializableDictDot):
     def _get_metric_expectation_map(self) -> dict[tuple[str, ...], str]:
         if not all(
             [
-                isinstance(metric_names, str)  # noqa: PLR1701
+                isinstance(metric_names, str)  # noqa: PLR1701, SIM101
                 or isinstance(metric_names, tuple)
             ]
-            for metric_names in self.metric_expectation_map.keys()
+            for metric_names in self.metric_expectation_map.keys()  # noqa: SIM118
         ):
             raise gx_exceptions.DataAssistantResultExecutionError(  # noqa: TRY003
                 "All metric_expectation_map keys must be of type str or tuple."
@@ -923,7 +923,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             column for column in df.columns if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
-        if sequential:
+        if sequential:  # noqa: SIM108
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
@@ -1003,7 +1003,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             column for column in df.columns if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
-        if sequential:
+        if sequential:  # noqa: SIM108
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
@@ -1292,7 +1292,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             column for column in df.columns if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
-        if sequential:
+        if sequential:  # noqa: SIM108
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
@@ -1350,7 +1350,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             An altair line chart with confidence intervals corresponding to "between" expectations
         """  # noqa: E501
         domain_type: MetricDomainTypes
-        if subtitle:
+        if subtitle:  # noqa: SIM108
             domain_type = MetricDomainTypes.COLUMN
         else:
             domain_type = MetricDomainTypes.TABLE
@@ -1383,7 +1383,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         ]
 
         batch_type: alt.StandardType
-        if sequential:
+        if sequential:  # noqa: SIM108
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
@@ -1530,7 +1530,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
-        if sequential:
+        if sequential:  # noqa: SIM108
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
@@ -1638,7 +1638,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             )
         ]
         batch_type: alt.StandardType
-        if sequential:
+        if sequential:  # noqa: SIM108
             batch_type = AltairDataTypes.ORDINAL.value
         else:
             batch_type = AltairDataTypes.NOMINAL.value
@@ -1649,7 +1649,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         )
 
         y_axis_title: Optional[str]
-        if len(sanitized_metric_names) > 1:
+        if len(sanitized_metric_names) > 1:  # noqa: SIM108
             y_axis_title = "Column Values"
         else:
             y_axis_title = None
@@ -3199,7 +3199,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             if exclude_column_names and column_name in exclude_column_names:
                 return False
 
-            if include_column_names and column_name not in include_column_names:
+            if include_column_names and column_name not in include_column_names:  # noqa: SIM103
                 return False
 
             return True
@@ -3231,7 +3231,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             if exclude_column_names and column_name in exclude_column_names:
                 return False
 
-            if include_column_names and column_name not in include_column_names:
+            if include_column_names and column_name not in include_column_names:  # noqa: SIM103
                 return False
 
             return True
@@ -3253,7 +3253,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         for domain, attributed_metric_values in attributed_metrics.items():
             filtered_attributed_metrics[domain] = {}
             for metric_name in metric_names:
-                if metric_name in attributed_metric_values.keys():
+                if metric_name in attributed_metric_values.keys():  # noqa: SIM118
                     filtered_attributed_metrics[domain][metric_name] = attributed_metric_values[
                         metric_name
                     ]
@@ -3758,7 +3758,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         table_column_metrics: List[str] = ["table_columns"]
         new_column_list: List[str]
         new_record_list: List[List[str]] = []
-        if all(
+        if all(  # noqa: SIM102
             sanitized_metric_name in table_column_metrics
             for sanitized_metric_name in sanitized_metric_names
         ):

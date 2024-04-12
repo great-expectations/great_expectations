@@ -715,7 +715,7 @@ def _is_to_be_removed_from_deep_filter_properties_iterable(
 
 def is_truthy(value: Any) -> bool:
     try:
-        if value:
+        if value:  # noqa: SIM103
             return True
         else:
             return False

@@ -157,7 +157,7 @@ class MicrosoftTeamsRenderer(Renderer):
             query["attachments"][0]["content"]["body"][1]["items"] = validation_result_elements
 
             if data_docs_pages:
-                for docs_link_key in data_docs_pages.keys():
+                for docs_link_key in data_docs_pages.keys():  # noqa: SIM118
                     if docs_link_key == "class":
                         continue
                     docs_link = data_docs_pages[docs_link_key]

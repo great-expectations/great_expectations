@@ -336,7 +336,7 @@ def test_get_context_with_context_root_dir_gitignore_error(clear_env_vars, tmp_p
     context_root_dir = tmp_path / FileDataContext.GX_DIR
     context_root_dir.mkdir()
 
-    with mock.patch(
+    with mock.patch(  # noqa: SIM117
         "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._scaffold_gitignore",
         side_effect=OSError("Error"),
     ):

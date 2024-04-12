@@ -16,7 +16,7 @@ from great_expectations.exceptions.exceptions import GXCloudConfigurationError
 @pytest.mark.cloud
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
-    with mock.patch(
+    with mock.patch(  # noqa: SIM117
         "great_expectations.data_context.CloudDataContext._get_cloud_config_dict",
         return_value={"base_url": None, "organization_id": None, "access_token": None},
     ):
@@ -40,7 +40,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
         status=200,
         match=[responses.matchers.header_matcher(request_headers)],
     )
-    try:
+    try:  # noqa: SIM105
         get_context(
             cloud_mode=True,
             cloud_base_url=ge_cloud_runtime_base_url,

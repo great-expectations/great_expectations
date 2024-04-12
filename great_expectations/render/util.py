@@ -89,7 +89,7 @@ def ordinal(num):
     """Convert a number to ordinal"""
     # Taken from https://codereview.stackexchange.com/questions/41298/producing-ordinal-numbers/41301
     # Consider a library like num2word when internationalization comes
-    if 10 <= num % 100 <= 20:  # noqa: PLR2004
+    if 10 <= num % 100 <= 20:  # noqa: PLR2004, SIM108
         suffix = "th"
     else:
         # the second parameter is a default.
@@ -118,7 +118,7 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
         if run_name is None:
             return False
         regex_match = re.search(regex, run_name)
-        return False if regex_match is None else True
+        return False if regex_match is None else True  # noqa: SIM211
 
 
 @public_api

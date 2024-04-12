@@ -738,7 +738,7 @@ class CloudDataContext(SerializableDataContext):
 
     def _validate_suite_unique_constaints_before_save(self, key: GXCloudIdentifier) -> None:
         id = key.id
-        if id:
+        if id:  # noqa: SIM102
             if self.expectations_store.has_key(key):
                 raise gx_exceptions.DataContextError(  # noqa: TRY003
                     f"expectation_suite with GX Cloud ID {id} already exists. "
@@ -882,7 +882,7 @@ class CloudDataContext(SerializableDataContext):
         **kwargs,
     ) -> ExpectationSuite:
         cloud_id: str | None
-        if expectation_suite.id:
+        if expectation_suite.id:  # noqa: SIM108
             cloud_id = expectation_suite.id
         else:
             cloud_id = None

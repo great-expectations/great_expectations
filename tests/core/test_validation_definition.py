@@ -104,7 +104,7 @@ class TestValidationRun:
     @pytest.fixture
     def mock_validator(self, mocker: MockerFixture):
         """Set up our ProjectManager to return a mock Validator"""
-        with mock.patch.object(ProjectManager, "get_validator") as mock_get_validator:
+        with mock.patch.object(ProjectManager, "get_validator") as mock_get_validator:  # noqa: SIM117
             with mock.patch.object(OldValidator, "graph_validate"):
                 gx.get_context()
                 mock_execution_engine = mocker.MagicMock(

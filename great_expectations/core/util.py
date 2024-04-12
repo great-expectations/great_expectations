@@ -522,7 +522,7 @@ def substitute_all_strftime_format_strings(
     """  # noqa: E501
 
     datetime_obj = datetime_obj or datetime.datetime.now()  # noqa: DTZ005
-    if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
+    if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701, SIM101
         return {
             k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
             for k, v in data.items()

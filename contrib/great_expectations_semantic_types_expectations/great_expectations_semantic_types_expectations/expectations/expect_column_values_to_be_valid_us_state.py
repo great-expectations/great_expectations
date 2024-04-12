@@ -14,9 +14,9 @@ def is_valid_state(state: str, dc_statehood: bool):
         list_of_states.append("District Of Columbia")
     else:
         pass
-    if len(state) > 20 or type(state) != str:
+    if len(state) > 20 or type(state) != str:  # noqa: E721
         return False
-    elif state in list_of_states:
+    elif state in list_of_states:  # noqa: SIM103
         return True
     else:
         return False

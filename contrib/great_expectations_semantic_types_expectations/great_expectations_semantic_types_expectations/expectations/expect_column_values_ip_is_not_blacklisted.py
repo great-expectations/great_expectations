@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics import (
 def is_not_blacklisted(ip_addr: str) -> bool:
     ip_checker = pydnsbl.DNSBLIpChecker()
     res = ip_checker.check(ip_addr)
-    if res.blacklisted:
+    if res.blacklisted:  # noqa: SIM103
         return False
     else:
         return True

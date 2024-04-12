@@ -293,7 +293,7 @@ class ExpectationValidationResult(SerializableDictDot):
             or result["unexpected_percent_nonmissing"] > 100  # noqa: PLR2004
         ):
             return False
-        if result.get("missing_count") and result["missing_count"] < 0:
+        if result.get("missing_count") and result["missing_count"] < 0:  # noqa: SIM103
             return False
         return True
 

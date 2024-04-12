@@ -771,7 +771,7 @@ class Validator:
         if runtime_configuration is None:
             runtime_configuration = {}
 
-        if runtime_configuration.get("catch_exceptions", True):
+        if runtime_configuration.get("catch_exceptions", True):  # noqa: SIM108
             catch_exceptions = True
         else:
             catch_exceptions = False
@@ -1190,17 +1190,17 @@ class Validator:
             #  which calls _copy_and_clean_up_expectation
             expectation.success_on_last_run = None
 
-            if discard_result_format_kwargs:
+            if discard_result_format_kwargs:  # noqa: SIM102
                 if "result_format" in expectation.kwargs:
                     del expectation.kwargs["result_format"]
                     discards["result_format"] += 1
 
-            if discard_include_config_kwargs:
+            if discard_include_config_kwargs:  # noqa: SIM102
                 if "include_config" in expectation.kwargs:
                     del expectation.kwargs["include_config"]
                     discards["include_config"] += 1
 
-            if discard_catch_exceptions_kwargs:
+            if discard_catch_exceptions_kwargs:  # noqa: SIM102
                 if "catch_exceptions" in expectation.kwargs:
                     del expectation.kwargs["catch_exceptions"]
                     discards["catch_exceptions"] += 1

@@ -187,7 +187,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
 
-        if asset is not None:
+        if asset is not None:  # noqa: SIM102
             # Override the defaults
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern

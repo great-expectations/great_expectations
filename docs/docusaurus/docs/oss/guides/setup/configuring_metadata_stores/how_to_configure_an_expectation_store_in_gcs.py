@@ -82,7 +82,7 @@ configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend
     "prefix"
 ] = "how_to_configure_an_expectation_store_in_gcs/expectations"
 
-try:
+try:  # noqa: SIM105
     # remove this bucket if there was a failure in the script last time
     result = subprocess.run(
         "gsutil rm -r gs://test_metadata_store/how_to_configure_an_expectation_store_in_gcs/expectations".split(),

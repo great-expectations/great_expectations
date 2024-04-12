@@ -370,7 +370,7 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
     context = empty_base_data_context_in_cloud_mode
     suite_id = suite_1.id
 
-    with pytest.raises(StoreBackendError):
+    with pytest.raises(StoreBackendError):  # noqa: SIM117
         with mock.patch("requests.Session.delete", autospec=True, side_effect=mocked_404_response):
             context.delete_expectation_suite(id=suite_id)
 
@@ -407,7 +407,7 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 
     suite_name = "suite123"
 
-    with pytest.raises(DataContextError) as e:
+    with pytest.raises(DataContextError) as e:  # noqa: SIM117
         with mock.patch("requests.Session.get", autospec=True, side_effect=mocked_404_response):
             context.suites.get(suite_name)
 

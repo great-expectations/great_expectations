@@ -117,7 +117,7 @@ class TestTransactions:
     def test_transaction_exit_early(self):
         t = TypeLookup({"a_list": list, "a_dict": dict})
 
-        with pytest.raises(ValueError, match="oh uh"):
+        with pytest.raises(ValueError, match="oh uh"):  # noqa: SIM117
             with t.transaction():
                 print(f"t\t{len(t)}")
 

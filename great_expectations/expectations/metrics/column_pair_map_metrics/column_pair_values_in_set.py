@@ -43,12 +43,12 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
 
         results = []
         for i, t in temp_df.iterrows():
-            if pd.isnull(t["A"]):
+            if pd.isnull(t["A"]):  # noqa: SIM108
                 a = None
             else:
                 a = t["A"]
 
-            if pd.isnull(t["B"]):
+            if pd.isnull(t["B"]):  # noqa: SIM108
                 b = None
             else:
                 b = t["B"]

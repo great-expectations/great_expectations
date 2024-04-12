@@ -150,8 +150,8 @@ def _recursively_assert_actual_result_matches_expected_result_keys(
             E             -False
     """  # noqa: E501
     if isinstance(expected, Mapping):
-        for expected_key in expected.keys():
-            assert expected_key in actual.keys(), description_for_error_reporting
+        for expected_key in expected.keys():  # noqa: SIM118
+            assert expected_key in actual.keys(), description_for_error_reporting  # noqa: SIM118
             _recursively_assert_actual_result_matches_expected_result_keys(
                 expected[expected_key],
                 actual[expected_key],

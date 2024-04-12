@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics import (
 def are_values_after_split_in_value_set(val: str, delimiter: str, value_set: List[str]) -> bool:
     all_split_values = [v.strip() for v in val.split(delimiter)]
 
-    for val in all_split_values:
+    for val in all_split_values:  # noqa: SIM110
         if val not in value_set:
             return False
 

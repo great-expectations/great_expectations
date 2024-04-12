@@ -22,7 +22,7 @@ class ColumnValuesToBeValidMac(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         def matches_mac_regex(x):
-            if re.match(MAC_REGEX, str(x)):
+            if re.match(MAC_REGEX, str(x)):  # noqa: SIM103
                 return True
             return False
 

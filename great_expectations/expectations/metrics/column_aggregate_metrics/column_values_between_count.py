@@ -68,13 +68,13 @@ class ColumnValuesBetweenCount(MetricProvider):
                 series = (min_value <= val) and (val <= max_value)
 
         elif min_value is None and max_value is not None:
-            if strict_max:
+            if strict_max:  # noqa: SIM108
                 series = val < max_value
             else:
                 series = val <= max_value
 
         elif min_value is not None and max_value is None:
-            if strict_min:
+            if strict_min:  # noqa: SIM108
                 series = min_value < val
             else:
                 series = min_value <= val
@@ -157,13 +157,13 @@ class ColumnValuesBetweenCount(MetricProvider):
         column = sa.column(accessor_domain_kwargs["column"])
 
         if min_value is None:
-            if strict_max:
+            if strict_max:  # noqa: SIM108
                 condition = column < max_value
             else:
                 condition = column <= max_value
 
         elif max_value is None:
-            if strict_min:
+            if strict_min:  # noqa: SIM108
                 condition = column > min_value
             else:
                 condition = column >= min_value
@@ -217,13 +217,13 @@ class ColumnValuesBetweenCount(MetricProvider):
             raise ValueError("min_value and max_value cannot both be None")  # noqa: TRY003
 
         if min_value is None:
-            if strict_max:
+            if strict_max:  # noqa: SIM108
                 condition = column < max_value
             else:
                 condition = column <= max_value
 
         elif max_value is None:
-            if strict_min:
+            if strict_min:  # noqa: SIM108
                 condition = column > min_value
             else:
                 condition = column >= min_value

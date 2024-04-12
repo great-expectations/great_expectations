@@ -48,7 +48,7 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
                 char for char in special_characters if char not in allowed_characters
             ]
 
-            for c in special_characters:
+            for c in special_characters:  # noqa: SIM110
                 if c in str(val):
                     return False
             return True
@@ -63,7 +63,7 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
                 char for char in list(string.punctuation) if char not in allowed_characters
             ]
 
-            for c in special_characters:
+            for c in special_characters:  # noqa: SIM110
                 if c in str(val):
                     return False
             return True
@@ -243,7 +243,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+            False if runtime_configuration.get("include_column_name") is False else True  # noqa: SIM211
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

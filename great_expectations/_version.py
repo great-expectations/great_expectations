@@ -144,7 +144,7 @@ def git_get_keywords(versionfile_abs):  # noqa: C901 - too complex
     # _version.py.
     keywords = {}
     try:
-        f = open(versionfile_abs)
+        f = open(versionfile_abs)  # noqa: SIM115
         for line in f.readlines():
             if line.strip().startswith("git_refnames ="):
                 mo = re.search(r'=\s*"(.*)"', line)

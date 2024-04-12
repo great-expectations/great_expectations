@@ -21,7 +21,7 @@ from great_expectations.expectations.metrics import (
 def bic_belong_to_country(bic: str, country_code: str) -> bool:
     try:
         bic = schwifty.BIC(bic)
-        if bic.country_code.upper() == country_code.upper():
+        if bic.country_code.upper() == country_code.upper():  # noqa: SIM103
             return True
         else:
             return False

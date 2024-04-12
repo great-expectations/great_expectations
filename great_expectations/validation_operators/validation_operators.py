@@ -852,7 +852,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             ),
         )
 
-        if self.slack_webhook:
+        if self.slack_webhook:  # noqa: SIM102
             if (
                 self.notify_on == "all"
                 or self.notify_on == "success"

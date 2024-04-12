@@ -428,7 +428,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
                 "batching_regex is not currently supported and must be None for this DataAsset."
             )
 
-        if dataframe is None:
+        if dataframe is None:  # noqa: SIM108
             df = self.dataframe
         else:
             df = dataframe  # type: ignore[assignment]

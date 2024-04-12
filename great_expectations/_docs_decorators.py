@@ -275,7 +275,7 @@ def _add_text_below_string_docstring_argument(docstring: str, argument_name: str
                 param.description += "\n\n" + text + "\n"
 
     # Returns: includes an additional ":\n" that we need to strip out.
-    if parsed_docstring.returns:
+    if parsed_docstring.returns:  # noqa: SIM102
         if parsed_docstring.returns.description:
             parsed_docstring.returns.description = parsed_docstring.returns.description.strip(":\n")
 

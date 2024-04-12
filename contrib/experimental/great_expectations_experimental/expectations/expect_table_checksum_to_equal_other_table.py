@@ -441,7 +441,7 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
             if "ignore_columns" in configuration.kwargs:
                 pattern = re.compile(r"^(\w+)(,\s*\w+)*$")
                 assert (
-                    True if (pattern.match(configuration.kwargs["ignore_columns"])) else False
+                    True if (pattern.match(configuration.kwargs["ignore_columns"])) else False  # noqa: SIM210
                 ), "ignore_columns input is not valid. Please provide comma seperated columns list"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

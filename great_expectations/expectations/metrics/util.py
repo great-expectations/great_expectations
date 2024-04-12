@@ -791,7 +791,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
         List of tuples having mapping from string-valued column name to typed column name; None if "verify_only" is set.
     """  # noqa: E501
     column_names_list: List[str]
-    if isinstance(column_names, list):
+    if isinstance(column_names, list):  # noqa: SIM108
         column_names_list = column_names
     else:
         column_names_list = [column_names]
@@ -856,7 +856,7 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
-    if hasattr(dialect, "dialect"):
+    if hasattr(dialect, "dialect"):  # noqa: SIM102
         if issubclass(
             dialect.dialect,
             (
@@ -993,7 +993,7 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError(f"Invalid parameters: {chi2_msg}:")  # noqa: TRY003
 
-    elif isinstance(params, tuple) or isinstance(params, list):  # noqa: PLR1701
+    elif isinstance(params, tuple) or isinstance(params, list):  # noqa: PLR1701, SIM101
         scale = None
 
         # `params` is a tuple or a list

@@ -16,7 +16,7 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_mic(mic_code: str, df) -> bool:
     try:
-        if mic_code.upper() in df["MIC"].unique():
+        if mic_code.upper() in df["MIC"].unique():  # noqa: SIM103
             return True
         else:
             return False

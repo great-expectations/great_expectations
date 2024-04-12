@@ -17,13 +17,13 @@ from great_expectations.expectations.metrics import (
 def is_private_ip_address_in_class(addr: str, ip_class) -> bool:  # noqa: C901 - too complex
     try:
         for ic in ip_class:
-            if ic == "A":
+            if ic == "A":  # noqa: SIM102
                 if ipaddress.ip_address(addr) in ipaddress.ip_network("10.0.0.0/8"):
                     return True
-            if ic == "B":
+            if ic == "B":  # noqa: SIM102
                 if ipaddress.ip_address(addr) in ipaddress.ip_network("172.16.0.0/12"):
                     return True
-            if ic == "C":
+            if ic == "C":  # noqa: SIM102
                 if ipaddress.ip_address(addr) in ipaddress.ip_network("192.168.0.0/16"):
                     return True
         return False

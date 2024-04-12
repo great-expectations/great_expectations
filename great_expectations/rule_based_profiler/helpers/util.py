@@ -271,7 +271,7 @@ def get_parameter_value_and_validate_return_type(
         parameters=parameters,
     )
 
-    if expected_return_type is not None:
+    if expected_return_type is not None:  # noqa: SIM102
         if not isinstance(parameter_reference, expected_return_type):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{parameter_reference}" must be of type "{expected_return_type!s}" \
@@ -621,7 +621,7 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
         )
 
     if quantile_statistic_interpolation_method == "auto":
-        if round_decimals == 0:
+        if round_decimals == 0:  # noqa: SIM108
             quantile_statistic_interpolation_method = "nearest"
         else:
             quantile_statistic_interpolation_method = "linear"
@@ -1084,6 +1084,6 @@ class _NumericIterableWithDtype(Iterable, Protocol):
 def _is_iterable_of_numeric_dtypes(
     obj: Any,
 ) -> TypeGuard[_NumericIterableWithDtype]:
-    if hasattr(obj, "dtype") and np.issubdtype(obj.dtype, np.number):
+    if hasattr(obj, "dtype") and np.issubdtype(obj.dtype, np.number):  # noqa: SIM103
         return True
     return False

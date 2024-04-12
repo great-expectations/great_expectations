@@ -37,7 +37,7 @@ def get_certificate_exp_date(host, port=443, timeout=1):
 def has_valid_cert(url: str) -> bool:
     try:
         before_date, expiry_date = get_certificate_exp_date(url)
-        if (
+        if (  # noqa: SIM103
             expiry_date > datetime.utcnow()
             and before_date < datetime.utcnow()
             and expiry_date is not None

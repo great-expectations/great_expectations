@@ -212,12 +212,12 @@ class SiteBuilder:
             )
 
         # set default run_name_filter
-        if site_section_builders.get("validations", "None") not in FALSEY_YAML_STRINGS:
+        if site_section_builders.get("validations", "None") not in FALSEY_YAML_STRINGS:  # noqa: SIM102
             if site_section_builders["validations"].get("run_name_filter") is None:
                 site_section_builders["validations"]["run_name_filter"] = {
                     "not_includes": "profiling"
                 }
-        if site_section_builders.get("profiling", "None") not in FALSEY_YAML_STRINGS:
+        if site_section_builders.get("profiling", "None") not in FALSEY_YAML_STRINGS:  # noqa: SIM102
             if site_section_builders["profiling"].get("run_name_filter") is None:
                 site_section_builders["profiling"]["run_name_filter"] = {"includes": "profiling"}
 
@@ -429,7 +429,7 @@ class DefaultSiteSectionBuilder:
             if resource_identifiers and resource_key not in resource_identifiers:
                 continue
 
-            if self.run_name_filter and not isinstance(resource_key, GXCloudIdentifier):
+            if self.run_name_filter and not isinstance(resource_key, GXCloudIdentifier):  # noqa: SIM102
                 if not resource_key_passes_run_name_filter(resource_key, self.run_name_filter):
                     continue
             try:

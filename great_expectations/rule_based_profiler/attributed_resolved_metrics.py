@@ -41,7 +41,7 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:  # no
             return True
 
         value: MetricValue
-        if isinstance(values, (list, tuple)):
+        if isinstance(values, (list, tuple)):  # noqa: SIM102
             if values is not None and len(values) > 0:
                 values = deep_filter_properties_iterable(properties=values)
                 if values:

@@ -18,7 +18,7 @@ def is_valid_mic_match_country_code(mic: str, country_code, df) -> bool:
     try:
         if mic.upper() in df["MIC"].unique():
             cc = df.loc[df["MIC"] == mic.upper()]["ISO COUNTRY CODE (ISO 3166)"].iloc[0]
-            if country_code.upper() == cc[0:2]:
+            if country_code.upper() == cc[0:2]:  # noqa: SIM103
                 return True
             else:
                 return False

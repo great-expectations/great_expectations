@@ -68,7 +68,7 @@ def parse_ruff_errors(raw_errors: List[str]) -> List[DocstringError]:
             error_code_and_error = split_error[3].strip()
 
             error_code_match = re.search(pattern, error_code_and_error)
-            if error_code_match:
+            if error_code_match:  # noqa: SIM108
                 error_code = error_code_match.group()
             else:
                 error_code = ""

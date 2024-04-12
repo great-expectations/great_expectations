@@ -45,7 +45,7 @@ EvaluationParameterDict: TypeAlias = dict
 
 def is_evaluation_parameter(value: Any) -> TypeGuard[EvaluationParameterDict]:
     """Typeguard to check if a value is an evaluation parameter."""
-    return isinstance(value, dict) and "$PARAMETER" in value.keys()
+    return isinstance(value, dict) and "$PARAMETER" in value.keys()  # noqa: SIM118
 
 
 def get_evaluation_parameter_key(evaluation_parameter: EvaluationParameterDict) -> str:

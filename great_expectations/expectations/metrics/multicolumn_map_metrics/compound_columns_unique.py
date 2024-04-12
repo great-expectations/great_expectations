@@ -213,7 +213,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine):  # noqa: SIM102
             if (
                 metric.metric_name
                 == f"compound_columns.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"

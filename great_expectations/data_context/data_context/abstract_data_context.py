@@ -672,7 +672,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _add_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
     ) -> FluentDatasource:
-        if datasource:
+        if datasource:  # noqa: SIM108
             datasource_name = datasource.name
         else:
             datasource_name = kwargs.get("name", "")
@@ -704,7 +704,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
     ) -> FluentDatasource:
-        if datasource:
+        if datasource:  # noqa: SIM108
             datasource_name = datasource.name
         else:
             datasource_name = kwargs.get("name", "")
@@ -2892,7 +2892,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         logger.debug(f"Found {len(sites)} data_docs_sites.")
 
         if site_name:
-            if site_name not in sites.keys():
+            if site_name not in sites.keys():  # noqa: SIM118
                 raise gx_exceptions.DataContextError(  # noqa: TRY003
                     f"Could not find site named {site_name}. Please check your configurations"
                 )
@@ -3024,7 +3024,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             return [(metric_configuration, base_kwargs)]
 
         metric_configurations_list = []
-        for kwarg_name in metric_configuration.keys():
+        for kwarg_name in metric_configuration.keys():  # noqa: SIM118
             if not isinstance(metric_configuration[kwarg_name], dict):
                 raise gx_exceptions.DataContextError(  # noqa: TRY003
                     "Invalid metric_configuration: each key must contain a " "dictionary."
@@ -3032,7 +3032,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if (
                 kwarg_name == "metric_kwargs_id"
             ):  # this special case allows a hash of multiple kwargs
-                for metric_kwargs_id in metric_configuration[kwarg_name].keys():
+                for metric_kwargs_id in metric_configuration[kwarg_name].keys():  # noqa: SIM118
                     if base_kwargs != {}:
                         raise gx_exceptions.DataContextError(  # noqa: TRY003
                             "Invalid metric_configuration: when specifying "
@@ -3047,7 +3047,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                         for metric_name in metric_configuration[kwarg_name][metric_kwargs_id]
                     ]
             else:
-                for kwarg_value in metric_configuration[kwarg_name].keys():
+                for kwarg_value in metric_configuration[kwarg_name].keys():  # noqa: SIM118
                     base_kwargs.update({kwarg_name: kwarg_value})
                     if not isinstance(metric_configuration[kwarg_name][kwarg_value], list):
                         raise gx_exceptions.DataContextError(  # noqa: TRY003
@@ -3815,7 +3815,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self, include_rendered_content: Optional[bool] = None
     ) -> bool:
         if include_rendered_content is None:
-            if (
+            if (  # noqa: SIM103
                 self.include_rendered_content.expectation_suite is True
                 or self.include_rendered_content.globally is True
             ):
@@ -3828,7 +3828,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self, include_rendered_content: Optional[bool] = None
     ) -> bool:
         if include_rendered_content is None:
-            if (
+            if (  # noqa: SIM103
                 self.include_rendered_content.expectation_validation_result is True
                 or self.include_rendered_content.globally is True
             ):
@@ -4036,7 +4036,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             input value with all `$` characters replaced with the escape string
         """
-        if isinstance(value, dict) or isinstance(value, OrderedDict):  # noqa: PLR1701
+        if isinstance(value, dict) or isinstance(value, OrderedDict):  # noqa: PLR1701, SIM101
             return {
                 k: self.escape_all_config_variables(
                     value=v,

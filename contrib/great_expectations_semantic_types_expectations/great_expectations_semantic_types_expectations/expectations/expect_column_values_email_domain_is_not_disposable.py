@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_not_disposable(email_address: str) -> bool:
-    if email_address in blocklist:
+    if email_address in blocklist:  # noqa: SIM103
         return False
     else:
         return True

@@ -16,14 +16,14 @@ from great_expectations.expectations.metrics import (
 
 def is_weekday(ds) -> bool:
     try:
-        if isinstance(ds, str):
+        if isinstance(ds, str):  # noqa: SIM108
             d = parse(ds)
         else:
             d = ds
         print(d)
     except Exception:
         return False
-    if not d.weekday() > 4:
+    if not d.weekday() > 4:  # noqa: SIM103
         return True
     else:
         return False

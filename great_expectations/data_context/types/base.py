@@ -1467,7 +1467,7 @@ class DataContextConfigSchema(Schema):
             exc
             and exc.messages
             and isinstance(exc.messages, dict)
-            and all(key is None for key in exc.messages.keys())
+            and all(key is None for key in exc.messages.keys())  # noqa: SIM118
         ):
             exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
 
@@ -2515,7 +2515,7 @@ class CheckpointConfigSchema(Schema):
                 """  # noqa: E501
             )
 
-        if data.get("config_version"):
+        if data.get("config_version"):  # noqa: SIM102
             if "name" not in data:
                 raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                     """Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint

@@ -35,7 +35,7 @@ class OpsgenieRenderer(Renderer):
         batch_id = result.batch_id or "__no_batch_id__"
         check_details_text = f"{n_checks_succeeded} of {n_checks} expectations were met"
 
-        if result.success:
+        if result.success:  # noqa: SIM108
             status = "Success 🎉"
         else:
             status = "Failed ❌"

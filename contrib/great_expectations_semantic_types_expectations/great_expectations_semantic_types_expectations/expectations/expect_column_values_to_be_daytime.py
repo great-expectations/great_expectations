@@ -16,7 +16,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_daytime(ts, lat, lon) -> bool:
-    if isinstance(ts, str):
+    if isinstance(ts, str):  # noqa: SIM108
         d = parse(ts)
     else:
         d = ts
@@ -31,7 +31,7 @@ def is_daytime(ts, lat, lon) -> bool:
     rising_ts = obs.next_rising(ephem.Sun()).datetime()
     next_setting_ts = obs.next_setting(ephem.Sun()).datetime()
 
-    if d >= rising_ts and d < next_setting_ts:
+    if d >= rising_ts and d < next_setting_ts:  # noqa: SIM103
         return True
     else:
         return False

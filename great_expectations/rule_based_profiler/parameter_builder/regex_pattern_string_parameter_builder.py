@@ -175,7 +175,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_values = metric_values[:, 0]
 
         nonnull_count: int
-        if pd.isnull(metric_values).any():
+        if pd.isnull(metric_values).any():  # noqa: SIM108
             nonnull_count = 0
         else:
             nonnull_count = sum(metric_values)

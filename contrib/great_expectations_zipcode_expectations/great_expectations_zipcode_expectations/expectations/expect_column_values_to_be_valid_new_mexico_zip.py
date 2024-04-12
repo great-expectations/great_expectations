@@ -11,9 +11,9 @@ from great_expectations.expectations.metrics import (
 def is_valid_new_mexico_zip(zip: str):
     list_of_dicts_of_new_mexico_zips = zipcodes.filter_by(state="NM")
     list_of_new_mexico_zips = [d["zip_code"] for d in list_of_dicts_of_new_mexico_zips]
-    if len(zip) > 10 or type(zip) != str:
+    if len(zip) > 10 or type(zip) != str:  # noqa: E721
         return False
-    elif zip in list_of_new_mexico_zips:
+    elif zip in list_of_new_mexico_zips:  # noqa: SIM103
         return True
     else:
         return False

@@ -86,7 +86,7 @@ def mock_failed_migration(
     ) -> mock.MagicMock:  # noqa: TID251
         context = mock.MagicMock()  # noqa: TID251
 
-        with mock.patch.object(
+        with mock.patch.object(  # noqa: SIM117
             CloudMigrator,
             "_migrate_to_cloud",
             return_value=None,

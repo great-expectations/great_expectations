@@ -648,7 +648,7 @@ specified (empty "metric_name" value detected)."""  # noqa: E501
 
                         batch_metric_values.append(0.0)
                     elif not (
-                        (  # noqa: PLR1701
+                        (  # noqa: PLR1701, SIM101
                             isinstance(metric_value, (str, np.str_))
                             and is_parseable_date(value=metric_value)
                         )

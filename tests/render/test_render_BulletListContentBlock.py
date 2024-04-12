@@ -91,7 +91,7 @@ def test_all_expectations_using_test_definitions():
     # Loop over all test_files, datasets, and tests:
     test_results = defaultdict(list)
     for filename in test_files:
-        test_definitions = json.load(open(filename))
+        test_definitions = json.load(open(filename))  # noqa: SIM115
         if test_definitions["expectation_type"] in UNSUPPORTED_EXPECTATIONS:
             continue
         for dataset in test_definitions["datasets"]:

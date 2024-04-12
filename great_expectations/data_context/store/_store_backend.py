@@ -235,7 +235,7 @@ class StoreBackend(metaclass=ABCMeta):
         raise NotImplementedError
 
     def is_ignored_key(self, key):
-        for ignored in self.IGNORED_FILES:
+        for ignored in self.IGNORED_FILES:  # noqa: SIM110
             if ignored in key:
                 return True
 

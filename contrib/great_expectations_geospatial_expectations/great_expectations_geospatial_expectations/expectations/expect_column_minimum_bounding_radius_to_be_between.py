@@ -219,20 +219,20 @@ class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnAggregateExpectation):
         strict_min = success_kwargs.get("strict_min")
         strict_max = success_kwargs.get("strict_max")
 
-        if diameter_flag:
+        if diameter_flag:  # noqa: SIM108
             distance = radius * 2
         else:
             distance = radius
 
         # Evaluate the between statement (from column_values_between.py)
         if min_value is None:
-            if strict_max:
+            if strict_max:  # noqa: SIM108
                 success = distance < max_value
             else:
                 success = distance <= max_value
 
         elif max_value is None:
-            if strict_min:
+            if strict_min:  # noqa: SIM108
                 success = min_value < distance
             else:
                 success = min_value <= distance

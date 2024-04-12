@@ -362,7 +362,7 @@ class ExecutionEngine(ABC):
         assert (
             "column" in domain_kwargs or column_name is not None
         ), "No column provided: A column must be provided in domain_kwargs or in the column_name parameter"  # noqa: E501
-        if column_name is not None:
+        if column_name is not None:  # noqa: SIM108
             column = column_name
         else:
             column = domain_kwargs["column"]

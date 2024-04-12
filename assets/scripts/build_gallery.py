@@ -235,10 +235,10 @@ def get_expectations_info_dict(  # noqa: C901 - too complex
         exp_type_set = set()
         for line in re.split("\r?\n", text):
             match = rx.match(line)
-            if match:
+            if match:  # noqa: SIM102
                 if not line.strip().startswith("#"):
                     exp_type_set.add(match.group(1))
-        if file_path.startswith("great_expectations"):
+        if file_path.startswith("great_expectations"):  # noqa: SIM108
             _prefix = "Core "
         else:
             _prefix = "Contrib "

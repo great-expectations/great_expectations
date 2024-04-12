@@ -808,7 +808,7 @@ def test_get_compute_domain_with_column_pair(sa):
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
     assert (
-        "column_A" not in compute_kwargs.keys() and "column_B" not in compute_kwargs.keys()
+        "column_A" not in compute_kwargs.keys() and "column_B" not in compute_kwargs.keys()  # noqa: SIM118
     ), "domain kwargs should be existent"
     assert accessor_kwargs == {
         "column_A": "a",
@@ -903,7 +903,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
     assert raw_data == domain_data, "Data does not match after getting compute domain"
     # Ensuring compute kwargs have not been modified
     assert (
-        "row_condition" in compute_kwargs.keys()
+        "row_condition" in compute_kwargs.keys()  # noqa: SIM118
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
@@ -940,7 +940,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
 
     # Ensuring compute kwargs have not been modified
     assert (
-        "row_condition" in compute_kwargs.keys()
+        "row_condition" in compute_kwargs.keys()  # noqa: SIM118
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {"column": "b"}, "Accessor kwargs have been modified"
 

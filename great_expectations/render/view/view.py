@@ -368,9 +368,9 @@ class DefaultJinjaView:
                     f"<{default_param_tag} $styling>$content</{default_param_tag}>"
                 )
 
-                for parameter in template["params"].keys():
+                for parameter in template["params"].keys():  # noqa: SIM118
                     # If this param has styling that over-rides the default, skip it here and get it in the next loop.  # noqa: E501
-                    if "params" in template["styling"]:
+                    if "params" in template["styling"]:  # noqa: SIM102
                         if parameter in template["styling"]["params"]:
                             continue
 
@@ -512,7 +512,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         if "markdown_status_icon" in template["params"]:
             return template["params"]["markdown_status_icon"]
 
-        for parameter in template["params"].keys():
+        for parameter in template["params"].keys():  # noqa: SIM118
             if parameter == "html_success_icon":
                 template["params"][parameter] = ""
                 continue

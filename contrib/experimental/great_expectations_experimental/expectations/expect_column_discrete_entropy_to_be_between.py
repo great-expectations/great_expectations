@@ -110,7 +110,7 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
             {"table.row_count": MetricConfiguration("table.row_count", table_domain_kwargs)}
         )
 
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine) or isinstance(
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine) or isinstance(  # noqa: SIM101
             execution_engine, SparkDFExecutionEngine
         ):
             dependencies["column_values.nonnull.count"] = MetricConfiguration(
@@ -288,7 +288,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+            False if runtime_configuration.get("include_column_name") is False else True  # noqa: SIM211
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

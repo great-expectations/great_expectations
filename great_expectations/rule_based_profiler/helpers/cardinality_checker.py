@@ -274,13 +274,13 @@ def validate_input_parameters(  # noqa: C901
                     f"Please specify a supported cardinality mode. Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"  # noqa: E501
                 )
 
-    if max_unique_values is not None:
+    if max_unique_values is not None:  # noqa: SIM102
         if not isinstance(max_unique_values, int):
             raise ProfilerConfigurationError(  # noqa: TRY003
                 f"Please specify an int, you specified a {type(max_unique_values)}"
             )
 
-    if max_proportion_unique is not None:
+    if max_proportion_unique is not None:  # noqa: SIM102
         if not isinstance(max_proportion_unique, (float, int)):
             raise ProfilerConfigurationError(  # noqa: TRY003
                 f"Please specify a float or int, you specified a {type(max_proportion_unique)}"

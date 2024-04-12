@@ -499,7 +499,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_parameters(
 
 @pytest.mark.postgresql
 def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
-    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:  # noqa: SIM117
         with pytest.raises(LookupError):
             source.get_asset("my_asset")
 
@@ -945,7 +945,7 @@ def test_validate_valid_postgres_connection_string(
 def test_validate_invalid_postgres_connection_string(
     create_source: CreateSourceFixture, connection_string
 ):
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError):  # noqa: SIM117
         with create_source(
             validate_batch_spec=lambda _: None,
             dialect="postgresql",
@@ -1114,7 +1114,7 @@ def test_query_data_asset(empty_data_context, create_source):
 
 @pytest.mark.postgresql
 def test_non_select_query_data_asset(create_source):
-    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
+    with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:  # noqa: SIM117
         with pytest.raises(ValueError):
             source.add_query_asset(name="query_asset", query="* FROM my_table")
 

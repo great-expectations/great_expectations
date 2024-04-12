@@ -1065,7 +1065,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
 
         from google.cloud.exceptions import NotFound
 
-        try:
+        try:  # noqa: SIM105
             mock_client.bucket.assert_called_once_with("leakybucket")
         except NotFound:
             pass
@@ -1250,7 +1250,7 @@ def test_TupleAzureBlobStoreBackend_account_url():
         account_url=account_url, prefix=prefix, container=container
     )
 
-    with mock.patch(
+    with mock.patch(  # noqa: SIM117
         "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
         with mock.patch(

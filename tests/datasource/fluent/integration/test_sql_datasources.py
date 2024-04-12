@@ -305,7 +305,7 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 
 @pytest.fixture
 def databricks_creds_populated() -> bool:
-    if (
+    if (  # noqa: SIM103
         os.getenv("DATABRICKS_TOKEN")
         or os.getenv("DATABRICKS_HOST")
         or os.getenv("DATABRICKS_HTTP_PATH")
@@ -331,7 +331,7 @@ def databricks_sql_ds(
 
 @pytest.fixture
 def snowflake_creds_populated() -> bool:
-    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):  # noqa: SIM103
         return True
     return False
 

@@ -14,9 +14,9 @@ def is_valid_state_or_territory_abbreviation(state: str, dc_statehood: bool):
         list_of_state_and_territory_abbrs.append("DC")
     else:
         pass
-    if len(state) != 2 or type(state) != str:
+    if len(state) != 2 or type(state) != str:  # noqa: E721
         return False
-    elif state in list_of_state_and_territory_abbrs:
+    elif state in list_of_state_and_territory_abbrs:  # noqa: SIM103
         return True
     else:
         return False

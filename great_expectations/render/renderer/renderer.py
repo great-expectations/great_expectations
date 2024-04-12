@@ -118,7 +118,7 @@ class Renderer:
     def _group_evrs_by_column(cls, validation_results):
         columns = {}
         for evr in validation_results.results:
-            if "column" in evr.expectation_config.kwargs:
+            if "column" in evr.expectation_config.kwargs:  # noqa: SIM401
                 column = evr.expectation_config.kwargs["column"]
             else:
                 column = "Table-level Expectations"

@@ -229,7 +229,7 @@ class MetricListMetricRetriever(MetricRetriever):
         Returns:
             bool: True if all the metric types in the list are valid, False otherwise.
         """  # noqa: E501
-        for metric in metric_list:
+        for metric in metric_list:  # noqa: SIM110
             if metric not in MetricTypes:
                 return False
         return True
@@ -250,7 +250,7 @@ class MetricListMetricRetriever(MetricRetriever):
             MetricTypes.COLUMN_MEAN,
             MetricTypes.COLUMN_NULL_COUNT,
         ]
-        for metric in column_metrics:
+        for metric in column_metrics:  # noqa: SIM110
             if metric in metric_list:
                 return True
         return False

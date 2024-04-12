@@ -323,7 +323,7 @@ class HtmlSiteStore:
         if not isinstance(key, SiteSectionIdentifier):
             raise TypeError(f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}")  # noqa: TRY003
 
-        for key_class in self.store_backends.keys():
+        for key_class in self.store_backends.keys():  # noqa: SIM118
             try:
                 if isinstance(key.resource_identifier, key_class):
                     return
@@ -340,7 +340,7 @@ class HtmlSiteStore:
     def list_keys(self):
         keys = []
         for type_, backend in self.store_backends.items():
-            try:
+            try:  # noqa: SIM105
                 # If the store_backend does not support list_keys...
                 key_tuples = backend.list_keys()
             except NotImplementedError:

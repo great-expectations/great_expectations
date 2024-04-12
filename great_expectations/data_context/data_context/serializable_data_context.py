@@ -160,7 +160,7 @@ class SerializableDataContext(AbstractDataContext):
 
         # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.  # noqa: E501
         global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
-        if (
+        if (  # noqa: SIM103
             project_config_usage_stats.usage_statistics_url  # noqa: PLR1714
             != context_config_usage_stats.usage_statistics_url
             and context_config_usage_stats.usage_statistics_url != global_usage_stats_url

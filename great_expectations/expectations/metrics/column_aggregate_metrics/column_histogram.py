@@ -77,7 +77,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
 
-        if isinstance(bins, np.ndarray):
+        if isinstance(bins, np.ndarray):  # noqa: SIM108
             bins = bins.tolist()
         else:
             bins = list(bins)

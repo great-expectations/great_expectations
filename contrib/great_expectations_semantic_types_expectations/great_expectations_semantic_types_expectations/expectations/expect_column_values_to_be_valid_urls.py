@@ -21,7 +21,7 @@ def fits_regex(x):
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
-    if re.match(regex, str(x)):
+    if re.match(regex, str(x)):  # noqa: SIM103
         return True
     return False
 

@@ -203,7 +203,7 @@ class MetricIdentifier(DataContextKey):
         return self.to_tuple()
 
     def to_tuple(self):
-        if self._metric_kwargs_id is None:
+        if self._metric_kwargs_id is None:  # noqa: SIM108
             tuple_metric_kwargs_id = "__"
         else:
             tuple_metric_kwargs_id = self._metric_kwargs_id
@@ -261,7 +261,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         return self._expectation_suite_identifier
 
     def to_tuple(self):
-        if self.data_asset_name is None:
+        if self.data_asset_name is None:  # noqa: SIM108
             tuple_data_asset_name = "__"
         else:
             tuple_data_asset_name = self.data_asset_name
@@ -273,7 +273,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         )
 
     def to_fixed_length_tuple(self):
-        if self.data_asset_name is None:
+        if self.data_asset_name is None:  # noqa: SIM108
             tuple_data_asset_name = "__"
         else:
             tuple_data_asset_name = self.data_asset_name
@@ -301,7 +301,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "ValidationMetricIdentifier tuple must have at least six components."
             )
-        if tuple_[2] == "__":
+        if tuple_[2] == "__":  # noqa: SIM108
             tuple_data_asset_name = None
         else:
             tuple_data_asset_name = tuple_[2]
@@ -320,7 +320,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "ValidationMetricIdentifier fixed length tuple must have exactly six " "components."
             )
-        if tuple_[2] == "__":
+        if tuple_[2] == "__":  # noqa: SIM108
             tuple_data_asset_name = None
         else:
             tuple_data_asset_name = tuple_[2]

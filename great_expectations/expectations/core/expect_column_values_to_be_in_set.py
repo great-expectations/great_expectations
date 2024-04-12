@@ -27,7 +27,7 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 
-try:
+try:  # noqa: SIM105
     import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass

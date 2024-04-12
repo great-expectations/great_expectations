@@ -106,7 +106,7 @@ def mock_cloud_pandas_datasource(
         pact_response_body=GET_DATASOURCE_MIN_RESPONSE_BODY,
     )
 
-    with mock.patch(
+    with mock.patch(  # noqa: SIM117
         target="great_expectations.core.datasource_dict.DatasourceDict.data",
         return_value={},
     ):

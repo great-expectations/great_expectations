@@ -22,7 +22,7 @@ def is_cert_match(host: str) -> bool:
         sock = context.wrap_socket(conn, server_hostname=host)
         sock.settimeout(1)
         cert = sock.getpeercert()
-        if ssl.match_hostname(cert, host) is None:
+        if ssl.match_hostname(cert, host) is None:  # noqa: SIM103
             return True
         else:
             return False

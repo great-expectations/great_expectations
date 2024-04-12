@@ -140,7 +140,7 @@ class DataPartitioner(abc.ABC):
                 "date_parts are required when using partition_on_date_parts."
             )
         if not all(
-            (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701
+            (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701, SIM101
             for dp in date_parts
         ):
             raise gx_exceptions.InvalidConfigError("date_parts should be of type DatePart or str.")  # noqa: TRY003

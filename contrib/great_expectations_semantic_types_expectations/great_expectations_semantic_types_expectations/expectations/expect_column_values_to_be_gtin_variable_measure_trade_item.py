@@ -21,7 +21,7 @@ def is_gtin_variable_measure_trade_item(gtin_value: str) -> bool:
         gtin_obj = gtin.GTIN(gtin_value)
     except Exception:
         return False
-    if gtin_obj.indicator_digit == "9":
+    if gtin_obj.indicator_digit == "9":  # noqa: SIM103
         return True
     else:
         return False

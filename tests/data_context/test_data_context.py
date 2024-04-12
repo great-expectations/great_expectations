@@ -360,7 +360,7 @@ def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
 
 @pytest.mark.unit
 def test_add_store(empty_data_context):
-    assert "my_new_store" not in empty_data_context.stores.keys()
+    assert "my_new_store" not in empty_data_context.stores.keys()  # noqa: SIM118
     assert "my_new_store" not in empty_data_context.get_config()["stores"]
     new_store = empty_data_context.add_store(
         "my_new_store",
@@ -369,7 +369,7 @@ def test_add_store(empty_data_context):
             "class_name": "ExpectationsStore",
         },
     )
-    assert "my_new_store" in empty_data_context.stores.keys()
+    assert "my_new_store" in empty_data_context.stores.keys()  # noqa: SIM118
     assert "my_new_store" in empty_data_context.get_config()["stores"]
 
     assert isinstance(new_store, ExpectationsStore)

@@ -104,8 +104,8 @@ class ExpectationSuite(SerializableDictDot):
         if meta is None:
             meta = {"great_expectations_version": ge_version}
         if (
-            "great_expectations.__version__" not in meta.keys()
-            and "great_expectations_version" not in meta.keys()
+            "great_expectations.__version__" not in meta.keys()  # noqa: SIM118
+            and "great_expectations_version" not in meta.keys()  # noqa: SIM118
         ):
             meta["great_expectations_version"] = ge_version
         # We require meta information to be serializable, but do not convert until necessary
@@ -405,7 +405,7 @@ class ExpectationSuite(SerializableDictDot):
         # schemas to get serialization all-the-way down via dump
         expectation_configurations = [exp.configuration for exp in self.expectations]
         myself["expectations"] = convert_to_json_serializable(expectation_configurations)
-        try:
+        try:  # noqa: SIM105
             myself["evaluation_parameters"] = convert_to_json_serializable(
                 myself["evaluation_parameters"]
             )
@@ -991,7 +991,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation: ExpectationConfiguration
         expectation_configurations = [exp.configuration for exp in self.expectations]
         for expectation in expectation_configurations:
-            if "column" in expectation.kwargs:
+            if "column" in expectation.kwargs:  # noqa: SIM108, SIM401
                 column = expectation.kwargs["column"]
             else:
                 column = "_nocolumn"

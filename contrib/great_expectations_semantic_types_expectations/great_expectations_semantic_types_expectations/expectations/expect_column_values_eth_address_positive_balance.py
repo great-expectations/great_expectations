@@ -20,7 +20,7 @@ def has_eth_address_positive_balance(addr: str) -> bool:
         res = coinaddrvalidator.validate("eth", addr).valid
         if res is True:
             balance = blockcypher.get_total_balance(addr, "eth")
-            if balance > 0:
+            if balance > 0:  # noqa: SIM103
                 return True
             else:
                 return False

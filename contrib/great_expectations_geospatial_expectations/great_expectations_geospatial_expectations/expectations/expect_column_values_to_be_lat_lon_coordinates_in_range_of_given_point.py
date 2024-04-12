@@ -231,7 +231,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             assert (
                 center_point is not None and range is not None
             ), "center_point and range must be specified"
-            assert (isinstance(center_point, tuple) or isinstance(center_point, list)) and all(
+            assert (isinstance(center_point, tuple) or isinstance(center_point, list)) and all(  # noqa: SIM101
                 isinstance(n, float) for n in center_point
             ), "center_point must be a tuple or list of lat/lon floats"
             assert (center_point[0] >= -90 and center_point[0] <= 90) and (
@@ -441,7 +441,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
     ]:
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+            False if runtime_configuration.get("include_column_name") is False else True  # noqa: SIM211
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

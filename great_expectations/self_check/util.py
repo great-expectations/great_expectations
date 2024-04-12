@@ -1898,7 +1898,7 @@ def should_we_generate_this_test(  # noqa: C901, PLR0911, PLR0912, PLR0913
                 f"All sqlalchemy (including {backend}) is suppressed for test: {expectation_test_case.title} | {extra_debug_info}"  # noqa: E501
             )
             return False
-    if expectation_test_case.only_for is not None and expectation_test_case.only_for:
+    if expectation_test_case.only_for is not None and expectation_test_case.only_for:  # noqa: SIM102
         if backend not in expectation_test_case.only_for:
             if "sqlalchemy" in expectation_test_case.only_for and backend in SQL_DIALECT_NAMES:
                 return True
@@ -1910,7 +1910,7 @@ def should_we_generate_this_test(  # noqa: C901, PLR0911, PLR0912, PLR0913
                 ):
                     if major == "0" and minor in ["22", "23"]:
                         return True
-                elif "pandas>=024" in expectation_test_case.only_for:
+                elif "pandas>=024" in expectation_test_case.only_for:  # noqa: SIM102
                     if (major == "0" and int(minor) >= 24) or int(  # noqa: PLR2004
                         major
                     ) >= 1:
@@ -2071,8 +2071,8 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
 ) -> None:
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists  # noqa: E501
     # this will work for testing since result_format is COMPLETE
-    if pk_column:
-        if not result["success"]:
+    if pk_column:  # noqa: SIM102
+        if not result["success"]:  # noqa: SIM102
             if "unexpected_index_list" in result["result"]:
                 assert "unexpected_index_query" in result["result"]
 
@@ -2114,7 +2114,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
 
     # Determine if np.allclose(..) might be needed for float comparison
     try_allclose = False
-    if "observed_value" in test["output"]:
+    if "observed_value" in test["output"]:  # noqa: SIM102
         if RX_FLOAT.match(repr(test["output"]["observed_value"])):
             try_allclose = True
 

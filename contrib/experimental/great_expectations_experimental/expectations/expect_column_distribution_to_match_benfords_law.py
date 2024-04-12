@@ -86,7 +86,7 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnAggregateMetricProvider):
         for i in range(9):
             stat += ((listdata[i] - matchvalues[i]) ** 2) / (matchvalues[i])
 
-        if stat >= 5.071:
+        if stat >= 5.071:  # noqa: SIM103
             return False
         else:
             return True

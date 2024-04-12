@@ -124,7 +124,7 @@ def run_command(command: Command, suppress_output: bool = False) -> bool:
     # If suppressed, set STDOUT to dev/null
     stdout = sys.stdout
     if suppress_output:
-        sys.stdout = open(os.devnull, "w")
+        sys.stdout = open(os.devnull, "w")  # noqa: SIM115
 
     name, full_command, err = command
 

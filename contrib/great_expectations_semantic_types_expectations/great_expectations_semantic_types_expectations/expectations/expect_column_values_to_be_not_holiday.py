@@ -18,13 +18,13 @@ from great_expectations.expectations.metrics import (
 def is_not_holiday(date, country_code) -> bool:
     try:
         holidays_list = country_holidays(country_code.upper())
-        if isinstance(date, str):
+        if isinstance(date, str):  # noqa: SIM108
             d = parse(date)
         else:
             d = date
     except Exception:
         return False
-    if d in holidays_list:
+    if d in holidays_list:  # noqa: SIM103
         return False
     else:
         return True

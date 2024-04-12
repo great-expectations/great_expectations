@@ -209,7 +209,7 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         invoke docstrings -p=great_expectations/core -p=great_expectations/util.py
     """
 
-    if paths:
+    if paths:  # noqa: SIM108
         select_paths = [pathlib.Path(p) for p in paths]
     else:
         select_paths = None
@@ -293,7 +293,7 @@ def type_check(  # noqa: C901, PLR0912
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
-    if daemon:
+    if daemon:  # noqa: SIM108
         bin = "dmypy run --"
     else:
         bin = "mypy"
@@ -560,7 +560,7 @@ def type_schema(  # noqa: C901 - too complex
             schema_path = schema_dir.joinpath(f"{model.__name__}.json")
             json_str: str = model.schema_json(indent=indent) + "\n"
 
-            if schema_path.exists():
+            if schema_path.exists():  # noqa: SIM102
                 if json_str == schema_path.read_text():
                     print(f"✅  {name} - {schema_path.name} unchanged")
                     continue

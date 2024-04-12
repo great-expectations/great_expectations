@@ -456,7 +456,7 @@ def test_get_compute_domain_with_row_condition(
 
     # Ensuring compute kwargs have not been modified
     assert (
-        "row_condition" in compute_kwargs.keys()
+        "row_condition" in compute_kwargs.keys()  # noqa: SIM118
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {}
 
@@ -481,7 +481,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(
     assert data.collect() == expected_df.collect()
 
     # Ensuring compute kwargs have not been modified
-    assert "row_condition" in compute_kwargs.keys()
+    assert "row_condition" in compute_kwargs.keys()  # noqa: SIM118
     assert accessor_kwargs == {}
 
 
@@ -622,7 +622,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
 def dataframes_equal(first_table, second_table):
     if first_table.schema != second_table.schema:
         return False
-    if first_table.collect() != second_table.collect():
+    if first_table.collect() != second_table.collect():  # noqa: SIM103
         return False
     return True
 
@@ -944,7 +944,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session)
 
     # Ensuring compute kwargs have not been modified
     assert (
-        "row_condition" in compute_kwargs.keys()
+        "row_condition" in compute_kwargs.keys()  # noqa: SIM118
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {"column": "b"}, "Accessor kwargs have been modified"
 

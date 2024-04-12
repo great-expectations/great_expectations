@@ -17,7 +17,7 @@ from great_expectations.expectations.metrics import (
 def is_password_not_leaked(psw: str) -> bool:
     try:
         res = pwnedpasswords.check(psw)
-        if res > 1:
+        if res > 1:  # noqa: SIM103
             return False
         else:
             return True

@@ -107,7 +107,7 @@ class EmailRenderer(Renderer):
             if data_docs_pages:
                 if notify_with is not None:
                     for docs_link_key in notify_with:
-                        if docs_link_key in data_docs_pages.keys():
+                        if docs_link_key in data_docs_pages.keys():  # noqa: SIM118
                             docs_link = data_docs_pages[docs_link_key]
                             report_element = self._get_report_element(docs_link)
                         else:
@@ -121,7 +121,7 @@ class EmailRenderer(Renderer):
                             print(report_element)
                             html += report_element
                 else:
-                    for docs_link_key in data_docs_pages.keys():
+                    for docs_link_key in data_docs_pages.keys():  # noqa: SIM118
                         if docs_link_key == "class":
                             continue
                         docs_link = data_docs_pages[docs_link_key]

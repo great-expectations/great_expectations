@@ -18,7 +18,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_india_zip(zip: str):
     if len(zip) != 6 or zip.isnumeric() is False:
         return False
-    elif indiapins.isvalid(zip):
+    elif indiapins.isvalid(zip):  # noqa: SIM103
         return True
     else:
         return False

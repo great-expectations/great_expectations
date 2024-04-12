@@ -125,13 +125,13 @@ SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 def _is_sorter_list(
     sorters: SortersDefinition,
 ) -> TypeGuard[list[Sorter]]:
-    if len(sorters) == 0 or isinstance(sorters[0], Sorter):
+    if len(sorters) == 0 or isinstance(sorters[0], Sorter):  # noqa: SIM103
         return True
     return False
 
 
 def _is_str_sorter_list(sorters: SortersDefinition) -> TypeGuard[list[str]]:
-    if len(sorters) > 0 and isinstance(sorters[0], str):
+    if len(sorters) > 0 and isinstance(sorters[0], str):  # noqa: SIM103
         return True
     return False
 
@@ -845,7 +845,7 @@ class Datasource(
 
 
 # This is used to prevent passing things like `type`, `assets` etc. to the execution engine
-_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__.keys()}
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__.keys()}  # noqa: SIM118
 
 
 @dataclasses.dataclass(frozen=True)

@@ -1538,7 +1538,7 @@ representation."""  # noqa: E501
 representation."""  # noqa: E501
                     )
 
-        if isinstance(min_value, datetime.datetime) or isinstance(max_value, datetime.datetime):
+        if isinstance(min_value, datetime.datetime) or isinstance(max_value, datetime.datetime):  # noqa: SIM102
             if not isinstance(metric_value, datetime.datetime):
                 try:
                     metric_value = parse(metric_value)
@@ -1550,7 +1550,7 @@ representation."""  # noqa: E501
 
         # Checking if mean lies between thresholds
         if min_value is not None:
-            if strict_min:
+            if strict_min:  # noqa: SIM108
                 above_min = metric_value > min_value
             else:
                 above_min = metric_value >= min_value
@@ -1558,7 +1558,7 @@ representation."""  # noqa: E501
             above_min = True
 
         if max_value is not None:
-            if strict_max:
+            if strict_max:  # noqa: SIM108
                 below_max = metric_value < max_value
             else:
                 below_max = metric_value <= max_value

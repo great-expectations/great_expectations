@@ -856,7 +856,7 @@ def section_12_add_your_new_datasource_to_your_datacontext():
         # </snippet>
 
         assert (
-            datasource_name
+            datasource_name  # noqa: SIM118
             in data_context.list_datasources()[0]["data_connectors"].keys()
         ), f"{datasource_name} not in {data_context.list_datasources()}"
         data_context.delete_datasource(datasource_name="my_datasource_name")

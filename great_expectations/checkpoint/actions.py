@@ -328,7 +328,7 @@ class SlackNotificationAction(DataDocsAction):
 
     def _post_slack_payload(self, payload: dict, result: dict) -> dict:
         blocks = payload.get("blocks")
-        if blocks:
+        if blocks:  # noqa: SIM102
             if len(blocks) >= 1:
                 if blocks[0].get("text"):
                     result = self._send_notifications_in_batches(
@@ -439,7 +439,7 @@ class SlackNotificationAction(DataDocsAction):
             )
 
             blocks = payload.get("blocks")
-            if blocks:
+            if blocks:  # noqa: SIM102
                 if len(blocks) >= 1:
                     if blocks[0].get("text"):
                         result = self._send_notifications_in_batches(blocks, payload, result)

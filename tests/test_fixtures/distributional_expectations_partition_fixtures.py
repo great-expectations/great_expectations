@@ -71,7 +71,7 @@ def generate_new_partitions(df):
 if __name__ == "__main__":
     df = generate_new_data(seed=42)
     d = df.to_dict(orient="list")
-    json.dump(d, open("../test_sets/distributional_expectations_data_base.json", "w"))
+    json.dump(d, open("../test_sets/distributional_expectations_data_base.json", "w"))  # noqa: SIM115
     test_partitions = generate_new_partitions(df)
 
     test_partitions = gx.data_asset.util.recursively_convert_to_json_serializable(test_partitions)
@@ -80,5 +80,5 @@ if __name__ == "__main__":
 
     df = generate_new_data(seed=20190501)
     d = df.to_dict(orient="list")
-    json.dump(d, open("../test_sets/distributional_expectations_data_test.json", "w"))
+    json.dump(d, open("../test_sets/distributional_expectations_data_test.json", "w"))  # noqa: SIM115
     print("Done generating new base data, partitions, and test data.")

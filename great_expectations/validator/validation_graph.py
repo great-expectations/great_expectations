@@ -224,7 +224,7 @@ class ValidationGraph:
         if runtime_configuration is None:
             runtime_configuration = {}
 
-        if runtime_configuration.get("catch_exceptions", True):
+        if runtime_configuration.get("catch_exceptions", True):  # noqa: SIM108
             catch_exceptions = True
         else:
             catch_exceptions = False

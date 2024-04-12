@@ -19,7 +19,7 @@ def imsi_country_code(imsi_num: str, country_code) -> bool:
     try:
         imsi.validate(imsi_num)
         country = imsi.info(imsi_num)["cc"].lower()
-        if country_code.lower() == country:
+        if country_code.lower() == country:  # noqa: SIM103
             return True
         else:
             return False

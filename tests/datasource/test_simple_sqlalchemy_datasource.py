@@ -190,7 +190,7 @@ def _expected_data_connector_types(
     for key in introspection:
         expected_data_connector_types[key] = InferredAssetSqlDataConnector
     for _, table_dict in tables.items():
-        for key in table_dict["partitioners"].keys():
+        for key in table_dict["partitioners"].keys():  # noqa: SIM118
             expected_data_connector_types[key] = ConfiguredAssetSqlDataConnector
     return expected_data_connector_types
 
@@ -202,7 +202,7 @@ def _expected_data_assets_with_types(
     for key in introspection:
         expected_data_assets_with_types[key] = []
     for table_name, table_dict in tables.items():
-        for key in table_dict["partitioners"].keys():
+        for key in table_dict["partitioners"].keys():  # noqa: SIM118
             if key not in expected_data_assets_with_types:
                 expected_data_assets_with_types[key] = []
             expected_data_assets_with_types[key].append((table_name, "table"))

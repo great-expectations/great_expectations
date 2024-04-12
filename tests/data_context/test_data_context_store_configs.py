@@ -83,7 +83,7 @@ def test_add_store(totally_empty_data_context):
             "class_name": "ValidationsStore",
         },
     )
-    assert "my_new_store" in totally_empty_data_context.stores.keys()
+    assert "my_new_store" in totally_empty_data_context.stores.keys()  # noqa: SIM118
     assert len(totally_empty_data_context.stores.keys()) == 7
 
 
