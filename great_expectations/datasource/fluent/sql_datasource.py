@@ -15,6 +15,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Protocol,
     Tuple,
     Type,
     Union,
@@ -91,7 +92,7 @@ class SQLDatasourceError(Exception):
     pass
 
 
-class _Partitioner(PartitionerProtocol):
+class _Partitioner(PartitionerProtocol, Protocol):
     def param_defaults(self, sql_asset: _SQLAsset) -> List[Dict]:
         """Creates all valid batch requests options for sql_asset
 
