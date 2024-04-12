@@ -77,6 +77,7 @@ if TYPE_CHECKING:
     from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
 
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.fluent import BatchParameters
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -685,6 +686,44 @@ class _SQLAsset(DataAsset):
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_whole_table(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_yearly(
+        self, name: str, column: str, sort_asc: bool = True
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYear(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_monthly(
+        self, name: str, column: str, sort_asc: bool = True
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonth(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_daily(
+        self, name: str, column: str, sort_asc: bool = True
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonthAndDay(column_name=column),
             batching_regex=None,
         )
 
