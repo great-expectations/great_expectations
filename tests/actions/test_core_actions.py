@@ -936,163 +936,81 @@ class TestV1ActionRun:
         with mock.patch.object(Session, "post") as mock_post:
             action.v1_run(checkpoint_result=checkpoint_result)
 
-        from pprint import pprint
+        mock_post.assert_called_once()
 
-        pprint(mock_post.call_args.kwargs["json"])
-        mock_post.assert_called_once_with(
-            url="test",
-            json={
-                "attachments": [
-                    {
-                        "content": {
-                            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                            "actions": [],
-                            "body": [
-                                {
-                                    "height": "auto",
-                                    "items": [
-                                        {
-                                            "columns": [
-                                                {
-                                                    "items": [
-                                                        {
-                                                            "size": "large",
-                                                            "text": mock.ANY,
-                                                            "type": "TextBlock",
-                                                            "weight": "bolder",
-                                                            "wrap": "true",
-                                                        }
-                                                    ],
-                                                    "type": "Column",
-                                                    "width": "stretch",
-                                                }
-                                            ],
-                                            "type": "ColumnSet",
-                                        }
-                                    ],
-                                    "separator": "true",
-                                    "type": "Container",
-                                },
-                                {
-                                    "height": "auto",
-                                    "items": [
-                                        {
-                                            "horizontalAlignment": "left",
-                                            "text": [
-                                                {
-                                                    "color": "good",
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Batch "
-                                                    "Validation "
-                                                    "Status:** "
-                                                    "Success "
-                                                    "!!!",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Data " "Asset " "Name:** " "None",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Expectation "
-                                                    "Suite "
-                                                    "Name:** "
-                                                    "suite_a",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Run " "Name:** " "prod_20240401",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Batch " "ID:** " "None",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Summary:** "
-                                                    "*3* of "
-                                                    "*3* "
-                                                    "expectations "
-                                                    "were met",
-                                                    "type": "TextBlock",
-                                                },
-                                            ],
-                                            "type": "TextBlock",
-                                        }
-                                    ],
-                                    "separator": "true",
-                                    "type": "Container",
-                                },
-                                {
-                                    "height": "auto",
-                                    "items": [
-                                        {
-                                            "horizontalAlignment": "left",
-                                            "text": [
-                                                {
-                                                    "color": "good",
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Batch "
-                                                    "Validation "
-                                                    "Status:** "
-                                                    "Success "
-                                                    "!!!",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Data " "Asset " "Name:** " "None",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Expectation "
-                                                    "Suite "
-                                                    "Name:** "
-                                                    "suite_b",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Run " "Name:** " "prod_20240402",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Batch " "ID:** " "None",
-                                                    "type": "TextBlock",
-                                                },
-                                                {
-                                                    "horizontalAlignment": "left",
-                                                    "text": "**Summary:** "
-                                                    "*2* of "
-                                                    "*2* "
-                                                    "expectations "
-                                                    "were met",
-                                                    "type": "TextBlock",
-                                                },
-                                            ],
-                                            "type": "TextBlock",
-                                        }
-                                    ],
-                                    "separator": "true",
-                                    "type": "Container",
-                                },
-                            ],
-                            "type": "AdaptiveCard",
-                            "version": "1.0",
-                        },
-                        "contentType": "application/vnd.microsoft.card.adaptive",
-                    }
-                ],
-                "type": "message",
+        body = mock_post.call_args.kwargs["json"]["attachments"][0]["content"]["body"]
+        checkpoint_summary = body[0]["items"][0]["columns"][0]["items"][0]["text"]
+        first_validation = body[1]["items"][0]["text"]
+        second_validation = body[2]["items"][0]["text"]
+
+        assert len(body) == 3
+        assert "Success !!!" in checkpoint_summary
+        assert first_validation == [
+            {
+                "color": "good",
+                "horizontalAlignment": "left",
+                "text": "**Batch Validation Status:** Success !!!",
+                "type": "TextBlock",
             },
-        )
+            {
+                "horizontalAlignment": "left",
+                "text": "**Data Asset Name:** __no_data_asset_name__",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Expectation Suite Name:** suite_a",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Run Name:** prod_20240401",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Batch ID:** None",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Summary:** *3* of *3* expectations were met",
+                "type": "TextBlock",
+            },
+        ]
+        assert second_validation == [
+            {
+                "color": "good",
+                "horizontalAlignment": "left",
+                "text": "**Batch Validation Status:** Success !!!",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Data Asset Name:** __no_data_asset_name__",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Expectation Suite Name:** suite_b",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Run Name:** prod_20240402",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Batch ID:** None",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Summary:** *2* of *2* expectations were met",
+                "type": "TextBlock",
+            },
+        ]
 
     @pytest.mark.unit
     @pytest.mark.parametrize(

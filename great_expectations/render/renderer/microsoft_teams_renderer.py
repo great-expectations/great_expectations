@@ -46,7 +46,7 @@ class MicrosoftTeamsRenderer(Renderer):
     ) -> list[dict[str, str]]:
         return [
             self._render_status(validation_result=validation_result),
-            self._render_asset(validation_result=validation_result),
+            self._render_asset_name(validation_result=validation_result),
             self._render_suite_name(validation_result=validation_result),
             self._render_run_name(
                 validation_result_suite_identifier=validation_result_suite_identifier
@@ -63,8 +63,10 @@ class MicrosoftTeamsRenderer(Renderer):
             validation_result=validation_result,
         )
 
-    def _render_asset(self, validation_result: ExpectationSuiteValidationResult) -> dict[str, str]:
-        data_asset_name = validation_result.asset_name
+    def _render_asset_name(
+        self, validation_result: ExpectationSuiteValidationResult
+    ) -> dict[str, str]:
+        data_asset_name = validation_result.asset_name or "__no_data_asset_name__"
         return self._render_validation_result_element(key="Data Asset Name", value=data_asset_name)
 
     def _render_suite_name(
