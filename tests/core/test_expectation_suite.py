@@ -569,15 +569,15 @@ class TestCRUDMethods:
         assert suite.name == new_name
 
 
-class TestEvaluationParameterOptions:
-    """Tests around the evaluation_parameter_options property of ExpectationSuites.
+class TestSuiteParameterOptions:
+    """Tests around the suite_parameter_options property of ExpectationSuites.
 
-    Note: evaluation_parameter_options is currently a sorted tuple, but doesn't necessarily have to be
-    """  # noqa: E501
+    Note: suite_parameter_options is currently a sorted tuple, but doesn't necessarily have to be
+    """
 
-    EVALUATION_PARAMETER_VALUE_SET = "my_value_set"
-    EVALUATION_PARAMETER_MIN = "my_min"
-    EVALUATION_PARAMETER_MAX = "my_max"
+    SUITE_PARAMETER_VALUE_SET = "my_value_set"
+    SUITE_PARAMETER_MIN = "my_min"
+    SUITE_PARAMETER_MAX = "my_max"
 
     @pytest.fixture
     def expectation_suite(self) -> ExpectationSuite:
@@ -585,19 +585,19 @@ class TestEvaluationParameterOptions:
         return ExpectationSuite("test-suite")
 
     @pytest.fixture
-    def expectation_with_evaluation_parameter(
+    def expectation_with_suite_parameter(
         self,
     ) -> Expectation:
         return gxe.ExpectColumnDistinctValuesToBeInSet(
-            column="a", value_set={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE_SET}
+            column="a", value_set={"$PARAMETER": self.SUITE_PARAMETER_VALUE_SET}
         )
 
     @pytest.fixture
-    def expectation_with_duplicate_evaluation_parameter(
+    def expectation_with_duplicate_suite_parameter(
         self,
     ) -> Expectation:
         return gxe.ExpectColumnDistinctValuesToContainSet(
-            column="a", value_set={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE_SET}
+            column="a", value_set={"$PARAMETER": self.SUITE_PARAMETER_VALUE_SET}
         )
 
     @pytest.fixture
@@ -606,8 +606,8 @@ class TestEvaluationParameterOptions:
     ) -> Expectation:
         return gxe.ExpectColumnValuesToBeBetween(
             column="c",
-            min_value={"$PARAMETER": self.EVALUATION_PARAMETER_MIN},
-            max_value={"$PARAMETER": self.EVALUATION_PARAMETER_MAX},
+            min_value={"$PARAMETER": self.SUITE_PARAMETER_MIN},
+            max_value={"$PARAMETER": self.SUITE_PARAMETER_MAX},
         )
 
     @pytest.fixture
@@ -618,7 +618,7 @@ class TestEvaluationParameterOptions:
 
     @pytest.mark.unit
     def test_empty_suite(self, expectation_suite: ExpectationSuite):
-        assert expectation_suite.evaluation_parameter_options == tuple()
+        assert expectation_suite.suite_parameter_options == tuple()
 
     @pytest.mark.unit
     def test_expectations_but_no_evaluation_params(
@@ -628,33 +628,29 @@ class TestEvaluationParameterOptions:
     ):
         expectation_suite.add_expectation(expectation_without_suite_parameters)
 
-        assert expectation_suite.evaluation_parameter_options == tuple()
+        assert expectation_suite.suite_parameter_options == tuple()
 
     @pytest.mark.unit
-    def test_expectation_with_evaluation_parameter(
+    def test_expectation_with_suite_parameter(
         self,
         expectation_suite: ExpectationSuite,
-        expectation_with_evaluation_parameter: Expectation,
+        expectation_with_suite_parameter: Expectation,
     ):
-        expectation_suite.add_expectation(expectation_with_evaluation_parameter)
+        expectation_suite.add_expectation(expectation_with_suite_parameter)
 
-        assert expectation_suite.evaluation_parameter_options == (
-            self.EVALUATION_PARAMETER_VALUE_SET,
-        )
+        assert expectation_suite.suite_parameter_options == (self.SUITE_PARAMETER_VALUE_SET,)
 
     @pytest.mark.unit
     def test_duplicate_suite_parameters_only_show_once(
         self,
         expectation_suite: ExpectationSuite,
-        expectation_with_evaluation_parameter: Expectation,
-        expectation_with_duplicate_evaluation_parameter: Expectation,
+        expectation_with_suite_parameter: Expectation,
+        expectation_with_duplicate_suite_parameter: Expectation,
     ):
-        expectation_suite.add_expectation(expectation_with_evaluation_parameter)
-        expectation_suite.add_expectation(expectation_with_duplicate_evaluation_parameter)
+        expectation_suite.add_expectation(expectation_with_suite_parameter)
+        expectation_suite.add_expectation(expectation_with_duplicate_suite_parameter)
 
-        assert expectation_suite.evaluation_parameter_options == (
-            self.EVALUATION_PARAMETER_VALUE_SET,
-        )
+        assert expectation_suite.suite_parameter_options == (self.SUITE_PARAMETER_VALUE_SET,)
 
     @pytest.mark.unit
     def test_multiple_suite_parameters_on_one_expectation(
@@ -664,25 +660,25 @@ class TestEvaluationParameterOptions:
     ):
         expectation_suite.add_expectation(expectation_with_multiple_suite_parameters)
 
-        assert expectation_suite.evaluation_parameter_options == (
-            self.EVALUATION_PARAMETER_MAX,
-            self.EVALUATION_PARAMETER_MIN,
+        assert expectation_suite.suite_parameter_options == (
+            self.SUITE_PARAMETER_MAX,
+            self.SUITE_PARAMETER_MIN,
         )
 
     @pytest.mark.unit
     def test_multiple_suite_parameters_across_multiple_expectation(
         self,
         expectation_suite: ExpectationSuite,
-        expectation_with_evaluation_parameter: Expectation,
+        expectation_with_suite_parameter: Expectation,
         expectation_with_multiple_suite_parameters: Expectation,
     ):
-        expectation_suite.add_expectation(expectation_with_evaluation_parameter)
+        expectation_suite.add_expectation(expectation_with_suite_parameter)
         expectation_suite.add_expectation(expectation_with_multiple_suite_parameters)
 
-        assert expectation_suite.evaluation_parameter_options == (
-            self.EVALUATION_PARAMETER_MAX,
-            self.EVALUATION_PARAMETER_MIN,
-            self.EVALUATION_PARAMETER_VALUE_SET,
+        assert expectation_suite.suite_parameter_options == (
+            self.SUITE_PARAMETER_MAX,
+            self.SUITE_PARAMETER_MIN,
+            self.SUITE_PARAMETER_VALUE_SET,
         )
 
 

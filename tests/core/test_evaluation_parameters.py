@@ -13,13 +13,13 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.suite_parameters import (
-    _deduplicate_evaluation_parameter_dependencies,
-    find_evaluation_parameter_dependencies,
-    get_evaluation_parameter_key,
-    is_evaluation_parameter,
-    parse_evaluation_parameter,
+    _deduplicate_suite_parameter_dependencies,
+    find_suite_parameter_dependencies,
+    get_suite_parameter_key,
+    is_suite_parameter,
+    parse_suite_parameter,
 )
-from great_expectations.exceptions import EvaluationParameterError
+from great_expectations.exceptions import SuiteParameterError
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -38,22 +38,22 @@ from great_expectations.expectations.expectation_configuration import (
     ],
 )
 @pytest.mark.unit
-def test_is_evaluation_parameter(value: Any, expected: bool):
-    assert is_evaluation_parameter(value) == expected
+def test_is_suite_parameter(value: Any, expected: bool):
+    assert is_suite_parameter(value) == expected
 
 
 @pytest.mark.unit
-def test_get_evaluation_parameter_key():
+def test_get_suite_parameter_key():
     key = "foo"
-    assert get_evaluation_parameter_key({"$PARAMETER": key}) == key
+    assert get_suite_parameter_key({"$PARAMETER": key}) == key
 
 
 @pytest.mark.unit
-def test_parse_evaluation_parameter():
+def test_parse_suite_parameter():
     # Substitution alone is ok
-    assert parse_evaluation_parameter("a", {"a": 1}) == 1
+    assert parse_suite_parameter("a", {"a": 1}) == 1
     assert (
-        parse_evaluation_parameter(
+        parse_suite_parameter(
             "urn:great_expectations:validations:blarg",
             {"urn:great_expectations:validations:blarg": 1},
         )
@@ -61,14 +61,14 @@ def test_parse_evaluation_parameter():
     )
 
     # Very basic arithmetic is allowed as-is:
-    assert parse_evaluation_parameter("1 + 1", {}) == 2
+    assert parse_suite_parameter("1 + 1", {}) == 2
 
     # So is simple variable substitution:
-    assert parse_evaluation_parameter("a + 1", {"a": 2}) == 3
+    assert parse_suite_parameter("a + 1", {"a": 2}) == 3
 
     # URN syntax works
     assert (
-        parse_evaluation_parameter(
+        parse_suite_parameter(
             "urn:great_expectations:validations:source_patient_data.default"
             ":expect_table_row_count_to_equal.result.observed_value * 0.9",
             {
@@ -81,7 +81,7 @@ def test_parse_evaluation_parameter():
 
     # bare decimal is accepted
     assert (
-        parse_evaluation_parameter(
+        parse_suite_parameter(
             "urn:great_expectations:validations:source_patient_data.default"
             ":expect_table_row_count_to_equal.result.observed_value * .9",
             {
@@ -94,7 +94,7 @@ def test_parse_evaluation_parameter():
 
     # We have basic operations (trunc)
     assert (
-        parse_evaluation_parameter(
+        parse_suite_parameter(
             "urn:great_expectations:validations:source_patient_data.default"
             ":expect_table_row_count_to_equal.result.observed_value * 0.9",
             {
@@ -106,7 +106,7 @@ def test_parse_evaluation_parameter():
     )
 
     assert (
-        parse_evaluation_parameter(
+        parse_suite_parameter(
             "trunc(urn:great_expectations:validations:source_patient_data.default"
             ":expect_table_row_count_to_equal.result.observed_value * 0.9)",
             {
@@ -118,35 +118,32 @@ def test_parse_evaluation_parameter():
     )
 
     # Non GX URN syntax fails
-    with pytest.raises(EvaluationParameterError) as err:
-        parse_evaluation_parameter("urn:ieee:not_ge * 10", {"urn:ieee:not_ge": 1})
+    with pytest.raises(SuiteParameterError) as err:
+        parse_suite_parameter("urn:ieee:not_ge * 10", {"urn:ieee:not_ge": 1})
     assert "Parse Failure" in str(err.value)
 
     # Valid variables but invalid expression is no good
-    with pytest.raises(EvaluationParameterError) as err:
-        parse_evaluation_parameter("1 / a", {"a": 0})
-    assert "Error while evaluating evaluation parameter expression: division by zero" in str(
-        err.value
-    )
+    with pytest.raises(SuiteParameterError) as err:
+        parse_suite_parameter("1 / a", {"a": 0})
+    assert "Error while evaluating suite parameter expression: division by zero" in str(err.value)
 
     # It is okay to *substitute* strings in the expression...
-    assert parse_evaluation_parameter("foo", {"foo": "bar"}) == "bar"
+    assert parse_suite_parameter("foo", {"foo": "bar"}) == "bar"
 
     # ...and to have whitespace in substituted values...
-    assert parse_evaluation_parameter("foo", {"foo": "bar "}) == "bar "
+    assert parse_suite_parameter("foo", {"foo": "bar "}) == "bar "
 
     # ...but whitespace is *not* preserved from the parameter name if we evaluate it
-    assert parse_evaluation_parameter("foo ", {"foo": "bar"}) == "bar"  # NOT "bar "
+    assert parse_suite_parameter("foo ", {"foo": "bar"}) == "bar"  # NOT "bar "
 
     # We can use multiple parameters...
-    assert parse_evaluation_parameter("foo * bar", {"foo": 2, "bar": 3}) == 6
+    assert parse_suite_parameter("foo * bar", {"foo": 2, "bar": 3}) == 6
 
     # ...but we cannot leave *partially* evaluated expressions (phew!)
-    with pytest.raises(EvaluationParameterError) as e:
-        parse_evaluation_parameter("foo + bar", {"foo": 2})
-    assert (
-        "Error while evaluating evaluation parameter expression: Unknown string format: bar"
-        in str(e.value)
+    with pytest.raises(SuiteParameterError) as e:
+        parse_suite_parameter("foo + bar", {"foo": 2})
+    assert "Error while evaluating suite parameter expression: Unknown string format: bar" in str(
+        e.value
     )
 
 
@@ -156,7 +153,7 @@ def test_query_store_results_in_suite_parameters(data_context_with_query_store):
     DISTINCT_TITANIC_ROW_COUNT = 4
 
     # parse_suite_parameters correctly resolves a stores URN
-    res1 = parse_evaluation_parameter(
+    res1 = parse_suite_parameter(
         parameter_expression="urn:great_expectations:stores:my_query_store:col_count",
         suite_parameters=None,
         data_context=data_context_with_query_store,
@@ -164,7 +161,7 @@ def test_query_store_results_in_suite_parameters(data_context_with_query_store):
     assert res1 == TITANIC_ROW_COUNT
 
     # and can handle an operator
-    res2 = parse_evaluation_parameter(
+    res2 = parse_suite_parameter(
         parameter_expression="urn:great_expectations:stores:my_query_store:col_count * 2",
         suite_parameters=None,
         data_context=data_context_with_query_store,
@@ -172,7 +169,7 @@ def test_query_store_results_in_suite_parameters(data_context_with_query_store):
     assert res2 == TITANIC_ROW_COUNT * 2
 
     # can even handle multiple operators
-    res3 = parse_evaluation_parameter(
+    res3 = parse_suite_parameter(
         parameter_expression="urn:great_expectations:stores:my_query_store:col_count * 0 + 100",
         suite_parameters=None,
         data_context=data_context_with_query_store,
@@ -180,7 +177,7 @@ def test_query_store_results_in_suite_parameters(data_context_with_query_store):
     assert res3 == 100
 
     # allows stores URNs with functions
-    res4 = parse_evaluation_parameter(
+    res4 = parse_suite_parameter(
         parameter_expression="cos(urn:great_expectations:stores:my_query_store:col_count)",
         suite_parameters=None,
         data_context=data_context_with_query_store,
@@ -188,7 +185,7 @@ def test_query_store_results_in_suite_parameters(data_context_with_query_store):
     assert math.isclose(math.cos(TITANIC_ROW_COUNT), res4)
 
     # multiple stores URNs can be used
-    res5 = parse_evaluation_parameter(
+    res5 = parse_suite_parameter(
         parameter_expression="urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count",  # noqa: E501
         suite_parameters=None,
         data_context=data_context_with_query_store,
@@ -196,7 +193,7 @@ def test_query_store_results_in_suite_parameters(data_context_with_query_store):
     assert res5 == TITANIC_ROW_COUNT - DISTINCT_TITANIC_ROW_COUNT
 
     # complex expressions can combine operators, urns, and functions
-    res6 = parse_evaluation_parameter(
+    res6 = parse_suite_parameter(
         parameter_expression="abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count)",  # noqa: E501
         suite_parameters=None,
         data_context=data_context_with_query_store,
@@ -210,8 +207,8 @@ def test_parser_timing():
     doing so. But these operations are really quick, so this may not be necessary."""  # noqa: E501
     assert (
         timeit(
-            "parse_evaluation_parameter('x', {'x': 1})",
-            setup="from great_expectations.core.suite_parameters import parse_evaluation_parameter",
+            "parse_suite_parameter('x', {'x': 1})",
+            setup="from great_expectations.core.suite_parameters import parse_suite_parameter",
             number=100,
         )
         < 1
@@ -219,10 +216,10 @@ def test_parser_timing():
 
 
 @pytest.mark.unit
-def test_math_evaluation_paramaters():
-    assert parse_evaluation_parameter("sin(2*PI)") == math.sin(math.pi * 2)
-    assert parse_evaluation_parameter("cos(2*PI)") == math.cos(math.pi * 2)
-    assert parse_evaluation_parameter("tan(2*PI)") == math.tan(math.pi * 2)
+def test_math_suite_paramaters():
+    assert parse_suite_parameter("sin(2*PI)") == math.sin(math.pi * 2)
+    assert parse_suite_parameter("cos(2*PI)") == math.cos(math.pi * 2)
+    assert parse_suite_parameter("tan(2*PI)") == math.tan(math.pi * 2)
 
 
 @pytest.mark.unit
@@ -231,7 +228,7 @@ def test_temporal_suite_parameters():
     now = datetime.now()
     assert (
         (now - timedelta(weeks=1, seconds=3))
-        < dateutil.parser.parse(parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)"))
+        < dateutil.parser.parse(parse_suite_parameter("now() - timedelta(weeks=1, seconds=2)"))
         < now - timedelta(weeks=1, seconds=1)
     )
 
@@ -243,17 +240,15 @@ def test_temporal_suite_parameters_complex():
     # Choosing "2*3" == 6 weeks shows we can parse an expression inside a kwarg.
     assert (
         (now - timedelta(weeks=2 * 3, seconds=3))
-        < dateutil.parser.parse(
-            parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)")
-        )
+        < dateutil.parser.parse(parse_suite_parameter("now() - timedelta(weeks=2*3, seconds=2)"))
         < now - timedelta(weeks=2 * 3, seconds=1)
     )
 
 
 @pytest.mark.unit
-def test_find_evaluation_parameter_dependencies():
+def test_find_suite_parameter_dependencies():
     parameter_expression = "(-3 * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm) + urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value:column=norm"  # noqa: E501
-    dependencies = find_evaluation_parameter_dependencies(parameter_expression)
+    dependencies = find_suite_parameter_dependencies(parameter_expression)
     assert dependencies == {
         "urns": {
             "urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm",
@@ -263,7 +258,7 @@ def test_find_evaluation_parameter_dependencies():
     }
 
     parameter_expression = "upstream_value * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm"  # noqa: E501
-    dependencies = find_evaluation_parameter_dependencies(parameter_expression)
+    dependencies = find_suite_parameter_dependencies(parameter_expression)
     assert dependencies == {
         "urns": {
             "urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm",
@@ -272,20 +267,20 @@ def test_find_evaluation_parameter_dependencies():
     }
 
     parameter_expression = "upstream_value"
-    dependencies = find_evaluation_parameter_dependencies(parameter_expression)
+    dependencies = find_suite_parameter_dependencies(parameter_expression)
     assert dependencies == {"urns": set(), "other": {"upstream_value"}}
 
     parameter_expression = "3 * upstream_value"
-    dependencies = find_evaluation_parameter_dependencies(parameter_expression)
+    dependencies = find_suite_parameter_dependencies(parameter_expression)
     assert dependencies == {"urns": set(), "other": {"upstream_value"}}
 
     parameter_expression = "3"
-    dependencies = find_evaluation_parameter_dependencies(parameter_expression)
+    dependencies = find_suite_parameter_dependencies(parameter_expression)
     assert dependencies == {"urns": set(), "other": set()}
 
 
 @pytest.mark.unit
-def test_deduplicate_evaluation_parameter_dependencies():
+def test_deduplicate_suite_parameter_dependencies():
     dependencies = {
         "profile": [
             {
@@ -301,7 +296,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
         ]
     }
 
-    deduplicated = _deduplicate_evaluation_parameter_dependencies(dependencies)
+    deduplicated = _deduplicate_suite_parameter_dependencies(dependencies)
 
     # For test, use set to ignore order
     deduplicated["profile"][0]["metric_kwargs_id"]["column=norm"] = set(
@@ -449,8 +444,8 @@ def test_suite_parameters_for_between_expectations_parse_correctly(
         expectation_suite_name=expectation_suite_name,
     )
 
-    for evaluation_parameter in suite_parameters:
-        validator.set_evaluation_parameter(*evaluation_parameter)
+    for suite_parameter in suite_parameters:
+        validator.set_suite_parameter(*suite_parameter)
 
     actual_expectation_validation_result = getattr(validator, expectation_type)(
         **expectation_kwargs
@@ -460,19 +455,19 @@ def test_suite_parameters_for_between_expectations_parse_correctly(
 
 
 @pytest.mark.unit
-def test_now_evaluation_parameter():
+def test_now_suite_parameter():
     """
-    now() is unique in the fact that it is the only evaluation param built-in that has zero arity (takes no arguments).
+    now() is unique in the fact that it is the only suite param built-in that has zero arity (takes no arguments).
     The following tests ensure that it is properly parsed and evaluated in a variety of contexts.
     """  # noqa: E501
     # By itself
-    res = parse_evaluation_parameter("now()")
-    assert dateutil.parser.parse(res), "Provided evaluation parameter is not dateutil-parseable"
+    res = parse_suite_parameter("now()")
+    assert dateutil.parser.parse(res), "Provided suite parameter is not dateutil-parseable"
 
     # In conjunction with timedelta
-    res = parse_evaluation_parameter("now() - timedelta(weeks=1)")
-    assert dateutil.parser.parse(res), "Provided evaluation parameter is not dateutil-parseable"
+    res = parse_suite_parameter("now() - timedelta(weeks=1)")
+    assert dateutil.parser.parse(res), "Provided suite parameter is not dateutil-parseable"
 
     # Require parens to actually invoke
-    with pytest.raises(EvaluationParameterError):
-        parse_evaluation_parameter("now")
+    with pytest.raises(SuiteParameterError):
+        parse_suite_parameter("now")

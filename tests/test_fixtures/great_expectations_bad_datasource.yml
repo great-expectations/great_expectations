@@ -65,7 +65,7 @@ validation_operators:
       #     renderer:
       #       module_name: great_expectations.render.renderer.slack_renderer
       #       class_name: SlackRenderer
-      - name: store_evaluation_params
+      - name: store_suite_params
         action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
+          class_name: StoreSuiteParametersAction
+          target_store_name: suite_parameter_store
