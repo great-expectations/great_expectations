@@ -180,7 +180,7 @@ def _partitioner_and_sql_asset_to_batch_identifier_data(
 class _PartitionerDatetime(FluentBaseModel):
     column_name: str
     method_name: str
-    sort_batches_ascending: bool = True
+    sort_ascending: bool = True
 
     @property
     def columns(self) -> list[str]:
@@ -216,7 +216,7 @@ class _PartitionerDatetime(FluentBaseModel):
 
 class SqlPartitionerYear(_PartitionerDatetime):
     column_name: str
-    sort_batches_ascending: bool = True
+    sort_ascending: bool = True
     method_name: Literal["partition_on_year"] = "partition_on_year"
 
     @property
@@ -231,7 +231,7 @@ class SqlPartitionerYear(_PartitionerDatetime):
 
 class SqlPartitionerYearAndMonth(_PartitionerDatetime):
     column_name: str
-    sort_batches_ascending: bool = True
+    sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
     @property
@@ -246,7 +246,7 @@ class SqlPartitionerYearAndMonth(_PartitionerDatetime):
 
 class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
-    sort_batches_ascending: bool = True
+    sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month_and_day"] = (
         "partition_on_year_and_month_and_day"
     )
@@ -264,7 +264,7 @@ class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
 class SqlPartitionerDatetimePart(_PartitionerDatetime):
     datetime_parts: List[str]
     column_name: str
-    sort_batches_ascending: bool = True
+    sort_ascending: bool = True
     method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
 
     @property
@@ -288,7 +288,7 @@ class SqlPartitionerDatetimePart(_PartitionerDatetime):
 class _PartitionerOneColumnOneParam(FluentBaseModel):
     column_name: str
     method_name: str
-    sort_batches_ascending: bool = True
+    sort_ascending: bool = True
 
     @property
     def columns(self) -> list[str]:
@@ -394,7 +394,7 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
 
 class SqlPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
-    sort_batches_ascending: bool = True
+    sort_ascending: bool = True
     method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
     @property
@@ -437,7 +437,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
-    sort_batches_ascending: bool = True
+    sort_ascending: bool = True
     method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
 
     @property

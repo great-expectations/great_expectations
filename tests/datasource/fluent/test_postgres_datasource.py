@@ -1273,7 +1273,7 @@ def test_sorting_none_in_metadata(
         # We use a query asset because then we don't have to mock out db connection tests
         # in this unit test.
         asset = source.add_query_asset(name="my_asset", query="select * from table")
-        partitioner = PartitionerYear(column_name="my_col", sort_batches_ascending=False)
+        partitioner = PartitionerYear(column_name="my_col", sort_ascending=False)
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
         )

@@ -44,7 +44,7 @@ def test_get_batch_list_from_batch_request__sort_ascending(
     batch_definition = asset.add_batch_definition(
         "foo",
         partitioner=PartitionerYearAndMonth(
-            column_name="TODO: delete column from this partitioner", sort_batches_ascending=True
+            column_name="TODO: delete column from this partitioner", sort_ascending=True
         ),
     )
     batch_request = batch_definition.build_batch_request()
@@ -75,7 +75,7 @@ def test_get_batch_list_from_batch_request__sort_descending(
     batch_definition = asset.add_batch_definition(
         "foo",
         partitioner=PartitionerYearAndMonth(
-            column_name="TODO: delete column from this partitioner", sort_batches_ascending=False
+            column_name="TODO: delete column from this partitioner", sort_ascending=False
         ),
     )
     batch_request = batch_definition.build_batch_request()

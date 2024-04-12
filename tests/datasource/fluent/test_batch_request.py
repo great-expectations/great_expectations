@@ -110,7 +110,7 @@ def test_batch_request_config_serialization_round_trips(
         f'"options": {options_json}, '
         '"partitioner": {'
         '"column_name": "my_column", '
-        '"sort_batches_ascending": true, '
+        '"sort_ascending": true, '
         '"method_name": "partition_on_column_value"'
         "}, "
         '"batching_regex": "data_(?P<year>\\\\d{4})-(?P<month>\\\\d{2}).csv", '

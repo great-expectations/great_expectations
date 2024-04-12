@@ -347,7 +347,7 @@ def _test_delete_batch_definition__does_not_clobber_other_assets(
 class _MyPartitioner(FluentBaseModel):
     """Partitioner that adhere's to the expected protocol."""
 
-    sort_batches_ascending: bool = True
+    sort_ascending: bool = True
 
     @property
     def param_names(self) -> List[str]:
@@ -400,7 +400,7 @@ def test_sort_batches__ascending(
     metadata_2_none,
     metadata_none_none,
 ):
-    partitioner = _MyPartitioner(sort_batches_ascending=True)
+    partitioner = _MyPartitioner(sort_ascending=True)
     batches = [
         metadata_1_1,
         metadata_1_2,
@@ -435,7 +435,7 @@ def test_sort_batches__descending(
     metadata_2_none,
     metadata_none_none,
 ):
-    partitioner = _MyPartitioner(sort_batches_ascending=False)
+    partitioner = _MyPartitioner(sort_ascending=False)
     batches = [
         metadata_1_1,
         metadata_1_2,

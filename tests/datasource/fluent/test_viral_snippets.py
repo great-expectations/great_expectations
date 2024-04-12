@@ -265,7 +265,7 @@ def test_checkpoint_with_validator_workflow(
                 "partitioner": {
                     "method_name": "partition_on_year_and_month",
                     "column_name": "pickup_datetime",
-                    "sort_batches_ascending": True,
+                    "sort_ascending": True,
                 },
                 "batch_slice": None,
                 "batching_regex": None,

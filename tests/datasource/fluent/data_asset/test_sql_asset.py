@@ -40,7 +40,7 @@ def test_get_batch_list_from_batch_request__sort_ascending(postgres_asset):
     years = [2021, 2022]
     batches = postgres_asset.get_batch_list_from_batch_request(
         postgres_asset.build_batch_request(
-            partitioner=PartitionerYear(column_name="year", sort_batches_ascending=True)
+            partitioner=PartitionerYear(column_name="year", sort_ascending=True)
         )
     )
 
@@ -54,7 +54,7 @@ def test_get_batch_list_from_batch_request__sort_descending(postgres_asset):
     years = [2021, 2022]
     batches = postgres_asset.get_batch_list_from_batch_request(
         postgres_asset.build_batch_request(
-            partitioner=PartitionerYear(column_name="year", sort_batches_ascending=False)
+            partitioner=PartitionerYear(column_name="year", sort_ascending=False)
         )
     )
 

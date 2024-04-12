@@ -97,7 +97,7 @@ if TYPE_CHECKING:
 
 
 class _PartitionerProtocol(Protocol):
-    sort_batches_ascending: bool
+    sort_ascending: bool
 
     @property
     def param_names(self) -> List[str]: ...
@@ -413,7 +413,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Args:
             batch_list: The list of batches to sort in place.
         """
-        reverse = not partitioner.sort_batches_ascending
+        reverse = not partitioner.sort_ascending
         for key in reversed(partitioner.param_names):
             try:
                 batch_list.sort(
