@@ -137,7 +137,7 @@ class GrowthNumericDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
             ParameterBuilderConfig(
                 **table_row_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -145,7 +145,7 @@ class GrowthNumericDataAssistant(DataAssistant):
         table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
         mean_table_columns_set_match_multi_batch_parameter_builder_for_validations = (
@@ -153,7 +153,7 @@ class GrowthNumericDataAssistant(DataAssistant):
                 name="column_names_set_estimator",
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
             )
         )
 
@@ -270,9 +270,9 @@ class GrowthNumericDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_min_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -280,10 +280,10 @@ class GrowthNumericDataAssistant(DataAssistant):
         column_min_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_max_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -291,10 +291,10 @@ class GrowthNumericDataAssistant(DataAssistant):
         column_max_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_quantile_values_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -305,10 +305,10 @@ class GrowthNumericDataAssistant(DataAssistant):
                 "quantiles": f"{VARIABLES_KEY}quantiles",
                 "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
             },
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_median_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -316,10 +316,10 @@ class GrowthNumericDataAssistant(DataAssistant):
         column_median_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_mean_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -327,10 +327,10 @@ class GrowthNumericDataAssistant(DataAssistant):
         column_mean_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -338,7 +338,7 @@ class GrowthNumericDataAssistant(DataAssistant):
         column_standard_deviation_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
@@ -565,9 +565,9 @@ class GrowthNumericDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_distinct_values_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -575,7 +575,7 @@ class GrowthNumericDataAssistant(DataAssistant):
         column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
         column_unique_proportion_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
