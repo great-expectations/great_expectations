@@ -90,6 +90,7 @@ class InvalidAsset(DataAsset):
         options: dict | None = None,
         batch_slice: Any = None,
         partitioner: Any = None,
+        batching_regex: Any = None,
     ) -> NoReturn:
         self._raise_type_error()
 
@@ -102,7 +103,7 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_request_options_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
+    def get_batch_parameters_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
         self._raise_type_error()
 
 

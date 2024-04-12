@@ -1,4 +1,5 @@
 import os
+import re
 import sqlite3
 import typing
 from logging import Logger
@@ -47,8 +48,8 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchMetadata,
+    BatchParameters,
     BatchRequest,
-    BatchRequestOptions,
     DataAsset,
     Datasource,
 )
@@ -69,15 +70,16 @@ class _PandasDataAsset(DataAsset):
     def _get_reader_method(self) -> str: ...
     @override
     def test_connection(self) -> None: ...
-    def batch_request_options_template(self) -> BatchRequestOptions: ...
+    def batch_parameters_template(self) -> BatchParameters: ...
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = ...,
+        options: Optional[BatchParameters] = ...,
         batch_slice: Optional[BatchSlice] = ...,
         partitioner: Optional[Partitioner] = ...,
+        batching_regex: Optional[re.Pattern] = ...,
     ) -> BatchRequest: ...
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...

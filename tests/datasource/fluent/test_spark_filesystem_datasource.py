@@ -717,7 +717,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_request_options_keys()
+    options = asset.get_batch_parameters_keys()
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -735,7 +735,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_request_options_keys()
+    options = asset.get_batch_parameters_keys()
     assert options == ("year", "month", "path")
 
 
@@ -749,7 +749,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_request_options_keys()
+    options = asset.get_batch_parameters_keys()
     assert options == ("batch_request_param_1", "month", "path")
 
 
@@ -1154,12 +1154,10 @@ def column_value_partitioner():
 
 class TestPartitionerDirectoryAsset:
     @pytest.mark.unit
-    def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_batch_request_options(  # noqa: E501
+    def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_batch_parameters(
         self, directory_asset, column_value_partitioner
     ):
-        assert directory_asset.get_batch_request_options_keys(
-            partitioner=column_value_partitioner
-        ) == (
+        assert directory_asset.get_batch_parameters_keys(partitioner=column_value_partitioner) == (
             "path",
             "passenger_count",
         )
@@ -1278,10 +1276,10 @@ def file_asset(
 
 class TestPartitionerFileAsset:
     @pytest.mark.unit
-    def test_get_batch_list_from_batch_request_with_partitioner_file_asset_batch_request_options(
+    def test_get_batch_list_from_batch_request_with_partitioner_file_asset_batch_parameters(
         self, file_asset, column_value_partitioner
     ):
-        assert file_asset.get_batch_request_options_keys(partitioner=column_value_partitioner) == (
+        assert file_asset.get_batch_parameters_keys(partitioner=column_value_partitioner) == (
             "year",
             "month",
             "path",
@@ -1332,12 +1330,12 @@ class TestPartitionerFileAsset:
         )
 
     @pytest.mark.unit
-    def test_add_file_csv_asset_with_partitioner_conflicting_identifier_batch_request_options(
+    def test_add_file_csv_asset_with_partitioner_conflicting_identifier_batch_parameters(
         self, file_asset_with_no_partitioner: CSVAsset
     ):
         asset_with_conflicting_partitioner = file_asset_with_no_partitioner
         partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
-        assert asset_with_conflicting_partitioner.get_batch_request_options_keys(
+        assert asset_with_conflicting_partitioner.get_batch_parameters_keys(
             partitioner=partitioner
         ) == (
             "year",

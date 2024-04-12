@@ -46,7 +46,7 @@ my_asset = my_datasource.add_csv_asset(
 my_asset = my_asset.add_sorters(["+year", "-month"])
 # </snippet>
 
-assert my_asset.get_batch_request_options_keys() == ("year", "month", "path")
+assert my_asset.get_batch_parameters_keys() == ("year", "month", "path")
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py my_batch_list">

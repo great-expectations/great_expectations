@@ -4,6 +4,7 @@ import copy
 import inspect
 import logging
 import pathlib
+import re
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
@@ -17,8 +18,8 @@ from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context import get_context as get_gx_context
 from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.batch_request import (
+    BatchParameters,
     BatchRequest,
-    BatchRequestOptions,
 )
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import (
@@ -122,9 +123,10 @@ class DummyDataAsset(DataAsset):
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 

@@ -157,10 +157,10 @@ if TYPE_CHECKING:
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent.interfaces import (
-        BatchRequest as FluentBatchRequest,
+        BatchParameters,
     )
     from great_expectations.datasource.fluent.interfaces import (
-        BatchRequestOptions,
+        BatchRequest as FluentBatchRequest,
     )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation_configuration import (
@@ -462,9 +462,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite.name = expectation_suite_name
             key = ExpectationSuiteIdentifier(name=expectation_suite_name)
         if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
-            raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "  # noqa: E501
-                "expectation_suite, set overwrite_existing=True.".format(expectation_suite_name)
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
+                f"expectation_suite with name {expectation_suite_name} already exists. If you would like to overwrite this "  # noqa: E501
+                "expectation_suite, set overwrite_existing=True."
             )
         self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
@@ -2043,7 +2043,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
+        batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -2081,7 +2081,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             partitioner_method: The method used to partition the Data Asset into Batches
             partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
-            batch_request_options: Options for `FluentBatchRequest`
+            batch_parameters: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
@@ -2115,7 +2115,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
-            batch_request_options=batch_request_options,
+            batch_parameters=batch_parameters,
             **kwargs,
         )
 
@@ -2140,7 +2140,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
+        batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         result = get_batch_request_from_acceptable_arguments(
@@ -2163,7 +2163,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
-            batch_request_options=batch_request_options,
+            batch_parameters=batch_parameters,
             **kwargs,
         )
         datasource_name = result.datasource_name
@@ -3159,10 +3159,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
             logger.warning(
-                "The following globally-defined config variables failed validation:\n{}\n\n"
-                "Please fix the variables if you would like to apply global values to project_config.".format(  # noqa: E501
-                    json.dumps(validation_errors, indent=2)
-                )
+                f"The following globally-defined config variables failed validation:\n{json.dumps(validation_errors, indent=2)}\n\n"  # noqa: E501
+                "Please fix the variables if you would like to apply global values to project_config."  # noqa: E501
             )
 
         return config_with_global_config_overrides
@@ -3195,9 +3193,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 usage_statistics_enabled = False
             else:
                 logger.warning(
-                    "GE_USAGE_STATS environment variable must be one of: {}".format(
-                        AbstractDataContext.FALSEY_STRINGS
-                    )
+                    f"GE_USAGE_STATS environment variable must be one of: {AbstractDataContext.FALSEY_STRINGS}"  # noqa: E501
                 )
         for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
@@ -3811,8 +3807,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                     except gx_exceptions.UnavailableMetricError:
                         # This will happen frequently in larger pipelines
                         logger.debug(
-                            "metric {} was requested by another expectation suite but is not available in "  # noqa: E501
-                            "this validation result.".format(metric_name)
+                            f"metric {metric_name} was requested by another expectation suite but is not available in "  # noqa: E501
+                            "this validation result."
                         )
 
     def _determine_if_expectation_suite_include_rendered_content(
