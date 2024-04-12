@@ -237,7 +237,7 @@ class MicrosoftTeamsRenderer(Renderer):
                                 "items": [
                                     {
                                         "type": "TextBlock",
-                                        "te*xt": default_text,
+                                        "text": default_text,
                                         "horizontalAlignment": "left",
                                     }
                                 ],
