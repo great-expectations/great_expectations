@@ -117,7 +117,7 @@ def test_evaluation_parameter_store_methods(
         suite_name="source_patient_data.default",
     )
 
-    data_context_parameterized_expectation_suite_no_checkpoint_store.store_evaluation_parameters(
+    data_context_parameterized_expectation_suite_no_checkpoint_store.store_suite_parameters(
         source_patient_data_results
     )
 
@@ -157,7 +157,7 @@ def test_evaluation_parameter_store_methods(
         suite_name="source_diabetes_data.default",
     )
 
-    data_context_parameterized_expectation_suite_no_checkpoint_store.store_evaluation_parameters(
+    data_context_parameterized_expectation_suite_no_checkpoint_store.store_suite_parameters(
         source_diabetes_data_results
     )
     bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(  # noqa: E501

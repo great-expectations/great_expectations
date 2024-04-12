@@ -124,9 +124,7 @@ def test_evaluation_parameter_store_methods(
         suite_name="source_patient_data.default",
     )
 
-    data_context_parameterized_expectation_suite.store_evaluation_parameters(
-        source_patient_data_results
-    )
+    data_context_parameterized_expectation_suite.store_suite_parameters(source_patient_data_results)
 
     bound_parameters = (
         data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
@@ -166,7 +164,7 @@ def test_evaluation_parameter_store_methods(
         suite_name="source_diabetes_data.default",
     )
 
-    data_context_parameterized_expectation_suite.store_evaluation_parameters(
+    data_context_parameterized_expectation_suite.store_suite_parameters(
         source_diabetes_data_results
     )
     bound_parameters = (

@@ -214,7 +214,7 @@ def serialized_configuration_bundle() -> dict:
                 "name": "my_checkpoint",
                 "action_list": [],
                 "batch_request": {},
-                "evaluation_parameters": {},
+                "suite_parameters": {},
                 "expectation_suite_id": None,
                 "expectation_suite_name": None,
                 "id": None,
@@ -261,7 +261,7 @@ def serialized_configuration_bundle() -> dict:
         ],
         "validation_results": {
             "some_key": {
-                "evaluation_parameters": {},
+                "suite_parameters": {},
                 "meta": {},
                 "results": [],
                 "suite_name": "empty_suite",

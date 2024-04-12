@@ -14,7 +14,7 @@ validations:
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
-    evaluation_parameters:
+    suite_parameters:
       param1: "$MY_PARAM"
       param2: 1 + "$OLD_PARAM"
     runtime_configuration:

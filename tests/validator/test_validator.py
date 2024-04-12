@@ -1041,7 +1041,7 @@ def test_validator_include_rendered_content_diagnostic(
     ],
 )
 @pytest.mark.big
-def test_validator_validate_substitutes_evaluation_parameters(
+def test_validator_validate_substitutes_suite_parameters(
     value_set: list[int],
     expected: bool,
 ):
@@ -1070,12 +1070,12 @@ def test_validator_validate_substitutes_evaluation_parameters(
     )
 
     # Act
-    result = validator.validate(evaluation_parameters={"value_set": value_set})
+    result = validator.validate(suite_parameters={"value_set": value_set})
     assert isinstance(result, ExpectationSuiteValidationResult)
-    evaluation_parameters_used = result.results[0]["expectation_config"]["kwargs"]["value_set"]
+    suite_parameters_used = result.results[0]["expectation_config"]["kwargs"]["value_set"]
 
     # Assert
-    assert evaluation_parameters_used == value_set
+    assert suite_parameters_used == value_set
     assert result.success == expected
 
 

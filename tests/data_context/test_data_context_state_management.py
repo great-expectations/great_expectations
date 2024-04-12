@@ -855,7 +855,7 @@ def test_add_or_update_checkpoint_adds_successfully(
             {
                 "action_list": [],
                 "batch_request": {},
-                "evaluation_parameters": {},
+                "suite_parameters": {},
                 "expectation_suite_name": "oss_test_expectation_suite",
                 "runtime_configuration": {},
                 "validations": [
@@ -883,7 +883,7 @@ def test_add_or_update_checkpoint_adds_successfully(
                 **{
                     "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
-                    "evaluation_parameters": {},
+                    "suite_parameters": {},
                     "expectation_suite_name": "oss_test_expectation_suite",
                     "name": "my_checkpoint",
                     "runtime_configuration": {},
@@ -914,7 +914,7 @@ def test_add_or_update_checkpoint_adds_successfully(
         pytest.param(
             {
                 "validations": [],
-                "evaluation_parameters": {
+                "suite_parameters": {
                     "environment": "$GE_ENVIRONMENT",
                     "tolerance": 1.0e-2,
                     "aux_param_0": "$MY_PARAM",
@@ -925,7 +925,7 @@ def test_add_or_update_checkpoint_adds_successfully(
                 **{
                     "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
-                    "evaluation_parameters": {
+                    "suite_parameters": {
                         "environment": "$GE_ENVIRONMENT",
                         "tolerance": 1.0e-2,
                         "aux_param_0": "$MY_PARAM",

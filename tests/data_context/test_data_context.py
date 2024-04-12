@@ -1075,7 +1075,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     assert sorted(config.keys()) == [
         "action_list",
         "batch_request",
-        "evaluation_parameters",
+        "suite_parameters",
         "name",
         "runtime_configuration",
         "validations",
@@ -1340,7 +1340,7 @@ def test_add_expectation_to_expectation_suite(empty_data_context_stats_enabled):
 
 
 @pytest.mark.filesystem
-def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_store):
+def test_stores_suite_parameters_resolve_correctly(data_context_with_query_store):
     """End to end test demonstrating usage of Stores evaluation parameters"""
     context = data_context_with_query_store
     suite_name = "eval_param_suite"

@@ -96,7 +96,7 @@ class TestInit:
 
         assert suite.name == fake_expectation_suite_name
         assert suite.expectations == []
-        assert suite.evaluation_parameters == {}
+        assert suite.suite_parameters == {}
         assert suite.execution_engine_type is None
         assert suite.meta == default_meta
         assert suite.id is None
@@ -110,7 +110,7 @@ class TestInit:
         class DummyExecutionEngine:
             pass
 
-        test_evaluation_parameters = {"$PARAMETER": "test_evaluation_parameters"}
+        test_suite_parameters = {"$PARAMETER": "test_suite_parameters"}
         dummy_execution_engine_type = type(DummyExecutionEngine())
         default_meta = {"great_expectations_version": ge_version}
         test_meta_base = {"test_key": "test_value"}
@@ -120,7 +120,7 @@ class TestInit:
         suite = ExpectationSuite(
             name=fake_expectation_suite_name,
             expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
-            evaluation_parameters=test_evaluation_parameters,
+            suite_parameters=test_suite_parameters,
             execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
             meta=test_meta,
             id=test_id,
@@ -129,7 +129,7 @@ class TestInit:
         assert suite.expectation_configurations == [
             expect_column_values_to_be_in_set_col_a_with_meta
         ]
-        assert suite.evaluation_parameters == test_evaluation_parameters
+        assert suite.suite_parameters == test_suite_parameters
         assert suite.execution_engine_type == dummy_execution_engine_type
         assert suite.meta == test_meta
         assert suite.id == test_id
@@ -601,7 +601,7 @@ class TestEvaluationParameterOptions:
         )
 
     @pytest.fixture
-    def expectation_with_multiple_evaluation_parameters(
+    def expectation_with_multiple_suite_parameters(
         self,
     ) -> Expectation:
         return gxe.ExpectColumnValuesToBeBetween(
@@ -611,7 +611,7 @@ class TestEvaluationParameterOptions:
         )
 
     @pytest.fixture
-    def expectation_without_evaluation_parameters(
+    def expectation_without_suite_parameters(
         self,
     ) -> Expectation:
         return gxe.ExpectColumnDistinctValuesToBeInSet(column="d", value_set=[1, 2])
@@ -624,9 +624,9 @@ class TestEvaluationParameterOptions:
     def test_expectations_but_no_evaluation_params(
         self,
         expectation_suite: ExpectationSuite,
-        expectation_without_evaluation_parameters: Expectation,
+        expectation_without_suite_parameters: Expectation,
     ):
-        expectation_suite.add_expectation(expectation_without_evaluation_parameters)
+        expectation_suite.add_expectation(expectation_without_suite_parameters)
 
         assert expectation_suite.evaluation_parameter_options == tuple()
 
@@ -643,7 +643,7 @@ class TestEvaluationParameterOptions:
         )
 
     @pytest.mark.unit
-    def test_duplicate_evaluation_parameters_only_show_once(
+    def test_duplicate_suite_parameters_only_show_once(
         self,
         expectation_suite: ExpectationSuite,
         expectation_with_evaluation_parameter: Expectation,
@@ -657,12 +657,12 @@ class TestEvaluationParameterOptions:
         )
 
     @pytest.mark.unit
-    def test_multiple_evaluation_parameters_on_one_expectation(
+    def test_multiple_suite_parameters_on_one_expectation(
         self,
         expectation_suite: ExpectationSuite,
-        expectation_with_multiple_evaluation_parameters: Expectation,
+        expectation_with_multiple_suite_parameters: Expectation,
     ):
-        expectation_suite.add_expectation(expectation_with_multiple_evaluation_parameters)
+        expectation_suite.add_expectation(expectation_with_multiple_suite_parameters)
 
         assert expectation_suite.evaluation_parameter_options == (
             self.EVALUATION_PARAMETER_MAX,
@@ -670,14 +670,14 @@ class TestEvaluationParameterOptions:
         )
 
     @pytest.mark.unit
-    def test_multiple_evaluation_parameters_across_multiple_expectation(
+    def test_multiple_suite_parameters_across_multiple_expectation(
         self,
         expectation_suite: ExpectationSuite,
         expectation_with_evaluation_parameter: Expectation,
-        expectation_with_multiple_evaluation_parameters: Expectation,
+        expectation_with_multiple_suite_parameters: Expectation,
     ):
         expectation_suite.add_expectation(expectation_with_evaluation_parameter)
-        expectation_suite.add_expectation(expectation_with_multiple_evaluation_parameters)
+        expectation_suite.add_expectation(expectation_with_multiple_suite_parameters)
 
         assert expectation_suite.evaluation_parameter_options == (
             self.EVALUATION_PARAMETER_MAX,
@@ -945,7 +945,7 @@ class TestEqDunder:
                 ),
             ),
             pytest.param("expectations", []),
-            pytest.param("evaluation_parameters", {"different": "evaluation_parameters"}),
+            pytest.param("suite_parameters", {"different": "suite_parameters"}),
             pytest.param(
                 "execution_engine_type",
                 type(ExecutionEngine),

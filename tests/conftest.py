@@ -1113,7 +1113,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 },
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1152,7 +1152,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 },
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "FOO",
             "tolerance": "FOOBOO",
             "aux_param_0": "FOOBARBOO",
@@ -1203,7 +1203,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 "action": {"class_name": "Template2SpecialAction"},
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1242,7 +1242,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 "action": {"class_name": "Template3SpecialAction"},
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1674,7 +1674,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 },
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1713,7 +1713,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 },
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "FOO",
             "tolerance": "FOOBOO",
             "aux_param_0": "FOOBARBOO",
@@ -1764,7 +1764,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 "action": {"class_name": "Template2SpecialAction"},
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1803,7 +1803,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 "action": {"class_name": "Template3SpecialAction"},
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",

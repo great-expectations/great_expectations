@@ -391,7 +391,7 @@ class TestEvaluationParameterOptions:
         assert expectation.evaluation_parameter_options == (self.EVALUATION_PARAMETER_MAX,)
 
     @pytest.mark.unit
-    def test_expectation_with_multiple_evaluation_parameters(self):
+    def test_expectation_with_multiple_suite_parameters(self):
         expectation = gxe.ExpectColumnValuesToBeBetween(
             column="foo",
             min_value={"$PARAMETER": self.EVALUATION_PARAMETER_MIN},
@@ -403,7 +403,7 @@ class TestEvaluationParameterOptions:
         )
 
     @pytest.mark.unit
-    def test_expectation_with_duplicate_evaluation_parameters(self):
+    def test_expectation_with_duplicate_suite_parameters(self):
         expectation = gxe.ExpectColumnValuesToBeBetween(
             column="foo",
             min_value={"$PARAMETER": self.EVALUATION_PARAMETER_VALUE},

@@ -151,14 +151,14 @@ def test_parse_evaluation_parameter():
 
 
 @pytest.mark.filesystem
-def test_query_store_results_in_evaluation_parameters(data_context_with_query_store):
+def test_query_store_results_in_suite_parameters(data_context_with_query_store):
     TITANIC_ROW_COUNT = 1313  # taken from the titanic db conftest
     DISTINCT_TITANIC_ROW_COUNT = 4
 
-    # parse_evaluation_parameters correctly resolves a stores URN
+    # parse_suite_parameters correctly resolves a stores URN
     res1 = parse_evaluation_parameter(
         parameter_expression="urn:great_expectations:stores:my_query_store:col_count",
-        evaluation_parameters=None,
+        suite_parameters=None,
         data_context=data_context_with_query_store,
     )
     assert res1 == TITANIC_ROW_COUNT
@@ -166,7 +166,7 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
     # and can handle an operator
     res2 = parse_evaluation_parameter(
         parameter_expression="urn:great_expectations:stores:my_query_store:col_count * 2",
-        evaluation_parameters=None,
+        suite_parameters=None,
         data_context=data_context_with_query_store,
     )
     assert res2 == TITANIC_ROW_COUNT * 2
@@ -174,7 +174,7 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
     # can even handle multiple operators
     res3 = parse_evaluation_parameter(
         parameter_expression="urn:great_expectations:stores:my_query_store:col_count * 0 + 100",
-        evaluation_parameters=None,
+        suite_parameters=None,
         data_context=data_context_with_query_store,
     )
     assert res3 == 100
@@ -182,7 +182,7 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
     # allows stores URNs with functions
     res4 = parse_evaluation_parameter(
         parameter_expression="cos(urn:great_expectations:stores:my_query_store:col_count)",
-        evaluation_parameters=None,
+        suite_parameters=None,
         data_context=data_context_with_query_store,
     )
     assert math.isclose(math.cos(TITANIC_ROW_COUNT), res4)
@@ -190,7 +190,7 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
     # multiple stores URNs can be used
     res5 = parse_evaluation_parameter(
         parameter_expression="urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count",  # noqa: E501
-        evaluation_parameters=None,
+        suite_parameters=None,
         data_context=data_context_with_query_store,
     )
     assert res5 == TITANIC_ROW_COUNT - DISTINCT_TITANIC_ROW_COUNT
@@ -198,7 +198,7 @@ def test_query_store_results_in_evaluation_parameters(data_context_with_query_st
     # complex expressions can combine operators, urns, and functions
     res6 = parse_evaluation_parameter(
         parameter_expression="abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count)",  # noqa: E501
-        evaluation_parameters=None,
+        suite_parameters=None,
         data_context=data_context_with_query_store,
     )
     assert res6 == TITANIC_ROW_COUNT + DISTINCT_TITANIC_ROW_COUNT
@@ -211,7 +211,7 @@ def test_parser_timing():
     assert (
         timeit(
             "parse_evaluation_parameter('x', {'x': 1})",
-            setup="from great_expectations.core.evaluation_parameters import parse_evaluation_parameter",  # noqa: E501
+            setup="from great_expectations.core.suite_parameters import parse_evaluation_parameter",
             number=100,
         )
         < 1
@@ -226,7 +226,7 @@ def test_math_evaluation_paramaters():
 
 
 @pytest.mark.unit
-def test_temporal_evaluation_parameters():
+def test_temporal_suite_parameters():
     # allow 1 second for "now" tolerance
     now = datetime.now()
     assert (
@@ -237,7 +237,7 @@ def test_temporal_evaluation_parameters():
 
 
 @pytest.mark.unit
-def test_temporal_evaluation_parameters_complex():
+def test_temporal_suite_parameters_complex():
     # allow 1 second for "now" tolerance
     now = datetime.now()
     # Choosing "2*3" == 6 weeks shows we can parse an expression inside a kwarg.
@@ -324,7 +324,7 @@ def test_deduplicate_evaluation_parameter_dependencies():
 
 @pytest.mark.filesystem
 @pytest.mark.parametrize(
-    "dataframe,evaluation_parameters,expectation_type,expectation_kwargs,expected_expectation_validation_result",
+    "dataframe,suite_parameters,expectation_type,expectation_kwargs,expected_expectation_validation_result",
     [
         (
             pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}),
@@ -420,10 +420,10 @@ def test_deduplicate_evaluation_parameter_dependencies():
         ),
     ],
 )
-def test_evaluation_parameters_for_between_expectations_parse_correctly(
+def test_suite_parameters_for_between_expectations_parse_correctly(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     dataframe: pd.DataFrame,
-    evaluation_parameters: Dict[str, Any],
+    suite_parameters: Dict[str, Any],
     expectation_type: str,
     expectation_kwargs: Dict[str, dict],
     expected_expectation_validation_result: ExpectationValidationResult,
@@ -449,7 +449,7 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
         expectation_suite_name=expectation_suite_name,
     )
 
-    for evaluation_parameter in evaluation_parameters:
+    for evaluation_parameter in suite_parameters:
         validator.set_evaluation_parameter(*evaluation_parameter)
 
     actual_expectation_validation_result = getattr(validator, expectation_type)(

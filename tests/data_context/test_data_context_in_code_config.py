@@ -434,7 +434,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
         ).store_backend._suppress_store_backend_id
         is False
     )
-    # InMemoryStoreBackend created for evaluation_parameters_store & inactive_evaluation_parameters_store  # noqa: E501
+    # InMemoryStoreBackend created for suite_parameters_store & inactive_suite_parameters_store  # noqa: E501
     assert (
         in_code_data_context.stores.get(
             "inactive_evaluation_parameter_store"

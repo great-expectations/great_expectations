@@ -84,7 +84,7 @@ def get_table_columns_metric(
 
 
 @pytest.fixture(scope="module")
-def expectation_and_runtime_configuration_with_evaluation_parameters():
+def expectation_and_runtime_configuration_with_suite_parameters():
     configuration = ExpectationConfiguration(
         expectation_type="expect_column_min_to_be_between",
         kwargs={
@@ -95,26 +95,26 @@ def expectation_and_runtime_configuration_with_evaluation_parameters():
         },
         meta={"BasicDatasetProfiler": {"confidence": "very low"}},
     )
-    # runtime configuration with evaluation_parameters loaded
+    # runtime configuration with suite_parameters loaded
     runtime_configuration_with_eval = {
         "styling": {
             "default": {"classes": ["badge", "badge-secondary"]},
             "params": {"column": {"classes": ["badge", "badge-primary"]}},
         },
         "include_column_name": None,
-        "evaluation_parameters": {"MIN_VAL_PARAM": 15, "MAX_VAL_PARAM": 20},
+        "suite_parameters": {"MIN_VAL_PARAM": 15, "MAX_VAL_PARAM": 20},
     }
     return configuration, runtime_configuration_with_eval
 
 
 @pytest.mark.unit
 def test_prescriptive_renderer_no_decorator(
-    expectation_and_runtime_configuration_with_evaluation_parameters,
+    expectation_and_runtime_configuration_with_suite_parameters,
 ):
     (
         configuration,
         runtime_configuration_with_eval,
-    ) = expectation_and_runtime_configuration_with_evaluation_parameters
+    ) = expectation_and_runtime_configuration_with_suite_parameters
 
     # noinspection PyShadowingNames
     def bare_bones_prescriptive_renderer(
@@ -174,12 +174,12 @@ def test_prescriptive_renderer_no_decorator(
 
 @pytest.mark.big
 def test_prescriptive_renderer_with_decorator(
-    expectation_and_runtime_configuration_with_evaluation_parameters,
+    expectation_and_runtime_configuration_with_suite_parameters,
 ):
     (
         configuration,
         runtime_configuration_with_eval,
-    ) = expectation_and_runtime_configuration_with_evaluation_parameters
+    ) = expectation_and_runtime_configuration_with_suite_parameters
 
     # noinspection PyShadowingNames
     @render_evaluation_parameter_string
@@ -293,7 +293,7 @@ def test_prescriptive_renderer_with_decorator(
             "params": {"column": {"classes": ["badge", "badge-primary"]}},
         },
         "include_column_name": None,
-        "evaluation_parameters": {
+        "suite_parameters": {
             "MIN_VAL_PARAM": 15,
             "MAX_VAL_PARAM": 20,
             "IAMEXTRA": "EXTRA",
@@ -306,14 +306,14 @@ def test_prescriptive_renderer_with_decorator(
     )
     assert len(res) == 3
 
-    # missing evaluation_parameters will not render (MAX_VAL_PARAM is missing)
+    # missing suite_parameters will not render (MAX_VAL_PARAM is missing)
     runtime_configuration_with_missing = {
         "styling": {
             "default": {"classes": ["badge", "badge-secondary"]},
             "params": {"column": {"classes": ["badge", "badge-primary"]}},
         },
         "include_column_name": None,
-        "evaluation_parameters": {"MIN_VAL_PARAM": 15},
+        "suite_parameters": {"MIN_VAL_PARAM": 15},
     }
     res = bare_bones_prescriptive_renderer(
         configuration=configuration,

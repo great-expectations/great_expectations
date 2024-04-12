@@ -256,7 +256,7 @@ def _checkpoint_config(data_file_name, with_slack):
                     "action_list": action_list,
                     "batch_request": {},
                     "default_validation_id": "51c303bd-2396-4f04-b567-79f746b09173",
-                    "evaluation_parameters": {},
+                    "suite_parameters": {},
                     "expectation_suite_id": None,
                     "expectation_suite_name": None,
                     "id": "731dc2a5-45d8-4827-9118-39b77c5cd413",

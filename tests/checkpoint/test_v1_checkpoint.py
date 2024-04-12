@@ -524,7 +524,7 @@ class TestCheckpointResult:
 
         validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
             batch_parameters=batch_parameters,
-            evaluation_parameters=expectation_parameters,
+            suite_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
         )
 
