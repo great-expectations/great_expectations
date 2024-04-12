@@ -197,6 +197,14 @@ class ValidationAction(BaseModel):
             and not success
         )
 
+    def _get_data_docs_pages_from_prior_action(
+        self, action_context: ActionContext | None
+    ) -> list[dict] | None:
+        if action_context:
+            return action_context.filter_results(class_=UpdateDataDocsAction)
+
+        return None
+
 
 class DataDocsAction(ValidationAction):
     def _build_data_docs(
@@ -327,9 +335,7 @@ class SlackNotificationAction(DataDocsAction):
             )
 
         validation_success = validation_result_suite.success
-        data_docs_pages = None
-        if action_context:
-            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
         # Assemble complete GX Cloud URL for a specific validation result
         data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
@@ -550,6 +556,26 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         return renderer
 
     @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ):
+        success = checkpoint_result.success or False
+        if not self._is_enabled(success=success):
+            return {"microsoft_teams_notification_result": None}
+
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
+
+        payload = self.renderer.v1_render(
+            checkpoint_result=checkpoint_result,
+            data_docs_pages=data_docs_pages,
+        )
+        # this will actually sent the POST request to the Microsoft Teams webapp server
+        teams_notif_result = send_microsoft_teams_notifications(
+            payload=payload, microsoft_teams_webhook=self.teams_webhook
+        )
+        return {"microsoft_teams_notification_result": teams_notif_result}
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -576,9 +602,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             )
         validation_success = validation_result_suite.success
 
-        data_docs_pages = None
-        if action_context:
-            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
         if self._is_enabled(success=validation_success):
             query = self.renderer.render(
@@ -869,9 +893,7 @@ class EmailAction(ValidationAction):
 
         validation_success = validation_result_suite.success
 
-        data_docs_pages = None
-        if action_context:
-            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
         if self._is_enabled(success=validation_success):
             title, html = self.renderer.render(
