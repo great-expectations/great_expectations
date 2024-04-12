@@ -48,7 +48,7 @@ def construct_data_context_config():
         config_version: float = _DEFAULT_CONFIG_VERSION,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,  # noqa: E501
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
-        evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,  # noqa: E501
+        suite_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,  # noqa: E501
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         plugins_directory: Optional[str] = None,
@@ -66,7 +66,7 @@ def construct_data_context_config():
             "datasources": datasources,
             "expectations_store_name": expectations_store_name,
             "validations_store_name": validations_store_name,
-            "evaluation_parameter_store_name": evaluation_parameter_store_name,
+            "suite_parameter_store_name": suite_parameter_store_name,
             "checkpoint_store_name": checkpoint_store_name,
             "profiler_store_name": profiler_store_name,
             "plugins_directory": plugins_directory,
@@ -185,7 +185,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
 
     # Create desired config
     desired_stores_config = {
-        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
+        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -247,7 +247,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_S3_store",
         validations_store_name="validations_S3_store",
-        evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         checkpoint_store_name="checkpoint_S3_store",
         profiler_store_name="profiler_S3_store",
         stores=desired_stores_config,
@@ -294,7 +294,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         profiler_store_prefix="custom_profiler_store_prefix",
         expectations_store_name="custom_expectations_S3_store_name",
         validations_store_name="custom_validations_S3_store_name",
-        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_S3_store_name",
         profiler_store_name="custom_profiler_S3_store_name",
     )
@@ -320,7 +320,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
 
     # Create desired config
     desired_stores_config = {
-        "custom_evaluation_parameter_store_name": {"class_name": "SuiteParameterStore"},
+        "custom_suite_parameter_store_name": {"class_name": "SuiteParameterStore"},
         "custom_expectations_S3_store_name": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -382,7 +382,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_S3_store_name",
         validations_store_name="custom_validations_S3_store_name",
-        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_S3_store_name",
         profiler_store_name="custom_profiler_S3_store_name",
         stores=desired_stores_config,
@@ -563,7 +563,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
     # Create desired config
     data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
     desired_stores_config = {
-        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
+        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_GCS_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -633,7 +633,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         validations_store_name="validations_GCS_store",
         checkpoint_store_name="checkpoint_GCS_store",
         profiler_store_name="profiler_GCS_store",
-        evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -684,7 +684,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         profiler_store_prefix="custom_profiler_store_prefix",
         expectations_store_name="custom_expectations_GCS_store_name",
         validations_store_name="custom_validations_GCS_store_name",
-        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_GCS_store_name",
         profiler_store_name="custom_profiler_GCS_store_name",
     )
@@ -710,7 +710,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
 
     # Create desired config
     desired_stores_config = {
-        "custom_evaluation_parameter_store_name": {"class_name": "SuiteParameterStore"},
+        "custom_suite_parameter_store_name": {"class_name": "SuiteParameterStore"},
         "custom_expectations_GCS_store_name": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -777,7 +777,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_GCS_store_name",
         validations_store_name="custom_validations_GCS_store_name",
-        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_GCS_store_name",
         profiler_store_name="custom_profiler_GCS_store_name",
         stores=desired_stores_config,
@@ -842,7 +842,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
 
     # Create desired config
     desired_stores_config = {
-        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
+        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_database_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -935,7 +935,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         validations_store_name="validations_database_store",
         checkpoint_store_name="checkpoint_database_store",
         profiler_store_name="profiler_database_store",
-        evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -1009,7 +1009,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         },
         expectations_store_name="custom_expectations_database_store_name",
         validations_store_name="custom_validations_database_store_name",
-        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_database_store_name",
         profiler_store_name="custom_profiler_database_store_name",
     )
@@ -1035,7 +1035,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
 
     # Create desired config
     desired_stores_config = {
-        "custom_evaluation_parameter_store_name": {"class_name": "SuiteParameterStore"},
+        "custom_suite_parameter_store_name": {"class_name": "SuiteParameterStore"},
         "custom_expectations_database_store_name": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -1126,7 +1126,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_database_store_name",
         validations_store_name="custom_validations_database_store_name",
-        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_database_store_name",
         profiler_store_name="custom_profiler_database_store_name",
         stores=desired_stores_config,
@@ -1208,7 +1208,7 @@ def test_override_general_defaults(
                     "prefix": "REPLACE_ME",
                 },
             },
-            "custom_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
+            "custom_suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "checkpoint_S3_store": {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -1228,7 +1228,7 @@ def test_override_general_defaults(
         },
         expectations_store_name="custom_expectations_store_name",
         validations_store_name="custom_validations_store_name",
-        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="checkpoint_S3_store",
         profiler_store_name="profiler_S3_store",
         data_docs_sites={
@@ -1273,7 +1273,7 @@ def test_override_general_defaults(
     )
 
     desired_stores = {
-        "custom_evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
+        "custom_suite_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -1374,7 +1374,7 @@ def test_override_general_defaults(
         config_version=999.0,
         expectations_store_name="custom_expectations_store_name",
         validations_store_name="custom_validations_store_name",
-        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="checkpoint_S3_store",
         profiler_store_name="profiler_S3_store",
         stores=desired_stores,
@@ -1431,7 +1431,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     # Create desired config
     desired_stores_config = {
-        "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
+        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_S3_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
@@ -1495,7 +1495,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         validations_store_name="validations_S3_store",
         checkpoint_store_name="checkpoint_S3_store",
         profiler_store_name="profiler_S3_store",
-        evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -1545,7 +1545,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         "checkpoint_store_name": "checkpoint_store",
         "profiler_store_name": "profiler_store",
         "config_version": 3.0,
-        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "expectations_store",
         "include_rendered_content": {
             "expectation_suite": False,
@@ -1561,7 +1561,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
                 "class_name": "ProfilerStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
-            "evaluation_parameter_store": {"class_name": "SuiteParameterStore"},
+            "suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
@@ -1610,7 +1610,7 @@ def test_data_context_config_defaults():
         "config_version": 3,
         "data_docs_sites": None,
         "datasources": {},
-        "evaluation_parameter_store_name": None,
+        "suite_parameter_store_name": None,
         "expectations_store_name": None,
         "fluent_datasources": {},
         "include_rendered_content": {

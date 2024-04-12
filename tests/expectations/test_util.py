@@ -28,7 +28,7 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -182,7 +182,7 @@ def test_prescriptive_renderer_with_decorator(
     ) = expectation_and_runtime_configuration_with_suite_parameters
 
     # noinspection PyShadowingNames
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def bare_bones_prescriptive_renderer(
         configuration=None,
         runtime_configuration=None,

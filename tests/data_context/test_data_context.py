@@ -237,12 +237,12 @@ def test_get_expectation_suite_include_rendered_content(
 
 
 @pytest.mark.filesystem
-def test_compile_evaluation_parameter_dependencies(
+def test_compile_suite_parameter_dependencies(
     data_context_parameterized_expectation_suite,
 ):
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {}
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
+    assert data_context_parameterized_expectation_suite._suite_parameter_dependencies == {}
+    data_context_parameterized_expectation_suite._compile_suite_parameter_dependencies()
+    assert data_context_parameterized_expectation_suite._suite_parameter_dependencies == {
         "source_diabetes_data.default": [
             {
                 "metric_kwargs_id": {
@@ -257,7 +257,7 @@ def test_compile_evaluation_parameter_dependencies(
 
 
 @pytest.mark.filesystem
-def test_compile_evaluation_parameter_dependencies_broken_suite(
+def test_compile_suite_parameter_dependencies_broken_suite(
     data_context_parameterized_expectation_suite: FileDataContext,
 ):
     broken_suite_path = pathlib.Path(
@@ -285,10 +285,10 @@ def test_compile_evaluation_parameter_dependencies_broken_suite(
     with broken_suite_path.open("w", encoding="UTF-8") as fp:
         json.dump(obj=broken_suite_dict, fp=fp)
 
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {}
+    assert data_context_parameterized_expectation_suite._suite_parameter_dependencies == {}
     with pytest.warns(UserWarning):
-        data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
+        data_context_parameterized_expectation_suite._compile_suite_parameter_dependencies()
+    assert data_context_parameterized_expectation_suite._suite_parameter_dependencies == {
         "source_diabetes_data.default": [
             {
                 "metric_kwargs_id": {
