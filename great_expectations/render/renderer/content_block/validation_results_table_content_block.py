@@ -107,7 +107,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             **kwargs,
         ):
             eval_param_value_dict = kwargs.get("suite_parameters", None)
-            # loading into evaluation parameters to be passed onto prescriptive renderer
+            # loading into suite parameters to be passed onto prescriptive renderer
             if eval_param_value_dict is not None:
                 runtime_configuration["suite_parameters"] = eval_param_value_dict
 

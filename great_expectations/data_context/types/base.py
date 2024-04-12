@@ -2552,7 +2552,7 @@ class CheckpointConfig(BaseYamlConfig):
         expectation_suite_name: The expectation suite name of your checkpoint
         batch_request: The batch request
         action_list: The action list
-        suite_parameters: The evaluation parameters
+        suite_parameters: The suite parameters
         runtime_configuration: The runtime configuration for your checkpoint
         validations: An optional list of validations in your checkpoint
         default_validation_id: The default validation id of your checkpoint

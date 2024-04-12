@@ -1378,7 +1378,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
-            suite_parameters: The evaluation parameters to use in generating this checkpoint.
+            suite_parameters: The suite parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             id: The ID to use in generating this checkpoint.
@@ -1516,7 +1516,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
-            suite_parameters: The evaluation parameters to use in generating this checkpoint.
+            suite_parameters: The suite parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
@@ -3649,7 +3649,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _compile_suite_parameter_dependencies(self) -> None:
         self._suite_parameter_dependencies = {}
-        # we have to iterate through all expectation suites because evaluation parameters
+        # we have to iterate through all expectation suites because suite parameters
         # can reference metric values from other suites
         for key in self.expectations_store.list_keys():
             try:
@@ -3658,7 +3658,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured  # noqa: E501
                 # we should ignore that instead of breaking all checkpoints in the entire context
                 warnings.warn(
-                    f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "  # noqa: E501
+                    f"Suite with identifier {key} was not considered when compiling suite parameter dependencies "  # noqa: E501
                     f"because it failed to load with message: {e}",
                     UserWarning,
                 )

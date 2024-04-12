@@ -44,22 +44,22 @@ SuiteParameterDict: TypeAlias = dict
 
 
 def is_suite_parameter(value: Any) -> TypeGuard[SuiteParameterDict]:
-    """Typeguard to check if a value is an evaluation parameter."""
+    """Typeguard to check if a value is an suite parameter."""
     return isinstance(value, dict) and "$PARAMETER" in value.keys()
 
 
 def get_suite_parameter_key(suite_parameter: SuiteParameterDict) -> str:
-    """Get the key of an evaluation parameter.
+    """Get the key of an suite parameter.
 
-    e.g. if the evaluation parameter is {"$PARAMETER": "foo"}, this function will return "foo".
+    e.g. if the suite parameter is {"$PARAMETER": "foo"}, this function will return "foo".
     When evaluating the runtime configuration of an expectation, we will look for
     a runtime value for "foo".
 
     Args:
-        suite_parameter: The evaluation parameter to get the key of
+        suite_parameter: The suite parameter to get the key of
 
     Returns:
-        The key of the evaluation parameter
+        The key of the suite parameter
     """
     return suite_parameter["$PARAMETER"]
 
@@ -225,17 +225,17 @@ class SuiteParameterParser:
                 evaluated = int(op)
                 logger.info("Evaluation parameter operand successfully parsed as integer.")
             except ValueError:
-                logger.info("Parsing evaluation parameter operand as integer failed.")
+                logger.info("Parsing suite parameter operand as integer failed.")
                 try:
                     evaluated = float(op)
                     logger.info("Evaluation parameter operand successfully parsed as float.")
                 except ValueError:
-                    logger.info("Parsing evaluation parameter operand as float failed.")
+                    logger.info("Parsing suite parameter operand as float failed.")
                     try:
                         evaluated = dateutil.parser.parse(op)
                         logger.info("Evaluation parameter operand successfully parsed as datetime.")
                     except ValueError as e:
-                        logger.info("Parsing evaluation parameter operand as datetime failed.")
+                        logger.info("Parsing suite parameter operand as datetime failed.")
                         raise e  # noqa: TRY201
             return evaluated
 
@@ -268,7 +268,7 @@ def build_suite_parameters(
                 evaluation_args[key] = evaluation_args[key][param_key]
                 del expectation_args[key][param_key]
 
-            # If not, try to parse the evaluation parameter and substitute, which will raise
+            # If not, try to parse the suite parameter and substitute, which will raise
             # an exception if we do not have a value
             else:
                 raw_value = value["$PARAMETER"]
@@ -308,10 +308,10 @@ def find_suite_parameter_dependencies(parameter_expression):  # noqa: C901
         _ = parser.parseString(parameter_expression, parseAll=True)
     except ParseException as err:
         raise SuiteParameterError(  # noqa: TRY003
-            f"Unable to parse evaluation parameter: {err!s} at line {err.line}, column {err.column}"
+            f"Unable to parse suite parameter: {err!s} at line {err.line}, column {err.column}"
         )
     except AttributeError as err:
-        raise SuiteParameterError(f"Unable to parse evaluation parameter: {err!s}")  # noqa: TRY003
+        raise SuiteParameterError(f"Unable to parse suite parameter: {err!s}")  # noqa: TRY003
 
     for word in expr.exprStack:
         if isinstance(word, (int, float)):
@@ -340,7 +340,7 @@ def find_suite_parameter_dependencies(parameter_expression):  # noqa: C901
             # This particular suite_parameter or operator is not a valid URN
             pass
 
-        # If we got this far, it's a legitimate "other" evaluation parameter
+        # If we got this far, it's a legitimate "other" suite parameter
         dependencies["other"].add(word)
 
     return dependencies
@@ -394,7 +394,7 @@ def parse_suite_parameter(  # noqa: C901, PLR0912, PLR0915
                     f"No value found for $PARAMETER {parse_results[0]!s}"
                 )
         except ParseException as e:
-            logger.debug(f"Parse exception while parsing evaluation parameter: {e!s}")
+            logger.debug(f"Parse exception while parsing suite parameter: {e!s}")
             raise SuiteParameterError(  # noqa: TRY003
                 f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e
@@ -407,8 +407,8 @@ def parse_suite_parameter(  # noqa: C901, PLR0912, PLR0915
     elif len(parse_results) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this  # noqa: E501
         # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)  # noqa: E501
-        # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that  # noqa: E501
-        # case here; is the evaluation parameter provided here in fact a metric definition?
+        # NOTE: 20201023 - JPC - to support MetricDefinition as an suite parameter type, we need to handle that  # noqa: E501
+        # case here; is the suite parameter provided here in fact a metric definition?
         return suite_parameters[parse_results[0]]
 
     elif len(parse_results) == 0 or parse_results[0] != "Parse Failure":
@@ -452,7 +452,7 @@ def parse_suite_parameter(  # noqa: C901, PLR0912, PLR0915
         exception_message = f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
         logger.debug(exception_message, e, exc_info=True)
         raise SuiteParameterError(  # noqa: TRY003
-            f"Error while evaluating evaluation parameter expression: {e!s}"
+            f"Error while evaluating suite parameter expression: {e!s}"
         ) from e
 
     return result

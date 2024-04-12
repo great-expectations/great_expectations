@@ -146,7 +146,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 "expectation configuration kwargs must be a dict."
             )
         self._kwargs = kwargs
-        # the kwargs before evaluation parameters are evaluated
+        # the kwargs before suite parameters are evaluated
         self._raw_kwargs: dict[str, Any] | None = None
         if meta is None:
             meta = {}
@@ -179,7 +179,7 @@ class ExpectationConfiguration(SerializableDictDot):
             logger.debug("suite_parameters have already been built on this expectation")
 
     def get_raw_configuration(self) -> ExpectationConfiguration:
-        # return configuration without substituted evaluation parameters
+        # return configuration without substituted suite parameters
         raw_config = deepcopy(self)
         if raw_config._raw_kwargs is not None:
             raw_config._kwargs = raw_config._raw_kwargs

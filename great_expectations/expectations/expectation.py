@@ -111,7 +111,7 @@ T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
 
 
 def render_suite_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]:  # noqa: C901
-    """Decorator for Expectation classes that renders evaluation parameters as strings.
+    """Decorator for Expectation classes that renders suite parameters as strings.
 
     allows Expectations that use Evaluation Parameters to render the values
     of the Evaluation Parameters along with the rest of the output.
@@ -136,7 +136,7 @@ def render_suite_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]
                     current_expectation_params.append(key)
 
         # if expectation configuration has no eval params, then don't look for the values in runtime_configuration  # noqa: E501
-        # isinstance check should be removed upon implementation of RenderedAtomicContent evaluation parameter support  # noqa: E501
+        # isinstance check should be removed upon implementation of RenderedAtomicContent suite parameter support  # noqa: E501
         if current_expectation_params and not isinstance(
             rendered_string_template, RenderedAtomicContent
         ):
@@ -164,8 +164,8 @@ def render_suite_parameter_string(render_func: Callable[P, T]) -> Callable[P, T]
                             rendered_string_template.append(rendered_content)
             else:
                 raise GreatExpectationsError(  # noqa: TRY003
-                    f"""GX was not able to render the value of evaluation parameters.
-                        Expectation {render_func} had evaluation parameters set, but they were not passed in."""  # noqa: E501
+                    f"""GX was not able to render the value of suite parameters.
+                        Expectation {render_func} had suite parameters set, but they were not passed in."""  # noqa: E501
                 )
         return rendered_string_template
 
@@ -1203,8 +1203,8 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         """SuiteParameter options for this Expectation.
 
         Returns:
-            tuple[str, ...]: The keys of the evaluation parameters used in this Expectation at runtime.
-        """  # noqa: E501
+            tuple[str, ...]: The keys of the suite parameters used in this Expectation at runtime.
+        """
         output: set[str] = set()
         as_dict = self.dict(exclude_defaults=True)
         for value in as_dict.values():

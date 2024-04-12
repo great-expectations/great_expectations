@@ -1300,8 +1300,8 @@ class Validator:
             run_id: Used to identify this validation result as part of a collection of validations.
             run_name: Used to identify this validation result as part of a collection of validations. Only used if a `run_id` is not passed. See DataContext for more information.
             run_time: Used to identify this validation result as part of a collection of validations. Only used if a `run_id` is not passed. See DataContext for more information.
-            data_context: A datacontext object to use as part of validation for binding evaluation parameters and registering validation results. Overrides the Data Context configured when the Validator is instantiated.
-            suite_parameters: If None, uses the evaluation_paramters from the Expectation Suite provided or as part of the Data Asset. If a dict, uses the evaluation parameters in the dictionary.
+            data_context: A datacontext object to use as part of validation for binding suite parameters and registering validation results. Overrides the Data Context configured when the Validator is instantiated.
+            suite_parameters: If None, uses the evaluation_paramters from the Expectation Suite provided or as part of the Data Asset. If a dict, uses the suite parameters in the dictionary.
             catch_exceptions: If True, exceptions raised by tests will not end validation and will be described in the returned report.
             result_format: If None, uses the default value ('BASIC' or as specified). If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
             only_return_failures: If True, expectation results are only returned when `success = False`.
@@ -1383,7 +1383,7 @@ class Validator:
             if suite_parameters is not None:
                 runtime_suite_parameters.update(suite_parameters)
 
-            # Convert evaluation parameters to be json-serializable
+            # Convert suite parameters to be json-serializable
             runtime_suite_parameters = recursively_convert_to_json_serializable(
                 runtime_suite_parameters
             )
@@ -1456,7 +1456,7 @@ class Validator:
         expectation_configurations: list[ExpectationConfiguration],
         suite_parameters: Optional[dict[str, Any]] = None,
     ) -> list[ExpectationConfiguration]:
-        """Substitute evaluation parameters into the provided expectations and sort by column."""
+        """Substitute suite parameters into the provided expectations and sort by column."""
         NO_COLUMN = "_nocolumn"  # just used to group expectations that don't specify a column
         columns: dict[str, list[ExpectationConfiguration]] = {}
 
@@ -1482,14 +1482,14 @@ class Validator:
 
     def get_suite_parameter(self, parameter_name, default_value=None):
         """
-        Get an evaluation parameter value that has been stored in meta.
+        Get an suite parameter value that has been stored in meta.
 
         Args:
             parameter_name (string): The name of the parameter to store.
             default_value (any): The default value to be returned if the parameter is not found.
 
         Returns:
-            The current value of the evaluation parameter.
+            The current value of the suite parameter.
         """
         if parameter_name in self._expectation_suite.suite_parameters:
             return self._expectation_suite.suite_parameters[parameter_name]

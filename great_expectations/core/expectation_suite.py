@@ -122,7 +122,7 @@ class ExpectationSuite(SerializableDictDot):
         """SuiteParameter options for this ExpectationSuite.
 
         Returns:
-            tuple[str, ...]: The keys of the evaluation parameters used by all Expectations of this suite at runtime.
+            tuple[str, ...]: The keys of the suite parameters used by all Expectations of this suite at runtime.
         """  # noqa: E501
         output: set[str] = set()
         for expectation in self.expectations:
@@ -324,7 +324,7 @@ class ExpectationSuite(SerializableDictDot):
     # noinspection PyPep8Naming
     def isEquivalentTo(self, other):
         """
-        ExpectationSuite equivalence relies only on expectations and evaluation parameters. It does not include:
+        ExpectationSuite equivalence relies only on expectations and suite parameters. It does not include:
         - data_asset_name
         - name
         - meta
@@ -408,7 +408,7 @@ class ExpectationSuite(SerializableDictDot):
         try:
             myself["suite_parameters"] = convert_to_json_serializable(myself["suite_parameters"])
         except KeyError:
-            pass  # Allow evaluation parameters to be missing if empty
+            pass  # Allow suite parameters to be missing if empty
         myself["meta"] = convert_to_json_serializable(myself["meta"])
         return myself
 

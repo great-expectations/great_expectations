@@ -566,7 +566,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         else:
             assert isinstance(param_type, RendererValueType)
             renderer_params_args = self.params.dict(exclude_none=False)
-            # if we already moved the evaluation parameter raw_kwargs to a param,
+            # if we already moved the suite parameter raw_kwargs to a param,
             # we need to combine the param passed to add_param() with those existing raw_kwargs
             if (
                 name in renderer_params_args and renderer_params_args[name]["suite_parameter"]  # type: ignore[index]
