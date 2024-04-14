@@ -1344,7 +1344,6 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("config_version",),
         ("data_docs_sites",),
         ("datasources",),
-        ("evaluation_parameter_store_name",),
         ("expectations_store_name",),
         ("fluent_datasources",),
         ("include_rendered_content",),
@@ -1352,6 +1351,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("profiler_store_name",),
         ("progress_bars",),
         ("stores",),
+        ("suite_parameter_store_name",),
         ("validation_operators",),
         ("validations_store_name",),
     ]
