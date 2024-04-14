@@ -1128,7 +1128,7 @@ def test_serialize_profiler_config(
         "enforce_numeric_metric": False,
         "replace_nan_with_zero": False,
         "reduce_scalar_metric": True,
-        "evaluation_parameter_builder_configs": None,
+        "suite_parameter_builder_configs": None,
     }
     assert isinstance(
         profiler.rules[0].expectation_configuration_builders[0],

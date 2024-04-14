@@ -157,7 +157,7 @@ def test__send_validation_results_sends_valid_http_request(
     keys = [f"key_{i}" for i in range(5)]
     validation_results = {
         key: {
-            "evaluation_parameters": {},
+            "suite_parameters": {},
             "meta": {},
             "results": [],
             "statistics": {},

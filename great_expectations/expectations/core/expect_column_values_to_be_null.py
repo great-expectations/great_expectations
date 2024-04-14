@@ -8,7 +8,7 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     parse_result_format,
@@ -195,7 +195,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

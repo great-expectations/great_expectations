@@ -164,10 +164,10 @@ sample_data = [
     ),
 ]
 
-evaluation_parameters = [
+suite_parameters = [
     IntegrationTestFixture(
-        name="dynamically_load_evaluation_parameters_from_a_database",
-        user_flow_script="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py",
+        name="dynamically_load_suite_parameters_from_a_database",
+        user_flow_script="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_suite_parameters_from_a_database.py",
         data_context_dir="tests/integration/fixtures/query_store/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
@@ -197,6 +197,6 @@ getting_started = [
 postgresql_integration_tests += connecting_to_your_data
 postgresql_integration_tests += partition_data
 postgresql_integration_tests += sample_data
-postgresql_integration_tests += evaluation_parameters
+postgresql_integration_tests += suite_parameters
 postgresql_integration_tests += fluent_datasources
 postgresql_integration_tests += getting_started

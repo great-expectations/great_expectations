@@ -139,7 +139,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics  # noqa: E501
         total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()  # noqa: E501
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         map_metric_name: str
         mode: str
@@ -151,7 +151,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         condition: str
 
         map_metric_name = "column_values.nonnull"
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
@@ -169,7 +169,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             mode=mode,
             max_error_rate=None,
             expectation_type=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=None,
         )
 
@@ -184,7 +184,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             mode=mode,
             max_error_rate=f"{VARIABLES_KEY}max_error_rate",
             expectation_type=expectation_type,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=None,
         )
 
@@ -215,7 +215,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         )
 
         map_metric_name = "column_values.null"
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
@@ -233,7 +233,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             mode=mode,
             max_error_rate=None,
             expectation_type=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=None,
         )
 
@@ -248,7 +248,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             mode=mode,
             max_error_rate=f"{VARIABLES_KEY}max_error_rate",
             expectation_type=expectation_type,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=None,
         )
 

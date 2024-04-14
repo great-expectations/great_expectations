@@ -496,20 +496,23 @@ class TestCheckpointResult:
     def test_checkpoint_run_actions(
         self,
         validation_definition: ValidationDefinition,
-        actions: list[CheckpointAction],
+        mocker: MockerFixture,
     ):
-        validation_definitions = [validation_definition]
+        # Arrange
+        action = mocker.Mock(spec=UpdateDataDocsAction)
         checkpoint = Checkpoint(
             name=self.checkpoint_name,
-            validation_definitions=validation_definitions,
-            actions=actions,
+            validation_definitions=[validation_definition],
+            actions=[action],
         )
 
-        with mock.patch.object(ValidationAction, "v1_run") as mock_run:
-            result = checkpoint.run()
+        # Act
+        result = checkpoint.run()
 
-        assert mock_run.call_count == len(actions)
-        mock_run.assert_called_with(checkpoint_result=result, action_context=mock.ANY)
+        # Assert
+        action._copy_and_set_values().v1_run.assert_called_once_with(
+            checkpoint_result=result, action_context=mock.ANY
+        )
 
     @pytest.mark.unit
     def test_checkpoint_sorts_actions(self, validation_definition: ValidationDefinition):
@@ -549,7 +552,7 @@ class TestCheckpointResult:
 
         validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
             batch_parameters=batch_parameters,
-            evaluation_parameters=expectation_parameters,
+            suite_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
         )
 

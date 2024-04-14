@@ -50,7 +50,7 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
             name="my_mean_table_columns_set_match_multi_batch_parameter_builder",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )

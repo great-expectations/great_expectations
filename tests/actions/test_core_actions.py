@@ -80,6 +80,9 @@ class MockSlackResponse:
     def json(self):
         return {"ok": "True"}
 
+    def raise_for_status(self):
+        pass
+
 
 class MockCloudResponse:
     def __init__(self, status_code):
@@ -1103,12 +1106,49 @@ class TestV1ActionRun:
         mock_pypd_event.assert_not_called()
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
     def test_SlackNotificationAction_run(self, checkpoint_result: CheckpointResult):
-        action = SlackNotificationAction(slack_webhook="test")
-        action.v1_run(checkpoint_result=checkpoint_result)
+        action = SlackNotificationAction(slack_webhook="test", notify_on="all")
+
+        with mock.patch.object(Session, "post") as mock_post:
+            output = action.v1_run(checkpoint_result=checkpoint_result)
+
+        assert mock_post.call_count == 5  # Sent in batches
+        mock_post.assert_called_with(
+            url="test",
+            headers=None,
+            json={
+                "blocks": [
+                    {
+                        "text": {
+                            "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite name*: `suite_a`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
+                            "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *3* of *3* expectations were met",  # noqa: E501
+                            "type": "mrkdwn",
+                        },
+                        "type": "section",
+                    },
+                    {
+                        "text": {
+                            "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite name*: `suite_b`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
+                            "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *2* of *2* expectations were met",  # noqa: E501
+                            "type": "mrkdwn",
+                        },
+                        "type": "section",
+                    },
+                    {
+                        "elements": [
+                            {
+                                "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/docs/terms/data_docs",
+                                "type": "mrkdwn",
+                            },
+                        ],
+                        "type": "context",
+                    },
+                ],
+                "text": "et",
+            },
+        )
+
+        assert output == {"slack_notification_result": "Slack notification succeeded."}
 
     @pytest.mark.unit
     def test_SNSNotificationAction_run(self, sns, checkpoint_result: CheckpointResult):

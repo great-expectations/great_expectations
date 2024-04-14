@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import logging
 import re
-import warnings
 from collections import Counter
 from pprint import pformat as pf
 from typing import (
@@ -308,7 +307,9 @@ class _FilePathDataAsset(DataAsset):
             )
             batch_list.append(batch)
 
-        self.sort_batches(batch_list)
+        if batch_request.partitioner:
+            spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
+            self.sort_batches(batch_list, spark_partitioner)
 
         return batch_list
 
@@ -334,9 +335,8 @@ class _FilePathDataAsset(DataAsset):
                 if batch_parameters_counts[param_name] == 1:
                     batch_request_copy_without_partitioner_kwargs.options.pop(param_name)
                 else:
-                    warnings.warn(
-                        f"The same option name is applied for your batch regex and partitioner config: {param_name}"  # noqa: E501
-                    )
+                    # TODO: figure out what to do here!
+                    ...
             batch_definition_list = self._data_connector.get_batch_definition_list(
                 batch_request=batch_request_copy_without_partitioner_kwargs
             )
