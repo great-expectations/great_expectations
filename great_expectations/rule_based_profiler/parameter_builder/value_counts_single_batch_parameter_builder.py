@@ -52,7 +52,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -60,7 +60,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
-            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            suite_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
@@ -78,7 +78,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=False,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
             )
         )
         self._column_values_nonnull_count_metric_single_batch_parameter_builder_config = (
@@ -92,12 +92,12 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=False,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
             )
         )
 
-        if evaluation_parameter_builder_configs is None:
-            evaluation_parameter_builder_configs = [
+        if suite_parameter_builder_configs is None:
+            suite_parameter_builder_configs = [
                 self._column_value_counts_metric_single_batch_parameter_builder_config,
                 self._column_values_nonnull_count_metric_single_batch_parameter_builder_config,
             ]
@@ -110,7 +110,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=data_context,
         )
 

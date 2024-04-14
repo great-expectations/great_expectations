@@ -24,7 +24,7 @@ assert len(df) == 10000
 
 # Tutorial content resumes here.
 
-# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py get_validator">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_suite_parameters_from_a_database.py get_validator">
 import great_expectations as gx
 
 context = gx.get_context()
@@ -43,7 +43,7 @@ validator = context.get_validator(
 # </snippet>
 
 
-# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py define expectation">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_suite_parameters_from_a_database.py define expectation">
 validator_results = validator.expect_column_values_to_be_in_set(
     column="passenger_count",
     value_set={
@@ -53,7 +53,7 @@ validator_results = validator.expect_column_values_to_be_in_set(
 # </snippet>
 
 
-# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py expected_validator_results">
+# <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_dynamically_load_suite_parameters_from_a_database.py expected_validator_results">
 expected_validator_results = """
 {
   "expectation_config": {

@@ -11,7 +11,6 @@ import logging
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     List,
     Literal,
     Optional,
@@ -197,6 +196,14 @@ class ValidationAction(BaseModel):
             and not success
         )
 
+    def _get_data_docs_pages_from_prior_action(
+        self, action_context: ActionContext | None
+    ) -> list[dict] | None:
+        if action_context:
+            return action_context.filter_results(class_=UpdateDataDocsAction)
+
+        return None
+
 
 class DataDocsAction(ValidationAction):
     def _build_data_docs(
@@ -301,6 +308,77 @@ class SlackNotificationAction(DataDocsAction):
         return values
 
     @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
+        success = checkpoint_result.success or False
+        result = {"slack_notification_result": "none required"}
+        if not self._is_enabled(success=success):
+            return result
+
+        checkpoint_text_blocks: list[dict] = []
+        for (
+            validation_result_suite_identifier,
+            validation_result_suite,
+        ) in checkpoint_result.run_results.items():
+            validation_text_blocks = self._render_validation_result(
+                result_identifier=validation_result_suite_identifier,
+                result=validation_result_suite,
+                action_context=action_context,
+            )
+            checkpoint_text_blocks.extend(validation_text_blocks)
+
+        payload = self.renderer.concatenate_text_blocks(
+            checkpoint_result=checkpoint_result, text_blocks=checkpoint_text_blocks
+        )
+
+        return self._post_slack_payload(payload=payload, result=result)
+
+    def _post_slack_payload(self, payload: dict, result: dict) -> dict:
+        blocks = payload.get("blocks")
+        if blocks:
+            if len(blocks) >= 1:
+                if blocks[0].get("text"):
+                    result = self._send_notifications_in_batches(
+                        blocks=blocks, payload=payload, result=result
+                    )
+                else:
+                    result = self._get_slack_result(payload=payload)
+
+        return result
+
+    def _render_validation_result(
+        self,
+        result_identifier: ValidationResultIdentifier,
+        result: ExpectationSuiteValidationResult,
+        action_context: ActionContext | None = None,
+    ) -> list[dict]:
+        data_docs_pages = None
+        if action_context:
+            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+
+        # Assemble complete GX Cloud URL for a specific validation result
+        data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
+            resource_identifier=result_identifier
+        )
+
+        validation_result_urls: list[str] = [
+            data_docs_url["site_url"]
+            for data_docs_url in data_docs_urls
+            if data_docs_url["site_url"]
+        ]
+        if result.result_url:
+            validation_result_urls.append(result.result_url)
+
+        return self.renderer.v1_render(
+            validation_result=result,
+            data_docs_pages=data_docs_pages,
+            notify_with=self.notify_with,
+            show_failed_expectations=self.show_failed_expectations,
+            validation_result_urls=validation_result_urls,
+        )
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -327,9 +405,7 @@ class SlackNotificationAction(DataDocsAction):
             )
 
         validation_success = validation_result_suite.success
-        data_docs_pages = None
-        if action_context:
-            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
         # Assemble complete GX Cloud URL for a specific validation result
         data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
@@ -360,7 +436,7 @@ class SlackNotificationAction(DataDocsAction):
 
         result = {"slack_notification_result": "none required"}
         if self._is_enabled(success=validation_success):
-            query: Dict = self.renderer.render(
+            payload = self.renderer.render(
                 validation_result_suite,
                 data_docs_pages,
                 self.notify_with,
@@ -368,31 +444,31 @@ class SlackNotificationAction(DataDocsAction):
                 validation_result_urls,
             )
 
-            blocks = query.get("blocks")
+            blocks = payload.get("blocks")
             if blocks:
                 if len(blocks) >= 1:
                     if blocks[0].get("text"):
-                        result = self._send_notifications_in_batches(blocks, query, result)
+                        result = self._send_notifications_in_batches(blocks, payload, result)
                     else:
-                        result = self._get_slack_result(query)
+                        result = self._get_slack_result(payload)
 
         return result
 
-    def _send_notifications_in_batches(self, blocks, query, result):
+    def _send_notifications_in_batches(self, blocks, payload, result):
         text = blocks[0]["text"]["text"]
         chunks, chunk_size = len(text), len(text) // 4
         split_text = [
             text[position : position + chunk_size] for position in range(0, chunks, chunk_size)
         ]
         for batch in split_text:
-            query["text"] = batch
-            result = self._get_slack_result(query)
+            payload["text"] = batch
+            result = self._get_slack_result(payload)
         return result
 
-    def _get_slack_result(self, query):
+    def _get_slack_result(self, payload):
         # this will actually send the POST request to the Slack webapp server
         slack_notif_result = send_slack_notification(
-            query,
+            payload=payload,
             slack_webhook=self.slack_webhook,
             slack_token=self.slack_token,
             slack_channel=self.slack_channel,
@@ -550,6 +626,26 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         return renderer
 
     @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ):
+        success = checkpoint_result.success or False
+        if not self._is_enabled(success=success):
+            return {"microsoft_teams_notification_result": None}
+
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
+
+        payload = self.renderer.v1_render(
+            checkpoint_result=checkpoint_result,
+            data_docs_pages=data_docs_pages,
+        )
+        # this will actually sent the POST request to the Microsoft Teams webapp server
+        teams_notif_result = send_microsoft_teams_notifications(
+            payload=payload, microsoft_teams_webhook=self.teams_webhook
+        )
+        return {"microsoft_teams_notification_result": teams_notif_result}
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -576,9 +672,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             )
         validation_success = validation_result_suite.success
 
-        data_docs_pages = None
-        if action_context:
-            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
         if self._is_enabled(success=validation_success):
             query = self.renderer.render(
@@ -869,9 +963,7 @@ class EmailAction(ValidationAction):
 
         validation_success = validation_result_suite.success
 
-        data_docs_pages = None
-        if action_context:
-            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
         if self._is_enabled(success=validation_success):
             title, html = self.renderer.render(

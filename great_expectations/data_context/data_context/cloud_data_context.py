@@ -274,6 +274,41 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         config["fluent_datasources"] = _extract_fluent_datasources(config)
 
+        # V1 renamed EvaluationParameters to SuiteParameters, so this is a temporary patch
+        # until Cloud implements a V1 endpoint for DataContextConfig
+        config = cls._replace_evaluation_parameters_with_suite_parameters(config)
+
+        return config
+
+    @classmethod
+    def _replace_evaluation_parameters_with_suite_parameters(cls, config: dict) -> dict:
+        """Ensure cloud config follows V1 conventions for SuiteParameters"""
+        # store name
+        V0_STORE_NAME_KEY = "evaluation_parameter_store_name"
+        V1_STORE_NAME_KEY = "suite_parameter_store_name"
+        if config.get(V0_STORE_NAME_KEY):
+            value = config.pop(V0_STORE_NAME_KEY)
+            if not config.get(V1_STORE_NAME_KEY):
+                config[V1_STORE_NAME_KEY] = value
+
+        if not config.get("stores"):
+            return config  # no store dict to update
+
+        store_key_tuples = [
+            # (V0 Store Key, V1 Store Key)
+            ("default_evaluation_parameter_store", "default_suite_parameter_store"),
+            ("evaluation_parameter_store", "suite_parameter_store"),
+        ]
+        for v0_store_key, v1_store_key in store_key_tuples:
+            store_config = config["stores"].pop(v0_store_key, None)
+            if not store_config:
+                continue
+            # replace class name, if its legacy
+            if store_config["class_name"] == "EvaluationParameterStore":
+                store_config["class_name"] = "SuiteParameterStore"
+            # replace the config under the V1 key
+            config["stores"][v1_store_key] = store_config
+
         return config
 
     @classmethod
@@ -725,7 +760,7 @@ class CloudDataContext(SerializableDataContext):
         if not overwrite_existing:
             self._validate_suite_unique_constaints_before_save(key)
 
-        self._evaluation_parameter_dependencies_compiled = False
+        self._suite_parameter_dependencies_compiled = False
         include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
             include_rendered_content=include_rendered_content
         )
@@ -760,7 +795,7 @@ class CloudDataContext(SerializableDataContext):
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
         id: str | None = None,
@@ -778,7 +813,7 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
             expectation_suite_id=expectation_suite_id,

@@ -62,7 +62,7 @@ class ValidationOperator:
         self,
         assets_to_validate,
         run_id=None,
-        evaluation_parameters=None,
+        suite_parameters=None,
         run_name=None,
         run_time=None,
     ) -> None:
@@ -140,7 +140,7 @@ class ActionListValidationOperator(ValidationOperator):
         {
             "run_id": {"run_time": "20200527T041833.074212Z", "run_name": "my_run_name"},
             "success": True,
-            "evaluation_parameters": None,
+            "suite_parameters": None,
             "validation_operator_config": {
                 "class_name": "ActionListValidationOperator",
                 "module_name": "great_expectations.validation_operators",
@@ -266,7 +266,7 @@ class ActionListValidationOperator(ValidationOperator):
         self,
         assets_to_validate,
         run_id=None,
-        evaluation_parameters=None,
+        suite_parameters=None,
         run_name=None,
         run_time=None,
         catch_exceptions=None,
@@ -296,7 +296,7 @@ class ActionListValidationOperator(ValidationOperator):
             batch_validate_arguments = {
                 "run_id": run_id,
                 "result_format": result_format,
-                "evaluation_parameters": evaluation_parameters,
+                "suite_parameters": suite_parameters,
             }
 
             if catch_exceptions is not None:
@@ -354,7 +354,7 @@ class ActionListValidationOperator(ValidationOperator):
             run_id=run_id,
             run_results=run_results,
             validation_operator_config=self.validation_operator_config,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
         )
 
     def _run_actions(  # noqa: PLR0913

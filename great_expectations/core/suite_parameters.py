@@ -29,7 +29,7 @@ from pyparsing import (
 
 from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.exceptions import EvaluationParameterError
+from great_expectations.exceptions import SuiteParameterError
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias, TypeGuard
@@ -40,33 +40,33 @@ logger = logging.getLogger(__name__)
 _epsilon = 1e-12
 
 # NOTE: Temporary alias - to be converted to a rich type
-EvaluationParameterDict: TypeAlias = dict
+SuiteParameterDict: TypeAlias = dict
 
 
-def is_evaluation_parameter(value: Any) -> TypeGuard[EvaluationParameterDict]:
-    """Typeguard to check if a value is an evaluation parameter."""
+def is_suite_parameter(value: Any) -> TypeGuard[SuiteParameterDict]:
+    """Typeguard to check if a value is an suite parameter."""
     return isinstance(value, dict) and "$PARAMETER" in value.keys()
 
 
-def get_evaluation_parameter_key(evaluation_parameter: EvaluationParameterDict) -> str:
-    """Get the key of an evaluation parameter.
+def get_suite_parameter_key(suite_parameter: SuiteParameterDict) -> str:
+    """Get the key of a suite parameter.
 
-    e.g. if the evaluation parameter is {"$PARAMETER": "foo"}, this function will return "foo".
+    e.g. if the suite parameter is {"$PARAMETER": "foo"}, this function will return "foo".
     When evaluating the runtime configuration of an expectation, we will look for
     a runtime value for "foo".
 
     Args:
-        evaluation_parameter: The evaluation parameter to get the key of
+        suite_parameter: The suite parameter to get the key of
 
     Returns:
-        The key of the evaluation parameter
+        The key of the suite parameter
     """
-    return evaluation_parameter["$PARAMETER"]
+    return suite_parameter["$PARAMETER"]
 
 
-class EvaluationParameterParser:
+class SuiteParameterParser:
     """
-    This Evaluation Parameter Parser uses pyparsing to provide a basic expression language capable of evaluating
+    This Suite Parameter Parser uses pyparsing to provide a basic expression language capable of evaluating
     parameters using values available only at run time.
 
     expop   :: '^'
@@ -218,44 +218,44 @@ class EvaluationParameterParser:
                 return self.fn[op](*args)
         else:
             # Require that the *entire* expression evaluates to number or datetime UNLESS there is *exactly one*  # noqa: E501
-            # expression to substitute (see cases where len(parse_results) == 1 in the parse_evaluation_parameter  # noqa: E501
+            # expression to substitute (see cases where len(parse_results) == 1 in the parse_suite_parameter  # noqa: E501
             # method).
             evaluated: Union[int, float, datetime.datetime]
             try:
                 evaluated = int(op)
-                logger.info("Evaluation parameter operand successfully parsed as integer.")
+                logger.info("Suite parameter operand successfully parsed as integer.")
             except ValueError:
-                logger.info("Parsing evaluation parameter operand as integer failed.")
+                logger.info("Parsing suite parameter operand as integer failed.")
                 try:
                     evaluated = float(op)
-                    logger.info("Evaluation parameter operand successfully parsed as float.")
+                    logger.info("Suite parameter operand successfully parsed as float.")
                 except ValueError:
-                    logger.info("Parsing evaluation parameter operand as float failed.")
+                    logger.info("Parsing suite parameter operand as float failed.")
                     try:
                         evaluated = dateutil.parser.parse(op)
-                        logger.info("Evaluation parameter operand successfully parsed as datetime.")
+                        logger.info("Suite parameter operand successfully parsed as datetime.")
                     except ValueError as e:
-                        logger.info("Parsing evaluation parameter operand as datetime failed.")
+                        logger.info("Parsing suite parameter operand as datetime failed.")
                         raise e  # noqa: TRY201
             return evaluated
 
 
-def build_evaluation_parameters(
+def build_suite_parameters(
     expectation_args: dict,
-    evaluation_parameters: Optional[dict] = None,
+    suite_parameters: Optional[dict] = None,
     interactive_evaluation: bool = True,
     data_context=None,
 ) -> Tuple[dict, dict]:
-    """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
+    """Build a dictionary of parameters to evaluate, using the provided suite_parameters,
     AND mutate expectation_args by removing any parameter values passed in as temporary values during
     exploratory work.
     """  # noqa: E501
-    evaluation_args = copy.deepcopy(expectation_args)
+    suite_args = copy.deepcopy(expectation_args)
     substituted_parameters = {}
 
     # Iterate over arguments, and replace $PARAMETER-defined args with their
     # specified parameters.
-    for key, value in evaluation_args.items():
+    for key, value in suite_args.items():
         if isinstance(value, dict) and "$PARAMETER" in value:
             # We do not even need to search for a value if we are not going to do interactive evaluation  # noqa: E501
             if not interactive_evaluation:
@@ -265,29 +265,29 @@ def build_evaluation_parameters(
             # If it was, use that one, but remove it from the stored config
             param_key = f"$PARAMETER.{value['$PARAMETER']}"
             if param_key in value:
-                evaluation_args[key] = evaluation_args[key][param_key]
+                suite_args[key] = suite_args[key][param_key]
                 del expectation_args[key][param_key]
 
-            # If not, try to parse the evaluation parameter and substitute, which will raise
+            # If not, try to parse the suite parameter and substitute, which will raise
             # an exception if we do not have a value
             else:
                 raw_value = value["$PARAMETER"]
-                parameter_value = parse_evaluation_parameter(
+                parameter_value = parse_suite_parameter(
                     raw_value,
-                    evaluation_parameters=evaluation_parameters,
+                    suite_parameters=suite_parameters,
                     data_context=data_context,
                 )
-                evaluation_args[key] = parameter_value
+                suite_args[key] = parameter_value
                 # Once we've substituted, we also track that we did so
                 substituted_parameters[key] = parameter_value
 
-    return evaluation_args, substituted_parameters
+    return suite_args, substituted_parameters
 
 
-EXPR = EvaluationParameterParser()
+EXPR = SuiteParameterParser()
 
 
-def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
+def find_suite_parameter_dependencies(parameter_expression):  # noqa: C901
     """Parse a parameter expression to identify dependencies including GX URNs.
 
     Args:
@@ -299,7 +299,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
           - "other": set of non-GX URN strings that are required to evaluate the parameter expression
 
     """  # noqa: E501
-    expr = EvaluationParameterParser()
+    expr = SuiteParameterParser()
 
     dependencies = {"urns": set(), "other": set()}
     # Calling get_parser clears the stack
@@ -307,11 +307,11 @@ def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
     try:
         _ = parser.parseString(parameter_expression, parseAll=True)
     except ParseException as err:
-        raise EvaluationParameterError(  # noqa: TRY003
-            f"Unable to parse evaluation parameter: {err!s} at line {err.line}, column {err.column}"
+        raise SuiteParameterError(  # noqa: TRY003
+            f"Unable to parse suite parameter: {err!s} at line {err.line}, column {err.column}"
         )
     except AttributeError as err:
-        raise EvaluationParameterError(f"Unable to parse evaluation parameter: {err!s}")  # noqa: TRY003
+        raise SuiteParameterError(f"Unable to parse suite parameter: {err!s}")  # noqa: TRY003
 
     for word in expr.exprStack:
         if isinstance(word, (int, float)):
@@ -337,26 +337,26 @@ def find_evaluation_parameter_dependencies(parameter_expression):  # noqa: C901
             dependencies["urns"].add(word)
             continue
         except ParseException:
-            # This particular evaluation_parameter or operator is not a valid URN
+            # This particular suite_parameter or operator is not a valid URN
             pass
 
-        # If we got this far, it's a legitimate "other" evaluation parameter
+        # If we got this far, it's a legitimate "other" suite parameter
         dependencies["other"].add(word)
 
     return dependencies
 
 
-def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
+def parse_suite_parameter(  # noqa: C901, PLR0912, PLR0915
     parameter_expression: str,
-    evaluation_parameters: Optional[Dict[str, Any]] = None,
+    suite_parameters: Optional[Dict[str, Any]] = None,
     data_context: Optional[AbstractDataContext] = None,
 ) -> Any:
-    """Use the provided evaluation_parameters dict to parse a given parameter expression.
+    """Use the provided suite_parameters dict to parse a given parameter expression.
 
     Args:
         parameter_expression (str): A string, potentially containing basic arithmetic operations and functions,
             and variables to be substituted
-        evaluation_parameters (dict): A dictionary of name-value pairs consisting of values to substitute
+        suite_parameters (dict): A dictionary of name-value pairs consisting of values to substitute
         data_context (DataContext): A data context to use to obtain metrics, if necessary
 
     The parser will allow arithmetic operations +, -, /, *, as well as basic functions, including trunc() and round() to
@@ -364,10 +364,10 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
 
     Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$',
     EXCEPT if they begin with the string "urn:great_expectations" in which case they may also include additional
-    characters to support inclusion of GX URLs (see :ref:`evaluation_parameters` for more information).
+    characters to support inclusion of GX URLs (see :ref:`suite_parameters` for more information).
     """  # noqa: E501
-    if evaluation_parameters is None:
-        evaluation_parameters = {}
+    if suite_parameters is None:
+        suite_parameters = {}
 
     parse_results: Union[ParseResults, list] = _get_parse_results(parameter_expression)
 
@@ -376,7 +376,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
         # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior  # noqa: E501
         pass
 
-    elif len(parse_results) == 1 and parse_results[0] not in evaluation_parameters:
+    elif len(parse_results) == 1 and parse_results[0] not in suite_parameters:
         # In this special case there were no operations to find, so only one value, but we don't have something to  # noqa: E501
         # substitute for that value
         try:
@@ -390,34 +390,34 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
                 logger.error(
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
-                raise EvaluationParameterError(  # noqa: TRY003
+                raise SuiteParameterError(  # noqa: TRY003
                     f"No value found for $PARAMETER {parse_results[0]!s}"
                 )
         except ParseException as e:
-            logger.debug(f"Parse exception while parsing evaluation parameter: {e!s}")
-            raise EvaluationParameterError(  # noqa: TRY003
+            logger.debug(f"Parse exception while parsing suite parameter: {e!s}")
+            raise SuiteParameterError(  # noqa: TRY003
                 f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e
         except AttributeError as e:
             logger.warning("Unable to get store for store-type valuation parameter.")
-            raise EvaluationParameterError(  # noqa: TRY003
+            raise SuiteParameterError(  # noqa: TRY003
                 f"No value found for $PARAMETER {parse_results[0]!s}"
             ) from e
 
     elif len(parse_results) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this  # noqa: E501
         # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)  # noqa: E501
-        # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that  # noqa: E501
-        # case here; is the evaluation parameter provided here in fact a metric definition?
-        return evaluation_parameters[parse_results[0]]
+        # NOTE: 20201023 - JPC - to support MetricDefinition as an suite parameter type, we need to handle that  # noqa: E501
+        # case here; is the suite parameter provided here in fact a metric definition?
+        return suite_parameters[parse_results[0]]
 
     elif len(parse_results) == 0 or parse_results[0] != "Parse Failure":
         # we have a stack to evaluate and there was no parse failure.
         # iterate through values and look for URNs pointing to a store:
         for i, ob in enumerate(EXPR.exprStack):
-            if isinstance(ob, str) and ob in evaluation_parameters:
-                EXPR.exprStack[i] = str(evaluation_parameters[ob])
-            elif isinstance(ob, str) and ob not in evaluation_parameters:
+            if isinstance(ob, str) and ob in suite_parameters:
+                EXPR.exprStack[i] = str(suite_parameters[ob])
+            elif isinstance(ob, str) and ob not in suite_parameters:
                 # try to retrieve this value from a store
                 try:
                     res = ge_urn.parseString(ob)
@@ -440,7 +440,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
 
     else:
         err_str, err_line, err_col = parse_results[-1]
-        raise EvaluationParameterError(  # noqa: TRY003
+        raise SuiteParameterError(  # noqa: TRY003
             f"Parse Failure: {err_str}\nStatement: {err_line}\nColumn: {err_col}"
         )
 
@@ -451,8 +451,8 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
         exception_traceback = traceback.format_exc()
         exception_message = f'{type(e).__name__}: "{e!s}".  Traceback: "{exception_traceback}".'
         logger.debug(exception_message, e, exc_info=True)
-        raise EvaluationParameterError(  # noqa: TRY003
-            f"Error while evaluating evaluation parameter expression: {e!s}"
+        raise SuiteParameterError(  # noqa: TRY003
+            f"Error while evaluating suite parameter expression: {e!s}"
         ) from e
 
     return result
@@ -483,7 +483,7 @@ def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> boo
     )
 
 
-def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:  # noqa: C901 - too complex
+def _deduplicate_suite_parameter_dependencies(dependencies: dict) -> dict:  # noqa: C901 - too complex
     deduplicated: dict = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []
@@ -513,7 +513,7 @@ def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict: 
     return deduplicated
 
 
-EvaluationParameterIdentifier = namedtuple(  # noqa: PYI024 # this class is not used
-    "EvaluationParameterIdentifier",
+SuiteParameterIdentifier = namedtuple(  # noqa: PYI024 # this class is not used
+    "SuiteParameterIdentifier",
     ["expectation_suite_name", "metric_name", "metric_kwargs_id"],
 )
