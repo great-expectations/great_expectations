@@ -97,24 +97,19 @@ def send_opsgenie_alert(query: str, message: str, settings: dict) -> bool:
     return True
 
 
-def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
+def send_microsoft_teams_notifications(payload: dict, microsoft_teams_webhook: str) -> str | None:
     session = requests.Session()
     try:
-        response = session.post(url=microsoft_teams_webhook, json=query)
+        response = session.post(url=microsoft_teams_webhook, json=payload)
+        response.raise_for_status()
     except requests.ConnectionError:
         logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
+        return None
+    except requests.HTTPError as e:
+        logger.warning(f"Request to Microsoft Teams API returned error {response.status_code}: {e}")
+        return None
 
-    except Exception as e:
-        logger.error(str(e))  # noqa: TRY400
-    else:
-        if response.status_code != 200:  # noqa: PLR2004
-            logger.warning(
-                "Request to Microsoft Teams webhook "
-                f"returned error {response.status_code}: {response.text}"
-            )
-            return
-        else:
-            return "Microsoft Teams notification succeeded."
+    return "Microsoft Teams notification succeeded."
 
 
 def send_webhook_notifications(query, webhook, target_platform):
