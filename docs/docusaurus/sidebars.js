@@ -412,7 +412,7 @@ module.exports = {
     },
     {
       type: 'doc',
-      id: 'core/changelog',
+      id: 'oss/changelog',
       label: 'Changelog'
     },
   ],
