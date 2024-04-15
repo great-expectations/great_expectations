@@ -285,7 +285,7 @@ lint.select = [
     # https://docs.astral.sh/ruff/rules/#tryceratops-try
     "TRY", # TRYceratops
     # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
-    # TODO: enable all of flake8-simplify 
+    # TODO: enable all of flake8-simplify
     "SIM101", # duplicate-isinstance-call
     "SIM114", # if-with-same-arms
 ]
