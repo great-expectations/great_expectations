@@ -210,11 +210,6 @@ module.exports = {
           label: 'Customize Expectations',
           id: 'core/installation_and_setup/manage_data_docs',
         },
-        {
-          type: 'doc',
-          label: 'Customize Data Docs',
-          id: 'core/installation_and_setup/manage_data_docs',
-        },
       ]
     },
     {
@@ -232,17 +227,29 @@ module.exports = {
           label: 'Create a Validation Definition',
           id: 'core/installation_and_setup/manage_data_docs',
         },
+        {
+          type: 'doc',
+          label: 'Add Validation Actions',
+          id: 'core/installation_and_setup/manage_data_docs',
+        },
       ]
     },
     {
-      type: 'doc',
-      label: 'View Data Documentation',
-      id: 'core/installation_and_setup/manage_data_docs',
-    },
-    {
-      type: 'doc',
-      label: 'Add Validation Actions',
-      id: 'core/installation_and_setup/manage_data_docs',
+      type: 'category',
+      label: 'Review results',
+      link: {type: 'doc', id: 'core/validate_data/validate_data'},
+      items: [
+        {
+          type: 'doc',
+          label: 'Customize Data Documentation',
+          id: 'core/installation_and_setup/manage_data_docs',
+        },
+        {
+          type: 'doc',
+          label: 'View Data Documentation',
+          id: 'core/installation_and_setup/manage_data_docs',
+        },
+      ]
     },
   ],
   gx_cloud: [
