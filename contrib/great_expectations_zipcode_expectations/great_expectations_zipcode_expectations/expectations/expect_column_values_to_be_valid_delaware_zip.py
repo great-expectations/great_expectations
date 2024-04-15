@@ -11,9 +11,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_delaware_zip(zip: str):
     list_of_dicts_of_delaware_zips = zipcodes.filter_by(state="DE")
     list_of_delaware_zips = [d["zip_code"] for d in list_of_dicts_of_delaware_zips]
-    if len(zip) > 10:
-        return False
-    elif type(zip) != str:  # noqa: E721
+    if len(zip) > 10 or type(zip) != str:
         return False
     elif zip in list_of_delaware_zips:
         return True
