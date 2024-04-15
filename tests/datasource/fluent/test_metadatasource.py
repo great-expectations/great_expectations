@@ -352,7 +352,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         type = "blue"
 
         @override
-        def test_connection(self): ...  # type: ignore[override]
+        def test_connection(self): ...
 
     class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]
