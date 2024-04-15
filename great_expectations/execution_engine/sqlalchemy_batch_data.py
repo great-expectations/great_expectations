@@ -262,7 +262,7 @@ class SqlAlchemyBatchData(BatchData):
             )
         # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()  # noqa: E501
         # Similar message may be needed in the future for Trino backend.
-        elif dialect == GXSqlDialect.TRINO or dialect == GXSqlDialect.CLICKHOUSE:
+        elif dialect in (GXSqlDialect.TRINO, GXSqlDialect.CLICKHOUSE):
             logger.warning(
                 f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."  # noqa: E501
             )

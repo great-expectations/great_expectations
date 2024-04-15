@@ -381,8 +381,7 @@ class DataAssistantResult(SerializableDictDot):
     def _get_metric_expectation_map(self) -> dict[tuple[str, ...], str]:
         if not all(
             [
-                isinstance(metric_names, str)  # noqa: PLR1701
-                or isinstance(metric_names, tuple)
+                isinstance(metric_names, (str, tuple))
             ]
             for metric_names in self.metric_expectation_map.keys()
         ):

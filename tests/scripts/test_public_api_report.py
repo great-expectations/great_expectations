@@ -421,9 +421,7 @@ class TestPublicAPIChecker:
         definitions = []
         for node in ast.walk(tree):
             if (
-                isinstance(node, ast.ClassDef)  # noqa: PLR1701
-                or isinstance(node, ast.FunctionDef)
-                or isinstance(node, ast.AsyncFunctionDef)
+                isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
             ):
                 definitions.append(node)
 
