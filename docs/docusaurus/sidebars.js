@@ -34,7 +34,7 @@ module.exports = {
       items: [
         {
           type: 'category',
-          label: 'Data Contexts',
+          label: 'Set up a Data Context',
           link: {type: 'doc', id: 'core/installation_and_setup/manage_data_contexts'},
           items: [
             {
@@ -66,19 +66,14 @@ module.exports = {
         },
         {
           type: 'doc',
-          label: 'Metadata Stores',
+          label: 'Customize Metadata Stores',
           id: 'core/installation_and_setup/manage_metadata_stores',
-        },
-        {
-          type: 'doc',
-          label: 'Data Docs',
-          id: 'core/installation_and_setup/manage_data_docs',
         },
       ]
     },
     {
       type: 'category',
-      label: 'Access data',
+      label: 'Connect to data',
       link: {type: 'doc', id: 'core/manage_and_access_data/manage_and_access_data'},
       items: [
         {
@@ -104,130 +99,24 @@ module.exports = {
           ]
         },
         {
-          type: 'category',
-          label: 'Connect to and request data',
-          link: {type: 'doc', id: 'core/manage_and_access_data/connect_to_data/connect_to_data'},
-          items: [
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/connect_to_data/file_system/file_system',
-              label: 'Connect to file system data'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/connect_to_data/in_memory/in_memory',
-              label: 'Connect to in memory data'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/connect_to_data/sql/sql',
-              label: 'Connect to SQL database data'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/request_data',
-              label: 'Request data'
-            },
-          ]
+          type: 'doc',
+          id: 'core/manage_and_access_data/connect_to_data/file_system/file_system',
+          label: 'Connect to file system data'
         },
         {
-          type: 'category',
-          label: 'Data Sources',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_data_sources/manage_data_sources'},
-          items: [
-            {
-              type: 'link',
-              label: 'List available Data Sources',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_sources#list-available-data-sources',
-            },
-            {
-              type: 'link',
-              label: 'Get an existing Data Source',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_sources#get-an-existing-data-source',
-            },
-            {
-              type: 'link',
-              label: 'Delete a Data Source',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_sources#delete-a-data-source',
-            },
-          ]
+          type: 'doc',
+          id: 'core/manage_and_access_data/connect_to_data/in_memory/in_memory',
+          label: 'Connect to in memory data'
         },
         {
-          type: 'category',
-          label: 'Data Assets',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_data_assets'},
-          items: [
-            {
-              type: 'link',
-              label: 'List all Data Assets in a Data Source',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#list-all-data-assets-in-a-data-source',
-            },
-            {
-              type: 'link',
-              label: 'Get an existing Data Asset',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#get-an-existing-data-asset',
-            },
-            {
-              type: 'link',
-              label: 'Add a Partitioner to a Data Asset',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#add-a-partitioner-to-a-data-asset',
-            },
-            {
-              type: 'link',
-              label: 'Delete a Data Asset',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#delete-a-data-asset',
-            },
-          ]
+          type: 'doc',
+          id: 'core/manage_and_access_data/connect_to_data/sql/sql',
+          label: 'Connect to SQL database data'
         },
         {
-          type: 'category',
-          label: 'Batch Definitions',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_batch_requests'},
-          items: [
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: 'Retrieve all Batches from a Data Asset'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: 'Retrieve specific Batches from a Data Asset'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: 'Iterate retrieved Batches'
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Batches',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_batches'},
-          items: [
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: 'View a sample of the data in a Batch'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: 'Validate a Batch against an Expectation'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: 'Validate a Batch against an Expectation Suite'
-            },
-            <!--TODO: Validation is being moved into the Batch object, are there other API changes? -->
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: 'Get the Batch Request for a given Batch'
-            },
-          ]
+          type: 'doc',
+          id: 'core/manage_and_access_data/request_data',
+          label: 'Request data'
         },
       ]
     },
@@ -239,7 +128,7 @@ module.exports = {
         // 'oss/guides/expectations/create_expectations_overview',
         {
           type: 'category',
-          label: 'Expectations',
+          label: 'Define Expectations',
           link: { type: 'doc', id: 'core/create_expectations/expectations/manage_expectations' },
           items: [
             {
@@ -264,9 +153,9 @@ module.exports = {
             },
           ]
         },
-      {
+        {
           type: 'category',
-          label: 'Expectation Suites',
+          label: 'Organize Expectations',
           link: { type: 'doc', id: 'core/create_expectations/expectation_suites/manage_expectation_suites' },
           items: [
             {
@@ -316,14 +205,16 @@ module.exports = {
             },
           ]
         },
-        // {
-        //   type: 'category',
-        //   label: 'Data Assistants',
-        //   link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
-        //   items: [
-        //     'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
-        //   ]
-        // },
+        {
+          type: 'doc',
+          label: 'Customize Expectations',
+          id: 'core/installation_and_setup/manage_data_docs',
+        },
+        {
+          type: 'doc',
+          label: 'Customize Data Docs',
+          id: 'core/installation_and_setup/manage_data_docs',
+        },
       ]
     },
     {
@@ -332,91 +223,27 @@ module.exports = {
       link: {type: 'doc', id: 'core/validate_data/validate_data'},
       items: [
         {
-          type: 'category',
-          label: 'Validation Definitions',
-          link: { type: 'doc', id: 'core/validate_data/validation_definitions/manage_validation_definitions' },
-          items: [
-            {
-              type: 'link',
-              label: 'Create a Validation Definition',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#create-a-validation-definition',
-            },
-            {
-              type: 'link',
-              label: 'List available Validation Definitions',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#list-available-validation-definitions',
-            },
-            {
-              type: 'link',
-              label: 'Get a Validation Definition by name',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#get-a-validation-definition-by-name',
-            },
-            {
-              type: 'link',
-              label: 'Get Validation Definitions by attributes',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#get-validation-definitions-by-attributes',
-            },
-            {
-              type: 'link',
-              label: 'Delete a Validation Definition',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#delete-a-validation-definition',
-            },
-            {
-              type: 'link',
-              label: 'Duplicate a Validation Definition',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#duplicate-a-validation-definition',
-            },
-            {
-              type: 'link',
-              label: 'Run a Validation Definition',
-              href: '/docs/1.0-prerelease/core/validate_data/validation_definitions/manage_validation_definitions#run-a-validation-definition',
-            },
-          ]
+          type: 'doc',
+          label: 'Validate a Batch',
+          id: 'core/installation_and_setup/manage_data_docs',
         },
         {
-          type: 'category',
-          label: 'Checkpoints',
-          link: { type: 'doc', id: 'core/validate_data/checkpoints/manage_checkpoints' },
-          items: [
-            {
-              type: 'link',
-              label: 'Create a Checkpoint',
-              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#create-a-checkpoint',
-            },
-            {
-              type: 'link',
-              label: 'List available Checkpoints',
-              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#list-available-checkpoints',
-            },
-            {
-              type: 'link',
-              label: 'Get a Checkpoint by name',
-              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#get-a-checkpoint-by-name',
-            },
-            {
-              type: 'link',
-              label: 'Get Checkpoints by attributes',
-              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#get-checkpoints-by-attributes',
-            },
-            {
-              type: 'link',
-              label: 'Update a Checkpoint',
-              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#update-a-checkpoint',
-            },
-            {
-              type: 'link',
-              label: 'Delete a Checkpoint',
-              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#delete-a-checkpoint',
-            },
-            {
-              type: 'link',
-              label: 'Run a Checkpoint',
-              href: '/docs/1.0-prerelease/core/validate_data/checkpoints/manage_checkpoints#run-a-checkpoint',
-            },
-          ]
+          type: 'doc',
+          label: 'Create a Validation Definition',
+          id: 'core/installation_and_setup/manage_data_docs',
         },
       ]
-    }
+    },
+    {
+      type: 'doc',
+      label: 'View Data Documentation',
+      id: 'core/installation_and_setup/manage_data_docs',
+    },
+    {
+      type: 'doc',
+      label: 'Add Validation Actions',
+      id: 'core/installation_and_setup/manage_data_docs',
+    },
   ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
