@@ -201,6 +201,7 @@ class ValidationDefinition(BaseModel):
         batch_parameters: Optional[BatchParameters] = None,
         suite_parameters: Optional[dict[str, Any]] = None,
         result_format: ResultFormat = ResultFormat.SUMMARY,
+        run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(
             batch_definition=self.batch_definition,
@@ -212,7 +213,9 @@ class ValidationDefinition(BaseModel):
         (
             expectation_suite_identifier,
             validation_result_id,
-        ) = self._get_expectation_suite_and_validation_result_ids(validator)
+        ) = self._get_expectation_suite_and_validation_result_ids(
+            validator=validator, run_id=run_id
+        )
 
         ref = self._validation_results_store.store_validation_results(
             suite_validation_result=results,
@@ -230,6 +233,7 @@ class ValidationDefinition(BaseModel):
     def _get_expectation_suite_and_validation_result_ids(
         self,
         validator: Validator,
+        run_id: RunIdentifier | None = None,
     ) -> (
         tuple[GXCloudIdentifier, GXCloudIdentifier]
         | tuple[ExpectationSuiteIdentifier, ValidationResultIdentifier]
@@ -246,8 +250,10 @@ class ValidationDefinition(BaseModel):
             )
             return expectation_suite_identifier, validation_result_id
         else:
-            run_time = datetime.datetime.now(tz=datetime.timezone.utc)
-            run_id = RunIdentifier(run_time=run_time)
+            if not run_id:
+                run_time = datetime.datetime.now(tz=datetime.timezone.utc)
+                run_id = RunIdentifier(run_time=run_time)
+
             expectation_suite_identifier = ExpectationSuiteIdentifier(name=self.suite.name)
             validation_result_id = ValidationResultIdentifier(
                 batch_identifier=validator.active_batch_id,
