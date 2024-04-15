@@ -63,7 +63,7 @@ class _ConfigurationSubstitutor:
         if isinstance(data, BaseYamlConfig):
             data = (data.__class__.get_schema_class())().dump(data)
 
-        if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
+        if isinstance(data, (dict, OrderedDict)):
             return {
                 k: self.substitute_all_config_variables(v, replace_variables_dict)
                 for k, v in data.items()

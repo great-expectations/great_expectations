@@ -448,7 +448,7 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901, PLR09
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError(f"Invalid parameters: {chi2_msg}:")  # noqa: TRY003
 
-    elif isinstance(params, tuple) or isinstance(params, list):  # noqa: PLR1701
+    elif isinstance(params, (tuple, list)):
         scale = None
 
         # `params` is a tuple or a list

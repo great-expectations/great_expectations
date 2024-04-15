@@ -14,9 +14,7 @@ def is_valid_state_or_territory(state: str, dc_statehood: bool):
         list_of_states_and_territories.append("District Of Columbia")
     else:
         pass
-    if len(state) > 24:
-        return False
-    elif type(state) != str:  # noqa: E721
+    if len(state) > 24 or type(state) != str:  # noqa: E721
         return False
     elif state in list_of_states_and_territories:
         return True
