@@ -4,8 +4,8 @@ flag_management:
     carryforward: false
     statuses:
       - type: project
-        target: auto
-        threshold: 5% # the default minimum threshold for the project
+        target: 80% # Use coverage of base commit as target
+        threshold: 5% # We allow the coverage to drop by this percent
       - type: patch
         target: 90%
   # in general these individual flags should correspond to pytest markers
