@@ -12,26 +12,19 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Set up a GX environment',
+      label: 'Manage GX projects',
       link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
       items: [
         {
           type: 'doc',
           id: 'core/installation_and_setup/install_gx',
-          label: 'Install Python and GX'
+          label: 'Install GX 1.0'
         },
         {
           type: 'doc',
           id: 'core/installation_and_setup/additional_dependencies/additional_dependencies',
           label: 'Install additional dependencies'
         },
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Manage GX projects',
-      link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
-      items: [
         {
           type: 'category',
           label: 'Data Contexts',
@@ -65,25 +58,8 @@ module.exports = {
           ]
         },
         {
-          type: 'doc',
-          label: 'Metadata Stores',
-          id: 'core/installation_and_setup/manage_metadata_stores',
-        },
-        {
-          type: 'doc',
-          label: 'Data Docs',
-          id: 'core/installation_and_setup/manage_data_docs',
-        },
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Access data',
-      link: {type: 'doc', id: 'core/manage_and_access_data/manage_and_access_data'},
-      items: [
-        {
           type: 'category',
-          label: 'Provide credentials',
+          label: 'Credentials',
           link: {type: 'doc', id: 'core/installation_and_setup/manage_credentials'},
           items: [
             {
@@ -103,6 +79,23 @@ module.exports = {
             },
           ]
         },
+        {
+          type: 'doc',
+          label: 'Metadata Stores',
+          id: 'core/installation_and_setup/manage_metadata_stores',
+        },
+        {
+          type: 'doc',
+          label: 'Data Docs',
+          id: 'core/installation_and_setup/manage_data_docs',
+        },
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Access data',
+      link: {type: 'doc', id: 'core/manage_and_access_data/manage_and_access_data'},
+      items: [
         {
           type: 'category',
           label: 'Connect to and request data',
