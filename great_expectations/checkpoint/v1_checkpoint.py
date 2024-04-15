@@ -39,7 +39,6 @@ if TYPE_CHECKING:
     )
 
 CheckpointAction: TypeAlias = Union[
-    EmailAction,
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
     PagerdutyAlertAction,
@@ -47,6 +46,9 @@ CheckpointAction: TypeAlias = Union[
     SNSNotificationAction,
     StoreValidationResultAction,
     UpdateDataDocsAction,
+    # NOTE: Currently placed last as the root validator emits warnings
+    #       that aren't relevant to end users (unless they are using the action).
+    EmailAction,
 ]
 
 
