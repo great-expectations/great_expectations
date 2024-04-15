@@ -10,7 +10,8 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
+from great_expectations.datasource.fluent.interfaces import Batch, DataAsset, Datasource
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
 DATASOURCE_NAME = "my datasource for batch configs"
@@ -341,3 +342,131 @@ def _test_delete_batch_definition__does_not_clobber_other_assets(
     # ensure neither call to delete_batch_definition() didn't clobber each other
     for asset_name in asset_names:
         assert loaded_datasource.get_asset(asset_name).batch_definitions == []
+
+
+class _MyPartitioner(FluentBaseModel):
+    """Partitioner that adhere's to the expected protocol."""
+
+    sort_ascending: bool = True
+
+    @property
+    def param_names(self) -> List[str]:
+        return ["a", "b"]
+
+
+@pytest.fixture
+def metadata_1_1(mocker):
+    return mocker.MagicMock(spec=Batch, metadata={"a": 1, "b": 1})
+
+
+@pytest.fixture
+def metadata_1_2(mocker):
+    return mocker.MagicMock(spec=Batch, metadata={"a": 1, "b": 2})
+
+
+@pytest.fixture
+def metadata_2_1(mocker):
+    return mocker.MagicMock(spec=Batch, metadata={"a": 2, "b": 1})
+
+
+@pytest.fixture
+def metadata_2_2(mocker):
+    return mocker.MagicMock(spec=Batch, metadata={"a": 2, "b": 2})
+
+
+@pytest.fixture
+def metadata_2_none(mocker):
+    return mocker.MagicMock(spec=Batch, metadata={"a": 2, "b": None})
+
+
+@pytest.fixture
+def metadata_none_2(mocker):
+    return mocker.MagicMock(spec=Batch, metadata={"a": None, "b": 2})
+
+
+@pytest.fixture
+def metadata_none_none(mocker):
+    return mocker.MagicMock(spec=Batch, metadata={"a": None, "b": None})
+
+
+@pytest.mark.unit
+def test_sort_batches__ascending(
+    empty_data_asset,
+    metadata_1_1,
+    metadata_1_2,
+    metadata_2_1,
+    metadata_2_2,
+    metadata_none_2,
+    metadata_2_none,
+    metadata_none_none,
+):
+    partitioner = _MyPartitioner(sort_ascending=True)
+    batches = [
+        metadata_1_1,
+        metadata_1_2,
+        metadata_2_1,
+        metadata_2_2,
+        metadata_2_none,
+        metadata_none_2,
+        metadata_none_none,
+    ]
+
+    empty_data_asset.sort_batches(batches, partitioner)
+
+    assert batches == [
+        metadata_none_none,
+        metadata_none_2,
+        metadata_1_1,
+        metadata_1_2,
+        metadata_2_none,
+        metadata_2_1,
+        metadata_2_2,
+    ]
+
+
+@pytest.mark.unit
+def test_sort_batches__descending(
+    empty_data_asset,
+    metadata_1_1,
+    metadata_1_2,
+    metadata_2_1,
+    metadata_2_2,
+    metadata_none_2,
+    metadata_2_none,
+    metadata_none_none,
+):
+    partitioner = _MyPartitioner(sort_ascending=False)
+    batches = [
+        metadata_1_1,
+        metadata_1_2,
+        metadata_2_1,
+        metadata_2_2,
+        metadata_2_none,
+        metadata_none_2,
+        metadata_none_none,
+    ]
+
+    empty_data_asset.sort_batches(batches, partitioner)
+
+    assert batches == [
+        metadata_2_2,
+        metadata_2_1,
+        metadata_2_none,
+        metadata_1_2,
+        metadata_1_1,
+        metadata_none_2,
+        metadata_none_none,
+    ]
+
+
+@pytest.mark.unit
+def test_sort_batches__requires_keys(empty_data_asset, mocker):
+    partitioner = _MyPartitioner()
+
+    wheres_my_b = mocker.MagicMock(spec=Batch, metadata={"a": 1})
+    i_have_a_b = mocker.MagicMock(spec=Batch, metadata={"a": 1, "b": 2})
+
+    expected_error = "Trying to sort my data asset for batch configs table asset batches on key b"
+
+    with pytest.raises(KeyError, match=expected_error):
+        empty_data_asset.sort_batches([wheres_my_b, i_have_a_b], partitioner)

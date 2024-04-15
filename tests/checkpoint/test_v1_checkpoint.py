@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import pathlib
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from unittest import mock
 
 import pytest
@@ -13,6 +13,8 @@ from great_expectations import expectations as gxe
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
+    OpsgenieAlertAction,
+    PagerdutyAlertAction,
     SlackNotificationAction,
     UpdateDataDocsAction,
     ValidationAction,
@@ -494,8 +496,38 @@ class TestCheckpointResult:
     def test_checkpoint_run_actions(
         self,
         validation_definition: ValidationDefinition,
-        actions: list[CheckpointAction],
+        mocker: MockerFixture,
     ):
+        # Arrange
+        action = mocker.Mock(spec=UpdateDataDocsAction)
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name,
+            validation_definitions=[validation_definition],
+            actions=[action],
+        )
+
+        # Act
+        result = checkpoint.run()
+
+        # Assert
+        action._copy_and_set_values().v1_run.assert_called_once_with(
+            checkpoint_result=result, action_context=mock.ANY
+        )
+
+    @pytest.mark.unit
+    def test_checkpoint_sorts_actions(self, validation_definition: ValidationDefinition):
+        """
+        Note that we are directly testing the `_sort_actions()` private method here.
+
+        This was done as a way to expedite the testing process due to some conflicts with
+        Pydantics and mocks.
+        Ideally, this would be tested through the public `run()` method.
+        """
+        pd_action = PagerdutyAlertAction(api_key="api_key", routing_key="routing_key")
+        og_action = OpsgenieAlertAction(api_key="api_key")
+        data_docs_action = UpdateDataDocsAction()
+        actions: List[CheckpointAction] = [pd_action, og_action, data_docs_action]
+
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(
             name=self.checkpoint_name,
@@ -503,11 +535,7 @@ class TestCheckpointResult:
             actions=actions,
         )
 
-        with mock.patch.object(ValidationAction, "v1_run") as mock_run:
-            result = checkpoint.run()
-
-        assert mock_run.call_count == len(actions)
-        mock_run.assert_called_with(checkpoint_result=result)
+        assert checkpoint._sort_actions() == [data_docs_action, pd_action, og_action]
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(
@@ -524,7 +552,7 @@ class TestCheckpointResult:
 
         validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
             batch_parameters=batch_parameters,
-            evaluation_parameters=expectation_parameters,
+            suite_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
         )
 

@@ -6,6 +6,7 @@ from collections import OrderedDict
 from typing import TYPE_CHECKING, Optional
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.checkpoint.actions import ActionContext
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import parse_result_format
@@ -76,7 +77,7 @@ class ValidationOperator:
         self,
         assets_to_validate,
         run_id=None,
-        evaluation_parameters=None,
+        suite_parameters=None,
         run_name=None,
         run_time=None,
     ) -> None:
@@ -154,7 +155,7 @@ class ActionListValidationOperator(ValidationOperator):
         {
             "run_id": {"run_time": "20200527T041833.074212Z", "run_name": "my_run_name"},
             "success": True,
-            "evaluation_parameters": None,
+            "suite_parameters": None,
             "validation_operator_config": {
                 "class_name": "ActionListValidationOperator",
                 "module_name": "great_expectations.validation_operators",
@@ -216,10 +217,8 @@ class ActionListValidationOperator(ValidationOperator):
             assert isinstance(action_config, dict)
             # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
             if not set(action_config.keys()) == {"name", "action"}:
-                raise KeyError(
-                    'Action config keys must be ("name", "action"). Instead got {}'.format(
-                        action_config.keys()
-                    )
+                raise KeyError(  # noqa: TRY003
+                    f'Action config keys must be ("name", "action"). Instead got {action_config.keys()}'  # noqa: E501
                 )
 
             if "class_name" in action_config["action"]:
@@ -282,7 +281,7 @@ class ActionListValidationOperator(ValidationOperator):
         self,
         assets_to_validate,
         run_id=None,
-        evaluation_parameters=None,
+        suite_parameters=None,
         run_name=None,
         run_time=None,
         catch_exceptions=None,
@@ -312,7 +311,7 @@ class ActionListValidationOperator(ValidationOperator):
             batch_validate_arguments = {
                 "run_id": run_id,
                 "result_format": result_format,
-                "evaluation_parameters": evaluation_parameters,
+                "suite_parameters": suite_parameters,
             }
 
             if catch_exceptions is not None:
@@ -370,7 +369,7 @@ class ActionListValidationOperator(ValidationOperator):
             run_id=run_id,
             run_results=run_results,
             validation_operator_config=self.validation_operator_config,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
         )
 
     def _run_actions(  # noqa: PLR0913
@@ -395,7 +394,7 @@ class ActionListValidationOperator(ValidationOperator):
         :param run_id:
         :return: a dictionary: {action name -> result returned by the action}
         """
-        batch_actions_results = {}
+        action_context = ActionContext()
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
             name = action["name"]
@@ -416,7 +415,7 @@ class ActionListValidationOperator(ValidationOperator):
                 action_result = self.actions[name].run(
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
-                    payload=batch_actions_results,
+                    action_context=action_context,
                     expectation_suite_identifier=expectation_suite_identifier,
                     checkpoint_identifier=checkpoint_identifier,
                 )
@@ -435,14 +434,18 @@ class ActionListValidationOperator(ValidationOperator):
                     transformed_result = action_result
 
                 # add action_result
-                batch_actions_results[action["name"]] = transformed_result
-                batch_actions_results[action["name"]]["class"] = action["action"]["class_name"]
+                action_context.update(action=action, action_result=transformed_result)
 
             except Exception as e:
                 logger.exception(f"Error running action with name {action['name']}")
                 raise e  # noqa: TRY201
 
-        return batch_actions_results
+        action_data = {}
+        for action, action_result in action_context.data:
+            action_data[action["name"]] = action_result
+            action_data[action["name"]]["class"] = action["action"]["class_name"]
+
+        return action_data
 
 
 class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationOperator):
@@ -533,7 +536,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         {
             "run_id": {"run_time": "20200527T041833.074212Z", "run_name": "my_run_name"},
             "success": True,
-            "evaluation_parameters": None,
+            "suite_parameters": None,
             "validation_operator_config": {
                 "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
                 "module_name": "great_expectations.validation_operators",
@@ -711,9 +714,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Learn about FailureVsWarning Validation Operators at {}".format(
-                        documentation_url
-                    ),
+                    "text": f"Learn about FailureVsWarning Validation Operators at {documentation_url}",  # noqa: E501
                 }
             ],
         }
@@ -726,7 +727,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
         assets_to_validate,
         run_id=None,
         base_expectation_suite_name=None,
-        evaluation_parameters=None,
+        suite_parameters=None,
         run_name=None,
         run_time=None,
         result_format=None,
@@ -784,7 +785,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                     failure_expectation_suite,
                     run_id,
                     result_format=result_format if result_format else self.result_format,
-                    evaluation_parameters=evaluation_parameters,
+                    suite_parameters=suite_parameters,
                 )
                 failure_run_result_obj["validation_result"] = failure_validation_result
                 failure_actions_results = self._run_actions(
@@ -826,7 +827,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
                     warning_expectation_suite,
                     run_id,
                     result_format=result_format if result_format else self.result_format,
-                    evaluation_parameters=evaluation_parameters,
+                    suite_parameters=suite_parameters,
                 )
                 warning_run_result_obj["validation_result"] = warning_validation_result
                 warning_actions_results = self._run_actions(
@@ -843,7 +844,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
             run_id=run_id,
             run_results=run_results,
             validation_operator_config=self.validation_operator_config,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             success=all(
                 run_result_obj["validation_result"].success
                 for run_result_obj in run_results.values()

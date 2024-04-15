@@ -5,8 +5,8 @@ from typing import Dict, Union
 
 from scipy import stats
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,
 )
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
@@ -142,8 +142,8 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
         [Wasserstein Metric on Wikipedia](https://en.wikipedia.org/wiki/Wasserstein_metric)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.wasserstein",)
@@ -222,7 +222,7 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")
-    # @render_evaluation_parameter_string
+    # @render_suite_parameter_string
     # def _prescriptive_renderer(
     #     cls,
     #     configuration=None,

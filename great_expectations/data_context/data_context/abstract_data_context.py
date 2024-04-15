@@ -137,7 +137,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store import (
         CheckpointStore,
-        EvaluationParameterStore,
+        SuiteParameterStore,
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.expectations_store import (
@@ -157,10 +157,10 @@ if TYPE_CHECKING:
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent.interfaces import (
-        BatchRequest as FluentBatchRequest,
+        BatchParameters,
     )
     from great_expectations.datasource.fluent.interfaces import (
-        BatchRequestOptions,
+        BatchRequest as FluentBatchRequest,
     )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation_configuration import (
@@ -288,8 +288,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Override the project_config data_context_id if an expectations_store was already set up
         self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
 
-        self._evaluation_parameter_dependencies_compiled = False
-        self._evaluation_parameter_dependencies: dict = {}
+        self._suite_parameter_dependencies_compiled = False
+        self._suite_parameter_dependencies: dict = {}
 
         self._assistants = DataAssistantDispatcher(data_context=self)
 
@@ -462,11 +462,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite.name = expectation_suite_name
             key = ExpectationSuiteIdentifier(name=expectation_suite_name)
         if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
-            raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "  # noqa: E501
-                "expectation_suite, set overwrite_existing=True.".format(expectation_suite_name)
+            raise gx_exceptions.DataContextError(  # noqa: TRY003
+                f"expectation_suite with name {expectation_suite_name} already exists. If you would like to overwrite this "  # noqa: E501
+                "expectation_suite, set overwrite_existing=True."
             )
-        self._evaluation_parameter_dependencies_compiled = False
+        self._suite_parameter_dependencies_compiled = False
         include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
             include_rendered_content=include_rendered_content
         )
@@ -585,12 +585,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.expectations_store_name]
 
     @property
-    def evaluation_parameter_store_name(self) -> Optional[str]:
-        return self.variables.evaluation_parameter_store_name
+    def suite_parameter_store_name(self) -> Optional[str]:
+        return self.variables.suite_parameter_store_name
 
     @property
-    def evaluation_parameter_store(self) -> EvaluationParameterStore:
-        return self.stores[self.evaluation_parameter_store_name]
+    def suite_parameter_store(self) -> SuiteParameterStore:
+        return self.stores[self.suite_parameter_store_name]
 
     @property
     def validations_store_name(self) -> Optional[str]:
@@ -1039,13 +1039,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
             validations_store_name,
-            evaluation_parameter_store_name,
+            suite_parameter_store_name,
             checkpoint_store_name
         """  # noqa: E501
         active_store_names: List[str] = [
             self.expectations_store_name,  # type: ignore[list-item]
             self.validations_store_name,  # type: ignore[list-item]
-            self.evaluation_parameter_store_name,  # type: ignore[list-item]
+            self.suite_parameter_store_name,  # type: ignore[list-item]
         ]
 
         try:
@@ -1304,7 +1304,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[CheckpointValidationDefinition] | list[dict] | None = ...,
         id: str | None = ...,
@@ -1327,7 +1327,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
-        evaluation_parameters: None = ...,
+        suite_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
         id: None = ...,
@@ -1359,7 +1359,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
         id: str | None = None,
@@ -1378,7 +1378,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
-            evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
+            suite_parameters: The suite parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             id: The ID to use in generating this checkpoint.
@@ -1398,7 +1398,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
             expectation_suite_id=expectation_suite_id,
@@ -1450,7 +1450,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
         action_list: Sequence[ActionDict] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         expectation_suite_id: str | None = ...,
@@ -1472,7 +1472,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: None = ...,
         batch_request: None = ...,
         action_list: Sequence[ActionDict] | None = ...,
-        evaluation_parameters: None = ...,
+        suite_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
         expectation_suite_id: None = ...,
@@ -1500,7 +1500,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
         expectation_suite_id: str | None = None,
@@ -1516,7 +1516,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The expectation suite name to use in generating this checkpoint.
             batch_request: The batch request to use in generating this checkpoint.
             action_list: The action list to use in generating this checkpoint.
-            evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
+            suite_parameters: The suite parameters to use in generating this checkpoint.
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
@@ -1535,7 +1535,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
             expectation_suite_id=expectation_suite_id,
@@ -1562,7 +1562,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
         expectation_suite_id: str | None = None,
@@ -1593,7 +1593,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
                 action_list=action_list,
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 runtime_configuration=runtime_configuration,
                 validations=validations,
                 id=id,
@@ -1652,18 +1652,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return self.checkpoint_store.delete_checkpoint(name=name, id=id)
 
-    def store_evaluation_parameters(self, validation_results, target_store_name=None) -> None:
+    def store_suite_parameters(self, validation_results, target_store_name=None) -> None:
         """
-        Stores ValidationResult EvaluationParameters to defined store
+        Stores ValidationResult Suite Parameters to defined store
         """
-        if not self._evaluation_parameter_dependencies_compiled:
-            self._compile_evaluation_parameter_dependencies()
+        if not self._suite_parameter_dependencies_compiled:
+            self._compile_suite_parameter_dependencies()
 
         if target_store_name is None:
-            target_store_name = self.evaluation_parameter_store_name
+            target_store_name = self.suite_parameter_store_name
 
         self._store_metrics(
-            self._evaluation_parameter_dependencies,
+            self._suite_parameter_dependencies,
             validation_results,
             target_store_name,
         )
@@ -2043,7 +2043,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
+        batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -2081,7 +2081,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             partitioner_method: The method used to partition the Data Asset into Batches
             partitioner_kwargs: Arguments for the partitioning method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
-            batch_request_options: Options for `FluentBatchRequest`
+            batch_parameters: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
@@ -2115,7 +2115,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
-            batch_request_options=batch_request_options,
+            batch_parameters=batch_parameters,
             **kwargs,
         )
 
@@ -2140,7 +2140,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
+        batch_parameters: Optional[Union[dict, BatchParameters]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         result = get_batch_request_from_acceptable_arguments(
@@ -2163,7 +2163,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
-            batch_request_options=batch_request_options,
+            batch_parameters=batch_parameters,
             **kwargs,
         )
         datasource_name = result.datasource_name
@@ -2184,7 +2184,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: None = ...,
@@ -2201,7 +2201,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: None = ...,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: ExpectationSuite = ...,
@@ -2219,7 +2219,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         expectation_suite: ExpectationSuite | None = None,
@@ -2252,7 +2252,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The name of the suite to create.
             id: Identifier to associate with this suite.
             expectations: Expectation Configurations to associate with this suite.
-            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+            suite_parameters: Suite parameters to be substituted when evaluating Expectations.
             execution_engine_type: Name of the execution engine type.
             meta: Metadata related to the suite.
 
@@ -2267,7 +2267,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name=expectation_suite_name,
             id=id,
             expectations=expectations,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             execution_engine_type=execution_engine_type,
             meta=meta,
             expectation_suite=expectation_suite,
@@ -2279,7 +2279,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: Sequence[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         overwrite_existing: bool = False,
@@ -2303,7 +2303,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 execution_engine_type=execution_engine_type,
                 meta=meta,
             )
@@ -2371,7 +2371,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: None = ...,
@@ -2389,7 +2389,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: None = ...,
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
-        evaluation_parameters: dict | None = ...,
+        suite_parameters: dict | None = ...,
         execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: ExpectationSuite = ...,
@@ -2408,7 +2408,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         expectation_suite: ExpectationSuite | None = None,
@@ -2419,7 +2419,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The name of the suite to create or replace.
             id: Identifier to associate with this suite (ignored if updating existing suite).
             expectations: Expectation Configurations to associate with this suite.
-            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+            suite_parameters: Suite parameters to be substituted when evaluating Expectations.
             execution_engine_type: Name of the Execution Engine type.
             meta: Metadata related to the suite.
             expectation_suite: The `ExpectationSuite` object you wish to persist.
@@ -2441,7 +2441,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 name=expectation_suite_name,
                 id=id,
                 expectations=expectations,
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 execution_engine_type=execution_engine_type,
                 meta=meta,
             )
@@ -2568,7 +2568,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         validation_operator_name: str,
         assets_to_validate: List,
         run_id: Optional[Union[str, RunIdentifier]] = None,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
@@ -2583,7 +2583,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
-            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            suite_parameters: $parameter_name syntax references to be evaluated at runtime
             run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
             run_time: The date/time of the run
@@ -2597,7 +2597,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             validation_operator_name=validation_operator_name,
             assets_to_validate=assets_to_validate,
             run_id=run_id,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
@@ -2609,7 +2609,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         validation_operator_name: str,
         assets_to_validate: List,
         run_id: Optional[Union[str, RunIdentifier]] = None,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = None,
@@ -2637,7 +2637,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if run_id is None and run_name is None:
             run_name = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
             logger.info(f"Setting run_name to: {run_name}")
-        if evaluation_parameters is None:
+        if suite_parameters is None:
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
@@ -2650,7 +2650,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
                 run_id=run_id,
-                evaluation_parameters=evaluation_parameters,
+                suite_parameters=suite_parameters,
                 run_name=run_name,
                 run_time=run_time,
                 result_format=result_format,
@@ -3159,10 +3159,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
             logger.warning(
-                "The following globally-defined config variables failed validation:\n{}\n\n"
-                "Please fix the variables if you would like to apply global values to project_config.".format(  # noqa: E501
-                    json.dumps(validation_errors, indent=2)
-                )
+                f"The following globally-defined config variables failed validation:\n{json.dumps(validation_errors, indent=2)}\n\n"  # noqa: E501
+                "Please fix the variables if you would like to apply global values to project_config."  # noqa: E501
             )
 
         return config_with_global_config_overrides
@@ -3195,9 +3193,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 usage_statistics_enabled = False
             else:
                 logger.warning(
-                    "GE_USAGE_STATS environment variable must be one of: {}".format(
-                        AbstractDataContext.FALSEY_STRINGS
-                    )
+                    f"GE_USAGE_STATS environment variable must be one of: {AbstractDataContext.FALSEY_STRINGS}"  # noqa: E501
                 )
         for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
@@ -3647,9 +3643,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _compile_evaluation_parameter_dependencies(self) -> None:
-        self._evaluation_parameter_dependencies = {}
-        # we have to iterate through all expectation suites because evaluation parameters
+    def _compile_suite_parameter_dependencies(self) -> None:
+        self._suite_parameter_dependencies = {}
+        # we have to iterate through all expectation suites because suite parameters
         # can reference metric values from other suites
         for key in self.expectations_store.list_keys():
             try:
@@ -3658,7 +3654,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured  # noqa: E501
                 # we should ignore that instead of breaking all checkpoints in the entire context
                 warnings.warn(
-                    f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "  # noqa: E501
+                    f"Suite with identifier {key} was not considered when compiling suite parameter dependencies "  # noqa: E501
                     f"because it failed to load with message: {e}",
                     UserWarning,
                 )
@@ -3668,11 +3664,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 continue
             expectation_suite = ExpectationSuite(**expectation_suite_dict)
 
-            dependencies: dict = expectation_suite.get_evaluation_parameter_dependencies()
+            dependencies: dict = expectation_suite.get_suite_parameter_dependencies()
             if len(dependencies) > 0:
-                nested_update(self._evaluation_parameter_dependencies, dependencies)
+                nested_update(self._suite_parameter_dependencies, dependencies)
 
-        self._evaluation_parameter_dependencies_compiled = True
+        self._suite_parameter_dependencies_compiled = True
 
     def get_validation_result(  # noqa: C901, PLR0913
         self,
@@ -3811,8 +3807,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                     except gx_exceptions.UnavailableMetricError:
                         # This will happen frequently in larger pipelines
                         logger.debug(
-                            "metric {} was requested by another expectation suite but is not available in "  # noqa: E501
-                            "this validation result.".format(metric_name)
+                            f"metric {metric_name} was requested by another expectation suite but is not available in "  # noqa: E501
+                            "this validation result."
                         )
 
     def _determine_if_expectation_suite_include_rendered_content(

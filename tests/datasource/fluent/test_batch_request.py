@@ -108,7 +108,11 @@ def test_batch_request_config_serialization_round_trips(
         f'"datasource_name": "{datasource_name}", '
         f'"data_asset_name": "{data_asset_name}", '
         f'"options": {options_json}, '
-        '"partitioner": {"column_name": "my_column", "method_name": "partition_on_column_value"}, '
+        '"partitioner": {'
+        '"column_name": "my_column", '
+        '"sort_ascending": true, '
+        '"method_name": "partition_on_column_value"'
+        "}, "
         '"batching_regex": "data_(?P<year>\\\\d{4})-(?P<month>\\\\d{2}).csv", '
         f'"batch_slice": {batch_slice_json}'
         "}"

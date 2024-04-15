@@ -1,3 +1,5 @@
+@import "sass_variables.scss";
+
 :root {
   --navbar-background-color: #F9F9FB;
 }
@@ -29,6 +31,21 @@
   &:has(.non-versioned-section.navbar__link--active) {
     .navbar__items:first-child .dropdown {
       visibility: hidden;
+    }
+  }
+
+  .navbar-sidebar__items:not(.navbar-sidebar__items--show-secondary) .menu > .menu__list{
+    display: flex;
+    flex-direction: column;
+
+    .menu__list-item:has(.version-dropdown) {
+      order: 1;
+      margin-top: 0.75rem;
+      border-width: 1px;
+      border-top: 0.5px solid var(--black-15);
+    }
+    .menu__list-item:has(.header-cloud-link) {
+      order: 2;
     }
   }
 }
@@ -115,3 +132,21 @@
   color: #FFF;
   background-color: #DE550A;
 }
+
+
+@media (max-width: $mobile-breakpoint) {
+  .navbar-sidebar .header-cloud-link {
+    display: flex;
+    justify-content: center;
+    margin: 0.75rem;
+    padding: 0.25rem;
+    box-shadow: 0 3px 6px -1px var(--orange-300);
+  }
+
+  .navbar-sidebar .github-badge {
+    display: none;
+  }
+}
+
+
+

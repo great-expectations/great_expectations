@@ -41,11 +41,8 @@ def instantiate_class_from_config(  # noqa: C901, PLR0912
         try:
             module_name = config_defaults.pop("module_name")
         except KeyError:
-            raise KeyError(
-                "Neither config : {} nor config_defaults : {} contains a module_name key.".format(
-                    config,
-                    config_defaults,
-                )
+            raise KeyError(  # noqa: TRY003
+                f"Neither config : {config} nor config_defaults : {config_defaults} contains a module_name key."  # noqa: E501
             )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
@@ -63,11 +60,8 @@ def instantiate_class_from_config(  # noqa: C901, PLR0912
         try:
             class_name = config_defaults.pop("class_name")
         except KeyError:
-            raise KeyError(
-                "Neither config : {} nor config_defaults : {} contains a class_name key.".format(
-                    config,
-                    config_defaults,
-                )
+            raise KeyError(  # noqa: TRY003
+                f"Neither config : {config} nor config_defaults : {config_defaults} contains a class_name key."  # noqa: E501
             )
     else:
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
@@ -98,9 +92,7 @@ def instantiate_class_from_config(  # noqa: C901, PLR0912
         class_instance = class_(**config_with_defaults)
     except TypeError as e:
         raise TypeError(
-            "Couldn't instantiate class: {} with config: \n\t{}\n \n".format(
-                class_name, format_dict_for_error_message(config_with_defaults)
-            )
+            f"Couldn't instantiate class: {class_name} with config: \n\t{format_dict_for_error_message(config_with_defaults)}\n \n"  # noqa: E501
             + str(e)
         )
 

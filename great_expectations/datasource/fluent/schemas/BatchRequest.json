@@ -1,6 +1,6 @@
 {
     "title": "BatchRequest",
-    "description": "--Public API--A BatchRequest is the way to specify which data Great Expectations will validate.\n\nA Batch Request is provided to a Data Asset in order to create one or more Batches.\n\nArgs:\n    datasource_name: The name of the Datasource used to connect to the data.\n    data_asset_name: The name of the Data Asset used to connect to the data.\n    options: A dict that can be used to filter the batch groups associated with the Data Asset.\n        The dict structure depends on the asset type. The available keys for dict can be obtained by\n        calling DataAsset.get_batch_request_options_keys(...).\n    batch_slice: A python slice that can be used to filter the sorted batches by index.\n        e.g. `batch_slice = \"[-5:]\"` will request only the last 5 batches after the options filter is applied.\n\nReturns:\n    BatchRequest",
+    "description": "--Public API--A BatchRequest is the way to specify which data Great Expectations will validate.\n\nA Batch Request is provided to a Data Asset in order to create one or more Batches.\n\nArgs:\n    datasource_name: The name of the Datasource used to connect to the data.\n    data_asset_name: The name of the Data Asset used to connect to the data.\n    options: A dict that can be used to filter the batch groups associated with the Data Asset.\n        The dict structure depends on the asset type. The available keys for dict can be obtained by\n        calling DataAsset.get_batch_parameters_keys(...).\n    batch_slice: A python slice that can be used to filter the sorted batches by index.\n        e.g. `batch_slice = \"[-5:]\"` will request only the last 5 batches after the options filter is applied.\n\nReturns:\n    BatchRequest",
     "type": "object",
     "properties": {
         "datasource_name": {
@@ -49,6 +49,11 @@
                     "$ref": "#/definitions/PartitionerConvertedDatetime"
                 }
             ]
+        },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "type": "string",
+            "format": "regex"
         },
         "batch_slice": {
             "title": "Batch Slice",
@@ -103,6 +108,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_column_value",
@@ -127,6 +137,11 @@
                     "items": {
                         "type": "string"
                     }
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 },
                 "method_name": {
                     "title": "Method Name",
@@ -153,6 +168,11 @@
                 "column_name": {
                     "title": "Column Name",
                     "type": "string"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 },
                 "method_name": {
                     "title": "Method Name",
@@ -181,6 +201,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_mod_integer",
@@ -204,6 +229,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_year",
@@ -226,6 +256,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_year_and_month",
@@ -247,6 +282,11 @@
                 "column_name": {
                     "title": "Column Name",
                     "type": "string"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 },
                 "method_name": {
                     "title": "Method Name",
@@ -277,6 +317,11 @@
                     "title": "Column Name",
                     "type": "string"
                 },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
                 "method_name": {
                     "title": "Method Name",
                     "default": "partition_on_date_parts",
@@ -299,6 +344,11 @@
                 "column_name": {
                     "title": "Column Name",
                     "type": "string"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 },
                 "method_name": {
                     "title": "Method Name",

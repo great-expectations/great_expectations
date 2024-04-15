@@ -48,7 +48,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -170,7 +170,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=1,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -266,7 +266,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         include_estimator_samples_histogram_in_details=True,
         false_positive_rate=5.0e-2,
         round_decimals=1,
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -355,7 +355,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=None,
             round_decimals=1,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -467,9 +467,9 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         enforce_numeric_metric=True,
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
-    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+    suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         my_column_min_metric_multi_batch_parameter_builder_config,
     ]
     numeric_metric_range_parameter_builder: ParameterBuilder = (
@@ -483,7 +483,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=1,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=data_context,
         )
     )
@@ -579,7 +579,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         include_estimator_samples_histogram_in_details=True,
         false_positive_rate=5.0e-2,
         round_decimals=1,
-        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        suite_parameter_builder_configs=suite_parameter_builder_configs,
         data_context=data_context,
     )
 
@@ -664,7 +664,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
             estimator="bootstrap",
             false_positive_rate=1.0,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -720,7 +720,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
             estimator="bootstrap",
             false_positive_rate=-0.05,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -777,7 +777,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
             estimator="bootstrap",
             false_positive_rate=0.0,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -840,7 +840,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
             estimator="bootstrap",
             false_positive_rate=smaller_than_np_epsilon_false_positive_rate,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -897,7 +897,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -1021,7 +1021,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
             estimator="bootstrap",
             false_positive_rate=5.0e-2,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -1071,7 +1071,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
             estimator="kde",
             false_positive_rate=5.0e-2,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -1136,7 +1136,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
             estimator="kde",
             false_positive_rate=5.0e-2,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
@@ -1187,7 +1187,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
             bw_method=0.5,
             false_positive_rate=5.0e-2,
             round_decimals=0,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )

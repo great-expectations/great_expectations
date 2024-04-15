@@ -107,10 +107,10 @@ def test_metric_store_deserialize() -> None:
 
 
 @pytest.mark.unit
-def test_evaluation_parameter_store_get_bind_params() -> None:
+def test_suite_parameter_store_get_bind_params() -> None:
     pass
 
 
 @pytest.mark.unit
-def test_evaluation_parameter_store_config_property_and_defaults() -> None:
+def test_suite_parameter_store_config_property_and_defaults() -> None:
     pass

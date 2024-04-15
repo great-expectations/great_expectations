@@ -284,7 +284,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             + [self.metric_name, self.metric_kwargs_id or "__"]
         )
 
-    def to_evaluation_parameter_urn(self):
+    def to_suite_parameter_urn(self):
         if self._metric_kwargs_id is None:
             return "urn:great_expectations:validations:" + ":".join(
                 list(self.expectation_suite_identifier.to_fixed_length_tuple()) + [self.metric_name]

@@ -25,7 +25,7 @@ def totally_empty_data_context(tmp_path_factory):
     config = {
         "config_version": 3,
         "plugins_directory": "plugins/",
-        "evaluation_parameter_store_name": "not_a_real_store_name",
+        "suite_parameter_store_name": "not_a_real_store_name",
         "validations_store_name": "another_fake_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
@@ -95,7 +95,7 @@ def test_default_config_yml_stores(tmp_path_factory):
     assert set(context.stores.keys()) == {
         "expectations_store",
         "validations_store",
-        "evaluation_parameter_store",
+        "suite_parameter_store",
         "profiler_store",
         "checkpoint_store",
         "validation_definition_store",
@@ -113,7 +113,7 @@ def test_default_config_yml_stores(tmp_path_factory):
         "checkpoint_store",
         "expectations_store",
         "validations_store",
-        "evaluation_parameter_store",
+        "suite_parameter_store",
         "profiler_store",
         "validation_definition_store",
         "my_new_validations_store",

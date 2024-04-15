@@ -266,7 +266,7 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=None,
         )
     )
