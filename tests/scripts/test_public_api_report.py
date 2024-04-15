@@ -420,9 +420,7 @@ class TestPublicAPIChecker:
         """Helper function to find class and function definitions from ast tree for tests."""
         definitions = []
         for node in ast.walk(tree):
-            if (
-                isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef))
-            ):
+            if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
                 definitions.append(node)
 
         return definitions
