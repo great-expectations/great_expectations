@@ -209,7 +209,9 @@ class ValidationDefinition(BaseModel):
             result_format=result_format,
         )
         results = validator.validate_expectation_suite(self.suite, suite_parameters)
-        results.meta["run_id"] = run_id
+
+        if run_id:
+            results.meta["run_id"] = run_id
 
         (
             expectation_suite_identifier,
