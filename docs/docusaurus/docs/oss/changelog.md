@@ -1,5 +1,6 @@
 ---
 title: Changelog
+slug: /core/changelog
 ---
 
 ### Deprecation policy
