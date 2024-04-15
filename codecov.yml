@@ -4,8 +4,8 @@ flag_management:
     carryforward: false
     statuses:
       - type: project
-        target: 80%
-        threshold: 75% # the default minimum threshold for the project
+        target: auto
+        threshold: 5% # the default minimum threshold for the project
       - type: patch
         target: 90%
   # in general these individual flags should correspond to pytest markers
