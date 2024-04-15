@@ -12,19 +12,26 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Manage GX projects',
+      label: 'Set up a GX environment',
       link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
       items: [
         {
           type: 'doc',
           id: 'core/installation_and_setup/install_gx',
-          label: 'Install GX 1.0'
+          label: 'Install Python and GX'
         },
         {
           type: 'doc',
           id: 'core/installation_and_setup/additional_dependencies/additional_dependencies',
           label: 'Install additional dependencies'
         },
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Manage GX projects',
+      link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
+      items: [
         {
           type: 'category',
           label: 'Data Contexts',
@@ -58,8 +65,25 @@ module.exports = {
           ]
         },
         {
+          type: 'doc',
+          label: 'Metadata Stores',
+          id: 'core/installation_and_setup/manage_metadata_stores',
+        },
+        {
+          type: 'doc',
+          label: 'Data Docs',
+          id: 'core/installation_and_setup/manage_data_docs',
+        },
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Access data',
+      link: {type: 'doc', id: 'core/manage_and_access_data/manage_and_access_data'},
+      items: [
+        {
           type: 'category',
-          label: 'Credentials',
+          label: 'Provide credentials',
           link: {type: 'doc', id: 'core/installation_and_setup/manage_credentials'},
           items: [
             {
@@ -79,23 +103,6 @@ module.exports = {
             },
           ]
         },
-        {
-          type: 'doc',
-          label: 'Metadata Stores',
-          id: 'core/installation_and_setup/manage_metadata_stores',
-        },
-        {
-          type: 'doc',
-          label: 'Data Docs',
-          id: 'core/installation_and_setup/manage_data_docs',
-        },
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Access data',
-      link: {type: 'doc', id: 'core/manage_and_access_data/manage_and_access_data'},
-      items: [
         {
           type: 'category',
           label: 'Connect to and request data',
@@ -232,7 +239,7 @@ module.exports = {
         // 'oss/guides/expectations/create_expectations_overview',
         {
           type: 'category',
-          label: 'Define Expectations',
+          label: 'Expectations',
           link: { type: 'doc', id: 'core/create_expectations/expectations/manage_expectations' },
           items: [
             {
@@ -259,7 +266,7 @@ module.exports = {
         },
       {
           type: 'category',
-          label: 'Organize Expectations',
+          label: 'Expectation Suites',
           link: { type: 'doc', id: 'core/create_expectations/expectation_suites/manage_expectation_suites' },
           items: [
             {
