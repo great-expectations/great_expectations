@@ -6,7 +6,7 @@ toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
 
-GX Cloud simplifies data quality management and monitoring. Its easy-to-use web interface lets you quickly validate your data without creating and running complex Python code. With GX Cloud, you can work collaboratively with your teammates to define and test reusable data queries that alert you to changes in your data.
+GX Cloud simplifies data quality management and monitoring. Its easy-to-use web interface lets you quickly validate your data without provisioning and maintaining complex infrastructure. With GX Cloud, you can work collaboratively with your teammates to define and test reusable data queries that alert you to changes in your data.
 
 GX Cloud includes the following features and functionality:
 
