@@ -26,7 +26,7 @@ def checkpoint(
                     "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
                 },
             ],
-            "evaluation_parameters": {},
+            "suite_parameters": {},
             "runtime_configuration": {},
             "validations": [
                 {
@@ -51,7 +51,7 @@ def test_checkpoint_config_repr(checkpoint):
     for key in (
         "action_list",
         "batch_request",
-        "evaluation_parameters",
+        "suite_parameters",
         "name",
         "runtime_configuration",
         "validations",

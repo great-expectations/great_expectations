@@ -22,7 +22,7 @@ from tests import test_utils
 @pytest.fixture(
     params=[
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
@@ -36,7 +36,7 @@ from tests import test_utils
             },
         },
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "module_name": "great_expectations.data_context.store",
         },
     ]
@@ -57,13 +57,13 @@ def param_store(request, test_backends):
 @pytest.fixture(
     params=[
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "store_backend": {
                 "class_name": "InMemoryStoreBackend",
             },
         },
         {
-            "class_name": "EvaluationParameterStore",
+            "class_name": "SuiteParameterStore",
             "module_name": "great_expectations.data_context.store",
         },
     ]
@@ -82,7 +82,7 @@ def in_memory_param_store(request, test_backends):
 
 
 @pytest.mark.filesystem
-def test_evaluation_parameter_store_methods(
+def test_suite_parameter_store_methods(
     data_context_parameterized_expectation_suite_no_checkpoint_store,
 ):
     run_id = RunIdentifier(run_name="20191125T000000.000000Z")
@@ -117,11 +117,11 @@ def test_evaluation_parameter_store_methods(
         suite_name="source_patient_data.default",
     )
 
-    data_context_parameterized_expectation_suite_no_checkpoint_store.store_evaluation_parameters(
+    data_context_parameterized_expectation_suite_no_checkpoint_store.store_suite_parameters(
         source_patient_data_results
     )
 
-    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(  # noqa: E501
+    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.suite_parameter_store.get_bind_params(  # noqa: E501
         run_id
     )
     assert bound_parameters == {
@@ -157,10 +157,10 @@ def test_evaluation_parameter_store_methods(
         suite_name="source_diabetes_data.default",
     )
 
-    data_context_parameterized_expectation_suite_no_checkpoint_store.store_evaluation_parameters(
+    data_context_parameterized_expectation_suite_no_checkpoint_store.store_suite_parameters(
         source_diabetes_data_results
     )
-    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.evaluation_parameter_store.get_bind_params(  # noqa: E501
+    bound_parameters = data_context_parameterized_expectation_suite_no_checkpoint_store.suite_parameter_store.get_bind_params(  # noqa: E501
         run_id
     )
     assert bound_parameters == {
@@ -172,7 +172,7 @@ def test_evaluation_parameter_store_methods(
 
 
 @pytest.mark.postgresql
-def test_database_evaluation_parameter_store_basics(param_store):
+def test_database_suite_parameter_store_basics(param_store):
     run_id = RunIdentifier(
         run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     )
@@ -191,7 +191,7 @@ def test_database_evaluation_parameter_store_basics(param_store):
 
 
 @pytest.mark.unit
-def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_store):
+def test_database_suite_parameter_store_store_backend_id(in_memory_param_store):
     """
     What does this test and why?
     A Store should be able to report it's store_backend_id
@@ -205,7 +205,7 @@ def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_st
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.postgresql
-def test_database_evaluation_parameter_store_get_bind_params(param_store):
+def test_database_suite_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
     run_id = RunIdentifier(

@@ -21,14 +21,14 @@ def basic_data_context_config_for_validation_operator():
     return DataContextConfig(
         config_version=2,
         plugins_directory=None,
-        evaluation_parameter_store_name="evaluation_parameter_store",
+        suite_parameter_store_name="suite_parameter_store",
         expectations_store_name="expectations_store",
         checkpoint_store_name="checkpoint_store",
         datasources={},
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "validation_result_store": {"class_name": "ValidationsStore"},
             "metrics_store": {"class_name": "MetricStore"},
         },

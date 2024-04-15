@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -27,8 +27,8 @@ try:
 except ImportError:
     pass
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
@@ -154,8 +154,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                 }
     """  # noqa: E501
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 
@@ -232,7 +232,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     @classmethod
     @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(  # type: ignore[override] # TODO: Fix this type ignore
         cls,
         configuration: ExpectationConfiguration,

@@ -12,7 +12,7 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationValidationResult,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -176,7 +176,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     success_keys = ("mostly",)
 
     @renderer(renderer_type="renderer.diagnostic.observed_value")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _diagnostic_observed_value_renderer(
         cls,
         configuration: ExpectationConfiguration = None,
@@ -206,7 +206,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
             return "--"
 
     @renderer(renderer_type="renderer.diagnostic.unexpected_statement")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _diagnostic_unexpected_statement_renderer(
         cls,
         configuration: ExpectationConfiguration = None,
@@ -307,7 +307,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
             ]
 
     @renderer(renderer_type="renderer.diagnostic.unexpected_table")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _diagnostic_unexpected_table_renderer(  # noqa: C901, PLR0912
         cls,
         configuration: ExpectationConfiguration = None,

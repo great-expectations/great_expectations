@@ -14,7 +14,7 @@ The following are some recommendations for resolving issues on your own. Resolvi
 
 Search the docs you're using currently for an answer to your issue or question.
 
-If you're new to GX Cloud, review [About GX Cloud](/cloud/about_gx.md) or [Try GX Cloud](/cloud/try_gx_cloud.md).
+If you're new to GX Cloud, review [About GX Cloud](/cloud/about_gx.md).
 
 If you're new to GX OSS, see [Try GX](core/introduction/try_gx.md).  
 

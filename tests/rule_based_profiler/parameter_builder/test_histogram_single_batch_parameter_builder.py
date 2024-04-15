@@ -49,7 +49,7 @@ def test_histogram_single_batch_parameter_builder_alice(
     parameter_builder: ParameterBuilder = HistogramSingleBatchParameterBuilder(
         name="my_name",
         bins="auto",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -117,7 +117,7 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
     parameter_builder: ParameterBuilder = HistogramSingleBatchParameterBuilder(
         name="my_name",
         bins="auto",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -170,7 +170,7 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
     parameter_builder: ParameterBuilder = HistogramSingleBatchParameterBuilder(
         name="my_name",
         bins="auto",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -249,7 +249,7 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
     parameter_builder: ParameterBuilder = HistogramSingleBatchParameterBuilder(
         name="my_name",
         bins="auto",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -330,7 +330,7 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
     parameter_builder: ParameterBuilder = HistogramSingleBatchParameterBuilder(
         name="my_name",
         bins="auto",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -403,14 +403,14 @@ def test_histogram_single_batch_parameter_builder_alice_check_serialized_keys(
     parameter_builder: ParameterBuilder = HistogramSingleBatchParameterBuilder(
         name="my_name",
         bins="auto",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 
-    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
+    # Note: "suite_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
     assert set(parameter_builder.to_json_dict().keys()) == {
         "class_name",
         "module_name",
         "name",
-        "evaluation_parameter_builder_configs",
+        "suite_parameter_builder_configs",
     }

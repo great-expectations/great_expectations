@@ -26,7 +26,7 @@ def checkpoint(
                     "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
                 },
             ],
-            "evaluation_parameters": {},
+            "suite_parameters": {},
             "runtime_configuration": {},
             "validations": [
                 {

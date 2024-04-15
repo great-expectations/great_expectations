@@ -295,7 +295,7 @@ def test_set(
                                         },
                                     ],
                                 ),
-                                ("evaluation_parameters", {}),
+                                ("suite_parameters", {}),
                                 ("runtime_configuration", {}),
                                 ("validations", []),
                                 ("id", None),

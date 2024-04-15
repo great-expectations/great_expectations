@@ -156,7 +156,7 @@ context.add_or_update_checkpoint(
             ],
         }
     ],
-    evaluation_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
+    suite_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
     runtime_configuration={
         "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
     },
@@ -213,7 +213,7 @@ context.add_or_update_checkpoint(
             "action": {"class_name": "UpdateDataDocsAction"},
         },
     ],
-    evaluation_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
+    suite_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
     runtime_configuration={
         "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
     },
@@ -277,7 +277,7 @@ context.add_or_update_checkpoint(
             "action": {"class_name": "UpdateDataDocsAction"},
         },
     ],
-    evaluation_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
+    suite_parameters={"GT_PARAM": 1000, "LT_PARAM": 50000},
     runtime_configuration={
         "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
     },

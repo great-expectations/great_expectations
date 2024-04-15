@@ -28,7 +28,7 @@ datasources:
 config_variables_file_path: uncommitted/config_variables.yml
 
 plugins_directory: ${l}
-evaluation_parameter_store_name: ${m}
+suite_parameter_store_name: ${m}
 expectations_store_name: ${n}
 validations_store_name: ${o}
 checkpoint_store_name: ${cps}
@@ -50,7 +50,7 @@ stores:
       class_name: ${v}
       base_directory: ${w}
 
-  evaluation_parameter_store:
+  suite_parameter_store:
     module_name: ${x}
     class_name: ${y}
 

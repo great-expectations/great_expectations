@@ -27,7 +27,7 @@ stores:
   # leave this section alone.
   #
   # Three stores are required: expectations, validations, and
-  # evaluation_parameters, and must exist with a valid store entry. Additional
+  # suite_parameters, and must exist with a valid store entry. Additional
   # stores can be configured for uses such as data_docs, etc.
   expectations_store:
     class_name: ExpectationsStore
@@ -61,10 +61,10 @@ stores:
       prefix: <YOUR GCS PREFIX NAME>
   # </snippet>
 
-  evaluation_parameter_store:
+  suite_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
-    class_name: EvaluationParameterStore
+    # https://docs.greatexpectations.io/en/latest/reference/core_concepts/suite_parameters.html
+    class_name: SuiteParameterStore
 
   checkpoint_store:
     class_name: CheckpointStore
@@ -79,7 +79,7 @@ expectations_store_name: expectations_GCS_store
 # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_store_name">
 validations_store_name: validations_GCS_store
 # </snippet>
-evaluation_parameter_store_name: evaluation_parameter_store
+suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 
 data_docs_sites:

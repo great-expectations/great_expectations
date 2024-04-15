@@ -34,7 +34,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
-        SortersDefinition,
     )
 
 logger = logging.getLogger(__file__)
@@ -45,20 +44,6 @@ pytestmark = [
         PANDAS_VERSION < 1.2, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
     )
 ]
-
-
-@pytest.fixture
-def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasource:
-    base_directory_rel_path = pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
-    base_directory_abs_path = (
-        pathlib.Path(__file__).parent.joinpath(base_directory_rel_path).resolve(strict=True)
-    )
-    pandas_filesystem_datasource = PandasFilesystemDatasource(
-        name="pandas_filesystem_datasource",
-        base_directory=base_directory_abs_path,
-    )
-    pandas_filesystem_datasource._data_context = empty_data_context
-    return pandas_filesystem_datasource
 
 
 class SpyInterrupt(RuntimeError):
@@ -565,91 +550,6 @@ def test_get_batch_list_from_partially_specified_batch_request(
         YearMonth(year=batch.metadata["year"], month=batch.metadata["month"]) for batch in batches
     }
     assert expected_year_month == batch_year_month
-
-
-@pytest.mark.timeout(
-    6.0  # this test can take longer than the default timeout, try to reduce it
-)
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "order_by",
-    [
-        ["+year", "month"],
-        ["+year", "+month"],
-        ["+year", "-month"],
-        ["year", "month"],
-        ["year", "+month"],
-        ["year", "-month"],
-        ["-year", "month"],
-        ["-year", "+month"],
-        ["-year", "-month"],
-        ["month", "+year"],
-        ["+month", "+year"],
-        ["-month", "+year"],
-        ["month", "year"],
-        ["+month", "year"],
-        ["-month", "year"],
-        ["month", "-year"],
-        ["+month", "-year"],
-        ["-month", "-year"],
-    ],
-)
-def test_pandas_sorter(
-    pandas_filesystem_datasource: PandasFilesystemDatasource,
-    order_by: SortersDefinition,
-):
-    # Verify test directory has files we expect
-    years = ["2018", "2019", "2020"]
-    months = [format(m, "02d") for m in range(1, 13)]
-    file_name: PathStr
-    all_files: list[str] = [
-        file_name.stem
-        for file_name in list(pathlib.Path(pandas_filesystem_datasource.base_directory).iterdir())
-    ]
-    # assert there are 12 files for each year
-    for year in years:
-        files_for_year = [
-            file_name
-            for file_name in all_files
-            if file_name.find(f"yellow_tripdata_sample_{year}") == 0
-        ]
-        assert len(files_for_year) == 12
-
-    asset = pandas_filesystem_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-        order_by=order_by,
-    )
-    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
-    assert (len(batches)) == 36
-
-    @dataclass(frozen=True)
-    class TimeRange:
-        key: str
-        range: list[str]
-
-    ordered_years = reversed(years) if "-year" in order_by else years
-    ordered_months = reversed(months) if "-month" in order_by else months
-    if "year" in order_by[0]:  # type: ignore[operator]
-        ordered = [
-            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
-            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
-        ]
-    else:
-        ordered = [
-            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
-            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
-        ]
-
-    batch_index = -1
-    for range1 in ordered[0].range:
-        key1 = ordered[0].key
-        for range2 in ordered[1].range:
-            key2 = ordered[1].key
-            batch_index += 1
-            metadata = batches[batch_index].metadata
-            assert metadata[key1] == range1
-            assert metadata[key2] == range2
 
 
 @pytest.mark.unit
