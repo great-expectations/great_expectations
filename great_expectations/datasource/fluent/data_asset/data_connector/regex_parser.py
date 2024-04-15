@@ -35,7 +35,7 @@ class RegExParser:
     def get_matches(self, target: str) -> Optional[Match[str]]:
         return self._regex_pattern.match(target)
 
-    def get_named_group_name_to_group_value_mapping(self, target: str) -> Dict[str, str] | None:
+    def get_group_name_to_value_map(self, target: str) -> Dict[str, str] | None:
         # Check for `(?P<name>)` named group syntax
         matches: Optional[Match[str]] = self.get_matches(target=target)
         if matches is None:
