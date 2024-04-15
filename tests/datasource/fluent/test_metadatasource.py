@@ -286,7 +286,8 @@ class TestMisconfiguredMetaDatasource:
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
-                def test_connection(self) -> None: ...
+                @override
+                def test_connection(self) -> None: ...  # type: ignore[override]
 
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
@@ -295,10 +296,11 @@ class TestMisconfiguredMetaDatasource:
         class MissingExecEngineTypeDatasource(Datasource):
             type: str = "valid"
 
+            @override
             def test_connection(self) -> None: ...  # type: ignore[override]
 
         with pytest.raises(NotImplementedError):
-            MissingExecEngineTypeDatasource(name="name").get_execution_engine()  # type: ignore[call-arg]
+            MissingExecEngineTypeDatasource(name="name").get_execution_engine()
 
     def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
         with pytest.raises(
@@ -361,7 +363,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         def execution_engine_type(self) -> Type[ExecutionEngine]:
             return DummyExecutionEngine
 
-        def test_connection(self): ...  # type: ignore[override]
+        def test_connection(self): ...
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)  # type: ignore[call-arg] # ?
