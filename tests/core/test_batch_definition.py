@@ -64,6 +64,22 @@ def test_build_batch_request(
 
 
 @pytest.mark.unit
+def test_get_batch(mock_data_asset: DataAsset):
+    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition.set_data_asset(mock_data_asset)
+
+    batch_definition.get_batch()
+
+    mock_get_batch_list_from_batch_request = (
+        batch_definition.data_asset.get_batch_list_from_batch_request
+    )
+    assert isinstance(mock_get_batch_list_from_batch_request, Mock)
+    mock_get_batch_list_from_batch_request.assert_called_once_with(
+        batch_definition.build_batch_request()
+    )
+
+
+@pytest.mark.unit
 def test_identifier_bundle():
     ds = PandasDatasource(
         name="pandas_datasource",

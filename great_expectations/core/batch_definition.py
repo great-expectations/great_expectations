@@ -50,10 +50,25 @@ class BatchDefinition(pydantic.BaseModel):
             batching_regex=self.batching_regex,
         )
 
-    def get_batch(self, batch_parameters: Optional[BatchParameters] = None) -> list[Batch]:
-        return self.data_asset.get_batch_list_from_batch_request(
+    def get_batch(self, batch_parameters: Optional[BatchParameters] = None) -> Batch:
+        """
+        Retrieves a batch from the underlying asset. Defaults to the last batch
+        from the asset's batch list.
+
+        Args:
+            batch_parameters: Additional parameters to be used in fetching the batch.
+
+        Returns:
+            A Batch of data.
+        """
+        batch_list = self.data_asset.get_batch_list_from_batch_request(
             self.build_batch_request(batch_parameters=batch_parameters)
-        )[-1]
+        )
+
+        if len(batch_list) == 0:
+            raise ValueError("No batch found")  # noqa: TRY003
+
+        return batch_list[-1]
 
     def save(self) -> None:
         self.data_asset._save_batch_definition(self)
