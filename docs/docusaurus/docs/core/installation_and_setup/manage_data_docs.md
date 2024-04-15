@@ -1,5 +1,4 @@
 ---
-sidebar_label: 'Manage Data Docs'
 title: Manage Data Docs
 id: manage_data_docs
 description: Host and share Data Docs stored on a filesystem or a Data Source.
