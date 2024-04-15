@@ -53,7 +53,7 @@ class BatchDefinition(pydantic.BaseModel):
     def get_batch(self, batch_parameters: Optional[BatchParameters] = None) -> list[Batch]:
         return self.data_asset.get_batch_list_from_batch_request(
             self.build_batch_request(batch_parameters=batch_parameters)
-        )
+        )[-1]
 
     def save(self) -> None:
         self.data_asset._save_batch_definition(self)
