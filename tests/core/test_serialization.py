@@ -401,7 +401,7 @@ def test_checkpoint_config_deepcopy():
             {
                 "action_list": [],
                 "batch_request": {},
-                "evaluation_parameters": {},
+                "suite_parameters": {},
                 "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
                 "id": None,
@@ -442,7 +442,7 @@ def test_checkpoint_config_deepcopy():
                 "action_list": [],
                 "batch_request": {},
                 "default_validation_id": "93e015ee-6405-4d5e-894c-741dc763f509",
-                "evaluation_parameters": {},
+                "suite_parameters": {},
                 "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
                 "id": None,
@@ -484,7 +484,7 @@ def test_checkpoint_config_deepcopy():
                 "action_list": [],
                 "batch_request": {},
                 "default_validation_id": "e3ff7a3a-3529-4c2a-be22-598493269680",
-                "evaluation_parameters": {},
+                "suite_parameters": {},
                 "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
                 "id": None,
@@ -525,7 +525,7 @@ def test_checkpoint_config_deepcopy():
             {
                 "action_list": [],
                 "batch_request": {},
-                "evaluation_parameters": {},
+                "suite_parameters": {},
                 "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
                 "id": None,
@@ -572,7 +572,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
             {
                 "action_list": [],
                 "batch_request": {},
-                "evaluation_parameters": {},
+                "suite_parameters": {},
                 "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
                 "id": None,
@@ -600,7 +600,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
             {
                 "action_list": [],
                 "batch_request": {},
-                "evaluation_parameters": {},
+                "suite_parameters": {},
                 "expectation_suite_id": None,
                 "expectation_suite_name": "users.delivery",
                 "id": None,

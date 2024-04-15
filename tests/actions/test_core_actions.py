@@ -61,9 +61,14 @@ def mock_context(mocker: MockerFixture):
 
 
 class MockTeamsResponse:
-    def __init__(self, status_code):
+    def __init__(self, status_code: int, raise_for_status: bool = False):
         self.status_code = status_code
+        self._raise_for_status = raise_for_status
         self.text = "test_text"
+
+    def raise_for_status(self):
+        if self._raise_for_status:
+            raise requests.exceptions.HTTPError("test")
 
 
 class MockSlackResponse:
@@ -74,6 +79,9 @@ class MockSlackResponse:
 
     def json(self):
         return {"ok": "True"}
+
+    def raise_for_status(self):
+        pass
 
 
 class MockCloudResponse:
@@ -436,7 +444,9 @@ def test_MicrosoftTeamsNotificationAction_good_request(
 
 
 @pytest.mark.big
-@mock.patch.object(Session, "post", return_value=MockTeamsResponse(400))
+@mock.patch.object(
+    Session, "post", return_value=MockTeamsResponse(status_code=400, raise_for_status=True)
+)
 def test_MicrosoftTeamsNotificationAction_bad_request(
     validation_result_suite,
     validation_result_suite_extended_id,
@@ -461,8 +471,6 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
         validation_result_suite_identifier=validation_result_suite_extended_id,
         validation_result_suite=validation_result_suite,
     ) == {"microsoft_teams_notification_result": None}
-
-    assert "Request to Microsoft Teams webhook returned error 400" in caplog.text
 
 
 class MockSMTPServer:
@@ -925,12 +933,87 @@ class TestV1ActionRun:
         assert out == {"email_result": mock_send_email()}
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
     def test_MicrosoftTeamsNotificationAction_run(self, checkpoint_result: CheckpointResult):
         action = MicrosoftTeamsNotificationAction(teams_webhook="test")
-        action.v1_run(checkpoint_result=checkpoint_result)
+
+        with mock.patch.object(Session, "post") as mock_post:
+            action.v1_run(checkpoint_result=checkpoint_result)
+
+        mock_post.assert_called_once()
+
+        body = mock_post.call_args.kwargs["json"]["attachments"][0]["content"]["body"]
+        checkpoint_summary = body[0]["items"][0]["columns"][0]["items"][0]["text"]
+        first_validation = body[1]["items"][0]["text"]
+        second_validation = body[2]["items"][0]["text"]
+
+        assert len(body) == 3
+        assert "Success !!!" in checkpoint_summary
+        assert first_validation == [
+            {
+                "color": "good",
+                "horizontalAlignment": "left",
+                "text": "**Batch Validation Status:** Success !!!",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Data Asset Name:** __no_data_asset_name__",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Expectation Suite Name:** suite_a",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Run Name:** prod_20240401",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Batch ID:** None",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Summary:** *3* of *3* expectations were met",
+                "type": "TextBlock",
+            },
+        ]
+        assert second_validation == [
+            {
+                "color": "good",
+                "horizontalAlignment": "left",
+                "text": "**Batch Validation Status:** Success !!!",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Data Asset Name:** __no_data_asset_name__",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Expectation Suite Name:** suite_b",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Run Name:** prod_20240402",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Batch ID:** None",
+                "type": "TextBlock",
+            },
+            {
+                "horizontalAlignment": "left",
+                "text": "**Summary:** *2* of *2* expectations were met",
+                "type": "TextBlock",
+            },
+        ]
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
@@ -1023,12 +1106,49 @@ class TestV1ActionRun:
         mock_pypd_event.assert_not_called()
 
     @pytest.mark.unit
-    @pytest.mark.xfail(
-        reason="Not yet implemented for this class", strict=True, raises=NotImplementedError
-    )
     def test_SlackNotificationAction_run(self, checkpoint_result: CheckpointResult):
-        action = SlackNotificationAction(slack_webhook="test")
-        action.v1_run(checkpoint_result=checkpoint_result)
+        action = SlackNotificationAction(slack_webhook="test", notify_on="all")
+
+        with mock.patch.object(Session, "post") as mock_post:
+            output = action.v1_run(checkpoint_result=checkpoint_result)
+
+        assert mock_post.call_count == 5  # Sent in batches
+        mock_post.assert_called_with(
+            url="test",
+            headers=None,
+            json={
+                "blocks": [
+                    {
+                        "text": {
+                            "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite name*: `suite_a`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
+                            "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *3* of *3* expectations were met",  # noqa: E501
+                            "type": "mrkdwn",
+                        },
+                        "type": "section",
+                    },
+                    {
+                        "text": {
+                            "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite name*: `suite_b`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
+                            "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *2* of *2* expectations were met",  # noqa: E501
+                            "type": "mrkdwn",
+                        },
+                        "type": "section",
+                    },
+                    {
+                        "elements": [
+                            {
+                                "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/docs/terms/data_docs",
+                                "type": "mrkdwn",
+                            },
+                        ],
+                        "type": "context",
+                    },
+                ],
+                "text": "et",
+            },
+        )
+
+        assert output == {"slack_notification_result": "Slack notification succeeded."}
 
     @pytest.mark.unit
     def test_SNSNotificationAction_run(self, sns, checkpoint_result: CheckpointResult):

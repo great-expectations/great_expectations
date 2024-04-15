@@ -11,7 +11,7 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-evaluation_parameters: {}
+suite_parameters: {}
 runtime_configuration: {}
 validations: []
 ge_cloud_id:

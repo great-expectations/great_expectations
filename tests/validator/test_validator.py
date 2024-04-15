@@ -955,9 +955,9 @@ def test_validator_include_rendered_content_diagnostic(
     assert len(validation_result.rendered_content) == 1
     assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
 
-    # test evaluation parameters render
-    validator_include_rendered_content.set_evaluation_parameter("upstream_column_min", 1)
-    validator_include_rendered_content.set_evaluation_parameter("upstream_column_max", 8)
+    # test suite parameters render
+    validator_include_rendered_content.set_suite_parameter("upstream_column_min", 1)
+    validator_include_rendered_content.set_suite_parameter("upstream_column_max", 8)
 
     validation_result: ExpectationValidationResult = (
         validator_include_rendered_content.expect_column_max_to_be_between(
@@ -1041,11 +1041,11 @@ def test_validator_include_rendered_content_diagnostic(
     ],
 )
 @pytest.mark.big
-def test_validator_validate_substitutes_evaluation_parameters(
+def test_validator_validate_substitutes_suite_parameters(
     value_set: list[int],
     expected: bool,
 ):
-    """Integration test to ensure evaluation parameters are respected when validating.
+    """Integration test to ensure suite parameters are respected when validating.
     The setup here is to provide very simple data, and a variety of evaluation_parameter inputs,
     just checking for result.success as a proxy for the evaluation_parameter being respected.
     """
@@ -1070,12 +1070,12 @@ def test_validator_validate_substitutes_evaluation_parameters(
     )
 
     # Act
-    result = validator.validate(evaluation_parameters={"value_set": value_set})
+    result = validator.validate(suite_parameters={"value_set": value_set})
     assert isinstance(result, ExpectationSuiteValidationResult)
-    evaluation_parameters_used = result.results[0]["expectation_config"]["kwargs"]["value_set"]
+    suite_parameters_used = result.results[0]["expectation_config"]["kwargs"]["value_set"]
 
     # Assert
-    assert evaluation_parameters_used == value_set
+    assert suite_parameters_used == value_set
     assert result.success == expected
 
 

@@ -93,13 +93,11 @@ class Builder(SerializableDictDot):
     ) -> None:
         arg: Any
         num_supplied_batch_specification_args: int = sum(
-            [
-                0 if arg is None else 1
-                for arg in (
-                    batch_list,
-                    batch_request,
-                )
-            ]
+            0 if arg is None else 1
+            for arg in (
+                batch_list,
+                batch_request,
+            )
         )
         if num_supplied_batch_specification_args > 1:
             raise gx_exceptions.ProfilerConfigurationError(  # noqa: TRY003

@@ -5,7 +5,7 @@ config_version: 2
 plugins_directory: "foo"
 expectations_store_name: expectations_store
 validations_store_name: "foo"
-evaluation_parameter_store_name: "baz"
+suite_parameter_store_name: "baz"
 datasources: "1"
 stores:
   validations_store:

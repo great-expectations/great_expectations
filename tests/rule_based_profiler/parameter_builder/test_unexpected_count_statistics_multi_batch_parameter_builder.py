@@ -68,7 +68,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
 
 
 @pytest.mark.big
-def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(  # noqa: E501
+def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_no_suite_parameter_builder_configs(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -79,12 +79,12 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
             mode="unexpected_count_fraction_values",
-            evaluation_parameter_builder_configs=None,
+            suite_parameter_builder_configs=None,
             data_context=data_context,
         )
     )
 
-    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
+    # Note: "suite_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
     assert set(unexpected_count_statistics_multi_batch_parameter_builder.to_json_dict().keys()) == {
         "class_name",
         "module_name",
@@ -94,12 +94,12 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "mode",
         "max_error_rate",
         "expectation_type",
-        "evaluation_parameter_builder_configs",
+        "suite_parameter_builder_configs",
     }
 
 
 @pytest.mark.big
-def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(  # noqa: E501
+def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_with_suite_parameter_builder_configs(  # noqa: E501
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -114,7 +114,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         enforce_numeric_metric=False,
         replace_nan_with_zero=False,
         reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
     my_total_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
@@ -126,10 +126,10 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         enforce_numeric_metric=False,
         replace_nan_with_zero=False,
         reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
     )
 
-    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+    suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         my_null_count_metric_multi_batch_parameter_builder_config,
         my_total_count_metric_multi_batch_parameter_builder_config,
     ]
@@ -139,12 +139,12 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
             mode="unexpected_count_fraction_values",
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=data_context,
         )
     )
 
-    # Note: "evaluation_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
+    # Note: "suite_parameter_builder_configs" is not one of "ParameterBuilder" formal property attributes.  # noqa: E501
     assert set(unexpected_count_statistics_multi_batch_parameter_builder.to_json_dict().keys()) == {
         "class_name",
         "module_name",
@@ -154,7 +154,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "mode",
         "max_error_rate",
         "expectation_type",
-        "evaluation_parameter_builder_configs",
+        "suite_parameter_builder_configs",
     }
 
 

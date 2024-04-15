@@ -190,7 +190,7 @@ class Checkpoint(BaseModel):
         for validation_definition in self.validation_definitions:
             validation_result = validation_definition.run(
                 batch_parameters=batch_parameters,
-                evaluation_parameters=expectation_parameters,
+                suite_parameters=expectation_parameters,
                 result_format=result_format,
             )
             key = self._build_result_key(
@@ -221,12 +221,30 @@ class Checkpoint(BaseModel):
         checkpoint_result: CheckpointResult,
     ) -> None:
         action_context = ActionContext()
-        for action in self.actions:
+        sorted_actions = self._sort_actions()
+        for action in sorted_actions:
             action_result = action.v1_run(
                 checkpoint_result=checkpoint_result,
                 action_context=action_context,
             )
             action_context.update(action=action, action_result=action_result)
+
+    def _sort_actions(self) -> List[CheckpointAction]:
+        """
+        UpdateDataDocsActions are prioritized to run first, followed by all other actions.
+
+        This is due to the fact that certain actions reference data docs sites,
+        which must be updated first.
+        """
+        priority_actions: List[CheckpointAction] = []
+        secondary_actions: List[CheckpointAction] = []
+        for action in self.actions:
+            if isinstance(action, UpdateDataDocsAction):
+                priority_actions.append(action)
+            else:
+                secondary_actions.append(action)
+
+        return priority_actions + secondary_actions
 
     @public_api
     def save(self) -> None:

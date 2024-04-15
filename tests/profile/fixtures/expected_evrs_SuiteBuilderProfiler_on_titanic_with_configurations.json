@@ -941,7 +941,7 @@
     "success_percent": 90.9090909090909
   },
   "success": false,
-  "evaluation_parameters": {},
+  "suite_parameters": {},
   "meta": {
     "great_expectations_version": "0.13.25+18.gef0fa6b73.dirty",
     "expectation_suite_name": "default",

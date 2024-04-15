@@ -29,7 +29,7 @@
           "batch_parameters": null,
           "validation_time": "20200727T171932.962507Z"
         },
-        "evaluation_parameters": {},
+        "suite_parameters": {},
         "results": [
           {
             "expectation_config": {
@@ -412,7 +412,7 @@
           "batch_parameters": null,
           "validation_time": "20200727T171932.962507Z"
         },
-        "evaluation_parameters": {},
+        "suite_parameters": {},
         "results": [
           {
             "expectation_config": {
@@ -791,5 +791,5 @@
     }
   },
   "success": false,
-  "evaluation_parameters": null
+  "suite_parameters": null
 }

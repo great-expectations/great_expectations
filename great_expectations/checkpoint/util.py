@@ -27,7 +27,12 @@ from great_expectations.types import DictDot
 logger = logging.getLogger(__name__)
 
 
-def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack_token=None):
+def send_slack_notification(
+    payload: dict,
+    slack_webhook: str | None = None,
+    slack_channel: str | None = None,
+    slack_token: str | None = None,
+) -> str | None:
     session = requests.Session()
     url = slack_webhook
     headers = None
@@ -36,31 +41,28 @@ def send_slack_notification(query, slack_webhook=None, slack_channel=None, slack
     # https://api.slack.com/legacy/custom-integrations/messaging/webhooks
     # ** Since it is legacy, it could be deprecated or removed in the future **
     if slack_channel:
-        query["channel"] = slack_channel
+        payload["channel"] = slack_channel
 
     if not slack_webhook:
         url = "https://slack.com/api/chat.postMessage"
         headers = {"Authorization": f"Bearer {slack_token}"}
 
+    if not url:
+        raise ValueError("No Slack webhook URL provided.")  # noqa: TRY003
+
     try:
-        response = session.post(url=url, headers=headers, json=query)
-        if slack_webhook:
-            ok_status = response.text == "ok"
-        else:
-            ok_status = response.json()["ok"]
+        response = session.post(url=url, headers=headers, json=payload)
+        response.raise_for_status()
     except requests.ConnectionError:
         logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
-    except Exception as e:
-        logger.error(str(e))  # noqa: TRY400
-    else:
-        if response.status_code != 200 or not ok_status:  # noqa: PLR2004
-            logger.warning(
-                "Request to Slack webhook "
-                f"returned error {response.status_code}: {response.text}"
-            )
+        return None
+    except requests.HTTPError:
+        logger.warning(
+            "Request to Slack webhook " f"returned error {response.status_code}: {response.text}"
+        )
+        return None
 
-        else:
-            return "Slack notification succeeded."
+    return "Slack notification succeeded."
 
 
 # noinspection SpellCheckingInspection
@@ -95,24 +97,19 @@ def send_opsgenie_alert(query: str, message: str, settings: dict) -> bool:
     return True
 
 
-def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
+def send_microsoft_teams_notifications(payload: dict, microsoft_teams_webhook: str) -> str | None:
     session = requests.Session()
     try:
-        response = session.post(url=microsoft_teams_webhook, json=query)
+        response = session.post(url=microsoft_teams_webhook, json=payload)
+        response.raise_for_status()
     except requests.ConnectionError:
         logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
+        return None
+    except requests.HTTPError as e:
+        logger.warning(f"Request to Microsoft Teams API returned error {response.status_code}: {e}")
+        return None
 
-    except Exception as e:
-        logger.error(str(e))  # noqa: TRY400
-    else:
-        if response.status_code != 200:  # noqa: PLR2004
-            logger.warning(
-                "Request to Microsoft Teams webhook "
-                f"returned error {response.status_code}: {response.text}"
-            )
-            return
-        else:
-            return "Microsoft Teams notification succeeded."
+    return "Microsoft Teams notification succeeded."
 
 
 def send_webhook_notifications(query, webhook, target_platform):
@@ -198,9 +195,9 @@ def get_substituted_validation_dict(
             base_action_list=substituted_runtime_config.get("action_list", []),
             other_action_list=validation_dict.get("action_list", {}),
         ),
-        "evaluation_parameters": nested_update(
-            substituted_runtime_config.get("evaluation_parameters") or {},
-            validation_dict.get("evaluation_parameters", {}),
+        "suite_parameters": nested_update(
+            substituted_runtime_config.get("suite_parameters") or {},
+            validation_dict.get("suite_parameters", {}),
             dedup=True,
         ),
         "runtime_configuration": nested_update(
@@ -294,14 +291,14 @@ def substitute_runtime_config(  # noqa: C901 - 11
             base_action_list=action_list,
             other_action_list=runtime_kwargs["action_list"],
         )
-    if runtime_kwargs.get("evaluation_parameters") is not None:
-        evaluation_parameters = dest_config.get("evaluation_parameters") or {}
-        updated_evaluation_parameters = nested_update(
-            evaluation_parameters,
-            runtime_kwargs["evaluation_parameters"],
+    if runtime_kwargs.get("suite_parameters") is not None:
+        suite_parameters = dest_config.get("suite_parameters") or {}
+        updated_suite_parameters = nested_update(
+            suite_parameters,
+            runtime_kwargs["suite_parameters"],
             dedup=True,
         )
-        dest_config["evaluation_parameters"] = updated_evaluation_parameters
+        dest_config["suite_parameters"] = updated_suite_parameters
     if runtime_kwargs.get("runtime_configuration") is not None:
         runtime_configuration = dest_config.get("runtime_configuration") or {}
         updated_runtime_configuration = nested_update(
