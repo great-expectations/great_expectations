@@ -63,7 +63,7 @@ class Rule(SerializableDictDot):
             name: A string representing the name of the ProfilerRule
             variables: Any variables to be substituted within the rules
             domain_builder: A Domain Builder object used to build rule data domain
-            parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters
+            parameter_builders: A Parameter Builder list used to configure necessary rule suite parameters
             expectation_configuration_builders: A list of Expectation Configuration Builders
         """  # noqa: E501
         self._name = name

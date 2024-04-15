@@ -107,7 +107,7 @@ class BaseCheckpoint(ConfigPeer):
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         validator: Validator | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
         run_id: str | RunIdentifier | None = None,
@@ -125,7 +125,7 @@ class BaseCheckpoint(ConfigPeer):
             batch_request: Batch request describing the batch of data to validate.
             validator: Validator objects, loaded with Batch data samples, can be supplied (in lieu of  "batch_request")
             action_list: A list of actions to perform after each batch is validated.
-            evaluation_parameters: Evaluation parameters to use in generating this checkpoint.
+            suite_parameters: Suite parameters to use in generating this checkpoint.
             runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
                 (e.g. `result_format`).
             validations: Validations to be executed as part of checkpoint.
@@ -198,7 +198,7 @@ class BaseCheckpoint(ConfigPeer):
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request or {},
             "action_list": action_list or [],
-            "evaluation_parameters": evaluation_parameters or {},
+            "suite_parameters": suite_parameters or {},
             "runtime_configuration": runtime_configuration or {},
             "validations": validations or [],
             "expectation_suite_id": expectation_suite_id,
@@ -388,7 +388,7 @@ class BaseCheckpoint(ConfigPeer):
             return action_list_validation_operator.run(
                 assets_to_validate=[validator],
                 run_id=run_id,
-                evaluation_parameters=substituted_validation_dict.get("evaluation_parameters"),
+                suite_parameters=substituted_validation_dict.get("suite_parameters"),
                 result_format=result_format,
                 checkpoint_identifier=checkpoint_identifier,
                 checkpoint_name=self.name,
@@ -472,7 +472,7 @@ class Checkpoint(BaseCheckpoint):
         expectation_suite_name: Expectation suite associated with checkpoint.
         batch_request: Batch request describing the batch of data to validate.
         action_list: A list of actions to perform after each batch is validated.
-        evaluation_parameters: Evaluation parameters to use in generating this checkpoint.
+        suite_parameters: Suite parameters to use in generating this checkpoint.
         runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
             (e.g. `result_format`).
         validations: Validations to be executed as part of checkpoint.
@@ -513,7 +513,7 @@ class Checkpoint(BaseCheckpoint):
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         validator: Validator | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
         id: str | None = None,
@@ -558,7 +558,7 @@ constructor arguments.
             batch_request=batch_request,  # type: ignore[arg-type] # FluentBatchRequest is not a dict
             # TODO: check if `pydantic.BaseModel` and call `batch_request.dict()`??
             action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
             id=id,
@@ -583,7 +583,7 @@ constructor arguments.
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
         action_list: Optional[Sequence[ActionDict]] = None,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[Union[list[dict], list[CheckpointValidationDefinition]]] = None,
         id: Optional[str] = None,
@@ -617,7 +617,7 @@ constructor arguments.
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request,
             "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
+            "suite_parameters": suite_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
             "id": id,

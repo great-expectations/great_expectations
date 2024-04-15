@@ -46,7 +46,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -70,7 +70,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             reduce_scalar_metric:
                 if True (default), then reduces computation of 1-dimensional metric to scalar value.
-            evaluation_parameter_builder_configs:
+            suite_parameter_builder_configs:
                 ParameterBuilder configurations, executing and making whose respective
                 ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
                 These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -78,7 +78,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         """  # noqa: E501
         super().__init__(
             name=name,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=data_context,
         )
 

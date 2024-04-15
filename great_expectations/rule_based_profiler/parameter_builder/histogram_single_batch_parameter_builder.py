@@ -58,7 +58,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         bins: str = "uniform",
         n_bins: int = 10,
         allow_relative_error: bool = False,
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -70,7 +70,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             to "ColumnPartition" (great_expectations/expectations/metrics/column_aggregate_metrics/column_partition.py).
             n_bins: Number of bins for histogram computation (ignored and recomputed if "bins" argument is "auto").
             allow_relative_error: Used for partitioning strategy values that involve quantiles (all except "uniform").
-            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            suite_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with this ParameterBuilder
@@ -91,12 +91,12 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=False,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
             )
         )
 
-        if evaluation_parameter_builder_configs is None:
-            evaluation_parameter_builder_configs = [
+        if suite_parameter_builder_configs is None:
+            suite_parameter_builder_configs = [
                 self._column_partition_metric_single_batch_parameter_builder_config,
             ]
 
@@ -108,7 +108,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=data_context,
         )
 
@@ -171,7 +171,7 @@ elements.
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=False,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
                 data_context=self.data_context,
             )
         )

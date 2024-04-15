@@ -125,6 +125,7 @@ def format(
         "path": _PATH_HELP_DESC,
         "fmt": "Disable formatting. Runs by default.",
         "fix": "Attempt to automatically fix lint violations.",
+        "unsafe-fixes": "Enable potentially unsafe fixes.",
         "watch": "Run in watch mode by re-running whenever files change.",
         "pty": _PTY_HELP_DESC,
     }
@@ -134,6 +135,7 @@ def lint(
     path: str = ".",
     fmt_: bool = True,
     fix: bool = False,
+    unsafe_fixes: bool = False,
     watch: bool = False,
     pty: bool = True,
 ):
@@ -145,16 +147,23 @@ def lint(
     cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
+    if unsafe_fixes:
+        cmds.append("--unsafe-fixes")
     if watch:
         cmds.append("--watch")
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
-@invoke.task(help={"path": _PATH_HELP_DESC})
-def fix(ctx: Context, path: str = "."):
-    """Automatically fix all possible code issues."""
-    lint(ctx, path=path, fix=True)
-    format(ctx, path=path, sort_=True)
+@invoke.task(help={"path": _PATH_HELP_DESC, "safe-only": "Only apply 'safe' fixes."})
+def fix(ctx: Context, path: str = ".", safe_only: bool = False):
+    """
+    Automatically fix all possible code issues.
+    Applies unsafe fixes by default.
+    https://docs.astral.sh/ruff/linter/#fix-safety
+    """
+    unsafe_fixes = not safe_only
+    lint(ctx, path=path, fmt_=False, fix=True, unsafe_fixes=unsafe_fixes)
+    format(ctx, path=path, check=False, sort_=False)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})

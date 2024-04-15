@@ -61,6 +61,7 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
     GxDatasourceWarning,
+    PartitionerProtocol,
     Sorter,
     SortersDefinition,
     TestConnectionError,
@@ -77,6 +78,7 @@ if TYPE_CHECKING:
     from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
 
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.fluent import BatchParameters
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -90,68 +92,7 @@ class SQLDatasourceError(Exception):
     pass
 
 
-class _Partitioner(Protocol):
-    @property
-    def columns(self) -> list[str]:
-        """The names of the column used to partition the data"""
-
-    @property
-    def method_name(self) -> str:
-        """Returns a partitioner method name.
-
-        The possible values of partitioner method names are defined in the enum,
-        great_expectations.execution_engine.partition_and_sample.data_partitioner.PartitionerMethod
-        """
-
-    @property
-    def param_names(self) -> List[str]:
-        """Returns the parameter names that specify a batch derived from this partitioner
-
-        For example, for PartitionerYearMonth this returns ["year", "month"]. For more
-        examples, please see Partitioner* classes below.
-        """
-
-    def partitioner_method_kwargs(self) -> Dict[str, Any]:
-        """A shim to our sqlalchemy execution engine partitioner methods
-
-        We translate any internal _Partitioner state and what is passed in from
-        a batch_request to the partitioner_kwargs required by our execution engine
-        data partitioners defined in:
-        great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner
-
-        Look at Partitioner* classes for concrete examples.
-        """
-
-    def batch_parameters_to_batch_spec_kwarg_identifiers(
-        self, options: BatchParameters
-    ) -> Dict[str, Any]:
-        """Translates `options` to the execution engine batch spec kwarg identifiers
-
-        Arguments:
-            options: A BatchRequest.options dictionary that specifies ALL the fields necessary
-                     to specify a batch with respect to this partitioner.
-
-        Returns:
-            A dictionary that can be added to batch_spec_kwargs["batch_identifiers"].
-            This has one of 2 forms:
-              1. This category has many parameters are derived from 1 column.
-                 These only are datetime partitioners and the batch_spec_kwargs["batch_identifiers"]
-                 look like:
-                   {column_name: {datepart_1: value, datepart_2: value, ...}
-                 where datepart_* are strings like "year", "month", "day". The exact
-                 fields depend on the partitioner.
-
-              2. This category has only 1 parameter for each column.
-                 This is used for all other partitioners and the batch_spec_kwargs["batch_identifiers"]
-                 look like:
-                   {column_name_1: value, column_name_2: value, ...}
-                 where value is the value of the column after being processed by the partitioner.
-                 For example, for the PartitionerModInteger where mod = 3,
-                 {"passenger_count": 2}, means the raw passenger count value is in the set:
-                 {2, 5, 8, ...} = {2*n + 1 | n is a nonnegative integer }
-                 This category was only 1 parameter per column.
-        """  # noqa: E501
-
+class _Partitioner(PartitionerProtocol, Protocol):
     def param_defaults(self, sql_asset: _SQLAsset) -> List[Dict]:
         """Creates all valid batch requests options for sql_asset
 
@@ -162,6 +103,7 @@ class _Partitioner(Protocol):
         ie dictionaries, of the form {"year": year, "month": month} that contain all these distinct
         pairs.
         """
+        ...
 
 
 def _partitioner_and_sql_asset_to_batch_identifier_data(
@@ -180,6 +122,7 @@ def _partitioner_and_sql_asset_to_batch_identifier_data(
 class _PartitionerDatetime(FluentBaseModel):
     column_name: str
     method_name: str
+    sort_ascending: bool = True
 
     @property
     def columns(self) -> list[str]:
@@ -215,6 +158,7 @@ class _PartitionerDatetime(FluentBaseModel):
 
 class SqlPartitionerYear(_PartitionerDatetime):
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_year"] = "partition_on_year"
 
     @property
@@ -229,6 +173,7 @@ class SqlPartitionerYear(_PartitionerDatetime):
 
 class SqlPartitionerYearAndMonth(_PartitionerDatetime):
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
     @property
@@ -243,6 +188,7 @@ class SqlPartitionerYearAndMonth(_PartitionerDatetime):
 
 class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month_and_day"] = (
         "partition_on_year_and_month_and_day"
     )
@@ -260,6 +206,7 @@ class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
 class SqlPartitionerDatetimePart(_PartitionerDatetime):
     datetime_parts: List[str]
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
 
     @property
@@ -283,6 +230,7 @@ class SqlPartitionerDatetimePart(_PartitionerDatetime):
 class _PartitionerOneColumnOneParam(FluentBaseModel):
     column_name: str
     method_name: str
+    sort_ascending: bool = True
 
     @property
     def columns(self) -> list[str]:
@@ -388,6 +336,7 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
 
 class SqlPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
+    sort_ascending: bool = True
     method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
     @property
@@ -430,6 +379,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
 
     @property
@@ -636,7 +586,8 @@ class _SQLAsset(DataAsset):
                     batch_definition=batch_definition,
                 )
             )
-        self.sort_batches(batch_list)
+        if sql_partitioner:
+            self.sort_batches(batch_list, sql_partitioner)
         return batch_list[batch_request.batch_slice]
 
     @public_api
@@ -685,6 +636,44 @@ class _SQLAsset(DataAsset):
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_whole_table(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_yearly(
+        self, name: str, column: str, sort_asc: bool = True
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYear(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_monthly(
+        self, name: str, column: str, sort_asc: bool = True
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonth(column_name=column),
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_daily(
+        self, name: str, column: str, sort_asc: bool = True
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonthAndDay(column_name=column),
             batching_regex=None,
         )
 

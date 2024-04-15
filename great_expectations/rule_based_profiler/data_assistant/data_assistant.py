@@ -308,7 +308,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
                 data_context=None,
             )
 
@@ -333,7 +333,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 enforce_numeric_metric=False,
                 replace_nan_with_zero=False,
                 reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
                 data_context=None,
             )
 
@@ -359,7 +359,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 enforce_numeric_metric=True,
                 replace_nan_with_zero=True,
                 reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
                 data_context=None,
             )
 
@@ -384,7 +384,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 enforce_numeric_metric=True,
                 replace_nan_with_zero=True,
                 reduce_scalar_metric=True,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
                 data_context=None,
             )
 
@@ -393,20 +393,18 @@ class DataAssistant(metaclass=MetaDataAssistant):
             metric_name: Optional[str] = None,
             suffix: Optional[str] = None,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
-            evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
+            suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         ) -> ParameterBuilder:
             """
             This method instantiates "NumericMetricRangeMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """  # noqa: E501
-            if evaluation_parameter_builder_configs is None:
-                evaluation_parameter_builder_configs = []
+            if suite_parameter_builder_configs is None:
+                suite_parameter_builder_configs = []
 
             metric_multi_batch_parameter_builder_name: Optional[str] = None
             if metric_name is None:
-                metric_name = evaluation_parameter_builder_configs[0]["metric_name"]
-                metric_multi_batch_parameter_builder_name = evaluation_parameter_builder_configs[
-                    0
-                ].name
+                metric_name = suite_parameter_builder_configs[0]["metric_name"]
+                metric_multi_batch_parameter_builder_name = suite_parameter_builder_configs[0].name
 
             name: str = f"{metric_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}range"
             name = sanitize_parameter_name(name=name, suffix=suffix)
@@ -429,7 +427,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
                 truncate_values=f"{VARIABLES_KEY}truncate_values",
                 round_decimals=f"{VARIABLES_KEY}round_decimals",
-                evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+                suite_parameter_builder_configs=suite_parameter_builder_configs,
                 data_context=None,
             )
 
@@ -447,7 +445,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_value_kwargs=None,
                 threshold=1.0,
                 candidate_regexes=f"{VARIABLES_KEY}candidate_regexes",
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
                 data_context=None,
             )
 
@@ -461,7 +459,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             name = sanitize_parameter_name(name=name, suffix=None)
             return HistogramSingleBatchParameterBuilder(
                 name=name,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
                 data_context=None,
             )
 
@@ -842,7 +840,7 @@ def build_map_metric_rule(  # noqa: PLR0913
     ):
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations = DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()  # noqa: E501
 
-    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+    suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         ParameterBuilderConfig(
             **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
         ),
@@ -857,7 +855,7 @@ def build_map_metric_rule(  # noqa: PLR0913
         null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
-        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        suite_parameter_builder_configs=suite_parameter_builder_configs,
         data_context=None,
     )
 

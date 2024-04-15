@@ -352,7 +352,7 @@ def build_in_memory_runtime_context(
         datasources=datasources,  # type: ignore[arg-type]
         expectations_store_name="expectations_store",
         validations_store_name="validations_store",
-        evaluation_parameter_store_name="evaluation_parameter_store",
+        suite_parameter_store_name="suite_parameter_store",
         checkpoint_store_name="checkpoint_store",
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )

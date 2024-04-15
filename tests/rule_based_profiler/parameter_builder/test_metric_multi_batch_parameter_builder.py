@@ -42,7 +42,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
         enforce_numeric_metric=True,
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -117,7 +117,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
         enforce_numeric_metric=True,
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 
@@ -196,7 +196,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
         enforce_numeric_metric=True,
         replace_nan_with_zero=True,
         reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 

@@ -19,7 +19,7 @@ from .in_memory_store_backend import InMemoryStoreBackend  # isort:skip
 from .configuration_store import ConfigurationStore  # isort:skip
 from .checkpoint_store import CheckpointStore  # isort:skip
 from .metric_store import (  # isort:skip
-    EvaluationParameterStore,
+    SuiteParameterStore,
     MetricStore,
 )
 from .expectations_store import ExpectationsStore  # isort:skip

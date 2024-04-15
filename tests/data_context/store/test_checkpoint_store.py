@@ -86,7 +86,7 @@ def test_checkpoint_store(empty_data_context):
         }
     ]
     expectation_suite_name_0: str = "my.test.expectation_suite.name"
-    evaluation_parameters_0: dict = {
+    suite_parameters_0: dict = {
         "environment": "$GE_ENVIRONMENT",
         "tolerance": 1.0e-2,
         "aux_param_0": "$MY_PARAM",
@@ -101,7 +101,7 @@ def test_checkpoint_store(empty_data_context):
     my_checkpoint_config_0 = CheckpointConfig(
         name=checkpoint_name_0,
         expectation_suite_name=expectation_suite_name_0,
-        evaluation_parameters=evaluation_parameters_0,
+        suite_parameters=suite_parameters_0,
         runtime_configuration=runtime_configuration_0,
         validations=validations_0,
     )
@@ -155,7 +155,7 @@ def test_checkpoint_store(empty_data_context):
         "data_connector_name": "my_runtime_data_connector",
         "data_asset_name": "my_website_logs",
     }
-    evaluation_parameters_1: dict = {
+    suite_parameters_1: dict = {
         "environment": "$GE_ENVIRONMENT",
         "tolerance": 1.0e-2,
         "aux_param_0": "$MY_PARAM",
@@ -171,7 +171,7 @@ def test_checkpoint_store(empty_data_context):
         name=checkpoint_name_1,
         expectation_suite_name=expectation_suite_name_1,
         batch_request=batch_request_1,
-        evaluation_parameters=evaluation_parameters_1,
+        suite_parameters=suite_parameters_1,
         runtime_configuration=runtime_configuration_1,
         validations=validations_1,
     )
