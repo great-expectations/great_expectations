@@ -11,7 +11,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_nevada_zip(zip: str):
     list_of_dicts_of_nevada_zips = zipcodes.filter_by(state="NV")
     list_of_nevada_zips = [d["zip_code"] for d in list_of_dicts_of_nevada_zips]
-    if len(zip) > 10 or type(zip) != str:
+    if len(zip) > 10 or type(zip) != str:  # noqa: E721
         return False
     elif zip in list_of_nevada_zips:
         return True
