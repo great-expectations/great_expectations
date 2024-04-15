@@ -11,7 +11,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_louisiana_zip(zip: str):
     list_of_dicts_of_louisiana_zips = zipcodes.filter_by(state="LA")
     list_of_louisiana_zips = [d["zip_code"] for d in list_of_dicts_of_louisiana_zips]
-    if len(zip) > 10 or type(zip) != str:
+    if len(zip) > 10 or type(zip) != str:  # noqa: E721
         return False
     elif zip in list_of_louisiana_zips:
         return True

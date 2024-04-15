@@ -13,7 +13,7 @@ def is_valid_city_name(city: str):
     dict_of_cities = geocache.get_cities()
     list_of_cities = [d for d in dict_of_cities.values()]
     list_of_city_names = [item["name"] for item in list_of_cities]
-    if len(city) > 54 or type(city) != str:
+    if len(city) > 54 or type(city) != str:  # noqa: E721
         return False
     elif city in list_of_city_names:
         return True
