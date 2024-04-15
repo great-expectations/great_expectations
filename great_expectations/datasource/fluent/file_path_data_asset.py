@@ -62,6 +62,7 @@ from great_expectations.datasource.fluent.spark_generic_partitioners import (
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -77,6 +78,16 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__name__)
+
+
+class RegexMissingRequiredGroupsError(ValueError):
+    def __init__(self, missing_groups: set[str]):
+        message = (
+            "The following group(s) are required but are "
+            f"missing from the regex: {', '.join(missing_groups)}."
+        )
+        super().__init__(message)
+        self.missing_groups = missing_groups
 
 
 class _FilePathDataAsset(DataAsset):
@@ -234,6 +245,66 @@ class _FilePathDataAsset(DataAsset):
             partitioner=partitioner,
             batching_regex=batching_regex,
         )
+
+    @public_api
+    def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
+        # add test to ensure the path exists and matches a single file
+        regex = re.compile(str(path))
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=regex,
+        )
+
+    @public_api
+    def add_batch_definition_yearly(self, name: str, batching_regex: re.Pattern) -> BatchDefinition:
+        REQUIRED_GROUP_NAME = {"year"}
+        self._assert_group_names_in_regex(
+            regex=batching_regex, expected_group_names=REQUIRED_GROUP_NAME
+        )
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=batching_regex,
+        )
+
+    @public_api
+    def add_batch_definition_monthly(
+        self, name: str, batching_regex: re.Pattern
+    ) -> BatchDefinition:
+        REQUIRED_GROUP_NAMES = {"year", "month"}
+        self._assert_group_names_in_regex(
+            regex=batching_regex, expected_group_names=REQUIRED_GROUP_NAMES
+        )
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=batching_regex,
+        )
+
+    @public_api
+    def add_batch_definition_daily(self, name: str, batching_regex: re.Pattern) -> BatchDefinition:
+        REQUIRED_GROUP_NAMES = {"year", "month", "day"}
+        self._assert_group_names_in_regex(
+            regex=batching_regex, expected_group_names=REQUIRED_GROUP_NAMES
+        )
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=batching_regex,
+        )
+
+    @classmethod
+    def _assert_group_names_in_regex(
+        cls, regex: re.Pattern, expected_group_names: set[str]
+    ) -> None:
+        regex_parser = RegExParser(
+            regex_pattern=regex,
+        )
+        actual_group_names = set(regex_parser.get_all_group_names())
+        if not expected_group_names == actual_group_names:
+            missing_names = expected_group_names - actual_group_names
+            raise RegexMissingRequiredGroupsError(missing_names)
 
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
