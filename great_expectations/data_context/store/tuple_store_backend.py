@@ -76,8 +76,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.verify_that_key_to_filepath_operation_is_reversible()
             self._fixed_length_key = True
 
+    @staticmethod
     def _is_missing_prefix_or_suffix(
-        self, filepath_prefix: str, filepath_suffix: str, key: str
+        filepath_prefix: str, filepath_suffix: str, key: str | int | bytes
     ) -> bool:
         missing_prefix = filepath_prefix and not key.startswith(filepath_prefix)
         missing_suffix = filepath_suffix and not key.endswith(filepath_suffix)
@@ -365,15 +366,6 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 else:
                     filepath = os.path.join(relative_path, file_name)  # noqa: PTH118
 
-                is_missing_prefix = self.filepath_prefix and not filepath.startswith(
-                    self.filepath_prefix
-                )
-                is_missing_suffix = self.filepath_suffix and not filepath.endswith(
-                    self.filepath_suffix
-                )
-                if is_missing_prefix or is_missing_suffix:
-                    continue
-
                 if self._is_missing_prefix_or_suffix(
                     filepath_prefix=self.filepath_prefix,
                     filepath_suffix=self.filepath_suffix,
@@ -646,13 +638,11 @@ class TupleS3StoreBackend(TupleStoreBackend):
                     if s3_object_key.startswith(f"{self.prefix}/"):
                         s3_object_key = s3_object_key[len(self.prefix) + 1 :]
 
-            is_missing_prefix = self.filepath_prefix and not s3_object_key.startswith(
-                self.filepath_prefix
-            )
-            is_missing_suffix = self.filepath_suffix and not s3_object_key.endswith(
-                self.filepath_suffix
-            )
-            if is_missing_prefix or is_missing_suffix:
+            if self._is_missing_prefix_or_suffix(
+                filepath_prefix=self.filepath_prefix,
+                filepath_suffix=self.filepath_suffix,
+                key=s3_object_key,
+            ):
                 continue
             key = self._convert_filepath_to_key(s3_object_key)
             if key:
@@ -921,11 +911,10 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_name,
                 self.prefix,
             )
-            if (
-                self.filepath_prefix
-                and not gcs_object_key.startswith(self.filepath_prefix)
-                or self.filepath_suffix
-                and not gcs_object_key.endswith(self.filepath_suffix)
+            if self._is_missing_prefix_or_suffix(
+                filepath_prefix=self.filepath_prefix,
+                filepath_suffix=self.filepath_suffix,
+                key=gcs_object_key,
             ):
                 continue
             key = self._convert_filepath_to_key(gcs_object_key)
@@ -1125,11 +1114,11 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             if az_blob_key.startswith(f"{self.prefix}{os.path.sep}"):
                 az_blob_key = az_blob_key[len(self.prefix) + 1 :]
 
-            missing_prefix = self.filepath_prefix and not az_blob_key.startswith(
-                self.filepath_prefix
-            )
-            missing_suffix = self.filepath_suffix and not az_blob_key.endswith(self.filepath_suffix)
-            if missing_prefix or missing_suffix:
+            if self._is_missing_prefix_or_suffix(
+                filepath_prefix=self.filepath_prefix,
+                filepath_suffix=self.filepath_suffix,
+                key=az_blob_key,
+            ):
                 continue
             key = self._convert_filepath_to_key(az_blob_key)
 
