@@ -255,10 +255,9 @@ class ValidationDefinition(BaseModel):
             )
             return expectation_suite_identifier, validation_result_id
         else:
-            if not run_id:
-                run_time = datetime.datetime.now(tz=datetime.timezone.utc)
-                run_id = RunIdentifier(run_time=run_time)
-
+            run_id = run_id or RunIdentifier(
+                run_time=datetime.datetime.now(tz=datetime.timezone.utc)
+            )
             expectation_suite_identifier = ExpectationSuiteIdentifier(name=self.suite.name)
             validation_result_id = ValidationResultIdentifier(
                 batch_identifier=validator.active_batch_id,
