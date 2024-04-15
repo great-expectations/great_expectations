@@ -39,7 +39,7 @@ class TestCloudDataStore:
             context.add_expectation_suite("test_suite")
 
 
-@pytest.mark.cloud  # NOTE: needs orjson dependency
+# @pytest.mark.cloud  # NOTE: needs orjson dependency
 class TestCloudDataStoreMetricRun:
     def test_add_metric_run_non_generic_metric_type(
         self,
@@ -213,10 +213,10 @@ class TestCloudDataStoreMetricRun:
         metric_run = MetricRun(
             data_asset_id=data_asset_id,
             metrics=[
-                ColumnMetric[numpy.float64](
+                ColumnMetric[numpy.float16](
                     batch_id="batch_id",
                     metric_name="metric_name",
-                    value=numpy.float64(2.5),
+                    value=numpy.float16(2.5),
                     exception=None,
                     column="column",
                 )
@@ -236,7 +236,7 @@ class TestCloudDataStoreMetricRun:
                 {
                     "id": str(response_metric_id),
                     "metric_type": "ColumnMetric",
-                    "value_type": "float64",
+                    "value_type": "float16",
                     "batch_id": "batch_id",
                     "column": "column",
                     "exception": None,
@@ -248,7 +248,7 @@ class TestCloudDataStoreMetricRun:
 
         uuid_from_add = cloud_data_store.add(metric_run)
 
-        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":2.5,"exception":null,"column":"column","value_type":"float64","metric_type":"ColumnMetric"}]}}}'  # noqa: E501
+        expected_data = '{"data":{"type":"metric-run","attributes":{"data_asset_id":"4469ed3b-61d4-421f-9635-8339d2558b0f","metrics":[{"batch_id":"batch_id","metric_name":"metric_name","value":2.5,"exception":null,"column":"column","value_type":"float16","metric_type":"ColumnMetric"}]}}}'  # noqa: E501
 
         cloud_data_store._session.post.assert_called_once_with(
             url="https://app.greatexpectations.fake.io/organizations/12345678-1234-5678-1234-567812345678/metric-runs",
