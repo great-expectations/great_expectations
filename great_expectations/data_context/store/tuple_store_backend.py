@@ -76,6 +76,13 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.verify_that_key_to_filepath_operation_is_reversible()
             self._fixed_length_key = True
 
+    def _is_missing_prefix_or_suffix(
+        self, filepath_prefix: str, filepath_suffix: str, key: str
+    ) -> bool:
+        missing_prefix = filepath_prefix and not key.startswith(filepath_prefix)
+        missing_suffix = filepath_suffix and not key.endswith(filepath_suffix)
+        return missing_prefix or missing_suffix
+
     @override
     def _validate_key(self, key) -> None:
         super()._validate_key(key)
@@ -358,9 +365,20 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 else:
                     filepath = os.path.join(relative_path, file_name)  # noqa: PTH118
 
-                if self.filepath_prefix and not filepath.startswith(self.filepath_prefix):
+                is_missing_prefix = self.filepath_prefix and not filepath.startswith(
+                    self.filepath_prefix
+                )
+                is_missing_suffix = self.filepath_suffix and not filepath.endswith(
+                    self.filepath_suffix
+                )
+                if is_missing_prefix or is_missing_suffix:
                     continue
-                elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
+
+                if self._is_missing_prefix_or_suffix(
+                    filepath_prefix=self.filepath_prefix,
+                    filepath_suffix=self.filepath_suffix,
+                    key=filepath,
+                ):
                     continue
                 key = self._convert_filepath_to_key(filepath)
                 if key and not self.is_ignored_key(key):
@@ -627,9 +645,14 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 else:  # noqa: PLR5501
                     if s3_object_key.startswith(f"{self.prefix}/"):
                         s3_object_key = s3_object_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not s3_object_key.startswith(self.filepath_prefix):
-                continue
-            elif self.filepath_suffix and not s3_object_key.endswith(self.filepath_suffix):
+
+            is_missing_prefix = self.filepath_prefix and not s3_object_key.startswith(
+                self.filepath_prefix
+            )
+            is_missing_suffix = self.filepath_suffix and not s3_object_key.endswith(
+                self.filepath_suffix
+            )
+            if is_missing_prefix or is_missing_suffix:
                 continue
             key = self._convert_filepath_to_key(s3_object_key)
             if key:
@@ -898,9 +921,12 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_name,
                 self.prefix,
             )
-            if self.filepath_prefix and not gcs_object_key.startswith(self.filepath_prefix):
-                continue
-            elif self.filepath_suffix and not gcs_object_key.endswith(self.filepath_suffix):
+            if (
+                self.filepath_prefix
+                and not gcs_object_key.startswith(self.filepath_prefix)
+                or self.filepath_suffix
+                and not gcs_object_key.endswith(self.filepath_suffix)
+            ):
                 continue
             key = self._convert_filepath_to_key(gcs_object_key)
             if key:
@@ -1098,9 +1124,12 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             az_blob_key = os.path.relpath(obj.name)
             if az_blob_key.startswith(f"{self.prefix}{os.path.sep}"):
                 az_blob_key = az_blob_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not az_blob_key.startswith(self.filepath_prefix):
-                continue
-            elif self.filepath_suffix and not az_blob_key.endswith(self.filepath_suffix):
+
+            missing_prefix = self.filepath_prefix and not az_blob_key.startswith(
+                self.filepath_prefix
+            )
+            missing_suffix = self.filepath_suffix and not az_blob_key.endswith(self.filepath_suffix)
+            if missing_prefix or missing_suffix:
                 continue
             key = self._convert_filepath_to_key(az_blob_key)
 

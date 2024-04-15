@@ -136,12 +136,16 @@ class SnowflakeDatasource(SQLDatasource):
         connection_string: str | ConnectionDetails | None = values.get("connection_string")
         if connection_string:
             # Method 1 - connection string
-            if isinstance(connection_string, (str, ConfigStr)):
-                return values
+            is_connection_string: bool = isinstance(
+                connection_string, (str, ConfigStr, SnowflakeDsn)
+            )
             # Method 2 - individual args (account, user, and password are bare minimum)
-            elif isinstance(connection_string, ConnectionDetails) and bool(
+            has_min_connection_detail_values: bool = isinstance(
+                connection_string, ConnectionDetails
+            ) and bool(
                 connection_string.account and connection_string.user and connection_string.password
-            ):
+            )
+            if is_connection_string or has_min_connection_detail_values:
                 return values
         raise ValueError(  # noqa: TRY003
             "Must provide either a connection string or a combination of account, user, and password."  # noqa: E501
