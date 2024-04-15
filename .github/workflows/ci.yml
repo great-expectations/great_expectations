@@ -36,13 +36,13 @@ concurrency:
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     if: github.event.pull_request.draft == true
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
   ci-is-on-main-repo:
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     # job only runs on main repo where we have access to credentials, or as part of the release
     if: |
       github.event.pull_request.head.repo.full_name == github.repository ||
@@ -52,7 +52,7 @@ jobs:
       - run: echo "This CI step only runs on the main repo, where we have access to credentials."
 
   static-analysis:
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -83,7 +83,7 @@ jobs:
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
       github.event_name == 'merge_group'
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     strategy:
       matrix:
         doc-step:
@@ -173,7 +173,7 @@ jobs:
   unit-tests:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [enterprise-arc]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     runs-on: ${{ matrix.os }}
@@ -207,7 +207,7 @@ jobs:
   doc-checks:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -246,7 +246,7 @@ jobs:
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
       github.event_name == 'merge_group'
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -270,7 +270,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     env:
       GX_CLOUD_BASE_URL: ${{vars.MERCURY_BASE_URL}}
       PACT_BROKER_READ_WRITE_TOKEN: ${{secrets.PACT_BROKER_READ_WRITE_TOKEN}}
@@ -355,7 +355,7 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
       SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     strategy:
       matrix:
         markers:
@@ -412,7 +412,7 @@ jobs:
   py38-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -430,7 +430,7 @@ jobs:
   py39-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -448,7 +448,7 @@ jobs:
   py310-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -466,7 +466,7 @@ jobs:
   py311-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -484,7 +484,7 @@ jobs:
   pydantic-v1:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -501,7 +501,7 @@ jobs:
 
   airflow-min-versions:
     needs: [unit-tests, static-analysis]
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -520,7 +520,7 @@ jobs:
   import_gx:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
@@ -561,7 +561,7 @@ jobs:
       ]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     name: Build and publish Python distributions to PyPI
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     environment:
       name: pypi
       url: https://pypi.org/p/great-expectations
@@ -609,7 +609,7 @@ jobs:
         build-n-publish,
       ]
     if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request' && github.event_name != 'merge_group'
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Scheduled CI job failure
         id: slack
@@ -625,7 +625,7 @@ jobs:
 
   notify_on_release:
     needs: [build-n-publish]
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Announce Release
         id: slack
