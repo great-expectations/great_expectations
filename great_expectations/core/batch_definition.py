@@ -15,7 +15,7 @@ if TYPE_CHECKING:
         BatchParameters,
         BatchRequest,
     )
-    from great_expectations.datasource.fluent.interfaces import DataAsset
+    from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 
 
 class BatchDefinition(pydantic.BaseModel):
@@ -48,6 +48,11 @@ class BatchDefinition(pydantic.BaseModel):
             options=batch_parameters,
             partitioner=self.partitioner,
             batching_regex=self.batching_regex,
+        )
+
+    def get_batch(self, batch_parameters: Optional[BatchParameters] = None) -> list[Batch]:
+        return self.data_asset.get_batch_list_from_batch_request(
+            self.build_batch_request(batch_parameters=batch_parameters)
         )
 
     def save(self) -> None:
