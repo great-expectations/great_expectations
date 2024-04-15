@@ -649,31 +649,33 @@ class _SQLAsset(DataAsset):
 
     @public_api
     def add_batch_definition_yearly(
-        self, name: str, column: str, sort_asc: bool = True
+        self, name: str, column: str, sort_ascending: bool = True
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYear(column_name=column),
+            partitioner=PartitionerYear(column_name=column, sort_ascending=sort_ascending),
             batching_regex=None,
         )
 
     @public_api
     def add_batch_definition_monthly(
-        self, name: str, column: str, sort_asc: bool = True
+        self, name: str, column: str, sort_ascending: bool = True
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonth(column_name=column),
+            partitioner=PartitionerYearAndMonth(column_name=column, sort_ascending=sort_ascending),
             batching_regex=None,
         )
 
     @public_api
     def add_batch_definition_daily(
-        self, name: str, column: str, sort_asc: bool = True
+        self, name: str, column: str, sort_ascending: bool = True
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonthAndDay(column_name=column),
+            partitioner=PartitionerYearAndMonthAndDay(
+                column_name=column, sort_ascending=sort_ascending
+            ),
             batching_regex=None,
         )
 
