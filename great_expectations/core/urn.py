@@ -36,4 +36,6 @@ ge_stores_urn = Combine(
     + Suppress(LineEnd())
 )
 
+print("hi")
+
 ge_urn = ge_metrics_urn | ge_validations_urn | ge_stores_urn
