@@ -72,7 +72,7 @@ stores:
       base_directory: expectations/
 
   validation_results_store:
-    class_name: ultValidationsStore
+    class_name: ValidationsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       suppress_store_backend_id: true
