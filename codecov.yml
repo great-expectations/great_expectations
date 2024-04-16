@@ -5,7 +5,7 @@ flag_management:
     statuses:
       - type: project
         target: 80%
-        threshold: 5% # We allow the coverage to drop by this percent on a PR
+        threshold: 2% # We allow the coverage to drop by this percent on a PR
       - type: patch
         target: 90%
   # in general these individual flags should correspond to pytest markers
