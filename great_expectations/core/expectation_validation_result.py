@@ -517,6 +517,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         meta: Optional[ExpectationSuiteValidationResultMeta | dict] = None,
         batch_id: Optional[str] = None,
         result_url: Optional[str] = None,
+        run_id: Optional[RunIdentifier] = None,
         id: Optional[str] = None,
     ) -> None:
         self.success = success
@@ -530,6 +531,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         self.batch_id = batch_id
         self.result_url = result_url
         self.id = id
+        self.run_id = run_id
         self._metrics: dict = {}
 
     @property

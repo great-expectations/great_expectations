@@ -179,7 +179,7 @@ class ValidationResultIdentifier(DataContextKey):
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 validation_result.meta["expectation_suite_name"]
             ),
-            run_id=validation_result.meta.get("run_id"),
+            run_id=validation_result.run_id,
             batch_identifier=batch_identifier,
         )
 

@@ -152,7 +152,9 @@ class ValidationResultsPageRenderer(Renderer):
     def _parse_run_values(
         self, validation_results: ExpectationSuiteValidationResult
     ) -> Tuple[str, str]:
-        run_id: Union[str, dict, RunIdentifier] = validation_results.meta["run_id"]
+        run_id: Union[str, dict, RunIdentifier] = (
+            validation_results.run_id or validation_results.meta.get("run_id", {})
+        )
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
@@ -430,7 +432,7 @@ class ValidationResultsPageRenderer(Renderer):
 
     @classmethod
     def _render_validation_info(cls, validation_results):
-        run_id = validation_results.meta["run_id"]
+        run_id = validation_results.run_id or validation_results.meta.get("run_id", {})
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -890,7 +892,7 @@ class ProfilingResultsPageRenderer(Renderer):
             )
 
     def render(self, validation_results):  # noqa: C901, PLR0912
-        run_id = validation_results.meta["run_id"]
+        run_id = validation_results.run_id or validation_results.meta.get("run_id", {})
         if isinstance(run_id, str):
             try:
                 run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")

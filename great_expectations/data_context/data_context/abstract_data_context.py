@@ -3768,7 +3768,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 - statistics.successful_expectations
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
-        run_id = validation_results.meta["run_id"]
+        run_id = validation_results.run_id
         data_asset_name = validation_results.meta.get("active_batch_definition", {}).get(
             "data_asset_name"
         )

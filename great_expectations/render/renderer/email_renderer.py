@@ -34,7 +34,7 @@ class EmailRenderer(Renderer):
         asset_name = result.asset_name or "__no_asset_name__"
         n_checks_succeeded = result.statistics["successful_expectations"]
         n_checks = result.statistics["evaluated_expectations"]
-        run_id = result.meta.get("run_id", "__no_run_id__")
+        run_id = result.run_id or "__no_run_id__"
         batch_id = result.batch_id
         check_details_text = f"<strong>{n_checks_succeeded}</strong> of <strong>{n_checks}</strong> expectations were met"  # noqa: E501
         status = "Success 🎉" if result.success else "Failed ❌"
@@ -86,7 +86,7 @@ class EmailRenderer(Renderer):
 
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
-            run_id = validation_result.meta.get("run_id", "__no_run_id__")
+            run_id = validation_result.run_id or "__no_run_id__"
             batch_id = BatchKwargs(validation_result.meta.get("batch_kwargs", {})).to_id()
             check_details_text = f"<strong>{n_checks_succeeded}</strong> of <strong>{n_checks}</strong> expectations were met"  # noqa: E501
 
