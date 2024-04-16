@@ -163,7 +163,7 @@ class _FilePathDataAsset(DataAsset):
         self._all_group_index_to_group_name_mapping = (
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
-        self._all_group_names = self._regex_parser.get_all_group_names()
+        self._all_group_names = self._regex_parser.group_names()
 
     def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SparkPartitioner:
         PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
@@ -301,7 +301,7 @@ class _FilePathDataAsset(DataAsset):
         regex_parser = RegExParser(
             regex_pattern=regex,
         )
-        actual_group_names = set(regex_parser.get_all_group_names())
+        actual_group_names = set(regex_parser.group_names())
         if not required_group_names == actual_group_names:
             missing_names = required_group_names - actual_group_names
             raise RegexMissingRequiredGroupsError(missing_names)

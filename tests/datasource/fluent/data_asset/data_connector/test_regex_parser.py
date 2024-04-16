@@ -79,7 +79,7 @@ def test_regex_pattern_two_named_groups(
         1: "year",
         2: "month",
     }
-    assert regex_parser.get_all_group_names() == ["year", "month"]
+    assert regex_parser.group_names() == ["year", "month"]
 
 
 @pytest.mark.unit
@@ -106,7 +106,7 @@ def test_regex_pattern_first_named_group_second_common_group(
         1: "year",
         2: "batch_request_param_2",
     }
-    assert regex_parser.get_all_group_names() == ["year", "batch_request_param_2"]
+    assert regex_parser.group_names() == ["year", "batch_request_param_2"]
 
 
 @pytest.mark.unit
@@ -133,7 +133,7 @@ def test_regex_pattern_first_common_group_second_named_group(
         1: "batch_request_param_1",
         2: "month",
     }
-    assert regex_parser.get_all_group_names() == ["batch_request_param_1", "month"]
+    assert regex_parser.group_names() == ["batch_request_param_1", "month"]
 
 
 @pytest.mark.unit
@@ -159,7 +159,7 @@ def test_regex_pattern_two_common_groups(
         1: "batch_request_param_1",
         2: "batch_request_param_2",
     }
-    assert regex_parser.get_all_group_names() == [
+    assert regex_parser.group_names() == [
         "batch_request_param_1",
         "batch_request_param_2",
     ]
@@ -177,4 +177,4 @@ def test_regex_pattern_no_groups(regex_pattern_no_groups: re.Pattern, csv_path: 
     assert regex_parser.get_all_group_names_to_group_indexes_bidirectional_mappings() == ({}, {})
     assert regex_parser.get_all_group_name_to_group_index_mapping() == {}
     assert regex_parser.get_all_group_index_to_group_name_mapping() == {}
-    assert regex_parser.get_all_group_names() == []
+    assert regex_parser.group_names() == []

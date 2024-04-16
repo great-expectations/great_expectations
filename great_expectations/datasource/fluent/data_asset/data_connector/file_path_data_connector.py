@@ -295,7 +295,7 @@ class FilePathDataConnector(DataConnector):
             regex_pattern=batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
         )
-        group_names: List[str] = regex_parser.get_all_group_names()
+        group_names: List[str] = regex_parser.group_names()
         path: str = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
             regex_pattern=batching_regex,
@@ -318,7 +318,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             regex_pattern=regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
         )
-        group_names: List[str] = regex_parser.get_all_group_names()
+        group_names: List[str] = regex_parser.group_names()
         if FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY not in group_names:
             pattern: str = regex.pattern
             pattern = f"(?P<{FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY}>{pattern})"
