@@ -499,7 +499,7 @@ class TestCheckpointResult:
         mocker: MockerFixture,
     ):
         # Arrange
-        action = mocker.Mock(spec=UpdateDataDocsAction)
+        action = mocker.Mock(spec=UpdateDataDocsAction, type="update_data_docs")
         checkpoint = Checkpoint(
             name=self.checkpoint_name,
             validation_definitions=[validation_definition],
