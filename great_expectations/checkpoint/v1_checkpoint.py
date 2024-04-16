@@ -39,7 +39,6 @@ if TYPE_CHECKING:
     )
 
 CheckpointAction: TypeAlias = Union[
-    EmailAction,
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
     PagerdutyAlertAction,
@@ -47,6 +46,9 @@ CheckpointAction: TypeAlias = Union[
     SNSNotificationAction,
     StoreValidationResultAction,
     UpdateDataDocsAction,
+    # NOTE: Currently placed last as the root validator emits warnings
+    #       that aren't relevant to end users (unless they are using the action).
+    EmailAction,
 ]
 
 
@@ -161,8 +163,9 @@ class Checkpoint(BaseModel):
         self,
         batch_parameters: Dict[str, Any] | None = None,
         expectation_parameters: Dict[str, Any] | None = None,
+        run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
-        run_id = RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
+        run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
             batch_parameters=batch_parameters,
             expectation_parameters=expectation_parameters,
@@ -192,6 +195,7 @@ class Checkpoint(BaseModel):
                 batch_parameters=batch_parameters,
                 suite_parameters=expectation_parameters,
                 result_format=result_format,
+                run_id=run_id,
             )
             key = self._build_result_key(
                 validation_definition=validation_definition,

@@ -11,9 +11,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_maryland_zip(zip: str):
     list_of_dicts_of_maryland_zips = zipcodes.filter_by(state="MD")
     list_of_maryland_zips = [d["zip_code"] for d in list_of_dicts_of_maryland_zips]
-    if len(zip) > 10:
-        return False
-    elif type(zip) != str:  # noqa: E721
+    if len(zip) > 10 or type(zip) != str:  # noqa: E721
         return False
     elif zip in list_of_maryland_zips:
         return True

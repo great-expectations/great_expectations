@@ -554,6 +554,7 @@ class TestCheckpointResult:
             batch_parameters=batch_parameters,
             suite_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
+            run_id=mock.ANY,
         )
 
     @pytest.mark.unit

@@ -4036,7 +4036,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             input value with all `$` characters replaced with the escape string
         """
-        if isinstance(value, dict) or isinstance(value, OrderedDict):  # noqa: PLR1701
+        if isinstance(value, (dict, OrderedDict)):
             return {
                 k: self.escape_all_config_variables(
                     value=v,
