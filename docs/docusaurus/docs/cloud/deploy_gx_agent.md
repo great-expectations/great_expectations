@@ -230,6 +230,16 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
 </TabItem>
 </Tabs>
 
+## View GX Agent logs
+
+If you encounter an issue deploying the GX Agent or performing a GX Cloud task, review log information to troubleshoot the cause and determine a fix.
+
+1. In GX Cloud, click **Logs**.
+
+2. Click **Show log** next to a log entry to display additional log details.
+
+3. Optional. Click **Hide log** to close the log details view.
+
 
 ## Next steps
 
