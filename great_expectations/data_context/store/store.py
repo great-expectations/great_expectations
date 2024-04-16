@@ -139,9 +139,7 @@ class Store:
 
     def _validate_key(self, key: DataContextKey) -> None:
         # STORE_BACKEND_ID_KEY always validated
-        if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return
-        elif isinstance(key, self.key_class):
+        if key == StoreBackend.STORE_BACKEND_ID_KEY or isinstance(key, self.key_class):
             return
         else:
             raise TypeError(  # noqa: TRY003
