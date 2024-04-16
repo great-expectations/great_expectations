@@ -148,7 +148,7 @@ class FilePathDataConnector(DataConnector):
 
     # Interface Method
     @override
-    def get_matched_data_references(self) -> List[str]:
+    def get_matched_data_references(self, regex: re.Pattern | None = None) -> List[str]:
         """
         Returns the list of data_references matched by configuration by looping through items in
         _data_references_cache and returning data_references that have an associated data_asset.
@@ -156,7 +156,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are matched by configuration.
         """
-        return self._get_data_references(matched=True)
+        return self._get_data_references(matched=True, regex=regex)
 
     # Interface Method
     @override
@@ -239,7 +239,7 @@ class FilePathDataConnector(DataConnector):
         )
         return [batch_definition]
 
-    def _get_data_references(self, matched: bool) -> List[str]:
+    def _get_data_references(self, matched: bool, regex: re.Pattern | None = None) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in
         _data_references_cache and returning data_references that do not have an associated data_asset.
@@ -247,6 +247,9 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """  # noqa: E501
+
+        if not regex:
+            regex = self._batching_regex
 
         def _matching_criterion(
             batch_definition_list: Union[List[LegacyBatchDefinition], None],
@@ -256,7 +259,7 @@ class FilePathDataConnector(DataConnector):
             )
 
         data_reference_mapped_element: Tuple[str, Union[List[LegacyBatchDefinition], None]]
-        data_references = self._get_data_references_cache(batching_regex=self._batching_regex)
+        data_references = self._get_data_references_cache(batching_regex=regex)
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
