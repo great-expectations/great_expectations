@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 
 class QuantileRange(pydantic.BaseModel):
     quantiles: List[float]
-    value_ranges: List[List[Union[None, int, float]]]
+    value_ranges: List[List[Union[float, int, None]]]
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
