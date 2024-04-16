@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from pprint import pprint
 from typing import (
     TYPE_CHECKING,
     Generator,
@@ -38,7 +37,6 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    Sorter,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.postgres_datasource import (
@@ -601,28 +599,6 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
         partitioner = PartitionerYearAndMonth(column_name="my_col")
         with pytest.raises(ge_exceptions.InvalidBatchRequestError):
             asset.build_batch_request(options={"invalid_key": None}, partitioner=partitioner)
-
-
-@pytest.mark.postgresql
-@pytest.mark.parametrize(
-    "order_by",
-    [
-        ["+year", "-month"],
-        [{"key": "year"}, {"key": "month", "reverse": True}],
-    ],
-)
-def test_table_asset_sorter_parsing(order_by: list):
-    """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""  # noqa: E501
-    expected_sorters = [
-        Sorter(key="year"),
-        Sorter(key="month", reverse=True),
-    ]
-
-    table_asset = TableAsset(name="SorterTest", table_name="SORTER_TEST", order_by=order_by)
-    print(table_asset)
-    pprint(f"\n{table_asset.dict()}")
-
-    assert table_asset.order_by == expected_sorters
 
 
 @pytest.mark.postgresql
