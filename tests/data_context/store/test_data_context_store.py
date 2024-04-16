@@ -63,7 +63,7 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
                 "class_name": "ValidationDefinitionStore",
             },
             "validation_results_store": {
-                "class_name": "ValidationsStore",
+                "class_name": "ValidationResultsStore",
             },
         },
     }

@@ -126,7 +126,7 @@ expected_existing_validation_results_store_yaml = """
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py existing_validation_results_store">
 stores:
   validation_results_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -144,7 +144,7 @@ configured_validation_results_store_yaml = """
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py new_validation_results_store">
 stores:
   validation_results_S3_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleS3StoreBackend
       bucket: '<YOUR S3 VALIDATION BUCKET NAME>'

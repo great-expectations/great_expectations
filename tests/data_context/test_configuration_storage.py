@@ -159,7 +159,7 @@ stores:
     class_name: SuiteParameterStore
 
   validation_results_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
 
   checkpoint_store:
     class_name: CheckpointStore

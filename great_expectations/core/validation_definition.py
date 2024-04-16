@@ -36,7 +36,9 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.data_context.store.validation_results_store import ValidationsStore
+    from great_expectations.data_context.store.validation_results_store import (
+        ValidationResultsStore,
+    )
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
@@ -93,7 +95,7 @@ class ValidationDefinition(BaseModel):
     data: BatchDefinition = Field(..., allow_mutation=False)
     suite: ExpectationSuite = Field(..., allow_mutation=False)
     id: Union[str, None] = None
-    _validation_results_store: ValidationsStore = PrivateAttr()
+    _validation_results_store: ValidationResultsStore = PrivateAttr()
 
     def __init__(self, **data: Any):
         super().__init__(**data)

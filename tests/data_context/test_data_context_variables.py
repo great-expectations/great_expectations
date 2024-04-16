@@ -459,7 +459,7 @@ def test_data_context_variables_save_config(
             },
             "checkpoint_store": {"class_name": "CheckpointStore"},
             "profiler_store": {"class_name": "ProfilerStore"},
-            "validation_results_store": {"class_name": "ValidationsStore"},
+            "validation_results_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
         "include_rendered_content": {

@@ -39,7 +39,7 @@ from great_expectations.compatibility.pypd import pypd
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.store.validation_results_store import ValidationsStore
+from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -995,7 +995,7 @@ class EmailAction(ValidationAction):
 # TODO: This action is slated for deletion in favor of using ValidationResult.run()
 @public_api
 class StoreValidationResultAction(ValidationAction):
-    """Store a validation result in the ValidationsStore.
+    """Store a validation result in the ValidationResultsStore.
     Typical usage example:
         ```yaml
         - name: store_validation_result
@@ -1017,7 +1017,7 @@ class StoreValidationResultAction(ValidationAction):
     class Config:
         arbitrary_types_allowed = True
 
-    _target_store: ValidationsStore = PrivateAttr()
+    _target_store: ValidationResultsStore = PrivateAttr()
 
     def __init__(
         self,
@@ -1030,8 +1030,8 @@ class StoreValidationResultAction(ValidationAction):
         else:
             target_store = data_context.stores[target_store_name]
 
-        if not isinstance(target_store, ValidationsStore):
-            raise ValueError("target_store must be a ValidationsStore")  # noqa: TRY003, TRY004
+        if not isinstance(target_store, ValidationResultsStore):
+            raise ValueError("target_store must be a ValidationResultsStore")  # noqa: TRY003, TRY004
 
         self._target_store = target_store
 

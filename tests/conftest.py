@@ -3146,7 +3146,7 @@ stores:
       suppress_store_backend_id: True
 
   default_validation_results_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: {GXCloudStoreBackend.__name__}
       ge_cloud_base_url: {ge_cloud_base_url}

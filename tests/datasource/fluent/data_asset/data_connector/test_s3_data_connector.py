@@ -787,7 +787,7 @@ def test_s3_checkpoint_run_using_different_store_prefixes_successfully(
     context.add_store(
         "validation_results_S3_store",
         store_config={
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "test_bucket",
                 "class_name": "TupleS3StoreBackend",
@@ -859,7 +859,7 @@ def test_s3_checkpoint_run_using_same_store_prefixes_errors(
     context.add_store(
         "validation_results_S3_store",
         store_config={
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "test_bucket",
                 "class_name": "TupleS3StoreBackend",

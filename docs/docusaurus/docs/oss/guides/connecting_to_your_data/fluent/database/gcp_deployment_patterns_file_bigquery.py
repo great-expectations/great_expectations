@@ -139,7 +139,7 @@ actual_existing_validation_results_store["validation_results_store_name"] = (
 expected_existing_validation_results_store_yaml = """
 stores:
   validation_results_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -153,7 +153,7 @@ assert actual_existing_validation_results_store == yaml.load(
 configured_validation_results_store_yaml = """
 stores:
   validation_results_GCS_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>

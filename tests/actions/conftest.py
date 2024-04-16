@@ -29,7 +29,7 @@ def basic_data_context_config_for_validation_operator():
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
             "suite_parameter_store": {"class_name": "SuiteParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
+            "validation_result_store": {"class_name": "ValidationResultsStore"},
             "metrics_store": {"class_name": "MetricStore"},
         },
         validation_results_store_name="validation_result_store",

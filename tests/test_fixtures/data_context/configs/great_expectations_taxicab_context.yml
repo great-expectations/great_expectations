@@ -21,7 +21,7 @@ stores:
   expectations_store:
     class_name: ExpectationsStore
   validation_results_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
   suite_parameter_store:
     class_name: SuiteParameterStore
   checkpoint_store:

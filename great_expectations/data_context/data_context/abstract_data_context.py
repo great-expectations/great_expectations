@@ -150,7 +150,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
-    from great_expectations.data_context.store.validation_results_store import ValidationsStore
+    from great_expectations.data_context.store.validation_results_store import (
+        ValidationResultsStore,
+    )
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
@@ -609,7 +611,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._save_project_config()
 
     @property
-    def validation_results_store(self) -> ValidationsStore:
+    def validation_results_store(self) -> ValidationResultsStore:
         return self.stores[self.validation_results_store_name]
 
     @property

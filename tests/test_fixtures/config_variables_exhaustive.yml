@@ -29,7 +29,7 @@ v: TupleFilesystemStoreBackend
 w: expectations/
 x: great_expectations.data_context.store
 y: SuiteParameterStore
-z: ValidationsStore
+z: ValidationResultsStore
 aa: ActionListValidationOperator
 bb: store_validation_result
 cc: StoreValidationResultAction

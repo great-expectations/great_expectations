@@ -412,7 +412,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                     },
                 },
                 "default_validation_results_store": {
-                    "class_name": "ValidationsStore",
+                    "class_name": "ValidationResultsStore",
                     "store_backend": {
                         "class_name": GXCloudStoreBackend.__name__,
                         "ge_cloud_base_url": "http://foo/bar/",
