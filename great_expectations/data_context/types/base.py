@@ -1426,7 +1426,7 @@ class DataContextConfigSchema(Schema):
         load_only=True,
     )
     expectations_store_name = fields.Str()
-    validations_store_name = fields.Str()
+    validation_results_store_name = fields.Str()
     suite_parameter_store_name = fields.Str()
     checkpoint_store_name = fields.Str(required=False, allow_none=True)
     profiler_store_name = fields.Str(required=False, allow_none=True)
@@ -1558,7 +1558,7 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     EXPECTATIONS_BASE_DIRECTORY = "expectations"
     DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{EXPECTATIONS_BASE_DIRECTORY}/"
-    DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
+    DEFAULT_VALIDATIONS_STORE_NAME = "validation_results_store"
     VALIDATIONS_BASE_DIRECTORY = "validations"
     DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{UNCOMMITTED}/{VALIDATIONS_BASE_DIRECTORY}/"
@@ -1683,7 +1683,7 @@ class BaseStoreBackendDefaults(DictDot):
     def __init__(  # noqa: PLR0913
         self,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,  # noqa: E501
-        validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
+        validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
         suite_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,  # noqa: E501
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
@@ -1693,7 +1693,7 @@ class BaseStoreBackendDefaults(DictDot):
         data_docs_sites: Optional[dict] = None,
     ) -> None:
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
+        self.validation_results_store_name = validation_results_store_name
         self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name
@@ -1719,17 +1719,17 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
     Args:
         default_bucket_name: Use this bucket name for stores that do not have a bucket name provided
         expectations_store_bucket_name: Overrides default_bucket_name if supplied
-        validations_store_bucket_name: Overrides default_bucket_name if supplied
+        validation_results_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
         checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
         profiler_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_prefix: Overrides default if supplied
-        validations_store_prefix: Overrides default if supplied
+        validation_results_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
         profiler_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
-        validations_store_name: Overrides default if supplied
+        validation_results_store_name: Overrides default if supplied
         suite_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
         profiler_store_name: Overrides default if supplied
@@ -1739,19 +1739,19 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         self,
         default_bucket_name: Optional[str] = None,
         expectations_store_bucket_name: Optional[str] = None,
-        validations_store_bucket_name: Optional[str] = None,
+        validation_results_store_bucket_name: Optional[str] = None,
         validation_definition_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
         profiler_store_bucket_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
-        validations_store_prefix: str = "validations",
+        validation_results_store_prefix: str = "validations",
         validation_definition_store_prefix: str = "validation_definitions",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
         profiler_store_prefix: str = "profilers",
         expectations_store_name: str = "expectations_S3_store",
-        validations_store_name: str = "validations_S3_store",
+        validation_results_store_name: str = "validations_S3_store",
         suite_parameter_store_name: str = "suite_parameter_store",
         checkpoint_store_name: str = "checkpoint_S3_store",
         profiler_store_name: str = "profiler_S3_store",
@@ -1762,8 +1762,8 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         # Use default_bucket_name if separate store buckets are not provided
         if expectations_store_bucket_name is None:
             expectations_store_bucket_name = default_bucket_name
-        if validations_store_bucket_name is None:
-            validations_store_bucket_name = default_bucket_name
+        if validation_results_store_bucket_name is None:
+            validation_results_store_bucket_name = default_bucket_name
         if validation_definition_store_bucket_name is None:
             validation_definition_store_bucket_name = default_bucket_name
         if data_docs_bucket_name is None:
@@ -1775,7 +1775,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
+        self.validation_results_store_name = validation_results_store_name
         self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name
@@ -1788,12 +1788,12 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": expectations_store_prefix,
                 },
             },
-            validations_store_name: {
+            validation_results_store_name: {
                 "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
-                    "bucket": validations_store_bucket_name,
-                    "prefix": validations_store_prefix,
+                    "bucket": validation_results_store_bucket_name,
+                    "prefix": validation_results_store_prefix,
                 },
             },
             self.validation_definition_store_name: {
@@ -1863,7 +1863,7 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             self.stores[self.expectations_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
-            self.stores[self.validations_store_name]["store_backend"][  # type: ignore[index]
+            self.stores[self.validation_results_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
             self.stores[self.checkpoint_store_name]["store_backend"][  # type: ignore[index]
@@ -1901,7 +1901,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "InMemoryStoreBackend",
                 },
             },
-            self.validations_store_name: {
+            self.validation_results_store_name: {
                 "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
@@ -1945,22 +1945,22 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         default_bucket_name: Use this bucket name for stores that do not have a bucket name provided
         default_project_name: Use this project name for stores that do not have a project name provided
         expectations_store_bucket_name: Overrides default_bucket_name if supplied
-        validations_store_bucket_name: Overrides default_bucket_name if supplied
+        validation_results_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
         checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
         profiler_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_project_name: Overrides default_project_name if supplied
-        validations_store_project_name: Overrides default_project_name if supplied
+        validation_results_store_project_name: Overrides default_project_name if supplied
         data_docs_project_name: Overrides default_project_name if supplied
         checkpoint_store_project_name: Overrides default_project_name if supplied
         profiler_store_project_name: Overrides default_project_name if supplied
         expectations_store_prefix: Overrides default if supplied
-        validations_store_prefix: Overrides default if supplied
+        validation_results_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
         profiler_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
-        validations_store_name: Overrides default if supplied
+        validation_results_store_name: Overrides default if supplied
         suite_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
         profiler_store_name: Overrides default if supplied
@@ -1971,25 +1971,25 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         default_bucket_name: Optional[str] = None,
         default_project_name: Optional[str] = None,
         expectations_store_bucket_name: Optional[str] = None,
-        validations_store_bucket_name: Optional[str] = None,
+        validation_results_store_bucket_name: Optional[str] = None,
         validation_definition_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
         profiler_store_bucket_name: Optional[str] = None,
         expectations_store_project_name: Optional[str] = None,
-        validations_store_project_name: Optional[str] = None,
+        validation_results_store_project_name: Optional[str] = None,
         validation_definition_store_project_name: Optional[str] = None,
         data_docs_project_name: Optional[str] = None,
         checkpoint_store_project_name: Optional[str] = None,
         profiler_store_project_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
-        validations_store_prefix: str = "validations",
+        validation_results_store_prefix: str = "validations",
         validation_definition_store_prefix: str = "validation_definitions",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
         profiler_store_prefix: str = "profilers",
         expectations_store_name: str = "expectations_GCS_store",
-        validations_store_name: str = "validations_GCS_store",
+        validation_results_store_name: str = "validations_GCS_store",
         suite_parameter_store_name: str = "suite_parameter_store",
         checkpoint_store_name: str = "checkpoint_GCS_store",
         profiler_store_name: str = "profiler_GCS_store",
@@ -2000,8 +2000,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         # Use default_bucket_name if separate store buckets are not provided
         if expectations_store_bucket_name is None:
             expectations_store_bucket_name = default_bucket_name
-        if validations_store_bucket_name is None:
-            validations_store_bucket_name = default_bucket_name
+        if validation_results_store_bucket_name is None:
+            validation_results_store_bucket_name = default_bucket_name
         if validation_definition_store_bucket_name is None:
             validation_definition_store_bucket_name = default_bucket_name
         if data_docs_bucket_name is None:
@@ -2014,8 +2014,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         # Use default_project_name if separate store projects are not provided
         if expectations_store_project_name is None:
             expectations_store_project_name = default_project_name
-        if validations_store_project_name is None:
-            validations_store_project_name = default_project_name
+        if validation_results_store_project_name is None:
+            validation_results_store_project_name = default_project_name
         if validation_definition_store_project_name is None:
             validation_definition_store_project_name = default_project_name
         if data_docs_project_name is None:
@@ -2027,7 +2027,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
+        self.validation_results_store_name = validation_results_store_name
         self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name
@@ -2041,13 +2041,13 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": expectations_store_prefix,
                 },
             },
-            validations_store_name: {
+            validation_results_store_name: {
                 "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "TupleGCSStoreBackend",
-                    "project": validations_store_project_name,
-                    "bucket": validations_store_bucket_name,
-                    "prefix": validations_store_prefix,
+                    "project": validation_results_store_project_name,
+                    "bucket": validation_results_store_bucket_name,
+                    "prefix": validation_results_store_prefix,
                 },
             },
             self.validation_definition_store_name: {
@@ -2102,11 +2102,11 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
     Args:
         default_credentials: Use these credentials for all stores that do not have credentials provided
         expectations_store_credentials: Overrides default_credentials if supplied
-        validations_store_credentials: Overrides default_credentials if supplied
+        validation_results_store_credentials: Overrides default_credentials if supplied
         checkpoint_store_credentials: Overrides default_credentials if supplied
         profiler_store_credentials: Overrides default_credentials if supplied
         expectations_store_name: Overrides default if supplied
-        validations_store_name: Overrides default if supplied
+        validation_results_store_name: Overrides default if supplied
         suite_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
         profiler_store_name: Overrides default if supplied
@@ -2116,12 +2116,12 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         self,
         default_credentials: Optional[Dict] = None,
         expectations_store_credentials: Optional[Dict] = None,
-        validations_store_credentials: Optional[Dict] = None,
+        validation_results_store_credentials: Optional[Dict] = None,
         validation_definition_store_credentials: Optional[Dict] = None,
         checkpoint_store_credentials: Optional[Dict] = None,
         profiler_store_credentials: Optional[Dict] = None,
         expectations_store_name: str = "expectations_database_store",
-        validations_store_name: str = "validations_database_store",
+        validation_results_store_name: str = "validations_database_store",
         suite_parameter_store_name: str = "suite_parameter_store",
         checkpoint_store_name: str = "checkpoint_database_store",
         profiler_store_name: str = "profiler_database_store",
@@ -2129,11 +2129,11 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         # Initialize base defaults
         super().__init__()
 
-        # Use default credentials if separate credentials not supplied for expectations_store and validations_store  # noqa: E501
+        # Use default credentials if separate credentials not supplied for expectations_store and validation_results_store  # noqa: E501
         if expectations_store_credentials is None:
             expectations_store_credentials = default_credentials
-        if validations_store_credentials is None:
-            validations_store_credentials = default_credentials
+        if validation_results_store_credentials is None:
+            validation_results_store_credentials = default_credentials
         if validation_definition_store_credentials is None:
             validation_definition_store_credentials = default_credentials
         if checkpoint_store_credentials is None:
@@ -2143,7 +2143,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
+        self.validation_results_store_name = validation_results_store_name
         self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name
@@ -2156,11 +2156,11 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                     "credentials": expectations_store_credentials,
                 },
             },
-            validations_store_name: {
+            validation_results_store_name: {
                 "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "DatabaseStoreBackend",
-                    "credentials": validations_store_credentials,
+                    "credentials": validation_results_store_credentials,
                 },
             },
             self.validation_definition_store_name: {
@@ -2207,7 +2207,7 @@ class DataContextConfig(BaseYamlConfig):
             DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
         fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
         expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
-        validations_store_name (Optional[str]): name of ValidationsStore to be used by DataContext.
+        validation_results_store_name (Optional[str]): name of ValidationsStore to be used by DataContext.
         suite_parameter_store_name (Optional[str]): name of SuiteParamterStore to be used by DataContext.
         checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
         profiler_store_name (Optional[str]): name of ProfilerStore to be used by DataContext.
@@ -2240,7 +2240,7 @@ class DataContextConfig(BaseYamlConfig):
         ] = None,
         fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
-        validations_store_name: Optional[str] = None,
+        validation_results_store_name: Optional[str] = None,
         suite_parameter_store_name: Optional[str] = None,
         checkpoint_store_name: Optional[str] = None,
         profiler_store_name: Optional[str] = None,
@@ -2266,8 +2266,8 @@ class DataContextConfig(BaseYamlConfig):
                 stores = store_backend_defaults.stores
             if expectations_store_name is None:
                 expectations_store_name = store_backend_defaults.expectations_store_name
-            if validations_store_name is None:
-                validations_store_name = store_backend_defaults.validations_store_name
+            if validation_results_store_name is None:
+                validation_results_store_name = store_backend_defaults.validation_results_store_name
             if suite_parameter_store_name is None:
                 suite_parameter_store_name = store_backend_defaults.suite_parameter_store_name
             if data_docs_sites is None:
@@ -2283,7 +2283,7 @@ class DataContextConfig(BaseYamlConfig):
         self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
+        self.validation_results_store_name = validation_results_store_name
         self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name

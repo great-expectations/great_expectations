@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.data_context.store.validations_store import ValidationsStore
+    from great_expectations.data_context.store.validation_results_store import ValidationsStore
     from great_expectations.datasource.fluent.batch_request import BatchParameters
     from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
 
@@ -99,7 +99,7 @@ class ValidationDefinition(BaseModel):
         super().__init__(**data)
 
         # TODO: Migrate this to model_post_init when we get to pydantic 2
-        self._validation_results_store = project_manager.get_validations_store()
+        self._validation_results_store = project_manager.get_validation_results_store()
 
     @property
     def batch_definition(self) -> BatchDefinition:

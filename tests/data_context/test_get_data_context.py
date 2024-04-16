@@ -61,7 +61,7 @@ def test_base_context(clear_env_vars):
             "validation_result_store": {"class_name": "ValidationsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
-        validations_store_name="validation_result_store",
+        validation_results_store_name="validation_result_store",
         data_docs_sites={},
         validation_operators={},
     )
@@ -91,7 +91,7 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
             "new_suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "new_validation_result_store": {"class_name": "ValidationsStore"},
         },
-        validations_store_name="new_validation_result_store",
+        validation_results_store_name="new_validation_result_store",
         data_docs_sites={},
         validation_operators={},
     )
@@ -136,7 +136,7 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
             "suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "validation_result_store": {"class_name": "ValidationsStore"},
         },
-        validations_store_name="validation_result_store",
+        validation_results_store_name="validation_result_store",
         data_docs_sites={},
         validation_operators={},
     )
@@ -223,7 +223,7 @@ def test_cloud_context_with_in_memory_config_overrides(
                 "new_suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "new_validation_result_store": {"class_name": "ValidationsStore"},
             },
-            validations_store_name="new_validation_result_store",
+            validation_results_store_name="new_validation_result_store",
             data_docs_sites={},
             validation_operators={},
         )

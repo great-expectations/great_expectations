@@ -31,7 +31,7 @@ checkpoint_store_name: checkpoint_store
 
 plugins_directory: plugins/
 suite_parameter_store_name: suite_parameter_store
-validations_store_name: validation_store
+validation_results_store_name: validation_store
 
 data_docs_sites:
 

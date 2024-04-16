@@ -17,7 +17,7 @@ plugins_directory: plugins/
 
 expectations_store_name: expectations_store
 suite_parameter_store_name: suite_parameter_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 
 stores:
   expectations_store:
@@ -25,7 +25,7 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
-  validations_store:
+  validation_results_store:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
@@ -57,7 +57,7 @@ data_docs_sites:
   team_site:
     # "team_site" is meant to support the "shared source of truth for a team" use case.
     # By default only the expectations section is enabled.
-    #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and validations_store attributes based on the team's decisions where these are stored (a local filesystem or S3).
+    #  Users have to configure the profiling and the validations sections (and the corresponding validation_results_store and validation_results_store attributes based on the team's decisions where these are stored (a local filesystem or S3).
     # Reach out on Slack (https://greatexpectations.io/slack>) if you would like to discuss the best way to configure a team site.
 
     class_name: SiteBuilder
@@ -94,7 +94,7 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          target_store_name: validations_store
+          target_store_name: validation_results_store
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction

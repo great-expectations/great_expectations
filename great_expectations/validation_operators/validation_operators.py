@@ -113,7 +113,7 @@ class ActionListValidationOperator(ValidationOperator):
           - name: store_validation_result
             action:
               class_name: StoreValidationResultAction
-              target_store_name: validations_store
+              target_store_name: validation_results_store
           - name: send_slack_notification_on_validation_result
             action:
               class_name: SlackNotificationAction
@@ -506,7 +506,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(ActionListValidationO
               - name: store_validation_result
                 action:
                   class_name: StoreValidationResultAction
-                  target_store_name: validations_store
+                  target_store_name: validation_results_store
 
     **Invocation**
 

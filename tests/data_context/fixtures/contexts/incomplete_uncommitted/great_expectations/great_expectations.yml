@@ -78,7 +78,7 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
-  validations_store:
+  validation_results_store:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
@@ -88,7 +88,7 @@ stores:
     # https://docs.greatexpectations.io/en/latest/reference/suite_parameters.html
     class_name: InMemorySuiteParameterStore
 expectations_store_name: expectations_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 suite_parameter_store_name: suite_parameter_store
 
 data_docs_sites:
