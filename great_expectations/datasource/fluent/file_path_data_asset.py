@@ -82,7 +82,7 @@ class RegexMissingRequiredGroupsError(ValueError):
     def __init__(self, missing_groups: set[str]):
         message = (
             "The following group(s) are required but are "
-            f"missing from the regex: {', '.join(missing_groups)}."
+            f"missing from the regex: {', '.join(missing_groups)}"
         )
         super().__init__(message)
         self.missing_groups = missing_groups
@@ -319,7 +319,7 @@ class _FilePathDataAsset(DataAsset):
             regex_pattern=regex,
         )
         actual_group_names = set(regex_parser.group_names())
-        if not required_group_names == actual_group_names:
+        if not required_group_names.issubset(actual_group_names):
             missing_names = required_group_names - actual_group_names
             raise RegexMissingRequiredGroupsError(missing_names)
 
