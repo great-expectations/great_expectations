@@ -38,6 +38,7 @@ from great_expectations.datasource.fluent.batch_request import (
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
+    FilePathDataConnector,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
@@ -65,9 +66,6 @@ if TYPE_CHECKING:
     from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.core.partitioners import Partitioner
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
-        DataConnector,
-    )
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -88,6 +86,20 @@ class RegexMissingRequiredGroupsError(ValueError):
         )
         super().__init__(message)
         self.missing_groups = missing_groups
+
+
+class PathNotFoundError(ValueError):
+    def __init__(self, path: PathStr):
+        message = f"Provided path was not able to be resolved: {path} "
+        super().__init__(message)
+        self.path = path
+
+
+class AmbiguousPathError(ValueError):
+    def __init__(self, path: PathStr):
+        message = f"Provided path matched multiple targets, and must match exactly one: {path} "
+        super().__init__(message)
+        self.path = path
 
 
 class _FilePathDataAsset(DataAsset):
@@ -121,7 +133,7 @@ class _FilePathDataAsset(DataAsset):
     _all_group_names: List[str] = pydantic.PrivateAttr()
 
     # `_data_connector`` should be set inside `_build_data_connector()`
-    _data_connector: DataConnector = pydantic.PrivateAttr()
+    _data_connector: FilePathDataConnector = pydantic.PrivateAttr()
     # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
     _test_connection_error_message: str = pydantic.PrivateAttr("Could not connect to your asset")
     _partitioner_implementation_map: dict[type[Partitioner], type[SparkPartitioner]] = (
@@ -248,8 +260,13 @@ class _FilePathDataAsset(DataAsset):
 
     @public_api
     def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
-        # add test to ensure the path exists and matches a single file
         regex = re.compile(str(path))
+        matched_data_references = len(self._data_connector.get_matched_data_references(regex=regex))
+        # we require path to match exactly 1 file
+        if matched_data_references < 1:
+            raise PathNotFoundError(path=path)
+        elif matched_data_references > 1:
+            raise AmbiguousPathError(path=path)
         return self.add_batch_definition(
             name=name,
             partitioner=None,
