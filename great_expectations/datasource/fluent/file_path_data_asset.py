@@ -260,7 +260,7 @@ class _FilePathDataAsset(DataAsset):
     def add_batch_definition_yearly(self, name: str, batching_regex: re.Pattern) -> BatchDefinition:
         REQUIRED_GROUP_NAME = {"year"}
         self._assert_group_names_in_regex(
-            regex=batching_regex, expected_group_names=REQUIRED_GROUP_NAME
+            regex=batching_regex, required_group_names=REQUIRED_GROUP_NAME
         )
         return self.add_batch_definition(
             name=name,
@@ -274,7 +274,7 @@ class _FilePathDataAsset(DataAsset):
     ) -> BatchDefinition:
         REQUIRED_GROUP_NAMES = {"year", "month"}
         self._assert_group_names_in_regex(
-            regex=batching_regex, expected_group_names=REQUIRED_GROUP_NAMES
+            regex=batching_regex, required_group_names=REQUIRED_GROUP_NAMES
         )
         return self.add_batch_definition(
             name=name,
@@ -286,7 +286,7 @@ class _FilePathDataAsset(DataAsset):
     def add_batch_definition_daily(self, name: str, batching_regex: re.Pattern) -> BatchDefinition:
         REQUIRED_GROUP_NAMES = {"year", "month", "day"}
         self._assert_group_names_in_regex(
-            regex=batching_regex, expected_group_names=REQUIRED_GROUP_NAMES
+            regex=batching_regex, required_group_names=REQUIRED_GROUP_NAMES
         )
         return self.add_batch_definition(
             name=name,
@@ -296,14 +296,14 @@ class _FilePathDataAsset(DataAsset):
 
     @classmethod
     def _assert_group_names_in_regex(
-        cls, regex: re.Pattern, expected_group_names: set[str]
+        cls, regex: re.Pattern, required_group_names: set[str]
     ) -> None:
         regex_parser = RegExParser(
             regex_pattern=regex,
         )
         actual_group_names = set(regex_parser.get_all_group_names())
-        if not expected_group_names == actual_group_names:
-            missing_names = expected_group_names - actual_group_names
+        if not required_group_names == actual_group_names:
+            missing_names = required_group_names - actual_group_names
             raise RegexMissingRequiredGroupsError(missing_names)
 
     @override
