@@ -785,7 +785,7 @@ def test_s3_checkpoint_run_using_different_store_prefixes_successfully(
         },
     )
     context.add_store(
-        "validations_S3_store",
+        "validation_results_S3_store",
         store_config={
             "class_name": "ValidationsStore",
             "store_backend": {
@@ -795,7 +795,7 @@ def test_s3_checkpoint_run_using_different_store_prefixes_successfully(
             },
         },
     )
-    context.validation_results_store_name = "validations_S3_store"
+    context.validation_results_store_name = "validation_results_S3_store"
     context.expectations_store_name = "expectations_S3_store"
     assert len(context.stores) == 8
     assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
@@ -857,7 +857,7 @@ def test_s3_checkpoint_run_using_same_store_prefixes_errors(
         },
     )
     context.add_store(
-        "validations_S3_store",
+        "validation_results_S3_store",
         store_config={
             "class_name": "ValidationsStore",
             "store_backend": {
@@ -867,7 +867,7 @@ def test_s3_checkpoint_run_using_same_store_prefixes_errors(
             },
         },
     )
-    context.validation_results_store_name = "validations_S3_store"
+    context.validation_results_store_name = "validation_results_S3_store"
     context.expectations_store_name = "expectations_S3_store"
     assert len(context.stores) == 8
     assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)

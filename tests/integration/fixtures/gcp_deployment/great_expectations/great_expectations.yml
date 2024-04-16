@@ -51,8 +51,8 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-  # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store">
-  validations_GCS_store:
+  # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validation_results_GCS_store">
+  validation_results_GCS_store:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleGCSStoreBackend
@@ -77,7 +77,7 @@ stores:
 expectations_store_name: expectations_GCS_store
 # </snippet>
 # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validation_results_store_name">
-validation_results_store_name: validations_GCS_store
+validation_results_store_name: validation_results_GCS_store
 # </snippet>
 suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store

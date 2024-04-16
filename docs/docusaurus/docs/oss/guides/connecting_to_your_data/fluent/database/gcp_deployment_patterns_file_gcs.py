@@ -158,7 +158,7 @@ assert actual_existing_validation_results_store == yaml.load(
 configured_validation_results_store_yaml = """
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py new_validation_results_store">
 stores:
-  validations_GCS_store:
+  validation_results_GCS_store:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleGCSStoreBackend
@@ -166,7 +166,7 @@ stores:
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
 
-validation_results_store_name: validations_GCS_store
+validation_results_store_name: validation_results_GCS_store
 # </snippet>
 """
 
@@ -174,25 +174,29 @@ validation_results_store_name: validations_GCS_store
 configured_validation_results_store = yaml.load(
     configured_validation_results_store_yaml
 )
-configured_validation_results_store["stores"]["validations_GCS_store"]["store_backend"][
-    "project"
-] = gcp_project
-configured_validation_results_store["stores"]["validations_GCS_store"]["store_backend"][
-    "bucket"
-] = "test_metadata_store"
-configured_validation_results_store["stores"]["validations_GCS_store"]["store_backend"][
-    "prefix"
-] = "metadata/validations"
+configured_validation_results_store["stores"]["validation_results_GCS_store"][
+    "store_backend"
+]["project"] = gcp_project
+configured_validation_results_store["stores"]["validation_results_GCS_store"][
+    "store_backend"
+]["bucket"] = "test_metadata_store"
+configured_validation_results_store["stores"]["validation_results_GCS_store"][
+    "store_backend"
+]["prefix"] = "metadata/validations"
 
 # add and set the new validation store
 context.add_store(
     store_name=configured_validation_results_store["validation_results_store_name"],
-    store_config=configured_validation_results_store["stores"]["validations_GCS_store"],
+    store_config=configured_validation_results_store["stores"][
+        "validation_results_GCS_store"
+    ],
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
-great_expectations_yaml["validation_results_store_name"] = "validations_GCS_store"
-great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
+great_expectations_yaml["validation_results_store_name"] = (
+    "validation_results_GCS_store"
+)
+great_expectations_yaml["stores"]["validation_results_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:

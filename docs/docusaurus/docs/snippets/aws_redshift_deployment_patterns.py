@@ -144,7 +144,7 @@ assert actual_existing_validation_results_store == yaml.load(
 configured_validation_results_store_yaml = """
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py new_validation_results_store">
 stores:
-  validations_S3_store:
+  validation_results_S3_store:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleS3StoreBackend
@@ -153,7 +153,7 @@ stores:
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py set_new_validation_results_store">
-validation_results_store_name: validations_S3_store
+validation_results_store_name: validation_results_S3_store
 # </snippet>
 """
 
@@ -161,22 +161,24 @@ validation_results_store_name: validations_S3_store
 configured_validation_results_store = yaml.load(
     configured_validation_results_store_yaml
 )
-configured_validation_results_store["stores"]["validations_S3_store"]["store_backend"][
-    "bucket"
-] = "aws-golden-path-tests"
-configured_validation_results_store["stores"]["validations_S3_store"]["store_backend"][
-    "prefix"
-] = "metadata/validations"
+configured_validation_results_store["stores"]["validation_results_S3_store"][
+    "store_backend"
+]["bucket"] = "aws-golden-path-tests"
+configured_validation_results_store["stores"]["validation_results_S3_store"][
+    "store_backend"
+]["prefix"] = "metadata/validations"
 
 # add and set the new validation store
 context.add_store(
     store_name=configured_validation_results_store["validation_results_store_name"],
-    store_config=configured_validation_results_store["stores"]["validations_S3_store"],
+    store_config=configured_validation_results_store["stores"][
+        "validation_results_S3_store"
+    ],
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
-great_expectations_yaml["validation_results_store_name"] = "validations_S3_store"
-great_expectations_yaml["stores"]["validations_S3_store"]["store_backend"].pop(
+great_expectations_yaml["validation_results_store_name"] = "validation_results_S3_store"
+great_expectations_yaml["stores"]["validation_results_S3_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:

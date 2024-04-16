@@ -45,7 +45,7 @@ def build_in_code_data_context_project_config(
                     "prefix": expectations_store_prefix,
                 },
             },
-            "validations_S3_store": {
+            "validation_results_S3_store": {
                 "class_name": "ValidationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -74,7 +74,7 @@ def build_in_code_data_context_project_config(
         stores=stores,
         checkpoint_store_name="checkpoint_store",
         expectations_store_name="expectations_S3_store",
-        validation_results_store_name="validations_S3_store",
+        validation_results_store_name="validation_results_S3_store",
         suite_parameter_store_name="suite_parameter_store",
         data_docs_sites={
             "s3_site": {
@@ -372,7 +372,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
                 "prefix": expectations_store_prefix,
             },
         },
-        "validations_S3_store": {
+        "validation_results_S3_store": {
             "class_name": "ValidationsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
@@ -389,7 +389,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
                 "prefix": expectations_store_prefix,
             },
         },
-        "inactive_validations_S3_store": {
+        "inactive_validation_results_S3_store": {
             "class_name": "ValidationsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
@@ -418,7 +418,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
     )
     assert (
         in_code_data_context.stores.get(
-            "inactive_validations_S3_store"
+            "inactive_validation_results_S3_store"
         ).store_backend._suppress_store_backend_id
         is True
     )
@@ -430,7 +430,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
     )
     assert (
         in_code_data_context.stores.get(
-            "validations_S3_store"
+            "validation_results_S3_store"
         ).store_backend._suppress_store_backend_id
         is False
     )
@@ -482,7 +482,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
                 "prefix": expectations_store_prefix,
             },
         },
-        "validations_S3_store": {
+        "validation_results_S3_store": {
             "class_name": "ValidationsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
@@ -508,7 +508,7 @@ def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
     )
     assert (
         caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store. Exception was: \n Unable to set object in s3."  # noqa: E501
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validation_results_S3_store. Exception was: \n Unable to set object in s3."  # noqa: E501
         )
         == 1
     )
@@ -546,7 +546,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
                 "prefix": expectations_store_prefix,
             },
         },
-        "validations_S3_store": {
+        "validation_results_S3_store": {
             "class_name": "ValidationsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
@@ -563,7 +563,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
                 "prefix": expectations_store_prefix,
             },
         },
-        "inactive_validations_S3_store": {
+        "inactive_validation_results_S3_store": {
             "class_name": "ValidationsStore",
             "store_backend": {
                 "class_name": "TupleS3StoreBackend",
@@ -589,7 +589,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
     )
     assert (
         caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store"  # noqa: E501
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validation_results_S3_store"  # noqa: E501
         )
         == 0
     )

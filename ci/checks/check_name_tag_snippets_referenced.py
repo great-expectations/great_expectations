@@ -344,7 +344,7 @@ IGNORED_VIOLATIONS = [
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_GCS_store",  # noqa: E501
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_store_name",  # noqa: E501
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml gs_site",
-    "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store",  # noqa: E501
+    "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validation_results_GCS_store",  # noqa: E501
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validation_results_store_name",  # noqa: E501
 ]
 

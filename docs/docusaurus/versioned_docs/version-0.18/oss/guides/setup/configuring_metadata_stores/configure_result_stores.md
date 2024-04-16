@@ -188,7 +188,7 @@ This configuration tells Great Expectations to look for Validation Results in th
 
 ### Update your configuration file to include a new Store for Validation Results
 
-In the following example, `validations_store_name` is set to ``validations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Validation Result files are stored.
+In the following example, `validations_store_name` is set to ``validation_results_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Validation Result files are stored.
 
 ```yaml title="YAML" name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validations_store_yaml"
 ```
@@ -211,7 +211,7 @@ Additional methods for copying Validation Results into GCS are available. See [U
 
 ### Reference the new configuration
 
-To make Great Expectations look for Validation Results on the GCS store, set the ``validations_store_name`` variable to the name of your GCS Validations Store. In the previous example this was `validations_GCS_store`.
+To make Great Expectations look for Validation Results on the GCS store, set the ``validations_store_name`` variable to the name of your GCS Validations Store. In the previous example this was `validation_results_GCS_store`.
 
 ### Confirm that the Validation Results Store has been correctly configured
 

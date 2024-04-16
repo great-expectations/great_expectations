@@ -109,7 +109,7 @@ By default, Validations are stored in JSON format in the `uncommitted/validation
 ```YAML title="YAML" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py expected_validations_store"
 ```
 
-Great Expectations can then be configured to use this new Validations Store, `validations_GCS_store`, by setting the `validations_store_name` value in the `great_expectations.yml` file.
+Great Expectations can then be configured to use this new Validations Store, `validation_results_GCS_store`, by setting the `validations_store_name` value in the `great_expectations.yml` file.
 
 ```YAML title="YAML" name="version-0.17.23 docs/docusaurus/versioned_docs/version-0.17.23/snippets/gcp_deployment_patterns_file_gcs.py new_validations_store"
 ```
