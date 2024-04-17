@@ -240,7 +240,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_succ
     datasource.add_batch_definition.return_value = expected_batch_definition
 
     # act
-    batch_definition = asset.add_batch_definition_yearly(name=name, batching_regex=batching_regex)
+    batch_definition = asset.add_batch_definition_yearly(name=name, regex=batching_regex)
 
     # assert
     assert batch_definition == expected_batch_definition
@@ -263,7 +263,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fail
 
     # act
     with pytest.raises(RegexMissingRequiredGroupsError) as error:
-        asset.add_batch_definition_yearly(name=name, batching_regex=batching_regex)
+        asset.add_batch_definition_yearly(name=name, regex=batching_regex)
 
         # assert -- we need to still be inside context manager to access this instance attribute
         assert error.missing_groups == {"year"}
@@ -287,7 +287,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fail
 
     # act
     with pytest.raises(RegexUnknownGroupsError) as error:
-        asset.add_batch_definition_yearly(name=name, batching_regex=batching_regex)
+        asset.add_batch_definition_yearly(name=name, regex=batching_regex)
 
         # assert -- we need to still be inside context manager to access this instance attribute
         assert error.unknown_groups == {"foo"}
@@ -310,7 +310,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_suc
     datasource.add_batch_definition.return_value = expected_batch_definition
 
     # act
-    batch_definition = asset.add_batch_definition_monthly(name=name, batching_regex=batching_regex)
+    batch_definition = asset.add_batch_definition_monthly(name=name, regex=batching_regex)
 
     # assert
     assert batch_definition == expected_batch_definition
@@ -333,7 +333,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_fai
 
     # act
     with pytest.raises(RegexMissingRequiredGroupsError) as error:
-        asset.add_batch_definition_monthly(name=name, batching_regex=batching_regex)
+        asset.add_batch_definition_monthly(name=name, regex=batching_regex)
 
         # assert -- we need to still be inside context manager to access this instance attribute
         assert error.missing_groups == {"year", "month"}
@@ -357,7 +357,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_fai
 
     # act
     with pytest.raises(RegexUnknownGroupsError) as error:
-        asset.add_batch_definition_monthly(name=name, batching_regex=batching_regex)
+        asset.add_batch_definition_monthly(name=name, regex=batching_regex)
 
         # assert -- we need to still be inside context manager to access this instance attribute
         assert error.unknown_groups == {"foo"}
@@ -380,7 +380,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_succe
     datasource.add_batch_definition.return_value = expected_batch_definition
 
     # act
-    batch_definition = asset.add_batch_definition_daily(name=name, batching_regex=batching_regex)
+    batch_definition = asset.add_batch_definition_daily(name=name, regex=batching_regex)
 
     # assert
     assert batch_definition == expected_batch_definition
@@ -403,7 +403,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails
 
     # act
     with pytest.raises(RegexMissingRequiredGroupsError) as error:
-        asset.add_batch_definition_daily(name=name, batching_regex=batching_regex)
+        asset.add_batch_definition_daily(name=name, regex=batching_regex)
 
         # assert -- we need to still be inside context manager to access this instance attribute
         assert error.missing_groups == {"year", "month", "day"}
@@ -429,7 +429,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails
 
     # act
     with pytest.raises(RegexUnknownGroupsError) as error:
-        asset.add_batch_definition_daily(name=name, batching_regex=batching_regex)
+        asset.add_batch_definition_daily(name=name, regex=batching_regex)
 
         # assert -- we need to still be inside context manager to access this instance attribute
         assert error.unknown_groups == {"foo"}

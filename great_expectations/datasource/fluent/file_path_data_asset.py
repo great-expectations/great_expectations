@@ -270,6 +270,16 @@ class _FilePathDataAsset(DataAsset):
 
     @public_api
     def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
+        """Adds a BatchDefinition which matches a single Path.
+
+        Parameters:
+            name: BatchDefinition name
+            path: File path relative to the Asset
+
+        Raises:
+             PathNotFoundError: path cannot be resolved
+             AmbiguousPathError: path matches more than one file
+        """
         regex = re.compile(str(path))
         matched_data_references = len(self._data_connector.get_matched_data_references(regex=regex))
         # we require path to match exactly 1 file
@@ -284,41 +294,67 @@ class _FilePathDataAsset(DataAsset):
         )
 
     @public_api
-    def add_batch_definition_yearly(self, name: str, batching_regex: re.Pattern) -> BatchDefinition:
+    def add_batch_definition_yearly(self, name: str, regex: re.Pattern) -> BatchDefinition:
+        """Adds a BatchDefinition which defines yearly batches by file name.
+
+        Parameters:
+            name: BatchDefinition name
+            regex: Regular Expression used to define batches by file name.
+                Must contain a single group `year`
+
+        Raises:
+            RegexMissingRequiredGroupsError: regex is missing the group `year`
+            RegexUnknownGroupsError: regex has groups other than `year`
+        """
         REQUIRED_GROUP_NAME = {"year"}
-        self._assert_group_names_in_regex(
-            regex=batching_regex, required_group_names=REQUIRED_GROUP_NAME
-        )
+        self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAME)
         return self.add_batch_definition(
             name=name,
             partitioner=None,
-            batching_regex=batching_regex,
+            batching_regex=regex,
         )
 
     @public_api
-    def add_batch_definition_monthly(
-        self, name: str, batching_regex: re.Pattern
-    ) -> BatchDefinition:
+    def add_batch_definition_monthly(self, name: str, regex: re.Pattern) -> BatchDefinition:
+        """Adds a BatchDefinition which defines monthly batches by file name.
+
+        Parameters:
+            name: BatchDefinition name
+            regex: Regular Expression used to define batches by file name.
+                Must contain the groups `year` and `month`.
+
+        Raises:
+            RegexMissingRequiredGroupsError: regex is missing the groups `year` and/or `month`.
+            RegexUnknownGroupsError: regex has groups other than `year` and/or `month`.
+        """
         REQUIRED_GROUP_NAMES = {"year", "month"}
-        self._assert_group_names_in_regex(
-            regex=batching_regex, required_group_names=REQUIRED_GROUP_NAMES
-        )
+        self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
             partitioner=None,
-            batching_regex=batching_regex,
+            batching_regex=regex,
         )
 
     @public_api
-    def add_batch_definition_daily(self, name: str, batching_regex: re.Pattern) -> BatchDefinition:
+    def add_batch_definition_daily(self, name: str, regex: re.Pattern) -> BatchDefinition:
+        """Adds a BatchDefinition which defines daily batches by file name.
+
+        Parameters:
+            name: BatchDefinition name
+            regex: Regular Expression used to define batches by file name.
+                Must contain the groups `year`, `month`, and `day`.
+
+        Raises:
+            RegexMissingRequiredGroupsError: regex is missing the
+                groups `year`, `month`, and/or `day`.
+            RegexUnknownGroupsError: regex has groups other than `year`, `month`, and/or `day`.
+        """
         REQUIRED_GROUP_NAMES = {"year", "month", "day"}
-        self._assert_group_names_in_regex(
-            regex=batching_regex, required_group_names=REQUIRED_GROUP_NAMES
-        )
+        self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
             partitioner=None,
-            batching_regex=batching_regex,
+            batching_regex=regex,
         )
 
     @classmethod
