@@ -19,6 +19,7 @@ from typing import (
 )
 
 import requests
+from typing_extensions import Annotated
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.util import (
@@ -1307,3 +1308,18 @@ class APINotificationAction(ValidationAction):
             "data_asset_name": data_asset_name,
             "validation_results": validation_results_serializable,
         }
+
+
+CheckpointAction = Annotated[
+    Union[
+        EmailAction,
+        MicrosoftTeamsNotificationAction,
+        OpsgenieAlertAction,
+        PagerdutyAlertAction,
+        SlackNotificationAction,
+        SNSNotificationAction,
+        StoreValidationResultAction,
+        UpdateDataDocsAction,
+    ],
+    Field(discriminator="type"),
+]
