@@ -55,9 +55,9 @@ Connect GX to data stored on filesystems, databases, or in memory.  Then tell GX
 
 </LinkCardGrid>
 
-## Manage GX's data objects
+## Manage data objects
 
-Retrieve, view, and delete GX's data objects, or use them to retrieve data for use within GX.
+Retrieve, view, and delete data objects, or use them to retrieve data for use within GX.
 
 <LinkCardGrid>
 

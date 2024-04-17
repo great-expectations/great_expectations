@@ -3,7 +3,6 @@ title: "Validate Data"
 hide_feedback_survey: true
 ---
 
-import OverviewCard from '@site/src/components/OverviewCard';
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
@@ -13,7 +12,6 @@ import InProgress from '../_core_components/_in_progress.md';
 <OverviewCard title={frontMatter.title}>
   Create, edit, and implement Validation Definitions and Checkpoints.
 </OverviewCard>
-
 
 ## Manage Validation Definitions
 
