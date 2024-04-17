@@ -94,7 +94,3 @@ Retrieve, view, and delete GX's data objects, or use them to retrieve data for u
   />
 
 </LinkCardGrid>
-
-## Next steps
-
-- [Create Expectations](/core/manage_and_access_data/manage_data_assets.md)
