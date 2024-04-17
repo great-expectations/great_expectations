@@ -12,6 +12,7 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
     AmbiguousPathError,
     PathNotFoundError,
     RegexMissingRequiredGroupsError,
+    RegexUnknownGroupsError,
     _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
@@ -178,7 +179,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_path_fails_
         asset.add_batch_definition_path(name=name, path=path)
 
         # assert -- we need to still be inside context manager to access this instance attribute
-        assert error.path == path
+        assert error.path == path  # type: ignore[attr-defined]  # pytest.raises obscures type
 
     file_path_data_connector.get_matched_data_references.assert_called_once_with(
         regex=expected_regex
@@ -216,7 +217,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_path_fails_
         asset.add_batch_definition_path(name=name, path=path)
 
         # assert -- we need to still be inside context manager to access this instance attribute
-        assert error.path == path
+        assert error.path == path  # type: ignore[attr-defined]  # pytest.raises obscures type
 
     file_path_data_connector.get_matched_data_references.assert_called_once_with(
         regex=expected_regex
@@ -271,6 +272,30 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fail
 
 
 @pytest.mark.unit
+def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fails_if_unknown_groups_are_found(  # noqa: E501
+    datasource, asset
+):
+    # arrange
+    name = "batch_def_name"
+    batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<foo>\d{4}).csv")
+    expected_batch_definition = BatchDefinition(
+        name=name,
+        partitioner=None,
+        batching_regex=batching_regex,
+    )
+    datasource.add_batch_definition.return_value = expected_batch_definition
+
+    # act
+    with pytest.raises(RegexUnknownGroupsError) as error:
+        asset.add_batch_definition_yearly(name=name, batching_regex=batching_regex)
+
+        # assert -- we need to still be inside context manager to access this instance attribute
+        assert error.unknown_groups == {"foo"}
+
+    datasource.add_batch_definition.assert_not_called()
+
+
+@pytest.mark.unit
 def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_success(
     datasource, asset
 ):
@@ -317,6 +342,30 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_fai
 
 
 @pytest.mark.unit
+def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_fails_if_unknown_groups_are_found(  # noqa: E501
+    datasource, asset
+):
+    # arrange
+    name = "batch_def_name"
+    batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<foo>\d{4}).csv")
+    expected_batch_definition = BatchDefinition(
+        name=name,
+        partitioner=None,
+        batching_regex=batching_regex,
+    )
+    datasource.add_batch_definition.return_value = expected_batch_definition
+
+    # act
+    with pytest.raises(RegexUnknownGroupsError) as error:
+        asset.add_batch_definition_monthly(name=name, batching_regex=batching_regex)
+
+        # assert -- we need to still be inside context manager to access this instance attribute
+        assert error.unknown_groups == {"foo"}
+
+    datasource.add_batch_definition.assert_not_called()
+
+
+@pytest.mark.unit
 def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_success(
     datasource, asset
 ):
@@ -358,5 +407,31 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails
 
         # assert -- we need to still be inside context manager to access this instance attribute
         assert error.missing_groups == {"year", "month", "day"}
+
+    datasource.add_batch_definition.assert_not_called()
+
+
+@pytest.mark.unit
+def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails_if_unknown_groups_are_found(  # noqa: E501
+    datasource, asset
+):
+    # arrange
+    name = "batch_def_name"
+    batching_regex = re.compile(
+        r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})-(?P<foo>\d{4}).csv"
+    )
+    expected_batch_definition = BatchDefinition(
+        name=name,
+        partitioner=None,
+        batching_regex=batching_regex,
+    )
+    datasource.add_batch_definition.return_value = expected_batch_definition
+
+    # act
+    with pytest.raises(RegexUnknownGroupsError) as error:
+        asset.add_batch_definition_daily(name=name, batching_regex=batching_regex)
+
+        # assert -- we need to still be inside context manager to access this instance attribute
+        assert error.unknown_groups == {"foo"}
 
     datasource.add_batch_definition.assert_not_called()

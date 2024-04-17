@@ -88,6 +88,16 @@ class RegexMissingRequiredGroupsError(ValueError):
         self.missing_groups = missing_groups
 
 
+class RegexUnknownGroupsError(ValueError):
+    def __init__(self, unknown_groups: set[str]):
+        message = (
+            "Regex has the following group(s) which do not match "
+            f"batch parameters: {', '.join(unknown_groups)}"
+        )
+        super().__init__(message)
+        self.unknown_groups = unknown_groups
+
+
 class PathNotFoundError(ValueError):
     def __init__(self, path: PathStr):
         message = f"Provided path was not able to be resolved: {path} "
@@ -320,8 +330,11 @@ class _FilePathDataAsset(DataAsset):
         )
         actual_group_names = set(regex_parser.group_names())
         if not required_group_names.issubset(actual_group_names):
-            missing_names = required_group_names - actual_group_names
-            raise RegexMissingRequiredGroupsError(missing_names)
+            missing_groups = required_group_names - actual_group_names
+            raise RegexMissingRequiredGroupsError(missing_groups)
+        if not actual_group_names.issubset(required_group_names):
+            unknown_groups = actual_group_names - required_group_names
+            raise RegexUnknownGroupsError(unknown_groups)
 
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
