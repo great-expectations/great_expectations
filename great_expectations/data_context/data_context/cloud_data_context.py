@@ -286,12 +286,6 @@ class CloudDataContext(SerializableDataContext):
         stores = config.get("stores")
         if stores:
             cls._change_key_from_v0_to_v1(
-                stores, "default_evaluation_parameter_store", "default_suite_parameter_store"
-            )
-            cls._change_key_from_v0_to_v1(
-                stores, "default_validations_store", "default_validation_results_store"
-            )
-            cls._change_key_from_v0_to_v1(
                 stores, "evaluation_parameter_store", "suite_parameter_store"
             )
             cls._change_key_from_v0_to_v1(stores, "validations_store", "validation_results_store")
