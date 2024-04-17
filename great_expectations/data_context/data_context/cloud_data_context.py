@@ -43,6 +43,7 @@ from great_expectations.data_context.data_context.serializable_data_context impo
 )
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
+    DataContextVariableSchema,
 )
 from great_expectations.data_context.store import DataAssetStore
 from great_expectations.data_context.store.datasource_store import (
@@ -51,6 +52,8 @@ from great_expectations.data_context.store.datasource_store import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
+from great_expectations.data_context.store.metric_store import SuiteParameterStore
+from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationDefinition,
@@ -278,25 +281,25 @@ class CloudDataContext(SerializableDataContext):
         # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
 
         cls._change_key_from_v0_to_v1(
-            config, "evaluation_parameter_store_name", "suite_parameter_store_name"
+            config,
+            "evaluation_parameter_store_name",
+            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
         )
         cls._change_key_from_v0_to_v1(
-            config, "validations_store_name", "validation_results_store_name"
+            config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
         )
         stores = config.get("stores")
         if stores:
-            cls._change_key_from_v0_to_v1(
-                stores, "evaluation_parameter_store", "suite_parameter_store"
-            )
-            cls._change_key_from_v0_to_v1(stores, "validations_store", "validation_results_store")
-
             for store in stores.values():
                 if store:
                     cls._change_value_from_v0_to_v1(
-                        store, "class_name", "EvaluationParameterStore", "SuiteParameterStore"
+                        store,
+                        "class_name",
+                        "EvaluationParameterStore",
+                        SuiteParameterStore.__name__,
                     )
                     cls._change_value_from_v0_to_v1(
-                        store, "class_name", "ValidationsStore", "ValidationResultsStore"
+                        store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
                     )
 
         return config
