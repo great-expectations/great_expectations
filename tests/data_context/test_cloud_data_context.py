@@ -196,4 +196,4 @@ def test_parses_v0_config_from_cloud(config: dict):
         cloud_organization_id=ORG_ID,
     )
 
-    # if we didn't raise when intantiating the context, we are good!
+    # if we didn't raise when instantiating the context, we are good!
