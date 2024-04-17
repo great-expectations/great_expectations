@@ -179,7 +179,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
     spec:
       containers:
        name: gx-agent
-        image: greatexpectations/agent:latest
+        image: greatexpectations/agent:stable
         envFrom:
         secretRef:
          name: gx-agent-secret
