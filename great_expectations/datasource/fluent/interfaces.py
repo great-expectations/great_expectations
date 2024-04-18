@@ -30,6 +30,8 @@ from typing import (
     overload,
 )
 
+from typing_extensions import Generic  # noqa
+
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import (
@@ -56,8 +58,6 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from typing import Generic
-
     import pandas as pd
     from typing_extensions import TypeAlias, TypeGuard
 
