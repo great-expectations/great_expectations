@@ -168,12 +168,8 @@ my_checkpoint_config = f"""
 name: {my_checkpoint_name}
 """
 
-# <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py test checkpoint config">
-my_checkpoint = context.test_yaml_config(my_checkpoint_config, class_name="Checkpoint")
-# </snippet>
-
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py add checkpoint config">
-context.add_or_update_checkpoint(**yaml.load(my_checkpoint_config))
+my_checkpoint = context.add_or_update_checkpoint(**yaml.load(my_checkpoint_config))
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py run checkpoint">
