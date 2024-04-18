@@ -83,10 +83,6 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def add_sorters(self, sorters: List[Any]) -> NoReturn:
-        self._raise_type_error()
-
-    @override
     def build_batch_request(
         self,
         options: dict | None = None,
