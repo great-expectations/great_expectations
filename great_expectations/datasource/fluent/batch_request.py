@@ -24,7 +24,7 @@ from great_expectations.compatibility.pydantic import (
 from great_expectations.compatibility.typing_extensions import override
 
 # moving this import into TYPE_CHECKING requires forward refs to be updated.
-from great_expectations.core.partitioners import Partitioner  # noqa: TCH001
+from great_expectations.core.partitioners import PartitionerT
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,
@@ -48,7 +48,7 @@ BatchParameters: TypeAlias = Dict[StrictStr, Any]
 
 
 @public_api
-class BatchRequest(pydantic.BaseModel):
+class BatchRequest(pydantic.GenericModel, PartitionerT):
     """A BatchRequest is the way to specify which data Great Expectations will validate.
 
     A Batch Request is provided to a Data Asset in order to create one or more Batches.
@@ -84,7 +84,7 @@ class BatchRequest(pydantic.BaseModel):
             "The structure and types depends on the asset type."
         ),
     )
-    partitioner: Optional[Partitioner] = None
+    partitioner: Optional[PartitionerT] = None
     batching_regex: Optional[re.Pattern] = None
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,

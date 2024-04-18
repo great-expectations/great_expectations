@@ -1,7 +1,9 @@
-from typing import List, Literal, Union
+from typing import List, Literal, TypeVar, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
+
+PartitionerT = TypeVar("PartitionerT")
 
 
 @public_api
