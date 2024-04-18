@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 PartitionerT = TypeVar("PartitionerT")
 
 
-class BatchDefinition(pydantic.BaseModel, Generic[PartitionerT]):
+class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     """Configuration for a batch of data.
 
     References the DataAsset to be used, and any additional parameters needed to fetch the data.
