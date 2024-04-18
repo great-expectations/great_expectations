@@ -2552,7 +2552,9 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         return_obj["result"]["unexpected_percent_nonmissing"] = unexpected_percent_nonmissing
 
     if result_format["include_unexpected_rows"]:
-        unexpected_rows = unexpected_rows.head(result_format["partial_unexpected_count"])
+        if unexpected_rows is not None:
+            if isinstance(unexpected_rows, pd.DataFrame):
+                unexpected_rows = unexpected_rows.head(result_format["partial_unexpected_count"])
         return_obj["result"].update(
             {
                 "unexpected_rows": unexpected_rows,
