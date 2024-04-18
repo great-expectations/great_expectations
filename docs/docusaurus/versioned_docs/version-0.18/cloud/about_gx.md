@@ -97,6 +97,11 @@ For example, you might opt to run and interact with the GX OSS client locally to
 
 GX provides flexible, robust products that allow your organization to quickly deploy GX Cloud or GX OSS to fit your unique requirements.
 
+
+### Versioning
+
+GX Cloud is a cloud-based service that is updated regularly. GX Cloud uses a versioning system to manage changes and updates to the service. The versioning system is based on the [Semantic Versioning](https://semver.org/) standard.
+
 ## GX Cloud workflow
 
 The GX Cloud workflow is a sequence of tasks you complete to perform Data Validations. 
