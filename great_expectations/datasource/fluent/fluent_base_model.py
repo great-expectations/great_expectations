@@ -46,7 +46,7 @@ yaml.default_flow_style = False
 _Self = TypeVar("_Self", bound="FluentBaseModel")
 
 
-class FluentBaseModel(pydantic.BaseModel):
+class FluentBaseModel(pydantic.GenericModel):
     """
     Base model for most fluent datasource related pydantic models.
 
