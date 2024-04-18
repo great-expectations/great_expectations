@@ -46,7 +46,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
-    DatasourceT,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_generic_partitioners import (
@@ -80,7 +79,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner]):
+class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
