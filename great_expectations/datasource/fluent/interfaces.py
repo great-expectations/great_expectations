@@ -16,7 +16,6 @@ from typing import (
     ClassVar,
     Dict,
     Final,
-    Generic,
     List,
     Mapping,
     MutableMapping,
@@ -57,6 +56,8 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from typing import Generic
+
     import pandas as pd
     from typing_extensions import TypeAlias, TypeGuard
 
