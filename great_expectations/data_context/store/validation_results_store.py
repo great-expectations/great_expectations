@@ -27,13 +27,13 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 
-class ValidationsStore(Store):
+class ValidationResultsStore(Store):
     """
-    A ValidationsStore manages Validation Results to ensure they are accessible via a Data Context for review and rendering into Data Docs.
+    A ValidationResultsStore manages Validation Results to ensure they are accessible via a Data Context for review and rendering into Data Docs.
 
     --ge-feature-maturity-info--
 
-        id: validations_store_filesystem
+        id: validation_results_store_filesystem
         title: Validations Store - Filesystem
         icon:
         short_description: Filesystem
@@ -48,7 +48,7 @@ class ValidationsStore(Store):
             documentation_completeness: Complete
             bug_risk: Low
 
-        id: validations_store_s3
+        id: validation_results_store_s3
         title: Validations Store - S3
         icon:
         short_description: S3
@@ -63,7 +63,7 @@ class ValidationsStore(Store):
             documentation_completeness: Complete
             bug_risk: Low
 
-        id: validations_store_gcs
+        id: validation_results_store_gcs
         title: Validations Store - GCS
         icon:
         short_description:
@@ -78,7 +78,7 @@ class ValidationsStore(Store):
             documentation_completeness: Partial
             bug_risk: Low
 
-        id: validations_store_azure_blob_storage
+        id: validation_results_store_azure_blob_storage
         title: Validations Store - Azure
         icon:
         short_description: Azure Blob Storage
@@ -116,7 +116,7 @@ class ValidationsStore(Store):
             elif issubclass(store_backend_class, DatabaseStoreBackend):
                 # Provide defaults for this common case
                 store_backend["table_name"] = store_backend.get(
-                    "table_name", "ge_validations_store"
+                    "table_name", "ge_validation_results_store"
                 )
                 store_backend["key_columns"] = store_backend.get(
                     "key_columns",

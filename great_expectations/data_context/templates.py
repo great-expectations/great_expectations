@@ -79,7 +79,11 @@ EXPECTATIONS_STORE_STRING = yaml.dump(
     {"expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value["expectations_store"]}
 ).replace("\n", "\n  ")[:-2]
 VALIDATIONS_STORE_STRING = yaml.dump(
-    {"validations_store": DataContextConfigDefaults.DEFAULT_STORES.value["validations_store"]}
+    {
+        "validation_results_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "validation_results_store"
+        ]
+    }
 ).replace("\n", "\n  ")[:-2]
 SUITE_PARAMETER_STORE_STRING = yaml.dump(
     DataContextConfigDefaults.DEFAULT_STORES.value["suite_parameter_store"]
@@ -125,7 +129,7 @@ stores:
   {PROFILER_STORE_STRING}
   {VALIDATION_DEFINITION_STORE_STRING}
 expectations_store_name: expectations_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 

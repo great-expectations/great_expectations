@@ -101,16 +101,16 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = context.get_legacy_checkpoint(checkpoint_config.name)
 
-    assert len(context.validations_store.list_keys()) == 0
+    assert len(context.validation_results_store.list_keys()) == 0
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     result: CheckpointResult = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
-    validation_result_identifier: DataContextKey = context.validations_store.list_keys()[0]
-    validation_result: ExpectationSuiteValidationResult = context.validations_store.get(
+    validation_result_identifier: DataContextKey = context.validation_results_store.list_keys()[0]
+    validation_result: ExpectationSuiteValidationResult = context.validation_results_store.get(
         validation_result_identifier
     )
 
@@ -142,12 +142,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 0
+    assert len(context.validation_results_store.list_keys()) == 0
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -178,12 +178,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 0
+    assert len(context.validation_results_store.list_keys()) == 0
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -217,12 +217,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         # noinspection PyUnusedLocal
         result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 0
+    assert len(context.validation_results_store.list_keys()) == 0
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -270,7 +270,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             ]
         )
 
-    assert len(context.validations_store.list_keys()) == 0
+    assert len(context.validation_results_store.list_keys()) == 0
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     # noinspection PyUnusedLocal
@@ -281,7 +281,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ]
     )
 
-    assert len(context.validations_store.list_keys()) == 2
+    assert len(context.validation_results_store.list_keys()) == 2
     assert result["success"]
 
 
@@ -334,7 +334,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             ]
         )
 
-    assert len(context.validations_store.list_keys()) == 0
+    assert len(context.validation_results_store.list_keys()) == 0
 
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     # noinspection PyUnusedLocal
@@ -345,7 +345,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ]
     )
 
-    assert len(context.validations_store.list_keys()) == 2
+    assert len(context.validation_results_store.list_keys()) == 2
     assert result["success"]
 
 
@@ -384,7 +384,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -447,7 +447,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -482,7 +482,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=runtime_batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -519,7 +519,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=runtime_batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -564,7 +564,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -601,7 +601,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=runtime_batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -638,7 +638,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -682,7 +682,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=runtime_batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -725,7 +725,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -765,7 +765,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.get_legacy_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -803,7 +803,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.get_legacy_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -842,7 +842,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.get_legacy_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -884,7 +884,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": runtime_batch_request}],
     )
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -924,7 +924,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": runtime_batch_request}],
     )
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -965,7 +965,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": runtime_batch_request}],
     )
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -1012,7 +1012,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.get_legacy_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=runtime_batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -1060,7 +1060,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": runtime_batch_request}],
     )
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 

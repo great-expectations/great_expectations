@@ -1353,7 +1353,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("stores",),
         ("suite_parameter_store_name",),
         ("validation_operators",),
-        ("validations_store_name",),
+        ("validation_results_store_name",),
     ]
 
     # test .move
