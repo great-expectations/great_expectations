@@ -32,6 +32,7 @@ from great_expectations.core.partitioners import (
     PartitionerYearAndMonth,
     PartitionerYearAndMonthAndDay,
 )
+from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
@@ -47,6 +48,9 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     TestConnectionError,
+)
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    _PandasFilePathDatasource,
 )
 from great_expectations.datasource.fluent.spark_generic_partitioners import (
     SparkPartitioner,
@@ -79,7 +83,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset[Partitioner]):
+FilePathDataSource = _PandasFilePathDatasource | _SparkFilePathDatasource
+
+
+class _FilePathDataAsset(DataAsset[FilePathDataSource, Partitioner]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",

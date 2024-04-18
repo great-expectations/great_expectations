@@ -18,6 +18,7 @@ from typing import (
     Protocol,
     Tuple,
     Type,
+    TypeVar,
     Union,
     cast,
 )
@@ -421,8 +422,10 @@ SqlPartitioner = Union[
     SqlitePartitionerConvertedDateTime,
 ]
 
+_SqlDatasourceT = TypeVar("_SqlDatasourceT")
 
-class _SQLAsset(DataAsset[Partitioner]):
+
+class _SQLAsset(DataAsset[_SqlDatasourceT, Partitioner]):
     """A _SQLAsset Mixin
 
     This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
