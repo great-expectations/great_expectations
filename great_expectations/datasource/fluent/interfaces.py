@@ -56,6 +56,9 @@ from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
+from great_expectations.datasource.fluent.data_asset.data_connector import (
+    DataConnector,
+)
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -84,9 +87,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchParameters,
         BatchRequest,
-    )
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
-        DataConnector,
     )
     from great_expectations.datasource.fluent.type_lookup import (
         TypeLookup,
