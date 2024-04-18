@@ -98,7 +98,8 @@ GX provides flexible, robust products that allow your organization to quickly de
 
 ### Versioning
 
-GX Cloud uses a versioning system to manage changes and updates to the service. 
+The GX agent is released weekly using a date-based versioning scheme (`YYYYMMMDD` or `YYYMMMDD.dev`). The `stable` tag points to the latest released image and is one we recommend in most use cases. The `dev` tag points to the latest pre-release image (or release if no pre-release exists after the release), and will contain the latest features and bugfixes that are not yet ready for production determined by the development team. The examples in our documentation will use the `stable` release tag. 
+
 
 ## GX Cloud workflow
 

@@ -97,10 +97,9 @@ For example, you might opt to run and interact with the GX OSS client locally to
 
 GX provides flexible, robust products that allow your organization to quickly deploy GX Cloud or GX OSS to fit your unique requirements.
 
-
 ### Versioning
 
-GX Cloud is a cloud-based service that is updated regularly. GX Cloud uses a versioning system to manage changes and updates to the service. The versioning system is based on the [Semantic Versioning](https://semver.org/) standard.
+The GX agent is released weekly using a date-based versioning scheme (`YYYYMMMDD` or `YYYMMMDD.dev`). The `stable` tag points to the latest released image and is one we recommend in most use cases. The `dev` tag points to the latest pre-release image (or release if no pre-release exists after the release), and will contain the latest features and bugfixes that are not yet ready for production determined by the development team. The examples in our documentation will use the `stable` release tag. 
 
 ## GX Cloud workflow
 
