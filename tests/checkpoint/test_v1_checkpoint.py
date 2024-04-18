@@ -499,7 +499,7 @@ class TestCheckpointResult:
         mocker: MockerFixture,
     ):
         # Arrange
-        action = mocker.Mock(spec=UpdateDataDocsAction)
+        action = mocker.Mock(spec=UpdateDataDocsAction, type="update_data_docs")
         checkpoint = Checkpoint(
             name=self.checkpoint_name,
             validation_definitions=[validation_definition],
@@ -554,6 +554,7 @@ class TestCheckpointResult:
             batch_parameters=batch_parameters,
             suite_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
+            run_id=mock.ANY,
         )
 
     @pytest.mark.unit

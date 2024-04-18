@@ -8,13 +8,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import (
     ActionContext,
-    EmailAction,
-    MicrosoftTeamsNotificationAction,
-    OpsgenieAlertAction,
-    PagerdutyAlertAction,
-    SlackNotificationAction,
-    SNSNotificationAction,
-    StoreValidationResultAction,
+    CheckpointAction,
     UpdateDataDocsAction,
 )
 from great_expectations.compatibility.pydantic import BaseModel, Field, root_validator, validator
@@ -32,22 +26,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
-
-CheckpointAction: TypeAlias = Union[
-    EmailAction,
-    MicrosoftTeamsNotificationAction,
-    OpsgenieAlertAction,
-    PagerdutyAlertAction,
-    SlackNotificationAction,
-    SNSNotificationAction,
-    StoreValidationResultAction,
-    UpdateDataDocsAction,
-]
 
 
 class Checkpoint(BaseModel):
@@ -161,8 +142,9 @@ class Checkpoint(BaseModel):
         self,
         batch_parameters: Dict[str, Any] | None = None,
         expectation_parameters: Dict[str, Any] | None = None,
+        run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
-        run_id = RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
+        run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
             batch_parameters=batch_parameters,
             expectation_parameters=expectation_parameters,
@@ -192,6 +174,7 @@ class Checkpoint(BaseModel):
                 batch_parameters=batch_parameters,
                 suite_parameters=expectation_parameters,
                 result_format=result_format,
+                run_id=run_id,
             )
             key = self._build_result_key(
                 validation_definition=validation_definition,

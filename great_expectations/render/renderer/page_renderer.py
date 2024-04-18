@@ -95,7 +95,7 @@ class ValidationResultsPageRenderer(Renderer):
     ):
         # Gather run identifiers
         run_name, run_time = self._parse_run_values(validation_results)
-        expectation_suite_name = validation_results.meta["expectation_suite_name"]
+        expectation_suite_name = validation_results.suite_name
         batch_kwargs = (
             validation_results.meta.get("batch_kwargs", {})
             or validation_results.meta.get("batch_spec", {})
@@ -356,7 +356,7 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_validation_header(cls, validation_results):
         success = validation_results.success
-        expectation_suite_name = validation_results.meta["expectation_suite_name"]
+        expectation_suite_name = validation_results.suite_name
         expectation_suite_path_components = (
             [".." for _ in range(len(expectation_suite_name.split(".")) + 3)]
             + ["expectations"]
