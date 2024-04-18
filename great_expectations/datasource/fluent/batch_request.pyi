@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Generic, Optional
 
 from typing_extensions import TypeAlias
 
@@ -10,7 +10,7 @@ from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 
 BatchParameters: TypeAlias = Dict[StrictStr, Any]
 
-class BatchRequest(pydantic.GenericModel, PartitionerT):
+class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
     datasource_name: StrictStr
     data_asset_name: StrictStr
     options: BatchParameters

@@ -7,6 +7,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Generic,
     Mapping,
     Optional,
     Union,
@@ -48,7 +49,7 @@ BatchParameters: TypeAlias = Dict[StrictStr, Any]
 
 
 @public_api
-class BatchRequest(pydantic.GenericModel, PartitionerT):
+class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
     """A BatchRequest is the way to specify which data Great Expectations will validate.
 
     A Batch Request is provided to a Data Asset in order to create one or more Batches.
