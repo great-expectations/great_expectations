@@ -288,7 +288,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT, PartitionerT]):
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[PartitionerT] = None,
         batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
