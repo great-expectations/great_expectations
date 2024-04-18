@@ -18,10 +18,10 @@ datasources:
           engine: python
 
 plugins_directory: plugins/
-evaluation_parameter_store_name: evaluation_parameter_store
+suite_parameter_store_name: suite_parameter_store
 expectations_store_name: expectations_store
 checkpoint_store_name: checkpoint_store
-validations_store_name: validation_store
+validation_results_store_name: validation_store
 
 data_docs_sites:
 
@@ -36,11 +36,11 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
-  evaluation_parameter_store:
+  suite_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
+    class_name: SuiteParameterStore
   validation_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html

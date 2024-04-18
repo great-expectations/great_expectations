@@ -16,9 +16,9 @@ k:
   password: ""
   database: postgres
 l: plugins/
-m: evaluation_parameter_store
+m: suite_parameter_store
 n: expectations_store
-o: validations_store
+o: validation_results_store
 p: SiteBuilder
 q: true
 r: TupleFilesystemStoreBackend
@@ -28,12 +28,12 @@ u: ExpectationsStore
 v: TupleFilesystemStoreBackend
 w: expectations/
 x: great_expectations.data_context.store
-y: EvaluationParameterStore
-z: ValidationsStore
+y: SuiteParameterStore
+z: ValidationResultsStore
 aa: ActionListValidationOperator
 bb: store_validation_result
 cc: StoreValidationResultAction
-dd: validations_store
+dd: validation_results_store
 ee: notify_slack
 ff: SlackNotificationAction
 gg: www.fake-slack-webhook.net
@@ -41,7 +41,7 @@ hh: all
 ii: great_expectations.render.renderer.slack_renderer
 jj: SlackRenderer
 kk: store_evaluation_params
-mm: evaluation_parameter_store
+mm: suite_parameter_store
 ###
 cps: checkpoint_store
 cpu: CheckpointStore

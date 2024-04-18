@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 import numpy as np
 import pandas as pd
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -146,7 +146,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Union[list, set, EvaluationParameterDict, None]
+    value_set: Union[list, set, SuiteParameterDict, None]
 
     library_metadata = {
         "maturity": "production",
@@ -217,7 +217,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

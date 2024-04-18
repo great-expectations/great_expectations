@@ -163,7 +163,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
                 isinstance(n_features, int) or n_features is None
             ), "n_features must be an integer"
             if columns is not None:
-                assert (isinstance(columns, tuple) or isinstance(columns, list)) and all(
+                assert (isinstance(columns, (tuple, list))) and all(
                     isinstance(i, str) for i in columns
                 ), "columns must be a tuple or list of string column names"
             assert (

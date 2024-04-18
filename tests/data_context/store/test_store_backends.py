@@ -14,7 +14,6 @@ from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -29,7 +28,6 @@ from great_expectations.data_context.store import (
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
-from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -44,87 +42,6 @@ from great_expectations.util import (
 from tests import test_utils
 
 yaml = YAMLHandler()
-
-
-@pytest.fixture()
-def basic_data_context_config_for_validation_operator():
-    return DataContextConfig(
-        config_version=2,
-        plugins_directory=None,
-        evaluation_parameter_store_name="evaluation_parameter_store",
-        expectations_store_name="expectations_store",
-        datasources={},
-        stores={
-            "expectations_store": {"class_name": "ExpectationsStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
-            "metrics_store": {"class_name": "MetricStore"},
-        },
-        validations_store_name="validation_result_store",
-        data_docs_sites={},
-        validation_operators={
-            "store_val_res_and_extract_eval_params": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-            "errors_and_warnings_validation_operator": {
-                "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-
-@pytest.fixture
-def validation_operators_data_context(
-    basic_data_context_config_for_validation_operator, filesystem_csv_4
-):
-    data_context = get_context(basic_data_context_config_for_validation_operator)
-
-    data_context.add_datasource(
-        "my_datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_4),
-            }
-        },
-    )
-    data_context.add_expectation_suite("f1.foo")
-
-    df = data_context._get_batch_v2(
-        batch_kwargs=data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"),
-        expectation_suite_name="f1.foo",
-    )
-    df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
-    failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-
-    df.expect_column_values_to_not_be_null(column="y")
-    warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-
-    failure_expectations.name = "f1.failure"
-    data_context.add_expectation_suite(expectation_suite=failure_expectations)
-    warning_expectations.name = "f1.warning"
-    data_context.add_expectation_suite(expectation_suite=warning_expectations)
-
-    return data_context
 
 
 @pytest.fixture()
@@ -1265,6 +1182,61 @@ def test_TupleAzureBlobStoreBackend_account_url():
             mock_azure_credential.assert_called_once()
 
 
+@pytest.mark.unit
+def test_TupleAzureBlobStoreBackend_get_all(mocker: MockerFixture):
+    pytest.importorskip("azure.storage.blob")
+    pytest.importorskip("azure.identity")
+    """
+    What does this test test and why?
+    Since no package like moto exists for Azure-Blob services, we mock the Azure-blob client
+    and assert that the store backend makes the right calls for set, get, and list.
+    """
+    credential = "this_is_a_test_credential_string"
+    account_url = "this_is_a_test_account_url"
+    prefix = "this_is_a_test_prefix"
+    suffix = ".json"
+    container = "dummy-container"
+    val_a = "aaa"
+    val_b = "bbb"
+    key_a = f"{prefix}/foo.json"
+    key_b = f"{prefix}/bar.json"
+
+    def _create_mock_blob(name: str):
+        output = mocker.Mock()
+        output.name = name
+        return output
+
+    def mock_get_blob(object_key):
+        """Test double for BlobServiceClient::download_blob."""
+        key_to_return_val = {
+            key_a: val_a,
+            key_b: val_b,
+        }
+        return mocker.Mock(
+            readall=mocker.Mock(return_value=key_to_return_val[object_key].encode("utf-8"))
+        )
+
+    my_store = TupleAzureBlobStoreBackend(
+        credential=credential,
+        account_url=account_url,
+        prefix=prefix,
+        filepath_suffix=suffix,
+        container=container,
+    )
+
+    with mock.patch("great_expectations.compatibility.azure.BlobServiceClient", autospec=True):
+        mock_container_client = my_store._container_client
+        mock_container_client.list_blobs.return_value = [
+            _create_mock_blob(key_a),
+            _create_mock_blob(key_b),
+        ]
+        mock_container_client.download_blob.side_effect = mock_get_blob
+
+        result = my_store.get_all()
+
+        assert sorted(result) == [val_a, val_b]
+
+
 @mock_s3
 @pytest.mark.slow  # 14.36s
 @pytest.mark.aws_deps
@@ -1372,7 +1344,6 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("config_version",),
         ("data_docs_sites",),
         ("datasources",),
-        ("evaluation_parameter_store_name",),
         ("expectations_store_name",),
         ("fluent_datasources",),
         ("include_rendered_content",),
@@ -1380,8 +1351,9 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("profiler_store_name",),
         ("progress_bars",),
         ("stores",),
+        ("suite_parameter_store_name",),
         ("validation_operators",),
-        ("validations_store_name",),
+        ("validation_results_store_name",),
     ]
 
     # test .move

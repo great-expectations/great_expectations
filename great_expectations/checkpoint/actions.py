@@ -11,14 +11,15 @@ import logging
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     List,
     Literal,
     Optional,
+    Type,
     Union,
 )
 
 import requests
+from typing_extensions import Annotated
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.util import (
@@ -35,9 +36,11 @@ from great_expectations.compatibility.pydantic import (
     root_validator,
     validator,
 )
+from great_expectations.compatibility.pypd import pypd
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -79,6 +82,26 @@ def _build_renderer(config: dict) -> Renderer:
     return renderer
 
 
+class ActionContext:
+    """
+    Shared context for all actions in a checkpoint run.
+    Note that order matters in the action list, as the context is updated with each action's result.
+    """
+
+    def __init__(self) -> None:
+        self._data: list[tuple[ValidationAction, dict]] = []
+
+    @property
+    def data(self) -> list[tuple[ValidationAction, dict]]:
+        return self._data
+
+    def update(self, action: ValidationAction, action_result: dict) -> None:
+        self._data.append((action, action_result))
+
+    def filter_results(self, class_: Type[ValidationAction]) -> list[dict]:
+        return [action_result for action, action_result in self._data if isinstance(action, class_)]
+
+
 @public_api
 class ValidationAction(BaseModel):
     """
@@ -94,6 +117,7 @@ class ValidationAction(BaseModel):
         json_encoders = {Renderer: lambda r: r.serialize()}
 
     type: str
+    notify_on: Literal["all", "failure", "success"] = "all"
 
     @property
     def _using_cloud_context(self) -> bool:
@@ -133,7 +157,6 @@ class ValidationAction(BaseModel):
             **kwargs,
         )
 
-    @public_api
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -160,8 +183,27 @@ class ValidationAction(BaseModel):
         """  # noqa: E501
 
     # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
-    def v1_run(self, checkpoint_result: CheckpointResult) -> None:
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
         raise NotImplementedError
+
+    def _is_enabled(self, success: bool) -> bool:
+        return (
+            self.notify_on == "all"
+            or self.notify_on == "success"
+            and success
+            or self.notify_on == "failure"
+            and not success
+        )
+
+    def _get_data_docs_pages_from_prior_action(
+        self, action_context: ActionContext | None
+    ) -> list[dict] | None:
+        if action_context:
+            return action_context.filter_results(class_=UpdateDataDocsAction)
+
+        return None
 
 
 class DataDocsAction(ValidationAction):
@@ -267,11 +309,82 @@ class SlackNotificationAction(DataDocsAction):
         return values
 
     @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
+        success = checkpoint_result.success or False
+        result = {"slack_notification_result": "none required"}
+        if not self._is_enabled(success=success):
+            return result
+
+        checkpoint_text_blocks: list[dict] = []
+        for (
+            validation_result_suite_identifier,
+            validation_result_suite,
+        ) in checkpoint_result.run_results.items():
+            validation_text_blocks = self._render_validation_result(
+                result_identifier=validation_result_suite_identifier,
+                result=validation_result_suite,
+                action_context=action_context,
+            )
+            checkpoint_text_blocks.extend(validation_text_blocks)
+
+        payload = self.renderer.concatenate_text_blocks(
+            checkpoint_result=checkpoint_result, text_blocks=checkpoint_text_blocks
+        )
+
+        return self._post_slack_payload(payload=payload, result=result)
+
+    def _post_slack_payload(self, payload: dict, result: dict) -> dict:
+        blocks = payload.get("blocks")
+        if blocks:
+            if len(blocks) >= 1:
+                if blocks[0].get("text"):
+                    result = self._send_notifications_in_batches(
+                        blocks=blocks, payload=payload, result=result
+                    )
+                else:
+                    result = self._get_slack_result(payload=payload)
+
+        return result
+
+    def _render_validation_result(
+        self,
+        result_identifier: ValidationResultIdentifier,
+        result: ExpectationSuiteValidationResult,
+        action_context: ActionContext | None = None,
+    ) -> list[dict]:
+        data_docs_pages = None
+        if action_context:
+            data_docs_pages = action_context.filter_results(class_=UpdateDataDocsAction)
+
+        # Assemble complete GX Cloud URL for a specific validation result
+        data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
+            resource_identifier=result_identifier
+        )
+
+        validation_result_urls: list[str] = [
+            data_docs_url["site_url"]
+            for data_docs_url in data_docs_urls
+            if data_docs_url["site_url"]
+        ]
+        if result.result_url:
+            validation_result_urls.append(result.result_url)
+
+        return self.renderer.v1_render(
+            validation_result=result,
+            data_docs_pages=data_docs_pages,
+            notify_with=self.notify_with,
+            show_failed_expectations=self.show_failed_expectations,
+            validation_result_urls=validation_result_urls,
+        )
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: C901, PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context: ActionContext | None = None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -293,12 +406,7 @@ class SlackNotificationAction(DataDocsAction):
             )
 
         validation_success = validation_result_suite.success
-        data_docs_pages = None
-        if payload:
-            # process the payload
-            for action_names in payload.keys():
-                if payload[action_names]["class"] == "UpdateDataDocsAction":
-                    data_docs_pages = payload[action_names]
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
         # Assemble complete GX Cloud URL for a specific validation result
         data_docs_urls: list[dict[str, str]] = self._get_docs_sites_urls(
@@ -317,22 +425,19 @@ class SlackNotificationAction(DataDocsAction):
             # To send a notification with a link to the validation result, we need to have created the validation  # noqa: E501
             # result in cloud. If the user has configured the store action after the notification action, they will  # noqa: E501
             # get a warning that no link will be provided. See the __init__ method for ActionListValidationOperator.  # noqa: E501
-            if (
-                "store_validation_result" in payload
-                and "validation_result_url" in payload["store_validation_result"]
-            ):
-                validation_result_urls.append(
-                    payload["store_validation_result"]["validation_result_url"]
-                )
+            action_context = action_context or ActionContext()
+            store_validation_results = action_context.filter_results(
+                class_=StoreValidationResultAction
+            )
+            for payload in store_validation_results:
+                if "validation_result_url" in payload:
+                    validation_result_urls.append(
+                        payload["store_validation_result"]["validation_result_url"]
+                    )
+
         result = {"slack_notification_result": "none required"}
-        if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
-        ):
-            query: Dict = self.renderer.render(
+        if self._is_enabled(success=validation_success):
+            payload = self.renderer.render(
                 validation_result_suite,
                 data_docs_pages,
                 self.notify_with,
@@ -340,31 +445,31 @@ class SlackNotificationAction(DataDocsAction):
                 validation_result_urls,
             )
 
-            blocks = query.get("blocks")
+            blocks = payload.get("blocks")
             if blocks:
                 if len(blocks) >= 1:
                     if blocks[0].get("text"):
-                        result = self._send_notifications_in_batches(blocks, query, result)
+                        result = self._send_notifications_in_batches(blocks, payload, result)
                     else:
-                        result = self._get_slack_result(query)
+                        result = self._get_slack_result(payload)
 
         return result
 
-    def _send_notifications_in_batches(self, blocks, query, result):
+    def _send_notifications_in_batches(self, blocks, payload, result):
         text = blocks[0]["text"]["text"]
         chunks, chunk_size = len(text), len(text) // 4
         split_text = [
             text[position : position + chunk_size] for position in range(0, chunks, chunk_size)
         ]
         for batch in split_text:
-            query["text"] = batch
-            result = self._get_slack_result(query)
+            payload["text"] = batch
+            result = self._get_slack_result(payload)
         return result
 
-    def _get_slack_result(self, query):
+    def _get_slack_result(self, payload):
         # this will actually send the POST request to the Slack webapp server
         slack_notif_result = send_slack_notification(
-            query,
+            payload=payload,
             slack_webhook=self.slack_webhook,
             slack_token=self.slack_token,
             slack_channel=self.slack_channel,
@@ -401,16 +506,28 @@ class PagerdutyAlertAction(ValidationAction):
     severity: Literal["critical", "error", "warning", "info"] = "critical"
 
     @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
+        success = checkpoint_result.success or False
+        checkpoint_name = checkpoint_result.checkpoint_config.name
+        summary = f"Great Expectations Checkpoint {checkpoint_name} has "
+        if success:
+            summary += "succeeded"
+        else:
+            summary += "failed"
+
+        return self._run_pypd_alert(dedup_key=checkpoint_name, message=summary, success=success)
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        import pypd
-
         logger.debug("PagerdutyAlertAction.run")
 
         if validation_result_suite is None:
@@ -429,25 +546,26 @@ class PagerdutyAlertAction(ValidationAction):
             )
 
         validation_success = validation_result_suite.success
+        expectation_suite_name = validation_result_suite.meta.get(
+            "expectation_suite_name", "__no_expectation_suite_name__"
+        )
 
-        if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
-        ):
-            expectation_suite_name = validation_result_suite.meta.get(
-                "expectation_suite_name", "__no_expectation_suite_name__"
-            )
+        return self._run_pypd_alert(
+            dedup_key=expectation_suite_name,
+            message=f"Great Expectations suite check {expectation_suite_name} has failed",
+            success=validation_success,
+        )
+
+    def _run_pypd_alert(self, dedup_key: str, message: str, success: bool):
+        if self._is_enabled(success=success):
             pypd.api_key = self.api_key
             pypd.EventV2.create(
                 data={
                     "routing_key": self.routing_key,
-                    "dedup_key": expectation_suite_name,
+                    "dedup_key": dedup_key,
                     "event_action": "trigger",
                     "payload": {
-                        "summary": f"Great Expectations suite check {expectation_suite_name} has failed",  # noqa: E501
+                        "summary": message,
                         "severity": self.severity,
                         "source": "Great Expectations",
                     },
@@ -455,6 +573,7 @@ class PagerdutyAlertAction(ValidationAction):
             )
 
             return {"pagerduty_alert_result": "success"}
+
         return {"pagerduty_alert_result": "none sent"}
 
 
@@ -508,11 +627,31 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         return renderer
 
     @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ):
+        success = checkpoint_result.success or False
+        if not self._is_enabled(success=success):
+            return {"microsoft_teams_notification_result": None}
+
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
+
+        payload = self.renderer.v1_render(
+            checkpoint_result=checkpoint_result,
+            data_docs_pages=data_docs_pages,
+        )
+        # this will actually sent the POST request to the Microsoft Teams webapp server
+        teams_notif_result = send_microsoft_teams_notifications(
+            payload=payload, microsoft_teams_webhook=self.teams_webhook
+        )
+        return {"microsoft_teams_notification_result": teams_notif_result}
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -533,21 +672,10 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
                 f"not {type(validation_result_suite_identifier)}"
             )
         validation_success = validation_result_suite.success
-        data_docs_pages = None
 
-        if payload:
-            # process the payload
-            for action_names in payload.keys():
-                if payload[action_names]["class"] == "UpdateDataDocsAction":
-                    data_docs_pages = payload[action_names]
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
-        if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
-        ):
+        if self._is_enabled(success=validation_success):
             query = self.renderer.render(
                 validation_result_suite,
                 validation_result_suite_identifier,
@@ -607,11 +735,42 @@ class OpsgenieAlertAction(ValidationAction):
         return renderer
 
     @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
+        validation_success = checkpoint_result.success or False
+        checkpoint_name = checkpoint_result.checkpoint_config.name
+
+        if self._is_enabled(success=validation_success):
+            settings = {
+                "api_key": self.api_key,
+                "region": self.region,
+                "priority": self.priority,
+                "tags": self.tags,
+            }
+
+            description = self.renderer.v1_render(checkpoint_result=checkpoint_result)
+
+            message = f"Great Expectations Checkpoint {checkpoint_name} "
+            if checkpoint_result.success:
+                message += "succeeded!"
+            else:
+                message += "failed!"
+
+            alert_result = send_opsgenie_alert(
+                query=description, message=message, settings=settings
+            )
+
+            return {"opsgenie_alert_result": alert_result}
+        else:
+            return {"opsgenie_alert_result": "No alert sent"}
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -634,13 +793,7 @@ class OpsgenieAlertAction(ValidationAction):
 
         validation_success = validation_result_suite.success
 
-        if (
-            self.notify_on == "all"
-            or self.notify_on == "success"
-            and validation_success
-            or self.notify_on == "failure"
-            and not validation_success
-        ):
+        if self._is_enabled(success=validation_success):
             expectation_suite_name = validation_result_suite.meta.get(
                 "expectation_suite_name", "__no_expectation_suite_name__"
             )
@@ -654,7 +807,8 @@ class OpsgenieAlertAction(ValidationAction):
 
             description = self.renderer.render(validation_result_suite, None, None)
 
-            alert_result = send_opsgenie_alert(description, expectation_suite_name, settings)
+            message = f"Great Expectations suite {expectation_suite_name} failed"
+            alert_result = send_opsgenie_alert(description, message, settings)
 
             return {"opsgenie_alert_result": alert_result}
         else:
@@ -753,11 +907,41 @@ class EmailAction(ValidationAction):
         return values
 
     @override
+    def v1_run(
+        self,
+        checkpoint_result: CheckpointResult,
+        action_context: ActionContext | None = None,
+    ) -> dict:
+        success = checkpoint_result.success or False
+        if not self._is_enabled(success=success):
+            return {"email_result": ""}
+
+        title, html = self.renderer.v1_render(checkpoint_result=checkpoint_result)
+        receiver_emails_list = list(map(lambda x: x.strip(), self.receiver_emails.split(",")))
+
+        # this will actually send the email
+        email_result = send_email(
+            title=title,
+            html=html,
+            smtp_address=self.smtp_address,
+            smtp_port=self.smtp_port,
+            sender_login=self.sender_login,
+            sender_password=self.sender_password,
+            sender_alias=self.sender_alias,
+            receiver_emails_list=receiver_emails_list,
+            use_tls=self.use_tls,
+            use_ssl=self.use_ssl,
+        )
+
+        # sending payload back as dictionary
+        return {"email_result": email_result}
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -779,19 +963,10 @@ class EmailAction(ValidationAction):
             )
 
         validation_success = validation_result_suite.success
-        data_docs_pages = None
 
-        if payload:
-            # process the payload
-            for action_names in payload.keys():
-                if payload[action_names]["class"] == "UpdateDataDocsAction":
-                    data_docs_pages = payload[action_names]
+        data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
-        if (
-            (self.notify_on == "all")
-            or (self.notify_on == "success" and validation_success)
-            or (self.notify_on == "failure" and not validation_success)
-        ):
+        if self._is_enabled(success=validation_success):
             title, html = self.renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
@@ -821,7 +996,7 @@ class EmailAction(ValidationAction):
 # TODO: This action is slated for deletion in favor of using ValidationResult.run()
 @public_api
 class StoreValidationResultAction(ValidationAction):
-    """Store a validation result in the ValidationsStore.
+    """Store a validation result in the ValidationResultsStore.
     Typical usage example:
         ```yaml
         - name: store_validation_result
@@ -829,7 +1004,7 @@ class StoreValidationResultAction(ValidationAction):
           class_name: StoreValidationResultAction
           # name of the store where the actions will store validation results
           # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: validations_store
+          target_store_name: validation_results_store
         ```
     Args:
         data_context: GX Data Context.
@@ -843,7 +1018,7 @@ class StoreValidationResultAction(ValidationAction):
     class Config:
         arbitrary_types_allowed = True
 
-    _target_store: ValidationsStore = PrivateAttr()
+    _target_store: ValidationResultsStore = PrivateAttr()
 
     def __init__(
         self,
@@ -852,12 +1027,12 @@ class StoreValidationResultAction(ValidationAction):
     ) -> None:
         super().__init__(type="store_validation_result")
         if target_store_name is None:
-            target_store = data_context.stores[data_context.validations_store_name]
+            target_store = data_context.stores[data_context.validation_results_store_name]
         else:
             target_store = data_context.stores[target_store_name]
 
-        if not isinstance(target_store, ValidationsStore):
-            raise ValueError("target_store must be a ValidationsStore")  # noqa: TRY003, TRY004
+        if not isinstance(target_store, ValidationResultsStore):
+            raise ValueError("target_store must be a ValidationResultsStore")  # noqa: TRY003, TRY004
 
         self._target_store = target_store
 
@@ -866,7 +1041,7 @@ class StoreValidationResultAction(ValidationAction):
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
@@ -920,11 +1095,36 @@ class UpdateDataDocsAction(DataDocsAction):
     site_names: List[str] = []
 
     @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
+        action_results: dict[ValidationResultIdentifier, dict] = {}
+        for result_identifier, result in checkpoint_result.run_results.items():
+            suite_name = result.suite_name
+
+            expectation_suite_identifier: ExpectationSuiteIdentifier | GXCloudIdentifier
+            if self._using_cloud_context:
+                expectation_suite_identifier = GXCloudIdentifier(
+                    resource_type=GXCloudRESTResource.EXPECTATION_SUITE, resource_name=suite_name
+                )
+            else:
+                expectation_suite_identifier = ExpectationSuiteIdentifier(name=suite_name)
+
+            action_result = self._run(
+                validation_result_suite=result,
+                validation_result_suite_identifier=result_identifier,
+                expectation_suite_identifier=expectation_suite_identifier,
+            )
+            action_results[result_identifier] = action_result
+
+        return action_results
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
-        payload=None,
+        action_context=None,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
@@ -940,10 +1140,9 @@ class UpdateDataDocsAction(DataDocsAction):
             validation_result_suite_identifier,
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
-            raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(  # noqa: E501
-                    type(validation_result_suite_identifier)
-                )
+            raise TypeError(  # noqa: TRY003
+                "validation_result_id must be of type ValidationResultIdentifier or"
+                f" GeCloudIdentifier, not {type(validation_result_suite_identifier)}"
             )
 
         # TODO Update for RenderedDataDocs
@@ -967,6 +1166,7 @@ class UpdateDataDocsAction(DataDocsAction):
         # process payload
         for sites in docs_site_urls_list:
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
+
         return data_docs_validation_results
 
 
@@ -995,6 +1195,20 @@ class SNSNotificationAction(ValidationAction):
 
     sns_topic_arn: str
     sns_message_subject: Optional[str]
+
+    @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
+        msg = send_sns_notification(
+            sns_topic_arn=self.sns_topic_arn,
+            sns_subject=self.sns_message_subject or checkpoint_result.name,
+            validation_results=json.dumps(
+                [result.to_json_dict() for result in checkpoint_result.run_results.values()],
+                indent=4,
+            ),
+        )
+        return {"result": msg}
 
     @override
     def _run(  # type: ignore[override] # signature does not match parent
@@ -1036,6 +1250,26 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
+    def v1_run(
+        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
+    ) -> dict:
+        aggregate_payload = []
+        for run_id, run_result in checkpoint_result.run_results.items():
+            suite_name = run_result.suite_name
+            serializable_results = convert_to_json_serializable(run_result.results)
+            batch_identifier = run_id.batch_identifier
+
+            payload = self.create_payload(
+                data_asset_name=batch_identifier,
+                suite_name=suite_name,
+                validation_results_serializable=serializable_results,
+            )
+            aggregate_payload.append(payload)
+
+        response = self.send_results(aggregate_payload)
+        return {"result": f"Posted results to API, status code - {response.status_code}"}
+
+    @override
     def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -1044,24 +1278,17 @@ class APINotificationAction(ValidationAction):
         checkpoint_identifier=None,
         **kwargs,
     ):
-        suite_name: str = validation_result_suite.meta["expectation_suite_name"]
-        if "batch_kwargs" in validation_result_suite.meta:
-            data_asset_name = validation_result_suite.meta["batch_kwargs"].get(
-                "data_asset_name", "__no_data_asset_name__"
-            )
-        elif "active_batch_definition" in validation_result_suite.meta:
-            data_asset_name = (
-                validation_result_suite.meta["active_batch_definition"].data_asset_name
-                if validation_result_suite.meta["active_batch_definition"].data_asset_name
-                else "__no_data_asset_name__"
-            )
-        else:
-            data_asset_name = "__no_data_asset_name__"
+        suite_name: str = validation_result_suite.suite_name
+        data_asset_name: str = validation_result_suite.asset_name or "__no_data_asset_name__"
 
-        validation_results: list = validation_result_suite.get("results")
+        validation_results: list = validation_result_suite.results
         validation_results_serializable: list = convert_to_json_serializable(validation_results)
 
-        payload = self.create_payload(data_asset_name, suite_name, validation_results_serializable)
+        payload = self.create_payload(
+            data_asset_name=data_asset_name,
+            suite_name=suite_name,
+            validation_results_serializable=validation_results_serializable,
+        )
 
         response = self.send_results(payload)
         return f"Successfully Posted results to API, status code - {response.status_code}"
@@ -1075,12 +1302,24 @@ class APINotificationAction(ValidationAction):
             raise e  # noqa: TRY201
 
     @staticmethod
-    def create_payload(data_asset_name, suite_name, validation_results_serializable) -> str:
-        payload = json.dumps(
-            {
-                "test_suite_name": suite_name,
-                "data_asset_name": data_asset_name,
-                "validation_results": validation_results_serializable,
-            }
-        )
-        return payload
+    def create_payload(data_asset_name, suite_name, validation_results_serializable) -> dict:
+        return {
+            "test_suite_name": suite_name,
+            "data_asset_name": data_asset_name,
+            "validation_results": validation_results_serializable,
+        }
+
+
+CheckpointAction = Annotated[
+    Union[
+        EmailAction,
+        MicrosoftTeamsNotificationAction,
+        OpsgenieAlertAction,
+        PagerdutyAlertAction,
+        SlackNotificationAction,
+        SNSNotificationAction,
+        StoreValidationResultAction,
+        UpdateDataDocsAction,
+    ],
+    Field(discriminator="type"),
+]

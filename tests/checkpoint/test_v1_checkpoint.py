@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import pathlib
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from unittest import mock
 
 import pytest
@@ -13,6 +13,8 @@ from great_expectations import expectations as gxe
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
+    OpsgenieAlertAction,
+    PagerdutyAlertAction,
     SlackNotificationAction,
     UpdateDataDocsAction,
     ValidationAction,
@@ -49,7 +51,7 @@ if TYPE_CHECKING:
 @pytest.mark.unit
 def test_checkpoint_no_validation_definitions_raises_error():
     with pytest.raises(ValueError) as e:
-        Checkpoint(name="my_checkpoint", validation_definitions=[], actions=[])
+        Checkpoint(name="my_checkpoint", validation_definitions=[])
 
     assert "Checkpoint must contain at least one validation definition" in str(e.value)
 
@@ -62,7 +64,6 @@ def test_checkpoint_save_success(mocker: MockerFixture):
     checkpoint = Checkpoint(
         name="my_checkpoint",
         validation_definitions=[mocker.Mock(spec=ValidationDefinition)],
-        actions=[],
     )
     store_key = context.v1_checkpoint_store.get_key.return_value
     checkpoint.save()
@@ -477,7 +478,7 @@ class TestCheckpointResult:
     @pytest.mark.unit
     def test_checkpoint_run_no_actions(self, validation_definition: ValidationDefinition):
         checkpoint = Checkpoint(
-            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+            name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
         result = checkpoint.run()
 
@@ -495,8 +496,38 @@ class TestCheckpointResult:
     def test_checkpoint_run_actions(
         self,
         validation_definition: ValidationDefinition,
-        actions: list[CheckpointAction],
+        mocker: MockerFixture,
     ):
+        # Arrange
+        action = mocker.Mock(spec=UpdateDataDocsAction, type="update_data_docs")
+        checkpoint = Checkpoint(
+            name=self.checkpoint_name,
+            validation_definitions=[validation_definition],
+            actions=[action],
+        )
+
+        # Act
+        result = checkpoint.run()
+
+        # Assert
+        action._copy_and_set_values().v1_run.assert_called_once_with(
+            checkpoint_result=result, action_context=mock.ANY
+        )
+
+    @pytest.mark.unit
+    def test_checkpoint_sorts_actions(self, validation_definition: ValidationDefinition):
+        """
+        Note that we are directly testing the `_sort_actions()` private method here.
+
+        This was done as a way to expedite the testing process due to some conflicts with
+        Pydantics and mocks.
+        Ideally, this would be tested through the public `run()` method.
+        """
+        pd_action = PagerdutyAlertAction(api_key="api_key", routing_key="routing_key")
+        og_action = OpsgenieAlertAction(api_key="api_key")
+        data_docs_action = UpdateDataDocsAction()
+        actions: List[CheckpointAction] = [pd_action, og_action, data_docs_action]
+
         validation_definitions = [validation_definition]
         checkpoint = Checkpoint(
             name=self.checkpoint_name,
@@ -504,18 +535,14 @@ class TestCheckpointResult:
             actions=actions,
         )
 
-        with mock.patch.object(ValidationAction, "v1_run") as mock_run:
-            result = checkpoint.run()
-
-        assert mock_run.call_count == len(actions)
-        mock_run.assert_called_with(checkpoint_result=result)
+        assert checkpoint._sort_actions() == [data_docs_action, pd_action, og_action]
 
     @pytest.mark.unit
     def test_checkpoint_run_passes_through_runtime_params(
         self, validation_definition: ValidationDefinition
     ):
         checkpoint = Checkpoint(
-            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+            name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
         batch_parameters = {"my_param": "my_value"}
         expectation_parameters = {"my_other_param": "my_other_value"}
@@ -525,8 +552,9 @@ class TestCheckpointResult:
 
         validation_definition.run.assert_called_with(  # type: ignore[attr-defined]
             batch_parameters=batch_parameters,
-            evaluation_parameters=expectation_parameters,
+            suite_parameters=expectation_parameters,
             result_format=ResultFormat.SUMMARY,
+            run_id=mock.ANY,
         )
 
     @pytest.mark.unit
@@ -640,7 +668,7 @@ class TestCheckpointResult:
         )
 
         checkpoint = Checkpoint(
-            name=self.checkpoint_name, validation_definitions=[validation_definition], actions=[]
+            name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
         result = checkpoint.run()
 

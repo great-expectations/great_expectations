@@ -45,8 +45,8 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
                     "class_name": "TupleFilesystemStoreBackend",
                 },
             },
-            "evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore",
+            "suite_parameter_store": {
+                "class_name": "SuiteParameterStore",
                 "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {
@@ -62,8 +62,8 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
             "validation_definition_store": {
                 "class_name": "ValidationDefinitionStore",
             },
-            "validations_store": {
-                "class_name": "ValidationsStore",
+            "validation_results_store": {
+                "class_name": "ValidationResultsStore",
             },
         },
     }

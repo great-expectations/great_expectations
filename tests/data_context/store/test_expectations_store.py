@@ -179,86 +179,53 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
     assert gen_directory_tree_str(project_path) == initialized_directory_tree_with_store_backend_id
 
 
-@pytest.mark.cloud
+def _create_suite_config(name: str, id: str, expectations: list[dict] | None = None) -> dict:
+    return {
+        "id": id,
+        "name": name,
+        "expectations": expectations or [],
+        "meta": {},
+        "notes": None,
+    }
+
+
+_SUITE_CONFIG = _create_suite_config("my_suite", "03d61d4e-003f-48e7-a3b2-f9f842384da3")
+_SUITE_CONFIG_WITH_EXPECTATIONS = _create_suite_config(
+    "my_suite_with_expectations",
+    "03d61d4e-003f-48e7-a3b2-f9f842384da3",
+    [
+        {
+            "expectation_type": "expect_column_to_exist",
+            "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
+            "kwargs": {"column": "infinities"},
+            "meta": {},
+            "expectation_context": None,
+            "rendered_content": [],
+        }
+    ],
+)
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "response_json, expected, error_type",
     [
         pytest.param(
-            {
-                "data": {
-                    "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                    "name": "my_suite",
-                    "expectations": [],
-                    "meta": {},
-                    "notes": None,
-                }
-            },
-            {
-                "name": "my_suite",
-                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                "expectations": [],
-                "meta": {},
-                "notes": None,
-            },
+            {"data": _SUITE_CONFIG},
+            _SUITE_CONFIG,
             None,
             id="single_config",
         ),
         pytest.param({"data": []}, None, ValueError, id="empty_payload"),
         pytest.param(
-            {
-                "data": [
-                    {
-                        "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                        "name": "my_suite",
-                        "expectations": [],
-                        "meta": {},
-                        "notes": None,
-                    }
-                ]
-            },
-            {
-                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                "name": "my_suite",
-                "expectations": [],
-                "meta": {},
-                "notes": None,
-            },
+            {"data": [_SUITE_CONFIG]},
+            _SUITE_CONFIG,
             None,
             id="single_config_in_list",
         ),
         pytest.param(
-            {
-                "data": {
-                    "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                    "name": "my_suite",
-                    "expectations": [
-                        {
-                            "expectation_type": "expect_column_to_exist",
-                            "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
-                            "kwargs": {"column": "infinities", "result_format": None},
-                            "meta": {},
-                        }
-                    ],
-                    "meta": {},
-                    "notes": None,
-                }
-            },
-            {
-                "name": "my_suite",
-                "id": "03d61d4e-003f-48e7-a3b2-f9f842384da3",
-                "expectations": [
-                    {
-                        "expectation_type": "expect_column_to_exist",
-                        "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
-                        "kwargs": {"column": "infinities"},
-                        "meta": {},
-                        "expectation_context": None,
-                        "rendered_content": [],
-                    }
-                ],
-                "meta": {},
-                "notes": None,
-            },
+            {"data": _SUITE_CONFIG_WITH_EXPECTATIONS},
+            _SUITE_CONFIG_WITH_EXPECTATIONS,
             None,
             id="null_result_format",
         ),
@@ -273,6 +240,21 @@ def test_gx_cloud_response_json_to_object_dict(
     else:
         actual = ExpectationsStore.gx_cloud_response_json_to_object_dict(response_json)
         assert actual == expected
+
+
+@pytest.mark.unit
+def test_gx_cloud_response_json_to_object_collection():
+    response_json = {
+        "data": [
+            _SUITE_CONFIG,
+            _SUITE_CONFIG_WITH_EXPECTATIONS,
+        ]
+    }
+
+    result = ExpectationsStore.gx_cloud_response_json_to_object_collection(response_json)
+
+    expected = [_SUITE_CONFIG, _SUITE_CONFIG_WITH_EXPECTATIONS]
+    assert result == expected
 
 
 @pytest.mark.unit

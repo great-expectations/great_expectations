@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import re
 import warnings
 from datetime import date, datetime
 from pprint import pformat as pf
@@ -60,6 +61,7 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
     GxDatasourceWarning,
+    PartitionerProtocol,
     Sorter,
     SortersDefinition,
     TestConnectionError,
@@ -76,7 +78,8 @@ if TYPE_CHECKING:
     from sqlalchemy.sql import quoted_name  # noqa: TID251 # type-checking only
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.datasource.fluent import BatchRequestOptions
+    from great_expectations.core.batch_definition import BatchDefinition
+    from great_expectations.datasource.fluent import BatchParameters
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -89,68 +92,7 @@ class SQLDatasourceError(Exception):
     pass
 
 
-class _Partitioner(Protocol):
-    @property
-    def columns(self) -> list[str]:
-        """The names of the column used to partition the data"""
-
-    @property
-    def method_name(self) -> str:
-        """Returns a partitioner method name.
-
-        The possible values of partitioner method names are defined in the enum,
-        great_expectations.execution_engine.partition_and_sample.data_partitioner.PartitionerMethod
-        """
-
-    @property
-    def param_names(self) -> List[str]:
-        """Returns the parameter names that specify a batch derived from this partitioner
-
-        For example, for PartitionerYearMonth this returns ["year", "month"]. For more
-        examples, please see Partitioner* classes below.
-        """
-
-    def partitioner_method_kwargs(self) -> Dict[str, Any]:
-        """A shim to our sqlalchemy execution engine partitioner methods
-
-        We translate any internal _Partitioner state and what is passed in from
-        a batch_request to the partitioner_kwargs required by our execution engine
-        data partitioners defined in:
-        great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner
-
-        Look at Partitioner* classes for concrete examples.
-        """
-
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
-        """Translates `options` to the execution engine batch spec kwarg identifiers
-
-        Arguments:
-            options: A BatchRequest.options dictionary that specifies ALL the fields necessary
-                     to specify a batch with respect to this partitioner.
-
-        Returns:
-            A dictionary that can be added to batch_spec_kwargs["batch_identifiers"].
-            This has one of 2 forms:
-              1. This category has many parameters are derived from 1 column.
-                 These only are datetime partitioners and the batch_spec_kwargs["batch_identifiers"]
-                 look like:
-                   {column_name: {datepart_1: value, datepart_2: value, ...}
-                 where datepart_* are strings like "year", "month", "day". The exact
-                 fields depend on the partitioner.
-
-              2. This category has only 1 parameter for each column.
-                 This is used for all other partitioners and the batch_spec_kwargs["batch_identifiers"]
-                 look like:
-                   {column_name_1: value, column_name_2: value, ...}
-                 where value is the value of the column after being processed by the partitioner.
-                 For example, for the PartitionerModInteger where mod = 3,
-                 {"passenger_count": 2}, means the raw passenger count value is in the set:
-                 {2, 5, 8, ...} = {2*n + 1 | n is a nonnegative integer }
-                 This category was only 1 parameter per column.
-        """  # noqa: E501
-
+class _Partitioner(PartitionerProtocol, Protocol):
     def param_defaults(self, sql_asset: _SQLAsset) -> List[Dict]:
         """Creates all valid batch requests options for sql_asset
 
@@ -161,6 +103,7 @@ class _Partitioner(Protocol):
         ie dictionaries, of the form {"year": year, "month": month} that contain all these distinct
         pairs.
         """
+        ...
 
 
 def _partitioner_and_sql_asset_to_batch_identifier_data(
@@ -179,6 +122,7 @@ def _partitioner_and_sql_asset_to_batch_identifier_data(
 class _PartitionerDatetime(FluentBaseModel):
     column_name: str
     method_name: str
+    sort_ascending: bool = True
 
     @property
     def columns(self) -> list[str]:
@@ -193,14 +137,14 @@ class _PartitionerDatetime(FluentBaseModel):
             params.append(identifer_data[self.column_name])
         return params
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         """Validates all the datetime parameters for this partitioner exist in `options`."""
         identifiers: Dict = {}
         for part in self.param_names:
             if part not in options:
-                raise ValueError(f"'{part}' must be specified in the batch request options")  # noqa: TRY003
+                raise ValueError(f"'{part}' must be specified in the batch parameters")  # noqa: TRY003
             identifiers[part] = options[part]
         return {self.column_name: identifiers}
 
@@ -214,6 +158,7 @@ class _PartitionerDatetime(FluentBaseModel):
 
 class SqlPartitionerYear(_PartitionerDatetime):
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_year"] = "partition_on_year"
 
     @property
@@ -228,6 +173,7 @@ class SqlPartitionerYear(_PartitionerDatetime):
 
 class SqlPartitionerYearAndMonth(_PartitionerDatetime):
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
     @property
@@ -242,6 +188,7 @@ class SqlPartitionerYearAndMonth(_PartitionerDatetime):
 
 class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month_and_day"] = (
         "partition_on_year_and_month_and_day"
     )
@@ -259,6 +206,7 @@ class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
 class SqlPartitionerDatetimePart(_PartitionerDatetime):
     datetime_parts: List[str]
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
 
     @property
@@ -282,6 +230,7 @@ class SqlPartitionerDatetimePart(_PartitionerDatetime):
 class _PartitionerOneColumnOneParam(FluentBaseModel):
     column_name: str
     method_name: str
+    sort_ascending: bool = True
 
     @property
     def columns(self) -> list[str]:
@@ -303,8 +252,8 @@ class _PartitionerOneColumnOneParam(FluentBaseModel):
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         raise NotImplementedError
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         raise NotImplementedError
 
@@ -324,11 +273,11 @@ class SqlPartitionerDividedInteger(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name, "divisor": self.divisor}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "quotient" not in options:
-            raise ValueError("'quotient' must be specified in the batch request options")  # noqa: TRY003
+            raise ValueError("'quotient' must be specified in the batch parameters")  # noqa: TRY003
         return {self.column_name: options["quotient"]}
 
 
@@ -347,11 +296,11 @@ class SqlPartitionerModInteger(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name, "mod": self.mod}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "remainder" not in options:
-            raise ValueError("'remainder' must be specified in the batch request options")  # noqa: TRY003
+            raise ValueError("'remainder' must be specified in the batch parameters")  # noqa: TRY003
         return {self.column_name: options["remainder"]}
 
 
@@ -369,11 +318,11 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
         return {"column_name": self.column_name}
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if self.column_name not in options:
-            raise ValueError(f"'{self.column_name}' must be specified in the batch request options")  # noqa: TRY003
+            raise ValueError(f"'{self.column_name}' must be specified in the batch parameters")  # noqa: TRY003
         return {self.column_name: options[self.column_name]}
 
     @override
@@ -387,6 +336,7 @@ class SqlPartitionerColumnValue(_PartitionerOneColumnOneParam):
 
 class SqlPartitionerMultiColumnValue(FluentBaseModel):
     column_names: List[str]
+    sort_ascending: bool = True
     method_name: Literal["partition_on_multi_column_values"] = "partition_on_multi_column_values"
 
     @property
@@ -400,12 +350,12 @@ class SqlPartitionerMultiColumnValue(FluentBaseModel):
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_names": self.column_names}
 
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if not (set(self.column_names) <= set(options.keys())):
             raise ValueError(  # noqa: TRY003
-                f"All column names, {self.column_names}, must be specified in the batch request options. "  # noqa: E501
+                f"All column names, {self.column_names}, must be specified in the batch parameters. "  # noqa: E501
                 f" The options provided were f{options}."
             )
         return {col: options[col] for col in self.column_names}
@@ -429,6 +379,7 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
     column_name: str
+    sort_ascending: bool = True
     method_name: Literal["partition_on_converted_datetime"] = "partition_on_converted_datetime"
 
     @property
@@ -446,12 +397,12 @@ class SqlitePartitionerConvertedDateTime(_PartitionerOneColumnOneParam):
         }
 
     @override
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
+    def batch_parameters_to_batch_spec_kwarg_identifiers(
+        self, options: BatchParameters
     ) -> Dict[str, Any]:
         if "datetime" not in options:
             raise ValueError(  # noqa: TRY003
-                "'datetime' must be specified in the batch request options to create a batch identifier"  # noqa: E501
+                "'datetime' must be specified in the batch parameters to create a batch identifier"
             )
         return {self.column_name: options["datetime"]}
 
@@ -510,7 +461,7 @@ class _SQLAsset(DataAsset):
         return PartitionerClass(**abstract_partitioner.dict())
 
     @override
-    def get_batch_request_options_keys(
+    def get_batch_parameters_keys(
         self,
         partitioner: Optional[Partitioner] = None,
     ) -> tuple[str, ...]:
@@ -525,7 +476,7 @@ class _SQLAsset(DataAsset):
         pass
 
     @staticmethod
-    def _matches_request_options(candidate: Dict, requested_options: BatchRequestOptions) -> bool:
+    def _matches_request_options(candidate: Dict, requested_options: BatchParameters) -> bool:
         for k, v in requested_options.items():
             if isinstance(candidate[k], (datetime, date)):
                 candidate[k] = str(candidate[k])
@@ -551,7 +502,7 @@ class _SQLAsset(DataAsset):
         batch_requests: List[BatchRequest] = []
         # We iterate through all possible batches as determined by the partitioner
         for params in sql_partitioner.param_defaults(self):
-            # If the params from the partitioner don't match the batch request options
+            # If the params from the partitioner don't match the batch parameters
             # we don't create this batch.
             if not _SQLAsset._matches_request_options(params, batch_request.options):
                 continue
@@ -599,7 +550,7 @@ class _SQLAsset(DataAsset):
                 # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
                 # it is hardcoded to a dict above, so we cast it here.
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
-                    sql_partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
+                    sql_partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(
                         request.options
                     )
                 )
@@ -635,40 +586,48 @@ class _SQLAsset(DataAsset):
                     batch_definition=batch_definition,
                 )
             )
-        self.sort_batches(batch_list)
+        if sql_partitioner:
+            self.sort_batches(batch_list, sql_partitioner)
         return batch_list[batch_request.batch_slice]
 
     @public_api
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
             options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling batch_request_options.
+                calling batch_parameters.
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
+            batching_regex: Parameter batching_regex is not supported by this Asset type and must be None.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """  # noqa: E501
-        if options is not None and not self._batch_request_options_are_valid(
+        if options is not None and not self._batch_parameters_are_valid(
             options=options, partitioner=partitioner
         ):
-            allowed_keys = set(self.get_batch_request_options_keys(partitioner=partitioner))
+            allowed_keys = set(self.get_batch_parameters_keys(partitioner=partitioner))
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
-                "Batch request options should only contain keys from the following set:\n"
+                "batch parameters should only contain keys from the following set:\n"
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+            )
+
+        if batching_regex is not None:
+            raise ValueError(  # noqa: TRY003
+                "batching_regex is not currently supported and must be None for this DataAsset."
             )
 
         return BatchRequest(
@@ -677,6 +636,47 @@ class _SQLAsset(DataAsset):
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_whole_table(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_yearly(
+        self, name: str, column: str, sort_ascending: bool = True
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYear(column_name=column, sort_ascending=sort_ascending),
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_monthly(
+        self, name: str, column: str, sort_ascending: bool = True
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonth(column_name=column, sort_ascending=sort_ascending),
+            batching_regex=None,
+        )
+
+    @public_api
+    def add_batch_definition_daily(
+        self, name: str, column: str, sort_ascending: bool = True
+    ) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonthAndDay(
+                column_name=column, sort_ascending=sort_ascending
+            ),
+            batching_regex=None,
         )
 
     @override
@@ -689,16 +689,14 @@ class _SQLAsset(DataAsset):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and self._batch_request_options_are_valid(
+            and self._batch_parameters_are_valid(
                 options=batch_request.options,
                 partitioner=batch_request.partitioner,
             )
         ):
             options = {
                 option: None
-                for option in self.get_batch_request_options_keys(
-                    partitioner=batch_request.partitioner
-                )
+                for option in self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             }
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,

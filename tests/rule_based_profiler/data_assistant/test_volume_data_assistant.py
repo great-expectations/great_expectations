@@ -1010,13 +1010,13 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "random_seed": "$variables.random_seed",
                                     "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",  # noqa: E501
                                     "round_decimals": "$variables.round_decimals",
-                                    "evaluation_parameter_builder_configs": [
+                                    "suite_parameter_builder_configs": [
                                         {
                                             "enforce_numeric_metric": True,
                                             "replace_nan_with_zero": True,
                                             "name": "table_row_count",
                                             "class_name": "MetricMultiBatchParameterBuilder",
-                                            "evaluation_parameter_builder_configs": None,
+                                            "suite_parameter_builder_configs": None,
                                             "metric_value_kwargs": None,
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                                             "metric_domain_kwargs": None,
@@ -1117,13 +1117,13 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                                     "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",  # noqa: E501
                                     "truncate_values": "$variables.truncate_values",
-                                    "evaluation_parameter_builder_configs": [
+                                    "suite_parameter_builder_configs": [
                                         {
                                             "enforce_numeric_metric": True,
                                             "replace_nan_with_zero": True,
                                             "name": "column_distinct_values_count",
                                             "class_name": "MetricMultiBatchParameterBuilder",
-                                            "evaluation_parameter_builder_configs": None,
+                                            "suite_parameter_builder_configs": None,
                                             "metric_value_kwargs": None,
                                             "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                                             "metric_domain_kwargs": "$domain.domain_kwargs",

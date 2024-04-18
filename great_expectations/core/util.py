@@ -394,6 +394,9 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if isinstance(data, RenderedContent):
         return data.to_json_dict()
 
+    if isinstance(data, re.Pattern):
+        return data.pattern
+
     # Unable to serialize (unrecognized data type).
     raise TypeError(f"{data!s} is of type {type(data).__name__} which cannot be serialized.")  # noqa: TRY003
 
@@ -519,7 +522,7 @@ def substitute_all_strftime_format_strings(
     """  # noqa: E501
 
     datetime_obj = datetime_obj or datetime.datetime.now()  # noqa: DTZ005
-    if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
+    if isinstance(data, (dict, OrderedDict)):
         return {
             k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
             for k, v in data.items()

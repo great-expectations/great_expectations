@@ -78,7 +78,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
-            get_unfiltered_batch_definition_list_fn=data_asset.get_unfiltered_batch_definition_list_fn(),
+            whole_directory_path_override=data_asset.get_whole_directory_path_override(),
         )
 
         # build a more specific `_test_connection_error_message`

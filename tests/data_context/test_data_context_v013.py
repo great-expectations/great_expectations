@@ -35,8 +35,8 @@ def basic_data_context_v013_config():
             "commented_map": {},
             "config_version": 3,
             "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "suite_parameter_store_name": "suite_parameter_store",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
@@ -49,9 +49,9 @@ def basic_data_context_v013_config():
                         "base_directory": "expectations/",
                     },
                 },
-                "evaluation_parameter_store": {
+                "suite_parameter_store": {
                     "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
+                    "class_name": "SuiteParameterStore",
                 },
                 "checkpoint_store": {
                     "class_name": "CheckpointStore",
@@ -218,8 +218,8 @@ def test_get_config(empty_data_context):
         "stores",
         "expectations_store_name",
         "fluent_datasources",
-        "validations_store_name",
-        "evaluation_parameter_store_name",
+        "validation_results_store_name",
+        "suite_parameter_store_name",
         "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",

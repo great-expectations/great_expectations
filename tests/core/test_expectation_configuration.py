@@ -106,7 +106,7 @@ def test_expectation_configuration_equivalence(config1, config2, config3, config
 
 
 @pytest.mark.unit
-def test_expectation_configuration_get_evaluation_parameter_dependencies():
+def test_expectation_configuration_get_suite_parameter_dependencies():
     # Getting evaluation parameter dependencies relies on pyparsing, but the expectation
     # configuration is responsible for ensuring that it only returns one copy of required metrics.
 
@@ -131,7 +131,7 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
         },
     )
 
-    dependencies = ec.get_evaluation_parameter_dependencies()
+    dependencies = ec.get_suite_parameter_dependencies()
     dependencies["profile"][0]["metric_kwargs_id"]["column=norm"] = set(
         dependencies["profile"][0]["metric_kwargs_id"]["column=norm"]
     )
@@ -151,7 +151,7 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
 
 
 @pytest.mark.unit
-def test_expectation_configuration_get_evaluation_parameter_dependencies_with_query_store_formatted_urns():  # noqa: E501
+def test_expectation_configuration_get_suite_parameter_dependencies_with_query_store_formatted_urns():  # noqa: E501
     ec = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -162,7 +162,7 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies_with_qu
     )
 
     # Should fully skip `nested_update` calls in method due to lacking an "expectation_suite_name" key  # noqa: E501
-    dependencies = ec.get_evaluation_parameter_dependencies()
+    dependencies = ec.get_suite_parameter_dependencies()
     assert dependencies == {}
 
 

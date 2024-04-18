@@ -53,8 +53,8 @@ def data_context_config_dict() -> dict:
     config: dict = {
         "config_version": 3.0,
         "plugins_directory": "plugins/",
-        "evaluation_parameter_store_name": "evaluation_parameter_store",
-        "validations_store_name": "validations_store",
+        "suite_parameter_store_name": "suite_parameter_store",
+        "validation_results_store_name": "validation_results_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
         "profiler_store_name": "profiler_store",
@@ -67,9 +67,9 @@ def data_context_config_dict() -> dict:
                     "base_directory": "expectations/",
                 },
             },
-            "evaluation_parameter_store": {
+            "suite_parameter_store": {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "EvaluationParameterStore",
+                "class_name": "SuiteParameterStore",
             },
         },
         "data_docs_sites": {},
@@ -244,11 +244,11 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         ),
         pytest.param(
             DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validations_store getter",
+            id="validation_results_store getter",
         ),
         pytest.param(
-            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
-            id="evaluation_parameter_store getter",
+            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
+            id="suite_parameter_store getter",
         ),
         pytest.param(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
@@ -341,14 +341,14 @@ def test_data_context_variables_get_with_substitutions(
             id="expectations_store setter",
         ),
         pytest.param(
-            "my_validations_store",
+            "my_validation_results_store",
             DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validations_store setter",
+            id="validation_results_store setter",
         ),
         pytest.param(
-            "my_evaluation_parameter_store",
-            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
-            id="evaluation_parameter_store setter",
+            "my_suite_parameter_store",
+            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
+            id="suite_parameter_store setter",
         ),
         pytest.param(
             "my_checkpoint_store",
@@ -453,13 +453,13 @@ def test_data_context_variables_save_config(
                     "base_directory": "expectations/",
                 },
             },
-            "evaluation_parameter_store": {
+            "suite_parameter_store": {
                 "module_name": "great_expectations.data_context.store",
-                "class_name": "EvaluationParameterStore",
+                "class_name": "SuiteParameterStore",
             },
             "checkpoint_store": {"class_name": "CheckpointStore"},
             "profiler_store": {"class_name": "ProfilerStore"},
-            "validations_store": {"class_name": "ValidationsStore"},
+            "validation_results_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
         "include_rendered_content": {

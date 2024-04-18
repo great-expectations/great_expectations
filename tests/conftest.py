@@ -1113,7 +1113,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 },
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1152,7 +1152,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 },
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "FOO",
             "tolerance": "FOOBOO",
             "aux_param_0": "FOOBARBOO",
@@ -1203,7 +1203,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 "action": {"class_name": "Template2SpecialAction"},
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1242,7 +1242,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                 "action": {"class_name": "Template3SpecialAction"},
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1674,7 +1674,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 },
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1713,7 +1713,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 },
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "FOO",
             "tolerance": "FOOBOO",
             "aux_param_0": "FOOBARBOO",
@@ -1764,7 +1764,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 "action": {"class_name": "Template2SpecialAction"},
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -1803,7 +1803,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_check
                 "action": {"class_name": "Template3SpecialAction"},
             },
         ],
-        evaluation_parameters={
+        suite_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
@@ -3131,8 +3131,8 @@ def empty_ge_cloud_data_context_config(
 ):
     config_yaml_str = f"""
 stores:
-  default_evaluation_parameter_store:
-    class_name: EvaluationParameterStore
+  default_suite_parameter_store:
+    class_name: SuiteParameterStore
 
   default_expectations_store:
     class_name: ExpectationsStore
@@ -3145,8 +3145,8 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
-  default_validations_store:
-    class_name: ValidationsStore
+  default_validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: {GXCloudStoreBackend.__name__}
       ge_cloud_base_url: {ge_cloud_base_url}
@@ -3189,9 +3189,9 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
-evaluation_parameter_store_name: default_evaluation_parameter_store
+suite_parameter_store_name: default_suite_parameter_store
 expectations_store_name: default_expectations_store
-validations_store_name: default_validations_store
+validation_results_store_name: default_validation_results_store
 checkpoint_store_name: default_checkpoint_store
 profiler_store_name: default_profiler_store
 
@@ -3778,7 +3778,7 @@ def alice_columnar_table_single_batch():
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     },
                     {
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
@@ -3790,7 +3790,7 @@ def alice_columnar_table_single_batch():
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -3851,7 +3851,7 @@ def alice_columnar_table_single_batch():
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     },
                     {
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
@@ -3863,7 +3863,7 @@ def alice_columnar_table_single_batch():
                         "enforce_numeric_metric": False,
                         "replace_nan_with_zero": False,
                         "reduce_scalar_metric": True,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     },
                     {
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
@@ -3875,7 +3875,7 @@ def alice_columnar_table_single_batch():
                         "enforce_numeric_metric": False,
                         "reduce_scalar_metric": True,
                         "replace_nan_with_zero": False,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     },
                     {
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",  # noqa: E501
@@ -3945,7 +3945,7 @@ def alice_columnar_table_single_batch():
                             "%y/%m/%d",
                         ],
                         "threshold": 1.0,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -4058,7 +4058,7 @@ def alice_columnar_table_single_batch():
                         "name": "my_user_agent_value_set",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "metric_value_kwargs": None,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -5121,7 +5121,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": 0},
                         "round_decimals": 0,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -5172,7 +5172,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
                         "round_decimals": None,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     },
                     {
                         "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
@@ -5194,7 +5194,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "quantile_bias_std_error_ratio_threshold": 0.25,
                         "truncate_values": {"lower_bound": None, "upper_bound": None},
                         "round_decimals": None,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     },
                 ],
                 "expectation_configuration_builders": [
@@ -5247,7 +5247,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_value_kwargs": None,
                         "candidate_strings": ["%y-%m-%d", "%Y-%m-%d %H:%M:%S"],
                         "threshold": 0.9,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -5294,7 +5294,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "metric_value_kwargs": None,
                         "candidate_regexes": ["^\\d{1}$", "^\\d{2}$"],
                         "threshold": 0.9,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     }
                 ],
                 "expectation_configuration_builders": [
@@ -5343,7 +5343,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "name": "my_pickup_location_id_value_set",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
                         "metric_value_kwargs": None,
-                        "evaluation_parameter_builder_configs": None,
+                        "suite_parameter_builder_configs": None,
                     }
                 ],
                 "expectation_configuration_builders": [

@@ -58,6 +58,7 @@ class _PowerBIAsset(DataAsset):
 
     _reader_method: ClassVar[FabricReaderMethods]
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "batch_definitions",
         "batch_metadata",
         "name",
         "order_by",

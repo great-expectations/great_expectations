@@ -43,6 +43,7 @@ from great_expectations.data_context.data_context.serializable_data_context impo
 )
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
+    DataContextVariableSchema,
 )
 from great_expectations.data_context.store import DataAssetStore
 from great_expectations.data_context.store.datasource_store import (
@@ -51,6 +52,8 @@ from great_expectations.data_context.store.datasource_store import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
+from great_expectations.data_context.store.metric_store import SuiteParameterStore
+from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationDefinition,
@@ -274,6 +277,48 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         config["fluent_datasources"] = _extract_fluent_datasources(config)
 
+        # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
+        # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
+
+        cls._change_key_from_v0_to_v1(
+            config,
+            "evaluation_parameter_store_name",
+            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
+        )
+        cls._change_key_from_v0_to_v1(
+            config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
+        )
+        stores = config.get("stores")
+        if stores:
+            for store in stores.values():
+                if store:
+                    cls._change_value_from_v0_to_v1(
+                        store,
+                        "class_name",
+                        "EvaluationParameterStore",
+                        SuiteParameterStore.__name__,
+                    )
+                    cls._change_value_from_v0_to_v1(
+                        store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
+                    )
+
+        return config
+
+    @staticmethod
+    def _change_key_from_v0_to_v1(config: dict, v0_key: str, v1_key: str) -> Optional[dict]:
+        """Update the key if we have a V0 key and no V1 key in the config.
+
+        Mutates the config object and returns the value that was renamed
+        """
+        value = config.pop(v0_key, None)
+        if value and v1_key not in config:
+            config[v1_key] = value
+        return config.get(v1_key)
+
+    @staticmethod
+    def _change_value_from_v0_to_v1(config: dict, key: str, v0_value: str, v1_value: str) -> dict:
+        if config.get(key) == v0_value:
+            config[key] = v1_value
         return config
 
     @classmethod
@@ -725,7 +770,7 @@ class CloudDataContext(SerializableDataContext):
         if not overwrite_existing:
             self._validate_suite_unique_constaints_before_save(key)
 
-        self._evaluation_parameter_dependencies_compiled = False
+        self._suite_parameter_dependencies_compiled = False
         include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
             include_rendered_content=include_rendered_content
         )
@@ -760,7 +805,7 @@ class CloudDataContext(SerializableDataContext):
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
         action_list: Sequence[ActionDict] | None = None,
-        evaluation_parameters: dict | None = None,
+        suite_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
         id: str | None = None,
@@ -778,7 +823,7 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
             action_list=action_list,
-            evaluation_parameters=evaluation_parameters,
+            suite_parameters=suite_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
             expectation_suite_id=expectation_suite_id,

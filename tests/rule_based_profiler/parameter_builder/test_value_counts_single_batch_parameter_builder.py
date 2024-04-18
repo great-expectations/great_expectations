@@ -49,7 +49,7 @@ def test_value_counts_single_batch_parameter_builder_alice(
 
     parameter_builder: ParameterBuilder = ValueCountsSingleBatchParameterBuilder(
         name="my_name",
-        evaluation_parameter_builder_configs=None,
+        suite_parameter_builder_configs=None,
         data_context=data_context,
     )
 

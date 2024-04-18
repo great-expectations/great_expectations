@@ -25,8 +25,8 @@ def totally_empty_data_context(tmp_path_factory):
     config = {
         "config_version": 3,
         "plugins_directory": "plugins/",
-        "evaluation_parameter_store_name": "not_a_real_store_name",
-        "validations_store_name": "another_fake_store",
+        "suite_parameter_store_name": "not_a_real_store_name",
+        "validation_results_store_name": "another_fake_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
         "datasources": {},
@@ -80,7 +80,7 @@ def test_add_store(totally_empty_data_context):
         "my_new_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
         },
     )
     assert "my_new_store" in totally_empty_data_context.stores.keys()
@@ -94,27 +94,27 @@ def test_default_config_yml_stores(tmp_path_factory):
 
     assert set(context.stores.keys()) == {
         "expectations_store",
-        "validations_store",
-        "evaluation_parameter_store",
+        "validation_results_store",
+        "suite_parameter_store",
         "profiler_store",
         "checkpoint_store",
         "validation_definition_store",
     }
 
     context.add_store(
-        "my_new_validations_store",
+        "my_new_validation_results_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
         },
     )
 
     assert set(context.stores.keys()) == {
         "checkpoint_store",
         "expectations_store",
-        "validations_store",
-        "evaluation_parameter_store",
+        "validation_results_store",
+        "suite_parameter_store",
         "profiler_store",
         "validation_definition_store",
-        "my_new_validations_store",
+        "my_new_validation_results_store",
     }

@@ -15,8 +15,8 @@ datasources:
         base_directory: ../data
 plugins_directory: plugins/
 
-evaluation_parameter_store_name: evaluation_parameter_store
-validations_store_name: validations_store
+suite_parameter_store_name: suite_parameter_store
+validation_results_store_name: validation_results_store
 expectations_store_name: expectations_store
 checkpoint_store_name: checkpoint_store
 
@@ -33,15 +33,15 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
 
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-  evaluation_parameter_store:
+  suite_parameter_store:
     module_name: great_expectations.data_context.store
-    class_name: EvaluationParameterStore
+    class_name: SuiteParameterStore
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
@@ -51,7 +51,7 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          target_store_name: validations_store
+          target_store_name: validation_results_store
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction

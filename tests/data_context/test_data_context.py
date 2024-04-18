@@ -237,12 +237,12 @@ def test_get_expectation_suite_include_rendered_content(
 
 
 @pytest.mark.filesystem
-def test_compile_evaluation_parameter_dependencies(
+def test_compile_suite_parameter_dependencies(
     data_context_parameterized_expectation_suite,
 ):
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {}
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
+    assert data_context_parameterized_expectation_suite._suite_parameter_dependencies == {}
+    data_context_parameterized_expectation_suite._compile_suite_parameter_dependencies()
+    assert data_context_parameterized_expectation_suite._suite_parameter_dependencies == {
         "source_diabetes_data.default": [
             {
                 "metric_kwargs_id": {
@@ -257,7 +257,7 @@ def test_compile_evaluation_parameter_dependencies(
 
 
 @pytest.mark.filesystem
-def test_compile_evaluation_parameter_dependencies_broken_suite(
+def test_compile_suite_parameter_dependencies_broken_suite(
     data_context_parameterized_expectation_suite: FileDataContext,
 ):
     broken_suite_path = pathlib.Path(
@@ -285,10 +285,10 @@ def test_compile_evaluation_parameter_dependencies_broken_suite(
     with broken_suite_path.open("w", encoding="UTF-8") as fp:
         json.dump(obj=broken_suite_dict, fp=fp)
 
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {}
+    assert data_context_parameterized_expectation_suite._suite_parameter_dependencies == {}
     with pytest.warns(UserWarning):
-        data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
+        data_context_parameterized_expectation_suite._compile_suite_parameter_dependencies()
+    assert data_context_parameterized_expectation_suite._suite_parameter_dependencies == {
         "source_diabetes_data.default": [
             {
                 "metric_kwargs_id": {
@@ -1075,9 +1075,9 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     assert sorted(config.keys()) == [
         "action_list",
         "batch_request",
-        "evaluation_parameters",
         "name",
         "runtime_configuration",
+        "suite_parameters",
         "validations",
     ]
 
@@ -1122,7 +1122,7 @@ def test_run_checkpoint_new_style(
     with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
         checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 0
+    assert len(context.validation_results_store.list_keys()) == 0
 
     context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
 
@@ -1132,7 +1132,7 @@ def test_run_checkpoint_new_style(
 
     result: CheckpointResult = checkpoint.run()
     assert len(result.list_validation_results()) == 1
-    assert len(context.validations_store.list_keys()) == 2
+    assert len(context.validation_results_store.list_keys()) == 2
     assert result.success
 
 
@@ -1340,8 +1340,8 @@ def test_add_expectation_to_expectation_suite(empty_data_context_stats_enabled):
 
 
 @pytest.mark.filesystem
-def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_store):
-    """End to end test demonstrating usage of Stores evaluation parameters"""
+def test_stores_suite_parameters_resolve_correctly(data_context_with_query_store):
+    """End to end test demonstrating usage of Stores suite parameters"""
     context = data_context_with_query_store
     suite_name = "eval_param_suite"
     context.add_expectation_suite(expectation_suite_name=suite_name)

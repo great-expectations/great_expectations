@@ -76,6 +76,12 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.verify_that_key_to_filepath_operation_is_reversible()
             self._fixed_length_key = True
 
+    @staticmethod
+    def _is_missing_prefix_or_suffix(filepath_prefix: str, filepath_suffix: str, key: str) -> bool:
+        missing_prefix = bool(filepath_prefix and not key.startswith(filepath_prefix))
+        missing_suffix = bool(filepath_suffix and not key.endswith(filepath_suffix))
+        return missing_prefix or missing_suffix
+
     @override
     def _validate_key(self, key) -> None:
         super()._validate_key(key)
@@ -83,24 +89,15 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         for key_element in key:
             for substring in self.forbidden_substrings:
                 if substring in key_element:
-                    raise ValueError(
-                        "Keys in {} must not contain substrings in {} : {}".format(
-                            self.__class__.__name__,
-                            self.forbidden_substrings,
-                            key,
-                        )
+                    raise ValueError(  # noqa: TRY003
+                        f"Keys in {self.__class__.__name__} must not contain substrings in {self.forbidden_substrings} : {key}"  # noqa: E501
                     )
 
     @override
     def _validate_value(self, value) -> None:
         if not isinstance(value, str) and not isinstance(value, bytes):
-            raise TypeError(
-                "Values in {} must be instances of {} or {}, not {}".format(
-                    self.__class__.__name__,
-                    str,
-                    bytes,
-                    type(value),
-                )
+            raise TypeError(  # noqa: TRY003
+                f"Values in {self.__class__.__name__} must be instances of {str} or {bytes}, not {type(value)}"  # noqa: E501
             )
 
     def _convert_key_to_filepath(self, key):
@@ -206,13 +203,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         filepath = self._convert_key_to_filepath(key)
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:
-            raise ValueError(
-                "filepath template {} for class {} is not reversible for a tuple of length {}. "
-                "Have you included all elements in the key tuple?".format(
-                    self.filepath_template,
-                    self.__class__.__name__,
-                    self.key_length,
-                )
+            raise ValueError(  # noqa: TRY003
+                f"filepath template {self.filepath_template} for class {self.__class__.__name__} is not reversible for a tuple of length {self.key_length}. "  # noqa: E501
+                "Have you included all elements in the key tuple?"
             )
 
     @property
@@ -371,9 +364,11 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 else:
                     filepath = os.path.join(relative_path, file_name)  # noqa: PTH118
 
-                if self.filepath_prefix and not filepath.startswith(self.filepath_prefix):
-                    continue
-                elif self.filepath_suffix and not filepath.endswith(self.filepath_suffix):
+                if self._is_missing_prefix_or_suffix(
+                    filepath_prefix=self.filepath_prefix,
+                    filepath_suffix=self.filepath_suffix,
+                    key=filepath,
+                ):
                     continue
                 key = self._convert_filepath_to_key(filepath)
                 if key and not self.is_ignored_key(key):
@@ -640,9 +635,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
                 else:  # noqa: PLR5501
                     if s3_object_key.startswith(f"{self.prefix}/"):
                         s3_object_key = s3_object_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not s3_object_key.startswith(self.filepath_prefix):
-                continue
-            elif self.filepath_suffix and not s3_object_key.endswith(self.filepath_suffix):
+
+            if self._is_missing_prefix_or_suffix(
+                filepath_prefix=self.filepath_prefix,
+                filepath_suffix=self.filepath_suffix,
+                key=s3_object_key,
+            ):
                 continue
             key = self._convert_filepath_to_key(s3_object_key)
             if key:
@@ -911,9 +909,11 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_name,
                 self.prefix,
             )
-            if self.filepath_prefix and not gcs_object_key.startswith(self.filepath_prefix):
-                continue
-            elif self.filepath_suffix and not gcs_object_key.endswith(self.filepath_suffix):
+            if self._is_missing_prefix_or_suffix(
+                filepath_prefix=self.filepath_prefix,
+                filepath_suffix=self.filepath_suffix,
+                key=gcs_object_key,
+            ):
                 continue
             key = self._convert_filepath_to_key(gcs_object_key)
             if key:
@@ -1071,7 +1071,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        keys = self.list_keys()
+        return [self._get(key) for key in keys]
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
         from great_expectations.compatibility.azure import ContentSettings
@@ -1110,9 +1111,12 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             az_blob_key = os.path.relpath(obj.name)
             if az_blob_key.startswith(f"{self.prefix}{os.path.sep}"):
                 az_blob_key = az_blob_key[len(self.prefix) + 1 :]
-            if self.filepath_prefix and not az_blob_key.startswith(self.filepath_prefix):
-                continue
-            elif self.filepath_suffix and not az_blob_key.endswith(self.filepath_suffix):
+
+            if self._is_missing_prefix_or_suffix(
+                filepath_prefix=self.filepath_prefix,
+                filepath_suffix=self.filepath_suffix,
+                key=az_blob_key,
+            ):
                 continue
             key = self._convert_filepath_to_key(az_blob_key)
 

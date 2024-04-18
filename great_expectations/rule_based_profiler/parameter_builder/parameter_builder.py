@@ -94,13 +94,13 @@ class ParameterBuilder(ABC, Builder):
     """  # noqa: E501
 
     exclude_field_names: ClassVar[Set[str]] = Builder.exclude_field_names | {
-        "evaluation_parameter_builders",
+        "suite_parameter_builders",
     }
 
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -110,7 +110,7 @@ class ParameterBuilder(ABC, Builder):
             name: the name of this parameter builder -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
-            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            suite_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
             data_context: AbstractDataContext associated with ParameterBuilder
@@ -119,10 +119,10 @@ class ParameterBuilder(ABC, Builder):
 
         self._name = name
 
-        self._evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
+        self._suite_parameter_builder_configs = suite_parameter_builder_configs
 
-        self._evaluation_parameter_builders = init_rule_parameter_builders(
-            parameter_builder_configs=evaluation_parameter_builder_configs,
+        self._suite_parameter_builders = init_rule_parameter_builders(
+            parameter_builder_configs=suite_parameter_builder_configs,
             data_context=self._data_context,
         )
 
@@ -212,10 +212,10 @@ class ParameterBuilder(ABC, Builder):
         This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
         "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to operate.
         """  # noqa: E501
-        # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.  # noqa: E501
-        evaluation_parameter_builders: List[ParameterBuilder] = self.evaluation_parameter_builders
+        # Step-1: Check if any "suite_parameter_builders" are configured for specified "ParameterBuilder" object.  # noqa: E501
+        suite_parameter_builders: List[ParameterBuilder] = self.suite_parameter_builders
 
-        if not evaluation_parameter_builders:
+        if not suite_parameter_builders:
             return
 
         # Step-2: Obtain all fully-qualified parameter names ("variables" and "parameter" keys) in namespace of "Domain"  # noqa: E501
@@ -231,20 +231,20 @@ class ParameterBuilder(ABC, Builder):
 
         # Step-3: Check presence of fully-qualified parameter names of "ParameterBuilder" objects, obtained by iterating  # noqa: E501
         # over evaluation dependencies.  Execute "ParameterBuilder.build_parameters()" if not in "Domain" scoped list.  # noqa: E501
-        evaluation_parameter_builder: ParameterBuilder
-        for evaluation_parameter_builder in evaluation_parameter_builders:
+        suite_parameter_builder: ParameterBuilder
+        for suite_parameter_builder in suite_parameter_builders:
             if (
-                evaluation_parameter_builder.raw_fully_qualified_parameter_name
+                suite_parameter_builder.raw_fully_qualified_parameter_name
                 not in fully_qualified_parameter_names
-                or evaluation_parameter_builder.json_serialized_fully_qualified_parameter_name
+                or suite_parameter_builder.json_serialized_fully_qualified_parameter_name
                 not in fully_qualified_parameter_names
             ):
-                evaluation_parameter_builder.set_batch_list_if_null_batch_request(
+                suite_parameter_builder.set_batch_list_if_null_batch_request(
                     batch_list=self.batch_list,
                     batch_request=self.batch_request,
                 )
 
-                evaluation_parameter_builder.build_parameters(
+                suite_parameter_builder.build_parameters(
                     domain=domain,
                     variables=variables,
                     parameters=parameters,
@@ -272,16 +272,16 @@ class ParameterBuilder(ABC, Builder):
         return self._name
 
     @property
-    def evaluation_parameter_builders(
+    def suite_parameter_builders(
         self,
     ) -> Optional[List[ParameterBuilder]]:
-        return self._evaluation_parameter_builders
+        return self._suite_parameter_builders
 
     @property
-    def evaluation_parameter_builder_configs(
+    def suite_parameter_builder_configs(
         self,
     ) -> Optional[List[ParameterBuilderConfig]]:
-        return self._evaluation_parameter_builder_configs
+        return self._suite_parameter_builder_configs
 
     @property
     def raw_fully_qualified_parameter_name(self) -> str:
@@ -648,13 +648,11 @@ specified (empty "metric_name" value detected)."""  # noqa: E501
 
                         batch_metric_values.append(0.0)
                     elif not (
-                        (  # noqa: PLR1701
-                            isinstance(metric_value, (str, np.str_))
-                            and is_parseable_date(value=metric_value)
+                        isinstance(metric_value, (str, np.str_))
+                        and is_parseable_date(value=metric_value)
+                        or isinstance(
+                            metric_value, (datetime.datetime, numbers.Number, decimal.Decimal)
                         )
-                        or isinstance(metric_value, datetime.datetime)
-                        or isinstance(metric_value, numbers.Number)
-                        or isinstance(metric_value, decimal.Decimal)
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
                         raise gx_exceptions.ProfilerExecutionError(

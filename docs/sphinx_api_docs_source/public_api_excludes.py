@@ -334,7 +334,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="False match for datasource self_check",
         name="self_check",
         filepath=pathlib.Path(
-            "great_expectations/data_context/store/validations_store.py"
+            "great_expectations/data_context/store/validation_results_store.py"
         ),
     ),
     IncludeExcludeDefinition(
@@ -830,28 +830,28 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
     ),
     IncludeExcludeDefinition(
         reason="This method does not need to be accessed by users, and will eventually be removed from docs.",
-        name="get_batch_request_options_keys",
+        name="get_batch_parameters_keys",
         filepath=pathlib.Path(
             "great_expectations/datasource/fluent/file_path_data_asset.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="This method does not need to be accessed by users, and will eventually be removed from docs.",
-        name="get_batch_request_options_keys",
+        name="get_batch_parameters_keys",
         filepath=pathlib.Path(
             "great_expectations/datasource/fluent/pandas_datasource.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="This method does not need to be accessed by users, and will eventually be removed from docs.",
-        name="get_batch_request_options_keys",
+        name="get_batch_parameters_keys",
         filepath=pathlib.Path(
             "great_expectations/datasource/fluent/spark_datasource.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="This method does not need to be accessed by users, and will eventually be removed from docs.",
-        name="get_batch_request_options_keys",
+        name="get_batch_parameters_keys",
         filepath=pathlib.Path("great_expectations/datasource/fluent/sql_datasource.py"),
     ),
 ]

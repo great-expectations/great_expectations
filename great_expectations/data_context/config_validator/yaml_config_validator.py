@@ -52,9 +52,9 @@ class _YamlConfigValidator:
 
     TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
         "ExpectationsStore",
-        "ValidationsStore",
+        "ValidationResultsStore",
         "HtmlSiteStore",
-        "EvaluationParameterStore",
+        "SuiteParameterStore",
         "MetricStore",
         "SqlAlchemyQueryStore",
         "CheckpointStore",

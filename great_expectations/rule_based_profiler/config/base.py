@@ -190,7 +190,7 @@ class ParameterBuilderConfig(SerializableDictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
-        evaluation_parameter_builder_configs: Optional[list] = None,
+        suite_parameter_builder_configs: Optional[list] = None,
         **kwargs,
     ) -> None:
         self.module_name = module_name
@@ -198,7 +198,7 @@ class ParameterBuilderConfig(SerializableDictDot):
 
         self.name = name
 
-        self.evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
+        self.suite_parameter_builder_configs = suite_parameter_builder_configs
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -272,7 +272,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=True,
         allow_none=False,
     )
-    evaluation_parameter_builder_configs = fields.List(
+    suite_parameter_builder_configs = fields.List(
         cls_or_instance=fields.Nested(
             lambda: ParameterBuilderConfigSchema(),
             required=True,

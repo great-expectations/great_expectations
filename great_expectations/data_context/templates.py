@@ -79,10 +79,14 @@ EXPECTATIONS_STORE_STRING = yaml.dump(
     {"expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value["expectations_store"]}
 ).replace("\n", "\n  ")[:-2]
 VALIDATIONS_STORE_STRING = yaml.dump(
-    {"validations_store": DataContextConfigDefaults.DEFAULT_STORES.value["validations_store"]}
+    {
+        "validation_results_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "validation_results_store"
+        ]
+    }
 ).replace("\n", "\n  ")[:-2]
-EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
-    DataContextConfigDefaults.DEFAULT_STORES.value["evaluation_parameter_store"]
+SUITE_PARAMETER_STORE_STRING = yaml.dump(
+    DataContextConfigDefaults.DEFAULT_STORES.value["suite_parameter_store"]
 )
 CHECKPOINT_STORE_STRING = yaml.dump(
     {"checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]}
@@ -113,20 +117,20 @@ stores:
 # leave this section alone.
 #
 # Three stores are required: expectations, validations, and
-# evaluation_parameters, and must exist with a valid store entry. Additional
+# suite_parameters, and must exist with a valid store entry. Additional
 # stores can be configured for uses such as data_docs, etc.
   {EXPECTATIONS_STORE_STRING}
   {VALIDATIONS_STORE_STRING}
-  evaluation_parameter_store:
-    # Evaluation Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/docs/reference/evaluation_parameters/
-    {EVALUATION_PARAMETER_STORE_STRING}
+  suite_parameter_store:
+    # Suite Parameters enable dynamic expectations. Read more here:
+    # https://docs.greatexpectations.io/docs/reference/suite_parameters/
+    {SUITE_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
   {PROFILER_STORE_STRING}
   {VALIDATION_DEFINITION_STORE_STRING}
 expectations_store_name: expectations_store
-validations_store_name: validations_store
-evaluation_parameter_store_name: evaluation_parameter_store
+validation_results_store_name: validation_results_store
+suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 
 data_docs_sites:

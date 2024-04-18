@@ -75,7 +75,7 @@ stores:
   # leave this section alone.
   #
   # Three stores are required: expectations, validations, and
-  # evaluation_parameters, and must exist with a valid store entry. Additional
+  # suite_parameters, and must exist with a valid store entry. Additional
   # stores can be configured for uses such as data_docs, validation_operators, etc.
   expectations_store:
     class_name: ExpectationsStore
@@ -89,21 +89,21 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
 
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-  evaluation_parameter_store:
+  suite_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
-    # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
-    class_name: EvaluationParameterStore
+    # https://docs.greatexpectations.io/en/latest/reference/core_concepts/suite_parameters.html
+    class_name: SuiteParameterStore
 
 expectations_store_name: expectations_store
 checkpoint_store_name: checkpoint_store
-validations_store_name: validations_store
-evaluation_parameter_store_name: evaluation_parameter_store
+validation_results_store_name: validation_results_store
+suite_parameter_store_name: suite_parameter_store
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These

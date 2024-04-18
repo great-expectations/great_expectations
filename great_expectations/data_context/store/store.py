@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -102,27 +103,43 @@ class Store:
             )
         self._use_fixed_length_key = self._store_backend.fixed_length_key
 
-    @staticmethod
-    def gx_cloud_response_json_to_object_dict(response_json: Dict) -> Dict:
+    @classmethod
+    def gx_cloud_response_json_to_object_dict(cls, response_json: Dict) -> Dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
         return response_json
 
-    @staticmethod
-    def gx_cloud_response_json_to_object_collection(response_json: Dict) -> List[Dict]:
+    @classmethod
+    def gx_cloud_response_json_to_object_collection(cls, response_json: Dict) -> List[Dict]:
         """
         This method takes full json response from GX cloud and outputs a list of dicts appropriate for
         deserialization into a collection of GX objects
         """  # noqa: E501
+        logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
+        data = response_json["data"]
+        if not isinstance(data, list):
+            raise TypeError("GX Cloud did not return a collection of Datasources when expected")  # noqa: TRY003
+
+        return [cls._convert_raw_json_to_object_dict(d) for d in data]
+
+    @staticmethod
+    def _convert_raw_json_to_object_dict(data: dict[str, Any]) -> dict[str, Any]:
+        """Method to convert data from API to raw object dict
+
+        This SHOULD be used by both gx_cloud_response_json_to_object_collection
+        and gx_cloud_response_json_to_object_dict. It is a means of keeping
+        response parsing DRY for different response types, e.g. collections
+        may be shaped like {"data": [item1, item2, ...]} while single items
+        may be shaped like {"data": item}. This allows for pulling out the
+        data key and passing it to the appropriate method for conversion.
+        """
         raise NotImplementedError
 
     def _validate_key(self, key: DataContextKey) -> None:
         # STORE_BACKEND_ID_KEY always validated
-        if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return
-        elif isinstance(key, self.key_class):
+        if key == StoreBackend.STORE_BACKEND_ID_KEY or isinstance(key, self.key_class):
             return
         else:
             raise TypeError(  # noqa: TRY003

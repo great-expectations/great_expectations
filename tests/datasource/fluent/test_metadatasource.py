@@ -4,8 +4,9 @@ import copy
 import inspect
 import logging
 import pathlib
+import re
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, Generator, List, Optional, Tuple, Type, Union
 
 import pytest
 
@@ -17,8 +18,8 @@ from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context import get_context as get_gx_context
 from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.batch_request import (
+    BatchParameters,
     BatchRequest,
-    BatchRequestOptions,
 )
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import (
@@ -122,19 +123,20 @@ class DummyDataAsset(DataAsset):
     @override
     def build_batch_request(
         self,
-        options: Optional[BatchRequestOptions] = None,
+        options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
+        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
 @pytest.fixture(scope="function")
-def context_sources_cleanup() -> _SourceFactories:
+def context_sources_cleanup() -> Generator[_SourceFactories, None, None]:
     """Return the sources object and reset types/factories on teardown"""
     try:
         # setup
-        sources_copy = copy.deepcopy(_SourceFactories._SourceFactories__crud_registry)
+        sources_copy = copy.deepcopy(_SourceFactories._SourceFactories__crud_registry)  # type: ignore[attr-defined]
         type_lookup_copy = copy.deepcopy(_SourceFactories.type_lookup)
         sources = get_context().sources
 
@@ -144,13 +146,13 @@ def context_sources_cleanup() -> _SourceFactories:
 
         yield sources
     finally:
-        _SourceFactories._SourceFactories__crud_registry = sources_copy
+        _SourceFactories._SourceFactories__crud_registry = sources_copy  # type: ignore[attr-defined]
         _SourceFactories.type_lookup = type_lookup_copy
 
 
 @pytest.fixture(scope="function")
-def empty_sources(context_sources_cleanup) -> _SourceFactories:
-    _SourceFactories._SourceFactories__crud_registry.clear()
+def empty_sources(context_sources_cleanup) -> Generator[_SourceFactories, None, None]:
+    _SourceFactories._SourceFactories__crud_registry.clear()  # type: ignore[attr-defined]
     _SourceFactories.type_lookup.clear()
     assert not _SourceFactories.type_lookup
     yield context_sources_cleanup
@@ -174,6 +176,7 @@ class TestMetaDatasource:
             type: str = "my_test"
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -196,6 +199,7 @@ class TestMetaDatasource:
             type: str = "my_test"
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -216,6 +220,7 @@ class TestMetaDatasource:
             extra_field: str
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -251,6 +256,7 @@ class TestMetaDatasource:
             type: str = "foo_bar"
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -276,10 +282,12 @@ class TestMisconfiguredMetaDatasource:
 
             class MissingTypeDatasource(Datasource):
                 @property
+                @override
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
-                def test_connection(self) -> None: ...
+                @override
+                def test_connection(self) -> None: ...  # type: ignore[override]
 
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
@@ -288,7 +296,8 @@ class TestMisconfiguredMetaDatasource:
         class MissingExecEngineTypeDatasource(Datasource):
             type: str = "valid"
 
-            def test_connection(self) -> None: ...
+            @override
+            def test_connection(self) -> None: ...  # type: ignore[override]
 
         with pytest.raises(NotImplementedError):
             MissingExecEngineTypeDatasource(name="name").get_execution_engine()
@@ -307,10 +316,12 @@ class TestMisconfiguredMetaDatasource:
                 asset_types: ClassVar[List[Type[DataAsset]]] = [MissingTypeAsset]
 
                 @property
+                @override
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
-                def test_connection(self) -> None: ...
+                @override
+                def test_connection(self) -> None: ...  # type: ignore[override]
 
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
@@ -320,6 +331,7 @@ class TestMisconfiguredMetaDatasource:
             type: str = "valid"
 
             @property
+            @override
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
@@ -339,6 +351,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     class BlueAsset(DataAsset):
         type = "blue"
 
+        @override
         def test_connection(self): ...
 
     class PurpleDatasource(Datasource):
@@ -346,13 +359,14 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         type: str = "purple"
 
         @property
+        @override
         def execution_engine_type(self) -> Type[ExecutionEngine]:
             return DummyExecutionEngine
 
         def test_connection(self): ...
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
-            asset = RedAsset(name=asset_name)
+            asset = RedAsset(name=asset_name)  # type: ignore[call-arg] # ?
             self._add_asset(asset=asset)
             return asset
 

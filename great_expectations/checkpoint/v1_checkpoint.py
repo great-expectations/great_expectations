@@ -7,16 +7,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union, c
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.checkpoint.actions import (
-    EmailAction,
-    MicrosoftTeamsNotificationAction,
-    OpsgenieAlertAction,
-    PagerdutyAlertAction,
-    SlackNotificationAction,
-    SNSNotificationAction,
-    StoreValidationResultAction,
+    ActionContext,
+    CheckpointAction,
     UpdateDataDocsAction,
 )
-from great_expectations.compatibility.pydantic import BaseModel, root_validator, validator
+from great_expectations.compatibility.pydantic import BaseModel, Field, root_validator, validator
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,  # noqa: TCH001
 )
@@ -31,22 +26,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
-
-CheckpointAction: TypeAlias = Union[
-    EmailAction,
-    MicrosoftTeamsNotificationAction,
-    OpsgenieAlertAction,
-    PagerdutyAlertAction,
-    SlackNotificationAction,
-    SNSNotificationAction,
-    StoreValidationResultAction,
-    UpdateDataDocsAction,
-]
 
 
 class Checkpoint(BaseModel):
@@ -67,7 +49,7 @@ class Checkpoint(BaseModel):
 
     name: str
     validation_definitions: List[ValidationDefinition]
-    actions: List[CheckpointAction]
+    actions: List[CheckpointAction] = Field(default_factory=list)
     result_format: ResultFormat = ResultFormat.SUMMARY
     id: Union[str, None] = None
 
@@ -160,8 +142,9 @@ class Checkpoint(BaseModel):
         self,
         batch_parameters: Dict[str, Any] | None = None,
         expectation_parameters: Dict[str, Any] | None = None,
+        run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
-        run_id = RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
+        run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
             batch_parameters=batch_parameters,
             expectation_parameters=expectation_parameters,
@@ -189,8 +172,9 @@ class Checkpoint(BaseModel):
         for validation_definition in self.validation_definitions:
             validation_result = validation_definition.run(
                 batch_parameters=batch_parameters,
-                evaluation_parameters=expectation_parameters,
+                suite_parameters=expectation_parameters,
                 result_format=result_format,
+                run_id=run_id,
             )
             key = self._build_result_key(
                 validation_definition=validation_definition,
@@ -219,10 +203,31 @@ class Checkpoint(BaseModel):
         self,
         checkpoint_result: CheckpointResult,
     ) -> None:
-        for action in self.actions:
-            action.v1_run(
+        action_context = ActionContext()
+        sorted_actions = self._sort_actions()
+        for action in sorted_actions:
+            action_result = action.v1_run(
                 checkpoint_result=checkpoint_result,
+                action_context=action_context,
             )
+            action_context.update(action=action, action_result=action_result)
+
+    def _sort_actions(self) -> List[CheckpointAction]:
+        """
+        UpdateDataDocsActions are prioritized to run first, followed by all other actions.
+
+        This is due to the fact that certain actions reference data docs sites,
+        which must be updated first.
+        """
+        priority_actions: List[CheckpointAction] = []
+        secondary_actions: List[CheckpointAction] = []
+        for action in self.actions:
+            if isinstance(action, UpdateDataDocsAction):
+                priority_actions.append(action)
+            else:
+                secondary_actions.append(action)
+
+        return priority_actions + secondary_actions
 
     @public_api
     def save(self) -> None:
@@ -249,7 +254,8 @@ class CheckpointResult(BaseModel):
         if len(run_results) == 0:
             raise ValueError("CheckpointResult must contain at least one run result")  # noqa: TRY003
 
-        values["success"] = all(result.success for result in run_results.values())
+        if values["success"] is None:
+            values["success"] = all(result.success for result in run_results.values())
         return values
 
     @property

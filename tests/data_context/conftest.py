@@ -162,8 +162,8 @@ def basic_data_context_config():
             "commented_map": {},
             "config_version": 2,
             "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "suite_parameter_store_name": "suite_parameter_store",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
@@ -183,9 +183,9 @@ def basic_data_context_config():
                         "base_directory": "checkpoints/",
                     },
                 },
-                "evaluation_parameter_store": {
+                "suite_parameter_store": {
                     "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
+                    "class_name": "SuiteParameterStore",
                 },
             },
             "data_docs_sites": {},
@@ -231,8 +231,8 @@ def data_context_config_with_datasources(conn_string_password):
             "commented_map": {},
             "config_version": 2,
             "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "suite_parameter_store_name": "suite_parameter_store",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
@@ -343,9 +343,9 @@ def data_context_config_with_datasources(conn_string_password):
                         "base_directory": "checkpoints/",
                     },
                 },
-                "evaluation_parameter_store": {
+                "suite_parameter_store": {
                     "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
+                    "class_name": "SuiteParameterStore",
                 },
             },
             "data_docs_sites": {},
@@ -378,8 +378,8 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
             "commented_map": {},
             "config_version": 2,
             "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "suite_parameter_store_name": "suite_parameter_store",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {},
@@ -397,7 +397,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+                "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {
@@ -411,8 +411,8 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_validations_store": {
-                    "class_name": "ValidationsStore",
+                "default_validation_results_store": {
+                    "class_name": "ValidationResultsStore",
                     "store_backend": {
                         "class_name": GXCloudStoreBackend.__name__,
                         "ge_cloud_base_url": "http://foo/bar/",

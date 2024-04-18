@@ -87,7 +87,7 @@ module.exports = {
         {
           type: 'doc',
           id: 'core/installation_and_setup/manage_data_docs',
-          label: '🚧 Manage Data Docs'
+          label: 'Manage Data Docs'
         },
       ]
     },
@@ -409,7 +409,12 @@ module.exports = {
           ]
         },
       ]
-    }
+    },
+    {
+      type: 'doc',
+      id: 'oss/changelog',
+      label: 'Changelog'
+    },
   ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
