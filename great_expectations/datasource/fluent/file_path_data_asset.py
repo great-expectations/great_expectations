@@ -15,6 +15,7 @@ from typing import (
     Optional,
     Pattern,
     Set,
+    TypeVar,
 )
 
 import great_expectations.exceptions as gx_exceptions
@@ -32,7 +33,6 @@ from great_expectations.core.partitioners import (
     PartitionerYearAndMonth,
     PartitionerYearAndMonthAndDay,
 )
-from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
@@ -48,9 +48,6 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     TestConnectionError,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    _PandasFilePathDatasource,
 )
 from great_expectations.datasource.fluent.spark_generic_partitioners import (
     SparkPartitioner,
@@ -83,10 +80,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-FilePathDataSource = _PandasFilePathDatasource | _SparkFilePathDatasource
+_FilePathDatasource = TypeVar("_FilePathDatasource")
 
 
-class _FilePathDataAsset(DataAsset[FilePathDataSource, Partitioner]):
+class _FilePathDataAsset(DataAsset[_FilePathDatasource, Partitioner]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
