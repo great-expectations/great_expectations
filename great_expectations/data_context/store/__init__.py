@@ -23,7 +23,7 @@ from .metric_store import (  # isort:skip
     MetricStore,
 )
 from .expectations_store import ExpectationsStore  # isort:skip
-from .validations_store import ValidationsStore  # isort:skip
+from .validation_results_store import ValidationResultsStore  # isort:skip
 from .query_store import SqlAlchemyQueryStore  # isort:skip
 from .html_site_store import HtmlSiteStore  # isort:skip
 from .datasource_store import DatasourceStore  # isort:skip

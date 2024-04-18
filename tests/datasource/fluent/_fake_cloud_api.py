@@ -165,7 +165,7 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
             "checkpoint_store_name": "default_checkpoint_store",
             "expectations_store_name": "default_expectations_store",
             "suite_parameter_store_name": "default_suite_parameter_store",
-            "validations_store_name": "default_validations_store",
+            "validation_results_store_name": "default_validation_results_store",
             "stores": {
                 "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "default_expectations_store": {
@@ -194,8 +194,8 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_validations_store": {
-                    "class_name": "ValidationsStore",
+                "default_validation_results_store": {
+                    "class_name": "ValidationResultsStore",
                     "store_backend": {
                         "class_name": "GXCloudStoreBackend",
                         "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",
