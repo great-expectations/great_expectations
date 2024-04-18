@@ -422,7 +422,7 @@ SqlPartitioner = Union[
 ]
 
 
-class _SQLAsset(DataAsset):
+class _SQLAsset(DataAsset[Partitioner]):
     """A _SQLAsset Mixin
 
     This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality

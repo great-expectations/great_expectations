@@ -41,7 +41,7 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.batch_definition import BatchDefinition, PartitionerT
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.constants import (
@@ -242,7 +242,7 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 _DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
 
 
-class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
+class DataAsset(FluentBaseModel, Generic[_DatasourceT, PartitionerT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -255,10 +255,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
-    batch_definitions: List[BatchDefinition] = Field(default_factory=list)
+    batch_definitions: List[BatchDefinition[PartitionerT]] = Field(default_factory=list)
 
     # non-field private attributes
-    _save_batch_definition: Callable[[BatchDefinition], None] = pydantic.PrivateAttr()
+    _save_batch_definition: Callable[[BatchDefinition[PartitionerT]], None] = pydantic.PrivateAttr()
     _datasource: _DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
@@ -331,7 +331,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         name: str,
         partitioner: Optional[Partitioner] = None,
         batching_regex: Optional[re.Pattern] = None,
-    ) -> BatchDefinition:
+    ) -> BatchDefinition[PartitionerT]:
         """Add a BatchDefinition to this DataAsset.
         BatchDefinition names must be unique within a DataAsset.
 
@@ -371,7 +371,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         return batch_definition
 
     @public_api
-    def delete_batch_definition(self, batch_definition: BatchDefinition) -> None:
+    def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         """Delete a batch definition.
 
         Args:
@@ -405,7 +405,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
             self.__fields_set__.add("batch_definitions")
 
-    def get_batch_definition(self, batch_definition_name: str) -> BatchDefinition:
+    def get_batch_definition(self, batch_definition_name: str) -> BatchDefinition[PartitionerT]:
         batch_definitions = [
             batch_definition
             for batch_definition in self.batch_definitions
@@ -587,7 +587,9 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    def add_batch_definition(self, batch_definition: BatchDefinition) -> BatchDefinition:
+    def add_batch_definition(
+        self, batch_definition: BatchDefinition[PartitionerT]
+    ) -> BatchDefinition[PartitionerT]:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
             raise DataContextError("Cannot save datasource without a data context.")  # noqa: TRY003
@@ -609,7 +611,7 @@ class Datasource(
         output.set_data_asset(batch_definition.data_asset)
         return output
 
-    def delete_batch_definition(self, batch_definition: BatchDefinition) -> None:
+    def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
             raise DataContextError("Cannot save datasource without a data context.")  # noqa: TRY003
