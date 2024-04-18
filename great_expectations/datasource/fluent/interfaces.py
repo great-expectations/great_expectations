@@ -239,10 +239,10 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
-_DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
+DatasourceT = TypeVar("DatasourceT", bound=MetaDatasource)
 
 
-class DataAsset(FluentBaseModel, Generic[_DatasourceT, PartitionerT]):
+class DataAsset(FluentBaseModel, Generic[DatasourceT, PartitionerT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -259,12 +259,12 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT, PartitionerT]):
 
     # non-field private attributes
     _save_batch_definition: Callable[[BatchDefinition[PartitionerT]], None] = pydantic.PrivateAttr()
-    _datasource: _DatasourceT = pydantic.PrivateAttr()
+    _datasource: DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
-    def datasource(self) -> _DatasourceT:
+    def datasource(self) -> DatasourceT:
         return self._datasource
 
     def test_connection(self) -> None:
