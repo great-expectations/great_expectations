@@ -8,7 +8,7 @@ from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
+from great_expectations.data_context.store import ExpectationsStore, ValidationResultsStore
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -114,7 +114,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
     site_section_builders = site_builder.site_section_builders
 
     expectations_site_section_builder = site_section_builders["expectations"]
-    assert isinstance(expectations_site_section_builder.source_store, ValidationsStore)
+    assert isinstance(expectations_site_section_builder.source_store, ValidationResultsStore)
 
     validations_site_section_builder = site_section_builders["validations"]
     assert isinstance(validations_site_section_builder.source_store, ExpectationsStore)

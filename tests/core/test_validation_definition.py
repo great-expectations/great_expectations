@@ -27,7 +27,7 @@ from great_expectations.data_context.data_context.context_factory import (
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
 from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
@@ -191,11 +191,11 @@ class TestValidationRun:
             },
         )
 
-    @mock.patch.object(ValidationsStore, "set")
+    @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
     def test_persists_validation_results_for_non_cloud(
         self,
-        mock_validations_store_set: MagicMock,
+        mock_validation_results_store_set: MagicMock,
         mock_validator: MagicMock,
         validation_definition: ValidationDefinition,
     ):
@@ -217,18 +217,18 @@ class TestValidationRun:
         )
 
         # validate we are calling set on the store with data that's roughly the right shape
-        [(_, kwargs)] = mock_validations_store_set.call_args_list
+        [(_, kwargs)] = mock_validation_results_store_set.call_args_list
         key = kwargs["key"]
         value = kwargs["value"]
         assert isinstance(key, ValidationResultIdentifier)
         assert key.batch_identifier == BATCH_ID
         assert value.success is True
 
-    @mock.patch.object(ValidationsStore, "set")
+    @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
     def test_persists_validation_results_for_cloud(
         self,
-        mock_validations_store_set: MagicMock,
+        mock_validation_results_store_set: MagicMock,
         mock_validator: MagicMock,
         cloud_validation_definition: ValidationDefinition,
     ):
@@ -240,7 +240,7 @@ class TestValidationRun:
         cloud_validation_definition.run()
 
         # validate we are calling set on the store with data that's roughly the right shape
-        [(_, kwargs)] = mock_validations_store_set.call_args_list
+        [(_, kwargs)] = mock_validation_results_store_set.call_args_list
         key = kwargs["key"]
         value = kwargs["value"]
         assert isinstance(key, GXCloudIdentifier)

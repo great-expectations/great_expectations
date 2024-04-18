@@ -37,7 +37,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
-from great_expectations.data_context.store import ValidationsStore
+from great_expectations.data_context.store import ValidationResultsStore
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
     ExpectationSuiteIdentifier,
@@ -94,7 +94,7 @@ class MockCloudResponse:
 @pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreAction(mock_context):
-    fake_in_memory_store = ValidationsStore(
+    fake_in_memory_store = ValidationResultsStore(
         store_backend={
             "class_name": "InMemoryStoreBackend",
         }

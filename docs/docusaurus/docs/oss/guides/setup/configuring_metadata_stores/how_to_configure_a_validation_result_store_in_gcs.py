@@ -74,61 +74,63 @@ pop_stores = ["checkpoint_store", "suite_parameter_store", "expectations_store"]
 for store in pop_stores:
     stores.pop(store)
 
-actual_existing_validations_store = {}
-actual_existing_validations_store["stores"] = stores
-actual_existing_validations_store["validations_store_name"] = great_expectations_yaml[
-    "validations_store_name"
-]
+actual_existing_validation_results_store = {}
+actual_existing_validation_results_store["stores"] = stores
+actual_existing_validation_results_store["validation_results_store_name"] = (
+    great_expectations_yaml["validation_results_store_name"]
+)
 
-expected_existing_validations_store_yaml = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validations_store_yaml">
+expected_existing_validation_results_store_yaml = """
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validation_results_store_yaml">
 stores:
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 # </snippet>
 """
 
-assert actual_existing_validations_store == yaml.load(
-    expected_existing_validations_store_yaml
+assert actual_existing_validation_results_store == yaml.load(
+    expected_existing_validation_results_store_yaml
 )
 
-configured_validations_store_yaml = """
-# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validations_store_yaml">
+configured_validation_results_store_yaml = """
+# <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validation_results_store_yaml">
 stores:
-  validations_GCS_store:
-    class_name: ValidationsStore
+  validation_results_GCS_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
 
-validations_store_name: validations_GCS_store
+validation_results_store_name: validation_results_GCS_store
 # </snippet>
 """
 
 # replace example code with integration test configuration
-configured_validations_store = yaml.load(configured_validations_store_yaml)
-configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
-    "project"
-] = gcp_project
-configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
-    "bucket"
-] = "test_metadata_store"
-configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
-    "prefix"
-] = "how_to_configure_a_validation_result_store_in_gcs/validations"
+configured_validation_results_store = yaml.load(
+    configured_validation_results_store_yaml
+)
+configured_validation_results_store["stores"]["validation_results_GCS_store"][
+    "store_backend"
+]["project"] = gcp_project
+configured_validation_results_store["stores"]["validation_results_GCS_store"][
+    "store_backend"
+]["bucket"] = "test_metadata_store"
+configured_validation_results_store["stores"]["validation_results_GCS_store"][
+    "store_backend"
+]["prefix"] = "how_to_configure_a_validation_result_store_in_gcs/validations"
 
 try:
     # clean up validation store from last time if there was a failure mid-script
     delete_validation_store_files = (
-        f"gsutil -m rm gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
-        + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}/**"
+        f"gsutil -m rm gs://{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['bucket']}"
+        + f"/{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['prefix']}/**"
     )
     result = subprocess.run(
         delete_validation_store_files, check=True, stderr=subprocess.PIPE, shell=True
@@ -140,13 +142,17 @@ except Exception:
 
 # add and set the new validation store
 context.add_store(
-    store_name=configured_validations_store["validations_store_name"],
-    store_config=configured_validations_store["stores"]["validations_GCS_store"],
+    store_name=configured_validation_results_store["validation_results_store_name"],
+    store_config=configured_validation_results_store["stores"][
+        "validation_results_GCS_store"
+    ],
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
-great_expectations_yaml["validations_store_name"] = "validations_GCS_store"
-great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
+great_expectations_yaml["validation_results_store_name"] = (
+    "validation_results_GCS_store"
+)
+great_expectations_yaml["stores"]["validation_results_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
@@ -179,22 +185,22 @@ copy_validation_command = copy_validation_command.replace(
 )
 copy_validation_command = copy_validation_command.replace(
     "<YOUR GCS BUCKET NAME>",
-    configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
-        "bucket"
-    ],
+    configured_validation_results_store["stores"]["validation_results_GCS_store"][
+        "store_backend"
+    ]["bucket"],
 )
 copy_validation_command = copy_validation_command.replace(
     "<YOUR GCS PREFIX NAME>/validation_1.json",
-    configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
-        "prefix"
-    ]
+    configured_validation_results_store["stores"]["validation_results_GCS_store"][
+        "store_backend"
+    ]["prefix"]
     + "/validation_1.json",
 )
 copy_validation_command = copy_validation_command.replace(
     "<YOUR GCS PREFIX NAME>/validation_2.json",
-    configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
-        "prefix"
-    ]
+    configured_validation_results_store["stores"]["validation_results_GCS_store"][
+        "store_backend"
+    ]["prefix"]
     + "/validation_2.json",
 )
 
@@ -244,8 +250,8 @@ stdout = result.stdout.decode("utf-8")
 
 list_validation_stores_output = """
 # <snippet name="docs/docusaurus/docs/oss/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py list_validation_stores_output">
-  - name: validations_GCS_store
-    class_name: ValidationsStore
+  - name: validation_results_GCS_store
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
@@ -254,15 +260,15 @@ list_validation_stores_output = """
 # </snippet>
 """
 
-assert "validations_GCS_store" in list_validation_stores_output
-assert "validations_GCS_store" in stdout
+assert "validation_results_GCS_store" in list_validation_stores_output
+assert "validation_results_GCS_store" in stdout
 assert "TupleGCSStoreBackend" in list_validation_stores_output
 assert "TupleGCSStoreBackend" in stdout
 
 # delete the validations in the GCS store
 delete_validation_store_files = (
-    f"gsutil -m rm gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
-    + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}/*.json"
+    f"gsutil -m rm gs://{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['bucket']}"
+    + f"/{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['prefix']}/*.json"
 )
 result = subprocess.run(
     delete_validation_store_files, check=True, stderr=subprocess.PIPE, shell=True
@@ -271,8 +277,8 @@ stderr = result.stderr.decode("utf-8")
 assert "Operation completed over 2 objects" in stderr
 
 list_validation_store_files = (
-    f"gsutil ls gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
-    + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}"
+    f"gsutil ls gs://{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['bucket']}"
+    + f"/{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['prefix']}"
 )
 result = subprocess.run(
     list_validation_store_files, check=True, stdout=subprocess.PIPE, shell=True
@@ -289,8 +295,8 @@ checkpoint = context.get_legacy_checkpoint(checkpoint_name)
 validation_result = checkpoint.run()
 assert validation_result["success"] is True
 list_validation_store_files = (
-    f"gsutil ls gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
-    + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}"
+    f"gsutil ls gs://{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['bucket']}"
+    + f"/{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['prefix']}"
 )
 result = subprocess.run(
     list_validation_store_files, check=True, stdout=subprocess.PIPE, shell=True
@@ -303,8 +309,8 @@ assert (
 
 # clean up validation store for next time
 delete_validation_store_files = (
-    f"gsutil -m rm gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
-    + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}/**"
+    f"gsutil -m rm gs://{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['bucket']}"
+    + f"/{configured_validation_results_store['stores']['validation_results_GCS_store']['store_backend']['prefix']}/**"
 )
 result = subprocess.run(
     delete_validation_store_files, check=True, stderr=subprocess.PIPE, shell=True

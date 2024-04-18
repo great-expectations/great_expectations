@@ -16,7 +16,7 @@ datasources:
 plugins_directory: plugins/
 
 suite_parameter_store_name: suite_parameter_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 expectations_store_name: expectations_store
 
 stores:
@@ -26,8 +26,8 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
 
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -44,6 +44,6 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          target_store_name: validations_store
+          target_store_name: validation_results_store
 
 data_docs_sites:

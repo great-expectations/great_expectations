@@ -334,7 +334,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="False match for datasource self_check",
         name="self_check",
         filepath=pathlib.Path(
-            "great_expectations/data_context/store/validations_store.py"
+            "great_expectations/data_context/store/validation_results_store.py"
         ),
     ),
     IncludeExcludeDefinition(
