@@ -123,7 +123,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
    docker run -it \
    -e GX_CLOUD_ACCESS_TOKEN= YOUR_ACCESS_TOKEN \ 
    -e GX_CLOUD_ORGANIZATION_ID= YOUR_ORGANIZATION_ID \  
-   greatexpectations/agent:latest
+   greatexpectations/agent:stable
     ```
     Replace `YOUR_ACCESS_TOKEN` and `YOUR_ORGANIZATION_ID` with the values you copied previously.
 
