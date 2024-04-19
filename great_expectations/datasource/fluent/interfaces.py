@@ -16,6 +16,7 @@ from typing import (
     ClassVar,
     Dict,
     Final,
+    Generic,
     List,
     Mapping,
     MutableMapping,
@@ -29,8 +30,6 @@ from typing import (
     Union,
     overload,
 )
-
-from typing_extensions import Generic  # noqa
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
