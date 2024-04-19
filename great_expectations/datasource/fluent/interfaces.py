@@ -60,7 +60,7 @@ if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import TypeAlias, TypeGuard
 
-    from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.partitioners import Partitioner, PartitionerT
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -329,7 +329,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     def add_batch_definition(
         self,
         name: str,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[PartitionerT] = None,
         batching_regex: Optional[re.Pattern] = None,
     ) -> BatchDefinition:
         """Add a BatchDefinition to this DataAsset.
