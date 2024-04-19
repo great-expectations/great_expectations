@@ -14,9 +14,9 @@ if TYPE_CHECKING:
         BatchParameters,
         BatchRequest,
     )
-    from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
+    from great_expectations.datasource.fluent.interfaces import Batch
 
-
+DataAssetT = TypeVar("DataAssetT")
 PartitionerT = TypeVar("PartitionerT")
 
 
@@ -32,13 +32,13 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     batching_regex: Optional[re.Pattern] = None
 
     # private attributes that must be set immediately after instantiation
-    _data_asset: DataAsset = pydantic.PrivateAttr()
+    _data_asset: DataAssetT = pydantic.PrivateAttr()
 
     @property
-    def data_asset(self) -> DataAsset:
+    def data_asset(self) -> DataAssetT:
         return self._data_asset
 
-    def set_data_asset(self, data_asset: DataAsset) -> None:
+    def set_data_asset(self, data_asset: DataAssetT) -> None:
         # pydantic prevents us from using @data_asset.setter
         self._data_asset = data_asset
 

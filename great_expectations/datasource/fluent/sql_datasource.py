@@ -12,6 +12,7 @@ from typing import (
     ClassVar,
     Dict,
     Final,
+    Generic,
     List,
     Literal,
     Optional,
@@ -423,7 +424,7 @@ SqlPartitioner = Union[
 ]
 
 
-class _SQLAsset(DataAsset[DatasourceT, Partitioner]):
+class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     """A _SQLAsset Mixin
 
     This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
