@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Optional, TypeVar
-
-from typing_extensions import Generic  # noqa
+from typing import TYPE_CHECKING, Generic, Optional, TypeVar
 
 from great_expectations.compatibility import pydantic
 

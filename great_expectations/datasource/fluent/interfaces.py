@@ -244,7 +244,7 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 DatasourceT = TypeVar("DatasourceT", bound=MetaDatasource)
 
 
-class DataAsset(GenericBaseModel):
+class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
