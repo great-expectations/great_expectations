@@ -54,7 +54,7 @@ The GX Agent is typically deployed in your organization's deployment environment
 
 ### GX Agent versioning
 
-GX uses a date-based versioning format for its weekly GX Agent releases. For example, `YYYYMMMDD`. GX appends `stable` or `dev` to the GX Agent version to identify the release type. The `stable` identifier indicates the release is fully tested and is the version GX recommends you use. The `dev` identifier indicates the release is pre-production and untested. This documentation assumes you are using the latest `stable` GX Agent release. 
+GX uses a date-based versioning format for its weekly GX Agent releases. For example, `YYYYMMMDD`. GX appends `stable` or `dev` to the GX Agent version to identify the release type. The `stable` identifier indicates the release is fully tested and ready for use. The `dev` identifier indicates the release is pre-production and untested. This documentation assumes you are using the latest `stable` GX Agent release. 
 
 
 ## GX Cloud deployment patterns
