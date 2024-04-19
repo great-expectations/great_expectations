@@ -1,4 +1,4 @@
-from typing import List, Type
+from typing import List
 
 import pytest
 
@@ -266,7 +266,7 @@ def test_delete_batch_definition__persists(
 
 @pytest.mark.unit
 def test_delete_batch_definition__unsaved_batch_definition(empty_data_asset: DataAsset):
-    batch_definition = BatchDefinition[Type[None]](name="uh oh")
+    batch_definition = BatchDefinition[None](name="uh oh")
 
     with pytest.raises(ValueError, match="does not exist"):
         empty_data_asset.delete_batch_definition(batch_definition)

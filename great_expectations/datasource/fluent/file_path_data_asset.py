@@ -255,7 +255,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
             valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
             expect_batch_request_form = BatchRequest[
-                Type[None]
+                None
             ](  # todo: update to a file path specific partitioner
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,

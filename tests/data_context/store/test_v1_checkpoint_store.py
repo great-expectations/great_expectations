@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any
 from unittest import mock
 
 import pytest
@@ -85,7 +85,7 @@ def mock_checkpoint_dict(mocker, mock_checkpoint_json: dict) -> dict:
     context = mocker.Mock(spec=AbstractDataContext)
     set_context(context)
 
-    data = BatchDefinition[Type[None]](name="my_batch_config")
+    data = BatchDefinition[None](name="my_batch_config")
     suite = ExpectationSuite(name="my_suite")
 
     return {

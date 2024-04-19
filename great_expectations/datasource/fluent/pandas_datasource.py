@@ -226,7 +226,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             and batch_request.data_asset_name == self.name
             and not batch_request.options
         ):
-            expect_batch_request_form = BatchRequest[Type[None]](
+            expect_batch_request_form = BatchRequest[None](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
