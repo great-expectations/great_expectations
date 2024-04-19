@@ -116,9 +116,9 @@ class ConfigurationBundle:
         validation_results = {
             str(key): cast(
                 ExpectationSuiteValidationResult,
-                self._context.validations_store.get(key),
+                self._context.validation_results_store.get(key),
             )
-            for key in self._context.validations_store.list_keys()
+            for key in self._context.validation_results_store.list_keys()
         }
         return validation_results
 

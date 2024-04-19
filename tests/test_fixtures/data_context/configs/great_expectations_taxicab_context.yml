@@ -20,15 +20,15 @@ datasources:
 stores:
   expectations_store:
     class_name: ExpectationsStore
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
   suite_parameter_store:
     class_name: SuiteParameterStore
   checkpoint_store:
     class_name: CheckpointStore
 
 suite_parameter_store_name: suite_parameter_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 expectations_store_name: expectations_store
 checkpoint_store_name: checkpoint_store
 

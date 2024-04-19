@@ -17,7 +17,7 @@ plugins_directory: plugins/
 expectations_store_name: expectations_store
 checkpoint_store_name: checkpoint_store
 suite_parameter_store_name: suite_parameter_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 
 stores:
   expectations_store:
@@ -30,8 +30,8 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -61,7 +61,7 @@ stores:
   #     file_extension: .html
 
   fixture_validation_results_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: fixtures/validations
@@ -87,7 +87,7 @@ data_docs_sites:
 
     site_section_builders:
       expectations:
-        source_store_name: validations_store
+        source_store_name: validation_results_store
 
       validations:
         source_store_name: expectations_store
@@ -107,7 +107,7 @@ validation_operators:
       - name: store_validation_result
         action:
           class_name: StoreValidationResultAction
-          target_store_name: validations_store
+          target_store_name: validation_results_store
       # Uncomment the notify_slack action below to send notifications during evaluation
       # - name: notify_slack
       #   action:
