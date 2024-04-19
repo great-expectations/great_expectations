@@ -341,7 +341,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
     def add_batch_definition(
         self,
         name: str,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[PartitionerT] = None,
         batching_regex: Optional[re.Pattern] = None,
     ) -> BatchDefinition[PartitionerT]:
         """Add a BatchDefinition to this DataAsset.
@@ -366,7 +366,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
-        batch_definition = BatchDefinition(
+        batch_definition = BatchDefinition[PartitionerT](
             name=name, partitioner=partitioner, batching_regex=batching_regex
         )
         batch_definition.set_data_asset(self)

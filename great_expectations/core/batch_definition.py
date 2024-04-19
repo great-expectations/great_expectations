@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Generic, List, Optional, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
 from great_expectations.compatibility import pydantic
 
@@ -14,31 +14,9 @@ if TYPE_CHECKING:
         BatchParameters,
         BatchRequest,
     )
-    from great_expectations.datasource.fluent.interfaces import Batch
+    from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 
 PartitionerT = TypeVar("PartitionerT")
-
-
-class DatasourceT(Protocol):
-    name: str
-    id: str
-
-
-class DataAssetT(Protocol):
-    id: str
-    name: str
-    datasource: DatasourceT
-
-    def build_batch_request(
-        self,
-        options: Optional[BatchParameters],
-        partitioner: Optional[PartitionerT],
-        batching_regex: Optional[re.Pattern],
-    ) -> BatchRequest: ...
-
-    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]: ...
-
-    def _save_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None: ...
 
 
 class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
@@ -53,13 +31,13 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     batching_regex: Optional[re.Pattern] = None
 
     # private attributes that must be set immediately after instantiation
-    _data_asset: DataAssetT = pydantic.PrivateAttr()
+    _data_asset: DataAsset[Any, PartitionerT] = pydantic.PrivateAttr()
 
     @property
-    def data_asset(self) -> DataAssetT:
+    def data_asset(self) -> DataAsset[Any, PartitionerT]:
         return self._data_asset
 
-    def set_data_asset(self, data_asset: DataAssetT) -> None:
+    def set_data_asset(self, data_asset: DataAsset[Any, PartitionerT]) -> None:
         # pydantic prevents us from using @data_asset.setter
         self._data_asset = data_asset
 
