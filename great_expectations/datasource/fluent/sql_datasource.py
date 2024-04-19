@@ -60,6 +60,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    DatasourceT,
     GxDatasourceWarning,
     PartitionerProtocol,
     Sorter,
@@ -422,7 +423,7 @@ SqlPartitioner = Union[
 ]
 
 
-class _SQLAsset(DataAsset):
+class _SQLAsset(DataAsset[DatasourceT, Partitioner]):
     """A _SQLAsset Mixin
 
     This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
