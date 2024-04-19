@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Type
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
@@ -69,7 +69,7 @@ def test_build_batch_request(
 @pytest.mark.unit
 def test_get_batch_retrieves_only_batch(mocker: pytest_mock.MockFixture):
     # Arrange
-    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition = BatchDefinition[Type[None]](name="test_batch_definition")
     mock_asset = mocker.Mock(spec=DataAsset)
     batch_definition.set_data_asset(mock_asset)
 
@@ -91,7 +91,7 @@ def test_get_batch_retrieves_only_batch(mocker: pytest_mock.MockFixture):
 @pytest.mark.unit
 def test_get_batch_retrieves_last_batch(mocker: pytest_mock.MockFixture):
     # Arrange
-    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition = BatchDefinition[Type[None]](name="test_batch_definition")
     mock_asset = mocker.Mock(spec=DataAsset)
     batch_definition.set_data_asset(mock_asset)
 
@@ -115,7 +115,7 @@ def test_get_batch_retrieves_last_batch(mocker: pytest_mock.MockFixture):
 @pytest.mark.unit
 def test_get_batch_raises_error_with_empty_batch_list(mocker: pytest_mock.MockFixture):
     # Arrange
-    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition = BatchDefinition[Type[None]](name="test_batch_definition")
     mock_asset = mocker.Mock(spec=DataAsset)
     batch_definition.set_data_asset(mock_asset)
 
