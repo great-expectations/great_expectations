@@ -7,6 +7,7 @@ from great_expectations.compatibility import pydantic
 
 # if we move this import into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
+from great_expectations.core.partitioners import Partitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 
 if TYPE_CHECKING:
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 
-PartitionerT = TypeVar("PartitionerT")
+PartitionerT = TypeVar("PartitionerT", bound=Optional[Partitioner])
 
 
 class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
