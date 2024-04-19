@@ -65,10 +65,10 @@
                     "items": {
                         "anyOf": [
                             {
-                                "type": "integer"
+                                "type": "string"
                             },
                             {
-                                "type": "string"
+                                "type": "integer"
                             }
                         ]
                     }
