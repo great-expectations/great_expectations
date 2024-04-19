@@ -687,8 +687,6 @@ module.exports = {
     },
   ],
   learn: [
-      'reference/learn/conceptual_guides/expectation_classes',
-      'reference/learn/conceptual_guides/metricproviders',
       'reference/learn/usage_statistics',
       'reference/learn/glossary'
   ],
