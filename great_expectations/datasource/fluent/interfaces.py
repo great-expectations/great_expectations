@@ -240,8 +240,18 @@ def _sorter_from_str(sort_key: str) -> Sorter:
     return Sorter(key=sort_key, reverse=False)
 
 
+# It would be best to bind this to ExecutionEngine, but we can't now due to circular imports
+_ExecutionEngineT = TypeVar("_ExecutionEngineT")
+
+
+class _DatasourceT(Protocol):
+    name: str
+
+    def get_execution_engine(self) -> _ExecutionEngineT: ...
+
+
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
-DatasourceT = TypeVar("DatasourceT", bound=MetaDatasource)
+DatasourceT = TypeVar("DatasourceT", bound=_DatasourceT)
 
 
 class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
@@ -495,10 +505,6 @@ def _sort_batches_with_none_metadata_values(
 
 # If a Datasource can have more than 1 _DataAssetT, this will need to change.
 _DataAssetT = TypeVar("_DataAssetT", bound=DataAsset)
-
-
-# It would be best to bind this to ExecutionEngine, but we can't now due to circular imports
-_ExecutionEngineT = TypeVar("_ExecutionEngineT")
 
 
 class Datasource(
