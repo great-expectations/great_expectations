@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pprint import pformat as pf
+from typing import Any
 
 import pytest
 
@@ -68,7 +69,7 @@ def fds_data_asset_with_event_type_partitioner(
 def batch_definition(
     fds_data_asset: DataAsset,
 ) -> BatchDefinition:
-    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition = BatchDefinition[Any](name="test_batch_definition")
     batch_definition.set_data_asset(fds_data_asset)
     return batch_definition
 
