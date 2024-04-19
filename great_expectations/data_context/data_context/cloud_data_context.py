@@ -43,6 +43,7 @@ from great_expectations.data_context.data_context.serializable_data_context impo
 )
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
+    DataContextVariableSchema,
 )
 from great_expectations.data_context.store import DataAssetStore
 from great_expectations.data_context.store.datasource_store import (
@@ -51,6 +52,8 @@ from great_expectations.data_context.store.datasource_store import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
+from great_expectations.data_context.store.metric_store import SuiteParameterStore
+from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationDefinition,
@@ -274,41 +277,48 @@ class CloudDataContext(SerializableDataContext):
         # to prevent downstream issues
         config["fluent_datasources"] = _extract_fluent_datasources(config)
 
-        # V1 renamed EvaluationParameters to SuiteParameters, so this is a temporary patch
-        # until Cloud implements a V1 endpoint for DataContextConfig
-        config = cls._replace_evaluation_parameters_with_suite_parameters(config)
+        # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
+        # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
+
+        cls._change_key_from_v0_to_v1(
+            config,
+            "evaluation_parameter_store_name",
+            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
+        )
+        cls._change_key_from_v0_to_v1(
+            config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
+        )
+        stores = config.get("stores")
+        if stores:
+            for store in stores.values():
+                if store:
+                    cls._change_value_from_v0_to_v1(
+                        store,
+                        "class_name",
+                        "EvaluationParameterStore",
+                        SuiteParameterStore.__name__,
+                    )
+                    cls._change_value_from_v0_to_v1(
+                        store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
+                    )
 
         return config
 
-    @classmethod
-    def _replace_evaluation_parameters_with_suite_parameters(cls, config: dict) -> dict:
-        """Ensure cloud config follows V1 conventions for SuiteParameters"""
-        # store name
-        V0_STORE_NAME_KEY = "evaluation_parameter_store_name"
-        V1_STORE_NAME_KEY = "suite_parameter_store_name"
-        if config.get(V0_STORE_NAME_KEY):
-            value = config.pop(V0_STORE_NAME_KEY)
-            if not config.get(V1_STORE_NAME_KEY):
-                config[V1_STORE_NAME_KEY] = value
+    @staticmethod
+    def _change_key_from_v0_to_v1(config: dict, v0_key: str, v1_key: str) -> Optional[dict]:
+        """Update the key if we have a V0 key and no V1 key in the config.
 
-        if not config.get("stores"):
-            return config  # no store dict to update
+        Mutates the config object and returns the value that was renamed
+        """
+        value = config.pop(v0_key, None)
+        if value and v1_key not in config:
+            config[v1_key] = value
+        return config.get(v1_key)
 
-        store_key_tuples = [
-            # (V0 Store Key, V1 Store Key)
-            ("default_evaluation_parameter_store", "default_suite_parameter_store"),
-            ("evaluation_parameter_store", "suite_parameter_store"),
-        ]
-        for v0_store_key, v1_store_key in store_key_tuples:
-            store_config = config["stores"].pop(v0_store_key, None)
-            if not store_config:
-                continue
-            # replace class name, if its legacy
-            if store_config["class_name"] == "EvaluationParameterStore":
-                store_config["class_name"] = "SuiteParameterStore"
-            # replace the config under the V1 key
-            config["stores"][v1_store_key] = store_config
-
+    @staticmethod
+    def _change_value_from_v0_to_v1(config: dict, key: str, v0_value: str, v1_value: str) -> dict:
+        if config.get(key) == v0_value:
+            config[key] = v1_value
         return config
 
     @classmethod

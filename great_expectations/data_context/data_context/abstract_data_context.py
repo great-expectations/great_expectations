@@ -150,7 +150,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
-    from great_expectations.data_context.store.validations_store import ValidationsStore
+    from great_expectations.data_context.store.validation_results_store import (
+        ValidationResultsStore,
+    )
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
@@ -593,24 +595,24 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.suite_parameter_store_name]
 
     @property
-    def validations_store_name(self) -> Optional[str]:
-        return self.variables.validations_store_name
+    def validation_results_store_name(self) -> Optional[str]:
+        return self.variables.validation_results_store_name
 
-    @validations_store_name.setter
+    @validation_results_store_name.setter
     @public_api
     @new_method_or_class(version="0.17.2")
-    def validations_store_name(self, value: str) -> None:
+    def validation_results_store_name(self, value: str) -> None:
         """Set the name of the validations store.
 
         Args:
             value: New value for the validations store name.
         """
-        self.variables.validations_store_name = value
+        self.variables.validation_results_store_name = value
         self._save_project_config()
 
     @property
-    def validations_store(self) -> ValidationsStore:
-        return self.stores[self.validations_store_name]
+    def validation_results_store(self) -> ValidationResultsStore:
+        return self.stores[self.validation_results_store_name]
 
     @property
     def validation_definition_store(self) -> ValidationDefinitionStore:
@@ -1038,13 +1040,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
-            validations_store_name,
+            validation_results_store_name,
             suite_parameter_store_name,
             checkpoint_store_name
         """  # noqa: E501
         active_store_names: List[str] = [
             self.expectations_store_name,  # type: ignore[list-item]
-            self.validations_store_name,  # type: ignore[list-item]
+            self.validation_results_store_name,  # type: ignore[list-item]
             self.suite_parameter_store_name,  # type: ignore[list-item]
         ]
 
@@ -3675,7 +3677,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name,
         run_id=None,
         batch_identifier=None,
-        validations_store_name=None,
+        validation_results_store_name=None,
         failed_only=False,
         include_rendered_content=None,
     ):
@@ -3684,7 +3686,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
-            validations_store_name: the name of the store from which to get validation results
+            validation_results_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
             include_rendered_content: whether to re-populate the validation_result rendered_content
 
@@ -3692,9 +3694,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             validation_result
 
         """  # noqa: E501
-        if validations_store_name is None:
-            validations_store_name = self.validations_store_name
-        selected_store = self.stores[validations_store_name]
+        if validation_results_store_name is None:
+            validation_results_store_name = self.validation_results_store_name
+        selected_store = self.stores[validation_results_store_name]
 
         if run_id is None or batch_identifier is None:
             # Get most recent run id

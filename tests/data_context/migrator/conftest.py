@@ -31,7 +31,7 @@ class StubCheckpointStore:
         return CheckpointConfig(name=name)
 
 
-class StubValidationsStore:
+class StubValidationResultsStore:
     def __init__(self, keys: Tuple[Optional[str]] = ("some_key",)):
         self._keys = keys
 
@@ -139,8 +139,8 @@ class StubBaseDataContext:
         return StubCheckpointStore()
 
     @property
-    def validations_store(self) -> StubValidationsStore:
-        return StubValidationsStore(keys=self._validation_results_keys)
+    def validation_results_store(self) -> StubValidationResultsStore:
+        return StubValidationResultsStore(keys=self._validation_results_keys)
 
     def list_expectation_suite_names(self) -> List[str]:
         return list(self._expectation_suite_names)
@@ -197,7 +197,7 @@ def empty_serialized_configuration_bundle() -> dict:
             "profiler_store_name": None,
             "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
             "validation_operators": None,
-            "validations_store_name": None,
+            "validation_results_store_name": None,
         },
         "datasources": [],
         "expectation_suites": [],
@@ -238,7 +238,7 @@ def serialized_configuration_bundle() -> dict:
             "plugins_directory": None,
             "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
             "validation_operators": None,
-            "validations_store_name": None,
+            "validation_results_store_name": None,
         },
         "datasources": [
             {

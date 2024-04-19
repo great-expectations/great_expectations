@@ -45,15 +45,15 @@ stores:
       prefix: <YOUR GCS PREFIX NAME>
   # </snippet>
 
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-  # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store">
-  validations_GCS_store:
-    class_name: ValidationsStore
+  # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validation_results_GCS_store">
+  validation_results_GCS_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
@@ -76,8 +76,8 @@ stores:
 # <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_store_name">
 expectations_store_name: expectations_GCS_store
 # </snippet>
-# <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_store_name">
-validations_store_name: validations_GCS_store
+# <snippet name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validation_results_store_name">
+validation_results_store_name: validation_results_GCS_store
 # </snippet>
 suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store

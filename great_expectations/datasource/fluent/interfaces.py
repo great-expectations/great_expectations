@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import pandas as pd
-    from typing_extensions import Self, TypeAlias, TypeGuard
+    from typing_extensions import TypeAlias, TypeGuard
 
     from great_expectations.core.partitioners import Partitioner
 
@@ -441,40 +441,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         cls, order_by: Optional[List[Union[Sorter, str, dict]]] = None
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
-
-    def add_sorters(self: Self, sorters: SortersDefinition) -> Self:
-        """Associates a sorter to this DataAsset
-
-        The passed in sorters will replace any previously associated sorters.
-        Batches returned from this DataAsset will be sorted on the batch's
-        metadata in the order specified by `sorters`. Sorters work left to right.
-        That is, batches will be sorted first by sorters[0].key, then
-        sorters[1].key, and so on. If sorter[i].reverse is True, that key will
-        sort the batches in descending, as opposed to ascending, order.
-
-        Args:
-            sorters: A list of either Sorter objects or strings. The strings
-              are a shorthand for Sorter objects and are parsed as follows:
-              r'[+-]?.*'
-              An optional prefix of '+' or '-' sets Sorter.reverse to
-              'False' or 'True' respectively. It is 'False' if no prefix is present.
-              The rest of the string gets assigned to the Sorter.key.
-              For example:
-              ["key1", "-key2", "key3"]
-              is equivalent to:
-              [
-                  Sorter(key="key1", reverse=False),
-                  Sorter(key="key2", reverse=True),
-                  Sorter(key="key3", reverse=False),
-              ]
-
-        Returns:
-            This DataAsset with the passed in sorters accessible via self.order_by
-        """
-        # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
-        # https://docs.pydantic.dev/usage/model_config/#options
-        self.order_by = _sorter_from_list(sorters)
-        return self
 
     def sort_batches(self, batch_list: List[Batch], partitioner: PartitionerProtocol) -> None:
         """Sorts batch_list in place in the order configured in this DataAsset.
