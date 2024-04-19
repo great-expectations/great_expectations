@@ -53,7 +53,7 @@ from great_expectations.datasource.fluent.fluent_base_model import (
     GenericBaseModel,
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
-from great_expectations.exceptions.exceptions import DataContextError
+from great_expectations.exceptions.exceptions import DataContextError, MissingDataContextError
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
@@ -433,6 +433,8 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         Batch.metadata at runtime.
         """
         batch_metadata = copy.deepcopy(self.batch_metadata)
+        if not self._datasource.data_context:
+            raise MissingDataContextError()
         config_variables = self._datasource.data_context.config_variables  # type: ignore[attr-defined]
         batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
             data=batch_metadata, replace_variables_dict=config_variables
