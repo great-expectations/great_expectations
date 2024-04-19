@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Generic, List, Optional, Protocol, TypeVar
 
 from great_expectations.compatibility import pydantic
 
@@ -14,10 +14,26 @@ if TYPE_CHECKING:
         BatchParameters,
         BatchRequest,
     )
-    from great_expectations.datasource.fluent.interfaces import Batch
+    from great_expectations.datasource.fluent.interfaces import Batch, DatasourceT
 
-DataAssetT = TypeVar("DataAssetT")
 PartitionerT = TypeVar("PartitionerT")
+
+
+class DataAssetT(Protocol):
+    id: str
+    name: str
+    datasource: DatasourceT
+
+    def build_batch_request(
+        self,
+        options: Optional[BatchParameters],
+        partitioner: Optional[PartitionerT],
+        batching_regex: Optional[re.Pattern],
+    ) -> BatchRequest: ...
+
+    def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]: ...
+
+    def _save_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None: ...
 
 
 class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
