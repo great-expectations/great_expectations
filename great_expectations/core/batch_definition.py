@@ -14,9 +14,14 @@ if TYPE_CHECKING:
         BatchParameters,
         BatchRequest,
     )
-    from great_expectations.datasource.fluent.interfaces import Batch, DatasourceT
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 PartitionerT = TypeVar("PartitionerT")
+
+
+class DatasourceT(Protocol):
+    name: str
+    id: str
 
 
 class DataAssetT(Protocol):
