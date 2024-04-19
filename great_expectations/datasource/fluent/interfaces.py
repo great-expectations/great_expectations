@@ -244,14 +244,7 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 _ExecutionEngineT = TypeVar("_ExecutionEngineT")
 
 
-class _DatasourceT(Protocol):
-    name: str
-
-    def get_execution_engine(self) -> _ExecutionEngineT: ...
-
-
-# It would be best to bind this to Datasource, but we can't now due to circular dependencies
-DatasourceT = TypeVar("DatasourceT", bound=_DatasourceT)
+DatasourceT = TypeVar("DatasourceT", bound="Datasource")
 
 
 class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
