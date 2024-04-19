@@ -31,7 +31,9 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     batching_regex: Optional[re.Pattern] = None
 
     # private attributes that must be set immediately after instantiation
-    _data_asset: DataAsset[Any, PartitionerT] = pydantic.PrivateAttr()
+    # Note that we're using type Any, but the getter setter ensure the right types.
+    # If we actually specify DataAsset, pydantic errors out.
+    _data_asset: Any = pydantic.PrivateAttr()
 
     @property
     def data_asset(self) -> DataAsset[Any, PartitionerT]:
