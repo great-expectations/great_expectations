@@ -260,10 +260,10 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
 
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
-    batch_definitions: List[BatchDefinition[PartitionerT]] = Field(default_factory=list)
+    batch_definitions: List[BatchDefinition] = Field(default_factory=list)
 
     # non-field private attributes
-    _save_batch_definition: Callable[[BatchDefinition[PartitionerT]], None] = pydantic.PrivateAttr()
+    _save_batch_definition: Callable[[BatchDefinition], None] = pydantic.PrivateAttr()
     _datasource: DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
