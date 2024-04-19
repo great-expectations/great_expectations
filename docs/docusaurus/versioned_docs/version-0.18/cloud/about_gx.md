@@ -52,6 +52,10 @@ The GX Agent is an intermediary between GX Cloud and your organization's data st
 
 The GX Agent is typically deployed in your organization's deployment environment, for example, in a development, staging, or production cloud services environment. The GX Agent serves all GX Cloud users within your organization. It can be run as part of your development or production workflows. See [Connect GX Cloud](./connect/connect_lp.md) for setup instructions.
 
+### GX Agent versioning
+
+GX uses a date-based versioning format for its weekly GX Agent releases. For example, `YYYYMMMDD`. GX appends `stable` or `dev` to the GX Agent version to identify the release type. The `stable` identifier indicates the release is fully tested and is the version GX recommends you use. The `dev` identifier indicates the release is pre-production and untested. This documentation assumes you are using the latest `stable` GX Agent release.
+
 
 ## GX Cloud deployment patterns
 
@@ -96,10 +100,6 @@ The deployment patterns described previously are not an exhaustive collection of
 For example, you might opt to run and interact with the GX OSS client locally to define your Data Sources, Data Assets, Expectation Suites, and Checkpoints, run the GX OSS client in your Airflow pipeline to execute Checkpoints on a regular schedule, run the GX Agent in your production environment to fetch Data Asset metrics from the GX Cloud web UI, and access the GX Cloud web UI to view Validation and Checkpoint run histories.
 
 GX provides flexible, robust products that allow your organization to quickly deploy GX Cloud or GX OSS to fit your unique requirements.
-
-### Versioning
-
-The GX agent is released weekly using a date-based versioning scheme (`YYYYMMMDD` or `YYYMMMDD.dev`). The `stable` tag points to the latest released image and is one we recommend in most use cases. The `dev` tag points to the latest pre-release image (or release if no pre-release exists after the release), and will contain the latest features and bugfixes that are not yet ready for production determined by the development team. The examples in our documentation will use the `stable` release tag. 
 
 ## GX Cloud workflow
 
