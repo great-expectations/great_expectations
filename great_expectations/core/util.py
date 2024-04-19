@@ -35,6 +35,7 @@ from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
     LegacyRow,
+    Row
 )
 from great_expectations.core.run_identifier import RunIdentifier
 
@@ -375,6 +376,9 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
 
     # sqlalchemy text for SqlAlchemy 2 compatibility
     if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
+        return str(data)
+
+    if isinstance(data, Row):
         return str(data)
 
     if isinstance(data, decimal.Decimal):
