@@ -251,7 +251,9 @@ class _FilePathDataAsset(DataAsset):
         ):
             valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
-            expect_batch_request_form = BatchRequest(
+            expect_batch_request_form = BatchRequest[
+                type[None]
+            ](  # todo: update to RegexPartitioner
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,

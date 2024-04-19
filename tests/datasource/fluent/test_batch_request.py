@@ -5,7 +5,7 @@ from typing import Any, Final
 
 import pytest
 
-from great_expectations.core.partitioners import PartitionerColumnValue
+from great_expectations.core.partitioners import Partitioner, PartitionerColumnValue
 from great_expectations.datasource.fluent import BatchRequest
 
 
@@ -71,7 +71,7 @@ def test_batch_request_config_serialization_round_trips(
         "batching_regex": r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     }
     batch_request_config.update(optional_batch_request_config)
-    batch_request = BatchRequest(**batch_request_config)
+    batch_request = BatchRequest[Partitioner](**batch_request_config)
     assert batch_request.datasource_name == datasource_name
     assert batch_request.data_asset_name == data_asset_name
     # options is optional and an empty dict by default
