@@ -648,13 +648,11 @@ specified (empty "metric_name" value detected)."""  # noqa: E501
 
                         batch_metric_values.append(0.0)
                     elif not (
-                        (  # noqa: PLR1701
-                            isinstance(metric_value, (str, np.str_))
-                            and is_parseable_date(value=metric_value)
+                        isinstance(metric_value, (str, np.str_))
+                        and is_parseable_date(value=metric_value)
+                        or isinstance(
+                            metric_value, (datetime.datetime, numbers.Number, decimal.Decimal)
                         )
-                        or isinstance(metric_value, datetime.datetime)
-                        or isinstance(metric_value, numbers.Number)
-                        or isinstance(metric_value, decimal.Decimal)
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
                         raise gx_exceptions.ProfilerExecutionError(

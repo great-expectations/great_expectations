@@ -117,7 +117,7 @@ class TestQueryAssets:
         asset = datasource.add_query_asset(
             name="query_asset",
             query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",  # noqa: E501
-        ).add_sorters(["year"])
+        )
         validator = context.get_validator(
             batch_request=asset.build_batch_request(
                 options={"year": 2019},
@@ -215,7 +215,6 @@ def test_filesystem_data_asset_batching_regex(
         "table_name",
         "partitioner_class",
         "partitioner_kwargs",
-        "sorter_args",
         "all_batches_cnt",
         "specified_batch_request",
         "specified_batch_cnt",
@@ -227,7 +226,6 @@ def test_filesystem_data_asset_batching_regex(
             "yellow_tripdata_sample_2020",
             PartitionerYear,
             {"column_name": "pickup_datetime"},
-            ["year"],
             1,
             {"year": 2020},
             1,
@@ -239,7 +237,6 @@ def test_filesystem_data_asset_batching_regex(
             "yellow_tripdata_sample_2020",
             PartitionerYearAndMonth,
             {"column_name": "pickup_datetime"},
-            ["year", "month"],
             12,
             {"year": 2020, "month": 6},
             1,
@@ -251,7 +248,6 @@ def test_filesystem_data_asset_batching_regex(
             "yellow_tripdata_sample_2019_02",
             PartitionerYearAndMonthAndDay,
             {"column_name": "pickup_datetime"},
-            ["year", "month", "day"],
             28,
             {"year": 2019, "month": 2, "day": 10},
             1,
@@ -266,7 +262,6 @@ def test_filesystem_data_asset_batching_regex(
                 "column_name": "pickup_datetime",
                 "datetime_parts": ["year", "month", "day"],
             },
-            ["year", "month", "day"],
             28,
             {"year": 2019, "month": 2},
             28,
@@ -278,7 +273,6 @@ def test_filesystem_data_asset_batching_regex(
             "yellow_tripdata_sample_2019_02",
             PartitionerColumnValue,
             {"column_name": "passenger_count"},
-            ["passenger_count"],
             7,
             {"passenger_count": 3},
             1,
@@ -290,7 +284,6 @@ def test_filesystem_data_asset_batching_regex(
             "yellow_tripdata_sample_2019_02",
             PartitionerColumnValue,
             {"column_name": "pickup_datetime"},
-            ["pickup_datetime"],
             9977,
             {"pickup_datetime": "2019-02-07 15:48:06"},
             1,
@@ -302,7 +295,6 @@ def test_filesystem_data_asset_batching_regex(
             "yellow_tripdata_sample_2019_02",
             PartitionerDividedInteger,
             {"column_name": "passenger_count", "divisor": 3},
-            ["quotient"],
             3,
             {"quotient": 2},
             1,
@@ -314,7 +306,6 @@ def test_filesystem_data_asset_batching_regex(
             "yellow_tripdata_sample_2019_02",
             PartitionerModInteger,
             {"column_name": "passenger_count", "mod": 3},
-            ["remainder"],
             3,
             {"remainder": 2},
             1,
@@ -326,7 +317,6 @@ def test_filesystem_data_asset_batching_regex(
             "yellow_tripdata_sample_2019_02",
             PartitionerConvertedDatetime,
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
-            ["datetime"],
             28,
             {"datetime": "2019-02-23"},
             1,
@@ -338,7 +328,6 @@ def test_filesystem_data_asset_batching_regex(
             "yellow_tripdata_sample_2019_02",
             PartitionerMultiColumnValue,
             {"column_names": ["passenger_count", "payment_type"]},
-            ["passenger_count", "payment_type"],
             23,
             {"passenger_count": 1, "payment_type": 1},
             1,
@@ -353,7 +342,6 @@ def test_partitioner(
     table_name,
     partitioner_class,
     partitioner_kwargs,
-    sorter_args,
     all_batches_cnt,
     specified_batch_request,
     specified_batch_cnt,
@@ -366,7 +354,6 @@ def test_partitioner(
         table_name=table_name,
     )
     partitioner = partitioner_class(**partitioner_kwargs)
-    asset.add_sorters(sorter_args)
     # Test getting all batches
     all_batches = asset.get_batch_list_from_batch_request(
         asset.build_batch_request(partitioner=partitioner)
@@ -392,7 +379,6 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
         "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",  # noqa: E501
     )
     partitioner = PartitionerColumnValue(column_name="pickup_date")
-    asset.add_sorters(["pickup_date"])
     # Test getting all batches
     all_batches = asset.get_batch_list_from_batch_request(
         asset.build_batch_request(partitioner=partitioner)
@@ -451,7 +437,7 @@ def test_success_with_partitioners_from_batch_definitions(
     asset = datasource.add_query_asset(
         name="query_asset",
         query=f"SELECT * from yellow_tripdata_sample_2020 WHERE passenger_count = {passenger_count_value}",  # noqa: E501
-    ).add_sorters(["year"])
+    )
     batch_definition = asset.add_batch_definition(
         name="whatevs",
         partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
@@ -568,7 +554,6 @@ def test_asset_specified_metadata(empty_data_context, add_asset_method, add_asse
         **add_asset_kwarg,
     )
     partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
-    asset.add_sorters(["year", "month"])
     # Test getting all batches
     batches = asset.get_batch_list_from_batch_request(
         asset.build_batch_request(partitioner=partitioner)

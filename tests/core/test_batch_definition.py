@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
@@ -10,8 +10,11 @@ from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.datasource.fluent.batch_request import BatchParameters
-from great_expectations.datasource.fluent.interfaces import DataAsset
+from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
+
+if TYPE_CHECKING:
+    import pytest_mock
 
 
 @pytest.fixture
@@ -60,6 +63,73 @@ def test_build_batch_request(
         options=batch_parameters,
         partitioner=partitioner,
         batching_regex=batching_regex,
+    )
+
+
+@pytest.mark.unit
+def test_get_batch_retrieves_only_batch(mocker: pytest_mock.MockFixture):
+    # Arrange
+    batch_definition = BatchDefinition(name="test_batch_definition")
+    mock_asset = mocker.Mock(spec=DataAsset)
+    batch_definition.set_data_asset(mock_asset)
+
+    mock_get_batch_list_from_batch_request = mock_asset.get_batch_list_from_batch_request
+
+    mock_batch = mocker.Mock(spec=Batch)
+    mock_get_batch_list_from_batch_request.return_value = [mock_batch]
+
+    # Act
+    batch = batch_definition.get_batch()
+
+    # Assert
+    assert batch == mock_batch
+    mock_get_batch_list_from_batch_request.assert_called_once_with(
+        batch_definition.build_batch_request()
+    )
+
+
+@pytest.mark.unit
+def test_get_batch_retrieves_last_batch(mocker: pytest_mock.MockFixture):
+    # Arrange
+    batch_definition = BatchDefinition(name="test_batch_definition")
+    mock_asset = mocker.Mock(spec=DataAsset)
+    batch_definition.set_data_asset(mock_asset)
+
+    mock_get_batch_list_from_batch_request = mock_asset.get_batch_list_from_batch_request
+
+    batch_a = mocker.Mock(spec=Batch)
+    batch_b = mocker.Mock(spec=Batch)
+    batch_list = [batch_a, batch_b]
+    mock_get_batch_list_from_batch_request.return_value = batch_list
+
+    # Act
+    batch = batch_definition.get_batch()
+
+    # Assert
+    assert batch == batch_b
+    mock_get_batch_list_from_batch_request.assert_called_once_with(
+        batch_definition.build_batch_request()
+    )
+
+
+@pytest.mark.unit
+def test_get_batch_raises_error_with_empty_batch_list(mocker: pytest_mock.MockFixture):
+    # Arrange
+    batch_definition = BatchDefinition(name="test_batch_definition")
+    mock_asset = mocker.Mock(spec=DataAsset)
+    batch_definition.set_data_asset(mock_asset)
+
+    mock_get_batch_list_from_batch_request = mock_asset.get_batch_list_from_batch_request
+
+    mock_get_batch_list_from_batch_request.return_value = []
+
+    # Act
+    with pytest.raises(ValueError):
+        batch_definition.get_batch()
+
+    # Assert
+    mock_get_batch_list_from_batch_request.assert_called_once_with(
+        batch_definition.build_batch_request()
     )
 
 

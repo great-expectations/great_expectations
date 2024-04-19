@@ -798,10 +798,7 @@ class ExpectationDoctor:
 
             result = "\n".join(sub_result_list)
 
-        elif isinstance(rendered_result, RenderedStringTemplateContent):
-            result = rendered_result.__str__()
-
-        elif isinstance(rendered_result, CollapseContent):
+        elif isinstance(rendered_result, (CollapseContent, RenderedStringTemplateContent)):
             result = rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):

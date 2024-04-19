@@ -75,9 +75,12 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                             backend, test_configuration["expectation_type"]
                         ):
                             skip_expectation = True
-                        elif suppress_test_for and backend in suppress_test_for:
-                            continue
-                        elif only_for and backend not in only_for:
+                        elif (
+                            suppress_test_for
+                            and backend in suppress_test_for
+                            or only_for
+                            and backend not in only_for
+                        ):
                             continue
                         else:
                             skip_expectation = False
@@ -144,62 +147,62 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     validator_with_data.active_batch_data,
                                     SqlAlchemyBatchData,
                                 ):
-                                    if "sqlalchemy" in only_for:
-                                        generate_test = True
-                                    elif (
-                                        "sqlite" in only_for
-                                        and sqliteDialect is not None
-                                        and isinstance(
-                                            validator_with_data.active_batch_data.sql_engine_dialect,
-                                            sqliteDialect,
+                                    if (
+                                        "sqlalchemy" in only_for
+                                        or (
+                                            "sqlite" in only_for
+                                            and sqliteDialect is not None
+                                            and isinstance(
+                                                validator_with_data.active_batch_data.sql_engine_dialect,
+                                                sqliteDialect,
+                                            )
                                         )
-                                    ):
-                                        generate_test = True
-                                    elif (
-                                        "postgresql" in only_for
-                                        and pgDialect is not None
-                                        and isinstance(
-                                            validator_with_data.active_batch_data.sql_engine_dialect,
-                                            pgDialect,
+                                        or (
+                                            (
+                                                "postgresql" in only_for
+                                                and pgDialect is not None
+                                                and isinstance(
+                                                    validator_with_data.active_batch_data.sql_engine_dialect,
+                                                    pgDialect,
+                                                )
+                                            )
+                                            or (
+                                                "mysql" in only_for
+                                                and mysqlDialect is not None
+                                                and isinstance(
+                                                    validator_with_data.active_batch_data.sql_engine_dialect,
+                                                    mysqlDialect,
+                                                )
+                                            )
                                         )
-                                    ):
-                                        generate_test = True
-                                    elif (
-                                        "mysql" in only_for
-                                        and mysqlDialect is not None
-                                        and isinstance(
-                                            validator_with_data.active_batch_data.sql_engine_dialect,
-                                            mysqlDialect,
+                                        or (
+                                            (
+                                                "snowflake" in only_for
+                                                and snowflake.snowflakedialect
+                                                and isinstance(
+                                                    validator_with_data.active_batch_data.sql_engine_dialect,
+                                                    snowflake.snowflakedialect.SnowflakeDialect,
+                                                )
+                                            )
+                                            or (
+                                                "mssql" in only_for
+                                                and mssqlDialect is not None
+                                                and isinstance(
+                                                    validator_with_data.active_batch_data.sql_engine_dialect,
+                                                    mssqlDialect,
+                                                )
+                                            )
+                                            or (
+                                                "bigquery" in only_for
+                                                and BigQueryDialect is not None
+                                                and hasattr(
+                                                    validator_with_data.active_batch_data.sql_engine_dialect,
+                                                    "name",
+                                                )
+                                                and validator_with_data.active_batch_data.sql_engine_dialect.name  # noqa: E501
+                                                == "bigquery"
+                                            )
                                         )
-                                    ):
-                                        generate_test = True
-                                    elif (
-                                        "snowflake" in only_for
-                                        and snowflake.snowflakedialect
-                                        and isinstance(
-                                            validator_with_data.active_batch_data.sql_engine_dialect,
-                                            snowflake.snowflakedialect.SnowflakeDialect,
-                                        )
-                                    ):
-                                        generate_test = True
-                                    elif (
-                                        "mssql" in only_for
-                                        and mssqlDialect is not None
-                                        and isinstance(
-                                            validator_with_data.active_batch_data.sql_engine_dialect,
-                                            mssqlDialect,
-                                        )
-                                    ):
-                                        generate_test = True
-                                    elif (
-                                        "bigquery" in only_for
-                                        and BigQueryDialect is not None
-                                        and hasattr(
-                                            validator_with_data.active_batch_data.sql_engine_dialect,
-                                            "name",
-                                        )
-                                        and validator_with_data.active_batch_data.sql_engine_dialect.name  # noqa: E501
-                                        == "bigquery"
                                     ):
                                         generate_test = True
                                     elif (

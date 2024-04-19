@@ -70,7 +70,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run()
 
-    assert len(data_context.validations_store.list_keys()) == 1
+    assert len(data_context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -101,16 +101,18 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     data_context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
     checkpoint: Checkpoint = data_context.get_legacy_checkpoint(checkpoint_config.name)
 
-    assert len(data_context.validations_store.list_keys()) == 0
+    assert len(data_context.validation_results_store.list_keys()) == 0
 
     data_context.suites.add(ExpectationSuite("my_expectation_suite"))
     result: CheckpointResult = checkpoint.run()
 
-    assert len(data_context.validations_store.list_keys()) == 1
+    assert len(data_context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
-    validation_result_identifier: DataContextKey = data_context.validations_store.list_keys()[0]
-    validation_result: ExpectationSuiteValidationResult = data_context.validations_store.get(
+    validation_result_identifier: DataContextKey = (
+        data_context.validation_results_store.list_keys()[0]
+    )
+    validation_result: ExpectationSuiteValidationResult = data_context.validation_results_store.get(
         validation_result_identifier
     )
 
@@ -141,7 +143,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(data_context.validations_store.list_keys()) == 1
+    assert len(data_context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -170,7 +172,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validator=validator,
     )
 
-    assert len(data_context.validations_store.list_keys()) == 1
+    assert len(data_context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -433,7 +435,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -458,7 +460,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context.suites.add(ExpectationSuite("my_expectation_suite"))
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -487,7 +489,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -535,7 +537,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ]
     )
 
-    assert len(context.validations_store.list_keys()) == 4
+    assert len(context.validation_results_store.list_keys()) == 4
     assert result["success"]
 
 
@@ -573,7 +575,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 2
+    assert len(context.validation_results_store.list_keys()) == 2
     assert result["success"]
 
 
@@ -601,7 +603,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -629,7 +631,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -659,7 +661,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -688,7 +690,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -719,7 +721,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.get_legacy_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -750,7 +752,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.get_legacy_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -782,7 +784,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint = context.get_legacy_checkpoint("my_checkpoint")
     result = checkpoint.run(batch_request=batch_request)
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -815,7 +817,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": batch_request}],
     )
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -848,7 +850,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": batch_request}],
     )
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -882,7 +884,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": batch_request}],
     )
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
 
 
@@ -1633,5 +1635,5 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     result = checkpoint.run()
 
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validation_results_store.list_keys()) == 1
     assert result["success"]
