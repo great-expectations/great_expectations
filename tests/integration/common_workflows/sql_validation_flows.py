@@ -4,7 +4,7 @@ NOTE: assertions here take the form of asserting that expectations pass
 based on knowledge of the data in the test set.
 """
 
-from typing import List
+from typing import Dict, Optional
 
 import pytest
 
@@ -25,10 +25,6 @@ VALUES_WITH_NO_DATE = [9]
 VALUES_FOR_MOST_RECENT_DATE = [10]
 MY_FAVORITE_DAY = {"year": 2000, "month": 6, "day": 1}
 VALUES_ON_MY_FAVORITE_DAY = [8]
-
-
-def _create_expectation(values: List[int]):
-    return gxe.ExpectColumnDistinctValuesToEqualSet(column=COLUMN_NAME, value_set=values)
 
 
 @pytest.fixture
@@ -65,160 +61,135 @@ def postgres_daily_batch_definition_descending(postgres_asset: _SQLAsset) -> Bat
     )
 
 
+def _create_test_cases(skip_daily_batch_definitions: bool = False):
+    """Create our test cases.
+
+    With each flow, we want to see that we can validate an entire asset,
+    as well as subsets of the asset, including sorting and using batch parameters.
+    """
+    return [
+        pytest.param(
+            gxe.ExpectColumnDistinctValuesToEqualSet(column=COLUMN_NAME, value_set=ALL_VALUES),
+            "postgres_whole_table_batch_definition",
+            None,
+            id="whole asset",
+        ),
+        pytest.param(
+            gxe.ExpectColumnDistinctValuesToEqualSet(
+                column=COLUMN_NAME, value_set=VALUES_FOR_MOST_RECENT_DATE
+            ),
+            "postgres_daily_batch_definition",
+            None,
+            id="ascending",
+            marks=[pytest.mark.skipif(skip_daily_batch_definitions, reason="Fix in V1-297")],
+        ),
+        pytest.param(
+            gxe.ExpectColumnDistinctValuesToEqualSet(
+                column=COLUMN_NAME, value_set=VALUES_WITH_NO_DATE
+            ),
+            "postgres_daily_batch_definition_descending",
+            None,
+            id="descending",
+            marks=[pytest.mark.skipif(skip_daily_batch_definitions, reason="Fix in V1-297")],
+        ),
+        pytest.param(
+            gxe.ExpectColumnDistinctValuesToEqualSet(
+                column=COLUMN_NAME, value_set=VALUES_ON_MY_FAVORITE_DAY
+            ),
+            "postgres_daily_batch_definition",
+            MY_FAVORITE_DAY,
+            id="batch params",
+            marks=[pytest.mark.skipif(skip_daily_batch_definitions, reason="Fix in V1-297")],
+        ),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("expectation", "batch_definition_fixture_name", "batch_parameters"),
+    _create_test_cases(skip_daily_batch_definitions=True),
+)
 @pytest.mark.postgresql
-def test_validate_expectation(postgres_whole_table_batch_definition: BatchDefinition) -> None:
-    batch = postgres_whole_table_batch_definition.get_batch()
-    expectation = _create_expectation(ALL_VALUES)
+def test_batch_validate_expectation(
+    expectation: gxe.Expectation,
+    batch_definition_fixture_name: str,
+    batch_parameters: Optional[Dict],
+    request: pytest.FixtureRequest,
+) -> None:
+    """Ensure Batch::validate(Epectation) works"""
+
+    batch_definition = request.getfixturevalue(batch_definition_fixture_name)
+    batch = batch_definition.get_batch(batch_parameters=batch_parameters)
     result = batch.validate(expectation)
 
     assert result.success
 
 
+@pytest.mark.parametrize(
+    ("expectation", "batch_definition_fixture_name", "batch_parameters"),
+    _create_test_cases(skip_daily_batch_definitions=True),
+)
 @pytest.mark.postgresql
-def test_validate_expectation_suite(postgres_whole_table_batch_definition: BatchDefinition) -> None:
-    batch = postgres_whole_table_batch_definition.get_batch()
-    good_expectation = _create_expectation(ALL_VALUES)
-    bad_expectation = _create_expectation(INVALID_VALUES)
-    suite = ExpectationSuite(
-        "my_suite",
-        expectations=[good_expectation, bad_expectation],
-    )
+def test_batch_validate_expectation_suite(
+    expectation: gxe.Expectation,
+    batch_definition_fixture_name: str,
+    batch_parameters: Optional[Dict],
+    request: pytest.FixtureRequest,
+) -> None:
+    """Ensure Batch::validate(EpectationSuite) works"""
+
+    suite = ExpectationSuite("my suite", expectations=[expectation])
+    batch_definition = request.getfixturevalue(batch_definition_fixture_name)
+    batch = batch_definition.get_batch(batch_parameters=batch_parameters)
     result = batch.validate(suite)
 
-    assert not result.success
-    assert [r.success for r in result.results] == [True, False]
-
-
-@pytest.mark.xfail(reason="TODO: Fix in V1-297")
-@pytest.mark.postgresql
-def test_validate_daily_expectation(postgres_daily_batch_definition: BatchDefinition) -> None:
-    expectation = _create_expectation(VALUES_FOR_MOST_RECENT_DATE)
-    batch = postgres_daily_batch_definition.get_batch(batch_parameters=MY_FAVORITE_DAY)
-    result = batch.validate(expectation)
-
     assert result.success
 
 
+@pytest.mark.parametrize(
+    ("expectation", "batch_definition_fixture_name", "batch_parameters"),
+    _create_test_cases(),
+)
 @pytest.mark.postgresql
-def test_validation_definition_run_whole_asset(
-    postgres_whole_table_batch_definition: BatchDefinition,
+def test_validation_definition_run(
+    expectation: gxe.Expectation,
+    batch_definition_fixture_name: str,
+    batch_parameters: Optional[Dict],
+    request: pytest.FixtureRequest,
 ) -> None:
-    expectation = _create_expectation(ALL_VALUES)
+    """Ensure ValidationDefinition::run works"""
+
+    batch_definition = request.getfixturevalue(batch_definition_fixture_name)
     suite = ExpectationSuite("my_suite", expectations=[expectation])
     validation_definition = ValidationDefinition(
-        name="whatever", data=postgres_whole_table_batch_definition, suite=suite
+        name="whatever", data=batch_definition, suite=suite
     )
-    result = validation_definition.run()
+    result = validation_definition.run(batch_parameters=batch_parameters)
 
     assert result.success
 
 
+@pytest.mark.parametrize(
+    ("expectation", "batch_definition_fixture_name", "batch_parameters"),
+    _create_test_cases(),
+)
 @pytest.mark.postgresql
-def test_validation_definition_daily_ascending(
-    postgres_daily_batch_definition: BatchDefinition,
-) -> None:
-    expectation = _create_expectation(VALUES_FOR_MOST_RECENT_DATE)
-    suite = ExpectationSuite("my_suite", expectations=[expectation])
-    validation_definition = ValidationDefinition(
-        name="whatever", data=postgres_daily_batch_definition, suite=suite
-    )
-    result = validation_definition.run()
-
-    assert result.success
-
-
-@pytest.mark.postgresql
-def test_validation_definition_daily_descending(
-    postgres_daily_batch_definition_descending: BatchDefinition,
-) -> None:
-    expectation = _create_expectation(VALUES_WITH_NO_DATE)
-    suite = ExpectationSuite("my_suite", expectations=[expectation])
-    validation_definition = ValidationDefinition(
-        name="whatever", data=postgres_daily_batch_definition_descending, suite=suite
-    )
-    result = validation_definition.run()
-
-    assert result.success
-
-
-@pytest.mark.postgresql
-def test_validation_definition_daily_with_batch_params(
-    postgres_daily_batch_definition: BatchDefinition,
-) -> None:
-    expectation = _create_expectation(VALUES_ON_MY_FAVORITE_DAY)
-    suite = ExpectationSuite("my_suite", expectations=[expectation])
-    validation_definition = ValidationDefinition(
-        name="whatever", data=postgres_daily_batch_definition, suite=suite
-    )
-    result = validation_definition.run(batch_parameters=MY_FAVORITE_DAY)
-
-    assert result.success
-
-
-@pytest.mark.postgresql
-def test_checkpoint_run_whole_asset(
-    context: AbstractDataContext, postgres_whole_table_batch_definition: BatchDefinition
-) -> None:
-    expectation = _create_expectation(ALL_VALUES)
-    suite = ExpectationSuite("my_suite", expectations=[expectation])
-    validation_definition = ValidationDefinition(
-        name="whatever", data=postgres_whole_table_batch_definition, suite=suite
-    )
-    checkpoint = context.checkpoints.add(
-        Checkpoint(name="whatever", validation_definitions=[validation_definition])
-    )
-    result = checkpoint.run()
-
-    assert result.success
-
-
-@pytest.mark.postgresql
-def test_checkpoint_daily_ascending(
-    context: AbstractDataContext, postgres_daily_batch_definition: BatchDefinition
-) -> None:
-    expectation = _create_expectation(VALUES_FOR_MOST_RECENT_DATE)
-    suite = ExpectationSuite("my_suite", expectations=[expectation])
-    validation_definition = ValidationDefinition(
-        name="whatever", data=postgres_daily_batch_definition, suite=suite
-    )
-    checkpoint = context.checkpoints.add(
-        Checkpoint(name="whatever", validation_definitions=[validation_definition])
-    )
-    result = checkpoint.run()
-
-    assert result.success
-
-
-@pytest.mark.postgresql
-def test_checkpoint_daily_descending(
+def test_checkpoint_run(
+    expectation: gxe.Expectation,
+    batch_definition_fixture_name: str,
+    batch_parameters: Optional[Dict],
     context: AbstractDataContext,
-    postgres_daily_batch_definition_descending: BatchDefinition,
+    request: pytest.FixtureRequest,
 ) -> None:
-    expectation = _create_expectation(VALUES_WITH_NO_DATE)
+    """Ensure Checkpoint::run works"""
+
+    batch_definition = request.getfixturevalue(batch_definition_fixture_name)
     suite = ExpectationSuite("my_suite", expectations=[expectation])
     validation_definition = ValidationDefinition(
-        name="whatever", data=postgres_daily_batch_definition_descending, suite=suite
+        name="whatever", data=batch_definition, suite=suite
     )
     checkpoint = context.checkpoints.add(
         Checkpoint(name="whatever", validation_definitions=[validation_definition])
     )
-    result = checkpoint.run(batch_parameters=None)
-
-    assert result.success
-
-
-@pytest.mark.postgresql
-def test_checkpoint_daily_with_batch_params(
-    context: AbstractDataContext, postgres_daily_batch_definition: BatchDefinition
-) -> None:
-    expectation = _create_expectation(VALUES_ON_MY_FAVORITE_DAY)
-    suite = ExpectationSuite("my_suite", expectations=[expectation])
-    validation_definition = ValidationDefinition(
-        name="whatever", data=postgres_daily_batch_definition, suite=suite
-    )
-    checkpoint = context.checkpoints.add(
-        Checkpoint(name="whatever", validation_definitions=[validation_definition])
-    )
-    result = checkpoint.run(batch_parameters=MY_FAVORITE_DAY)
+    result = checkpoint.run(batch_parameters=batch_parameters)
 
     assert result.success
