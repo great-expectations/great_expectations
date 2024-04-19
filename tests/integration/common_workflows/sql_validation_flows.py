@@ -16,6 +16,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.datasource.fluent.sql_datasource import _SQLAsset
+from tests.integration.common_workflows.conftest import CONNECTION_STRING, TABLE_NAME
 
 # constants for what we know about the test data
 COLUMN_NAME = "x"
@@ -34,10 +35,8 @@ def context() -> AbstractDataContext:
 
 @pytest.fixture
 def postgres_asset(context: AbstractDataContext) -> _SQLAsset:
-    CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost:5432/test_ci"
     DATASOURCE_NAME = "postgres"
     ASSET_NAME = "ten trips"
-    TABLE_NAME = "ct_column_values_to_be_between__evaluation_parameters_dataset_1"
     datasource = context.sources.add_postgres(DATASOURCE_NAME, connection_string=CONNECTION_STRING)
     data_asset = datasource.add_table_asset(name=ASSET_NAME, table_name=TABLE_NAME)
 
