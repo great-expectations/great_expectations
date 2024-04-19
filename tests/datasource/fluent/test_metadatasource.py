@@ -120,7 +120,6 @@ def get_context(context_root_dir: Optional[DirectoryPath] = None, **kwargs):
 class DummyDataAsset(DataAsset):
     """Minimal Concrete DataAsset Implementation"""
 
-    @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,

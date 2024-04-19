@@ -174,7 +174,6 @@ class _FilePathDataAsset(DataAsset):
         return option_keys
 
     @public_api
-    @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,

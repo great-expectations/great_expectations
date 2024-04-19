@@ -591,14 +591,13 @@ class _SQLAsset(DataAsset):
         return batch_list[batch_request.batch_slice]
 
     @public_api
-    @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
         batching_regex: Optional[re.Pattern] = None,
-    ) -> BatchRequest:
+    ) -> BatchRequest[Partitioner]:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:

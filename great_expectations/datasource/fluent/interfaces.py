@@ -79,7 +79,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context import (
         AbstractDataContext as GXDataContext,
     )
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import (
         BatchParameters,
         BatchRequest,
@@ -282,32 +281,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> tuple[str, ...]:
         raise NotImplementedError(
             """One needs to implement "get_batch_parameters_keys" on a DataAsset subclass."""
-        )
-
-    def build_batch_request(
-        self,
-        options: Optional[BatchParameters] = None,
-        batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
-    ) -> BatchRequest:
-        """A batch request that can be used to obtain batches for this DataAsset.
-
-        Args:
-            options: A dict that can be used to filter the batch groups returned from the asset.
-                The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling get_batch_parameters_keys(...).
-            batch_slice: A python slice that can be used to limit the sorted batches by index.
-                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
-            partitioner: A Partitioner used to narrow the data returned from the asset.
-            batching_regex: A Regular Expression used to build batches in path based Assets.
-
-        Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-        """  # noqa: E501
-        raise NotImplementedError(
-            """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:

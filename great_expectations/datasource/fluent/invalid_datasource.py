@@ -82,7 +82,6 @@ class InvalidAsset(DataAsset):
     ) -> NoReturn:
         self._raise_type_error()
 
-    @override
     def build_batch_request(
         self,
         options: dict | None = None,

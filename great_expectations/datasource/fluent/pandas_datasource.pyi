@@ -73,7 +73,6 @@ class _PandasDataAsset(DataAsset):
     def batch_parameters_template(self) -> BatchParameters: ...
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
-    @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = ...,
@@ -129,10 +128,9 @@ class DataFrameAsset(_PandasDataAsset):
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
         version="0.16.15",
     )
-    @override
-    def build_batch_request(  # type: ignore[override]
+    def build_batch_request(
         self, dataframe: Optional[pd.DataFrame] = None
-    ) -> BatchRequest: ...
+    ) -> BatchRequest[None]: ...
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> list[Batch]: ...
 

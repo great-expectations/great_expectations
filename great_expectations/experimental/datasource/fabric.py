@@ -131,8 +131,7 @@ class _PowerBIAsset(DataAsset):
         )
         return batch_list
 
-    @override
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(self) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Returns:

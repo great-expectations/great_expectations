@@ -172,12 +172,11 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         return batch_list
 
     @public_api
-    @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[None] = None,
         batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
@@ -386,13 +385,12 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
         version="0.16.15",
     )
-    @override
-    def build_batch_request(  # type: ignore[override]  # noqa: PLR0913
+    def build_batch_request(  # noqa: PLR0913
         self,
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[None] = None,
         batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
