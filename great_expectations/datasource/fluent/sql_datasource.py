@@ -700,7 +700,7 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
                 option: None
                 for option in self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             }
-            expect_batch_request_form = BatchRequest(
+            expect_batch_request_form = BatchRequest[Partitioner](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
