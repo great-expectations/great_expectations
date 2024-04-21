@@ -963,7 +963,7 @@ def test_sql_complete_output_no_id_pk_fallback(
     )
 
 @pytest.mark.filesystem
-def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
+def test_sql_result_format_filters_correct_number_of_rows(
         data_context_with_connection_to_metrics_db: FileDataContext,
         reference_sql_checkpoint_config_for_animal_names_table: dict,
         expect_column_values_to_be_in_set: ExpectationConfiguration,
