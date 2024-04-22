@@ -101,7 +101,6 @@ For example, you might opt to run and interact with the GX OSS client locally to
 
 GX provides flexible, robust products that allow your organization to quickly deploy GX Cloud or GX OSS to fit your unique requirements.
 
-
 ## GX Cloud workflow
 
 The GX Cloud workflow is a sequence of tasks you complete to perform Data Validations. 
