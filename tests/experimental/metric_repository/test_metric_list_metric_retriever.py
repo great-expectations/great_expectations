@@ -86,7 +86,7 @@ def test_get_metrics_table_metrics_only(mocker: MockerFixture):
     ]
 
 
-def test_get_metrics_full_list(mocker: MockerFixture):
+def test_get_metrics_full_list_of_metrics(mocker: MockerFixture):
     mock_context = mocker.Mock(spec=CloudDataContext)
     mock_validator = mocker.Mock(spec=Validator)
     mock_context.get_validator.return_value = mock_validator
