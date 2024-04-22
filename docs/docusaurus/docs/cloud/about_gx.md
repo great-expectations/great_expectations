@@ -49,7 +49,7 @@ The GX Agent is typically deployed in your organization's deployment environment
 
 ## GX Cloud deployment patterns
 
-GX Cloud deployments can be tailored to meet your specific business requirements. To determine which deployment pattern and GX architectural components are most suitable for your organization, determine how your data is accessed and how users interact with GX Cloud.
+GX Cloud deployments can be tailored to meet your specific business requirements. How your data is accessed and how you want your users to interact with GX Cloud determine which deployment pattern and GX architectural components are suitable for your organization.
 
 
 ### Org-hosted deployment pattern
