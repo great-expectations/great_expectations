@@ -54,7 +54,7 @@ GX Cloud deployments can be tailored to meet your specific business requirements
 
 ### Org-hosted deployment pattern
 
-In an org-hosted deployment, you run the GX Agent in your organization's deployment environment, for example, development or production. The GX Agent is an intermediary between GX Cloud and your organization's deployment environment data stores. Organization users can interact with GX Cloud using the web UI, the GX OSS client, or both.
+In an org-hosted deployment, you run the GX Agent in your organization's deployment environment. The GX Agent is an intermediary between GX Cloud and your organization's deployment environment data stores. Organization users can interact with GX Cloud using the web UI, the GX OSS client, or both.
 
 ![GX Cloud org-hosted deployment](./architecture_deployment_images/org_hosted_deployment.png)
 
