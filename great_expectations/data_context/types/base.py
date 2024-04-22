@@ -53,7 +53,6 @@ if TYPE_CHECKING:
     from io import TextIOWrapper
 
     from great_expectations.alias_types import JSONValues, PathStr
-    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.core.batch import BatchRequestBase
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest as FluentBatchRequest,
@@ -2552,7 +2551,7 @@ class CheckpointConfig(BaseYamlConfig):
         name: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[Sequence[ActionDict]] = None,
+        action_list: Optional[Sequence[dict]] = None,
         suite_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[CheckpointValidationDefinition]] = None,
@@ -2640,11 +2639,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_name = value
 
     @property
-    def action_list(self) -> Sequence[ActionDict]:
+    def action_list(self) -> Sequence[dict]:
         return self._action_list
 
     @action_list.setter
-    def action_list(self, value: Sequence[ActionDict]) -> None:
+    def action_list(self, value: Sequence[dict]) -> None:
         self._action_list = value
 
     @property
