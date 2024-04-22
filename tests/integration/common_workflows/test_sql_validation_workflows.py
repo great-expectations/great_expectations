@@ -80,7 +80,9 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
             "postgres_daily_batch_definition",
             None,
             id="ascending",
-            marks=[pytest.mark.skipif(skip_daily_batch_definitions, reason="Fix in V1-297")],
+            marks=[
+                pytest.mark.xfail(skip_daily_batch_definitions, reason="Fix in V1-297", strict=True)
+            ],
         ),
         pytest.param(
             gxe.ExpectColumnDistinctValuesToEqualSet(
@@ -89,7 +91,9 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
             "postgres_daily_batch_definition_descending",
             None,
             id="descending",
-            marks=[pytest.mark.skipif(skip_daily_batch_definitions, reason="Fix in V1-297")],
+            marks=[
+                pytest.mark.xfail(skip_daily_batch_definitions, reason="Fix in V1-297", strict=True)
+            ],
         ),
         pytest.param(
             gxe.ExpectColumnDistinctValuesToEqualSet(
@@ -98,7 +102,9 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
             "postgres_daily_batch_definition",
             MY_FAVORITE_DAY,
             id="batch params",
-            marks=[pytest.mark.skipif(skip_daily_batch_definitions, reason="Fix in V1-297")],
+            marks=[
+                pytest.mark.xfail(skip_daily_batch_definitions, reason="Fix in V1-297", strict=True)
+            ],
         ),
     ]
 
