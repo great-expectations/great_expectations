@@ -62,7 +62,9 @@ def filesystem_whole_table_batch_definition(file_system_asset: CSVAsset) -> Batc
 def filesystem_monthly_batch_definition(file_system_asset: CSVAsset) -> BatchDefinition:
     return file_system_asset.add_batch_definition(
         name="monthly",
-        partitioner=PartitionerYearAndMonth(column_name="CHANGE ME"),
+        partitioner=PartitionerYearAndMonth(
+            column_name="CHANGE ME"
+        ),  # The column name will be going away with the file-based fluent batch definition API
         batching_regex=re.compile(BATCHING_REGEX),
     )
 
@@ -71,7 +73,10 @@ def filesystem_monthly_batch_definition(file_system_asset: CSVAsset) -> BatchDef
 def filesystem_monthly_batch_definition_descending(file_system_asset: CSVAsset) -> BatchDefinition:
     return file_system_asset.add_batch_definition(
         name="monthly",
-        partitioner=PartitionerYearAndMonth(column_name="CHANGE ME", sort_ascending=False),
+        partitioner=PartitionerYearAndMonth(
+            column_name="CHANGE ME",
+            sort_ascending=False,
+        ),  # The column name will be going away with the file-based fluent batch definition API
         batching_regex=re.compile(BATCHING_REGEX),
     )
 
