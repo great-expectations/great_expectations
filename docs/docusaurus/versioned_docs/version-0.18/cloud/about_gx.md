@@ -54,7 +54,7 @@ The GX Agent is typically deployed in your organization's deployment environment
 
 ### GX Agent versioning
 
-GX uses a date-based versioning format for its weekly GX Agent releases. For example, `YYYYMMMDD`. GX appends `stable` or `dev` to the GX Agent version to identify the release type. The `stable` identifier indicates the release is fully tested and ready for use. The `dev` identifier indicates the release is pre-production and untested. This documentation assumes you are using the latest `stable` GX Agent release.
+GX uses a date-based versioning format for its weekly GX Agent Docker image releases. For example, `YYYYMMMDD.#` for stable releases or `YYYYMMDD.#.dev#` for pre-releases. GX uses the `stable` and `dev` Docker image tags to identify the release type. The `stable` tag indicates the image is fully tested and ready for use. The `dev` tag indicates a pre-release image. This documentation assumes you're using the latest `stable` GX Agent Docker image.
 
 
 ## GX Cloud deployment patterns
@@ -100,11 +100,6 @@ The deployment patterns described previously are not an exhaustive collection of
 For example, you might opt to run and interact with the GX OSS client locally to define your Data Sources, Data Assets, Expectation Suites, and Checkpoints, run the GX OSS client in your Airflow pipeline to execute Checkpoints on a regular schedule, run the GX Agent in your production environment to fetch Data Asset metrics from the GX Cloud web UI, and access the GX Cloud web UI to view Validation and Checkpoint run histories.
 
 GX provides flexible, robust products that allow your organization to quickly deploy GX Cloud or GX OSS to fit your unique requirements.
-
-### Versioning
-
-GX uses a date-based versioning format for its weekly GX Agent Docker image releases. For example, `YYYYMMMDD.#` for stable releases or `YYYYMMDD.#.dev#` for pre-releases. GX uses the `stable` and `dev` Docker image tags to identify the release type. The `stable` tag indicates the image is fully tested and ready for use. The `dev` tag indicates a pre-release image. This documentation assumes you're using the latest `stable` GX Agent Docker image.
-
 
 ## GX Cloud workflow
 
