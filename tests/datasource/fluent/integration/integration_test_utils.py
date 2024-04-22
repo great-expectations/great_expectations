@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
 
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
@@ -57,16 +56,7 @@ def run_checkpoint_and_data_doc(
     # Configure and run a checkpoint
     checkpoint_config = {
         "validations": [{"batch_request": batch_request, "expectation_suite_name": suite_name}],
-        "action_list": [
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-            ActionDict(
-                name="update_data_docs",
-                action=ActionDetails(class_name="UpdateDataDocsAction"),
-            ),
-        ],
+        "action_list": [],
     }
     metadata = validator.active_batch.metadata  # type: ignore[union-attr] # active_batch could be None
     if isinstance(datasource, PandasDatasource):
