@@ -87,7 +87,6 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     ValidationMetricIdentifier,
     ValidationResultIdentifier,
@@ -1021,15 +1020,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             for store in self.list_stores()
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
-
-    @public_api
-    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
-        """List existing Checkpoint identifiers on this context.
-
-        Returns:
-            Either a list of strings or ConfigurationIdentifiers depending on the environment and context type.
-        """  # noqa: E501
-        return self.checkpoint_store.list_checkpoints()
 
     @public_api
     def get_datasource(

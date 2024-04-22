@@ -30,7 +30,6 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DataContextConfigDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -967,56 +966,6 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
     assert isinstance(observed, list)
     assert observed == ["a.warning", "b.warning", "c.warning"]
     assert len(observed) == 3
-
-
-@pytest.mark.unit
-def test_list_checkpoints_on_empty_context_returns_empty_list(empty_data_context):
-    assert empty_data_context.list_checkpoints() == []
-
-
-@pytest.mark.unit
-def test_list_checkpoints_on_context_with_checkpoint(empty_context_with_checkpoint):
-    context = empty_context_with_checkpoint
-    assert context.list_checkpoints() == ["my_checkpoint"]
-
-
-@pytest.mark.filesystem
-def test_list_checkpoints_on_context_with_two_checkpoints(
-    empty_context_with_checkpoint,
-):
-    context = empty_context_with_checkpoint
-    checkpoints_file = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "my_checkpoint.yml",
-    )
-    shutil.copy(
-        checkpoints_file,
-        os.path.join(  # noqa: PTH118
-            os.path.dirname(checkpoints_file),  # noqa: PTH120
-            "another.yml",
-        ),
-    )
-    assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}
-
-
-@pytest.mark.filesystem
-def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoints_dir(
-    empty_context_with_checkpoint,
-):
-    context = empty_context_with_checkpoint
-
-    for extension in [".json", ".txt", "", ".py"]:
-        path = os.path.join(  # noqa: PTH118
-            context.root_directory,
-            DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-            f"foo{extension}",
-        )
-        with open(path, "w") as f:
-            f.write("foo: bar")
-        assert os.path.isfile(path)  # noqa: PTH113
-
-    assert context.list_checkpoints() == ["my_checkpoint"]
 
 
 @pytest.mark.filesystem
