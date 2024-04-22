@@ -9,6 +9,7 @@ from .actions import (
     UpdateDataDocsAction,
     ValidationAction,
 )
+from .v1_checkpoint import Checkpoint
 
 for module_name, package_name in [
     (".actions", "great_expectations.checkpoint"),
