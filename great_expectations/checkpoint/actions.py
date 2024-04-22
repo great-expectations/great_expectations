@@ -728,7 +728,7 @@ class UpdateDataDocsAction(DataDocsAction):
         return action_results
 
     @override
-    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
+    def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[ValidationResultIdentifier, GXCloudIdentifier],
