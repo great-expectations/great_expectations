@@ -82,7 +82,13 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
+class RegexPartitioner:
+    regex: re.Pattern
+    params: list[str]
+    sort_ascending: bool = True
+
+
+class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
