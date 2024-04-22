@@ -2356,7 +2356,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic
     assert not unexpected_index_query
 
 @pytest.mark.spark
-def test_spark_result_format_set_partial_unexpected_count_and_unexpected_rows_returns_correct_number_of_results(
+def test_spark_result_format_partial_unexpected_count_and_unexpected_rows_returns_correct_number_of_results(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -2478,7 +2478,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
     assert first_result_partial_list == [{"animals": "giraffe", "pk_1": 3}]
 
 @pytest.mark.filesystem
-def test_pandas_result_format_set_partial_unexpected_count_and_unexpected_rows_returns_correct_number_of_results(
+def test_pandas_result_format_partial_unexpected_count_and_unexpected_rows_returns_correct_number_of_results(
         in_memory_runtime_context: AbstractDataContext,
         batch_request_for_pandas_unexpected_rows_and_index: dict,
         reference_checkpoint_config_for_unexpected_column_names: dict,
