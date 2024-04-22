@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import uuid
 from typing import TYPE_CHECKING
 
@@ -10,6 +11,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import DataContextKey, StringKey
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
@@ -93,3 +95,14 @@ class CheckpointStore(Store):
         except gx_exceptions.StoreBackendError as e:
             name = key.to_tuple()[0]
             raise ValueError(f"Could not update Checkpoint '{name}'") from e  # noqa: TRY003
+
+    @staticmethod
+    def default_checkpoints_exist(directory_path: str) -> bool:
+        if not directory_path:
+            return False
+
+        checkpoints_directory_path: str = os.path.join(  # noqa: PTH118
+            directory_path,
+            DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
+        )
+        return os.path.isdir(checkpoints_directory_path)  # noqa: PTH112
