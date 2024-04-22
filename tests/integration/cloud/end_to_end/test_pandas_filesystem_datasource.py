@@ -12,8 +12,6 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
@@ -156,13 +154,3 @@ def test_interactive_validator(
         )
     )
     assert expectation_validation_result.success
-
-
-@pytest.mark.xfail(
-    reason="1.0 API requires a backend change. Test should pass once #2623 is merged"
-)
-@pytest.mark.cloud
-def test_checkpoint_run(checkpoint: Checkpoint):
-    """Test running a Checkpoint that was created using the entities defined in this module."""
-    checkpoint_result: CheckpointResult = checkpoint.run()
-    assert checkpoint_result.success

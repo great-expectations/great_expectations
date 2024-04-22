@@ -550,7 +550,7 @@ class TestTableIdentifiers:
                 }
             ],
         }
-        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
+        checkpoint = context.add_checkpoint(
             **checkpoint_config,
         )
         result = checkpoint.run()
@@ -847,7 +847,7 @@ class TestColumnIdentifiers:
                 }
             ],
         }
-        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
+        checkpoint = context.add_checkpoint(
             **checkpoint_config,
         )
         result = checkpoint.run()
