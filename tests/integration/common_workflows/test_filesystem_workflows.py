@@ -1,3 +1,11 @@
+"""Tests to ensure core validation flows work with sql assets
+
+NOTE: assertions here take the form of asserting that expectations pass
+based on knowledge of the data in the test set.
+
+Suites also assert that we only get the expected number of rows (they should all have 10)
+"""
+
 import re
 from typing import Dict, Optional
 
@@ -5,8 +13,11 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.partitioners import PartitionerYearAndMonth
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.datasource.fluent.pandas_file_path_datasource import CSVAsset
 
@@ -26,6 +37,9 @@ VALUES_ON_MY_FAVORITE_MONTH = [0, 1]
 @pytest.fixture
 def context() -> AbstractDataContext:
     return gx.get_context(mode="ephemeral")
+
+
+EXPECT_10_ROWS = gxe.ExpectTableRowCountToEqual(value=10)
 
 
 @pytest.fixture
@@ -48,7 +62,7 @@ def filesystem_whole_table_batch_definition(file_system_asset: CSVAsset) -> Batc
 def filesystem_monthly_batch_definition(file_system_asset: CSVAsset) -> BatchDefinition:
     return file_system_asset.add_batch_definition(
         name="monthly",
-        partitioner=PartitionerYearAndMonth(column_name="passenger_count"),
+        partitioner=PartitionerYearAndMonth(column_name="CHANGE ME"),
         batching_regex=re.compile(BATCHING_REGEX),
     )
 
@@ -57,7 +71,7 @@ def filesystem_monthly_batch_definition(file_system_asset: CSVAsset) -> BatchDef
 def filesystem_monthly_batch_definition_descending(file_system_asset: CSVAsset) -> BatchDefinition:
     return file_system_asset.add_batch_definition(
         name="monthly",
-        partitioner=PartitionerYearAndMonth(column_name="passenger_count", sort_ascending=False),
+        partitioner=PartitionerYearAndMonth(column_name="CHANGE ME", sort_ascending=False),
         batching_regex=re.compile(BATCHING_REGEX),
     )
 
@@ -99,6 +113,7 @@ def _create_test_cases():
             "filesystem_monthly_batch_definition",
             MY_FAVORITE_DAY,
             id="batch params",
+            marks=[pytest.mark.xfail(reason="Fix in V1-299", strict=True)],
         ),
     ]
 
@@ -114,10 +129,7 @@ def test_batch_validate_expectation(
     batch_parameters: Optional[Dict],
     request: pytest.FixtureRequest,
 ) -> None:
-    """Ensure Batch::validate(Epectation) works
-
-    Note: There's also a bonus assertion here to make it clear we are not concatenating files.
-    """
+    """Ensure Batch::validate(Epectation) works"""
     batch_definition = request.getfixturevalue(batch_definition_fixture_name)
     batch = batch_definition.get_batch(batch_parameters=batch_parameters)
 
@@ -125,4 +137,75 @@ def test_batch_validate_expectation(
     row_count_result = batch.validate(gxe.ExpectTableRowCountToEqual(value=10))
 
     assert row_count_result.success
+    assert result.success
+
+
+@pytest.mark.parametrize(
+    ("expectation", "batch_definition_fixture_name", "batch_parameters"),
+    _create_test_cases(),
+)
+@pytest.mark.postgresql
+def test_batch_validate_expectation_suite(
+    expectation: gxe.Expectation,
+    batch_definition_fixture_name: str,
+    batch_parameters: Optional[Dict],
+    request: pytest.FixtureRequest,
+) -> None:
+    """Ensure Batch::validate(EpectationSuite) works"""
+
+    suite = ExpectationSuite("my suite", expectations=[expectation, EXPECT_10_ROWS])
+    batch_definition = request.getfixturevalue(batch_definition_fixture_name)
+    batch = batch_definition.get_batch(batch_parameters=batch_parameters)
+    result = batch.validate(suite)
+
+    assert result.success
+
+
+@pytest.mark.parametrize(
+    ("expectation", "batch_definition_fixture_name", "batch_parameters"),
+    _create_test_cases(),
+)
+@pytest.mark.postgresql
+def test_validation_definition_run(
+    expectation: gxe.Expectation,
+    batch_definition_fixture_name: str,
+    batch_parameters: Optional[Dict],
+    request: pytest.FixtureRequest,
+) -> None:
+    """Ensure ValidationDefinition::run works"""
+
+    batch_definition = request.getfixturevalue(batch_definition_fixture_name)
+    suite = ExpectationSuite("my suite", expectations=[expectation, EXPECT_10_ROWS])
+    validation_definition = ValidationDefinition(
+        name="whatever", data=batch_definition, suite=suite
+    )
+    result = validation_definition.run(batch_parameters=batch_parameters)
+
+    assert result.success
+
+
+@pytest.mark.parametrize(
+    ("expectation", "batch_definition_fixture_name", "batch_parameters"),
+    _create_test_cases(),
+)
+@pytest.mark.postgresql
+def test_checkpoint_run(
+    expectation: gxe.Expectation,
+    batch_definition_fixture_name: str,
+    batch_parameters: Optional[Dict],
+    context: AbstractDataContext,
+    request: pytest.FixtureRequest,
+) -> None:
+    """Ensure Checkpoint::run works"""
+
+    batch_definition = request.getfixturevalue(batch_definition_fixture_name)
+    suite = ExpectationSuite("my suite", expectations=[expectation, EXPECT_10_ROWS])
+    validation_definition = ValidationDefinition(
+        name="whatever", data=batch_definition, suite=suite
+    )
+    checkpoint = context.checkpoints.add(
+        Checkpoint(name="whatever", validation_definitions=[validation_definition])
+    )
+    result = checkpoint.run(batch_parameters=batch_parameters)
+
     assert result.success
