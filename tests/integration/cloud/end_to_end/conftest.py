@@ -20,7 +20,6 @@ from great_expectations.execution_engine import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
     from great_expectations.compatibility import pyspark, sqlalchemy
     from great_expectations.core import ExpectationSuite
     from great_expectations.datasource.fluent import BatchRequest
@@ -94,46 +93,6 @@ def validator(
     _ = context.suites.get(
         name=expectation_suite.name,
     )
-
-
-@pytest.fixture(scope="module")
-def checkpoint(
-    context: CloudDataContext,
-    batch_request: BatchRequest,
-    expectation_suite: ExpectationSuite,
-) -> Iterator[Checkpoint]:
-    checkpoint_name = f"{batch_request.data_asset_name} | {expectation_suite.name}"
-    _ = context.add_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.name,
-                "batch_request": batch_request,
-            },
-            {
-                "expectation_suite_name": expectation_suite.name,
-                "batch_request": batch_request,
-            },
-        ],
-    )
-    _ = context.add_or_update_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.name,
-                "batch_request": batch_request,
-            }
-        ],
-    )
-    checkpoint = context.get_legacy_checkpoint(name=checkpoint_name)
-    assert (
-        len(checkpoint.validations) == 1
-    ), "Checkpoint was not updated in the previous method call."
-    yield checkpoint
-    context.delete_legacy_checkpoint(checkpoint.name)
-
-    with pytest.raises(gx_exceptions.DataContextError):
-        context.get_legacy_checkpoint(name=checkpoint_name)
 
 
 @pytest.fixture(scope="module")
