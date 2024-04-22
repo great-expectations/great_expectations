@@ -74,7 +74,6 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
     _YamlConfigValidator,
 )
 from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -130,9 +129,9 @@ if TYPE_CHECKING:
         DataContextVariables,
     )
     from great_expectations.data_context.store import (
-        CheckpointStore,
         SuiteParameterStore,
     )
+    from great_expectations.data_context.store.checkpoint_store import CheckpointStore
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
@@ -303,11 +302,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         self._checkpoints: CheckpointFactory | None = None
-        if self.stores.get(self.checkpoint_store_name):
-            # NOTE: Currently in an intermediate state where both the legacy and V1 stores exist.
-            #       Upon the deletion of the old checkpoint store, the new one will be promoted.
+        if checkpoint_store := self.stores.get(self.checkpoint_store_name):
             self._checkpoints = CheckpointFactory(
-                store=self.v1_checkpoint_store,
+                store=checkpoint_store,
             )
 
         self._validation_definitions: ValidationDefinitionFactory = ValidationDefinitionFactory(
@@ -626,18 +623,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def checkpoint_store(self) -> CheckpointStore:
         return self.stores[self.checkpoint_store_name]
-
-    @property
-    def v1_checkpoint_store(self) -> V1CheckpointStore:
-        # Temporary property until the legacy checkpoint store is removed
-        # and the new checkpoint store is promoted to the old namespace
-        legacy_checkpoint_store = self.checkpoint_store
-        store = V1CheckpointStore()
-
-        # Leverage same backend as what was configured for the old store
-        store._store_backend = legacy_checkpoint_store.store_backend
-
-        return store
 
     @property
     def assistants(self) -> DataAssistantDispatcher:

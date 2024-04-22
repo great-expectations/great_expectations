@@ -98,7 +98,7 @@ class ProjectManager:
         return self._project.expectations_store
 
     def get_checkpoints_store(self) -> V1CheckpointStore:
-        return self._project.v1_checkpoint_store
+        return self._project.checkpoint_store
 
     def get_validation_results_store(self) -> ValidationResultsStore:
         return self._project.validation_results_store
