@@ -25,6 +25,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
+from great_expectations.datasource.fluent.file_path_data_asset import RegexPartitioner
 
 if TYPE_CHECKING:
     from typing import DefaultDict
@@ -215,7 +216,7 @@ class FilePathDataConnector(DataConnector):
         batch_definition_list: list[LegacyBatchDefinition] = list()
         batch_definition_set = set()
         # if the batch request hasn't specified a batching_regex, fallback to a default
-        batching_regex = batch_request.batching_regex or self._batching_regex
+        batching_regex = batch_request.partitioner.batching_regex or self._batching_regex
         for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
             if (
                 self._batch_definition_matches_batch_request(
