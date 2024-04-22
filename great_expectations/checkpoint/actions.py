@@ -727,7 +727,6 @@ class UpdateDataDocsAction(DataDocsAction):
 
         return action_results
 
-    @override
     def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,

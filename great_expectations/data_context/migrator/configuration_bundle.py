@@ -19,7 +19,6 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariables,  # noqa: TCH001
 )
 from great_expectations.data_context.types.base import (
-    CheckpointConfig,
     DataContextConfigSchema,
     DatasourceConfig,
     DatasourceConfigSchema,
@@ -73,10 +72,6 @@ class ConfigurationBundle:
     @property
     def expectation_suites(self) -> List[ExpectationSuite]:
         return self._expectation_suites
-
-    @property
-    def checkpoints(self) -> List[CheckpointConfig]:
-        return self._checkpoints
 
     @property
     def validation_results(self) -> Dict[str, ExpectationSuiteValidationResult]:
