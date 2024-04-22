@@ -420,7 +420,7 @@ module.exports = {
     {type: 'doc', id: 'cloud/why_gx_cloud'},
         {
           type: 'category',
-          label: 'About GX Cloud',
+          label: 'GX Cloud deployment patterns and architecture',
           link: { type: 'doc', id: 'cloud/about_gx' },
           items: [
             {
