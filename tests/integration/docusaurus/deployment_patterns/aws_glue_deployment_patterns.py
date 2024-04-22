@@ -34,7 +34,6 @@ config = DataContextConfig(
     validation_results_store_name=config_file["validation_results_store_name"],
     suite_parameter_store_name=config_file["suite_parameter_store_name"],
     plugins_directory="/great_expectations/plugins",
-    validation_operators=config_file["validation_operators"],
     stores=config_file["stores"],
     data_docs_sites=config_file["data_docs_sites"],
     config_variables_file_path=config_file["config_variables_file_path"],

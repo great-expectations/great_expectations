@@ -196,7 +196,6 @@ def empty_serialized_configuration_bundle() -> dict:
             "plugins_directory": None,
             "profiler_store_name": None,
             "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
-            "validation_operators": None,
             "validation_results_store_name": None,
         },
         "datasources": [],
@@ -237,7 +236,6 @@ def serialized_configuration_bundle() -> dict:
             },
             "plugins_directory": None,
             "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
-            "validation_operators": None,
             "validation_results_store_name": None,
         },
         "datasources": [

@@ -53,7 +53,6 @@ def construct_data_context_config():
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
-        validation_operators: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
     ):
         if stores is None:
@@ -70,7 +69,6 @@ def construct_data_context_config():
             "checkpoint_store_name": checkpoint_store_name,
             "profiler_store_name": profiler_store_name,
             "plugins_directory": plugins_directory,
-            "validation_operators": validation_operators,
             "stores": stores,
             "data_docs_sites": data_docs_sites,
             "config_variables_file_path": None,
@@ -1254,21 +1252,6 @@ def test_override_general_defaults(
                 },
             },
         },
-        validation_operators={
-            "custom_action_list_operator": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "custom_store_validation_result",
-                        "action": {"class_name": "CustomStoreValidationResultAction"},
-                    },
-                    {
-                        "name": "update_data_docs",
-                        "action": {"class_name": "UpdateDataDocsAction"},
-                    },
-                ],
-            }
-        },
         anonymous_usage_statistics={"enabled": True},
     )
 
@@ -1350,21 +1333,6 @@ def test_override_general_defaults(
             },
         },
     }
-    desired_validation_operators = {
-        "custom_action_list_operator": {
-            "class_name": "ActionListValidationOperator",
-            "action_list": [
-                {
-                    "name": "custom_store_validation_result",
-                    "action": {"class_name": "CustomStoreValidationResultAction"},
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": {"class_name": "UpdateDataDocsAction"},
-                },
-            ],
-        }
-    }
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
@@ -1378,7 +1346,6 @@ def test_override_general_defaults(
         checkpoint_store_name="checkpoint_S3_store",
         profiler_store_name="profiler_S3_store",
         stores=desired_stores,
-        validation_operators=desired_validation_operators,
         data_docs_sites=desired_data_docs_sites_config,
         plugins_directory="custom_plugins_directory",
     )
@@ -1622,6 +1589,5 @@ def test_data_context_config_defaults():
         "profiler_store_name": None,
         "progress_bars": None,
         "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
-        "validation_operators": None,
         "validation_results_store_name": None,
     }

@@ -40,7 +40,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import deprecated_argument, public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
@@ -1431,9 +1431,6 @@ class DataContextConfigSchema(Schema):
     checkpoint_store_name = fields.Str(required=False, allow_none=True)
     profiler_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
-    validation_operators = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
-    )
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
@@ -1604,13 +1601,6 @@ class DataContextConfigDefaults(enum.Enum):
             "action": {"class_name": "UpdateDataDocsAction"},
         },
     ]
-    DEFAULT_VALIDATION_OPERATORS = {
-        "action_list_operator": {
-            "class_name": "ActionListValidationOperator",
-            "action_list": DEFAULT_ACTION_LIST,
-        }
-    }
-
     DEFAULT_EXPECTATIONS_STORE = {
         "class_name": "ExpectationsStore",
         "store_backend": {
@@ -1688,7 +1678,6 @@ class BaseStoreBackendDefaults(DictDot):
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-        validation_operators: Optional[dict] = None,
         stores: Optional[dict] = None,
         data_docs_sites: Optional[dict] = None,
     ) -> None:
@@ -1700,7 +1689,6 @@ class BaseStoreBackendDefaults(DictDot):
         self.validation_definition_store_name = (
             DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value
         )
-        self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
 
@@ -2189,7 +2177,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
 
 
 @public_api
-@deprecated_argument(argument_name="validation_operators", version="0.14.0")
 class DataContextConfig(BaseYamlConfig):
     """Config class for DataContext.
 
@@ -2212,7 +2199,6 @@ class DataContextConfig(BaseYamlConfig):
         checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
         profiler_store_name (Optional[str]): name of ProfilerStore to be used by DataContext.
         plugins_directory (Optional[str]): the directory in which custom plugin modules should be placed.
-        validation_operators: list of validation operators configured by this DataContext.
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
@@ -2245,7 +2231,6 @@ class DataContextConfig(BaseYamlConfig):
         checkpoint_store_name: Optional[str] = None,
         profiler_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
-        validation_operators=None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
@@ -2288,7 +2273,6 @@ class DataContextConfig(BaseYamlConfig):
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
-        self.validation_operators = validation_operators
         self.stores = self._init_stores(stores)
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path

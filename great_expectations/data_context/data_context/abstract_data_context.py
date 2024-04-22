@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import configparser
 import copy
-import datetime
 import json
 import logging
 import os
@@ -131,7 +130,6 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core.run_identifier import RunIdentifier
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -169,9 +167,6 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
     from great_expectations.render.renderer.site_builder import SiteBuilder
-    from great_expectations.validation_operators.validation_operators import (
-        ValidationOperator,
-    )
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
@@ -296,21 +291,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._assistants = DataAssistantDispatcher(data_context=self)
 
         self._init_factories()
-
-        # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
-        self.validation_operators: dict = {}
-        if (
-            "validation_operators" in self.get_config().commented_map  # type: ignore[union-attr]
-            and self.config.validation_operators
-        ):
-            for (
-                validation_operator_name,
-                validation_operator_config,
-            ) in self.config.validation_operators.items():
-                self.add_validation_operator(
-                    validation_operator_name,
-                    validation_operator_config,
-                )
 
         self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
         self._init_analytics()
@@ -2531,152 +2511,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"expectation_suite {expectation_suite_name} not found"
             )
-
-    def add_validation_operator(
-        self, validation_operator_name: str, validation_operator_config: dict
-    ) -> ValidationOperator:
-        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
-
-        Args:
-            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
-            validation_operator_config (dict): a config for the ValidationOperator to add
-
-        Returns:
-            validation_operator (ValidationOperator)
-        """  # noqa: E501
-
-        self.config.validation_operators[validation_operator_name] = validation_operator_config
-        config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
-        module_name = "great_expectations.validation_operators"
-        new_validation_operator = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": self,
-                "name": validation_operator_name,
-            },
-            config_defaults={"module_name": module_name},
-        )
-        if not new_validation_operator:
-            raise gx_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        self.validation_operators[validation_operator_name] = new_validation_operator
-        return new_validation_operator
-
-    def run_validation_operator(  # noqa: PLR0913
-        self,
-        validation_operator_name: str,
-        assets_to_validate: List,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        suite_parameters: Optional[dict] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        **kwargs,
-    ):
-        """
-        Run a validation operator to validate data assets and to perform the business logic around
-        validation that the operator implements.
-
-        Args:
-            validation_operator_name: name of the operator, as appears in the context's config file
-            assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
-                the list can be either batches, or a tuple that will allow the operator to fetch the batch:
-                (batch_kwargs, expectation_suite_name)
-            suite_parameters: $parameter_name syntax references to be evaluated at runtime
-            run_id: The run_id for the validation; if None, a default value will be used
-            run_name: The run_name for the validation; if None, a default value will be used
-            run_time: The date/time of the run
-            result_format: one of several supported formatting directives for expectation validation results
-            **kwargs: Additional kwargs to pass to the validation operator
-
-        Returns:
-            ValidationOperatorResult
-        """  # noqa: E501
-        return self._run_validation_operator(
-            validation_operator_name=validation_operator_name,
-            assets_to_validate=assets_to_validate,
-            run_id=run_id,
-            suite_parameters=suite_parameters,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            **kwargs,
-        )
-
-    def _run_validation_operator(  # noqa: PLR0913
-        self,
-        validation_operator_name: str,
-        assets_to_validate: List,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        suite_parameters: Optional[dict] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        **kwargs,
-    ):
-        result_format = result_format or {"result_format": "SUMMARY"}
-
-        if not assets_to_validate:
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
-                "No batches of data were passed in. These are required"
-            )
-
-        for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, Validator)):
-                raise gx_exceptions.DataContextError(  # noqa: TRY003
-                    "Batches are required to be of type tuple or Validator"
-                )
-        try:
-            validation_operator = self.validation_operators[validation_operator_name]
-        except KeyError:
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
-                f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml"  # noqa: E501
-            )
-
-        if run_id is None and run_name is None:
-            run_name = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
-            logger.info(f"Setting run_name to: {run_name}")
-        if suite_parameters is None:
-            return validation_operator.run(
-                assets_to_validate=assets_to_validate,
-                run_id=run_id,
-                run_name=run_name,
-                run_time=run_time,
-                result_format=result_format,
-                **kwargs,
-            )
-        else:
-            return validation_operator.run(
-                assets_to_validate=assets_to_validate,
-                run_id=run_id,
-                suite_parameters=suite_parameters,
-                run_name=run_name,
-                run_time=run_time,
-                result_format=result_format,
-                **kwargs,
-            )
-
-    def list_validation_operators(self):
-        """List currently-configured Validation Operators on this context"""
-
-        validation_operators = []
-        for (
-            name,
-            value,
-        ) in self.variables.validation_operators.items():
-            value["name"] = name
-            validation_operators.append(value)
-        return validation_operators
-
-    def list_validation_operator_names(self):
-        """List the names of currently-configured Validation Operators on this context"""
-        if not self.validation_operators:
-            return []
-
-        return list(self.validation_operators.keys())
 
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
