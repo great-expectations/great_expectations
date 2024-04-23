@@ -13,6 +13,7 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
@@ -104,14 +105,14 @@ def checkpoint(
 ) -> Iterator[Checkpoint]:
     checkpoint_name = f"{batch_request.data_asset_name} | {expectation_suite.name}"
 
-    validation_definitions = []
+    validation_definitions: list[ValidationDefinition] = []
     checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=validation_definitions)
-    checkpoint = context.checkpoints.add_checkpoint(checkpoint)
+    checkpoint = context.checkpoints.add(checkpoint)
     yield checkpoint
     context.checkpoints.delete(checkpoint)
 
     with pytest.raises(gx_exceptions.DataContextError):
-        context.get_legacy_checkpoint(name=checkpoint_name)
+        context.checkpoints.get(name=checkpoint_name)
 
 
 @pytest.fixture(scope="module")
