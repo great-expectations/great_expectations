@@ -18,6 +18,8 @@ from great_expectations.data_context.data_context.abstract_data_context import A
 from great_expectations.datasource.fluent.sql_datasource import _SQLAsset
 from tests.integration.common_workflows.conftest import CONNECTION_STRING, TABLE_NAME
 
+pytestmark = pytest.mark.postgresql
+
 # constants for what we know about the test data
 COLUMN_NAME = "x"
 ALL_VALUES = list(range(1, 11))
@@ -65,12 +67,17 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
 
     With each flow, we want to see that we can validate an entire asset,
     as well as subsets of the asset, including sorting and using batch parameters.
+
+    The positional arguments are:
+    - An Exception
+    - The fixture name for the batch definition
+    - The batch_parameters to pass in during validation
     """
     return [
         pytest.param(
             gxe.ExpectColumnDistinctValuesToEqualSet(column=COLUMN_NAME, value_set=ALL_VALUES),
             "postgres_whole_table_batch_definition",
-            None,
+            None,  # no batch parameters
             id="whole asset",
         ),
         pytest.param(
@@ -78,7 +85,7 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
                 column=COLUMN_NAME, value_set=VALUES_FOR_MOST_RECENT_DATE
             ),
             "postgres_daily_batch_definition",
-            None,
+            None,  # no batch parameters
             id="ascending",
             marks=[
                 pytest.mark.xfail(skip_daily_batch_definitions, reason="Fix in V1-297", strict=True)
@@ -89,7 +96,7 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
                 column=COLUMN_NAME, value_set=VALUES_WITH_NO_DATE
             ),
             "postgres_daily_batch_definition_descending",
-            None,
+            None,  # no batch parameters
             id="descending",
             marks=[
                 pytest.mark.xfail(skip_daily_batch_definitions, reason="Fix in V1-297", strict=True)
@@ -113,7 +120,6 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
     _create_test_cases(skip_daily_batch_definitions=True),
 )
-@pytest.mark.postgresql
 def test_batch_validate_expectation(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
@@ -133,7 +139,6 @@ def test_batch_validate_expectation(
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
     _create_test_cases(skip_daily_batch_definitions=True),
 )
-@pytest.mark.postgresql
 def test_batch_validate_expectation_suite(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
@@ -154,7 +159,6 @@ def test_batch_validate_expectation_suite(
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
     _create_test_cases(),
 )
-@pytest.mark.postgresql
 def test_validation_definition_run(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
@@ -177,7 +181,6 @@ def test_validation_definition_run(
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
     _create_test_cases(),
 )
-@pytest.mark.postgresql
 def test_checkpoint_run(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
