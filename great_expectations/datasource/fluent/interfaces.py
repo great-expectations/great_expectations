@@ -4,7 +4,6 @@ import copy
 import dataclasses
 import functools
 import logging
-import re
 import uuid
 import warnings
 from pprint import pformat as pf
@@ -63,8 +62,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import TypeAlias, TypeGuard
-
-    from great_expectations.core.partitioners import Partitioner
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -282,7 +279,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         )
 
     def get_batch_parameters_keys(
-        self, partitioner: Optional[Partitioner] = None
+        self, partitioner: Optional[PartitionerT] = None
     ) -> tuple[str, ...]:
         raise NotImplementedError(
             """One needs to implement "get_batch_parameters_keys" on a DataAsset subclass."""
@@ -293,7 +290,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[PartitionerT] = None,
-        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest[PartitionerT]:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -304,7 +300,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
-            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -334,7 +329,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         self,
         name: str,
         partitioner: Optional[PartitionerT] = None,
-        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchDefinition[PartitionerT]:
         """Add a BatchDefinition to this DataAsset.
         BatchDefinition names must be unique within a DataAsset.
@@ -358,9 +352,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
-        batch_definition = BatchDefinition[PartitionerT](
-            name=name, partitioner=partitioner, batching_regex=batching_regex
-        )
+        batch_definition = BatchDefinition[PartitionerT](name=name, partitioner=partitioner)
         batch_definition.set_data_asset(self)
         self.batch_definitions.append(batch_definition)
         self.update_batch_definition_field_set()
@@ -422,7 +414,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         return batch_definitions[0]
 
     def _batch_parameters_are_valid(
-        self, options: BatchParameters, partitioner: Optional[Partitioner]
+        self, options: BatchParameters, partitioner: Optional[PartitionerT]
     ) -> bool:
         valid_options = self.get_batch_parameters_keys(partitioner=partitioner)
         return set(options.keys()).issubset(set(valid_options))
@@ -471,8 +463,10 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
 class PartitionerI(Protocol):
     """Interface defining the fields a Partitioner must contain for sorting."""
 
-    param_names: list[str]
     sort_ascending: bool
+
+    @property
+    def param_names(self) -> list[str]: ...
 
 
 def _sort_batches_with_none_metadata_values(

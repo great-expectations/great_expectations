@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import logging
-import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -21,6 +20,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import RegexPartitioner
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
@@ -56,24 +56,6 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__name__)
-
-
-class RegexPartitioner:
-    regex: re.Pattern
-    param_names: list[str]
-    sort_ascending: bool = True
-
-
-class PartitionerYearly(RegexPartitioner):
-    param_names = ["year"]
-
-
-class PartitionerMonthly(RegexPartitioner):
-    param_names = ["year", "month"]
-
-
-class PartitionerDaily(RegexPartitioner):
-    param_names = ["year", "month", "day"]
 
 
 class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
@@ -164,7 +146,6 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
-            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the

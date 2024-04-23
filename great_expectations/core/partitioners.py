@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import re
 from typing import List, Literal, Union
 
 from great_expectations._docs_decorators import public_api
@@ -84,3 +87,21 @@ Partitioner = Union[
     PartitionerDatetimePart,
     PartitionerConvertedDatetime,
 ]
+
+
+class RegexPartitioner:
+    regex: re.Pattern
+    param_names: list[str]
+    sort_ascending: bool = True
+
+
+class PartitionerYearly(RegexPartitioner):
+    param_names = ["year"]
+
+
+class PartitionerMonthly(RegexPartitioner):
+    param_names = ["year", "month"]
+
+
+class PartitionerDaily(RegexPartitioner):
+    param_names = ["year", "month", "day"]

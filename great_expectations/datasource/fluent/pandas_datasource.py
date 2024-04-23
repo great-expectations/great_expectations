@@ -387,13 +387,12 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         version="0.16.15",
     )
     @override
-    def build_batch_request(  # type: ignore[override]  # noqa: PLR0913
+    def build_batch_request(  # type: ignore[override]
         self,
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -402,7 +401,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
             partitioner: This is not currently supported and must be None for this data asset.
-            batching_regex: This is currently not supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -421,11 +419,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         if partitioner is not None:
             raise ValueError(  # noqa: TRY003
                 "partitioner is not currently supported and must be None for this DataAsset."
-            )
-
-        if batching_regex is not None:
-            raise ValueError(  # noqa: TRY003
-                "batching_regex is not currently supported and must be None for this DataAsset."
             )
 
         if dataframe is None:
