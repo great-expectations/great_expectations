@@ -147,7 +147,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
         if partitioner:
-            option_keys += tuple(partitioner.params)
+            option_keys += tuple(partitioner.param_names)
         return option_keys
 
     @public_api
