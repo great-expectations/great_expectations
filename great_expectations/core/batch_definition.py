@@ -17,7 +17,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 
-PartitionerT = TypeVar("PartitionerT", bound=Optional[Partitioner])
+# Depending on the Asset
+PartitionerT = TypeVar("PartitionerT", Partitioner, None)
 
 
 class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):

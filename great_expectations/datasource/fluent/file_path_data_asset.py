@@ -88,7 +88,7 @@ class RegexPartitioner:
     sort_ascending: bool = True
 
 
-class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
+class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
