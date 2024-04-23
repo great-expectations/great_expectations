@@ -2556,7 +2556,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
             if isinstance(unexpected_rows, pd.DataFrame):
                 unexpected_rows = unexpected_rows.head(result_format["partial_unexpected_count"])
             elif isinstance(unexpected_rows, list):
-                unexpected_rows = unexpected_rows[:result_format["partial_unexpected_count"]]
+                unexpected_rows = unexpected_rows[: result_format["partial_unexpected_count"]]
         return_obj["result"].update(
             {
                 "unexpected_rows": unexpected_rows,
