@@ -21,16 +21,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.partitioners import (
-    PartitionerColumnValue,
-    PartitionerDatetimePart,
-    PartitionerDividedInteger,
-    PartitionerModInteger,
-    PartitionerMultiColumnValue,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
-)
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
@@ -46,17 +36,6 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     TestConnectionError,
-)
-from great_expectations.datasource.fluent.spark_generic_partitioners import (
-    SparkPartitioner,
-    SparkPartitionerColumnValue,
-    SparkPartitionerDatetimePart,
-    SparkPartitionerDividedInteger,
-    SparkPartitionerModInteger,
-    SparkPartitionerMultiColumnValue,
-    SparkPartitionerYear,
-    SparkPartitionerYearAndMonth,
-    SparkPartitionerYearAndMonthAndDay,
 )
 
 if TYPE_CHECKING:
@@ -113,20 +92,6 @@ class _FilePathDataAsset(DataAsset):
     _data_connector: DataConnector = pydantic.PrivateAttr()
     # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
     _test_connection_error_message: str = pydantic.PrivateAttr("Could not connect to your asset")
-    _partitioner_implementation_map: dict[type[Partitioner], type[SparkPartitioner]] = (
-        pydantic.PrivateAttr(
-            default={
-                PartitionerYear: SparkPartitionerYear,
-                PartitionerYearAndMonth: SparkPartitionerYearAndMonth,
-                PartitionerYearAndMonthAndDay: SparkPartitionerYearAndMonthAndDay,
-                PartitionerColumnValue: SparkPartitionerColumnValue,
-                PartitionerDatetimePart: SparkPartitionerDatetimePart,
-                PartitionerDividedInteger: SparkPartitionerDividedInteger,
-                PartitionerModInteger: SparkPartitionerModInteger,
-                PartitionerMultiColumnValue: SparkPartitionerMultiColumnValue,
-            }
-        )
-    )
 
     class Config:
         """
@@ -154,23 +119,13 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
-    def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SparkPartitioner:
-        PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
-        if PartitionerClass is None:
-            raise ValueError(  # noqa: TRY003
-                f"Requested Partitioner `{abstract_partitioner.method_name}` is not implemented for this DataAsset. "  # noqa: E501
-            )
-        return PartitionerClass(**abstract_partitioner.dict())
-
     @override
     def get_batch_parameters_keys(
         self,
         partitioner: Optional[Partitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
-        if partitioner:
-            spark_partitioner = self.get_partitioner_implementation(partitioner)
-            option_keys += tuple(spark_partitioner.param_names)
+        # todo: add params from partitioner
         return option_keys
 
     @public_api
