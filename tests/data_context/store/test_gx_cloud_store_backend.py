@@ -269,6 +269,7 @@ def test_set(
                                 ("batch_request", {}),
                                 ("suite_parameters", {}),
                                 ("runtime_configuration", {}),
+                                ("action_list", []),
                                 ("validations", []),
                                 ("id", None),
                                 ("expectation_suite_id", None),
