@@ -963,6 +963,32 @@ def test_sql_complete_output_no_id_pk_fallback(
     )
 
 
+@pytest.mark.filesystem
+def test_sql_result_format_filters_correct_number_of_rows(
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_sql_query_output: str,
+):
+    context = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
+        expectations_list=[expect_column_values_to_be_in_set],
+    )
+    result_format: dict = {
+        "result_format": "COMPLETE",
+        "partial_unexpected_count": 1,
+        "unexpected_index_column_names": ["pk_1"],
+        "include_unexpected_rows": True,
+    }
+    checkpoint = context.get_legacy_checkpoint("my_checkpoint")
+    result: CheckpointResult = checkpoint.run(result_format=result_format)
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
+    assert len(index_column_names) == 1
+
+
 # pandas
 @pytest.mark.filesystem
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
@@ -2332,6 +2358,37 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic
 
 
 @pytest.mark.spark
+def test_spark_result_format_partial_unexpected_count_and_unexpected_rows_correct_results(
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expect_column_values_to_be_in_set: ExpectationConfiguration,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "partial_unexpected_count": 1,
+            "include_unexpected_rows": True,
+        }
+    }
+    context = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    checkpoint = context.get_legacy_checkpoint("my_checkpoint")
+    result: CheckpointResult = checkpoint.run(
+        expectation_suite_name="metrics_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    index_column_names: List[str] = evrs[0]["results"][0]["result"].get("unexpected_rows")
+    assert len(index_column_names) == 1
+
+
+@pytest.mark.spark
 def test_spark_complete_output_no_id_pk_fallback(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2420,6 +2477,40 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
     ]
     # this is just 1 because we set `partial_unexpected_count` above
     assert first_result_partial_list == [{"animals": "giraffe", "pk_1": 3}]
+
+
+@pytest.mark.filesystem
+def test_pandas_result_format_partial_unexpected_count_and_unexpected_rows_correct_results(
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+):
+    """ """
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+            "partial_unexpected_count": 1,
+            "include_unexpected_rows": True,
+        }
+    }
+    context = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    checkpoint = context.get_legacy_checkpoint("my_checkpoint")
+    result: CheckpointResult = checkpoint.run(
+        expectation_suite_name="metrics_exp",
+        batch_request=batch_request_for_pandas_unexpected_rows_and_index,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    index_column_names: List[str] = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
+    assert len(index_column_names) == 1
 
 
 @pytest.mark.filesystem
