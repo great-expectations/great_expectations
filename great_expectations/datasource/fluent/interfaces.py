@@ -28,7 +28,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    overload,
 )
 
 from great_expectations._docs_decorators import public_api
@@ -68,11 +67,6 @@ if TYPE_CHECKING:
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
-    from great_expectations.core import (
-        ExpectationSuite,
-        ExpectationSuiteValidationResult,
-        ExpectationValidationResult,
-    )
     from great_expectations.core.batch import (
         BatchData,
         BatchMarkers,
@@ -90,10 +84,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.type_lookup import (
         TypeLookup,
-    )
-    from great_expectations.expectations.expectation import Expectation
-    from great_expectations.validator.v1_validator import (
-        Validator as V1Validator,
     )
 
 
@@ -933,10 +923,11 @@ class Batch:
         self._batch_spec = batch_spec
         self._batch_definition = batch_definition
 
-        # Mutable Attribute
+        # Mutable Attributes
         # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata  # noqa: E501
         # to a batch so developers may want to namespace any custom metadata they add.
         self.metadata = metadata or {}
+        self.result_format = ResultFormat.SUMMARY
 
         # Immutable generated attribute
         self._id = self._create_id()
@@ -1028,66 +1019,3 @@ class Batch:
             fetch_all=fetch_all,
         )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
-
-    @property
-    def result_format(self) -> str | ResultFormat:
-        # We always `return a ResultFormat`. However to prevent having to do #ignore[assignment] we return  # noqa: E501
-        # `str | ResultFormat`. When the getter/setter have different types mypy gets confused on lines like:  # noqa: E501
-        # batch.result_format = "SUMMARY"
-        # See:
-        # https://github.com/python/mypy/issues/3004
-        return self._validator.result_format
-
-    @result_format.setter
-    def result_format(self, result_format: str | ResultFormat):
-        # We allow a str result_format because this is an interactive workflow
-        self._validator.result_format = ResultFormat(result_format)
-
-    @overload
-    def validate(self, expect: Expectation) -> ExpectationValidationResult: ...
-
-    @overload
-    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult: ...
-
-    @public_api
-    def validate(
-        self, expect: Expectation | ExpectationSuite
-    ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
-        from great_expectations.core import ExpectationSuite
-        from great_expectations.expectations.expectation import Expectation
-
-        if isinstance(expect, Expectation):
-            return self._validate_expectation(expect)
-        elif isinstance(expect, ExpectationSuite):
-            return self._validate_expectation_suite(expect)
-        else:
-            # If we are type checking, we should never fall through to this case. However, exploratory  # noqa: E501
-            # workflows are not being type checked.
-            raise ValueError(  # noqa: TRY003, TRY004
-                f"Trying to validate something that isn't an Expectation or an ExpectationSuite: {expect}"  # noqa: E501
-            )
-
-    def _validate_expectation(self, expect: Expectation) -> ExpectationValidationResult:
-        return self._validator.validate_expectation(expect)
-
-    def _validate_expectation_suite(
-        self, expect: ExpectationSuite
-    ) -> ExpectationSuiteValidationResult:
-        return self._validator.validate_expectation_suite(expect)
-
-    @functools.cached_property
-    def _validator(self) -> V1Validator:
-        from great_expectations.validator.v1_validator import Validator as V1Validator
-
-        context = self.datasource.data_context
-        if context is None:
-            raise ValueError(  # noqa: TRY003
-                "We can't validate batches that are attached to datasources without a data context"
-            )
-        batch_definition = self.data_asset.add_batch_definition(
-            name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())])
-        )
-        return V1Validator(
-            batch_definition=batch_definition,
-            batch_parameters=self.batch_request.options,
-        )
