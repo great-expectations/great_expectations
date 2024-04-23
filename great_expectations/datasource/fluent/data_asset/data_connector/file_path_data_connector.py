@@ -25,7 +25,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
-from great_expectations.datasource.fluent.file_path_data_asset import RegexPartitioner
 
 if TYPE_CHECKING:
     from typing import DefaultDict
