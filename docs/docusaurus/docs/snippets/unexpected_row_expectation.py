@@ -41,7 +41,7 @@ class UnexpectedPassengerCount(UnexpectedRowsExpectation):
 
 # </snippet>
 
-# <snippet name=docs/docusaurus/docs/snippets/unexpected_row_expectation.py define_batch_definition">
+# <snippet name="docs/docusaurus/docs/snippets/unexpected_row_expectation.py define_batch_definition">
 batch_definition = (
     context.sources.add_postgres(
         name="pg_datasource", connection_string=PG_CONNECTION_STRING
@@ -51,12 +51,12 @@ batch_definition = (
 )
 # </snippet>
 
-# <snippet name=docs/docusaurus/docs/snippets/unexpected_row_expectation.py define_expectation_suite">
+# <snippet name="docs/docusaurus/docs/snippets/unexpected_row_expectation.py define_expectation_suite">
 expectation = UnexpectedPassengerCount()
 suite = ExpectationSuite("my_suite", expectations=[expectation])
 # </snippet>
 
-# <snippet name=docs/docusaurus/docs/snippets/unexpected_row_expectation.py validate_suite">
+# <snippet name="docs/docusaurus/docs/snippets/unexpected_row_expectation.py validate_suite">
 validation_definition = ValidationDefinition(
     name="my_validation", data=batch_definition, suite=suite
 )
