@@ -3817,26 +3817,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         self, include_rendered_content: Optional[bool] = None
     ) -> bool:
         if include_rendered_content is None:
-            if (
+            return bool(
                 self.include_rendered_content.expectation_suite is True
                 or self.include_rendered_content.globally is True
-            ):
-                return True
-            else:
-                return False
+            )
         return include_rendered_content
 
     def _determine_if_expectation_validation_result_include_rendered_content(
         self, include_rendered_content: Optional[bool] = None
     ) -> bool:
         if include_rendered_content is None:
-            if (
+            return bool(
                 self.include_rendered_content.expectation_validation_result is True
                 or self.include_rendered_content.globally is True
-            ):
-                return True
-            else:
-                return False
+            )
         return include_rendered_content
 
     @public_api

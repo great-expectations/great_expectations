@@ -19,10 +19,7 @@ def is_available(url: str) -> bool:
         res_code = urllib.request.urlopen(url).getcode()
     except Exception:
         return False
-    if res_code == 200:
-        return True
-    else:
-        return False
+    return res_code == 200
 
 
 # This class defines a Metric to support your Expectation.

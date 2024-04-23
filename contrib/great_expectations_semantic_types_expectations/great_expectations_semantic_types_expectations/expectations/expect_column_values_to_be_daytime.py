@@ -31,10 +31,7 @@ def is_daytime(ts, lat, lon) -> bool:
     rising_ts = obs.next_rising(ephem.Sun()).datetime()
     next_setting_ts = obs.next_setting(ephem.Sun()).datetime()
 
-    if d >= rising_ts and d < next_setting_ts:
-        return True
-    else:
-        return False
+    return bool(d >= rising_ts and d < next_setting_ts)
 
 
 # This class defines a Metric to support your Expectation.

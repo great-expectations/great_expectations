@@ -196,15 +196,11 @@ SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 def _is_sorter_list(
     sorters: SortersDefinition,
 ) -> TypeGuard[list[Sorter]]:
-    if len(sorters) == 0 or isinstance(sorters[0], Sorter):
-        return True
-    return False
+    return bool(len(sorters) == 0 or isinstance(sorters[0], Sorter))
 
 
 def _is_str_sorter_list(sorters: SortersDefinition) -> TypeGuard[list[str]]:
-    if len(sorters) > 0 and isinstance(sorters[0], str):
-        return True
-    return False
+    return bool(len(sorters) > 0 and isinstance(sorters[0], str))
 
 
 def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:

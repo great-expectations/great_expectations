@@ -748,10 +748,7 @@ def check_file_for_whitelisted_elements(file_path: Path) -> bool:
 
     """  # noqa: E501
     with open(file_path) as open_file:
-        if WHITELISTED_TAG in open_file.read():
-            return True
-        else:
-            return False
+        return WHITELISTED_TAG in open_file.read()
 
 
 def convert_to_import_path(file_path: Path) -> str:
