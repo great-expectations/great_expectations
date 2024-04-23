@@ -1085,7 +1085,9 @@ class Batch:
                 "We can't validate batches that are attached to datasources without a data context"
             )
         batch_definition = self.data_asset.add_batch_definition(
-            name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())])
+            name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())]),
+            partitioner=self.batch_request.partitioner,
+            batching_regex=self.batch_request.batching_regex,
         )
         return V1Validator(
             batch_definition=batch_definition,
