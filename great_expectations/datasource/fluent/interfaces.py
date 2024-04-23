@@ -448,10 +448,11 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def sort_batches(self, batch_list: List[Batch], partitioner: PartitionerProtocol) -> None:
+    def sort_batches(self, batch_list: List[Batch], partitioner: PartitionerI) -> None:
         """Sorts batch_list in place in the order configured in this DataAsset.
         Args:
             batch_list: The list of batches to sort in place.
+            partitioner:
         """
         reverse = not partitioner.sort_ascending
         for key in reversed(partitioner.param_names):
@@ -465,6 +466,13 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
                     f"Trying to sort {self.name} table asset batches on key {key} "
                     "which isn't available on all batches."
                 ) from e
+
+
+class PartitionerI(Protocol):
+    """Interface defining the fields a Partitioner must contain for sorting."""
+
+    param_names: list[str]
+    sort_ascending: bool
 
 
 def _sort_batches_with_none_metadata_values(

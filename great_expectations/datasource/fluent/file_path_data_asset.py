@@ -84,20 +84,20 @@ logger = logging.getLogger(__name__)
 
 class RegexPartitioner:
     regex: re.Pattern
-    params: list[str]
+    param_names: list[str]
     sort_ascending: bool = True
 
 
 class PartitionerYearly(RegexPartitioner):
-    params = ["year"]
+    param_names = ["year"]
 
 
 class PartitionerMonthly(RegexPartitioner):
-    params = ["year", "month"]
+    param_names = ["year", "month"]
 
 
 class PartitionerDaily(RegexPartitioner):
-    params = ["year", "month", "day"]
+    param_names = ["year", "month", "day"]
 
 
 class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
@@ -186,12 +186,11 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[RegexPartitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
         if partitioner:
-            spark_partitioner = self.get_partitioner_implementation(partitioner)
-            option_keys += tuple(spark_partitioner.param_names)
+            option_keys += tuple(partitioner.params)
         return option_keys
 
     @public_api
@@ -200,8 +199,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
+        partitioner: Optional[RegexPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -253,7 +251,6 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
-            batching_regex=batching_regex,
         )
 
     @override
@@ -272,13 +269,12 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
         ):
             valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
-            expect_batch_request_form = BatchRequest[
-                None
-            ](  # todo: update to a file path specific partitioner
+            expect_batch_request_form = BatchRequest[RegexPartitioner](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
                 batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
+                partitioner=batch_request.partitioner,
             )
             raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "BatchRequest should have form:\n"
@@ -331,8 +327,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
             batch_list.append(batch)
 
         if batch_request.partitioner:
-            spark_partitioner = self.get_partitioner_implementation(batch_request.partitioner)
-            self.sort_batches(batch_list, spark_partitioner)
+            self.sort_batches(batch_list, batch_request.partitioner)
 
         return batch_list
 
