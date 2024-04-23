@@ -85,7 +85,7 @@ def mock_checkpoint_dict(mocker, mock_checkpoint_json: dict) -> dict:
     context = mocker.Mock(spec=AbstractDataContext)
     set_context(context)
 
-    data = BatchDefinition(name="my_batch_config")
+    data = BatchDefinition[None](name="my_batch_config")
     suite = ExpectationSuite(name="my_suite")
 
     return {
