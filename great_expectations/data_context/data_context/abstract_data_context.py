@@ -1249,6 +1249,22 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
 
+    def store_suite_parameters(self, validation_results, target_store_name=None) -> None:
+        """
+        Stores ValidationResult Suite Parameters to defined store
+        """
+        if not self._suite_parameter_dependencies_compiled:
+            self._compile_suite_parameter_dependencies()
+
+        if target_store_name is None:
+            target_store_name = self.suite_parameter_store_name
+
+        self._store_metrics(
+            self._suite_parameter_dependencies,
+            validation_results,
+            target_store_name,
+        )
+
     @public_api
     def list_expectation_suite_names(self) -> List[str]:
         """Lists the available expectation suite names.
