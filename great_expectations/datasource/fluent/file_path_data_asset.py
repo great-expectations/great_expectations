@@ -88,7 +88,19 @@ class RegexPartitioner:
     sort_ascending: bool = True
 
 
-class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
+class PartitionerYearly(RegexPartitioner):
+    params = ["year"]
+
+
+class PartitionerMonthly(RegexPartitioner):
+    params = ["year", "month"]
+
+
+class PartitionerDaily(RegexPartitioner):
+    params = ["year", "month", "day"]
+
+
+class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
