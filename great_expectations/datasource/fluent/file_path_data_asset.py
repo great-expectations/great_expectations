@@ -16,6 +16,7 @@ from typing import (
     Optional,
     Pattern,
     Set,
+    Type,
 )
 
 import great_expectations.exceptions as gx_exceptions
@@ -115,7 +116,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
     _data_connector: DataConnector = pydantic.PrivateAttr()
     # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
     _test_connection_error_message: str = pydantic.PrivateAttr("Could not connect to your asset")
-    _partitioner_implementation_map: Dict[type[Partitioner], type[SparkPartitioner]] = (
+    _partitioner_implementation_map: Dict[Type[Partitioner], Type[SparkPartitioner]] = (
         pydantic.PrivateAttr(
             default={
                 PartitionerYear: SparkPartitionerYear,
