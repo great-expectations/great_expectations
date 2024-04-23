@@ -1,7 +1,6 @@
 import logging
 import os
 from typing import Dict, Tuple, cast
-from unittest import mock
 
 import pandas as pd
 import pytest
@@ -46,7 +45,6 @@ from tests.test_utils import (
     get_sqlite_table_names,
     get_sqlite_temp_table_names,
     get_sqlite_temp_table_names_from_engine,
-    load_data_into_test_database,
 )
 
 try:
@@ -171,66 +169,6 @@ def test_instantiation_via_fluent_data_sources_with_kwargs(
     assert execution_engine.config["class_name"] == "SqlAlchemyExecutionEngine"
     assert execution_engine.config["connection_string"] == connection_string
     assert execution_engine.engine
-
-
-@pytest.mark.trino
-def test_instantiation_via_fluent_data_source__trino_add_sql(sa, empty_data_context):
-    context = empty_data_context
-
-    CONNECTION_STRING = "trino://test@localhost:8088/memory/schema"
-
-    # This utility is not for general use. It is only to support testing.
-    load_data_into_test_database(
-        table_name="taxi_data",
-        csv_path=file_relative_path(
-            __file__,
-            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
-        ),
-        connection_string=CONNECTION_STRING,
-        convert_colnames_to_datetime=["pickup_datetime"],
-    )
-
-    with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource.sa.create_engine",
-        wraps=sa.create_engine,
-    ) as mock_create_engine:
-        datasource = context.sources.add_sql(
-            name="test_datasource",
-            connection_string=CONNECTION_STRING,
-            kwargs={"connect_args": {"http_scheme": "http"}},
-        )
-        assert mock_create_engine.call_args.args == (CONNECTION_STRING,)
-        assert mock_create_engine.call_args.kwargs == {"connect_args": {"http_scheme": "http"}}
-
-    datasource.add_table_asset("taxi_data")
-
-    # use a validator to create an expectation suite
-    validator = context.get_validator(
-        datasource_name="test_datasource", data_asset_name="taxi_data"
-    )
-    validator.expect_column_values_to_not_be_null("pickup_datetime")
-    context.add_expectation_suite("yellow_tripdata_suite")
-
-    # create a checkpoint
-    checkpoint = context.add_or_update_checkpoint(
-        name="my_checkpoint",
-        expectation_suite_name="yellow_tripdata_suite",
-    )
-
-    # add (save) the checkpoint to the data context
-    context.add_or_update_checkpoint(checkpoint=checkpoint)
-    cp = context.get_legacy_checkpoint(name="my_checkpoint")
-    assert cp.name == "my_checkpoint"
-
-    result = cp.run(
-        batch_request={
-            "datasource_name": "test_datasource",
-            "data_asset_name": "taxi_data",
-        },
-        run_name=None,
-    )
-
-    assert result["success"]
 
 
 @pytest.mark.sqlite
