@@ -6,7 +6,7 @@
     },
     {
       "type": "category",
-      "label": "About GX Cloud",
+      "label": "GX Cloud deployment patterns and architecture",
       "link": {
         "type": "doc",
         "id": "cloud/about_gx"
