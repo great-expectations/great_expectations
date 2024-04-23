@@ -89,19 +89,22 @@ Partitioner = Union[
 ]
 
 
-class RegexPartitioner:
+class PartitionerYearly(pydantic.BaseModel):
     regex: re.Pattern
-    param_names: list[str]
+    param_names = ["year"]
     sort_ascending: bool = True
 
 
-class PartitionerYearly(RegexPartitioner):
-    param_names = ["year"]
-
-
-class PartitionerMonthly(RegexPartitioner):
+class PartitionerMonthly(pydantic.BaseModel):
+    regex: re.Pattern
     param_names = ["year", "month"]
+    sort_ascending: bool = True
 
 
-class PartitionerDaily(RegexPartitioner):
+class PartitionerDaily(pydantic.BaseModel):
+    regex: re.Pattern
     param_names = ["year", "month", "day"]
+    sort_ascending: bool = True
+
+
+RegexPartitioner = Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily]
