@@ -1,14 +1,6 @@
-coverage:
-  status:
-    project:
-      default:
-        informational: true
-    patch:
-      default:
-        informational: true
-
 flag_management:
   default_rules: # the rules that will be followed for any flag added, generally
+    informational: true
     after_n_builds: 10
     carryforward: false
     statuses:
