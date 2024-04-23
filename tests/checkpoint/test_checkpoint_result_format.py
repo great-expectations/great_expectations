@@ -2383,7 +2383,7 @@ def test_spark_result_format_partial_unexpected_count_and_unexpected_rows_correc
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"].get(
-        "unexpected_index_column_names"
+        "unexpected_rows"
     )
     assert len(index_column_names) == 1
 
