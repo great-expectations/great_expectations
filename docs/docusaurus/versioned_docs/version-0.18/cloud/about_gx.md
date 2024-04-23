@@ -46,6 +46,10 @@ The GX Agent is an intermediary between GX Cloud and your organization's data st
 
 The GX Agent is typically deployed in your organization's deployment environment, for example, in a development, staging, or production cloud services environment. The GX Agent serves all GX Cloud users within your organization. It can be run as part of your development or production workflows. See [Connect GX Cloud](./connect/connect_lp.md) for setup instructions.
 
+### GX Agent versioning
+
+GX uses a date-based versioning format for its weekly GX Agent Docker image releases. For example, `YYYYMMMDD.#` for stable releases or `YYYYMMDD.#.dev#` for pre-releases. GX uses the `stable` and `dev` Docker image tags to identify the release type. The `stable` tag indicates the image is fully tested and ready for use. The `dev` tag indicates a pre-release image. This documentation assumes you're using the latest `stable` GX Agent Docker image.
+
 
 ## GX Cloud deployment patterns
 
