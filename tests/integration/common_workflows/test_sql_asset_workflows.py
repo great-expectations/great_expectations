@@ -69,7 +69,7 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
     as well as subsets of the asset, including sorting and using batch parameters.
 
     The positional arguments are:
-    - An Exception
+    - An Expectation
     - The fixture name for the batch definition
     - The batch_parameters to pass in during validation
     """
