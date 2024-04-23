@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, overload
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 
 # if we move this import into the TYPE_CHECKING block, we need to provide the
@@ -11,11 +12,17 @@ from great_expectations.core.partitioners import Partitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 
 if TYPE_CHECKING:
+    from great_expectations.core.expectation_suite import ExpectationSuite
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+        ExpectationValidationResult,
+    )
     from great_expectations.datasource.fluent.batch_request import (
         BatchParameters,
         BatchRequest,
     )
     from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
+    from great_expectations.expectations.expectation import Expectation
 
 # Depending on the Asset
 PartitionerT = TypeVar("PartitionerT", Partitioner, None)
@@ -74,6 +81,40 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
             raise ValueError("No batch found")  # noqa: TRY003
 
         return batch_list[-1]
+
+    @overload
+    def run(
+        self,
+        expect: Expectation,
+        batch_parameters: Optional[BatchParameters] = None,
+    ) -> ExpectationValidationResult: ...
+
+    @overload
+    def run(
+        self,
+        expect: ExpectationSuite,
+        batch_parameters: Optional[BatchParameters] = None,
+    ) -> ExpectationSuiteValidationResult: ...
+
+    @public_api
+    def run(
+        self,
+        expect: Expectation | ExpectationSuite,
+        batch_parameters: Optional[BatchParameters] = None,
+    ) -> ExpectationValidationResult | ExpectationSuiteValidationResult:
+        from great_expectations.core.expectation_suite import ExpectationSuite
+        from great_expectations.expectations.expectation import Expectation
+        from great_expectations.validator.v1_validator import Validator
+
+        validator = Validator(
+            batch_definition=self,
+            batch_parameters=batch_parameters,
+        )
+
+        if isinstance(expect, Expectation):
+            return validator.validate_expectation(expect)
+        elif isinstance(expect, ExpectationSuite):
+            return validator.validate_expectation_suite(expect)
 
     def save(self) -> None:
         self.data_asset._save_batch_definition(self)
