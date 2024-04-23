@@ -20,6 +20,7 @@ from great_expectations.execution_engine import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
     from great_expectations.compatibility import pyspark, sqlalchemy
     from great_expectations.core import ExpectationSuite
     from great_expectations.datasource.fluent import BatchRequest
@@ -93,6 +94,24 @@ def validator(
     _ = context.suites.get(
         name=expectation_suite.name,
     )
+
+
+@pytest.fixture(scope="module")
+def checkpoint(
+    context: CloudDataContext,
+    batch_request: BatchRequest,
+    expectation_suite: ExpectationSuite,
+) -> Iterator[Checkpoint]:
+    checkpoint_name = f"{batch_request.data_asset_name} | {expectation_suite.name}"
+
+    validation_definitions = []
+    checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=validation_definitions)
+    checkpoint = context.checkpoints.add_checkpoint(checkpoint)
+    yield checkpoint
+    context.checkpoints.delete(checkpoint)
+
+    with pytest.raises(gx_exceptions.DataContextError):
+        context.get_legacy_checkpoint(name=checkpoint_name)
 
 
 @pytest.fixture(scope="module")
