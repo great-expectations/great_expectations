@@ -1,4 +1,4 @@
-"""Tests to ensure core validation flows work with sql assets
+"""Tests to ensure core validation flows work with filesystem assets
 
 NOTE: assertions here take the form of asserting that expectations pass
 based on knowledge of the data in the test set.
@@ -21,6 +21,9 @@ from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.datasource.fluent.pandas_file_path_datasource import CSVAsset
 
+pytestmark = pytest.mark.filesystem
+
+
 DATASOURCE_NAME = "spark file system"
 ASSET_NAME = "first ten trips in each file"
 
@@ -30,7 +33,7 @@ COLUMN_NAME = "passenger_count"
 ALL_VALUES = list(range(1, 11))
 VALUES_FOR_OLDEST_DATE = [1, 2, 3, 6]
 VALUES_FOR_MOST_RECENT_DATE = [1, 2, 3, 4]
-MY_FAVORITE_DAY = {"year": "2020", "month": "09"}
+MY_FAVORITE_MONTH = {"year": "2020", "month": "09"}
 VALUES_ON_MY_FAVORITE_MONTH = [0, 1]
 
 
@@ -85,6 +88,11 @@ def _create_test_cases():
     """Create our test cases.
     With each flow, we want to see that we can validate an entire asset,
     as well as subsets of the asset, including sorting and using batch parameters.
+
+    The positional arguments are:
+    - An Exception
+    - The fixture name for the batch definition
+    - The batch_parameters to pass in during validation
     """
     return [
         pytest.param(
@@ -92,7 +100,7 @@ def _create_test_cases():
                 column=COLUMN_NAME, value_set=VALUES_FOR_MOST_RECENT_DATE
             ),
             "filesystem_whole_table_batch_definition",
-            None,
+            None,  # no batch parameters
             id="no batching regex - takes the last file",
         ),
         pytest.param(
@@ -100,7 +108,7 @@ def _create_test_cases():
                 column=COLUMN_NAME, value_set=VALUES_FOR_MOST_RECENT_DATE
             ),
             "filesystem_monthly_batch_definition",
-            None,
+            None,  # no batch parameters
             id="ascending",
         ),
         pytest.param(
@@ -108,7 +116,7 @@ def _create_test_cases():
                 column=COLUMN_NAME, value_set=VALUES_FOR_OLDEST_DATE
             ),
             "filesystem_monthly_batch_definition_descending",
-            None,
+            None,  # no batch parameters
             id="descending",
         ),
         pytest.param(
@@ -116,7 +124,7 @@ def _create_test_cases():
                 column=COLUMN_NAME, value_set=VALUES_ON_MY_FAVORITE_MONTH
             ),
             "filesystem_monthly_batch_definition",
-            MY_FAVORITE_DAY,
+            MY_FAVORITE_MONTH,
             id="batch params",
             marks=[pytest.mark.xfail(reason="Fix in V1-299", strict=True)],
         ),
@@ -127,7 +135,6 @@ def _create_test_cases():
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
     _create_test_cases(),
 )
-@pytest.mark.filesystem
 def test_batch_validate_expectation(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
@@ -149,7 +156,6 @@ def test_batch_validate_expectation(
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
     _create_test_cases(),
 )
-@pytest.mark.postgresql
 def test_batch_validate_expectation_suite(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
@@ -170,7 +176,6 @@ def test_batch_validate_expectation_suite(
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
     _create_test_cases(),
 )
-@pytest.mark.postgresql
 def test_validation_definition_run(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
@@ -193,7 +198,6 @@ def test_validation_definition_run(
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
     _create_test_cases(),
 )
-@pytest.mark.postgresql
 def test_checkpoint_run(
     expectation: gxe.Expectation,
     batch_definition_fixture_name: str,
