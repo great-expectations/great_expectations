@@ -1040,7 +1040,7 @@ def ci_tests(  # noqa: C901 - too complex (9)
     pytest_options = [f"--durations={slowest}", "-rEf"]
 
     if xdist:
-        pytest_options.append("-n auto")
+        pytest_options.append("-n 4")
 
     if timeout != 0:
         pytest_options.append(f"--timeout={timeout}")
