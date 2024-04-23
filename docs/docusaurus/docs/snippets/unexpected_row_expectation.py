@@ -1,0 +1,68 @@
+# <snippet name="docs/docusaurus/docs/snippets/custom_sql_expectations.py imports">
+import great_expectations as gx
+
+# These imports need to be cleaned up
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.expectations.expectation import UnexpectedRowsExpectation
+
+# </snippet>
+
+# <snippet name="docs/docusaurus/docs/snippets/custom_sql_expectations.py set up context">
+context = gx.get_context()
+# </snippet>
+
+# This utility is not for general use. It is only to support testing.
+from tests.test_utils import load_data_into_test_database
+
+# The following load & config blocks up until the batch requests are only to support testing.
+PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
+
+load_data_into_test_database(
+    table_name="postgres_taxi_data",
+    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
+    connection_string=PG_CONNECTION_STRING,
+    convert_colnames_to_datetime=["pickup_datetime", "pickup_datetime"],
+)
+
+
+# <snippet name="docs/docusaurus/docs/snippets/custom_sql_expectations.py define_custom_expectation">
+class UnexpectedPassengerCount(UnexpectedRowsExpectation):
+    unexpected_rows_query = """
+        SELECT
+            vendor_id, pickup_datetime
+        FROM
+            postgres_taxi_data
+        WHERE
+            trip_distance > 20
+    """
+    description = "There are trips longer than 20 miles"
+
+
+# </snippet>
+
+# <snippet name=docs/docusaurus/docs/snippets/custom_sql_expectations.py define_batch_definition">
+batch_definition = (
+    context.sources.add_postgres(
+        name="pg_datasource", connection_string=PG_CONNECTION_STRING
+    )
+    .add_table_asset(name="postgres_taxi_data", table_name="postgres_taxi_data")
+    .add_batch_definition_daily(name="daily", column="pickup_datetime")
+)
+# </snippet>
+
+# <snippet name=docs/docusaurus/docs/snippets/custom_sql_expectations.py define_expectation_suite">
+expectation = UnexpectedPassengerCount()
+suite = ExpectationSuite("my_suite", expectations=[expectation])
+# </snippet>
+
+# <snippet name=docs/docusaurus/docs/snippets/custom_sql_expectations.py validate_suite">
+validation_definition = ValidationDefinition(
+    name="my_validation", data=batch_definition, suite=suite
+)
+result = validation_definition.run()
+# </snippet>
+
+assert not result.success
+assert len(result.results) == 1
+assert result.results[0].result["observed_value"] == 1
