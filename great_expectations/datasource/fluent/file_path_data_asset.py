@@ -9,6 +9,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Generic,
     List,
     Mapping,
     Optional,
@@ -20,6 +21,9 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.partitioners import (
+    Partitioner,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
@@ -34,6 +38,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
+    DatasourceT,
     TestConnectionError,
 )
 
@@ -41,7 +46,6 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.core.partitioners import Partitioner
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -57,7 +61,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset):
+class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
@@ -205,7 +209,9 @@ class _FilePathDataAsset(DataAsset):
         ):
             valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
-            expect_batch_request_form = BatchRequest(
+            expect_batch_request_form = BatchRequest[
+                None
+            ](  # todo: update to a file path specific partitioner
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,

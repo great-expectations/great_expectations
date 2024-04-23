@@ -14,7 +14,6 @@ from typing import (
     Dict,
     Mapping,
     Type,
-    TypeVar,
     Union,
     overload,
 )
@@ -32,6 +31,8 @@ from great_expectations.datasource.fluent.constants import (
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
+    from typing_extensions import Self
+
     from great_expectations.core.config_provider import _ConfigurationProvider
 
 logger = logging.getLogger(__name__)
@@ -40,10 +41,6 @@ yaml = YAML(typ="safe")
 # NOTE (kilo59): the following settings appear to be what we use in existing codebase
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
-
-# TODO (kilo59): replace this with `typing_extensions.Self` once mypy supports it
-# Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
-_Self = TypeVar("_Self", bound="FluentBaseModel")
 
 
 class FluentBaseModel(pydantic.BaseModel):
@@ -69,7 +66,7 @@ class FluentBaseModel(pydantic.BaseModel):
         extra = pydantic.Extra.forbid
 
     @classmethod
-    def parse_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> _Self:
+    def parse_yaml(cls: Type[Self], f: Union[pathlib.Path, str]) -> Self:
         loaded = yaml.load(f)
         logger.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
         # noinspection PyArgumentList
@@ -302,6 +299,9 @@ class FluentBaseModel(pydantic.BaseModel):
 
     def __str__(self):
         return self.yaml()
+
+
+class GenericBaseModel(FluentBaseModel, pydantic.GenericModel): ...
 
 
 def _recursively_set_config_value(  # noqa: C901 - too complex
