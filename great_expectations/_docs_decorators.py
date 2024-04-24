@@ -8,6 +8,7 @@ from typing import Any, Callable, Optional, TypeVar
 from typing_extensions import ParamSpec
 
 from great_expectations.compatibility import docstring_parser
+from great_expectations.compatibility.typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,14 @@ class _PublicApiIntrospector:
 
     def add(self, func: F) -> None:
         try:
-            f = func if func.__class__ is not classmethod else func.__func__
+            # We use an if statement instead of a ternary to work around
+            # mypy's inability to type narrow inside a ternary.
+            f: F
+            if isinstance(func, classmethod):
+                f = func.__func__
+            else:
+                f = func
+
             info = _PublicApiInfo(
                 name=f.__name__,
                 qualname=f.__qualname__,
@@ -52,6 +60,7 @@ class _PublicApiIntrospector:
             logger.exception(f"Could not add this function to the public API list: {func}")
             raise
 
+    @override
     def __str__(self) -> str:
         out = []
         for t in sorted(list(self._public_api.keys())):
