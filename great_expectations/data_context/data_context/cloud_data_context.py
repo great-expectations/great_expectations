@@ -527,6 +527,12 @@ class CloudDataContext(SerializableDataContext):
         return self._cloud_config
 
     @override
+    @property
+    def _include_rendered_content(self) -> bool:
+        # Cloud contexts always want rendered content
+        return True
+
+    @override
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self.ge_cloud_config.base_url
         ge_cloud_organization_id: str = self.ge_cloud_config.organization_id  # type: ignore[assignment]

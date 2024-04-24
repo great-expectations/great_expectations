@@ -624,9 +624,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def _include_rendered_content(self) -> bool:
-        from great_expectations import project_manager
-
-        return project_manager.is_using_cloud()
+        return False
 
     def _add_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
