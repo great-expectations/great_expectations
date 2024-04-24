@@ -81,7 +81,7 @@ Define the data you want GX Cloud to access within Snowflake.
 
 9. Complete the following fields:
 
-    - **Table name**: Enter a name for the table you're creating in the Data Asset.
+    - **Table name**: Enter the name of the Data Source table you're connecting to.
     
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
 
@@ -230,7 +230,7 @@ Additional Data Assets can only be added to Data Sources created in GX Cloud.
 
 4. Complete the following fields:
 
-    - **Table name**: Enter a name for the table you're creating in the Data Asset.
+    - **Table name**: Enter the name of the Data Source table you're connecting to.
 
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
 
