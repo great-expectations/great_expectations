@@ -41,7 +41,7 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pydantic import dataclasses as pydantic_dc
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.batch_definition import BatchDefinition, PartitionerT
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.datasource.fluent.constants import (
@@ -49,12 +49,16 @@ from great_expectations.datasource.fluent.constants import (
 )
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
+    GenericBaseModel,
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
-from great_expectations.exceptions.exceptions import DataContextError
+from great_expectations.exceptions.exceptions import DataContextError, MissingDataContextError
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
+from great_expectations.datasource.fluent.data_asset.data_connector import (
+    DataConnector,
+)
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -83,9 +87,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         BatchParameters,
         BatchRequest,
-    )
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
-        DataConnector,
     )
     from great_expectations.datasource.fluent.type_lookup import (
         TypeLookup,
@@ -238,11 +239,14 @@ def _sorter_from_str(sort_key: str) -> Sorter:
     return Sorter(key=sort_key, reverse=False)
 
 
-# It would be best to bind this to Datasource, but we can't now due to circular dependencies
-_DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
+# It would be best to bind this to ExecutionEngine, but we can't now due to circular imports
+_ExecutionEngineT = TypeVar("_ExecutionEngineT")
 
 
-class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
+DatasourceT = TypeVar("DatasourceT", bound="Datasource")
+
+
+class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -259,12 +263,12 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     # non-field private attributes
     _save_batch_definition: Callable[[BatchDefinition], None] = pydantic.PrivateAttr()
-    _datasource: _DatasourceT = pydantic.PrivateAttr()
+    _datasource: DatasourceT = pydantic.PrivateAttr()
     _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
     _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
-    def datasource(self) -> _DatasourceT:
+    def datasource(self) -> DatasourceT:
         return self._datasource
 
     def test_connection(self) -> None:
@@ -288,9 +292,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[PartitionerT] = None,
         batching_regex: Optional[re.Pattern] = None,
-    ) -> BatchRequest:
+    ) -> BatchRequest[PartitionerT]:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
@@ -329,9 +333,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     def add_batch_definition(
         self,
         name: str,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[PartitionerT] = None,
         batching_regex: Optional[re.Pattern] = None,
-    ) -> BatchDefinition:
+    ) -> BatchDefinition[PartitionerT]:
         """Add a BatchDefinition to this DataAsset.
         BatchDefinition names must be unique within a DataAsset.
 
@@ -354,7 +358,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         # Let mypy know that self.datasource is a Datasource (it is currently bound to MetaDatasource)  # noqa: E501
         assert isinstance(self.datasource, Datasource)
 
-        batch_definition = BatchDefinition(
+        batch_definition = BatchDefinition[PartitionerT](
             name=name, partitioner=partitioner, batching_regex=batching_regex
         )
         batch_definition.set_data_asset(self)
@@ -371,7 +375,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         return batch_definition
 
     @public_api
-    def delete_batch_definition(self, batch_definition: BatchDefinition) -> None:
+    def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         """Delete a batch definition.
 
         Args:
@@ -405,7 +409,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         elif "batch_definitions" not in self.__fields_set__ and has_batch_definitions:
             self.__fields_set__.add("batch_definitions")
 
-    def get_batch_definition(self, batch_definition_name: str) -> BatchDefinition:
+    def get_batch_definition(self, batch_definition_name: str) -> BatchDefinition[PartitionerT]:
         batch_definitions = [
             batch_definition
             for batch_definition in self.batch_definitions
@@ -428,7 +432,9 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Batch.metadata at runtime.
         """
         batch_metadata = copy.deepcopy(self.batch_metadata)
-        config_variables = self._datasource.data_context.config_variables  # type: ignore[attr-defined]
+        if not self._datasource.data_context:
+            raise MissingDataContextError()
+        config_variables = self._datasource.data_context.config_variables
         batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
             data=batch_metadata, replace_variables_dict=config_variables
         )
@@ -493,10 +499,6 @@ def _sort_batches_with_none_metadata_values(
 
 # If a Datasource can have more than 1 _DataAssetT, this will need to change.
 _DataAssetT = TypeVar("_DataAssetT", bound=DataAsset)
-
-
-# It would be best to bind this to ExecutionEngine, but we can't now due to circular imports
-_ExecutionEngineT = TypeVar("_ExecutionEngineT")
 
 
 class Datasource(
@@ -587,7 +589,9 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    def add_batch_definition(self, batch_definition: BatchDefinition) -> BatchDefinition:
+    def add_batch_definition(
+        self, batch_definition: BatchDefinition[PartitionerT]
+    ) -> BatchDefinition[PartitionerT]:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
             raise DataContextError("Cannot save datasource without a data context.")  # noqa: TRY003
@@ -609,7 +613,7 @@ class Datasource(
         output.set_data_asset(batch_definition.data_asset)
         return output
 
-    def delete_batch_definition(self, batch_definition: BatchDefinition) -> None:
+    def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
             raise DataContextError("Cannot save datasource without a data context.")  # noqa: TRY003

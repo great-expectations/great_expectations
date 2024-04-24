@@ -508,7 +508,7 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
         partitioner = PartitionerClass(**add_partitioner_kwargs)
 
         src, ast, op = batch_request_args
-        batch_request = BatchRequest(
+        batch_request = BatchRequest[Partitioner](
             datasource_name=src or source.name,
             data_asset_name=ast or asset.name,
             options=op or {},
