@@ -27,7 +27,7 @@ load_data_into_test_database(
 
 
 # <snippet name="docs/docusaurus/docs/snippets/unexpected_row_expectation.py define_custom_expectation">
-class UnexpectedPassengerCount(UnexpectedRowsExpectation):
+class UnexpectedTripDistance(UnexpectedRowsExpectation):
     unexpected_rows_query = """
         SELECT
             vendor_id, pickup_datetime
@@ -52,7 +52,7 @@ batch_definition = (
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/unexpected_row_expectation.py define_expectation_suite">
-expectation = UnexpectedPassengerCount()
+expectation = UnexpectedTripDistance()
 suite = ExpectationSuite("my_suite", expectations=[expectation])
 # </snippet>
 
