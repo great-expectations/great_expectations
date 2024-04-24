@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any, Final, Union
+from typing import Any, Final
 
 import pytest
 
@@ -16,7 +16,6 @@ from great_expectations.core.partitioners import (
     PartitionerYearAndMonth,
     PartitionerYearAndMonthAndDay,
     PartitionerYearly,
-    RegexPartitioner,
 )
 from great_expectations.datasource.fluent import BatchRequest
 
@@ -132,14 +131,13 @@ def test_batch_request_config_serialization_round_trips(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "partitioner,partitioner_type",
+    "partitioner",
     [
         pytest.param(
             PartitionerYearAndMonthAndDay(
                 column_name="foo",
                 sort_ascending=False,
             ),
-            Partitioner,
             id="Sql Daily",
         ),
         pytest.param(
@@ -147,7 +145,6 @@ def test_batch_request_config_serialization_round_trips(
                 column_name="foo",
                 sort_ascending=False,
             ),
-            Partitioner,
             id="Sql Monthly",
         ),
         pytest.param(
@@ -155,7 +152,6 @@ def test_batch_request_config_serialization_round_trips(
                 column_name="foo",
                 sort_ascending=False,
             ),
-            Partitioner,
             id="Sql Yearly",
         ),
         pytest.param(
@@ -163,7 +159,6 @@ def test_batch_request_config_serialization_round_trips(
                 regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}).csv"),
                 sort_ascending=False,
             ),
-            RegexPartitioner,
             id="Regex Daily",
         ),
         pytest.param(
@@ -171,7 +166,6 @@ def test_batch_request_config_serialization_round_trips(
                 regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
                 sort_ascending=False,
             ),
-            RegexPartitioner,
             id="Regex Monthly",
         ),
         pytest.param(
@@ -179,11 +173,9 @@ def test_batch_request_config_serialization_round_trips(
                 regex=re.compile(r"data_(?P<year>\d{4}).csv"),
                 sort_ascending=False,
             ),
-            RegexPartitioner,
             id="Regex Yearly",
         ),
         pytest.param(
-            None,
             None,
             id="None",
         ),
@@ -191,7 +183,6 @@ def test_batch_request_config_serialization_round_trips(
 )
 def test_batch_request_config_partitioner_round_trip_serialization(
     partitioner: PartitionerT,
-    partitioner_type: type[Union[Partitioner, RegexPartitioner, None]],
 ) -> None:
     datasource_name: Final[str] = "my_datasource"
     data_asset_name: Final[str] = "my_data_asset"
