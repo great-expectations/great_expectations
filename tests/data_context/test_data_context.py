@@ -179,6 +179,7 @@ def test_save_expectation_suite_include_rendered_content(
         "this_data_asset_config_does_not_exist.default"
     )
     for expectation in expectation_suite_saved.expectation_configurations:
+        assert expectation.rendered_content
         for rendered_content_block in expectation.rendered_content:
             assert isinstance(
                 rendered_content_block,
@@ -214,6 +215,7 @@ def test_get_expectation_suite_include_rendered_content(
     )
 
     for expectation in expectation_suite_retrieved.expectation_configurations:
+        assert expectation.rendered_content
         for rendered_content_block in expectation.rendered_content:
             assert isinstance(
                 rendered_content_block,
