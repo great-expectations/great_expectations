@@ -266,24 +266,3 @@ validator.expect_column_values_to_be_between(
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py save_expectations">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
-
-# build Checkpoint
-# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py create_checkpoint">
-checkpoint = context.add_or_update_checkpoint(
-    name="my_checkpoint",
-    validations=[{"batch_request": request, "expectation_suite_name": "test_suite"}],
-)
-# </snippet>
-
-checkpoint_result = checkpoint.run()
-
-assert not checkpoint_result.success
-
-# build datadocs
-# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py build_docs">
-context.build_data_docs()
-# </snippet>
-
-# assert docs have been built
-results = client.list_objects(Bucket="demo-data-docs")
-assert client.head_object(Bucket="demo-data-docs", Key="index.html")
