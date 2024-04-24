@@ -18,6 +18,13 @@ T = TypeVar("T")
 F = TypeVar("F", bound=Callable[..., Any])
 
 
+def _remove_suffix(target: str, suffix: str) -> str:
+    end_index = len(target) - len(suffix)
+    if target.rfind(suffix) == end_index:
+        return target[:end_index]
+    return target
+
+
 @dataclass(frozen=True)
 class _PublicApiInfo:
     type: str
@@ -52,7 +59,7 @@ class _PublicApiIntrospector:
             for info in sorted(self._public_api[t], key=lambda info: info.qualname):
                 supporting_info = ""
                 if info.name != info.qualname:
-                    supporting_info = info.qualname.removesuffix("." + info.name)
+                    supporting_info = _remove_suffix(info.qualname, "." + info.name)
                 elif info.module is not None:
                     supporting_info = info.module
                 out.append(f"    {info.name}, {supporting_info}")
