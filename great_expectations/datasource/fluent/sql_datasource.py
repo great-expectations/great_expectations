@@ -120,17 +120,15 @@ def _partitioner_and_sql_asset_to_batch_identifier_data(
     )
 
 
-class _PartitionerDatetime(FluentBaseModel, _Partitioner):
+class _PartitionerDatetime(FluentBaseModel):
     column_name: str
     method_name: str
     sort_ascending: bool = True
 
     @property
-    @override
     def columns(self) -> list[str]:
         return [self.column_name]
 
-    @override
     def param_defaults(self, sql_asset: _SQLAsset) -> list[dict]:
         batch_identifier_data = _partitioner_and_sql_asset_to_batch_identifier_data(
             partitioner=self, asset=sql_asset
@@ -140,7 +138,6 @@ class _PartitionerDatetime(FluentBaseModel, _Partitioner):
             params.append(identifer_data[self.column_name])
         return params
 
-    @override
     def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, options: BatchParameters
     ) -> Dict[str, Any]:
@@ -153,11 +150,9 @@ class _PartitionerDatetime(FluentBaseModel, _Partitioner):
         return {self.column_name: identifiers}
 
     @property
-    @override
     def param_names(self) -> list[str]:
         raise NotImplementedError
 
-    @override
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         raise NotImplementedError
 
