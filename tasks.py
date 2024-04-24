@@ -1175,7 +1175,7 @@ def service(
 
 @invoke.task()
 def print_public_api(ctx: Context):
-    """Prints a list of all our public api."""
+    """Prints to STDOUT all of our public api."""
     # Walk the GX package to make sure we import all submodules to ensure we
     # retrieve all things decorated with our public api decorator.
     import great_expectations
