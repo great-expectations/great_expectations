@@ -199,7 +199,7 @@ def test_batch_request_config_partitioner_dict_round_trip_serialization(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "partitioner,TypedBatchRequest",
+    "partitioner",
     _partitioner_test_cases(),
 )
 def test_batch_request_config_partitioner_json_round_trip_serialization(
