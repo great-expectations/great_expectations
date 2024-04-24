@@ -16,10 +16,6 @@ from great_expectations.datasource.fluent.interfaces import (
     HeadData,
 )
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.render import (
-    AtomicDiagnosticRendererType,
-    AtomicPrescriptiveRendererType,
-)
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
@@ -32,14 +28,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def run_checkpoint_and_data_doc(  # noqa: PLR0915
+def run_checkpoint_and_data_doc(
     datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
-    include_rendered_content: bool,
 ):
     # context, datasource, asset, batch_request
     context, datasource, asset, batch_request = datasource_test_data
-    if include_rendered_content:
-        context.variables.include_rendered_content.globally = True
 
     # Define an expectation suite
     suite_name = "my_suite"
@@ -80,8 +73,7 @@ def run_checkpoint_and_data_doc(  # noqa: PLR0915
     assert number_of_runs == 1, f"{number_of_runs} runs were done when we only expected 1"
 
     # Grab the validation result and verify it is correct
-    result = checkpoint_result.run_results[list(checkpoint_result.run_results.keys())[0]]
-    validation_result = result["validation_result"]
+    validation_result = checkpoint_result.run_results[list(checkpoint_result.run_results.keys())[0]]
     assert validation_result.success
 
     expected_metric_values = {
@@ -102,37 +94,14 @@ def run_checkpoint_and_data_doc(  # noqa: PLR0915
 
     for r in validation_result.results:
         assert r.success
+        assert r.expectation_config
         assert (
             r.result["observed_value"]
             == expected_metric_values[r.expectation_config.expectation_type]["value"]
         )
 
-        if include_rendered_content:
-            # There is a prescriptive atomic renderer on r.expectation_config
-            num_prescriptive_renderer = len(r.expectation_config.rendered_content)
-            assert (
-                num_prescriptive_renderer == 1
-            ), f"Expected exactly 1 rendered content, found {num_prescriptive_renderer}"
-            rendered_content = r.expectation_config.rendered_content[0]
-            assert rendered_content.name == AtomicPrescriptiveRendererType.SUMMARY
-            assert (
-                rendered_content.value.template
-                == expected_metric_values[r.expectation_config.expectation_type][
-                    "rendered_template"
-                ]
-            )
-
-            # There is a diagnostic atomic renderer on r, a validation result result.
-            num_diagnostic_render = len(r.rendered_content)
-            assert (
-                num_diagnostic_render == 1
-            ), f"Expected 1 diagnostic renderer, found {num_diagnostic_render}"
-            diagnostic_renderer = r.rendered_content[0]
-            assert diagnostic_renderer.name == AtomicDiagnosticRendererType.OBSERVED_VALUE
-            assert diagnostic_renderer.value.schema["type"] == "com.superconductive.rendered.string"
-        else:
-            assert r.rendered_content is None
-            assert r.expectation_config.rendered_content is None
+        assert r.rendered_content is None
+        assert r.expectation_config.rendered_content is None
 
     # Rudimentary test for data doc generation
     docs_dict = context.build_data_docs()
