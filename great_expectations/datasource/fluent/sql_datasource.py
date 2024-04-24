@@ -12,6 +12,7 @@ from typing import (
     ClassVar,
     Dict,
     Final,
+    Generic,
     List,
     Literal,
     Optional,
@@ -60,6 +61,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    DatasourceT,
     GxDatasourceWarning,
     PartitionerProtocol,
     Sorter,
@@ -422,7 +424,7 @@ SqlPartitioner = Union[
 ]
 
 
-class _SQLAsset(DataAsset):
+class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     """A _SQLAsset Mixin
 
     This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
@@ -698,7 +700,7 @@ class _SQLAsset(DataAsset):
                 option: None
                 for option in self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             }
-            expect_batch_request_form = BatchRequest(
+            expect_batch_request_form = BatchRequest[Partitioner](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,

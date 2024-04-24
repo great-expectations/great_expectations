@@ -63,7 +63,6 @@ def test_base_context(clear_env_vars):
         },
         validation_results_store_name="validation_result_store",
         data_docs_sites={},
-        validation_operators={},
     )
     assert isinstance(gx.get_context(project_config=config), EphemeralDataContext)
 
@@ -93,7 +92,6 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
         },
         validation_results_store_name="new_validation_result_store",
         data_docs_sites={},
-        validation_operators={},
     )
     context = gx.get_context(project_config=config, context_root_dir=context_path)
     assert isinstance(context, FileDataContext)
@@ -138,7 +136,6 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
         },
         validation_results_store_name="validation_result_store",
         data_docs_sites={},
-        validation_operators={},
     )
 
     context_root_dir = tmp_path / "root"
@@ -225,7 +222,6 @@ def test_cloud_context_with_in_memory_config_overrides(
             },
             validation_results_store_name="new_validation_result_store",
             data_docs_sites={},
-            validation_operators={},
         )
         context = gx.get_context(
             project_config=config,

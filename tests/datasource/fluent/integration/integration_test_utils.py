@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
 
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
+from great_expectations.checkpoint.v1_checkpoint import Checkpoint
 from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
 from great_expectations.datasource.fluent.interfaces import (
@@ -32,12 +32,12 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def run_checkpoint_and_data_doc(
+def run_checkpoint_and_data_doc(  # noqa: PLR0915
     datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
     include_rendered_content: bool,
 ):
     # context, datasource, asset, batch_request
-    context, datasource, _asset, batch_request = datasource_test_data
+    context, datasource, asset, batch_request = datasource_test_data
     if include_rendered_content:
         context.variables.include_rendered_content.globally = True
 
@@ -54,20 +54,13 @@ def run_checkpoint_and_data_doc(
     validator.expect_column_median_to_be_between(column="passenger_count", min_value=1, max_value=4)
     validator.save_expectation_suite(discard_failed_expectations=False)
 
+    suite = validator.expectation_suite
+    batch_def = asset.add_batch_definition(name="my_batch_definition")
+
     # Configure and run a checkpoint
-    checkpoint_config = {
-        "validations": [{"batch_request": batch_request, "expectation_suite_name": suite_name}],
-        "action_list": [
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-            ActionDict(
-                name="update_data_docs",
-                action=ActionDetails(class_name="UpdateDataDocsAction"),
-            ),
-        ],
-    }
+    validation_definition = ValidationDefinition(
+        name="my_validation_definition", suite=suite, data=batch_def
+    )
     metadata = validator.active_batch.metadata  # type: ignore[union-attr] # active_batch could be None
     if isinstance(datasource, PandasDatasource):
         checkpoint_name = "single_batch_checkpoint"
@@ -76,19 +69,18 @@ def run_checkpoint_and_data_doc(
             f"batch_with_year_{metadata['year']}_month_{metadata['month']}_{suite_name}"
         )
     checkpoint = Checkpoint(
-        checkpoint_name,
-        context,
-        **checkpoint_config,  # type: ignore[arg-type]
+        name=checkpoint_name,
+        validation_definitions=[validation_definition],
     )
     checkpoint_result = checkpoint.run()
 
     # Verify checkpoint runs successfully
-    assert checkpoint_result._success, "Running expectation suite failed"
+    assert checkpoint_result.success, "Running expectation suite failed"
     number_of_runs = len(checkpoint_result.run_results)
     assert number_of_runs == 1, f"{number_of_runs} runs were done when we only expected 1"
 
     # Grab the validation result and verify it is correct
-    result = checkpoint_result["run_results"][list(checkpoint_result["run_results"].keys())[0]]
+    result = checkpoint_result.run_results[list(checkpoint_result.run_results.keys())[0]]
     validation_result = result["validation_result"]
     assert validation_result.success
 

@@ -76,7 +76,7 @@ def datasource(mocker):
 
 @pytest.fixture
 def asset(datasource) -> _SQLAsset:
-    asset = _SQLAsset(name="test_asset", type="_sql_asset")
+    asset = _SQLAsset[SQLDatasource](name="test_asset", type="_sql_asset")
     asset._datasource = datasource  # same pattern Datasource uses to init Asset
     return asset
 
