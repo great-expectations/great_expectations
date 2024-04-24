@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import pathlib
 import re
 from typing import TYPE_CHECKING, Optional
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
+import great_expectations as gx
+import great_expectations.expectations as gxe
 from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.datasource.fluent.batch_request import BatchParameters
@@ -146,3 +150,39 @@ def test_identifier_bundle():
         asset=_IdentifierBundle(name="my_asset", id=None),
         batch_definition=_IdentifierBundle(name="my_batch_definition", id=None),
     )
+
+
+@pytest.fixture
+def pandas_batch_definition(csv_path: pathlib.Path) -> BatchDefinition:
+    context = gx.get_context(mode="ephemeral")
+    source = context.sources.add_pandas("my_pandas")
+    filepath = (
+        csv_path
+        / "ten_trips_from_each_month"
+        / "yellow_tripdata_sample_10_trips_from_each_month.csv"
+    )
+    asset = source.add_csv_asset("my_csv", filepath_or_buffer=filepath)
+    batch_definition = asset.add_batch_definition("my_batch_definition")
+    return batch_definition
+
+
+@pytest.mark.filesystem
+def test_batch_validate_expectation(pandas_batch_definition: BatchDefinition):
+    # Make Expectation
+    expectation = gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95)
+    # Validate
+    result = pandas_batch_definition.run(expectation)
+    # Asserts on result
+    assert result.success is True
+
+
+@pytest.mark.filesystem
+def test_batch_validate_expectation_suite(pandas_batch_definition: BatchDefinition):
+    suite = ExpectationSuite("my_suite")
+    suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="vendor_id", mostly=0.95))
+
+    # Validate
+    result = pandas_batch_definition.run(suite)
+
+    # Asserts on result
+    assert result.success is True
