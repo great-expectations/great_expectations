@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import re
 import sqlite3
 import uuid
 from pprint import pformat as pf
@@ -178,7 +177,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -211,7 +209,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options={},
-            batching_regex=batching_regex,
         )
 
     @override

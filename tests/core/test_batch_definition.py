@@ -63,7 +63,6 @@ def test_build_batch_request(
     mock_build_batch_request.assert_called_once_with(
         options=batch_parameters,
         partitioner=partitioner,
-        batching_regex=batching_regex,
     )
 
 
