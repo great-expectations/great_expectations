@@ -24,7 +24,7 @@ def test_suite_factory_get_uses_store_get():
     key = store.get_key.return_value
     suite_dict = {"name": name, "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"}
     store.get.return_value = suite_dict
-    factory = SuiteFactory(store=store, include_rendered_content=False)
+    factory = SuiteFactory(store=store)
     context = Mock(spec=AbstractDataContext)
     set_context(context)
 
@@ -44,7 +44,7 @@ def test_suite_factory_get_raises_error_on_missing_key():
     store.has_key.return_value = False
     suite_dict = {"name": name, "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"}
     store.get.return_value = suite_dict
-    factory = SuiteFactory(store=store, include_rendered_content=False)
+    factory = SuiteFactory(store=store)
     context = Mock(spec=AbstractDataContext)
     set_context(context)
 
@@ -63,7 +63,7 @@ def test_suite_factory_add_uses_store_add():
     store = Mock(spec=ExpectationsStore)
     store.has_key.return_value = False
     key = store.get_key.return_value
-    factory = SuiteFactory(store=store, include_rendered_content=False)
+    factory = SuiteFactory(store=store)
     context = Mock(spec=AbstractDataContext)
     set_context(context)
     suite = ExpectationSuite(name=name)
@@ -81,7 +81,7 @@ def test_suite_factory_add_raises_for_duplicate_key():
     name = "test-suite"
     store = Mock(spec=ExpectationsStore)
     store.has_key.return_value = True
-    factory = SuiteFactory(store=store, include_rendered_content=False)
+    factory = SuiteFactory(store=store)
     context = Mock(spec=AbstractDataContext)
     set_context(context)
     suite = ExpectationSuite(name=name)
@@ -104,7 +104,7 @@ def test_suite_factory_delete_uses_store_remove_key():
     store = Mock(spec=ExpectationsStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    factory = SuiteFactory(store=store, include_rendered_content=False)
+    factory = SuiteFactory(store=store)
     context = Mock(spec=AbstractDataContext)
     set_context(context)
     suite = ExpectationSuite(name=name)
@@ -124,7 +124,7 @@ def test_suite_factory_delete_raises_for_missing_suite():
     name = "test-suite"
     store = Mock(spec=ExpectationsStore)
     store.has_key.return_value = False
-    factory = SuiteFactory(store=store, include_rendered_content=False)
+    factory = SuiteFactory(store=store)
     context = Mock(spec=AbstractDataContext)
     set_context(context)
     suite = ExpectationSuite(name=name)

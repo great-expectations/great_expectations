@@ -701,14 +701,11 @@ class CloudDataContext(SerializableDataContext):
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
-        include_rendered_content: Optional[bool] = None,
         id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GX Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
-            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
-                ExpectationConfiguration.
             id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
@@ -733,14 +730,9 @@ class CloudDataContext(SerializableDataContext):
                 f"Unable to load Expectation Suite {key.resource_name or key.id}"
             )
 
-        if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_suite_include_rendered_content()
-            )
-
         # create the ExpectationSuite from constructor
         expectation_suite = ExpectationSuite(**expectations_schema_dict)
-        if include_rendered_content:
+        if self._include_rendered_content:
             expectation_suite.render()
         return expectation_suite
 
@@ -750,7 +742,6 @@ class CloudDataContext(SerializableDataContext):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         id = expectation_suite.id
@@ -764,10 +755,7 @@ class CloudDataContext(SerializableDataContext):
             self._validate_suite_unique_constaints_before_save(key)
 
         self._suite_parameter_dependencies_compiled = False
-        include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
-            include_rendered_content=include_rendered_content
-        )
-        if include_rendered_content:
+        if self._include_rendered_content:
             expectation_suite.render()
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)
