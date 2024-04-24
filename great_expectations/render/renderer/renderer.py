@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import wraps
-from typing import Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 from typing_extensions import ParamSpec
 
@@ -12,6 +12,9 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -129,7 +132,7 @@ class Renderer:
 
         return columns
 
-    def render(self, **kwargs: dict) -> Any:
+    def render(self, checkpoint_result: CheckpointResult) -> Any:
         """
         Render interface method.
         """
