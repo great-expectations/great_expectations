@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING
+
+from great_expectations.compatibility.typing_extensions import override
 
 logger = logging.getLogger(__name__)
 
