@@ -11,9 +11,11 @@ To show task help page `invoke <NAME> --help`
 
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 import pathlib
+import pkgutil
 import shutil
 import sys
 from collections.abc import Generator, Mapping, Sequence
@@ -1169,3 +1171,15 @@ def service(
         ctx.run("sleep 15")
     else:
         print("  No matching services to start")
+
+
+@invoke.task()
+def print_public_api(ctx: Context):
+    """Prints a list of all our public api."""
+    # Walk the GX package to make sure we import all submodules to ensure we
+    # retrieve all things decorated with our public api decorator.
+    import great_expectations
+
+    for module_info in pkgutil.walk_packages(["great_expectations"], prefix="great_expectations."):
+        importlib.import_module(module_info.name)
+    print(great_expectations._docs_decorators.public_api_introspector)
