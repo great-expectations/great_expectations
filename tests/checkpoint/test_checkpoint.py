@@ -19,7 +19,7 @@ from great_expectations.checkpoint.actions import (
     UpdateDataDocsAction,
     ValidationAction,
 )
-from great_expectations.checkpoint.v1_checkpoint import (
+from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
     CheckpointAction,
     CheckpointResult,
@@ -510,7 +510,7 @@ class TestCheckpointResult:
         result = checkpoint.run()
 
         # Assert
-        action._copy_and_set_values().v1_run.assert_called_once_with(
+        action._copy_and_set_values().run.assert_called_once_with(
             checkpoint_result=result, action_context=mock.ANY
         )
 

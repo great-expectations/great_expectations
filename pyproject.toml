@@ -399,7 +399,7 @@ extend-exclude = [
 runtime-evaluated-base-classes = [
     # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
-    "great_expectations.checkpoint.v1_checkpoint.Checkpoint",
+    "great_expectations.checkpoint.checkpoint.Checkpoint",
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
     "great_expectations.datasource.fluent.interfaces.Datasource",
     "great_expectations.datasource.fluent.sql_datasource.SQLDatasource",

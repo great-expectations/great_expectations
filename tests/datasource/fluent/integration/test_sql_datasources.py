@@ -50,7 +50,7 @@ from great_expectations.execution_engine.sqlalchemy_dialect import (
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
