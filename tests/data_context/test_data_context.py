@@ -21,6 +21,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -153,6 +154,71 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
         expectation_suite.expectation_configurations
         == expectation_suite_saved.expectation_configurations
     )
+
+
+@pytest.mark.cloud
+def test_save_expectation_suite_include_rendered_content(
+    empty_cloud_data_context: CloudDataContext,
+):
+    context = empty_cloud_data_context
+
+    expectation_suite: ExpectationSuite = context.add_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
+    )
+    expectation_suite.expectation_configurations.append(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    for expectation in expectation_suite.expectation_configurations:
+        assert expectation.rendered_content is None
+    context.save_expectation_suite(
+        expectation_suite,
+    )
+    expectation_suite_saved: ExpectationSuite = context.get_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
+    )
+    for expectation in expectation_suite_saved.expectation_configurations:
+        for rendered_content_block in expectation.rendered_content:
+            assert isinstance(
+                rendered_content_block,
+                RenderedAtomicContent,
+            )
+
+
+@pytest.mark.cloud
+def test_get_expectation_suite_include_rendered_content(
+    empty_cloud_data_context: CloudDataContext,
+):
+    context = empty_cloud_data_context
+
+    expectation_suite: ExpectationSuite = context.add_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
+    )
+    expectation_suite.expectation_configurations.append(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    for expectation in expectation_suite.expectation_configurations:
+        assert expectation.rendered_content is None
+    context.save_expectation_suite(
+        expectation_suite,
+    )
+    (context.get_expectation_suite("this_data_asset_config_does_not_exist.default"))
+    for expectation in expectation_suite.expectation_configurations:
+        assert expectation.rendered_content is None
+
+    expectation_suite_retrieved: ExpectationSuite = context.get_expectation_suite(
+        "this_data_asset_config_does_not_exist.default",
+    )
+
+    for expectation in expectation_suite_retrieved.expectation_configurations:
+        for rendered_content_block in expectation.rendered_content:
+            assert isinstance(
+                rendered_content_block,
+                RenderedAtomicContent,
+            )
 
 
 @pytest.mark.filesystem
