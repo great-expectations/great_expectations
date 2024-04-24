@@ -266,3 +266,8 @@ validator.expect_column_values_to_be_between(
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py save_expectations">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
+
+# build datadocs
+# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py build_docs">
+context.build_data_docs()
+# </snippet>
