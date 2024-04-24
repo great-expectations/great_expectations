@@ -94,9 +94,22 @@ if TYPE_CHECKING:
     )
 
 
-class PartitionerProtocol(Protocol):
+class PartitionerSortingProtocol(Protocol):
+    """Interface defining the fields a Partitioner must contain for sorting."""
+
     sort_ascending: bool
 
+    @property
+    def param_names(self) -> list[str]:
+        """The parameter names that specify a batch derived from this partitioner
+
+        For example, for PartitionerYearMonth this returns ["year", "month"]. For more
+        examples, please see concrete Partitioner* classes.
+        """
+        ...
+
+
+class PartitionerProtocol(PartitionerSortingProtocol):
     @property
     def columns(self) -> list[str]:
         """The names of the column used to partition the data"""
@@ -108,15 +121,6 @@ class PartitionerProtocol(Protocol):
 
         The possible values of partitioner method names are defined in the enum,
         great_expectations.execution_engine.partition_and_sample.data_partitioner.PartitionerMethod
-        """
-        ...
-
-    @property
-    def param_names(self) -> List[str]:
-        """The parameter names that specify a batch derived from this partitioner
-
-        For example, for PartitionerYearMonth this returns ["year", "month"]. For more
-        examples, please see concrete Partitioner* classes.
         """
         ...
 
@@ -440,7 +444,9 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def sort_batches(self, batch_list: List[Batch], partitioner: PartitionerI) -> None:
+    def sort_batches(
+        self, batch_list: List[Batch], partitioner: PartitionerSortingProtocol
+    ) -> None:
         """Sorts batch_list in place in the order configured in this DataAsset.
         Args:
             batch_list: The list of batches to sort in place.
@@ -458,15 +464,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
                     f"Trying to sort {self.name} table asset batches on key {key} "
                     "which isn't available on all batches."
                 ) from e
-
-
-class PartitionerI(Protocol):
-    """Interface defining the fields a Partitioner must contain for sorting."""
-
-    sort_ascending: bool
-
-    @property
-    def param_names(self) -> list[str]: ...
 
 
 def _sort_batches_with_none_metadata_values(
