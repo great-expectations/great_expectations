@@ -450,7 +450,7 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         """Sorts batch_list in place in the order configured in this DataAsset.
         Args:
             batch_list: The list of batches to sort in place.
-            partitioner:
+            partitioner: Configuration used to determine sort.
         """
         reverse = not partitioner.sort_ascending
         for key in reversed(partitioner.param_names):
