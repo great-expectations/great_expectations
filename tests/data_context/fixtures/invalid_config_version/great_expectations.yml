@@ -18,7 +18,7 @@ datasources:
 config_variables_file_path: uncommitted/config_variables.yml
 
 expectations_store_name: expectations_store
-validations_store_name: "foo"
+validation_results_store_name: "foo"
 suite_parameter_store_name: suite_parameter_store
 
 plugins_directory: plugins/

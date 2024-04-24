@@ -10,7 +10,6 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-from great_expectations.checkpoint import Checkpoint
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
@@ -29,7 +28,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
-    filter_properties_dict,
     requires_lossy_conversion,
 )
 
@@ -333,49 +331,6 @@ def test_batch_request_deepcopy():
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
         properties=batch_request.to_dict(),
-        clean_falsy=True,
-    )
-
-
-@pytest.mark.filesystem
-def test_checkpoint_config_deepcopy():
-    nested_checkpoint_config = CheckpointConfig(
-        name="my_nested_checkpoint",
-        expectation_suite_name="users.delivery",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -2},
-                }
-            },
-        ],
-    )
-    nested_checkpoint: Checkpoint = Checkpoint(
-        **filter_properties_dict(
-            properties=nested_checkpoint_config.to_json_dict(),
-            delete_fields={"class_name", "module_name"},
-            clean_falsy=True,
-        ),
-    )
-    config_dict: dict = nested_checkpoint.config.to_json_dict()
-    config_dict_copy: dict = copy.deepcopy(config_dict)
-
-    assert deep_filter_properties_iterable(
-        properties=config_dict_copy,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=config_dict,
         clean_falsy=True,
     )
 

@@ -65,10 +65,10 @@ def test_checkpoint_save_success(mocker: MockerFixture):
         name="my_checkpoint",
         validation_definitions=[mocker.Mock(spec=ValidationDefinition)],
     )
-    store_key = context.v1_checkpoint_store.get_key.return_value
+    store_key = context.checkpoint_store.get_key.return_value
     checkpoint.save()
 
-    context.v1_checkpoint_store.update.assert_called_once_with(key=store_key, value=checkpoint)
+    context.checkpoint_store.update.assert_called_once_with(key=store_key, value=checkpoint)
 
 
 @pytest.fixture

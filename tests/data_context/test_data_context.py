@@ -14,13 +14,10 @@ import pytest
 from typing_extensions import override
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
     expectationSuiteSchema,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
@@ -32,12 +29,9 @@ from great_expectations.data_context.data_context.file_data_context import (
 )
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
-    CheckpointConfig,
     DataContextConfig,
-    DataContextConfigDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
@@ -974,168 +968,6 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
     assert len(observed) == 3
 
 
-@pytest.mark.unit
-def test_list_validation_operators_data_context_with_none_returns_empty_list(
-    titanic_data_context,
-):
-    titanic_data_context.validation_operators = {}
-    assert titanic_data_context.list_validation_operator_names() == []
-
-
-@pytest.mark.unit
-def test_list_validation_operators_data_context_with_one(titanic_data_context):
-    assert titanic_data_context.list_validation_operator_names() == ["action_list_operator"]
-
-
-@pytest.mark.unit
-def test_list_checkpoints_on_empty_context_returns_empty_list(empty_data_context):
-    assert empty_data_context.list_checkpoints() == []
-
-
-@pytest.mark.unit
-def test_list_checkpoints_on_context_with_checkpoint(empty_context_with_checkpoint):
-    context = empty_context_with_checkpoint
-    assert context.list_checkpoints() == ["my_checkpoint"]
-
-
-@pytest.mark.filesystem
-def test_list_checkpoints_on_context_with_two_checkpoints(
-    empty_context_with_checkpoint,
-):
-    context = empty_context_with_checkpoint
-    checkpoints_file = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "my_checkpoint.yml",
-    )
-    shutil.copy(
-        checkpoints_file,
-        os.path.join(  # noqa: PTH118
-            os.path.dirname(checkpoints_file),  # noqa: PTH120
-            "another.yml",
-        ),
-    )
-    assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}
-
-
-@pytest.mark.filesystem
-def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoints_dir(
-    empty_context_with_checkpoint,
-):
-    context = empty_context_with_checkpoint
-
-    for extension in [".json", ".txt", "", ".py"]:
-        path = os.path.join(  # noqa: PTH118
-            context.root_directory,
-            DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-            f"foo{extension}",
-        )
-        with open(path, "w") as f:
-            f.write("foo: bar")
-        assert os.path.isfile(path)  # noqa: PTH113
-
-    assert context.list_checkpoints() == ["my_checkpoint"]
-
-
-@pytest.mark.unit
-def test_get_checkpoint_raises_error_on_not_found_checkpoint(
-    empty_context_with_checkpoint,
-):
-    context = empty_context_with_checkpoint
-    with pytest.raises(gx_exceptions.DataContextError):
-        context.get_legacy_checkpoint("not_a_checkpoint")
-
-
-@pytest.mark.filesystem
-def test_get_checkpoint_raises_error_empty_checkpoint(
-    empty_context_with_checkpoint,
-):
-    context = empty_context_with_checkpoint
-    checkpoint_file_path = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "my_checkpoint.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        f.write("# Not a Checkpoint file")
-    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
-    assert context.list_checkpoints() == ["my_checkpoint"]
-
-    with pytest.raises(gx_exceptions.InvalidBaseYamlConfigError):
-        context.get_legacy_checkpoint("my_checkpoint")
-
-
-@pytest.mark.unit
-def test_get_checkpoint(empty_context_with_checkpoint):
-    context = empty_context_with_checkpoint
-    obs = context.get_legacy_checkpoint("my_checkpoint")
-    assert isinstance(obs, Checkpoint)
-    config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
-    assert isinstance(config, dict)
-    assert sorted(config.keys()) == [
-        "action_list",
-        "batch_request",
-        "name",
-        "runtime_configuration",
-        "suite_parameters",
-        "validations",
-    ]
-
-
-@pytest.mark.big
-def test_run_checkpoint_new_style(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
-    # add Checkpoint config
-    checkpoint_config = CheckpointConfig(
-        name="my_checkpoint",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_basic_data_connector",
-                    "data_asset_name": "Titanic_1911",
-                }
-            }
-        ],
-    )
-    checkpoint_config_key = ConfigurationIdentifier(configuration_key=checkpoint_config.name)
-    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
-
-    checkpoint = context.get_legacy_checkpoint(checkpoint_config.name)
-    with pytest.raises(gx_exceptions.DataContextError, match=r"expectation_suite .* not found"):
-        checkpoint.run()
-
-    assert len(context.validations_store.list_keys()) == 0
-
-    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
-
-    result: CheckpointResult = checkpoint.run()
-    assert len(result.list_validation_results()) == 1
-    assert result.success
-
-    result: CheckpointResult = checkpoint.run()
-    assert len(result.list_validation_results()) == 1
-    assert len(context.validations_store.list_keys()) == 2
-    assert result.success
-
-
 @pytest.mark.filesystem
 def test_get_validator_with_instantiated_expectation_suite(
     empty_data_context_stats_enabled, tmp_path_factory
@@ -1337,48 +1169,6 @@ def test_add_expectation_to_expectation_suite(empty_data_context_stats_enabled):
             expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
         )
     )
-
-
-@pytest.mark.filesystem
-def test_stores_suite_parameters_resolve_correctly(data_context_with_query_store):
-    """End to end test demonstrating usage of Stores suite parameters"""
-    context = data_context_with_query_store
-    suite_name = "eval_param_suite"
-    context.add_expectation_suite(expectation_suite_name=suite_name)
-    batch_request = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "default_runtime_data_connector_name",
-        "data_asset_name": "DEFAULT_ASSET_NAME",
-        "batch_identifiers": {"default_identifier_name": "test123"},
-        "runtime_parameters": {"query": "select * from titanic"},
-    }
-    validator = context.get_validator(
-        batch_request=RuntimeBatchRequest(**batch_request),
-        expectation_suite_name=suite_name,
-    )
-    validator.expect_table_row_count_to_equal(
-        value={
-            # unnecessarily complex URN which should resolve to the actual row count.
-            "$PARAMETER": "abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count) + 4"  # noqa: E501
-        }
-    )
-
-    checkpoint_config = {
-        "validations": [{"batch_request": batch_request, "expectation_suite_name": suite_name}],
-        "action_list": [
-            {
-                "name": "store_validation_result",
-                "action": {"class_name": "StoreValidationResultAction"},
-            },
-            {
-                "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction"},
-            },
-        ],
-    }
-    checkpoint = Checkpoint(f"_tmp_checkpoint_{suite_name}", context, **checkpoint_config)
-    checkpoint_result = checkpoint.run()
-    assert checkpoint_result.get("success") is True
 
 
 @pytest.mark.filesystem

@@ -54,7 +54,7 @@ def data_context_config_dict() -> dict:
         "config_version": 3.0,
         "plugins_directory": "plugins/",
         "suite_parameter_store_name": "suite_parameter_store",
-        "validations_store_name": "validations_store",
+        "validation_results_store_name": "validation_results_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
         "profiler_store_name": "profiler_store",
@@ -244,7 +244,7 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         ),
         pytest.param(
             DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validations_store getter",
+            id="validation_results_store getter",
         ),
         pytest.param(
             DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
@@ -341,9 +341,9 @@ def test_data_context_variables_get_with_substitutions(
             id="expectations_store setter",
         ),
         pytest.param(
-            "my_validations_store",
+            "my_validation_results_store",
             DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validations_store setter",
+            id="validation_results_store setter",
         ),
         pytest.param(
             "my_suite_parameter_store",
@@ -459,7 +459,7 @@ def test_data_context_variables_save_config(
             },
             "checkpoint_store": {"class_name": "CheckpointStore"},
             "profiler_store": {"class_name": "ProfilerStore"},
-            "validations_store": {"class_name": "ValidationsStore"},
+            "validation_results_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
         "include_rendered_content": {

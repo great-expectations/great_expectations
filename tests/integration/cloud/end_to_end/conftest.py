@@ -13,6 +13,7 @@ import pytest
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import CloudDataContext
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
@@ -103,37 +104,15 @@ def checkpoint(
     expectation_suite: ExpectationSuite,
 ) -> Iterator[Checkpoint]:
     checkpoint_name = f"{batch_request.data_asset_name} | {expectation_suite.name}"
-    _ = context.add_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.name,
-                "batch_request": batch_request,
-            },
-            {
-                "expectation_suite_name": expectation_suite.name,
-                "batch_request": batch_request,
-            },
-        ],
-    )
-    _ = context.add_or_update_checkpoint(
-        name=checkpoint_name,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite.name,
-                "batch_request": batch_request,
-            }
-        ],
-    )
-    checkpoint = context.get_legacy_checkpoint(name=checkpoint_name)
-    assert (
-        len(checkpoint.validations) == 1
-    ), "Checkpoint was not updated in the previous method call."
+
+    validation_definitions: list[ValidationDefinition] = []
+    checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=validation_definitions)
+    checkpoint = context.checkpoints.add(checkpoint)
     yield checkpoint
-    context.delete_legacy_checkpoint(checkpoint.name)
+    context.checkpoints.delete(checkpoint)
 
     with pytest.raises(gx_exceptions.DataContextError):
-        context.get_legacy_checkpoint(name=checkpoint_name)
+        context.checkpoints.get(name=checkpoint_name)
 
 
 @pytest.fixture(scope="module")
