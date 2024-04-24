@@ -109,7 +109,7 @@ class PartitionerSortingProtocol(Protocol):
         ...
 
 
-class PartitionerProtocol(PartitionerSortingProtocol):
+class PartitionerProtocol(PartitionerSortingProtocol, Protocol):
     @property
     def columns(self) -> list[str]:
         """The names of the column used to partition the data"""
