@@ -18,9 +18,6 @@ from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
 
-logger = logging.getLogger(__name__)
-
-
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     from typing_extensions import TypeAlias
@@ -41,10 +38,15 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
-    from great_expectations.data_context.types.base import DataContextConfig
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        IncludeRenderedContentConfig,
+    )
     from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent.batch_request import BatchRequest
     from great_expectations.validator.validator import Validator
+
+logger = logging.getLogger(__name__)
 
 ContextModes: TypeAlias = Literal["file", "cloud", "ephemeral"]
 
@@ -114,6 +116,9 @@ class ProjectManager:
 
     def get_validator(self, batch_request: BatchRequest) -> Validator:
         return self._project.get_validator(batch_request=batch_request)
+
+    def include_rendered_content(self) -> IncludeRenderedContentConfig:
+        return self._project.include_rendered_content
 
     def is_using_cloud(self) -> bool:
         from great_expectations.data_context import CloudDataContext

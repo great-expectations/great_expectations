@@ -80,8 +80,7 @@ def run_checkpoint_and_data_doc(  # noqa: PLR0915
     assert number_of_runs == 1, f"{number_of_runs} runs were done when we only expected 1"
 
     # Grab the validation result and verify it is correct
-    result = checkpoint_result.run_results[list(checkpoint_result.run_results.keys())[0]]
-    validation_result = result["validation_result"]
+    validation_result = checkpoint_result.run_results[list(checkpoint_result.run_results.keys())[0]]
     assert validation_result.success
 
     expected_metric_values = {

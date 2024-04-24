@@ -79,6 +79,17 @@ class Validator:
         )
 
     @property
+    def _include_rendered_content(self) -> bool:
+        from great_expectations import project_manager
+
+        rendered_content_config = project_manager.include_rendered_content()
+
+        return (
+            rendered_content_config.globally is True
+            or rendered_content_config.expectation_validation_result is True
+        )
+
+    @property
     def active_batch_id(self) -> Optional[str]:
         return self._wrapped_validator.active_batch_id
 
@@ -103,5 +114,9 @@ class Validator:
             configurations=processed_expectation_configs,
             runtime_configuration={"result_format": self.result_format.value},
         )
+
+        if self._include_rendered_content:
+            for result in results:
+                result.render()
 
         return results
