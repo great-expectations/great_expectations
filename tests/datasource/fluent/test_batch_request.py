@@ -16,7 +16,6 @@ from great_expectations.core.partitioners import (
     PartitionerYearAndMonth,
     PartitionerYearAndMonthAndDay,
     PartitionerYearly,
-    RegexPartitioner,
 )
 from great_expectations.datasource.fluent import BatchRequest
 
@@ -129,14 +128,13 @@ def test_batch_request_config_serialization_round_trips(
     )
 
 
-def _test_cases():
+def _partitioner_test_cases():
     return [
         pytest.param(
             PartitionerYearAndMonthAndDay(
                 column_name="foo",
                 sort_ascending=False,
             ),
-            BatchRequest[Partitioner],
             id="Sql Daily",
         ),
         pytest.param(
@@ -144,7 +142,6 @@ def _test_cases():
                 column_name="foo",
                 sort_ascending=False,
             ),
-            BatchRequest[Partitioner],
             id="Sql Monthly",
         ),
         pytest.param(
@@ -152,7 +149,6 @@ def _test_cases():
                 column_name="foo",
                 sort_ascending=False,
             ),
-            BatchRequest[Partitioner],
             id="Sql Yearly",
         ),
         pytest.param(
@@ -160,7 +156,6 @@ def _test_cases():
                 regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}).csv"),
                 sort_ascending=False,
             ),
-            BatchRequest[RegexPartitioner],
             id="Regex Daily",
         ),
         pytest.param(
@@ -168,7 +163,6 @@ def _test_cases():
                 regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
                 sort_ascending=False,
             ),
-            BatchRequest[RegexPartitioner],
             id="Regex Monthly",
         ),
         pytest.param(
@@ -176,12 +170,10 @@ def _test_cases():
                 regex=re.compile(r"data_(?P<year>\d{4}).csv"),
                 sort_ascending=False,
             ),
-            BatchRequest[RegexPartitioner],
             id="Regex Yearly",
         ),
         pytest.param(
             None,
-            BatchRequest[None],
             id="None",
         ),
     ]
@@ -189,33 +181,35 @@ def _test_cases():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "partitioner,TypedBatchRequest",
-    _test_cases(),
+    "partitioner",
+    _partitioner_test_cases(),
 )
 def test_batch_request_config_partitioner_dict_round_trip_serialization(
     partitioner: PartitionerT,
-    TypedBatchRequest: type[BatchRequest],
 ) -> None:
-    batch_request = TypedBatchRequest(
+    # Using Any here effectively turns off type checking. This test demonstrates that the
+    # BatchRequest doesn't need to be parameterized for Pydantic to correctly deserialize from dict
+    batch_request = BatchRequest[Any](
         datasource_name="test-datasource", data_asset_name="test-asset", partitioner=partitioner
     )
 
     batch_request_dict = batch_request.dict()
-    assert TypedBatchRequest(**batch_request_dict) == batch_request
+    assert BatchRequest(**batch_request_dict) == batch_request
 
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "partitioner,TypedBatchRequest",
-    _test_cases(),
+    _partitioner_test_cases(),
 )
 def test_batch_request_config_partitioner_json_round_trip_serialization(
     partitioner: PartitionerT,
-    TypedBatchRequest: type[BatchRequest],
 ) -> None:
-    batch_request = TypedBatchRequest(
+    # Using Any here effectively turns off type checking. This test demonstrates that the
+    # BatchRequest doesn't need to be parameterized for Pydantic to correctly deserialize from JSON
+    batch_request = BatchRequest[Any](
         datasource_name="test-datasource", data_asset_name="test-asset", partitioner=partitioner
     )
 
     batch_request_json = batch_request.json()
-    assert TypedBatchRequest.parse_raw(batch_request_json) == batch_request
+    assert BatchRequest.parse_raw(batch_request_json) == batch_request
