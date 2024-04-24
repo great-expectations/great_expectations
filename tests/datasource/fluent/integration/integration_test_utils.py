@@ -94,6 +94,7 @@ def run_checkpoint_and_data_doc(
 
     for r in validation_result.results:
         assert r.success
+        assert r.expectation_config
         assert (
             r.result["observed_value"]
             == expected_metric_values[r.expectation_config.expectation_type]["value"]
