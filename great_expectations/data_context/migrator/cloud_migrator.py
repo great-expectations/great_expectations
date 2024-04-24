@@ -205,7 +205,6 @@ class CloudMigrator:
         # NOTE(cdkini): Datasources should be verbose, not just summary!
         to_print = (
             ("Datasource", configuration_bundle.datasources),
-            ("Checkpoint", configuration_bundle.checkpoints),
             ("Expectation Suite", configuration_bundle.expectation_suites),
         )
 

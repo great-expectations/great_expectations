@@ -71,6 +71,10 @@ def test_get_batch_list_from_batch_request__sort_ascending(
         assert batch.metadata["month"] == str(expected_months[i])
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="This test will pass with a few adjustments when RegexPartitioners are implemented.",
+)
 @pytest.mark.filesystem
 def test_get_batch_list_from_batch_request__sort_descending(
     validated_pandas_filesystem_datasource: PandasFilesystemDatasource,

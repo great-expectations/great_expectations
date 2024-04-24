@@ -14,7 +14,6 @@ from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -29,7 +28,6 @@ from great_expectations.data_context.store import (
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
-from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -44,87 +42,6 @@ from great_expectations.util import (
 from tests import test_utils
 
 yaml = YAMLHandler()
-
-
-@pytest.fixture()
-def basic_data_context_config_for_validation_operator():
-    return DataContextConfig(
-        config_version=2,
-        plugins_directory=None,
-        suite_parameter_store_name="suite_parameter_store",
-        expectations_store_name="expectations_store",
-        datasources={},
-        stores={
-            "expectations_store": {"class_name": "ExpectationsStore"},
-            "suite_parameter_store": {"class_name": "SuiteParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
-            "metrics_store": {"class_name": "MetricStore"},
-        },
-        validations_store_name="validation_result_store",
-        data_docs_sites={},
-        validation_operators={
-            "store_val_res_and_extract_eval_params": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-            "errors_and_warnings_validation_operator": {
-                "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-
-@pytest.fixture
-def validation_operators_data_context(
-    basic_data_context_config_for_validation_operator, filesystem_csv_4
-):
-    data_context = get_context(basic_data_context_config_for_validation_operator)
-
-    data_context.add_datasource(
-        "my_datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_4),
-            }
-        },
-    )
-    data_context.add_expectation_suite("f1.foo")
-
-    df = data_context._get_batch_v2(
-        batch_kwargs=data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"),
-        expectation_suite_name="f1.foo",
-    )
-    df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
-    failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-
-    df.expect_column_values_to_not_be_null(column="y")
-    warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-
-    failure_expectations.name = "f1.failure"
-    data_context.add_expectation_suite(expectation_suite=failure_expectations)
-    warning_expectations.name = "f1.warning"
-    data_context.add_expectation_suite(expectation_suite=warning_expectations)
-
-    return data_context
 
 
 @pytest.fixture()
@@ -1435,8 +1352,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("progress_bars",),
         ("stores",),
         ("suite_parameter_store_name",),
-        ("validation_operators",),
-        ("validations_store_name",),
+        ("validation_results_store_name",),
     ]
 
     # test .move

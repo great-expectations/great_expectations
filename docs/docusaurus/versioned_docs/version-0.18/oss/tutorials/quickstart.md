@@ -97,6 +97,8 @@ click 7 "#validate-data"
 
   The second <TechnicalTag tag="expectation" text="Expectation"/> uses explicit kwargs along with the `passenger_count` column.
 
+  The basic workflow when creating an Expectation Suite is to populate it with Expectations that accurately describe the state of the associated data.  Therefore, when an Expectation Suite is saved failed Expectations are not kept by default.  However, the `discard_failed_expectations` parameter of `save_expectation_suite(...)` can be used to override this behavior if you have created Expectations that describe the ideal state of your data rather than its current state.  
+
 ## Validate data
 
 1. Run the following command to define a <TechnicalTag tag="checkpoint" text="Checkpoint"/> and examine the data to determine if it matches the defined <TechnicalTag tag="expectation" text="Expectations"/>:

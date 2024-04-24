@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from pprint import pprint
 from typing import (
     TYPE_CHECKING,
     Generator,
@@ -38,7 +37,6 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    Sorter,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.postgres_datasource import (
@@ -510,7 +508,7 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
         partitioner = PartitionerClass(**add_partitioner_kwargs)
 
         src, ast, op = batch_request_args
-        batch_request = BatchRequest(
+        batch_request = BatchRequest[Partitioner](
             datasource_name=src or source.name,
             data_asset_name=ast or asset.name,
             options=op or {},
@@ -605,28 +603,6 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
 
 @pytest.mark.postgresql
 @pytest.mark.parametrize(
-    "order_by",
-    [
-        ["+year", "-month"],
-        [{"key": "year"}, {"key": "month", "reverse": True}],
-    ],
-)
-def test_table_asset_sorter_parsing(order_by: list):
-    """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""  # noqa: E501
-    expected_sorters = [
-        Sorter(key="year"),
-        Sorter(key="month", reverse=True),
-    ]
-
-    table_asset = TableAsset(name="SorterTest", table_name="SORTER_TEST", order_by=order_by)
-    print(table_asset)
-    pprint(f"\n{table_asset.dict()}")
-
-    assert table_asset.order_by == expected_sorters
-
-
-@pytest.mark.postgresql
-@pytest.mark.parametrize(
     "batch_slice,expected_batch_count",
     [
         ("[-3:]", 3),
@@ -678,10 +654,6 @@ def test_data_source_json_has_properties(create_source: CreateSourceFixture):
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.add_sorters(["year", "month"])
-        source_json = source.json(indent=4, sort_keys=True)
-        print(source_json)
-        assert '"order_by": ' in source_json
         # type should be in dumped json even if not explicitly set
         assert f'"type": "{asset.type}"'  # noqa: PLW0129
 
@@ -695,9 +667,7 @@ def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.add_sorters(["year", "month"])
         source_str = source.__str__()
-        assert "order_by:" in source_str
         # type should be in dumped str even if not explicitly set
         assert f"type: {asset.type}" in source_str
 
@@ -707,22 +677,11 @@ def test_datasource_dict_has_properties(create_source):
     with create_source(validate_batch_spec=lambda _: None, dialect="postgresql") as source:
         (
             source,  # noqa: PLW2901
-            asset,
+            _,
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.add_sorters(["year", "month"])
         source_dict = source.dict()
-        pprint(source_dict)
-        assert isinstance(
-            list(
-                filter(
-                    lambda element: element["name"] == "my_asset",
-                    source_dict["assets"],
-                )
-            )[0]["order_by"],
-            list,
-        )
         # type should be in dumped dict even if not explicitly set
         assert (
             "type"
@@ -1115,7 +1074,6 @@ def test_partitioner_year_and_month_and_day(
         "PartitionerClass",
         "partitioner_kwargs",
         "partitioner_query_responses",
-        "sorter_args",
         "all_batches_cnt",
         "specified_batch_request",
         "specified_batch_cnt",
@@ -1126,7 +1084,6 @@ def test_partitioner_year_and_month_and_day(
             PartitionerYear,
             {"column_name": "pickup_datetime"},
             [{"year": 2020}],
-            ["year"],
             1,
             {"year": 2020},
             1,
@@ -1137,7 +1094,6 @@ def test_partitioner_year_and_month_and_day(
             PartitionerYearAndMonth,
             {"column_name": "pickup_datetime"},
             [{"year": 2020, "month": 1}, {"year": 2020, "month": 2}],
-            ["year", "month"],
             2,
             {"year": 2020, "month": 1},
             1,
@@ -1151,7 +1107,6 @@ def test_partitioner_year_and_month_and_day(
                 {"year": 2020, "month": 2, "day": 10},
                 {"year": 2020, "month": 2, "day": 12},
             ],
-            ["year", "month", "day"],
             2,
             {"year": 2020, "month": 2, "day": 10},
             1,
@@ -1168,7 +1123,6 @@ def test_partitioner_year_and_month_and_day(
                 {"year": 2020, "month": 2, "day": 10},
                 {"year": 2020, "month": 2, "day": 12},
             ],
-            ["year", "month", "day"],
             2,
             {"year": 2020, "month": 2},
             2,
@@ -1179,7 +1133,6 @@ def test_partitioner_year_and_month_and_day(
             PartitionerColumnValue,
             {"column_name": "passenger_count"},
             [(1,), (None,), (2,)],
-            ["passenger_count"],
             3,
             {"passenger_count": 2},
             1,
@@ -1190,7 +1143,6 @@ def test_partitioner_year_and_month_and_day(
             PartitionerDividedInteger,
             {"column_name": "passenger_count", "divisor": 3},
             [(1,), (2,)],
-            ["quotient"],
             2,
             {"quotient": 2},
             1,
@@ -1201,7 +1153,6 @@ def test_partitioner_year_and_month_and_day(
             PartitionerModInteger,
             {"column_name": "passenger_count", "mod": 3},
             [(1,), (2,)],
-            ["remainder"],
             2,
             {"remainder": 2},
             1,
@@ -1214,7 +1165,6 @@ def test_partitioner_year_and_month_and_day(
             # These types are (passenger_count, payment_type), that is in column_names order.
             # datetime partitioners return dicts while all other partitioners return tuples.
             [(3, 1), (1, 1), (1, 2)],
-            ["passenger_count", "payment_type"],
             3,
             {"passenger_count": 1},
             2,
@@ -1229,7 +1179,6 @@ def test_partitioner(
     PartitionerClass,
     partitioner_kwargs,
     partitioner_query_responses,
-    sorter_args,
     all_batches_cnt,
     specified_batch_request,
     specified_batch_cnt,
@@ -1243,7 +1192,6 @@ def test_partitioner(
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         partitioner = PartitionerClass(**partitioner_kwargs)
-        asset.add_sorters(sorter_args)
         # Test getting all batches
         all_batches = asset.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)

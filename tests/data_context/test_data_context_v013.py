@@ -36,7 +36,7 @@ def basic_data_context_v013_config():
             "config_version": 3,
             "plugins_directory": "plugins/",
             "suite_parameter_store_name": "suite_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
@@ -218,7 +218,7 @@ def test_get_config(empty_data_context):
         "stores",
         "expectations_store_name",
         "fluent_datasources",
-        "validations_store_name",
+        "validation_results_store_name",
         "suite_parameter_store_name",
         "checkpoint_store_name",
         "data_docs_sites",
@@ -421,21 +421,6 @@ def test_in_memory_data_context_configuration(
         mode=ConfigOutputModes.DICT
     )
     project_config_dict["plugins_directory"] = None
-    project_config_dict["validation_operators"] = {
-        "action_list_operator": {
-            "class_name": "ActionListValidationOperator",
-            "action_list": [
-                {
-                    "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction"},
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": {"class_name": "UpdateDataDocsAction"},
-                },
-            ],
-        }
-    }
 
     # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     project_config_dict = dataContextConfigSchema.dump(project_config_dict)

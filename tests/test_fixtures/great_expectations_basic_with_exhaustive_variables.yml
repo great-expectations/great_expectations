@@ -30,7 +30,7 @@ config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: ${l}
 suite_parameter_store_name: ${m}
 expectations_store_name: ${n}
-validations_store_name: ${o}
+validation_results_store_name: ${o}
 
 data_docs_sites:
   local_site:
@@ -53,30 +53,8 @@ stores:
     module_name: ${x}
     class_name: ${y}
 
-  validations_store:
+  validation_results_store:
     class_name: ${z}
-
-validation_operators:
-  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
-  default:
-    class_name: ${aa}
-    action_list:
-      - name: ${bb}
-        action:
-          class_name: ${cc}
-          target_store_name: ${dd}
-      - name: ${ee}
-        action:
-          class_name: ${ff}
-          slack_webhook: ${gg}
-          notify_on: ${hh}
-          renderer:
-            module_name: ${ii}
-            class_name: ${jj}
-      - name: ${kk}
-        action:
-          class_name: ${ll}
-          target_store_name: ${mm}
 
 anonymous_usage_statistics:
   data_context_id: d1aad86c-a205-49e6-95f7-b7c0a3635a43
