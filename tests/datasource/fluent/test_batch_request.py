@@ -124,7 +124,6 @@ def test_batch_request_config_serialization_round_trips(
         '"sort_ascending": true, '
         '"method_name": "partition_on_column_value"'
         "}, "
-        '"batching_regex": "data_(?P<year>\\\\d{4})-(?P<month>\\\\d{2}).csv", '
         f'"batch_slice": {batch_slice_json}'
         "}"
     )
