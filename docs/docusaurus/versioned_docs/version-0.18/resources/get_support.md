@@ -4,9 +4,26 @@ title: 'Get support'
 description: Learn what resources are available to help you resolve issues with GX Cloud and GX OSS.
 ---
 
-Great Expectations (GX) relies on an active user community for its continued success. Input from users like you helps GX and the community build its collective knowledge and improve GX Cloud and GX OSS. Knowing how and where to seek support will help you get the answers you need to resolve issues.
+## Where to get support
 
-## Try solving your issue first
+### GX Cloud support
+
+GX Cloud customers can reach the GX support team through the following channels.
+
+- Sending an email to support@greatexpectations.io
+- Creating a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/cloud-support/17).
+- Reaching out in the [GX Cloud Slack community channel](https://greatexpectationstalk.slack.com/archives/C051D941XAL).
+
+### GX OSS support
+
+If you're using GX OSS only, you can get support via the community.
+
+- Chat with community members about general issues and seek solutions on the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82).
+- If you've found a bug related to OSS, open an issue in our [GX GitHub repository](https://github.com/great-expectations/great_expectations).
+
+## How to effectively get support
+
+### Try solving your issue first
 
 The following are some recommendations for resolving issues on your own. Resolving issues on your own builds your knowledge and allows you to share that knowledge with the community.
 
@@ -33,14 +50,3 @@ Clearly explain the issue you're experiencing, or the problem you're trying to s
 - The version of GX OSS you're using.
 
 - A detailed explanation of what you're trying to resolve including what attempts you've made on your own to date.
-
-## GX Cloud support
-
-- Create a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/cloud-support/17) if you've encountered an error you can't resolve. This is the recommended option, as answers aren't removed after 90 days, and you're likely to get a quicker response.
-- Send an email to support@greatexpectations.io or create a ticket on the [support portal](https://support.greatexpectations.io).
-- Discuss GX Cloud issues on the [GX Cloud Slack community channel](https://greatexpectationstalk.slack.com/archives/C051D941XAL).
-
-## GX OSS support
-
-- Chat with community members about general issues and seek solutions on the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82). 
-- If you've found a bug, open an issue in one of the [GX GitHub repositories](https://github.com/great-expectations).
