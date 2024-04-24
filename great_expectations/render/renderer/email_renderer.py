@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import textwrap
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 
 class EmailRenderer(Renderer):
+    @override
     def render(self, checkpoint_result: CheckpointResult) -> tuple[str, str]:
         checkpoint_name = checkpoint_result.checkpoint_config.name
         status = checkpoint_result.success

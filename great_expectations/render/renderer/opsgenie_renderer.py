@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 
 class OpsgenieRenderer(Renderer):
+    @override
     def render(self, checkpoint_result: CheckpointResult):
         text_blocks: list[str] = []
         for run_result in checkpoint_result.run_results.values():

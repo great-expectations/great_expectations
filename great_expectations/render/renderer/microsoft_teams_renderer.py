@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from great_expectations.core import RunIdentifier
 from great_expectations.render.renderer.renderer import Renderer
@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 class MicrosoftTeamsRenderer(Renderer):
     MICROSOFT_TEAMS_SCHEMA_URL = "http://adaptivecards.io/schemas/adaptive-card.json"
 
+    @override
     def render(
         self, checkpoint_result: CheckpointResult, data_docs_pages: list[dict] | None = None
     ):
