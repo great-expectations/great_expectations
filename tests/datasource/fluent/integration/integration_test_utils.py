@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
 
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import AbstractDataContext
