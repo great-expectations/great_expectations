@@ -55,7 +55,7 @@ from great_expectations.render.renderer import (
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
@@ -121,8 +121,7 @@ class ValidationAction(BaseModel):
 
         return project_manager.is_using_cloud()
 
-    # NOTE: To be promoted to 'run' after V1 development (JIRA: V1-271)
-    def v1_run(
+    def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
         raise NotImplementedError
@@ -248,7 +247,7 @@ class SlackNotificationAction(DataDocsAction):
         return values
 
     @override
-    def v1_run(
+    def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
         success = checkpoint_result.success or False
@@ -369,7 +368,7 @@ class PagerdutyAlertAction(ValidationAction):
     severity: Literal["critical", "error", "warning", "info"] = "critical"
 
     @override
-    def v1_run(
+    def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
         success = checkpoint_result.success or False
@@ -453,9 +452,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         return renderer
 
     @override
-    def v1_run(
-        self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
-    ):
+    def run(self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None):
         success = checkpoint_result.success or False
         if not self._is_enabled(success=success):
             return {"microsoft_teams_notification_result": None}
@@ -518,7 +515,7 @@ class OpsgenieAlertAction(ValidationAction):
         return renderer
 
     @override
-    def v1_run(
+    def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
         validation_success = checkpoint_result.success or False
@@ -641,7 +638,7 @@ class EmailAction(ValidationAction):
         return values
 
     @override
-    def v1_run(
+    def run(
         self,
         checkpoint_result: CheckpointResult,
         action_context: ActionContext | None = None,
@@ -703,7 +700,7 @@ class UpdateDataDocsAction(DataDocsAction):
     site_names: List[str] = []
 
     @override
-    def v1_run(
+    def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
         action_results: dict[ValidationResultIdentifier, dict] = {}
@@ -804,7 +801,7 @@ class SNSNotificationAction(ValidationAction):
     sns_message_subject: Optional[str]
 
     @override
-    def v1_run(
+    def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
         msg = send_sns_notification(
@@ -824,7 +821,7 @@ class APINotificationAction(ValidationAction):
     url: str
 
     @override
-    def v1_run(
+    def run(
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
         aggregate_payload = []
