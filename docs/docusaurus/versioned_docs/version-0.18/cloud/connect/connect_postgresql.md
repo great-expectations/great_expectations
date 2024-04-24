@@ -51,13 +51,11 @@ To validate data stored in a PostgreSQL database from GX Cloud, you must add the
 
 8. Click **Continue**.
 
-9. Select **Table Asset** or **Query Asset** and complete the following fields:
+9. Complete the following fields:
 
-    - **Table name**: When **Table Asset** is selected, enter the name of the Data Source table you're connecting to.
+    - **Table name**: Enter the name of the Data Source table you're connecting to.
     
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique across all Data Sources in GX Cloud.
-
-    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the Data Asset. 
 
 10. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
