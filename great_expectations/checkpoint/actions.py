@@ -309,7 +309,7 @@ class SlackNotificationAction(DataDocsAction):
         if result.result_url:
             validation_result_urls.append(result.result_url)
 
-        return self.renderer.v1_render(
+        return self.renderer.render(
             validation_result=result,
             data_docs_pages=data_docs_pages,
             notify_with=self.notify_with,
@@ -459,7 +459,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
         data_docs_pages = self._get_data_docs_pages_from_prior_action(action_context=action_context)
 
-        payload = self.renderer.v1_render(
+        payload = self.renderer.render(
             checkpoint_result=checkpoint_result,
             data_docs_pages=data_docs_pages,
         )
@@ -529,7 +529,7 @@ class OpsgenieAlertAction(ValidationAction):
                 "tags": self.tags,
             }
 
-            description = self.renderer.v1_render(checkpoint_result=checkpoint_result)
+            description = self.renderer.render(checkpoint_result=checkpoint_result)
 
             message = f"Great Expectations Checkpoint {checkpoint_name} "
             if checkpoint_result.success:
@@ -647,7 +647,7 @@ class EmailAction(ValidationAction):
         if not self._is_enabled(success=success):
             return {"email_result": ""}
 
-        title, html = self.renderer.v1_render(checkpoint_result=checkpoint_result)
+        title, html = self.renderer.render(checkpoint_result=checkpoint_result)
         receiver_emails_list = list(map(lambda x: x.strip(), self.receiver_emails.split(",")))
 
         # this will actually send the email

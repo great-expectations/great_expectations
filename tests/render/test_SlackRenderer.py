@@ -443,7 +443,7 @@ def test_slack_renderer_shows_gx_cloud_url(failed_expectation_suite_validation_r
     assert "" f"*<{cloud_url} | Failed :x:>*" "" in rendered_msg["blocks"][0]["text"]["text"]
 
 
-def test_SlackRenderer_v1_render():
+def test_SlackRenderer_render():
     validation_result = ExpectationSuiteValidationResult(
         success=True,
         statistics={"successful_expectations": 3, "evaluated_expectations": 3},
@@ -454,7 +454,7 @@ def test_SlackRenderer_v1_render():
     notify_with = ["local_site"]
 
     slack_renderer = SlackRenderer()
-    output = slack_renderer.v1_render(
+    output = slack_renderer.render(
         validation_result=validation_result,
         data_docs_pages=data_docs_pages,
         notify_with=notify_with,

@@ -133,9 +133,9 @@ def test_EmailRenderer_get_report_element():
 
 
 @pytest.mark.unit
-def test_EmailRenderer_v1_render(v1_checkpoint_result):
+def test_EmailRenderer_render(v1_checkpoint_result):
     email_renderer = EmailRenderer()
-    _, raw_html = email_renderer.v1_render(checkpoint_result=v1_checkpoint_result)
+    _, raw_html = email_renderer.render(checkpoint_result=v1_checkpoint_result)
     html_blocks = raw_html.split("\n")
 
     assert html_blocks == [

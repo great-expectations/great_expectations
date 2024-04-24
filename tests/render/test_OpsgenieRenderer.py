@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.checkpoint.v1_checkpoint import CheckpointResult
+from great_expectations.checkpoint.checkpoint import CheckpointResult
 from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -106,10 +106,10 @@ def test_OpsgenieRenderer_validation_results_failure():
 
 
 @pytest.mark.unit
-def test_OpsgenieRenderer_v1_render(v1_checkpoint_result: CheckpointResult):
+def test_OpsgenieRenderer_render(v1_checkpoint_result: CheckpointResult):
     # Act
     renderer = OpsgenieRenderer()
-    raw_output = renderer.v1_render(checkpoint_result=v1_checkpoint_result)
+    raw_output = renderer.render(checkpoint_result=v1_checkpoint_result)
     parts = raw_output.split("\n")
 
     # Assert
