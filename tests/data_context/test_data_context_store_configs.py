@@ -47,7 +47,6 @@ def totally_empty_data_context(tmp_path_factory):
             },
         },
         "data_docs_sites": {},
-        "validation_operators": {},
     }
     with open(
         os.path.join(project_root_dir, "gx/great_expectations.yml"),  # noqa: PTH118

@@ -34,7 +34,7 @@ class TestProjectManagerStores:
 
         store = project_manager.get_checkpoints_store()
 
-        assert store == context.v1_checkpoint_store
+        assert store == context.checkpoint_store
 
     @pytest.mark.unit
     def test_get_checkpoints_store_fails_without_context(self):

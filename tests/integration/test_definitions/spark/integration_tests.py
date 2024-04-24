@@ -32,18 +32,6 @@ connecting_to_your_data = [
 ]
 
 databricks_deployment_patterns = [
-    IntegrationTestFixture(
-        name="databricks_deployment_patterns_dataframe_yaml_configs",
-        user_flow_script="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_yaml_configs.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="databricks_deployment_patterns_dataframe_python_configs",
-        user_flow_script="docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
     # unable to mock dbfs in CI
     # IntegrationTestFixture(
     #     name="databricks_deployment_patterns_file_python_configs",
