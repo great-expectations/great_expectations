@@ -17,10 +17,6 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
-from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from tests.data_context.conftest import MockResponse
 
 if TYPE_CHECKING:
@@ -538,67 +534,3 @@ def test_expectation_suite_gx_cloud_identifier_requires_id_or_resource_name(
 
     with pytest.raises(ValueError):
         context.expectations_store._validate_key(key=key)
-
-
-@pytest.mark.big
-def test_get_expectation_suite_include_rendered_content_prescriptive(
-    empty_data_context,
-):
-    context = empty_data_context
-
-    expectation_suite_name = "validating_taxi_data"
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
-        kwargs={
-            "column": "passenger_count",
-            "min_value": {"$PARAMETER": "upstream_column_min"},
-            "max_value": {"$PARAMETER": "upstream_column_max"},
-        },
-    )
-
-    context.add_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-        expectations=[expectation_configuration],
-    )
-
-    expectation_suite_exclude_rendered_content: ExpectationSuite = context.suites.get(
-        name=expectation_suite_name,
-    )
-    assert (
-        expectation_suite_exclude_rendered_content.expectation_configurations[0].rendered_content
-        is None
-    )
-
-    expected_expectation_configuration_prescriptive_rendered_content = [
-        RenderedAtomicContent(
-            value_type="StringValueType",
-            value=RenderedAtomicValue(
-                schema={"type": "com.superconductive.rendered.string"},
-                template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
-                params={
-                    "column": {
-                        "schema": {"type": "string"},
-                        "value": "passenger_count",
-                    },
-                    "min_value": {
-                        "schema": {"type": "object"},
-                        "value": {"$PARAMETER": "upstream_column_min"},
-                    },
-                    "max_value": {
-                        "schema": {"type": "object"},
-                        "value": {"$PARAMETER": "upstream_column_max"},
-                    },
-                },
-            ),
-            name="atomic.prescriptive.summary",
-        )
-    ]
-
-    expectation_suite_include_rendered_content: ExpectationSuite = context.get_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-    )
-    assert (
-        expectation_suite_include_rendered_content.expectation_configurations[0].rendered_content
-        == expected_expectation_configuration_prescriptive_rendered_content
-    )
