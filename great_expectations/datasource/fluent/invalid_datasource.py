@@ -79,9 +79,7 @@ class InvalidAsset(DataAsset):
         )
 
     @override
-    def add_batch_definition(
-        self, name: str, partitioner: Any | None = None, batching_regex: Any = None
-    ) -> NoReturn:
+    def add_batch_definition(self, name: str, partitioner: Any | None = None) -> NoReturn:
         self._raise_type_error()
 
     @override

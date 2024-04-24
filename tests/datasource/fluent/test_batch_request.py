@@ -1,11 +1,23 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Final
+import re
+from typing import Any, Final, Union
 
 import pytest
 
-from great_expectations.core.partitioners import Partitioner, PartitionerColumnValue
+from great_expectations.core.batch_definition import PartitionerT
+from great_expectations.core.partitioners import (
+    Partitioner,
+    PartitionerColumnValue,
+    PartitionerDaily,
+    PartitionerMonthly,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
+    PartitionerYearly,
+    RegexPartitioner,
+)
 from great_expectations.datasource.fluent import BatchRequest
 
 
@@ -68,7 +80,6 @@ def test_batch_request_config_serialization_round_trips(
         "datasource_name": datasource_name,
         "data_asset_name": data_asset_name,
         "partitioner": PartitionerColumnValue(column_name="my_column"),
-        "batching_regex": r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     }
     batch_request_config.update(optional_batch_request_config)
     batch_request = BatchRequest[Partitioner](**batch_request_config)
@@ -117,3 +128,82 @@ def test_batch_request_config_serialization_round_trips(
         f'"batch_slice": {batch_slice_json}'
         "}"
     )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "partitioner,partitioner_type",
+    [
+        pytest.param(
+            PartitionerYearAndMonthAndDay(
+                column_name="foo",
+                sort_ascending=False,
+            ),
+            Partitioner,
+            id="Sql Daily",
+        ),
+        pytest.param(
+            PartitionerYearAndMonth(
+                column_name="foo",
+                sort_ascending=False,
+            ),
+            Partitioner,
+            id="Sql Monthly",
+        ),
+        pytest.param(
+            PartitionerYear(
+                column_name="foo",
+                sort_ascending=False,
+            ),
+            Partitioner,
+            id="Sql Yearly",
+        ),
+        pytest.param(
+            PartitionerDaily(
+                regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}).csv"),
+                sort_ascending=False,
+            ),
+            RegexPartitioner,
+            id="Regex Daily",
+        ),
+        pytest.param(
+            PartitionerMonthly(
+                regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+                sort_ascending=False,
+            ),
+            RegexPartitioner,
+            id="Regex Monthly",
+        ),
+        pytest.param(
+            PartitionerYearly(
+                regex=re.compile(r"data_(?P<year>\d{4}).csv"),
+                sort_ascending=False,
+            ),
+            RegexPartitioner,
+            id="Regex Yearly",
+        ),
+        pytest.param(
+            None,
+            None,
+            id="None",
+        ),
+    ],
+)
+def test_batch_request_config_partitioner_round_trip_serialization(
+    partitioner: PartitionerT,
+    partitioner_type: type[Union[Partitioner, RegexPartitioner, None]],
+) -> None:
+    datasource_name: Final[str] = "my_datasource"
+    data_asset_name: Final[str] = "my_data_asset"
+
+    batch_request = BatchRequest(
+        datasource_name=datasource_name, data_asset_name=data_asset_name, partitioner=partitioner
+    )
+
+    # dict
+    batch_request_dict = batch_request.dict()
+    assert BatchRequest(**batch_request_dict) == batch_request
+
+    # json
+    batch_request_json = batch_request.json()
+    assert BatchRequest.parse_raw(batch_request_json) == batch_request
