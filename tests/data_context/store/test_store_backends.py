@@ -1352,7 +1352,6 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("progress_bars",),
         ("stores",),
         ("suite_parameter_store_name",),
-        ("validation_operators",),
         ("validation_results_store_name",),
     ]
 

@@ -18,7 +18,6 @@ import pytest
 import responses
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudRESTResource,
@@ -248,16 +247,6 @@ def test_set(
 
     my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-            ActionDict(
-                name="update_data_docs",
-                action=ActionDetails(class_name="UpdateDataDocsAction"),
-            ),
-        ],
     )
     my_simple_checkpoint_config_serialized = my_simple_checkpoint_config.get_schema_class()().dump(
         my_simple_checkpoint_config
@@ -278,23 +267,7 @@ def test_set(
                                 ("name", "my_minimal_simple_checkpoint"),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),
-                                (
-                                    "action_list",
-                                    [
-                                        {
-                                            "name": "store_validation_result",
-                                            "action": {
-                                                "class_name": "StoreValidationResultAction",
-                                            },
-                                        },
-                                        {
-                                            "name": "update_data_docs",
-                                            "action": {
-                                                "class_name": "UpdateDataDocsAction",
-                                            },
-                                        },
-                                    ],
-                                ),
+                                ("action_list", []),
                                 ("suite_parameters", {}),
                                 ("runtime_configuration", {}),
                                 ("validations", []),

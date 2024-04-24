@@ -11,7 +11,7 @@ from great_expectations.exceptions import DataContextError
 if TYPE_CHECKING:
     from great_expectations.core.data_context_key import StringKey
     from great_expectations.data_context.store.checkpoint_store import (
-        V1CheckpointStore as CheckpointStore,
+        CheckpointStore,
     )
     from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
