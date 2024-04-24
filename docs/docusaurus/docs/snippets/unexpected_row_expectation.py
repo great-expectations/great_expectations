@@ -36,7 +36,7 @@ class UnexpectedTripDistance(UnexpectedRowsExpectation):
         WHERE
             trip_distance > 20
     """
-    description = "There are trips longer than 20 miles"
+    description = "Trips should be less than 20 miles"
 
 
 # </snippet>
