@@ -17,7 +17,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.v1_checkpoint import Checkpoint as V1Checkpoint
+    from great_expectations.checkpoint.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -75,21 +75,21 @@ class CheckpointStore(Store):
 
     @override
     def deserialize(self, value):
-        from great_expectations.checkpoint.v1_checkpoint import Checkpoint as V1Checkpoint
+        from great_expectations.checkpoint.checkpoint import Checkpoint
 
         if self.cloud_mode:
-            return V1Checkpoint.parse_obj(value)
+            return Checkpoint.parse_obj(value)
 
-        return V1Checkpoint.parse_raw(value)
+        return Checkpoint.parse_raw(value)
 
     @override
-    def _add(self, key: DataContextKey, value: V1Checkpoint, **kwargs):
+    def _add(self, key: DataContextKey, value: Checkpoint, **kwargs):
         if not self.cloud_mode:
             value.id = str(uuid.uuid4())
         return super()._add(key=key, value=value, **kwargs)
 
     @override
-    def _update(self, key: DataContextKey, value: V1Checkpoint, **kwargs):
+    def _update(self, key: DataContextKey, value: Checkpoint, **kwargs):
         try:
             super()._update(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError as e:
