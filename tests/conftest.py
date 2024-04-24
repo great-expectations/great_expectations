@@ -2905,9 +2905,6 @@ expectations_store_name: default_expectations_store
 validation_results_store_name: default_validation_results_store
 checkpoint_store_name: default_checkpoint_store
 profiler_store_name: default_profiler_store
-
-include_rendered_content:
-    globally: True
 """
     data_context_config_dict = yaml.load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)

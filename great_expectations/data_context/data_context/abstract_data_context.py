@@ -80,7 +80,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
-    IncludeRenderedContentConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
@@ -297,7 +296,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         if expectations_store := self.stores.get(self.expectations_store_name):
             self._suites = SuiteFactory(
                 store=expectations_store,
-                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
             )
 
         self._checkpoints: CheckpointFactory | None = None
@@ -389,7 +387,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         """Save the provided ExpectationSuite into the DataContext using the configured ExpectationStore.
@@ -399,7 +396,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The name of this ExpectationSuite. If no name is provided, the name will be read
                 from the suite.
             overwrite_existing: Whether to overwrite the suite if it already exists.
-            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
             kwargs: Additional parameters, unused
 
         Returns:
@@ -418,7 +414,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             overwrite_existing=overwrite_existing,
-            include_rendered_content=include_rendered_content,
             **kwargs,
         )
 
@@ -427,7 +422,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         if expectation_suite_name is None:
@@ -441,10 +435,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "expectation_suite, set overwrite_existing=True."
             )
         self._suite_parameter_dependencies_compiled = False
-        include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
-            include_rendered_content=include_rendered_content
-        )
-        if include_rendered_content:
+        if self._include_rendered_content:
             expectation_suite.render()
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
@@ -630,6 +621,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def sources(self) -> _SourceFactories:
         return self._sources
+
+    @property
+    def _include_rendered_content(self) -> bool:
+        return False
 
     def _add_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
@@ -1318,7 +1313,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
-        include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> Validator:
         """Retrieve a Validator with a batch list and an `ExpectationSuite`.
@@ -1361,7 +1355,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The name of the ExpectationSuite to retrieve from the DataContext
             expectation_suite: The ExpectationSuite to use with the validator
             create_expectation_suite_with_name: Creates a Validator with a new ExpectationSuite with the provided name
-            include_rendered_content: If `True` the ExpectationSuite will include rendered content when saved
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
@@ -1375,17 +1368,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`), or if the `ExpectationSuite` cannot be created or
                 retrieved using either the provided name or identifier
         """  # noqa: E501
-        include_rendered_content = (
-            self._determine_if_expectation_validation_result_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
-        )
         expectation_suite = self._get_expectation_suite_from_inputs(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             create_expectation_suite_with_name=create_expectation_suite_with_name,
             expectation_suite_id=expectation_suite_id,
-            include_rendered_content=include_rendered_content,
         )
         batch_list = self._get_batch_list_from_inputs(
             datasource_name=datasource_name,
@@ -1415,7 +1402,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
             batch_list=batch_list,
-            include_rendered_content=include_rendered_content,
         )
 
     def _get_batch_list_from_inputs(  # noqa: PLR0913
@@ -1498,13 +1484,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         return computed_batch_list
 
-    def _get_expectation_suite_from_inputs(  # noqa: PLR0913
+    def _get_expectation_suite_from_inputs(
         self,
         expectation_suite: ExpectationSuite | None = None,
         expectation_suite_name: str | None = None,
         create_expectation_suite_with_name: str | None = None,
         expectation_suite_id: str | None = None,
-        include_rendered_content: bool | None = None,
     ) -> ExpectationSuite | None:
         """Get an expectation suite from optional inputs. Also validates inputs.
 
@@ -1514,7 +1499,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             create_expectation_suite_with_name: Creates a new ExpectationSuite with the provided name
             expectation_suite_id: The identifier of the ExpectationSuite to retrieve from the DataContext
                 (can be used in place of `expectation_suite_name`)
-            include_rendered_content: If `True` the ExpectationSuite will include rendered content when saved
 
         Returns:
             An ExpectationSuite instance
@@ -1542,13 +1526,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         if expectation_suite_id is not None:
             expectation_suite = self.get_expectation_suite(
-                include_rendered_content=include_rendered_content,
                 id=expectation_suite_id,
             )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(
                 expectation_suite_name,
-                include_rendered_content=include_rendered_content,
             )
         if create_expectation_suite_with_name is not None:
             expectation_suite = self.add_expectation_suite(
@@ -1562,7 +1544,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         expectation_suite: ExpectationSuite | None,
         batch_list: Sequence[Union[Batch, FluentBatch]],
-        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
         """
@@ -1570,7 +1551,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             expectation_suite ():
             batch_list ():
-            include_rendered_content ():
             **kwargs ():
 
         Returns:
@@ -1581,12 +1561,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 """Validator could not be created because BatchRequest returned an empty batch_list.
                 Please check your parameters and try again."""
             )
-
-        include_rendered_content = (
-            self._determine_if_expectation_validation_result_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
-        )
 
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one  # noqa: E501
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.  # noqa: E501
@@ -1613,7 +1587,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite=expectation_suite,
             data_context=self,
             batches=batch_list,
-            include_rendered_content=include_rendered_content,
         )
 
         return validator
@@ -2079,15 +2052,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def get_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
-        include_rendered_content: bool | None = None,
         id: str | None = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name.
 
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
-            include_rendered_content (bool): Whether to re-populate rendered_content for each
-                ExpectationConfiguration.
             id (str): The GX Cloud ID for the Expectation Suite (unused)
 
         Returns:
@@ -2109,16 +2079,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             raise ValueError("expectation_suite_name must be provided")  # noqa: TRY003
 
-        if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_suite_include_rendered_content()
-            )
-
         if self.expectations_store.has_key(key):
             expectations_schema_dict: dict = self.expectations_store.get(key)
             # create the ExpectationSuite from constructor
             expectation_suite = ExpectationSuite(**expectations_schema_dict)
-            if include_rendered_content:
+            if self._include_rendered_content:
                 expectation_suite.render()
             return expectation_suite
 
@@ -2739,10 +2704,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.variables.progress_bars
 
     @property
-    def include_rendered_content(self) -> IncludeRenderedContentConfig:
-        return self.variables.include_rendered_content
-
-    @property
     def datasources(self) -> DatasourceDict:
         """A single holder for all Datasources in this context"""
         return self._datasources
@@ -3128,7 +3089,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_identifier=None,
         validation_results_store_name=None,
         failed_only=False,
-        include_rendered_content=None,
     ):
         """Get validation results from a configured store.
 
@@ -3137,7 +3097,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
             validation_results_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
-            include_rendered_content: whether to re-populate the validation_result rendered_content
 
         Returns:
             validation_result
@@ -3173,11 +3132,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             if batch_identifier is None:
                 batch_identifier = filtered_key_list[-1].batch_identifier
 
-        if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_validation_result_include_rendered_content()
-            )
-
         key = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(name=expectation_suite_name),
             run_id=run_id,
@@ -3189,7 +3143,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             results_dict.get_failed_validation_results() if failed_only else results_dict
         )
 
-        if include_rendered_content:
+        if self._include_rendered_content:
             for expectation_validation_result in validation_result.results:
                 expectation_validation_result.render()
 
@@ -3261,32 +3215,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                             f"metric {metric_name} was requested by another expectation suite but is not available in "  # noqa: E501
                             "this validation result."
                         )
-
-    def _determine_if_expectation_suite_include_rendered_content(
-        self, include_rendered_content: Optional[bool] = None
-    ) -> bool:
-        if include_rendered_content is None:
-            if (
-                self.include_rendered_content.expectation_suite is True
-                or self.include_rendered_content.globally is True
-            ):
-                return True
-            else:
-                return False
-        return include_rendered_content
-
-    def _determine_if_expectation_validation_result_include_rendered_content(
-        self, include_rendered_content: Optional[bool] = None
-    ) -> bool:
-        if include_rendered_content is None:
-            if (
-                self.include_rendered_content.expectation_validation_result is True
-                or self.include_rendered_content.globally is True
-            ):
-                return True
-            else:
-                return False
-        return include_rendered_content
 
     @public_api
     def test_yaml_config(  # noqa: PLR0913

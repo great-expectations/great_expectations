@@ -18,9 +18,14 @@ if TYPE_CHECKING:
 
 
 class SuiteFactory(Factory[ExpectationSuite]):
-    def __init__(self, store: ExpectationsStore, include_rendered_content: bool):
+    def __init__(self, store: ExpectationsStore):
         self._store = store
-        self._include_rendered_content = include_rendered_content
+
+    @property
+    def _include_rendered_content(self) -> bool:
+        from great_expectations import project_manager
+
+        return project_manager.is_using_cloud()
 
     @public_api
     @override
