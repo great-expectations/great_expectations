@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
-from typing import Any, Dict, List, Set, Tuple, Union
+from typing import Dict, List, Set, Tuple
 from unittest import mock
 from unittest.mock import ANY, patch
 
@@ -199,68 +199,6 @@ def test_validator_default_expectation_args__sql(
             batch_identifiers={"date": "2020-01-15"},
             expectation_suite="I_am_not_an_expectation_suite",
         )
-
-
-@pytest.mark.big
-def test_columns(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-):
-    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates  # noqa: E501
-    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1911",
-    }
-    validator: Validator = data_context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        create_expectation_suite_with_name="warning",
-    )
-    columns: List[str] = validator.columns()
-
-    expected: List[str] = [
-        "Unnamed: 0",
-        "Name",
-        "PClass",
-        "Age",
-        "Sex",
-        "Survived",
-        "SexCode",
-    ]
-    assert columns == expected
-
-
-@pytest.mark.big
-def test_head(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-):
-    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates  # noqa: E501
-    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1911",
-    }
-    validator: Validator = data_context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        create_expectation_suite_with_name="warning",
-    )
-    head: pd.DataFrame = validator.head()
-
-    expected: Dict[str, Dict[int, Union[int, str]]] = {
-        "Unnamed: 0": {0: 1, 1: 2, 2: 3, 3: 4, 4: 5},
-        "Name": {
-            0: "Allen, Miss Elisabeth Walton",
-            1: "Allison, Miss Helen Loraine",
-            2: "Allison, Mr Hudson Joshua Creighton",
-            3: "Allison, Mrs Hudson JC (Bessie Waldo Daniels)",
-            4: "Allison, Master Hudson Trevor",
-        },
-        "PClass": {0: "1st", 1: "1st", 2: "1st", 3: "1st", 4: "1st"},
-        "Age": {0: 29.0, 1: 2.0, 2: 30.0, 3: 25.0, 4: 0.92},
-        "Sex": {0: "female", 1: "female", 2: "male", 3: "female", 4: "male"},
-        "Survived": {0: 1, 1: 0, 2: 0, 3: 0, 4: 1},
-        "SexCode": {0: 1, 1: 1, 2: 0, 3: 1, 4: 0},
-    }
-    assert head.to_dict() == expected
 
 
 @pytest.fixture()

@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     )
 
 
+@public_api
 class Checkpoint(BaseModel):
     """
     A Checkpoint is the primary means for validating data in a production deployment of Great Expectations.

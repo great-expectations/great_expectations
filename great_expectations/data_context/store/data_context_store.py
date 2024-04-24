@@ -27,7 +27,6 @@ class DataContextStore(ConfigurationStore):
         DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
         DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
         DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-        DataContextVariableSchema.VALIDATION_OPERATORS,
     }
 
     @override

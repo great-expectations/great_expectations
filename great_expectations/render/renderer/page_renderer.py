@@ -30,9 +30,6 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.validation_operators.types.validation_operator_result import (
-        ValidationOperatorResult,
-    )
 
 logger = logging.getLogger(__name__)
 
@@ -69,23 +66,6 @@ class ValidationResultsPageRenderer(Renderer):
             )
         self.run_info_at_end = run_info_at_end
         self._data_context = data_context
-
-    def render_validation_operator_result(
-        self, validation_operator_result: ValidationOperatorResult
-    ) -> List[RenderedDocumentContent]:
-        """
-        Render a ValidationOperatorResult which can have multiple ExpectationSuiteValidationResult
-
-        Args:
-            validation_operator_result: ValidationOperatorResult
-
-        Returns:
-            List[RenderedDocumentContent]
-        """
-        return [
-            self.render(validation_result)
-            for validation_result in validation_operator_result.list_validation_results()
-        ]
 
     # TODO: deprecate dual batch api support in 0.14
     def render(
