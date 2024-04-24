@@ -195,14 +195,14 @@ def test_batch_request_config_partitioner_round_trip_serialization(
     datasource_name: Final[str] = "my_datasource"
     data_asset_name: Final[str] = "my_data_asset"
 
-    batch_request = BatchRequest(
+    batch_request = BatchRequest[partitioner_type](
         datasource_name=datasource_name, data_asset_name=data_asset_name, partitioner=partitioner
     )
 
     # dict
     batch_request_dict = batch_request.dict()
-    assert BatchRequest(**batch_request_dict) == batch_request
+    assert BatchRequest[partitioner_type](**batch_request_dict) == batch_request
 
     # json
     batch_request_json = batch_request.json()
-    assert BatchRequest.parse_raw(batch_request_json) == batch_request
+    assert BatchRequest[partitioner_type].parse_raw(batch_request_json) == batch_request
