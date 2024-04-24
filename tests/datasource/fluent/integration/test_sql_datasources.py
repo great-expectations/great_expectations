@@ -12,9 +12,6 @@ from typing import (
     Final,
     Generator,
     Literal,
-    Protocol,
-    Sequence,
-    TypedDict,
 )
 
 import pytest
@@ -26,7 +23,6 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.compatibility.sqlalchemy import (
     TextClause,
-    engine,
     inspect,
     quoted_name,
 )
@@ -44,8 +40,8 @@ from great_expectations.datasource.fluent import (
 from great_expectations.execution_engine.sqlalchemy_dialect import (
     DIALECT_IDENTIFIER_QUOTE_STRINGS,
     GXSqlDialect,
-    quote_str,
 )
+from tests.conftest import TableFactory
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -180,100 +176,6 @@ def capture_engine_logs(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFi
     """Capture SQLAlchemy engine logs and display them if the test fails."""
     caplog.set_level(logging.INFO, logger="sqlalchemy.engine")
     return caplog
-
-
-class Row(TypedDict):
-    id: int
-    name: str
-    quoted_upper_col: str
-    quoted_lower_col: str
-    unquoted_upper_col: str
-    unquoted_lower_col: str
-
-
-class TableFactory(Protocol):
-    def __call__(
-        self,
-        gx_engine: SqlAlchemyExecutionEngine,
-        table_names: set[str],
-        schema: str | None = None,
-        data: Sequence[Row] = ...,
-    ) -> None: ...
-
-
-@pytest.fixture(
-    scope="class",
-)
-def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
-    """
-    Class scoped.
-    Given a SQLALchemy engine, table_name and schema,
-    create the table if it does not exist and drop it after the test class.
-    """
-    all_created_tables: dict[str, list[dict[Literal["table_name", "schema"], str | None]]] = {}
-    engines: dict[str, engine.Engine] = {}
-
-    def _table_factory(
-        gx_engine: SqlAlchemyExecutionEngine,
-        table_names: set[str],
-        schema: str | None = None,
-        data: Sequence[Row] = tuple(),
-    ) -> None:
-        sa_engine = gx_engine.engine
-        if sa_engine.dialect.name in DO_NOT_CREATE_TABLES:
-            LOGGER.info(f"Skipping table creation for {table_names} for {sa_engine.dialect.name}")
-            return
-        LOGGER.info(
-            f"SQLA:{SQLA_VERSION} - Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"  # noqa: E501
-        )
-        created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
-
-        with gx_engine.get_connection() as conn:
-            quoted_upper_col: str = quote_str(QUOTED_UPPER_COL, dialect=sa_engine.dialect.name)
-            quoted_lower_col: str = quote_str(QUOTED_LOWER_COL, dialect=sa_engine.dialect.name)
-            transaction = conn.begin()
-            if schema:
-                conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
-            for name in table_names:
-                qualified_table_name = f"{schema}.{name}" if schema else name
-                # TODO: use dialect specific quotes
-                create_tables: str = (
-                    f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
-                    f" (id INTEGER, name VARCHAR(255), {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"  # noqa: E501
-                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255))"
-                )
-                conn.execute(TextClause(create_tables))
-                if data:
-                    insert_data = (
-                        f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"  # noqa: E501
-                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col, :unquoted_upper_col, :unquoted_lower_col)"  # noqa: E501
-                    )
-                    conn.execute(TextClause(insert_data), data)
-
-                created_tables.append(dict(table_name=name, schema=schema))
-            transaction.commit()
-        all_created_tables[sa_engine.dialect.name] = created_tables
-        engines[sa_engine.dialect.name] = sa_engine
-
-    yield _table_factory
-
-    # teardown
-    print(f"dropping tables\n{pf(all_created_tables)}")
-    for dialect, tables in all_created_tables.items():
-        if dialect in DO_NOT_DROP_TABLES:
-            print(f"skipping drop for {dialect}")
-            continue
-        engine = engines[dialect]
-        with engine.connect() as conn:
-            transaction = conn.begin()
-            for table in tables:
-                name = table["table_name"]
-                schema = table["schema"]
-                qualified_table_name = f"{schema}.{name}" if schema else name
-                conn.execute(TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}"))
-            if schema:
-                conn.execute(TextClause(f"DROP SCHEMA IF EXISTS {schema}"))
-            transaction.commit()
 
 
 @pytest.fixture

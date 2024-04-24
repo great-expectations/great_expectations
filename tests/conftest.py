@@ -10,7 +10,20 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
+from pprint import pformat as pf
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Final,
+    Generator,
+    List,
+    Literal,
+    Optional,
+    Protocol,
+    Sequence,
+    TypedDict,
+)
 from unittest import mock
 
 import numpy as np
@@ -18,10 +31,18 @@ import packaging
 import pandas as pd
 import pytest
 from freezegun import freeze_time
+from packaging.version import Version
 
 import great_expectations as gx
 from great_expectations import project_manager, set_context
 from great_expectations.analytics.config import ENV_CONFIG
+from great_expectations.compatibility.sqlalchemy import (
+    TextClause,
+    engine,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    __version__ as sqlalchemy_version,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -80,6 +101,10 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SparkDFExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_dialect import quote_str
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -7701,3 +7726,113 @@ def filter_gx_datasource_warnings() -> Generator[None, None, None]:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=GxDatasourceWarning)
         yield
+
+
+class Row(TypedDict):
+    id: int
+    name: str
+    quoted_upper_col: str
+    quoted_lower_col: str
+    unquoted_upper_col: str
+    unquoted_lower_col: str
+
+
+class TableFactory(Protocol):
+    def __call__(
+        self,
+        gx_engine: SqlAlchemyExecutionEngine,
+        table_names: set[str],
+        schema: str | None = None,
+        data: Sequence[Row] = ...,
+    ) -> None: ...
+
+
+# NOTE: can we create tables in trino?
+# some of the trino tests probably don't make sense if we can't create tables
+DO_NOT_CREATE_TABLES: set[str] = {"trino"}
+# sqlite db files should be using fresh tmp_path on every test
+DO_NOT_DROP_TABLES: set[str] = {"sqlite"}
+LOGGER: Final = logging.getLogger("tests")
+
+# column names
+UNQUOTED_UPPER_COL: Final[Literal["UNQUOTED_UPPER_COL"]] = "UNQUOTED_UPPER_COL"
+UNQUOTED_LOWER_COL: Final[Literal["unquoted_lower_col"]] = "unquoted_lower_col"
+QUOTED_UPPER_COL: Final[Literal["QUOTED_UPPER_COL"]] = "QUOTED_UPPER_COL"
+QUOTED_LOWER_COL: Final[Literal["quoted_lower_col"]] = "quoted_lower_col"
+
+SQLA_VERSION: Final = Version(sqlalchemy_version or "0.0.0")
+
+
+@pytest.fixture(
+    scope="class",
+)
+def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
+    """
+    Class scoped.
+    Given a SQLALchemy engine, table_name and schema,
+    create the table if it does not exist and drop it after the test class.
+    """
+    all_created_tables: dict[str, list[dict[Literal["table_name", "schema"], str | None]]] = {}
+    engines: dict[str, engine.Engine] = {}
+
+    def _table_factory(
+        gx_engine: SqlAlchemyExecutionEngine,
+        table_names: set[str],
+        schema: str | None = None,
+        data: Sequence[Row] = tuple(),
+    ) -> None:
+        sa_engine = gx_engine.engine
+        if sa_engine.dialect.name in DO_NOT_CREATE_TABLES:
+            LOGGER.info(f"Skipping table creation for {table_names} for {sa_engine.dialect.name}")
+            return
+        LOGGER.info(
+            f"SQLA:{SQLA_VERSION} - Creating `{sa_engine.dialect.name}` table for {table_names} if it does not exist"  # noqa: E501
+        )
+        created_tables: list[dict[Literal["table_name", "schema"], str | None]] = []
+
+        with gx_engine.get_connection() as conn:
+            quoted_upper_col: str = quote_str(QUOTED_UPPER_COL, dialect=sa_engine.dialect.name)
+            quoted_lower_col: str = quote_str(QUOTED_LOWER_COL, dialect=sa_engine.dialect.name)
+            transaction = conn.begin()
+            if schema:
+                conn.execute(TextClause(f"CREATE SCHEMA IF NOT EXISTS {schema}"))
+            for name in table_names:
+                qualified_table_name = f"{schema}.{name}" if schema else name
+                # TODO: use dialect specific quotes
+                create_tables: str = (
+                    f"CREATE TABLE IF NOT EXISTS {qualified_table_name}"
+                    f" (id INTEGER, name VARCHAR(255), {quoted_upper_col} VARCHAR(255), {quoted_lower_col} VARCHAR(255),"  # noqa: E501
+                    f" {UNQUOTED_UPPER_COL} VARCHAR(255), {UNQUOTED_LOWER_COL} VARCHAR(255))"
+                )
+                conn.execute(TextClause(create_tables))
+                if data:
+                    insert_data = (
+                        f"INSERT INTO {qualified_table_name} (id, name, {quoted_upper_col}, {quoted_lower_col}, {UNQUOTED_UPPER_COL}, {UNQUOTED_LOWER_COL})"  # noqa: E501
+                        " VALUES (:id, :name, :quoted_upper_col, :quoted_lower_col, :unquoted_upper_col, :unquoted_lower_col)"  # noqa: E501
+                    )
+                    conn.execute(TextClause(insert_data), data)
+
+                created_tables.append(dict(table_name=name, schema=schema))
+            transaction.commit()
+        all_created_tables[sa_engine.dialect.name] = created_tables
+        engines[sa_engine.dialect.name] = sa_engine
+
+    yield _table_factory
+
+    # teardown
+    print(f"dropping tables\n{pf(all_created_tables)}")
+    for dialect, tables in all_created_tables.items():
+        if dialect in DO_NOT_DROP_TABLES:
+            print(f"skipping drop for {dialect}")
+            continue
+        engine = engines[dialect]
+        with engine.connect() as conn:
+            transaction = conn.begin()
+            for table in tables:
+                name = table["table_name"]
+                schema = table["schema"]
+                qualified_table_name = f"{schema}.{name}" if schema else name
+                conn.execute(TextClause(f"DROP TABLE IF EXISTS {qualified_table_name}"))
+            if schema:
+                conn.execute(TextClause(f"DROP SCHEMA IF EXISTS {schema}"))
+            transaction.commit()
