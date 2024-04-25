@@ -7,7 +7,7 @@ from unittest.mock import Mock  # noqa: TID251
 import pytest
 
 from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.partitioners import PartitionerYear
+from great_expectations.core.partitioners import PartitionerYearly
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
@@ -48,10 +48,11 @@ def test_build_batch_request(
     batch_parameters: Optional[BatchParameters],
     mock_data_asset: DataAsset,
 ):
-    partitioner = PartitionerYear(column_name="foo")
     batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    partitioner = PartitionerYearly(regex=batching_regex)
     batch_definition = BatchDefinition(
-        name="test_batch_definition", partitioner=partitioner, batching_regex=batching_regex
+        name="test_batch_definition",
+        partitioner=partitioner,
     )
     batch_definition.set_data_asset(mock_data_asset)
 
@@ -62,14 +63,13 @@ def test_build_batch_request(
     mock_build_batch_request.assert_called_once_with(
         options=batch_parameters,
         partitioner=partitioner,
-        batching_regex=batching_regex,
     )
 
 
 @pytest.mark.unit
 def test_get_batch_retrieves_only_batch(mocker: pytest_mock.MockFixture):
     # Arrange
-    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition = BatchDefinition[None](name="test_batch_definition")
     mock_asset = mocker.Mock(spec=DataAsset)
     batch_definition.set_data_asset(mock_asset)
 
@@ -91,7 +91,7 @@ def test_get_batch_retrieves_only_batch(mocker: pytest_mock.MockFixture):
 @pytest.mark.unit
 def test_get_batch_retrieves_last_batch(mocker: pytest_mock.MockFixture):
     # Arrange
-    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition = BatchDefinition[None](name="test_batch_definition")
     mock_asset = mocker.Mock(spec=DataAsset)
     batch_definition.set_data_asset(mock_asset)
 
@@ -115,7 +115,7 @@ def test_get_batch_retrieves_last_batch(mocker: pytest_mock.MockFixture):
 @pytest.mark.unit
 def test_get_batch_raises_error_with_empty_batch_list(mocker: pytest_mock.MockFixture):
     # Arrange
-    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition = BatchDefinition[None](name="test_batch_definition")
     mock_asset = mocker.Mock(spec=DataAsset)
     batch_definition.set_data_asset(mock_asset)
 

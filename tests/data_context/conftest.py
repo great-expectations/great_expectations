@@ -163,7 +163,7 @@ def basic_data_context_config():
             "config_version": 2,
             "plugins_directory": "plugins/",
             "suite_parameter_store_name": "suite_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
@@ -189,12 +189,6 @@ def basic_data_context_config():
                 },
             },
             "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
             "anonymous_usage_statistics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
@@ -232,7 +226,7 @@ def data_context_config_with_datasources(conn_string_password):
             "config_version": 2,
             "plugins_directory": "plugins/",
             "suite_parameter_store_name": "suite_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
@@ -349,12 +343,6 @@ def data_context_config_with_datasources(conn_string_password):
                 },
             },
             "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
             "anonymous_usage_statistics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
@@ -379,7 +367,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
             "config_version": 2,
             "plugins_directory": "plugins/",
             "suite_parameter_store_name": "suite_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "datasources": {},
@@ -411,8 +399,8 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_validations_store": {
-                    "class_name": "ValidationsStore",
+                "default_validation_results_store": {
+                    "class_name": "ValidationResultsStore",
                     "store_backend": {
                         "class_name": GXCloudStoreBackend.__name__,
                         "ge_cloud_base_url": "http://foo/bar/",
@@ -426,12 +414,6 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                 },
             },
             "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
             "anonymous_usage_statistics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",

@@ -4,6 +4,7 @@ from typing import List
 
 import pytest
 
+from great_expectations.core.partitioners import PartitionerMonthly
 from great_expectations.alias_types import PathStr
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import PartitionerYearAndMonth
@@ -48,15 +49,13 @@ def test_get_batch_list_from_batch_request__sort_ascending(
 
     NOTE: we just happen to be using pandas as the concrete class.
     """
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        batching_regex=batching_regex,
     )
     batch_definition = asset.add_batch_definition(
-        "foo",
-        partitioner=PartitionerYearAndMonth(
-            column_name="TODO: delete column from this partitioner", sort_ascending=True
-        ),
+        "foo", partitioner=PartitionerMonthly(sort_ascending=True, regex=re.compile(batching_regex))
     )
     batch_request = batch_definition.build_batch_request()
 
@@ -79,15 +78,14 @@ def test_get_batch_list_from_batch_request__sort_descending(
 
     NOTE: we just happen to be using pandas as the concrete class.
     """
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        batching_regex=batching_regex,
     )
     batch_definition = asset.add_batch_definition(
         "foo",
-        partitioner=PartitionerYearAndMonth(
-            column_name="TODO: delete column from this partitioner", sort_ascending=False
-        ),
+        partitioner=PartitionerMonthly(regex=re.compile(batching_regex), sort_ascending=False),
     )
     batch_request = batch_definition.build_batch_request()
 

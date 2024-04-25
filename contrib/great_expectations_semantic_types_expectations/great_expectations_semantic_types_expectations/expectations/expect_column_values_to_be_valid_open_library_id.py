@@ -20,9 +20,7 @@ class ColumnValuesToBeValidOpenLibraryId(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         def matches_open_library_id_regex(x):
-            if re.match(OPEN_LIBRARY_ID_REGEX, str(x)):
-                return True
-            return False
+            return bool(re.match(OPEN_LIBRARY_ID_REGEX, str(x)))
 
         return column.apply(lambda x: matches_open_library_id_regex(x) if x else False)
 

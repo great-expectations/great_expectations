@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import configparser
 import copy
-import datetime
 import json
 import logging
 import os
@@ -75,23 +74,18 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
     _YamlConfigValidator,
 )
 from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
-    CheckpointConfig,
-    CheckpointValidationDefinition,
     DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
-    IncludeRenderedContentConfig,
     ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     ValidationMetricIdentifier,
     ValidationResultIdentifier,
@@ -128,17 +122,14 @@ if not SQLAlchemyError:
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-    from great_expectations.core.run_identifier import RunIdentifier
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
     from great_expectations.data_context.store import (
-        CheckpointStore,
         SuiteParameterStore,
     )
+    from great_expectations.data_context.store.checkpoint_store import CheckpointStore
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
@@ -150,7 +141,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
-    from great_expectations.data_context.store.validations_store import ValidationsStore
+    from great_expectations.data_context.store.validation_results_store import (
+        ValidationResultsStore,
+    )
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
@@ -167,9 +160,6 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
     from great_expectations.render.renderer.site_builder import SiteBuilder
-    from great_expectations.validation_operators.validation_operators import (
-        ValidationOperator,
-    )
 
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
@@ -295,21 +285,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._init_factories()
 
-        # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
-        self.validation_operators: dict = {}
-        if (
-            "validation_operators" in self.get_config().commented_map  # type: ignore[union-attr]
-            and self.config.validation_operators
-        ):
-            for (
-                validation_operator_name,
-                validation_operator_config,
-            ) in self.config.validation_operators.items():
-                self.add_validation_operator(
-                    validation_operator_name,
-                    validation_operator_config,
-                )
-
         self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
         self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
@@ -321,15 +296,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         if expectations_store := self.stores.get(self.expectations_store_name):
             self._suites = SuiteFactory(
                 store=expectations_store,
-                include_rendered_content=self._determine_if_expectation_suite_include_rendered_content(),
             )
 
         self._checkpoints: CheckpointFactory | None = None
-        if self.stores.get(self.checkpoint_store_name):
-            # NOTE: Currently in an intermediate state where both the legacy and V1 stores exist.
-            #       Upon the deletion of the old checkpoint store, the new one will be promoted.
+        if checkpoint_store := self.stores.get(self.checkpoint_store_name):
             self._checkpoints = CheckpointFactory(
-                store=self.v1_checkpoint_store,
+                store=checkpoint_store,
             )
 
         self._validation_definitions: ValidationDefinitionFactory = ValidationDefinitionFactory(
@@ -415,7 +387,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         """Save the provided ExpectationSuite into the DataContext using the configured ExpectationStore.
@@ -425,7 +396,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The name of this ExpectationSuite. If no name is provided, the name will be read
                 from the suite.
             overwrite_existing: Whether to overwrite the suite if it already exists.
-            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
             kwargs: Additional parameters, unused
 
         Returns:
@@ -444,7 +414,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             overwrite_existing=overwrite_existing,
-            include_rendered_content=include_rendered_content,
             **kwargs,
         )
 
@@ -453,7 +422,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         if expectation_suite_name is None:
@@ -467,10 +435,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "expectation_suite, set overwrite_existing=True."
             )
         self._suite_parameter_dependencies_compiled = False
-        include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
-            include_rendered_content=include_rendered_content
-        )
-        if include_rendered_content:
+        if self._include_rendered_content:
             expectation_suite.render()
         return self.expectations_store.set(key, expectation_suite, **kwargs)
 
@@ -593,24 +558,24 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.suite_parameter_store_name]
 
     @property
-    def validations_store_name(self) -> Optional[str]:
-        return self.variables.validations_store_name
+    def validation_results_store_name(self) -> Optional[str]:
+        return self.variables.validation_results_store_name
 
-    @validations_store_name.setter
+    @validation_results_store_name.setter
     @public_api
     @new_method_or_class(version="0.17.2")
-    def validations_store_name(self, value: str) -> None:
+    def validation_results_store_name(self, value: str) -> None:
         """Set the name of the validations store.
 
         Args:
             value: New value for the validations store name.
         """
-        self.variables.validations_store_name = value
+        self.variables.validation_results_store_name = value
         self._save_project_config()
 
     @property
-    def validations_store(self) -> ValidationsStore:
-        return self.stores[self.validations_store_name]
+    def validation_results_store(self) -> ValidationResultsStore:
+        return self.stores[self.validation_results_store_name]
 
     @property
     def validation_definition_store(self) -> ValidationDefinitionStore:
@@ -650,24 +615,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.checkpoint_store_name]
 
     @property
-    def v1_checkpoint_store(self) -> V1CheckpointStore:
-        # Temporary property until the legacy checkpoint store is removed
-        # and the new checkpoint store is promoted to the old namespace
-        legacy_checkpoint_store = self.checkpoint_store
-        store = V1CheckpointStore()
-
-        # Leverage same backend as what was configured for the old store
-        store._store_backend = legacy_checkpoint_store.store_backend
-
-        return store
-
-    @property
     def assistants(self) -> DataAssistantDispatcher:
         return self._assistants
 
     @property
     def sources(self) -> _SourceFactories:
         return self._sources
+
+    @property
+    def _include_rendered_content(self) -> bool:
+        return False
 
     def _add_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
@@ -1038,13 +995,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
-            validations_store_name,
+            validation_results_store_name,
             suite_parameter_store_name,
             checkpoint_store_name
         """  # noqa: E501
         active_store_names: List[str] = [
             self.expectations_store_name,  # type: ignore[list-item]
-            self.validations_store_name,  # type: ignore[list-item]
+            self.validation_results_store_name,  # type: ignore[list-item]
             self.suite_parameter_store_name,  # type: ignore[list-item]
         ]
 
@@ -1058,15 +1015,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             for store in self.list_stores()
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
-
-    @public_api
-    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
-        """List existing Checkpoint identifiers on this context.
-
-        Returns:
-            Either a list of strings or ConfigurationIdentifiers depending on the environment and context type.
-        """  # noqa: E501
-        return self.checkpoint_store.list_checkpoints()
 
     @public_api
     def get_datasource(
@@ -1296,362 +1244,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
 
-    @public_api
-    @overload
-    def add_checkpoint(
-        self,
-        name: str = ...,
-        expectation_suite_name: str | None = ...,
-        batch_request: dict | None = ...,
-        action_list: Sequence[ActionDict] | None = ...,
-        suite_parameters: dict | None = ...,
-        runtime_configuration: dict | None = ...,
-        validations: list[CheckpointValidationDefinition] | list[dict] | None = ...,
-        id: str | None = ...,
-        expectation_suite_id: str | None = ...,
-        default_validation_id: str | None = ...,
-        validator: Validator | None = ...,
-        checkpoint: None = ...,
-    ) -> Checkpoint:
-        """
-        Individual constructor arguments are provided.
-        `checkpoint` should not be provided.
-        """
-        ...
-
-    @public_api
-    @overload
-    def add_checkpoint(
-        self,
-        name: None = ...,
-        expectation_suite_name: None = ...,
-        batch_request: None = ...,
-        action_list: Sequence[ActionDict] | None = ...,
-        suite_parameters: None = ...,
-        runtime_configuration: None = ...,
-        validations: None = ...,
-        id: None = ...,
-        expectation_suite_id: None = ...,
-        default_validation_id: None = ...,
-        validator: Validator | None = ...,
-        checkpoint: Checkpoint = ...,
-    ) -> Checkpoint:
-        """
-        A `checkpoint` is provided.
-        Individual constructor arguments should not be provided.
-        """
-        ...
-
-    @public_api
-    @new_argument(
-        argument_name="checkpoint",
-        version="0.15.48",
-        message="Pass in an existing checkpoint instead of individual constructor args",
-    )
-    @new_argument(
-        argument_name="validator",
-        version="0.16.15",
-        message="Pass in an existing validator instead of individual validations",
-    )
-    def add_checkpoint(  # noqa: PLR0913
-        self,
-        name: str | None = None,
-        expectation_suite_name: str | None = None,
-        batch_request: dict | None = None,
-        action_list: Sequence[ActionDict] | None = None,
-        suite_parameters: dict | None = None,
-        runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
-        id: str | None = None,
-        expectation_suite_id: str | None = None,
-        default_validation_id: str | None = None,
-        validator: Validator | None = None,
-        checkpoint: Checkpoint | None = None,
-    ) -> Checkpoint:
-        """Add a Checkpoint to the DataContext.
-
-        ---Documentation---
-            - https://docs.greatexpectations.io/docs/terms/checkpoint/
-
-        Args:
-            name: The name to give the checkpoint.
-            expectation_suite_name: The expectation suite name to use in generating this checkpoint.
-            batch_request: The batch request to use in generating this checkpoint.
-            action_list: The action list to use in generating this checkpoint.
-            suite_parameters: The suite parameters to use in generating this checkpoint.
-            runtime_configuration: The runtime configuration to use in generating this checkpoint.
-            validations: The validations to use in generating this checkpoint.
-            id: The ID to use in generating this checkpoint.
-            expectation_suite_id: The expectation suite ID to use in generating this checkpoint.
-            default_validation_id: The default validation ID to use in generating this checkpoint.
-            validator: An existing validator used to generate a validations list.
-            checkpoint: An existing checkpoint you wish to persist.
-
-        Returns:
-            The Checkpoint object created.
-        """
-        from great_expectations.checkpoint import Checkpoint
-
-        checkpoint = self._resolve_add_checkpoint_args(
-            name=name,
-            id=id,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            action_list=action_list,
-            suite_parameters=suite_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            expectation_suite_id=expectation_suite_id,
-            default_validation_id=default_validation_id,
-            validator=validator,
-            checkpoint=checkpoint,
-        )
-
-        result = self.checkpoint_store.add_checkpoint(checkpoint)
-
-        if isinstance(result, CheckpointConfig):
-            result = Checkpoint.instantiate_from_config_with_runtime_args(
-                checkpoint_config=result,
-                data_context=self,
-                name=name,
-            )
-        return result
-
-    @public_api
-    @new_method_or_class(version="0.15.48")
-    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
-        """Update a Checkpoint that already exists.
-
-        Args:
-            checkpoint: The checkpoint to use to update.
-
-        Raises:
-            DataContextError: A suite with the given name does not already exist.
-
-        Returns:
-            The updated Checkpoint.
-        """
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        result: Checkpoint | CheckpointConfig = self.checkpoint_store.update_checkpoint(checkpoint)
-        if isinstance(result, CheckpointConfig):
-            result = Checkpoint.instantiate_from_config_with_runtime_args(
-                checkpoint_config=result,
-                data_context=self,
-                name=result.name,
-            )
-        return result
-
-    @overload
-    def add_or_update_checkpoint(
-        self,
-        name: str = ...,
-        id: str | None = ...,
-        expectation_suite_name: str | None = ...,
-        batch_request: dict | None = ...,
-        action_list: Sequence[ActionDict] | None = ...,
-        suite_parameters: dict | None = ...,
-        runtime_configuration: dict | None = ...,
-        validations: list[dict] | None = ...,
-        expectation_suite_id: str | None = ...,
-        default_validation_id: str | None = ...,
-        validator: Validator | None = ...,
-        checkpoint: None = ...,
-    ) -> Checkpoint:
-        """
-        Individual constructor arguments are provided.
-        `checkpoint` should not be provided.
-        """
-        ...
-
-    @overload
-    def add_or_update_checkpoint(
-        self,
-        name: None = ...,
-        id: None = ...,
-        expectation_suite_name: None = ...,
-        batch_request: None = ...,
-        action_list: Sequence[ActionDict] | None = ...,
-        suite_parameters: None = ...,
-        runtime_configuration: None = ...,
-        validations: None = ...,
-        expectation_suite_id: None = ...,
-        default_validation_id: None = ...,
-        validator: Validator | None = ...,
-        checkpoint: Checkpoint = ...,
-    ) -> Checkpoint:
-        """
-        A `checkpoint` is provided.
-        Individual constructor arguments should not be provided.
-        """
-        ...
-
-    @public_api
-    @new_method_or_class(version="0.15.48")
-    @new_argument(
-        argument_name="validator",
-        version="0.16.15",
-        message="Pass in an existing validator instead of individual validations",
-    )
-    def add_or_update_checkpoint(  # noqa: PLR0913
-        self,
-        name: str | None = None,
-        id: str | None = None,
-        expectation_suite_name: str | None = None,
-        batch_request: dict | None = None,
-        action_list: Sequence[ActionDict] | None = None,
-        suite_parameters: dict | None = None,
-        runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
-        expectation_suite_id: str | None = None,
-        default_validation_id: str | None = None,
-        validator: Validator | None = None,
-        checkpoint: Checkpoint | None = None,
-    ) -> Checkpoint:
-        """Add a new Checkpoint or update an existing one on the context depending on whether it already exists or not.
-
-        Args:
-            name: The name to give the checkpoint.
-            id: The ID to associate with this checkpoint.
-            expectation_suite_name: The expectation suite name to use in generating this checkpoint.
-            batch_request: The batch request to use in generating this checkpoint.
-            action_list: The action list to use in generating this checkpoint.
-            suite_parameters: The suite parameters to use in generating this checkpoint.
-            runtime_configuration: The runtime configuration to use in generating this checkpoint.
-            validations: The validations to use in generating this checkpoint.
-            expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
-            default_validation_id: The default validation ID to use in generating this checkpoint.
-            validator: An existing validator used to generate a validations list.
-            checkpoint: An existing checkpoint you wish to persist.
-
-        Returns:
-            A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
-        """  # noqa: E501
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        checkpoint = self._resolve_add_checkpoint_args(
-            name=name,
-            id=id,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            action_list=action_list,
-            suite_parameters=suite_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            expectation_suite_id=expectation_suite_id,
-            default_validation_id=default_validation_id,
-            validator=validator,
-            checkpoint=checkpoint,
-        )
-
-        result: Checkpoint | CheckpointConfig = self.checkpoint_store.add_or_update_checkpoint(
-            checkpoint
-        )
-        if isinstance(result, CheckpointConfig):
-            result = Checkpoint.instantiate_from_config_with_runtime_args(
-                checkpoint_config=result,
-                data_context=self,
-                name=name,
-            )
-        return result
-
-    def _resolve_add_checkpoint_args(  # noqa: PLR0913
-        self,
-        name: str | None = None,
-        id: str | None = None,
-        expectation_suite_name: str | None = None,
-        batch_request: dict | None = None,
-        action_list: Sequence[ActionDict] | None = None,
-        suite_parameters: dict | None = None,
-        runtime_configuration: dict | None = None,
-        validations: list[CheckpointValidationDefinition] | list[dict] | None = None,
-        expectation_suite_id: str | None = None,
-        default_validation_id: str | None = None,
-        validator: Validator | None = None,
-        checkpoint: Checkpoint | None = None,
-    ) -> Checkpoint:
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        if not ((checkpoint is None) ^ (name is None)):
-            error_message = (
-                "Must either pass in an existing 'checkpoint' or individual constructor arguments"
-            )
-            if checkpoint and name:
-                error_message += " (but not both)"
-            raise TypeError(error_message)
-
-        action_list = action_list or self._determine_default_action_list()
-
-        if not checkpoint:
-            assert (
-                name
-            ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
-            checkpoint = Checkpoint.construct_from_config_args(
-                data_context=self,
-                checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
-                name=name,
-                expectation_suite_name=expectation_suite_name,
-                batch_request=batch_request,
-                action_list=action_list,
-                suite_parameters=suite_parameters,
-                runtime_configuration=runtime_configuration,
-                validations=validations,
-                id=id,
-                expectation_suite_id=expectation_suite_id,
-                default_validation_id=default_validation_id,
-                validator=validator,
-            )
-
-        return checkpoint
-
-    def _determine_default_action_list(self) -> Sequence[ActionDict]:
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        return Checkpoint.DEFAULT_ACTION_LIST
-
-    def get_legacy_checkpoint(
-        self,
-        name: str | None = None,
-        id: str | None = None,
-    ) -> Checkpoint:
-        """Retrieves a given Checkpoint by either name or id.
-        Args:
-            name: The name of the target Checkpoint.
-            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
-        Returns:
-            The requested Checkpoint.
-        Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exist.
-        """
-        if not name and not id:
-            raise ValueError("name and id cannot both be None")  # noqa: TRY003
-
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(name=name, id=id)
-        checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
-            checkpoint_config=checkpoint_config,
-            data_context=self,
-            name=name,
-        )
-
-        return checkpoint
-
-    def delete_legacy_checkpoint(
-        self,
-        name: str | None = None,
-        id: str | None = None,
-    ) -> None:
-        """Deletes a given Checkpoint by either name or id.
-        Args:
-            name: The name of the target Checkpoint.
-            ge_cloud_id: The id associated with the target Checkpoint.
-            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
-        Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exist.
-        """
-        return self.checkpoint_store.delete_checkpoint(name=name, id=id)
-
     def store_suite_parameters(self, validation_results, target_store_name=None) -> None:
         """
         Stores ValidationResult Suite Parameters to defined store
@@ -1721,7 +1313,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name: Optional[str] = None,
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
-        include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> Validator:
         """Retrieve a Validator with a batch list and an `ExpectationSuite`.
@@ -1764,7 +1355,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name: The name of the ExpectationSuite to retrieve from the DataContext
             expectation_suite: The ExpectationSuite to use with the validator
             create_expectation_suite_with_name: Creates a Validator with a new ExpectationSuite with the provided name
-            include_rendered_content: If `True` the ExpectationSuite will include rendered content when saved
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
@@ -1778,17 +1368,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`), or if the `ExpectationSuite` cannot be created or
                 retrieved using either the provided name or identifier
         """  # noqa: E501
-        include_rendered_content = (
-            self._determine_if_expectation_validation_result_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
-        )
         expectation_suite = self._get_expectation_suite_from_inputs(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
             create_expectation_suite_with_name=create_expectation_suite_with_name,
             expectation_suite_id=expectation_suite_id,
-            include_rendered_content=include_rendered_content,
         )
         batch_list = self._get_batch_list_from_inputs(
             datasource_name=datasource_name,
@@ -1818,7 +1402,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.get_validator_using_batch_list(
             expectation_suite=expectation_suite,
             batch_list=batch_list,
-            include_rendered_content=include_rendered_content,
         )
 
     def _get_batch_list_from_inputs(  # noqa: PLR0913
@@ -1901,13 +1484,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         return computed_batch_list
 
-    def _get_expectation_suite_from_inputs(  # noqa: PLR0913
+    def _get_expectation_suite_from_inputs(
         self,
         expectation_suite: ExpectationSuite | None = None,
         expectation_suite_name: str | None = None,
         create_expectation_suite_with_name: str | None = None,
         expectation_suite_id: str | None = None,
-        include_rendered_content: bool | None = None,
     ) -> ExpectationSuite | None:
         """Get an expectation suite from optional inputs. Also validates inputs.
 
@@ -1917,7 +1499,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             create_expectation_suite_with_name: Creates a new ExpectationSuite with the provided name
             expectation_suite_id: The identifier of the ExpectationSuite to retrieve from the DataContext
                 (can be used in place of `expectation_suite_name`)
-            include_rendered_content: If `True` the ExpectationSuite will include rendered content when saved
 
         Returns:
             An ExpectationSuite instance
@@ -1945,13 +1526,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         if expectation_suite_id is not None:
             expectation_suite = self.get_expectation_suite(
-                include_rendered_content=include_rendered_content,
                 id=expectation_suite_id,
             )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(
                 expectation_suite_name,
-                include_rendered_content=include_rendered_content,
             )
         if create_expectation_suite_with_name is not None:
             expectation_suite = self.add_expectation_suite(
@@ -1965,7 +1544,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         expectation_suite: ExpectationSuite | None,
         batch_list: Sequence[Union[Batch, FluentBatch]],
-        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
         """
@@ -1973,7 +1551,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             expectation_suite ():
             batch_list ():
-            include_rendered_content ():
             **kwargs ():
 
         Returns:
@@ -1984,12 +1561,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 """Validator could not be created because BatchRequest returned an empty batch_list.
                 Please check your parameters and try again."""
             )
-
-        include_rendered_content = (
-            self._determine_if_expectation_validation_result_include_rendered_content(
-                include_rendered_content=include_rendered_content
-            )
-        )
 
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one  # noqa: E501
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.  # noqa: E501
@@ -2016,7 +1587,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite=expectation_suite,
             data_context=self,
             batches=batch_list,
-            include_rendered_content=include_rendered_content,
         )
 
         return validator
@@ -2482,15 +2052,12 @@ class AbstractDataContext(ConfigPeer, ABC):
     def get_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
-        include_rendered_content: bool | None = None,
         id: str | None = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name.
 
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
-            include_rendered_content (bool): Whether to re-populate rendered_content for each
-                ExpectationConfiguration.
             id (str): The GX Cloud ID for the Expectation Suite (unused)
 
         Returns:
@@ -2512,16 +2079,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             raise ValueError("expectation_suite_name must be provided")  # noqa: TRY003
 
-        if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_suite_include_rendered_content()
-            )
-
         if self.expectations_store.has_key(key):
             expectations_schema_dict: dict = self.expectations_store.get(key)
             # create the ExpectationSuite from constructor
             expectation_suite = ExpectationSuite(**expectations_schema_dict)
-            if include_rendered_content:
+            if self._include_rendered_content:
                 expectation_suite.render()
             return expectation_suite
 
@@ -2529,152 +2091,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise gx_exceptions.DataContextError(  # noqa: TRY003
                 f"expectation_suite {expectation_suite_name} not found"
             )
-
-    def add_validation_operator(
-        self, validation_operator_name: str, validation_operator_config: dict
-    ) -> ValidationOperator:
-        """Add a new ValidationOperator to the DataContext and (for convenience) return the instantiated object.
-
-        Args:
-            validation_operator_name (str): a key for the new ValidationOperator in in self._validation_operators
-            validation_operator_config (dict): a config for the ValidationOperator to add
-
-        Returns:
-            validation_operator (ValidationOperator)
-        """  # noqa: E501
-
-        self.config.validation_operators[validation_operator_name] = validation_operator_config
-        config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
-        module_name = "great_expectations.validation_operators"
-        new_validation_operator = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": self,
-                "name": validation_operator_name,
-            },
-            config_defaults={"module_name": module_name},
-        )
-        if not new_validation_operator:
-            raise gx_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=config["class_name"],
-            )
-        self.validation_operators[validation_operator_name] = new_validation_operator
-        return new_validation_operator
-
-    def run_validation_operator(  # noqa: PLR0913
-        self,
-        validation_operator_name: str,
-        assets_to_validate: List,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        suite_parameters: Optional[dict] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        **kwargs,
-    ):
-        """
-        Run a validation operator to validate data assets and to perform the business logic around
-        validation that the operator implements.
-
-        Args:
-            validation_operator_name: name of the operator, as appears in the context's config file
-            assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
-                the list can be either batches, or a tuple that will allow the operator to fetch the batch:
-                (batch_kwargs, expectation_suite_name)
-            suite_parameters: $parameter_name syntax references to be evaluated at runtime
-            run_id: The run_id for the validation; if None, a default value will be used
-            run_name: The run_name for the validation; if None, a default value will be used
-            run_time: The date/time of the run
-            result_format: one of several supported formatting directives for expectation validation results
-            **kwargs: Additional kwargs to pass to the validation operator
-
-        Returns:
-            ValidationOperatorResult
-        """  # noqa: E501
-        return self._run_validation_operator(
-            validation_operator_name=validation_operator_name,
-            assets_to_validate=assets_to_validate,
-            run_id=run_id,
-            suite_parameters=suite_parameters,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            **kwargs,
-        )
-
-    def _run_validation_operator(  # noqa: PLR0913
-        self,
-        validation_operator_name: str,
-        assets_to_validate: List,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        suite_parameters: Optional[dict] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        **kwargs,
-    ):
-        result_format = result_format or {"result_format": "SUMMARY"}
-
-        if not assets_to_validate:
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
-                "No batches of data were passed in. These are required"
-            )
-
-        for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, Validator)):
-                raise gx_exceptions.DataContextError(  # noqa: TRY003
-                    "Batches are required to be of type tuple or Validator"
-                )
-        try:
-            validation_operator = self.validation_operators[validation_operator_name]
-        except KeyError:
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
-                f"No validation operator `{validation_operator_name}` was found in your project. Please verify this in your great_expectations.yml"  # noqa: E501
-            )
-
-        if run_id is None and run_name is None:
-            run_name = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
-            logger.info(f"Setting run_name to: {run_name}")
-        if suite_parameters is None:
-            return validation_operator.run(
-                assets_to_validate=assets_to_validate,
-                run_id=run_id,
-                run_name=run_name,
-                run_time=run_time,
-                result_format=result_format,
-                **kwargs,
-            )
-        else:
-            return validation_operator.run(
-                assets_to_validate=assets_to_validate,
-                run_id=run_id,
-                suite_parameters=suite_parameters,
-                run_name=run_name,
-                run_time=run_time,
-                result_format=result_format,
-                **kwargs,
-            )
-
-    def list_validation_operators(self):
-        """List currently-configured Validation Operators on this context"""
-
-        validation_operators = []
-        for (
-            name,
-            value,
-        ) in self.variables.validation_operators.items():
-            value["name"] = name
-            validation_operators.append(value)
-        return validation_operators
-
-    def list_validation_operator_names(self):
-        """List the names of currently-configured Validation Operators on this context"""
-        if not self.validation_operators:
-            return []
-
-        return list(self.validation_operators.keys())
 
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
@@ -3288,10 +2704,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.variables.progress_bars
 
     @property
-    def include_rendered_content(self) -> IncludeRenderedContentConfig:
-        return self.variables.include_rendered_content
-
-    @property
     def datasources(self) -> DatasourceDict:
         """A single holder for all Datasources in this context"""
         return self._datasources
@@ -3675,26 +3087,24 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_name,
         run_id=None,
         batch_identifier=None,
-        validations_store_name=None,
+        validation_results_store_name=None,
         failed_only=False,
-        include_rendered_content=None,
     ):
         """Get validation results from a configured store.
 
         Args:
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
-            validations_store_name: the name of the store from which to get validation results
+            validation_results_store_name: the name of the store from which to get validation results
             failed_only: if True, filter the result to return only failed expectations
-            include_rendered_content: whether to re-populate the validation_result rendered_content
 
         Returns:
             validation_result
 
         """  # noqa: E501
-        if validations_store_name is None:
-            validations_store_name = self.validations_store_name
-        selected_store = self.stores[validations_store_name]
+        if validation_results_store_name is None:
+            validation_results_store_name = self.validation_results_store_name
+        selected_store = self.stores[validation_results_store_name]
 
         if run_id is None or batch_identifier is None:
             # Get most recent run id
@@ -3722,11 +3132,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             if batch_identifier is None:
                 batch_identifier = filtered_key_list[-1].batch_identifier
 
-        if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_validation_result_include_rendered_content()
-            )
-
         key = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(name=expectation_suite_name),
             run_id=run_id,
@@ -3738,7 +3143,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             results_dict.get_failed_validation_results() if failed_only else results_dict
         )
 
-        if include_rendered_content:
+        if self._include_rendered_content:
             for expectation_validation_result in validation_result.results:
                 expectation_validation_result.render()
 
@@ -3810,32 +3215,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                             f"metric {metric_name} was requested by another expectation suite but is not available in "  # noqa: E501
                             "this validation result."
                         )
-
-    def _determine_if_expectation_suite_include_rendered_content(
-        self, include_rendered_content: Optional[bool] = None
-    ) -> bool:
-        if include_rendered_content is None:
-            if (
-                self.include_rendered_content.expectation_suite is True
-                or self.include_rendered_content.globally is True
-            ):
-                return True
-            else:
-                return False
-        return include_rendered_content
-
-    def _determine_if_expectation_validation_result_include_rendered_content(
-        self, include_rendered_content: Optional[bool] = None
-    ) -> bool:
-        if include_rendered_content is None:
-            if (
-                self.include_rendered_content.expectation_validation_result is True
-                or self.include_rendered_content.globally is True
-            ):
-                return True
-            else:
-                return False
-        return include_rendered_content
 
     @public_api
     def test_yaml_config(  # noqa: PLR0913

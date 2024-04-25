@@ -126,7 +126,7 @@ def sql_data(
     asset = datasource.add_table_asset(
         name="my_asset",
         table_name="yellow_tripdata_sample_2019_01",
-    ).add_sorters(["year", "month"])
+    )
     batch_request = asset.build_batch_request(
         options={"year": 2019, "month": 1},
         partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
@@ -196,7 +196,7 @@ def multibatch_sql_data(
     asset = datasource.add_table_asset(
         name="my_asset",
         table_name="yellow_tripdata_sample_2020",
-    ).add_sorters(["year", "month"])
+    )
     batch_request = asset.build_batch_request(
         options={"year": 2020},
         partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),

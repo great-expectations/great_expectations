@@ -34,7 +34,7 @@ class TestProjectManagerStores:
 
         store = project_manager.get_checkpoints_store()
 
-        assert store == context.v1_checkpoint_store
+        assert store == context.checkpoint_store
 
     @pytest.mark.unit
     def test_get_checkpoints_store_fails_without_context(self):
@@ -44,21 +44,21 @@ class TestProjectManagerStores:
             project_manager.get_checkpoints_store()
 
     @pytest.mark.unit
-    def test_get_validations_store_success(self):
+    def test_get_validation_results_store_success(self):
         context = Mock(spec=AbstractDataContext)
         project_manager = ProjectManager()
         project_manager.set_project(project=context)
 
-        store = project_manager.get_validations_store()
+        store = project_manager.get_validation_results_store()
 
-        assert store == context.validations_store
+        assert store == context.validation_results_store
 
     @pytest.mark.unit
-    def test_get_validations_store_fails_without_context(self):
+    def test_get_validation_results_store_fails_without_context(self):
         project_manager = ProjectManager()
 
         with pytest.raises(RuntimeError, match=self.missing_project_error_str):
-            project_manager.get_validations_store()
+            project_manager.get_validation_results_store()
 
     @pytest.mark.unit
     def test_get_suite_parameters_store_success(self):

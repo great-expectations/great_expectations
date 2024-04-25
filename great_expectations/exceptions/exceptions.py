@@ -143,6 +143,11 @@ class UnsupportedConfigVersionError(DataContextError):
     pass
 
 
+class MissingDataContextError(DataContextError):
+    def __init__(self) -> None:
+        super().__init__("Missing DataContext")
+
+
 class SuiteParameterError(GreatExpectationsError):
     pass
 

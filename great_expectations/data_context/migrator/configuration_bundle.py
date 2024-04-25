@@ -19,8 +19,6 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariables,  # noqa: TCH001
 )
 from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    CheckpointConfigSchema,
     DataContextConfigSchema,
     DatasourceConfig,
     DatasourceConfigSchema,
@@ -42,7 +40,6 @@ class ConfigurationBundle:
 
         self._datasources = self._get_all_datasources()
         self._expectation_suites = self._get_all_expectation_suites()
-        self._checkpoints = self._get_all_checkpoints()
 
         # Treated slightly differently as we require the keys downstream when printing migration status.  # noqa: E501
         self._validation_results = self._get_all_validation_results()
@@ -77,10 +74,6 @@ class ConfigurationBundle:
         return self._expectation_suites
 
     @property
-    def checkpoints(self) -> List[CheckpointConfig]:
-        return self._checkpoints
-
-    @property
     def validation_results(self) -> Dict[str, ExpectationSuiteValidationResult]:
         return self._validation_results
 
@@ -104,21 +97,15 @@ class ConfigurationBundle:
             self._context.suites.get(name) for name in self._context.list_expectation_suite_names()
         ]
 
-    def _get_all_checkpoints(self) -> List[CheckpointConfig]:
-        return [
-            self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, id=None)
-            for checkpoint_name in self._context.list_checkpoints()
-        ]
-
     def _get_all_validation_results(
         self,
     ) -> Dict[str, ExpectationSuiteValidationResult]:
         validation_results = {
             str(key): cast(
                 ExpectationSuiteValidationResult,
-                self._context.validations_store.get(key),
+                self._context.validation_results_store.get(key),
             )
-            for key in self._context.validations_store.list_keys()
+            for key in self._context.validation_results_store.list_keys()
         }
         return validation_results
 
@@ -134,10 +121,6 @@ class ConfigurationBundleSchema(Schema):
     )
     expectation_suites = fields.List(
         fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True),
-        required=True,
-    )
-    checkpoints = fields.List(
-        fields.Nested(CheckpointConfigSchema, allow_none=True, required=True),
         required=True,
     )
     validation_results = fields.Dict(

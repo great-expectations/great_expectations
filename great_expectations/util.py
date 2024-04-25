@@ -351,7 +351,7 @@ def build_in_memory_runtime_context(
     data_context_config: DataContextConfig = DataContextConfig(
         datasources=datasources,  # type: ignore[arg-type]
         expectations_store_name="expectations_store",
-        validations_store_name="validations_store",
+        validation_results_store_name="validation_results_store",
         suite_parameter_store_name="suite_parameter_store",
         checkpoint_store_name="checkpoint_store",
         store_backend_defaults=InMemoryStoreBackendDefaults(),
@@ -715,10 +715,7 @@ def _is_to_be_removed_from_deep_filter_properties_iterable(
 
 def is_truthy(value: Any) -> bool:
     try:
-        if value:
-            return True
-        else:
-            return False
+        return bool(value)
     except ValueError:
         return False
 

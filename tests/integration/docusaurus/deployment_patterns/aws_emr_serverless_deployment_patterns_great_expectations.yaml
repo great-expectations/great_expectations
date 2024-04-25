@@ -32,8 +32,8 @@ stores:
       bucket: "bucket_name"
       prefix: "great_expectations/expectations/"
 
-  validations_S3_store:
-    class_name: ValidationsStore
+  validation_results_S3_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleS3StoreBackend
       bucket: "bucket_name"
@@ -50,7 +50,7 @@ stores:
       prefix: "great_expectations/checkpoints/"
 
 expectations_store_name: expectations_S3_store
-validations_store_name: validations_S3_store
+validation_results_store_name: validation_results_S3_store
 suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_S3_store
 

@@ -1,15 +1,17 @@
 ---
 title: "Validate Data"
+hide_feedback_survey: true
 ---
 
-import OverviewCard from '@site/src/components/OverviewCard';
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
 import InProgress from '../_core_components/_in_progress.md';
 
-Create, edit, and implement Validation Definitions and Checkpoints. A Validation Definition associates data with an Expectation Suite and can be used in data testing and exploration. A Checkpoint executes one or more Validation Definitions and then performs a set of Actions based on the Validation Results each Validation Definition returns.
-
+<OverviewCard title={frontMatter.title}>
+  Create, edit, and implement Validation Definitions and Checkpoints.
+</OverviewCard>
 
 ## Manage Validation Definitions
 
@@ -65,6 +67,68 @@ Use Validation Definitions to associate data with Expectation Suites for Checkpo
     icon="/img/expectation_icon.svg" 
   />
   
+</LinkCardGrid>
 
+## Manage Checkpoints
 
+A Checkpoint executes one or more Validation Definitions and then performs a set of Actions based on the Validation Results each Validation Definition returns.
+
+<LinkCardGrid>
+  
+  <LinkCard 
+      topIcon 
+      label="Create a Checkpoint"
+      description="Create a Checkpoint."
+      to="/core/validate_data/validation_definitions/manage_validation_definitions#create-a-validation-definition" 
+      icon="/img/expectation_icon.svg" 
+  />
+
+  <LinkCard 
+    topIcon 
+    label="List available Checkpoints"
+    description="List available Checkpoints."
+    to="/core/validate_data/checkpoints/manage_checkpoints#list-available-checkpoints" 
+    icon="/img/expectation_icon.svg" 
+  />
+
+  <LinkCard 
+    topIcon 
+    label="Get a Checkpoint by name"
+    description="Get a Checkpoint by name."
+    to="/core/validate_data/checkpoints/manage_checkpoints#get-a-checkpoint-by-name" 
+    icon="/img/expectation_icon.svg" 
+  />
+
+  <LinkCard 
+    topIcon 
+    label="Get Checkpoints by attributes"
+    description="/core/validate_data/checkpoints/manage_checkpoints#get-checkpoints-by-attributes."
+    to="/core/validate_data/checkpoints/manage_checkpoints#get-checkpoints-by-attributes" 
+    icon="/img/expectation_icon.svg" 
+  />
+
+  <LinkCard 
+    topIcon 
+    label="Update a Checkpoint"
+    description="Update a Checkpoint."
+    to="/core/validate_data/checkpoints/manage_checkpoints#update-a-checkpoint" 
+    icon="/img/expectation_icon.svg" 
+  />
+
+  <LinkCard 
+    topIcon 
+    label="Delete a Checkpoint"
+    description="Delete a Checkpoint."
+    to="/core/validate_data/checkpoints/manage_checkpoints#delete-a-checkpoint" 
+    icon="/img/expectation_icon.svg" 
+  />
+
+  <LinkCard 
+    topIcon 
+    label="Run a Checkpoint"
+    description="Run a Checkpoint."
+    to="/core/validate_data/checkpoints/manage_checkpoints#run-a-checkpoint" 
+    icon="/img/expectation_icon.svg" 
+  />
+  
 </LinkCardGrid>

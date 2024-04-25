@@ -143,11 +143,6 @@ def _cloud_config(data_dir):
         },
         "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "default_expectations_store",
-        "include_rendered_content": {
-            "expectation_suite": True,
-            "expectation_validation_result": True,
-            "globally": True,
-        },
         "plugins_directory": "plugins/",
         "profiler_store_name": "default_profiler_store",
         "progress_bars": {
@@ -197,8 +192,8 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_validations_store": {
-                "class_name": "ValidationsStore",
+            "default_validation_results_store": {
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "GXCloudStoreBackend",
                     "ge_cloud_base_url": os.environ["GX_CLOUD_BASE_URL"],
@@ -222,7 +217,7 @@ def _cloud_config(data_dir):
                 },
             },
         },
-        "validations_store_name": "default_validations_store",
+        "validation_results_store_name": "default_validation_results_store",
     }
 
 

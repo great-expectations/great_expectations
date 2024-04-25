@@ -26,7 +26,7 @@ def totally_empty_data_context(tmp_path_factory):
         "config_version": 3,
         "plugins_directory": "plugins/",
         "suite_parameter_store_name": "not_a_real_store_name",
-        "validations_store_name": "another_fake_store",
+        "validation_results_store_name": "another_fake_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
         "datasources": {},
@@ -47,7 +47,6 @@ def totally_empty_data_context(tmp_path_factory):
             },
         },
         "data_docs_sites": {},
-        "validation_operators": {},
     }
     with open(
         os.path.join(project_root_dir, "gx/great_expectations.yml"),  # noqa: PTH118
@@ -80,7 +79,7 @@ def test_add_store(totally_empty_data_context):
         "my_new_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
         },
     )
     assert "my_new_store" in totally_empty_data_context.stores.keys()
@@ -94,7 +93,7 @@ def test_default_config_yml_stores(tmp_path_factory):
 
     assert set(context.stores.keys()) == {
         "expectations_store",
-        "validations_store",
+        "validation_results_store",
         "suite_parameter_store",
         "profiler_store",
         "checkpoint_store",
@@ -102,19 +101,19 @@ def test_default_config_yml_stores(tmp_path_factory):
     }
 
     context.add_store(
-        "my_new_validations_store",
+        "my_new_validation_results_store",
         {
             "module_name": "great_expectations.data_context.store",
-            "class_name": "ValidationsStore",
+            "class_name": "ValidationResultsStore",
         },
     )
 
     assert set(context.stores.keys()) == {
         "checkpoint_store",
         "expectations_store",
-        "validations_store",
+        "validation_results_store",
         "suite_parameter_store",
         "profiler_store",
         "validation_definition_store",
-        "my_new_validations_store",
+        "my_new_validation_results_store",
     }

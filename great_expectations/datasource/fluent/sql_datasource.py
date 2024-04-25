@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import logging
-import re
 import warnings
 from datetime import date, datetime
 from pprint import pformat as pf
@@ -12,6 +11,7 @@ from typing import (
     ClassVar,
     Dict,
     Final,
+    Generic,
     List,
     Literal,
     Optional,
@@ -60,6 +60,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    DatasourceT,
     GxDatasourceWarning,
     PartitionerProtocol,
     Sorter,
@@ -422,7 +423,7 @@ SqlPartitioner = Union[
 ]
 
 
-class _SQLAsset(DataAsset):
+class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     """A _SQLAsset Mixin
 
     This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
@@ -597,7 +598,6 @@ class _SQLAsset(DataAsset):
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -608,7 +608,6 @@ class _SQLAsset(DataAsset):
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
-            batching_regex: Parameter batching_regex is not supported by this Asset type and must be None.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -625,18 +624,12 @@ class _SQLAsset(DataAsset):
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
 
-        if batching_regex is not None:
-            raise ValueError(  # noqa: TRY003
-                "batching_regex is not currently supported and must be None for this DataAsset."
-            )
-
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
-            batching_regex=None,
         )
 
     @public_api
@@ -644,7 +637,6 @@ class _SQLAsset(DataAsset):
         return self.add_batch_definition(
             name=name,
             partitioner=None,
-            batching_regex=None,
         )
 
     @public_api
@@ -654,7 +646,6 @@ class _SQLAsset(DataAsset):
         return self.add_batch_definition(
             name=name,
             partitioner=PartitionerYear(column_name=column, sort_ascending=sort_ascending),
-            batching_regex=None,
         )
 
     @public_api
@@ -664,7 +655,6 @@ class _SQLAsset(DataAsset):
         return self.add_batch_definition(
             name=name,
             partitioner=PartitionerYearAndMonth(column_name=column, sort_ascending=sort_ascending),
-            batching_regex=None,
         )
 
     @public_api
@@ -676,7 +666,6 @@ class _SQLAsset(DataAsset):
             partitioner=PartitionerYearAndMonthAndDay(
                 column_name=column, sort_ascending=sort_ascending
             ),
-            batching_regex=None,
         )
 
     @override
@@ -698,7 +687,7 @@ class _SQLAsset(DataAsset):
                 option: None
                 for option in self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             }
-            expect_batch_request_form = BatchRequest(
+            expect_batch_request_form = BatchRequest[Partitioner](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,

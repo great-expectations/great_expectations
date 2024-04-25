@@ -339,27 +339,6 @@ fluent_datasources = [
         user_flow_script="docs/docusaurus/docs/snippets/batch_request.py",
         backend_dependencies=[],
     ),
-    IntegrationTestFixture(
-        name="checkpoints_and_actions_core_concepts",
-        user_flow_script="docs/docusaurus/docs/snippets/checkpoints_and_actions.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_create_a_new_checkpoint",
-        data_context_dir=None,
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="validate_data_by_running_a_checkpoint",
-        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py",
-        data_context_dir=None,
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[],
-    ),
     # IntegrationTestFixture(
     #     name="how_to_create_and_edit_an_expectation_with_domain_knowledge",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py",  # noqa: E501
@@ -371,13 +350,6 @@ fluent_datasources = [
         user_flow_script="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="checkpoints_glossary",
-        user_flow_script="docs/docusaurus/docs/snippets/checkpoints.py",
-        data_context_dir="tests/integration/fixtures/yellow_trip_data_fluent_pandas/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
     # IntegrationTestFixture(
