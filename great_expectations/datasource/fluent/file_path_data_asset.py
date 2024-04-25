@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -43,6 +44,7 @@ from great_expectations.datasource.fluent.interfaces import (
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -220,8 +222,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
             partitioner=partitioner,
         )
 
-    @public_api
-    def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
+    def _add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
         """Adds a BatchDefinition which matches a single Path.
 
         Parameters:
@@ -245,8 +246,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
             batching_regex=regex,
         )
 
-    @public_api
-    def add_batch_definition_yearly(self, name: str, regex: re.Pattern) -> BatchDefinition:
+    def _add_batch_definition_yearly(self, name: str, regex: re.Pattern) -> BatchDefinition:
         """Adds a BatchDefinition which defines yearly batches by file name.
 
         Parameters:
@@ -266,8 +266,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
             batching_regex=regex,
         )
 
-    @public_api
-    def add_batch_definition_monthly(self, name: str, regex: re.Pattern) -> BatchDefinition:
+    def _add_batch_definition_monthly(self, name: str, regex: re.Pattern) -> BatchDefinition:
         """Adds a BatchDefinition which defines monthly batches by file name.
 
         Parameters:
@@ -287,8 +286,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
             batching_regex=regex,
         )
 
-    @public_api
-    def add_batch_definition_daily(self, name: str, regex: re.Pattern) -> BatchDefinition:
+    def _add_batch_definition_daily(self, name: str, regex: re.Pattern) -> BatchDefinition:
         """Adds a BatchDefinition which defines daily batches by file name.
 
         Parameters:
