@@ -541,7 +541,7 @@ class TestTableIdentifiers:
         )
         result = checkpoint.run()
 
-        _ = _get_exception_details(result, prettyprint=True)
+        _get_exception_details(result, prettyprint=True)
         assert result.success is True
 
 
