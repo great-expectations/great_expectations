@@ -6,7 +6,7 @@ import pytest
 
 from great_expectations.alias_types import PathStr
 from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.partitioners import PartitionerYearAndMonth
+from great_expectations.core.partitioners import PartitionerMonthly
 from great_expectations.datasource.fluent.data_asset.data_connector import FilePathDataConnector
 from great_expectations.datasource.fluent.file_path_data_asset import (
     AmbiguousPathError,
