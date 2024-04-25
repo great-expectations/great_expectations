@@ -219,7 +219,9 @@ def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
 
     # This should never be reached because of static typing but is necessary because
     # mypy doesn't know of the if conditions must evaluate to True.
-    raise ValueError(f"sorters is a not a SortersDefinition but is a {type(sorters)}")
+    raise ValueError(  # noqa: TRY003
+        f"sorters is a not a SortersDefinition but is a {type(sorters)}"
+    )
 
 
 def _sorter_from_str(sort_key: str) -> Sorter:
@@ -411,9 +413,13 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
             if batch_definition.name == batch_definition_name
         ]
         if len(batch_definitions) == 0:
-            raise KeyError(f"BatchDefinition {batch_definition_name} not found")
+            raise KeyError(  # noqa: TRY003
+                f"BatchDefinition {batch_definition_name} not found"
+            )
         elif len(batch_definitions) > 1:
-            raise KeyError(f"Multiple keys for {batch_definition_name} found")
+            raise KeyError(  # noqa: TRY003
+                f"Multiple keys for {batch_definition_name} found"
+            )
         return batch_definitions[0]
 
     def _batch_parameters_are_valid(
@@ -592,7 +598,9 @@ class Datasource(
     ) -> BatchDefinition[PartitionerT]:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
-            raise DataContextError("Cannot save datasource without a data context.")
+            raise DataContextError(  # noqa: TRY003
+                "Cannot save datasource without a data context."
+            )
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
@@ -614,7 +622,9 @@ class Datasource(
     def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
-            raise DataContextError("Cannot save datasource without a data context.")
+            raise DataContextError(  # noqa: TRY003
+                "Cannot save datasource without a data context."
+            )
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
@@ -803,7 +813,9 @@ class Datasource(
             for idx, sorter in enumerate(order_by):
                 if isinstance(sorter, str):
                     if not sorter:
-                        raise ValueError('"order_by" list cannot contain an empty string')
+                        raise ValueError(  # noqa: TRY003
+                            '"order_by" list cannot contain an empty string'
+                        )
                     order_by_sorters.append(_sorter_from_str(sorter))
                 elif isinstance(sorter, dict):
                     key: Optional[Any] = sorter.get("key")
@@ -813,7 +825,9 @@ class Datasource(
                     elif key:
                         order_by_sorters.append(Sorter(key=key))
                     else:
-                        raise ValueError('"order_by" list dict must have a key named "key"')
+                        raise ValueError(  # noqa: TRY003
+                            '"order_by" list dict must have a key named "key"'
+                        )
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
