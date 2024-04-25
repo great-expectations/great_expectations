@@ -1032,7 +1032,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: The input `datasource_name` is None.
         """
         if datasource_name is None:
-            raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")
+            raise ValueError("Must provide a datasource_name to retrieve an existing Datasource")  # noqa: TRY003
 
         try:
             datasource: BaseDatasource | LegacyDatasource | FluentDatasource = self.datasources[
@@ -1230,7 +1230,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
 
         if not datasource_name:
-            raise ValueError("Datasource names must be a datasource name")
+            raise ValueError("Datasource names must be a datasource name")  # noqa: TRY003
 
         datasource = self.get_datasource(datasource_name=datasource_name)
 
@@ -1281,7 +1281,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         try:
             keys = self.expectations_store.list_keys()
         except KeyError as e:
-            raise gx_exceptions.InvalidConfigError(f"Unable to find configured store: {e!s}")
+            raise gx_exceptions.InvalidConfigError(f"Unable to find configured store: {e!s}")  # noqa: TRY003
         return keys  # type: ignore[return-value]
 
     @public_api
@@ -1857,7 +1857,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs,
     ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("overwrite_existing must be of type bool.")
+            raise ValueError("overwrite_existing must be of type bool.")  # noqa: TRY003, TRY004
 
         self._validate_expectation_suite_xor_expectation_suite_name(
             expectation_suite, expectation_suite_name
@@ -2570,7 +2570,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 logger.debug(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
-                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = global_usage_statistics_url
+                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = global_usage_statistics_url  # noqa: E501
             else:
                 validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
@@ -3532,4 +3532,4 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Only one of expectation_suite_name or expectation_suite may be specified."
             )
         if expectation_suite_name is None and expectation_suite is None:
-            raise TypeError("One of expectation_suite_name or expectation_suite must be specified.")
+            raise TypeError("One of expectation_suite_name or expectation_suite must be specified.")  # noqa: TRY003
