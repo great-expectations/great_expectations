@@ -485,15 +485,15 @@ class TestTableIdentifiers:
     @pytest.mark.parametrize(
         "datasource_type,schema",
         [
-            param("trino_ds", None, marks=[pytest.mark.trino]),
-            param("postgres_ds", None, marks=[pytest.mark.postgresql]),
-            param("snowflake_ds", RAND_SCHEMA, marks=[pytest.mark.snowflake]),
+            param("trino", None, marks=[pytest.mark.trino]),
+            param("postgres", None, marks=[pytest.mark.postgresql]),
+            param("snowflake", RAND_SCHEMA, marks=[pytest.mark.snowflake]),
             param(
-                "databricks_sql_ds",
+                "databricks_sql",
                 RAND_SCHEMA,
                 marks=[pytest.mark.databricks],
             ),
-            param("sqlite_ds", None, marks=[pytest.mark.sqlite]),
+            param("sqlite", None, marks=[pytest.mark.sqlite]),
         ],
     )
     def test_checkpoint_run(
@@ -505,7 +505,7 @@ class TestTableIdentifiers:
         datasource_type: DatabaseType,
         schema: str | None,
     ):
-        datasource: SQLDatasource = request.getfixturevalue(datasource_type)
+        datasource: SQLDatasource = request.getfixturevalue(f"{datasource_type}_ds")
 
         table_name: str | None = TABLE_NAME_MAPPING[datasource_type].get(asset_name)
         if not table_name:
