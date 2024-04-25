@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
     from great_expectations.validator.validator import Validator
-    from tests.integration.cloud.end_to_end.conftest import TableFactory
+    from tests.conftest import TableFactory
 
 
 @pytest.fixture(scope="module")
