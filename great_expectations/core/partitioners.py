@@ -107,4 +107,10 @@ class PartitionerDaily(pydantic.BaseModel):
     sort_ascending: bool = True
 
 
-RegexPartitioner = Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily]
+class PartitionerPath(pydantic.BaseModel):
+    regex: re.Pattern
+    param_names = []
+    sort_ascending: bool = True
+
+
+RegexPartitioner = Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily, PartitionerPath]
