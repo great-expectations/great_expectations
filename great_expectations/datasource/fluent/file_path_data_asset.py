@@ -21,7 +21,13 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.partitioners import RegexPartitioner
+from great_expectations.core.partitioners import (
+    PartitionerDaily,
+    PartitionerMonthly,
+    PartitionerPath,
+    PartitionerYearly,
+    RegexPartitioner,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
@@ -242,8 +248,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
             raise AmbiguousPathError(path=path)
         return self.add_batch_definition(
             name=name,
-            partitioner=None,
-            batching_regex=regex,
+            partitioner=PartitionerPath(regex=regex),
         )
 
     def _add_batch_definition_yearly(self, name: str, regex: re.Pattern) -> BatchDefinition:
@@ -262,8 +267,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAME)
         return self.add_batch_definition(
             name=name,
-            partitioner=None,
-            batching_regex=regex,
+            partitioner=PartitionerYearly(regex=regex),
         )
 
     def _add_batch_definition_monthly(self, name: str, regex: re.Pattern) -> BatchDefinition:
@@ -282,8 +286,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=None,
-            batching_regex=regex,
+            partitioner=PartitionerMonthly(regex=regex),
         )
 
     def _add_batch_definition_daily(self, name: str, regex: re.Pattern) -> BatchDefinition:
@@ -303,8 +306,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=None,
-            batching_regex=regex,
+            partitioner=PartitionerDaily(regex=regex),
         )
 
     @classmethod

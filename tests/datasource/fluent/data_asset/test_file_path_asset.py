@@ -118,6 +118,9 @@ def file_path_data_connector(mocker):
 def asset(request, datasource, file_path_data_connector) -> _FilePathDataAsset:
     # asset = _FilePathDataAsset(name="test_asset", type="_sql_asset")
     asset = request.param
+    # since we're parametrizing these tests multiple ways, this object
+    # will likely be reused, so we make sure the state we care about is reset:
+    asset.batch_definitions = []
     asset._datasource = datasource  # same pattern Datasource uses to init Asset
     asset._data_connector = file_path_data_connector
     return asset
