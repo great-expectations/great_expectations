@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import List, Literal, Union
+from typing import Final, List, Literal, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
@@ -109,7 +109,7 @@ class PartitionerDaily(pydantic.BaseModel):
 
 class PartitionerPath(pydantic.BaseModel):
     regex: re.Pattern
-    param_names = []
+    param_names: Final[List[str]] = []
     sort_ascending: bool = True
 
 
