@@ -327,7 +327,6 @@ lint.ignore = [
     "RUF015", # unnecessary-iterable-allocation-for-first-element - requires more careful review
     "TRY300", # Consider moving this statement to an `else` block - we don't use this; this is kind of weird
     # TODO: enable these a few at a time (ordered by number of violations)
-    "SIM103", # needless-bool
     "SIM118", # in-dict-keys
     "SIM108", # if-else-block-instead-of-if-exp
     "SIM211", # if-expr-with-false-true
@@ -399,7 +398,7 @@ extend-exclude = [
 runtime-evaluated-base-classes = [
     # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
-    "great_expectations.checkpoint.v1_checkpoint.Checkpoint",
+    "great_expectations.checkpoint.checkpoint.Checkpoint",
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
     "great_expectations.datasource.fluent.interfaces.Datasource",
     "great_expectations.datasource.fluent.sql_datasource.SQLDatasource",

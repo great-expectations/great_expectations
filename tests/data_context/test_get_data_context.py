@@ -205,7 +205,6 @@ def test_cloud_context_with_in_memory_config_overrides(
         )
         assert isinstance(context, CloudDataContext)
         assert context.expectations_store_name == "default_expectations_store"
-        assert context.variables.include_rendered_content.globally
 
         config: DataContextConfig = DataContextConfig(
             config_version=3.0,
@@ -270,24 +269,6 @@ def test_get_context_with_mode_equals_cloud_returns_cloud_data_context(
 
     mock_retrieve_config.assert_called_once()
     assert isinstance(context, CloudDataContext)
-
-
-@pytest.mark.parametrize("ge_cloud_mode", [True, None])
-@pytest.mark.cloud
-def test_cloud_context_include_rendered_content(
-    set_up_cloud_envs, empty_ge_cloud_data_context_config, ge_cloud_mode
-):
-    with mock.patch.object(
-        CloudDataContext,
-        "retrieve_data_context_config_from_cloud",
-        return_value=empty_ge_cloud_data_context_config,
-    ):
-        context = gx.get_context(cloud_mode=ge_cloud_mode)
-        assert isinstance(
-            context,
-            CloudDataContext,
-        )
-        assert context.variables.include_rendered_content.globally
 
 
 @pytest.mark.filesystem

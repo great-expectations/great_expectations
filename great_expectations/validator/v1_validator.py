@@ -82,6 +82,12 @@ class Validator:
     def active_batch_id(self) -> Optional[str]:
         return self._wrapped_validator.active_batch_id
 
+    @property
+    def _include_rendered_content(self) -> bool:
+        from great_expectations import project_manager
+
+        return project_manager.is_using_cloud()
+
     @cached_property
     def _wrapped_validator(self) -> OldValidator:
         batch_request = self._batch_definition.build_batch_request(
@@ -103,5 +109,9 @@ class Validator:
             configurations=processed_expectation_configs,
             runtime_configuration={"result_format": self.result_format.value},
         )
+
+        if self._include_rendered_content:
+            for result in results:
+                result.render()
 
         return results

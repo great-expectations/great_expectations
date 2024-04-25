@@ -21,9 +21,7 @@ def fits_regex(x):
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
-    if re.match(regex, str(x)):
-        return True
-    return False
+    return bool(re.match(regex, str(x)))
 
 
 # This class defines a Metric to support your Expectation
