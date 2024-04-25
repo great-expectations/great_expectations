@@ -20,7 +20,6 @@ Use one of the following methods to request support:
 - Post a message in the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82). 
 - Open an issue in the [GX GitHub repository](https://github.com/great-expectations/great_expectations) when you encounter a bug.
 
-- Chat with community members about general issues and seek solutions on the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82).
 
 ## How to effectively get support
 
