@@ -21,6 +21,8 @@ import pytest
 from packaging.version import Version
 from pytest import param
 
+import great_expectations.expectations.core as gxe
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
 )
@@ -33,6 +35,7 @@ from great_expectations.compatibility.sqlalchemy import (
 from great_expectations.compatibility.sqlalchemy import (
     __version__ as sqlalchemy_version,
 )
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
@@ -45,9 +48,6 @@ from great_expectations.execution_engine.sqlalchemy_dialect import (
     DIALECT_IDENTIFIER_QUOTE_STRINGS,
     GXSqlDialect,
     quote_str,
-)
-from great_expectations.expectations.expectation import (
-    ExpectationConfiguration,
 )
 
 if TYPE_CHECKING:
@@ -157,18 +157,8 @@ def _get_exception_details(
     ]
 ]:
     """Extract a list of exception_info dicts from a CheckpointResult."""
-    validation_results: list[
-        dict[
-            Literal["exception_info", "expectation_config", "meta", "result", "success"],
-            dict,
-        ]
-    ] = next(  # type: ignore[index, assignment]
-        iter(result.to_json_dict()["run_results"].values())  # type: ignore[call-overload,union-attr]
-    )[
-        "validation_result"  # type: ignore[index]
-    ][
-        "results"  # type: ignore[index]
-    ]
+    first_run_result = next(iter(result.run_results.values()))
+    validation_results = first_run_result.results
     if prettyprint:
         print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
 
@@ -529,39 +519,27 @@ class TestTableIdentifiers:
         )
 
         asset = datasource.add_table_asset(asset_name, table_name=table_name, schema_name=schema)
+        batch_definition = asset.add_batch_definition_whole_table("whole table!")
 
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
         )
-        suite.add_expectation_configuration(
-            expectation_configuration=ExpectationConfiguration(
-                expectation_type="expect_column_values_to_not_be_null",
-                kwargs={
-                    "column": "name",
-                    "mostly": 1,
-                },
-            )
-        )
+        suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name", mostly=1))
         suite = context.add_or_update_expectation_suite(expectation_suite=suite)
 
-        checkpoint_config = {
-            "name": f"{datasource.name}-{asset.name}",
-            "validations": [
-                {
-                    "expectation_suite_name": suite.name,
-                    "batch_request": {
-                        "datasource_name": datasource.name,
-                        "data_asset_name": asset.name,
-                    },
-                }
-            ],
-        }
-        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
-            **checkpoint_config,
+        checkpoint = context.checkpoints.add(
+            Checkpoint(
+                name=f"{datasource.name}-{asset.name}",
+                validation_definitions=[
+                    ValidationDefinition(
+                        name="validation_definition", suite=suite, data=batch_definition
+                    )
+                ],
+            )
         )
         result = checkpoint.run()
 
-        _ = _get_exception_details(result, prettyprint=True)
+        _get_exception_details(result, prettyprint=True)
         assert result.success is True
 
 
@@ -734,137 +712,6 @@ def _raw_query_check_column_exists(
             print(f"\n{column_name_param} does not exist!\n")
             return False
         return True
-
-
-@pytest.mark.parametrize(
-    "column_name",
-    [
-        # DDL: unquoted_lower_col ----------------------------------
-        param("unquoted_lower_col", id="str unquoted_lower_col"),
-        param('"unquoted_lower_col"', id='str "unquoted_lower_col"'),
-        param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
-        param('"UNQUOTED_LOWER_COL"', id='str "UNQUOTED_LOWER_COL"'),
-        # DDL: UNQUOTED_UPPER_COL ----------------------------------
-        param("unquoted_upper_col", id="str unquoted_upper_col"),
-        param('"unquoted_upper_col"', id='str "unquoted_upper_col"'),
-        param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
-        param('"UNQUOTED_UPPER_COL"', id='str "UNQUOTED_UPPER_COL"'),
-        # DDL: "quoted_lower_col"-----------------------------------
-        param("quoted_lower_col", id="str quoted_lower_col"),
-        param('"quoted_lower_col"', id='str "quoted_lower_col"'),
-        param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
-        param('"QUOTED_LOWER_COL"', id='str "QUOTED_LOWER_COL"'),
-        # DDL: "QUOTED_UPPER_COL" ----------------------------------
-        param("quoted_upper_col", id="str quoted_upper_col"),
-        param('"quoted_upper_col"', id='str "quoted_upper_col"'),
-        param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
-        param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
-    ],
-)
-class TestColumnIdentifiers:
-    @pytest.mark.parametrize(
-        "expectation_type",
-        [
-            "expect_column_to_exist",
-            "expect_column_values_to_not_be_null",
-        ],
-    )
-    def test_column_expectation(
-        self,
-        context: EphemeralDataContext,
-        all_sql_datasources: SQLDatasource,
-        table_factory: TableFactory,
-        column_name: str | quoted_name,
-        expectation_type: str,
-        request: pytest.FixtureRequest,
-    ):
-        param_id = request.node.callspec.id
-        datasource = all_sql_datasources
-        dialect = datasource.get_engine().dialect.name
-
-        if _is_quote_char_dialect_mismatch(dialect, column_name):
-            pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
-
-        if _requires_fix(param_id):
-            # apply marker this way so that xpasses can be seen in the report
-            request.applymarker(pytest.mark.xfail)
-
-        schema: str | None = (
-            RAND_SCHEMA
-            if GXSqlDialect(dialect) in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
-            else None
-        )
-
-        print(f"\ncolumn_name:\n  {column_name!r}")
-        print(f"type:\n  {type(column_name)}\n")
-
-        table_factory(
-            gx_engine=datasource.get_execution_engine(),
-            table_names={TEST_TABLE_NAME},
-            schema=schema,
-            data=[
-                {
-                    "id": 1,
-                    "name": param_id,
-                    "quoted_upper_col": "my column is uppercase",
-                    "quoted_lower_col": "my column is lowercase",
-                    "unquoted_upper_col": "whatever",
-                    "unquoted_lower_col": "whatever",
-                },
-            ],
-        )
-
-        qualified_table_name: str = f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
-        # check that the column exists so that we know what if the expectation should succeed or fail  # noqa: E501
-        column_exists = _raw_query_check_column_exists(
-            column_name,
-            qualified_table_name,
-            datasource.get_execution_engine(),
-        )
-
-        asset = datasource.add_table_asset(
-            "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
-        )
-        print(f"asset:\n{asset!r}\n")
-
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{datasource.name}-{asset.name}"
-        )
-        suite.add_expectation_configuration(
-            expectation_configuration=ExpectationConfiguration(
-                expectation_type=expectation_type,
-                kwargs={
-                    "column": column_name,
-                    "mostly": 1,
-                },
-            )
-        )
-        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
-
-        checkpoint_config = {
-            "name": f"{datasource.name}-{asset.name}",
-            "validations": [
-                {
-                    "expectation_suite_name": suite.name,
-                    "batch_request": {
-                        "datasource_name": datasource.name,
-                        "data_asset_name": asset.name,
-                    },
-                }
-            ],
-        }
-        checkpoint = context.add_checkpoint(  # type: ignore[call-overload]
-            **checkpoint_config,
-        )
-        result = checkpoint.run()
-
-        exc_details = _get_exception_details(result, prettyprint=True)
-        assert not exc_details, exc_details[0]["raised_exception"]
-
-        if column_exists:
-            assert result.success is True, "column exists but validation failed"
-        else:
-            assert result.success is False, "column does not exist but validation succeeded"
 
 
 if __name__ == "__main__":

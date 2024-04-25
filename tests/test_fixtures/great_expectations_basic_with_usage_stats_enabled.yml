@@ -48,25 +48,6 @@ stores:
   validation_results_store:
     class_name: ValidationResultsStore
 
-validation_operators:
-  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
-  default:
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          target_store_name: validation_results_store
-      # Uncomment the notify_slack action below to send notifications during evaluation
-      # - name: notify_slack
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     slack_webhook: ${validation_notification_slack_webhook}
-      #     notify_on: all
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
-
 anonymous_usage_statistics:
   data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
   enabled: true

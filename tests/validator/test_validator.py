@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
-from typing import Any, Dict, List, Set, Tuple, Union
+from typing import List, Set, Tuple
 from unittest import mock
 from unittest.mock import ANY, patch
 
@@ -36,7 +36,6 @@ from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
@@ -199,68 +198,6 @@ def test_validator_default_expectation_args__sql(
             batch_identifiers={"date": "2020-01-15"},
             expectation_suite="I_am_not_an_expectation_suite",
         )
-
-
-@pytest.mark.big
-def test_columns(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-):
-    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates  # noqa: E501
-    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1911",
-    }
-    validator: Validator = data_context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        create_expectation_suite_with_name="warning",
-    )
-    columns: List[str] = validator.columns()
-
-    expected: List[str] = [
-        "Unnamed: 0",
-        "Name",
-        "PClass",
-        "Age",
-        "Sex",
-        "Survived",
-        "SexCode",
-    ]
-    assert columns == expected
-
-
-@pytest.mark.big
-def test_head(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-):
-    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates  # noqa: E501
-    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1911",
-    }
-    validator: Validator = data_context.get_validator(
-        batch_request=BatchRequest(**batch_request),
-        create_expectation_suite_with_name="warning",
-    )
-    head: pd.DataFrame = validator.head()
-
-    expected: Dict[str, Dict[int, Union[int, str]]] = {
-        "Unnamed: 0": {0: 1, 1: 2, 2: 3, 3: 4, 4: 5},
-        "Name": {
-            0: "Allen, Miss Elisabeth Walton",
-            1: "Allison, Miss Helen Loraine",
-            2: "Allison, Mr Hudson Joshua Creighton",
-            3: "Allison, Mrs Hudson JC (Bessie Waldo Daniels)",
-            4: "Allison, Master Hudson Trevor",
-        },
-        "PClass": {0: "1st", 1: "1st", 2: "1st", 3: "1st", 4: "1st"},
-        "Age": {0: 29.0, 1: 2.0, 2: 30.0, 3: 25.0, 4: 0.92},
-        "Sex": {0: "female", 1: "female", 2: "male", 3: "female", 4: "male"},
-        "Survived": {0: 1, 1: 0, 2: 0, 3: 0, 4: 1},
-        "SexCode": {0: 1, 1: 1, 2: 0, 3: 1, 4: 0},
-    }
-    assert head.to_dict() == expected
 
 
 @pytest.fixture()
@@ -904,133 +841,6 @@ def test_validator_docstrings(multi_batch_taxi_validator):
         multi_batch_taxi_validator, "expect_column_values_to_be_in_set", None
     )
     assert expectation_impl.__doc__.startswith("Expect each column value to be in a given set")
-
-
-@pytest.mark.big
-def test_validator_include_rendered_content_diagnostic(
-    yellow_trip_pandas_data_context,
-):
-    context = yellow_trip_pandas_data_context
-    batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-    )
-    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
-
-    column: str = "fare_amount"
-    partition_object: Dict[str, List[float]] = {
-        "values": [1.0, 2.0],
-        "weights": [0.3, 0.7],
-    }
-
-    validator_exclude_rendered_content: Validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite=suite,
-    )
-    validation_result: ExpectationValidationResult = (
-        validator_exclude_rendered_content.expect_column_kl_divergence_to_be_less_than(
-            column=column,
-            partition_object=partition_object,
-        )
-    )
-    assert validation_result.expectation_config.rendered_content is None
-    assert validation_result.rendered_content is None
-
-    validator_include_rendered_content: Validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite=suite,
-        include_rendered_content=True,
-    )
-    validation_result: ExpectationValidationResult = (
-        validator_include_rendered_content.expect_column_kl_divergence_to_be_less_than(
-            column=column,
-            partition_object=partition_object,
-        )
-    )
-    assert len(validation_result.expectation_config.rendered_content) == 1
-    assert isinstance(
-        validation_result.expectation_config.rendered_content[0], RenderedAtomicContent
-    )
-    assert len(validation_result.rendered_content) == 1
-    assert isinstance(validation_result.rendered_content[0], RenderedAtomicContent)
-
-    # test suite parameters render
-    validator_include_rendered_content.set_suite_parameter("upstream_column_min", 1)
-    validator_include_rendered_content.set_suite_parameter("upstream_column_max", 8)
-
-    validation_result: ExpectationValidationResult = (
-        validator_include_rendered_content.expect_column_max_to_be_between(
-            column="passenger_count",
-            min_value={"$PARAMETER": "upstream_column_min"},
-            max_value={"$PARAMETER": "upstream_column_max"},
-            result_format={"result_format": "BOOLEAN_ONLY"},
-        )
-    )
-
-    expected_expectation_validation_result_diagnostic_rendered_content = RenderedAtomicContent(
-        name="atomic.diagnostic.observed_value",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={},
-            template="--",
-        ),
-        value_type="StringValueType",
-    )
-
-    assert (
-        expected_expectation_validation_result_diagnostic_rendered_content
-        in validation_result.rendered_content
-    )
-
-    # test conditional expectations render
-    validation_result: ExpectationValidationResult = (
-        validator_include_rendered_content.expect_column_min_to_be_between(
-            column="trip_distance",
-            min_value=0,
-            max_value=100,
-            condition_parser="pandas",
-            row_condition="passenger_count>0",
-        )
-    )
-
-    expected_expectation_validation_result_diagnostic_rendered_content = RenderedAtomicContent(
-        name="atomic.diagnostic.observed_value",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={},
-            template="0",
-        ),
-        value_type="StringValueType",
-    )
-
-    assert (
-        expected_expectation_validation_result_diagnostic_rendered_content
-        in validation_result.rendered_content
-    )
-
-    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
-        name="atomic.prescriptive.summary",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={
-                "column": {"schema": {"type": "string"}, "value": "trip_distance"},
-                "min_value": {"schema": {"type": "number"}, "value": 0},
-                "max_value": {"schema": {"type": "number"}, "value": 100},
-                "row_condition__0": {
-                    "schema": {"type": "string"},
-                    "value": "passenger_count>0",
-                },
-            },
-            template="If $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",  # noqa: E501
-        ),
-        value_type="StringValueType",
-    )
-
-    assert (
-        expected_expectation_configuration_diagnostic_rendered_content
-        in validation_result.expectation_config.rendered_content
-    )
 
 
 @pytest.mark.parametrize(

@@ -1,13 +1,13 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.store.checkpoint_store import (
-    V1CheckpointStore as CheckpointStore,
+    CheckpointStore,
 )
 from great_expectations.exceptions import DataContextError
 

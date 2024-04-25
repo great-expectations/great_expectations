@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable
 
 from great_expectations._docs_decorators import public_api
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
 from great_expectations.exceptions import DataContextError
@@ -11,7 +11,7 @@ from great_expectations.exceptions import DataContextError
 if TYPE_CHECKING:
     from great_expectations.core.data_context_key import StringKey
     from great_expectations.data_context.store.checkpoint_store import (
-        V1CheckpointStore as CheckpointStore,
+        CheckpointStore,
     )
     from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 

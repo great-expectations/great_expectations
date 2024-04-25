@@ -7,14 +7,10 @@ import pandas as pd
 import pytest
 from moto import mock_s3
 
-import great_expectations as gx
-from great_expectations import set_context
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
+from great_expectations.core.partitioners import PartitionerYearly
 from great_expectations.core.util import S3Url
-from great_expectations.data_context.store.tuple_store_backend import (
-    TupleS3StoreBackend,
-)
 from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
     sanitize_prefix_for_gcs_and_s3,
@@ -139,21 +135,22 @@ def test_return_all_batch_definitions_unsorted():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     keys: List[str] = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
+        "alex_2020-08-09_1000.csv",
+        "eugene_2020-08-09_1500.csv",
+        "james_2020-08-11_1009.csv",
+        "abe_2020-08-09_1040.csv",
+        "will_2020-08-09_1002.csv",
+        "james_2020-07-13_1567.csv",
+        "eugene_2020-11-29_1900.csv",
+        "will_2020-08-10_1001.csv",
+        "james_2020-08-10_1003.csv",
+        "alex_2020-08-19_1300.csv",
     ]
     for key in keys:
         client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
-
-    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv")
+    batching_regex = re.compile(
+        r"(?P<name>.+)_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})_(?P<price>.*)\.csv"
+    )
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
@@ -168,6 +165,8 @@ def test_return_all_batch_definitions_unsorted():
         # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list()
 
+    partitioner = PartitionerYearly(regex=batching_regex)
+
     # with empty options
     unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(
@@ -175,12 +174,12 @@ def test_return_all_batch_definitions_unsorted():
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_s3_data_asset",
                 options={},
-                batching_regex=batching_regex,
+                partitioner=partitioner,
             )
         )
     )
     processed_batching_regex = re.compile(
-        "(?P<path>(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\\.csv)"
+        "(?P<path>(?P<name>.+)_(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})_(?P<price>.*)\\.csv)"
     )
     expected: List[LegacyBatchDefinition] = [
         LegacyBatchDefinition(
@@ -189,9 +188,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "abe_20200809_1040.csv",
+                    "path": "abe_2020-08-09_1040.csv",
                     "name": "abe",
-                    "timestamp": "20200809",
+                    "year": "2020",
+                    "month": "08",
+                    "day": "09",
                     "price": "1040",
                 }
             ),
@@ -203,9 +204,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "alex_20200809_1000.csv",
+                    "path": "alex_2020-08-09_1000.csv",
                     "name": "alex",
-                    "timestamp": "20200809",
+                    "year": "2020",
+                    "month": "08",
+                    "day": "09",
                     "price": "1000",
                 }
             ),
@@ -217,9 +220,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "alex_20200819_1300.csv",
+                    "path": "alex_2020-08-19_1300.csv",
                     "name": "alex",
-                    "timestamp": "20200819",
+                    "year": "2020",
+                    "month": "08",
+                    "day": "19",
                     "price": "1300",
                 }
             ),
@@ -231,9 +236,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "eugene_20200809_1500.csv",
+                    "path": "eugene_2020-08-09_1500.csv",
                     "name": "eugene",
-                    "timestamp": "20200809",
+                    "year": "2020",
+                    "month": "08",
+                    "day": "09",
                     "price": "1500",
                 }
             ),
@@ -245,9 +252,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "eugene_20201129_1900.csv",
+                    "path": "eugene_2020-11-29_1900.csv",
                     "name": "eugene",
-                    "timestamp": "20201129",
+                    "year": "2020",
+                    "month": "11",
+                    "day": "29",
                     "price": "1900",
                 }
             ),
@@ -259,9 +268,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "james_20200713_1567.csv",
+                    "path": "james_2020-07-13_1567.csv",
                     "name": "james",
-                    "timestamp": "20200713",
+                    "year": "2020",
+                    "month": "07",
+                    "day": "13",
                     "price": "1567",
                 }
             ),
@@ -273,9 +284,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "james_20200810_1003.csv",
+                    "path": "james_2020-08-10_1003.csv",
                     "name": "james",
-                    "timestamp": "20200810",
+                    "year": "2020",
+                    "month": "08",
+                    "day": "10",
                     "price": "1003",
                 }
             ),
@@ -287,9 +300,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "james_20200811_1009.csv",
+                    "path": "james_2020-08-11_1009.csv",
                     "name": "james",
-                    "timestamp": "20200811",
+                    "year": "2020",
+                    "month": "08",
+                    "day": "11",
                     "price": "1009",
                 }
             ),
@@ -301,9 +316,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "will_20200809_1002.csv",
+                    "path": "will_2020-08-09_1002.csv",
                     "name": "will",
-                    "timestamp": "20200809",
+                    "year": "2020",
+                    "month": "08",
+                    "day": "09",
                     "price": "1002",
                 }
             ),
@@ -315,9 +332,11 @@ def test_return_all_batch_definitions_unsorted():
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {
-                    "path": "will_20200810_1001.csv",
+                    "path": "will_2020-08-10_1001.csv",
                     "name": "will",
-                    "timestamp": "20200810",
+                    "year": "2020",
+                    "month": "08",
+                    "day": "10",
                     "price": "1001",
                 }
             ),
@@ -331,8 +350,8 @@ def test_return_all_batch_definitions_unsorted():
         BatchRequest(
             datasource_name="my_file_path_datasource",
             data_asset_name="my_s3_data_asset",
-            options={"name": "alex", "timestamp": "20200819", "price": "1300"},
-            batching_regex=batching_regex,
+            options={"name": "alex", "year": "2020", "month": "08", "day": "19", "price": "1300"},
+            partitioner=partitioner,
         )
     )
     assert expected[2:3] == unsorted_batch_definition_list
@@ -645,85 +664,6 @@ def test_foxtrot():
     assert len(my_batch_definition_list) == 3
 
 
-# TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
-# TODO: <Alex>ALEX</Alex>
-# @pytest.mark.big
-# @mock_s3
-# def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
-#     tmp_path_factory,
-# ):
-#     region_name: str = "us-east-1"
-#     bucket: str = "test_bucket"
-#     conn = boto3.resource("s3", region_name=region_name)
-#     conn.create_bucket(Bucket=bucket)
-#     client: BaseClient = boto3.client("s3", region_name=region_name)
-#
-#     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-#
-#     keys: List[str] = [
-#         "alex_20200809_1000.csv",
-#         "eugene_20200809_1500.csv",
-#         "james_20200811_1009.csv",
-#         "abe_20200809_1040.csv",
-#         "will_20200809_1002.csv",
-#         "james_20200713_1567.csv",
-#         "eugene_20201129_1900.csv",
-#         "will_20200810_1001.csv",
-#         "james_20200810_1003.csv",
-#         "alex_20200819_1300.csv",
-#     ]
-#     for key in keys:
-#         client.put_object(
-#             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-#         )
-#
-#     my_data_connector_yaml = yaml.load(
-#         f"""
-#         class_name: S3DataConnector
-#         datasource_name: test_environment
-#         base_directory: {base_directory}
-#         glob_directive: "*.csv"
-#         assets:
-#             my_s3_data_asset:
-#                 pattern: (.+)_(.+)_(.+)\\.csv
-#                 group_names:
-#                     - name
-#                     - timestamp
-#                     - price
-#         default_regex:
-#             pattern: (.+)_.+_.+\\.csv
-#             group_names:
-#                 - name
-#         sorters:
-#             - orderby: asc
-#               class_name: LexicographicSorter
-#               name: name
-#             - datetime_format: "%Y%m%d"
-#               orderby: desc
-#               class_name: DateTimeSorter
-#               name: timestamp
-#             - orderby: desc
-#               class_name: NumericSorter
-#               name: for_me_Me_Me
-#     """,
-#     )
-#     with pytest.raises(gx_exceptions.DataConnectorError):
-#         # noinspection PyUnusedLocal
-#         my_data_connector: S3DataConnector = (
-#             instantiate_class_from_config(
-#                 config=my_data_connector_yaml,
-#                 runtime_environment={
-#                     "name": "fluent",
-#                     "execution_engine": PandasExecutionEngine(),
-#                 },
-#                 config_defaults={
-#                     "module_name": "great_expectations.datasource.data_connector"
-#                 },
-#             )
-#         )
-# TODO: <Alex>ALEX</Alex>
-
-
 @pytest.mark.unit
 def test_sanitize_prefix_behaves_the_same_as_local_files():
     def check_sameness(prefix, expected_output):
@@ -751,150 +691,3 @@ def test_sanitize_prefix_behaves_the_same_as_local_files():
     check_sameness("a.x/b/c", "a.x/b/c/")
     check_sameness("path/to/folder.something/", "path/to/folder.something/")
     check_sameness("path/to/folder.something", "path/to/folder.something")
-
-
-@pytest.mark.aws_deps
-@mock_s3
-def test_s3_checkpoint_run_using_different_store_prefixes_successfully(
-    tmp_path_factory,
-):
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client: BaseClient = boto3.client("s3", region_name=region_name)
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    client.put_object(
-        Bucket=bucket,
-        Body=test_df.to_csv(index=False).encode("utf-8"),
-        Key="titanic.csv",
-    )
-
-    base_directory: str = str(tmp_path_factory.mktemp("test_s3_checkpoint_run"))
-    context = gx.data_context.FileDataContext.create(base_directory)
-    # Configure the stores
-    context.add_store(
-        "expectations_S3_store",
-        store_config={
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "bucket": "test_bucket",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "gx_titanic_expectations",
-            },
-        },
-    )
-    context.add_store(
-        "validation_results_S3_store",
-        store_config={
-            "class_name": "ValidationResultsStore",
-            "store_backend": {
-                "bucket": "test_bucket",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "gx_titanic_validations",
-            },
-        },
-    )
-    context.validation_results_store_name = "validation_results_S3_store"
-    context.expectations_store_name = "expectations_S3_store"
-    assert len(context.stores) == 8
-    assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
-
-    datasource = context.sources.add_or_update_pandas_s3(name="s3_datasource", bucket=bucket)
-
-    asset = datasource.add_csv_asset(name="titanic_dataset", batching_regex="titanic.csv")
-
-    request = asset.build_batch_request()
-
-    context.add_or_update_expectation_suite(expectation_suite_name="test_titanic")
-    validator = context.get_validator(batch_request=request, expectation_suite_name="test_titanic")
-
-    validator.expect_column_values_to_be_between(column="col1", min_value=0, max_value=120)
-    validator.expect_column_values_to_be_between(column="col2", min_value=0, max_value=1)
-
-    validator.save_expectation_suite(discard_failed_expectations=False)
-
-    checkpoint = context.add_or_update_checkpoint(
-        name="my_checkpoint",
-        validations=[{"batch_request": request, "expectation_suite_name": "test_titanic"}],
-    )
-
-    # Should not raise an error
-    context.build_data_docs()
-    checkpoint.run()
-
-
-@pytest.mark.aws_deps
-@mock_s3
-def test_s3_checkpoint_run_using_same_store_prefixes_errors(
-    tmp_path_factory,
-):
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client: BaseClient = boto3.client("s3", region_name=region_name)
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    client.put_object(
-        Bucket=bucket,
-        Body=test_df.to_csv(index=False).encode("utf-8"),
-        Key="titanic.csv",
-    )
-
-    base_directory: str = str(tmp_path_factory.mktemp("test_s3_checkpoint_run"))
-    context = gx.data_context.FileDataContext.create(base_directory)
-    set_context(context)
-    # Configure the stores
-    context.add_store(
-        "expectations_S3_store",
-        store_config={
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "bucket": "test_bucket",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "gx_titanic",
-            },
-        },
-    )
-    context.add_store(
-        "validation_results_S3_store",
-        store_config={
-            "class_name": "ValidationResultsStore",
-            "store_backend": {
-                "bucket": "test_bucket",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "gx_titanic",
-            },
-        },
-    )
-    context.validation_results_store_name = "validation_results_S3_store"
-    context.expectations_store_name = "expectations_S3_store"
-    assert len(context.stores) == 8
-    assert isinstance(context.expectations_store._store_backend, TupleS3StoreBackend)
-
-    datasource = context.sources.add_or_update_pandas_s3(name="s3_datasource", bucket=bucket)
-
-    asset = datasource.add_csv_asset(name="titanic_dataset", batching_regex="titanic.csv")
-
-    request = asset.build_batch_request()
-
-    context.add_or_update_expectation_suite(expectation_suite_name="test_titanic")
-    validator = context.get_validator(batch_request=request, expectation_suite_name="test_titanic")
-
-    validator.expect_column_values_to_be_between(column="col1", min_value=0, max_value=120)
-    validator.expect_column_values_to_be_between(column="col2", min_value=0, max_value=1)
-
-    validator.save_expectation_suite(discard_failed_expectations=False)
-
-    checkpoint = context.add_or_update_checkpoint(
-        name="my_checkpoint",
-        validations=[{"batch_request": request, "expectation_suite_name": "test_titanic"}],
-    )
-
-    with pytest.raises(IndexError):
-        # Happens when an ExpectationIdentifier is being evaluated as ValidationResultIdentifier
-        context.build_data_docs()
-
-    with pytest.raises(IndexError):
-        # Happens when an ValidationResultIdentifier is being evaluated as ExpectationIdentifier
-        checkpoint.run()

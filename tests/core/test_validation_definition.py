@@ -232,10 +232,11 @@ class TestValidationRun:
         mock_validator: MagicMock,
         cloud_validation_definition: ValidationDefinition,
     ):
-        cloud_validation_definition.suite.add_expectation(
-            gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
-        )
-        mock_validator.graph_validate.return_value = [ExpectationValidationResult(success=True)]
+        expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
+        cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        mock_validator.graph_validate.return_value = [
+            ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
+        ]
 
         cloud_validation_definition.run()
 
@@ -245,6 +246,26 @@ class TestValidationRun:
         value = kwargs["value"]
         assert isinstance(key, GXCloudIdentifier)
         assert value.success is True
+
+    @mock.patch.object(ValidationResultsStore, "set")
+    @pytest.mark.unit
+    def test_cloud_validation_def_creates_rendered_content(
+        self,
+        mock_validation_results_store_set: MagicMock,
+        mock_validator: MagicMock,
+        cloud_validation_definition: ValidationDefinition,
+    ):
+        expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", max_value=1)
+        cloud_validation_definition.suite.add_expectation(expectation=expectation)
+        mock_validator.graph_validate.return_value = [
+            ExpectationValidationResult(success=True, expectation_config=expectation.configuration)
+        ]
+
+        result = cloud_validation_definition.run()
+
+        assert len(result.results) == 1
+        assert result.results[0].expectation_config.rendered_content is not None
+        assert result.results[0].rendered_content is not None
 
 
 class TestValidationDefinitionSerialization:

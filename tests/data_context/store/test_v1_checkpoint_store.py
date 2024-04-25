@@ -8,14 +8,14 @@ import pytest
 
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import SlackNotificationAction
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
+from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 if TYPE_CHECKING:
@@ -26,13 +26,13 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def ephemeral_store():
-    return V1CheckpointStore(store_name="ephemeral_checkpoint_store")
+    return CheckpointStore(store_name="ephemeral_checkpoint_store")
 
 
 @pytest.fixture
 def file_backed_store(tmp_path):
     base_directory = tmp_path / "base_dir"
-    return V1CheckpointStore(
+    return CheckpointStore(
         store_name="file_backed_checkpoint_store",
         store_backend={
             "class_name": "TupleFilesystemStoreBackend",
@@ -43,7 +43,7 @@ def file_backed_store(tmp_path):
 
 @pytest.fixture
 def cloud_backed_store(cloud_details: CloudDetails):
-    return V1CheckpointStore(
+    return CheckpointStore(
         store_name="cloud_backed_checkpoint_store",
         store_backend={
             "class_name": "GXCloudStoreBackend",
@@ -109,7 +109,7 @@ def mock_checkpoint_dict(mocker, mock_checkpoint_json: dict) -> dict:
 @pytest.fixture
 def checkpoint(
     mocker: MockerFixture, mock_checkpoint_json: dict, mock_checkpoint_dict: dict
-) -> V1CheckpointStore:
+) -> CheckpointStore:
     cp = mocker.Mock(spec=Checkpoint, name="my_checkpoint", id=None)
     cp.json.return_value = json.dumps(mock_checkpoint_json)
     cp.dict.return_value = mock_checkpoint_dict
@@ -119,7 +119,7 @@ def checkpoint(
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
 def test_add(request, store_fixture: str, checkpoint: Checkpoint):
-    store: V1CheckpointStore = request.getfixturevalue(store_fixture)
+    store: CheckpointStore = request.getfixturevalue(store_fixture)
     key = store.get_key(name="my_checkpoint")
 
     assert not checkpoint.id
@@ -129,7 +129,7 @@ def test_add(request, store_fixture: str, checkpoint: Checkpoint):
 
 
 @pytest.mark.cloud
-def test_add_cloud(cloud_backed_store: V1CheckpointStore, checkpoint: Checkpoint):
+def test_add_cloud(cloud_backed_store: CheckpointStore, checkpoint: Checkpoint):
     store = cloud_backed_store
 
     id = "5a8ada9f-5b71-461b-b1af-f1d93602a156"
@@ -185,14 +185,14 @@ def test_add_cloud(cloud_backed_store: V1CheckpointStore, checkpoint: Checkpoint
 @pytest.mark.parametrize("store_fixture", ["ephemeral_store", "file_backed_store"])
 @pytest.mark.unit
 def test_get_key(request, store_fixture: str):
-    store: V1CheckpointStore = request.getfixturevalue(store_fixture)
+    store: CheckpointStore = request.getfixturevalue(store_fixture)
 
     name = "my_checkpoint"
     assert store.get_key(name=name) == StringKey(key=name)
 
 
 @pytest.mark.cloud
-def test_get_key_cloud(cloud_backed_store: V1CheckpointStore):
+def test_get_key_cloud(cloud_backed_store: CheckpointStore):
     key = cloud_backed_store.get_key(name="my_checkpoint")
     assert key.resource_type == GXCloudRESTResource.CHECKPOINT  # type: ignore[union-attr]
     assert key.resource_name == "my_checkpoint"  # type: ignore[union-attr]
@@ -256,7 +256,7 @@ _CHECKPOINT_CONFIG = _create_checkpoint_config("my_checkpoint", _CHECKPOINT_ID)
     ],
 )
 def test_gx_cloud_response_json_to_object_dict_success(response_json: dict):
-    actual = V1CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
+    actual = CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
     expected = {**_CHECKPOINT_CONFIG, "id": _CHECKPOINT_ID}
     assert actual == expected
 
@@ -284,7 +284,7 @@ def test_gx_cloud_response_json_to_object_collection():
         ],
     }
 
-    result = V1CheckpointStore.gx_cloud_response_json_to_object_collection(response_json)
+    result = CheckpointStore.gx_cloud_response_json_to_object_collection(response_json)
 
     expected = [{**config_a, "id": id_a}, {**config_b, "id": id_b}]
     assert result == expected
@@ -325,12 +325,12 @@ def test_gx_cloud_response_json_to_object_collection():
 )
 def test_gx_cloud_response_json_to_object_dict_failure(response_json: dict, error_substring: str):
     with pytest.raises(ValueError, match=f"{error_substring}*."):
-        V1CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
+        CheckpointStore.gx_cloud_response_json_to_object_dict(response_json)
 
 
 @pytest.mark.unit
 def test_update_failure_wraps_store_backend_error(
-    ephemeral_store: V1CheckpointStore, checkpoint: Checkpoint
+    ephemeral_store: CheckpointStore, checkpoint: Checkpoint
 ):
     key = ephemeral_store.get_key(name="my_nonexistant_checkpoint")
 
