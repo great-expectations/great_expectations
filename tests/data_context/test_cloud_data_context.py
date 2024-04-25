@@ -67,11 +67,6 @@ def _create_cloud_config_response(
         },
         expectation_suite_store_name_key: "suite_parameter_store",
         "expectations_store_name": "default_expectations_store",
-        "include_rendered_content": {
-            "expectation_suite": True,
-            "expectation_validation_result": True,
-            "globally": True,
-        },
         "plugins_directory": "plugins/",
         "profiler_store_name": "default_profiler_store",
         "progress_bars": {

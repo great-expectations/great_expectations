@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import logging
-import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -21,9 +20,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.partitioners import (
-    Partitioner,
-)
+from great_expectations.core.partitioners import RegexPartitioner
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
@@ -61,7 +58,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
+class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
@@ -125,10 +122,11 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[RegexPartitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
-        # todo: add params from partitioner
+        if partitioner:
+            option_keys += tuple(partitioner.param_names)
         return option_keys
 
     @public_api
@@ -137,8 +135,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
+        partitioner: Optional[RegexPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -149,7 +146,6 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
-            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -190,7 +186,6 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
-            batching_regex=batching_regex,
         )
 
     @override
@@ -209,13 +204,12 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
         ):
             valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
-            expect_batch_request_form = BatchRequest[
-                None
-            ](  # todo: update to a file path specific partitioner
+            expect_batch_request_form = BatchRequest[RegexPartitioner](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
                 batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
+                partitioner=batch_request.partitioner,
             )
             raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "BatchRequest should have form:\n"
@@ -267,9 +261,8 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
             )
             batch_list.append(batch)
 
-        # todo: re-enable once RegexPartitioners are available
-        # if batch_request.partitioner:
-        #     self.sort_batches(batch_list, batch_request.partitioner)
+        if batch_request.partitioner:
+            self.sort_batches(batch_list, batch_request.partitioner)
 
         return batch_list
 

@@ -30,7 +30,6 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     GXCloudConfig,
-    IncludeRenderedContentConfig,
     ProgressBarsConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -79,11 +78,6 @@ def data_context_config_dict() -> dict:
             usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
         "progress_bars": None,
-        "include_rendered_content": {
-            "expectation_suite": False,
-            "expectation_validation_result": False,
-            "globally": False,
-        },
     }
     return config
 
@@ -213,15 +207,6 @@ def progress_bars() -> ProgressBarsConfig:
     )
 
 
-@pytest.fixture
-def include_rendered_content() -> IncludeRenderedContentConfig:
-    return IncludeRenderedContentConfig(
-        globally=False,
-        expectation_validation_result=False,
-        expectation_suite=False,
-    )
-
-
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "target_attr",
@@ -266,10 +251,6 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
         pytest.param(
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
-            id="include_rendered_content getter",
         ),
     ],
 )
@@ -376,11 +357,6 @@ def test_data_context_variables_get_with_substitutions(
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars setter",
         ),
-        pytest.param(
-            include_rendered_content,
-            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
-            id="include_rendered_content setter",
-        ),
     ],
 )
 @pytest.mark.slow  # 1.20s
@@ -462,11 +438,6 @@ def test_data_context_variables_save_config(
             "validation_results_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
-        "include_rendered_content": {
-            "expectation_suite": False,
-            "expectation_validation_result": False,
-            "globally": False,
-        },
         "profiler_store_name": "profiler_store",
     }
 
@@ -509,7 +480,6 @@ def test_file_data_context_variables_e2e(
     monkeypatch,
     file_data_context: FileDataContext,
     progress_bars: ProgressBarsConfig,
-    include_rendered_content: IncludeRenderedContentConfig,
 ) -> None:
     """
     What does this test do and why?
@@ -527,12 +497,6 @@ def test_file_data_context_variables_e2e(
     updated_progress_bars.globally = False
     updated_progress_bars.profilers = True
 
-    # Prepare updated include_rendered_content to set and serialize to disk
-    updated_include_rendered_content: IncludeRenderedContentConfig = copy.deepcopy(
-        include_rendered_content
-    )
-    updated_include_rendered_content.expectation_validation_result = True
-
     # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)  # noqa: E501
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
     value_associated_with_env_var: str = "foo/bar/baz"
@@ -540,7 +504,6 @@ def test_file_data_context_variables_e2e(
 
     # Set attributes defined above
     file_data_context.variables.progress_bars = updated_progress_bars
-    file_data_context.variables.include_rendered_content = updated_include_rendered_content
     file_data_context.variables.plugins_directory = f"${env_var_name}"
     file_data_context.variables.save_config()
 
@@ -554,10 +517,6 @@ def test_file_data_context_variables_e2e(
         config_saved_to_disk: DataContextConfig = DataContextConfig(**contents)
 
     assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
-    assert (
-        config_saved_to_disk.include_rendered_content.to_dict()
-        == updated_include_rendered_content.to_dict()
-    )
     assert file_data_context.variables.plugins_directory == value_associated_with_env_var
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
 

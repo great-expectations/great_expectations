@@ -58,14 +58,11 @@ if TYPE_CHECKING:
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.xfail(reason="This test has not yet been rewritten to use V1 checkpoints")
-@pytest.mark.parametrize("include_rendered_content", [False, True])
 def test_run_checkpoint_and_data_doc(
     datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
-    include_rendered_content: bool,
 ):
     run_checkpoint_and_data_doc(
         datasource_test_data=datasource_test_data,
-        include_rendered_content=include_rendered_content,
     )
 
 

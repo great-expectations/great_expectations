@@ -1,7 +1,7 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
 from great_expectations.core.validation_definition import ValidationDefinition
