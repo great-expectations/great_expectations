@@ -4,9 +4,7 @@ title: 'Get support'
 description: Learn what resources are available to help you resolve issues with GX Cloud and GX OSS.
 ---
 
-## Where to get support
-
-### GX Cloud support
+## GX Cloud support
 
 Use one of the following methods to request support:
 
@@ -14,14 +12,16 @@ Use one of the following methods to request support:
 - Create a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/cloud-support/17).
 - Post a message in the [GX Cloud Slack community channel](https://greatexpectationstalk.slack.com/archives/C051D941XAL).
 
-### GX OSS support
+## GX OSS support
 
 Use one of the following methods to request support:
-- Post a message in the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82). 
+
+- Post a message in the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82).
 - Open an issue in the [GX GitHub repository](https://github.com/great-expectations/great_expectations) when you encounter a bug.
 
-
 ## How to effectively get support
+
+Strategies to ensure your questions get resolved quicly.
 
 ### Try solving your issue first
 
