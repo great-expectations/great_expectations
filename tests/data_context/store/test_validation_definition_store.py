@@ -115,7 +115,6 @@ def test_add_cloud(
                             "id": None,
                             "name": "my_batch_definition",
                             "partitioner": None,
-                            "batching_regex": None,
                         },
                         "suite": {
                             "name": "my_suite",
