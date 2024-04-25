@@ -44,9 +44,6 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
-        DataConnector,
-    )
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -57,7 +54,6 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__name__)
-
 
 
 class RegexMissingRequiredGroupsError(ValueError):
