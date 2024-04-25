@@ -770,7 +770,7 @@ MARKER_DEPENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "clickhouse": TestDependencies(("reqs/requirements-dev-clickhouse.txt",)),
     "cloud": TestDependencies(
         (
-            "reqs/requirements-dev-cloud.txt",  # only used for testing
+            "reqs/requirements-dev-cloud.txt",
             "reqs/requirements-dev-snowflake.txt",
             "reqs/requirements-dev-spark.txt",
         ),
