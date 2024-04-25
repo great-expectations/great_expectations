@@ -637,7 +637,7 @@ def docs(
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
-        docs_builder.create_version(version=parse_version(version))  # type: ignore[arg-type]
+        docs_builder.create_version(version=parse_version(version))  # type: ignore[arg-type] # this is ok
     elif start:
         ctx.run(" ".join(["yarn start"]), echo=True)
     elif clear:
