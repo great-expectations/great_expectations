@@ -12,7 +12,7 @@ Use one of the following methods to request support:
 
 - Sending an email to support@greatexpectations.io
 - Creating a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/cloud-support/17).
-- Reaching out in the [GX Cloud Slack community channel](https://greatexpectationstalk.slack.com/archives/C051D941XAL).
+- Post a message in the [GX Cloud Slack community channel](https://greatexpectationstalk.slack.com/archives/C051D941XAL).
 
 ### GX OSS support
 
