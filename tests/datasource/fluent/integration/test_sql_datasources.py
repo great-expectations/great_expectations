@@ -21,6 +21,8 @@ import pytest
 from packaging.version import Version
 from pytest import param
 
+import great_expectations.expectations.core as gxe
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
 )
@@ -33,6 +35,7 @@ from great_expectations.compatibility.sqlalchemy import (
 from great_expectations.compatibility.sqlalchemy import (
     __version__ as sqlalchemy_version,
 )
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
@@ -482,6 +485,64 @@ class TestTableIdentifiers:
         print(f"sqlite tables:\n{pf(table_names)}))")
 
         sqlite_ds.add_table_asset(asset_name, table_name=table_name)
+
+    @pytest.mark.parametrize(
+        "datasource_type,schema",
+        [
+            param("trino", None, marks=[pytest.mark.trino]),
+            param("postgres", None, marks=[pytest.mark.postgresql]),
+            param("snowflake", RAND_SCHEMA, marks=[pytest.mark.snowflake]),
+            param(
+                "databricks_sql",
+                RAND_SCHEMA,
+                marks=[pytest.mark.databricks],
+            ),
+            param("sqlite", None, marks=[pytest.mark.sqlite]),
+        ],
+    )
+    def test_checkpoint_run(
+        self,
+        request: pytest.FixtureRequest,
+        context: EphemeralDataContext,
+        table_factory: TableFactory,
+        asset_name: TableNameCase,
+        datasource_type: DatabaseType,
+        schema: str | None,
+    ):
+        datasource: SQLDatasource = request.getfixturevalue(f"{datasource_type}_ds")
+
+        table_name: str | None = TABLE_NAME_MAPPING[datasource_type].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for {datasource_type}")
+
+        # create table
+        table_factory(
+            gx_engine=datasource.get_execution_engine(),
+            table_names={table_name},
+            schema=schema,
+        )
+
+        asset = datasource.add_table_asset(asset_name, table_name=table_name, schema_name=schema)
+        batch_definition = asset.add_batch_definition_whole_table("whole table!")
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name=f"{datasource.name}-{asset.name}"
+        )
+        suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name", mostly=1))
+        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+
+        checkpoint = context.checkpoints.add(
+            Checkpoint(
+                name=f"{datasource.name}-{asset.name}",
+                validation_definitions=[
+                    ValidationDefinition(name="foo", suite=suite, batch_definition=batch_definition)
+                ],
+            )
+        )
+        result = checkpoint.run()
+
+        _ = _get_exception_details(result, prettyprint=True)
+        assert result.success is True
 
 
 ColNameParamId: TypeAlias = Literal[
