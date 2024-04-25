@@ -21,10 +21,7 @@ def is_gtin_variable_measure_trade_item(gtin_value: str) -> bool:
         gtin_obj = gtin.GTIN(gtin_value)
     except Exception:
         return False
-    if gtin_obj.indicator_digit == "9":
-        return True
-    else:
-        return False
+    return gtin_obj.indicator_digit == "9"
 
 
 # This class defines a Metric to support your Expectation.

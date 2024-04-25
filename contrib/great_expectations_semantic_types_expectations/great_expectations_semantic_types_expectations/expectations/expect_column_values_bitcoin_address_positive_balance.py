@@ -20,10 +20,7 @@ def has_btc_address_positive_balance(addr: str) -> bool:
         res = coinaddrvalidator.validate("btc", addr).valid
         if res is True:
             balance = blockcypher.get_total_balance(addr)
-            if balance > 0:
-                return True
-            else:
-                return False
+            return balance > 0
         else:
             return False
     except Exception:

@@ -3196,10 +3196,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             if exclude_column_names and column_name in exclude_column_names:
                 return False
 
-            if include_column_names and column_name not in include_column_names:
-                return False
-
-            return True
+            return not (include_column_names and column_name not in include_column_names)
 
         column_based_expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
@@ -3228,10 +3225,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             if exclude_column_names and column_name in exclude_column_names:
                 return False
 
-            if include_column_names and column_name not in include_column_names:
-                return False
-
-            return True
+            return not (include_column_names and column_name not in include_column_names)
 
         domains: Set[Domain] = set(filter(lambda m: _filter(m), list(attributed_metrics.keys())))
         filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {

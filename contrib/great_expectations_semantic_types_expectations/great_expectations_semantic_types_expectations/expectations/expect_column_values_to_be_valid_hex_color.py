@@ -20,9 +20,7 @@ class ColumnValuesToBeValidHexColor(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         def matches_hexcolor_regex(x):
-            if re.match(HEX_COLOR_REGEX, str(x)):
-                return True
-            return False
+            return bool(re.match(HEX_COLOR_REGEX, str(x)))
 
         return column.apply(lambda x: matches_hexcolor_regex(x) if x else False)
 

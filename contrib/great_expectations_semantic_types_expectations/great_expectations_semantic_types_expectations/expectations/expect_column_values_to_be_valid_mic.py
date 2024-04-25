@@ -16,10 +16,7 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_mic(mic_code: str, df) -> bool:
     try:
-        if mic_code.upper() in df["MIC"].unique():
-            return True
-        else:
-            return False
+        return mic_code.upper() in df["MIC"].unique()
     except Exception:
         return False
 
