@@ -2,21 +2,34 @@
 
 To modify existing Great Expectations code, you complete the following tasks:
 
-- [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
-
-- [Create a virtual environment (optional)](#create-a-virtual-environment-optional)
-
-- [Install great_expectations](#install-great-expectations-and-extra-requirements-from-your-local-repository)
-
-- [Configure backends for testing (optional)](#configure-backends-for-testing-optional)
-
-- [Test code changes](#test-code-changes)
-
-- [Test performance](#test-performance)
-
-- [Submit a pull request](#submit-a-pull-request)
-
-- [Sign the contributor license agreement (CLA)](#contributor-license-agreement-cla)
+- [Contribute a code change](#contribute-a-code-change)
+  - [Prerequisites](#prerequisites)
+  - [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
+  - [Create a virtual environment (optional)](#create-a-virtual-environment-optional)
+    - [Python](#python)
+    - [Anaconda](#anaconda)
+  - [Install Great Expectations and extra requirements from your local repository](#install-great-expectations-and-extra-requirements-from-your-local-repository)
+  - [Configure backends for testing (optional)](#configure-backends-for-testing-optional)
+    - [Prerequisites](#prerequisites-1)
+    - [PostgreSQL](#postgresql)
+      - [Troubleshooting](#troubleshooting)
+    - [MySQL](#mysql)
+    - [Spark](#spark)
+      - [Prerequisites](#prerequisites-2)
+      - [Install PySpark](#install-pyspark)
+  - [Test code changes](#test-code-changes)
+    - [Unit testing](#unit-testing)
+    - [Marking tests](#marking-tests)
+    - [BigQuery testing](#bigquery-testing)
+    - [Unit testing Expectations](#unit-testing-expectations)
+      - [Data](#data)
+      - [Schemas](#schemas)
+      - [Tests](#tests)
+  - [Test performance](#test-performance)
+  - [Submit a pull request](#submit-a-pull-request)
+  - [Issue tags](#issue-tags)
+  - [Contributor license agreement (CLA)](#contributor-license-agreement-cla)
+  - [Issue Tags](#issue-tags-1)
 
 To discuss your code change before you implement it, join the [Great Expectations Slack community](https://greatexpectations.io/slack) and make your suggestion in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel.
 
@@ -107,7 +120,7 @@ Great Expectations requires a Python version from 3.8 to 3.11.
 
     To specify other dependencies, add a comma after `test` and enter the dependency name(s). **For example, ".[test, postgresql, trino]"**.
 
-    The supported extra dependencies include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `clickhouse`, `cloud`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `teradata`, `test`, `trino`, `vertica`.
+    The supported extra dependencies include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `clickhouse`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `teradata`, `test`, `trino`, `vertica`.
 
     Check below to see if any of your desired dependencies need system packages installed, **before `pip install`**.
 
