@@ -1,4 +1,3 @@
-import re
 from typing import Any, Dict, Generic, Optional
 
 from typing_extensions import TypeAlias
@@ -10,12 +9,11 @@ from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 
 BatchParameters: TypeAlias = Dict[StrictStr, Any]
 
-class BatchRequest(pydantic.BaseModel, Generic[PartitionerT]):
+class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
     datasource_name: StrictStr
     data_asset_name: StrictStr
     options: BatchParameters
     partitioner: Optional[PartitionerT] = None
-    batching_regex: Optional[re.Pattern] = None
 
     def __init__(  # noqa: PLR0913
         self,
@@ -24,7 +22,6 @@ class BatchRequest(pydantic.BaseModel, Generic[PartitionerT]):
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
         partitioner: Optional[PartitionerT] = None,
-        batching_regex: Optional[re.Pattern] = None,
     ) -> None: ...
     @property
     def batch_slice(self) -> slice: ...
