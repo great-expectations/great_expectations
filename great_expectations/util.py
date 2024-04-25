@@ -715,10 +715,7 @@ def _is_to_be_removed_from_deep_filter_properties_iterable(
 
 def is_truthy(value: Any) -> bool:
     try:
-        if value:
-            return True
-        else:
-            return False
+        return bool(value)
     except ValueError:
         return False
 

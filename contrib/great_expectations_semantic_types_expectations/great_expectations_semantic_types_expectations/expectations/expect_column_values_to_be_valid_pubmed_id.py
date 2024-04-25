@@ -20,9 +20,7 @@ class ColumnValuesToBeValidPubmedId(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         def matches_pubmed_id_regex(x):
-            if re.match(PUBMED_ID_REGEX, str(x)):
-                return True
-            return False
+            return bool(re.match(PUBMED_ID_REGEX, str(x)))
 
         return column.apply(lambda x: matches_pubmed_id_regex(x) if x else False)
 
