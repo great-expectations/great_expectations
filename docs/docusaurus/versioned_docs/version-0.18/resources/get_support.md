@@ -21,7 +21,6 @@ Use one of the following methods to request support:
 - Open an issue in the [GX GitHub repository](https://github.com/great-expectations/great_expectations) when you encounter a bug.
 
 - Chat with community members about general issues and seek solutions on the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82).
-- If you've found a bug related to OSS, open an issue in our [GX GitHub repository](https://github.com/great-expectations/great_expectations).
 
 ## How to effectively get support
 
