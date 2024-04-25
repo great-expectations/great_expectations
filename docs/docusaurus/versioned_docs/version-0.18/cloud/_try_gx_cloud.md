@@ -124,11 +124,9 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
     - **Role**: Enter your Snowflake role.
 
-6. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+6. Click **Connect**.
 
-7. Click **Continue**.
-
-8. Select **Table Asset** or **Query Asset** and complete the following fields:
+7. Select **Table Asset** or **Query Asset** and complete the following fields:
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
     
@@ -136,15 +134,15 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-9. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+8. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
     - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
 
     - **Column of datetime type** - Enter the name of the column containing the date and time data.
 
-10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-11. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created.
+10. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created.
 
 </TabItem>
 <TabItem value="PostgreSQL">
@@ -167,11 +165,9 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 4. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
 
-5. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+5. Click **Connect**.
 
-6. Click **Continue**.
-
-7. Select **Table Asset** or **Query Asset** and complete the following fields:
+6. Select **Table Asset** or **Query Asset** and complete the following fields:
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
     
@@ -179,15 +175,15 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-8. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+7. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
     - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
 
     - **Column of datetime type** - Enter the name of the column containing the date and time data.
 
-9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+8. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-10. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created. 
+9. Click **Finish**. The Data Asset(s), a default empty Expectation Suite, and a default Checkpoint are created. 
 
 </TabItem>
 </Tabs>
