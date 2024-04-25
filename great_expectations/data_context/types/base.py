@@ -1357,24 +1357,6 @@ class ProgressBarsConfigSchema(Schema):
     metric_calculations = fields.Boolean()
 
 
-class IncludeRenderedContentConfig(DictDot):
-    def __init__(
-        self,
-        globally: bool = False,
-        expectation_suite: bool = False,
-        expectation_validation_result: bool = False,
-    ) -> None:
-        self.globally = globally
-        self.expectation_suite = expectation_suite
-        self.expectation_validation_result = expectation_validation_result
-
-
-class IncludeRenderedContentConfigSchema(Schema):
-    globally = fields.Boolean(default=False)
-    expectation_suite = fields.Boolean(default=False)
-    expectation_validation_result = fields.Boolean(default=False)
-
-
 class GXCloudConfig(DictDot):
     def __init__(
         self,
@@ -1435,15 +1417,11 @@ class DataContextConfigSchema(Schema):
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
     progress_bars = fields.Nested(ProgressBarsConfigSchema, required=False, allow_none=True)
-    include_rendered_content = fields.Nested(
-        IncludeRenderedContentConfigSchema, required=False, allow_none=True
-    )
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
     # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook  # noqa: E501
     REMOVE_KEYS_IF_NONE = [
         "progress_bars",  # 0.13.49
-        "include_rendered_content",  # 0.15.19,
         "fluent_datasources",
     ]
 
@@ -2210,11 +2188,9 @@ class DataContextConfig(BaseYamlConfig):
             instantiating with yml file.
         progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally, for
             profilers, or metrics calculations.
-        include_rendered_content (Optional[IncludedRenderedContentConfig]): allows rendered content to be configured
-            globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """  # noqa: E501
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913
+    def __init__(  # noqa: C901, PLR0913
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2237,7 +2213,6 @@ class DataContextConfig(BaseYamlConfig):
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
-        include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
         # Set defaults
         if config_version is None:
@@ -2283,11 +2258,6 @@ class DataContextConfig(BaseYamlConfig):
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
         self.progress_bars = progress_bars
-        if include_rendered_content is None:
-            include_rendered_content = IncludeRenderedContentConfig()
-        elif isinstance(include_rendered_content, dict):
-            include_rendered_content = IncludeRenderedContentConfig(**include_rendered_content)
-        self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
 

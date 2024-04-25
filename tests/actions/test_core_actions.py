@@ -23,7 +23,7 @@ from great_expectations.checkpoint.actions import (
     UpdateDataDocsAction,
     ValidationAction,
 )
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
+from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -281,7 +281,7 @@ class TestV1ActionRun:
         action = APINotificationAction(url=url)
 
         with mock.patch.object(requests, "post") as mock_post:
-            action.v1_run(checkpoint_result=checkpoint_result)
+            action.run(checkpoint_result=checkpoint_result)
 
         mock_post.assert_called_once_with(
             url,
@@ -327,7 +327,7 @@ class TestV1ActionRun:
         )
 
         with mock.patch("great_expectations.checkpoint.actions.send_email") as mock_send_email:
-            out = action.v1_run(checkpoint_result=checkpoint_result)
+            out = action.run(checkpoint_result=checkpoint_result)
 
         # Should contain success/failure in title
         assert "True" in mock_send_email.call_args.kwargs["title"]
@@ -358,7 +358,7 @@ class TestV1ActionRun:
         action = MicrosoftTeamsNotificationAction(teams_webhook="test")
 
         with mock.patch.object(Session, "post") as mock_post:
-            action.v1_run(checkpoint_result=checkpoint_result)
+            action.run(checkpoint_result=checkpoint_result)
 
         mock_post.assert_called_once()
 
@@ -451,7 +451,7 @@ class TestV1ActionRun:
         checkpoint_result.success = success
 
         with mock.patch.object(Session, "post") as mock_post:
-            output = action.v1_run(checkpoint_result=checkpoint_result)
+            output = action.run(checkpoint_result=checkpoint_result)
 
         mock_post.assert_called_once()
         assert message in mock_post.call_args.kwargs["json"]["message"]
@@ -469,12 +469,12 @@ class TestV1ActionRun:
             checkpoint_name = checkpoint_result.checkpoint_config.name
 
             checkpoint_result.success = True
-            assert action.v1_run(checkpoint_result=checkpoint_result) == {
+            assert action.run(checkpoint_result=checkpoint_result) == {
                 "pagerduty_alert_result": "success"
             }
 
             checkpoint_result.success = False
-            assert action.v1_run(checkpoint_result=checkpoint_result) == {
+            assert action.run(checkpoint_result=checkpoint_result) == {
                 "pagerduty_alert_result": "success"
             }
 
@@ -520,7 +520,7 @@ class TestV1ActionRun:
         action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="failure")
 
         checkpoint_result.success = True
-        assert action.v1_run(checkpoint_result=checkpoint_result) == {
+        assert action.run(checkpoint_result=checkpoint_result) == {
             "pagerduty_alert_result": "none sent"
         }
 
@@ -531,7 +531,7 @@ class TestV1ActionRun:
         action = SlackNotificationAction(slack_webhook="test", notify_on="all")
 
         with mock.patch.object(Session, "post") as mock_post:
-            output = action.v1_run(checkpoint_result=checkpoint_result)
+            output = action.run(checkpoint_result=checkpoint_result)
 
         assert mock_post.call_count == 5  # Sent in batches
         mock_post.assert_called_with(
@@ -581,7 +581,7 @@ class TestV1ActionRun:
             sns_message_subject="Subject",
         )
 
-        result = action.v1_run(checkpoint_result=checkpoint_result)
+        result = action.run(checkpoint_result=checkpoint_result)
         assert "Successfully posted results" in result["result"]
 
     @pytest.mark.unit
@@ -610,7 +610,7 @@ class TestV1ActionRun:
 
         # Act
         action = UpdateDataDocsAction(site_names=site_names)
-        res = action.v1_run(checkpoint_result=checkpoint_result)
+        res = action.run(checkpoint_result=checkpoint_result)
 
         # Assert
         validation_identifier_a, validation_identifier_b = tuple(
@@ -678,7 +678,7 @@ class TestV1ActionRun:
 
         # Act
         action = UpdateDataDocsAction(site_names=site_names)
-        res = action.v1_run(checkpoint_result=checkpoint_result)
+        res = action.run(checkpoint_result=checkpoint_result)
 
         # Assert
         validation_identifier_a, validation_identifier_b = tuple(
