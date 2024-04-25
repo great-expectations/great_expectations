@@ -15,10 +15,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_valid_tld(tld: str, valid_tlds) -> bool:
-    if tld.upper() in valid_tlds:
-        return True
-    else:
-        return False
+    return tld.upper() in valid_tlds
 
 
 # This class defines a Metric to support your Expectation.

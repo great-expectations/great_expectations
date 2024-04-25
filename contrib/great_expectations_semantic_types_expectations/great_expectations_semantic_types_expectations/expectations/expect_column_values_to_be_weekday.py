@@ -23,10 +23,7 @@ def is_weekday(ds) -> bool:
         print(d)
     except Exception:
         return False
-    if not d.weekday() > 4:
-        return True
-    else:
-        return False
+    return bool(not d.weekday() > 4)
 
 
 # This class defines a Metric to support your Expectation.

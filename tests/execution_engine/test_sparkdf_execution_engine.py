@@ -622,9 +622,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
 def dataframes_equal(first_table, second_table):
     if first_table.schema != second_table.schema:
         return False
-    if first_table.collect() != second_table.collect():
-        return False
-    return True
+    return not first_table.collect() != second_table.collect()
 
 
 # Ensuring that, given aggregate metrics, they can be properly bundled together
