@@ -43,28 +43,6 @@ stores:
     module_name: great_expectations.data_context.store
     class_name: SuiteParameterStore
 
-validation_operators:
-  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
-  action_list_operator:
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          target_store_name: validation_results_store
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-      # Uncomment the notify_slack action below to send notifications during evaluation
-      # - name: notify_slack
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     slack_webhook: ${validation_notification_slack_webhook}
-      #     notify_on: all
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
-
 data_docs_sites:
   local_site: # this is a user-selected name - you may select your own
     class_name: SiteBuilder

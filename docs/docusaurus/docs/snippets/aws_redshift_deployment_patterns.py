@@ -268,17 +268,3 @@ validator.expect_column_values_to_be_between(
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py save_expectations">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
-
-# build Checkpoint
-# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py create_checkpoint">
-checkpoint = context.add_or_update_checkpoint(
-    name="my_checkpoint",
-    validations=[{"batch_request": request, "expectation_suite_name": "test_suite"}],
-)
-# </snippet>
-
-# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py run checkpoint">
-checkpoint_result = checkpoint.run()
-# </snippet>
-
-assert checkpoint_result.success is True

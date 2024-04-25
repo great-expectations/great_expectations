@@ -25,7 +25,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.base import (
         AnonymizedUsageStatisticsConfig,
         DataContextConfig,
-        IncludeRenderedContentConfig,
         ProgressBarsConfig,
     )
     from great_expectations.datasource.fluent.interfaces import (
@@ -45,13 +44,11 @@ class DataContextVariableSchema(str, enum.Enum):
     CHECKPOINT_STORE_NAME = "checkpoint_store_name"
     PROFILER_STORE_NAME = "profiler_store_name"
     PLUGINS_DIRECTORY = "plugins_directory"
-    VALIDATION_OPERATORS = "validation_operators"
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
     ANONYMOUS_USAGE_STATISTICS = "anonymous_usage_statistics"
     PROGRESS_BARS = "progress_bars"
-    INCLUDE_RENDERED_CONTENT = "include_rendered_content"
 
     @classmethod
     def has_value(cls, value: str) -> bool:
@@ -151,14 +148,6 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
 
     @property
-    def validation_operators(self) -> Optional[dict]:
-        return self._get(DataContextVariableSchema.VALIDATION_OPERATORS)
-
-    @validation_operators.setter
-    def validation_operators(self, validation_operators: dict) -> None:
-        self._set(DataContextVariableSchema.VALIDATION_OPERATORS, validation_operators)
-
-    @property
     def expectations_store_name(self) -> Optional[str]:
         return self._get(DataContextVariableSchema.EXPECTATIONS_STORE_NAME)
 
@@ -247,19 +236,6 @@ class DataContextVariables(ABC):
         self._set(
             DataContextVariableSchema.PROGRESS_BARS,
             progress_bars,
-        )
-
-    @property
-    def include_rendered_content(self) -> IncludeRenderedContentConfig:
-        return self._get(DataContextVariableSchema.INCLUDE_RENDERED_CONTENT)
-
-    @include_rendered_content.setter
-    def include_rendered_content(
-        self, include_rendered_content: IncludeRenderedContentConfig
-    ) -> None:
-        self._set(
-            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
-            include_rendered_content,
         )
 
 

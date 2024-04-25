@@ -161,7 +161,6 @@ class Validator:
         expectation_suite_name: The name of the Expectation Suite to validate.
         data_context: The Data Context associated with this Validator.
         batches: The Batches for which to validate.
-        include_rendered_content: If True, the Rendered Content will be included in the ExpectationValidationResult.
     """  # noqa: E501
 
     DEFAULT_RUNTIME_CONFIGURATION = {
@@ -179,7 +178,6 @@ class Validator:
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
         batches: List[Batch] | Sequence[Batch | FluentBatch] = tuple(),
-        include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
         self._data_context: Optional[AbstractDataContext] = data_context
@@ -209,7 +207,11 @@ class Validator:
         # saving expectation config objects
         self._active_validation: bool = False
 
-        self._include_rendered_content: Optional[bool] = include_rendered_content
+    @property
+    def _include_rendered_content(self) -> bool:
+        from great_expectations import project_manager
+
+        return project_manager.is_using_cloud()
 
     @property
     def execution_engine(self) -> ExecutionEngine:
@@ -1408,6 +1410,7 @@ class Validator:
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
+
             statistics = calc_validation_statistics(results)
 
             if only_return_failures:

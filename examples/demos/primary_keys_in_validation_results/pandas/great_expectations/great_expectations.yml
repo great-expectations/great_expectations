@@ -108,7 +108,3 @@ fluent_datasources:
           glob_directive: "*.csv"
         delimiter: "\t"
     base_directory: ../../../data
-include_rendered_content:
-  expectation_validation_result: false
-  expectation_suite: false
-  globally: false

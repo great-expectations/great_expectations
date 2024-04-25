@@ -117,8 +117,6 @@ exclude = [
     'rule_based_profiler/parameter_builder/regex_pattern_string_parameter_builder\.py',                    # 21
     'rule_based_profiler/parameter_builder/simple_date_format_string_parameter_builder\.py',               # 20
     'rule_based_profiler/rule_based_profiler\.py',                                                         # 40
-    'validation_operators/types/validation_operator_result\.py',                                           # 35
-    'validation_operators/validation_operators\.py',                                                       # 16
     # tests
     'tests/actions/test_core_actions\.py',
     'tests/checkpoint/test_checkpoint_result_format\.py',
@@ -191,7 +189,6 @@ module = [
     "great_expectations.render.renderer.*",
     "great_expectations.rule_based_profiler.*",
     "great_expectations.self_check.*",
-    "great_expectations.validation_operators.*",
     "tests.rule_based_profiler.*",
     "tests.test_utils",
 ]
@@ -402,7 +399,7 @@ extend-exclude = [
 runtime-evaluated-base-classes = [
     # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
-    "great_expectations.checkpoint.v1_checkpoint.Checkpoint",
+    "great_expectations.checkpoint.checkpoint.Checkpoint",
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
     "great_expectations.datasource.fluent.interfaces.Datasource",
     "great_expectations.datasource.fluent.sql_datasource.SQLDatasource",
