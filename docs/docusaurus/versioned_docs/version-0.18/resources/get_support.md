@@ -8,7 +8,7 @@ description: Learn what resources are available to help you resolve issues with 
 
 ### GX Cloud support
 
-GX Cloud customers can reach the GX support team through the following channels.
+Use one of the following methods to request support:
 
 - Sending an email to support@greatexpectations.io
 - Creating a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/cloud-support/17).
