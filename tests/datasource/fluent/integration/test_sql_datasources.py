@@ -535,7 +535,7 @@ class TestTableIdentifiers:
             Checkpoint(
                 name=f"{datasource.name}-{asset.name}",
                 validation_definitions=[
-                    ValidationDefinition(name="foo", suite=suite, batch_definition=batch_definition)
+                    ValidationDefinition(name="foo", suite=suite, data=batch_definition)
                 ],
             )
         )
