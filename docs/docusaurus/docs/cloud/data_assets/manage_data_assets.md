@@ -268,13 +268,13 @@ Edit Data Source settings to update Data Source connection information or access
 
 4. Optional. Edit the Data Source name.
 
-5. Optional. If you used a connection string to connect to the Data Source, click the **Use connection string** slider and edit the Data Source connection string.
+5. Optional. If you used a connection string to connect to the Data Source, click the **Connection string** tab and edit the Data Source connection string.
 
 6. Optional. If you're not using a connection string, edit the following fields:
     
+     - **Account identifier**: Enter new Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
+     
      - **Username**: Enter a new Snowflake username.
-
-    - **Account identifier**: Enter new Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
     - **Password**: Enter the password for the Snowflake user you're connecting to GX Cloud. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
