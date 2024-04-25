@@ -157,8 +157,12 @@ def _get_exception_details(
     ]
 ]:
     """Extract a list of exception_info dicts from a CheckpointResult."""
-    first_run_result = next(iter(result.run_results.values()))
-    validation_results = first_run_result.results
+    validation_results: list[
+        dict[
+            Literal["exception_info", "expectation_config", "meta", "result", "success"],
+            dict,
+        ]
+    ] = next(iter(result.dict()["run_results"].values()))["validation_result"]["results"]
     if prettyprint:
         print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
 
