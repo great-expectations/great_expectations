@@ -1084,4 +1084,4 @@ class _NumericIterableWithDtype(Iterable, Protocol):
 def _is_iterable_of_numeric_dtypes(
     obj: Any,
 ) -> TypeGuard[_NumericIterableWithDtype]:
-    return bool(hasattr(obj, "dtype") and np.issubdtype(obj.dtype, np.number))
+    return hasattr(obj, "dtype") and np.issubdtype(obj.dtype, np.number)
