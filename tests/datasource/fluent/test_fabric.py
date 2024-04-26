@@ -44,7 +44,7 @@ def patch_power_bi_datasource(monkeypatch: pytest.MonkeyPatch) -> None:
 def power_bi_datasource(
     empty_data_context: AbstractDataContext, patch_power_bi_datasource: None
 ) -> FabricPowerBIDatasource:
-    datasource = empty_data_context.sources.add_fabric_powerbi(
+    datasource = empty_data_context.data_sources.add_fabric_powerbi(
         "my_power_bi_datasource",
         dataset=_DUMMY_POWER_BI_DATASET_ID,
         workspace=None,

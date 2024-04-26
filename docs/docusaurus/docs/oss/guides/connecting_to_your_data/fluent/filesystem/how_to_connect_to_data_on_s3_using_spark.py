@@ -20,7 +20,7 @@ bucket_name = "superconductive-docs-test"
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_s3_using_spark.py create_datasource">
-datasource = context.sources.add_spark_s3(
+datasource = context.data_sources.add_spark_s3(
     name=datasource_name, bucket=bucket_name, boto3_options=boto3_options
 )
 # </snippet>
