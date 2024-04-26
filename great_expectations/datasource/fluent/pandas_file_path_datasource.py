@@ -17,9 +17,6 @@ from great_expectations.datasource.fluent.pandas_datasource import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
-    )
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
@@ -56,6 +53,7 @@ _FILE_PATH_ASSET_MODELS = _generate_pandas_data_asset_models(
     skip_first_param=True,
 )
 
+
 CSVAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("csv", _RegexDataAssetMixin)
 ExcelAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("excel", _RegexDataAssetMixin)
 FWFAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("fwf", _RegexDataAssetMixin)
@@ -71,4 +69,4 @@ class _PandasFilePathDatasource(_PandasDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_FILE_PATH_ASSET_MODELS.values())
 
     # instance attributes
-    assets: List[_FilePathDataAsset] = []
+    assets: List[_RegexDataAssetMixin] = []
