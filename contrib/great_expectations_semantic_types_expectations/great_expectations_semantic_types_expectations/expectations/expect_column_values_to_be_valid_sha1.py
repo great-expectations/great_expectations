@@ -20,9 +20,7 @@ class ColumnValuesToBeValidSha1(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         def matches_sha1_regex(x):
-            if re.match(SHA1_REGEX, str(x)):
-                return True
-            return False
+            return bool(re.match(SHA1_REGEX, str(x)))
 
         return column.apply(lambda x: matches_sha1_regex(x) if x else False)
 

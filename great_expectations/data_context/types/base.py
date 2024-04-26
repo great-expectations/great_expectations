@@ -1441,7 +1441,7 @@ class DataContextConfigSchema(Schema):
             exc
             and exc.messages
             and isinstance(exc.messages, dict)
-            and all(key is None for key in exc.messages.keys())
+            and all(key is None for key in exc.messages)
         ):
             exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
 

@@ -125,7 +125,7 @@ def build_batch_filter(  # noqa: C901 - too complex
 "{type(batch_filter_parameters)!s}", which is illegal.
                 """  # noqa: E501
             )
-        if not all(isinstance(key, str) for key in batch_filter_parameters.keys()):
+        if not all(isinstance(key, str) for key in batch_filter_parameters):
             raise gx_exceptions.BatchFilterError(  # noqa: TRY003
                 'All batch_filter_parameters keys must strings (Python "str").'
             )

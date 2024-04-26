@@ -13,10 +13,7 @@ def is_valid_iowa_zip(zip: str):
     list_of_iowa_zips = [d["zip_code"] for d in list_of_dicts_of_iowa_zips]
     if len(zip) > 10 or type(zip) != str:  # noqa: E721
         return False
-    elif zip in list_of_iowa_zips:
-        return True
-    else:
-        return False
+    return zip in list_of_iowa_zips
 
 
 # This class defines a Metric to support your Expectation.

@@ -62,7 +62,7 @@ def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
             if not isinstance(batch_filter_parameters, dict):
                 return False
 
-            for key in batch_filter_parameters.keys():
+            for key in batch_filter_parameters:
                 if not (
                     key in batch_definition.batch_identifiers
                     and batch_definition.batch_identifiers[key] == batch_filter_parameters[key]
@@ -73,7 +73,7 @@ def batch_definition_matches_batch_request(  # noqa: C901, PLR0911
         if not isinstance(batch_request.batch_identifiers, dict):
             return False
 
-        for key in batch_request.batch_identifiers.keys():
+        for key in batch_request.batch_identifiers:
             if not (
                 key in batch_definition.batch_identifiers
                 and batch_definition.batch_identifiers[key] == batch_request.batch_identifiers[key]

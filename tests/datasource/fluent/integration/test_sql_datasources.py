@@ -21,6 +21,8 @@ import pytest
 from packaging.version import Version
 from pytest import param
 
+import great_expectations.expectations.core as gxe
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
 )
@@ -33,6 +35,7 @@ from great_expectations.compatibility.sqlalchemy import (
 from great_expectations.compatibility.sqlalchemy import (
     __version__ as sqlalchemy_version,
 )
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
@@ -154,12 +157,8 @@ def _get_exception_details(
     ]
 ]:
     """Extract a list of exception_info dicts from a CheckpointResult."""
-    validation_results: list[
-        dict[
-            Literal["exception_info", "expectation_config", "meta", "result", "success"],
-            dict,
-        ]
-    ] = next(iter(result.dict()["run_results"].values()))["validation_result"]["results"]
+    first_run_result = next(iter(result.run_results.values()))
+    validation_results = first_run_result.results
     if prettyprint:
         print(f"validation_result.results:\n{pf(validation_results, depth=2)}\n")
 
@@ -296,13 +295,11 @@ def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
 
 @pytest.fixture
 def databricks_creds_populated() -> bool:
-    if (
+    return bool(
         os.getenv("DATABRICKS_TOKEN")
         or os.getenv("DATABRICKS_HOST")
         or os.getenv("DATABRICKS_HTTP_PATH")
-    ):
-        return True
-    return False
+    )
 
 
 @pytest.fixture
@@ -322,9 +319,7 @@ def databricks_sql_ds(
 
 @pytest.fixture
 def snowflake_creds_populated() -> bool:
-    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return True
-    return False
+    return bool(os.getenv("SNOWFLAKE_CI_USER_PASSWORD") or os.getenv("SNOWFLAKE_CI_ACCOUNT"))
 
 
 @pytest.fixture
@@ -482,6 +477,66 @@ class TestTableIdentifiers:
         print(f"sqlite tables:\n{pf(table_names)}))")
 
         sqlite_ds.add_table_asset(asset_name, table_name=table_name)
+
+    @pytest.mark.parametrize(
+        "datasource_type,schema",
+        [
+            param("trino", None, marks=[pytest.mark.trino]),
+            param("postgres", None, marks=[pytest.mark.postgresql]),
+            param("snowflake", RAND_SCHEMA, marks=[pytest.mark.snowflake]),
+            param(
+                "databricks_sql",
+                RAND_SCHEMA,
+                marks=[pytest.mark.databricks],
+            ),
+            param("sqlite", None, marks=[pytest.mark.sqlite]),
+        ],
+    )
+    def test_checkpoint_run(
+        self,
+        request: pytest.FixtureRequest,
+        context: EphemeralDataContext,
+        table_factory: TableFactory,
+        asset_name: TableNameCase,
+        datasource_type: DatabaseType,
+        schema: str | None,
+    ):
+        datasource: SQLDatasource = request.getfixturevalue(f"{datasource_type}_ds")
+
+        table_name: str | None = TABLE_NAME_MAPPING[datasource_type].get(asset_name)
+        if not table_name:
+            pytest.skip(f"no '{asset_name}' table_name for {datasource_type}")
+
+        # create table
+        table_factory(
+            gx_engine=datasource.get_execution_engine(),
+            table_names={table_name},
+            schema=schema,
+        )
+
+        asset = datasource.add_table_asset(asset_name, table_name=table_name, schema_name=schema)
+        batch_definition = asset.add_batch_definition_whole_table("whole table!")
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name=f"{datasource.name}-{asset.name}"
+        )
+        suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name", mostly=1))
+        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+
+        checkpoint = context.checkpoints.add(
+            Checkpoint(
+                name=f"{datasource.name}-{asset.name}",
+                validation_definitions=[
+                    ValidationDefinition(
+                        name="validation_definition", suite=suite, data=batch_definition
+                    )
+                ],
+            )
+        )
+        result = checkpoint.run()
+
+        _get_exception_details(result, prettyprint=True)
+        assert result.success is True
 
 
 ColNameParamId: TypeAlias = Literal[

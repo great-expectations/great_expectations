@@ -14,10 +14,7 @@ def is_valid_us_county_fip(county_fip: str):
     list_of_county_fips = [d["fips"] for d in dict_of_counties]
     if len(county_fip) > 5 or type(county_fip) != str:  # noqa: E721
         return False
-    if county_fip in list_of_county_fips:
-        return True
-    else:
-        return False
+    return county_fip in list_of_county_fips
 
 
 # This class defines a Metric to support your Expectation.

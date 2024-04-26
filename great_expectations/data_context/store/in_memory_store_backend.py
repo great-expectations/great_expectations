@@ -71,7 +71,7 @@ class InMemoryStoreBackend(StoreBackend):
         self._store.pop(source_key)
 
     def list_keys(self, prefix=()):
-        return [key for key in self._store.keys() if key[: len(prefix)] == prefix]
+        return [key for key in self._store if key[: len(prefix)] == prefix]
 
     def _has_key(self, key):
         return key in self._store

@@ -22,7 +22,11 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.partitioners import (
-    Partitioner,
+    PartitionerDaily,
+    PartitionerMonthly,
+    PartitionerPath,
+    PartitionerYearly,
+    RegexPartitioner,
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
@@ -31,6 +35,7 @@ from great_expectations.datasource.fluent.batch_request import (
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
+    FilePathDataConnector,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
@@ -45,10 +50,8 @@ from great_expectations.datasource.fluent.interfaces import (
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
-        DataConnector,
-    )
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -61,7 +64,41 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
+class RegexMissingRequiredGroupsError(ValueError):
+    def __init__(self, missing_groups: set[str]):
+        message = (
+            "The following group(s) are required but are "
+            f"missing from the regex: {', '.join(missing_groups)}"
+        )
+        super().__init__(message)
+        self.missing_groups = missing_groups
+
+
+class RegexUnknownGroupsError(ValueError):
+    def __init__(self, unknown_groups: set[str]):
+        message = (
+            "Regex has the following group(s) which do not match "
+            f"batch parameters: {', '.join(unknown_groups)}"
+        )
+        super().__init__(message)
+        self.unknown_groups = unknown_groups
+
+
+class PathNotFoundError(ValueError):
+    def __init__(self, path: PathStr):
+        message = f"Provided path was not able to be resolved: {path} "
+        super().__init__(message)
+        self.path = path
+
+
+class AmbiguousPathError(ValueError):
+    def __init__(self, path: PathStr):
+        message = f"Provided path matched multiple targets, and must match exactly one: {path} "
+        super().__init__(message)
+        self.path = path
+
+
+class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
@@ -92,7 +129,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
     _all_group_names: List[str] = pydantic.PrivateAttr()
 
     # `_data_connector`` should be set inside `_build_data_connector()`
-    _data_connector: DataConnector = pydantic.PrivateAttr()
+    _data_connector: FilePathDataConnector = pydantic.PrivateAttr()
     # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
     _test_connection_error_message: str = pydantic.PrivateAttr("Could not connect to your asset")
 
@@ -120,15 +157,16 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
         self._all_group_index_to_group_name_mapping = (
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
-        self._all_group_names = self._regex_parser.get_all_group_names()
+        self._all_group_names = self._regex_parser.group_names()
 
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[RegexPartitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
-        # todo: add params from partitioner
+        if partitioner:
+            option_keys += tuple(partitioner.param_names)
         return option_keys
 
     @public_api
@@ -137,8 +175,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
+        partitioner: Optional[RegexPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -149,7 +186,6 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
-            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -190,8 +226,103 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
-            batching_regex=batching_regex,
         )
+
+    def _add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
+        """Adds a BatchDefinition which matches a single Path.
+
+        Parameters:
+            name: BatchDefinition name
+            path: File path relative to the Asset
+
+        Raises:
+             PathNotFoundError: path cannot be resolved
+             AmbiguousPathError: path matches more than one file
+        """
+        regex = re.compile(str(path))
+        matched_data_references = len(self._data_connector.get_matched_data_references(regex=regex))
+        # we require path to match exactly 1 file
+        if matched_data_references < 1:
+            raise PathNotFoundError(path=path)
+        elif matched_data_references > 1:
+            raise AmbiguousPathError(path=path)
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerPath(regex=regex),
+        )
+
+    def _add_batch_definition_yearly(self, name: str, regex: re.Pattern) -> BatchDefinition:
+        """Adds a BatchDefinition which defines yearly batches by file name.
+
+        Parameters:
+            name: BatchDefinition name
+            regex: Regular Expression used to define batches by file name.
+                Must contain a single group `year`
+
+        Raises:
+            RegexMissingRequiredGroupsError: regex is missing the group `year`
+            RegexUnknownGroupsError: regex has groups other than `year`
+        """
+        REQUIRED_GROUP_NAME = {"year"}
+        self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAME)
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearly(regex=regex),
+        )
+
+    def _add_batch_definition_monthly(self, name: str, regex: re.Pattern) -> BatchDefinition:
+        """Adds a BatchDefinition which defines monthly batches by file name.
+
+        Parameters:
+            name: BatchDefinition name
+            regex: Regular Expression used to define batches by file name.
+                Must contain the groups `year` and `month`.
+
+        Raises:
+            RegexMissingRequiredGroupsError: regex is missing the groups `year` and/or `month`.
+            RegexUnknownGroupsError: regex has groups other than `year` and/or `month`.
+        """
+        REQUIRED_GROUP_NAMES = {"year", "month"}
+        self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerMonthly(regex=regex),
+        )
+
+    def _add_batch_definition_daily(self, name: str, regex: re.Pattern) -> BatchDefinition:
+        """Adds a BatchDefinition which defines daily batches by file name.
+
+        Parameters:
+            name: BatchDefinition name
+            regex: Regular Expression used to define batches by file name.
+                Must contain the groups `year`, `month`, and `day`.
+
+        Raises:
+            RegexMissingRequiredGroupsError: regex is missing the
+                groups `year`, `month`, and/or `day`.
+            RegexUnknownGroupsError: regex has groups other than `year`, `month`, and/or `day`.
+        """
+        REQUIRED_GROUP_NAMES = {"year", "month", "day"}
+        self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerDaily(regex=regex),
+        )
+
+    @classmethod
+    def _assert_group_names_in_regex(
+        cls, regex: re.Pattern, required_group_names: set[str]
+    ) -> None:
+        regex_parser = RegExParser(
+            regex_pattern=regex,
+        )
+        actual_group_names = set(regex_parser.group_names())
+        if not required_group_names.issubset(actual_group_names):
+            missing_groups = required_group_names - actual_group_names
+            raise RegexMissingRequiredGroupsError(missing_groups)
+        if not actual_group_names.issubset(required_group_names):
+            unknown_groups = actual_group_names - required_group_names
+            raise RegexUnknownGroupsError(unknown_groups)
 
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -209,13 +340,12 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
         ):
             valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
-            expect_batch_request_form = BatchRequest[
-                None
-            ](  # todo: update to a file path specific partitioner
+            expect_batch_request_form = BatchRequest[RegexPartitioner](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
                 batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
+                partitioner=batch_request.partitioner,
             )
             raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                 "BatchRequest should have form:\n"
@@ -267,9 +397,8 @@ class _FilePathDataAsset(DataAsset[DatasourceT, Partitioner], Generic[Datasource
             )
             batch_list.append(batch)
 
-        # todo: re-enable once RegexPartitioners are available
-        # if batch_request.partitioner:
-        #     self.sort_batches(batch_list, batch_request.partitioner)
+        if batch_request.partitioner:
+            self.sort_batches(batch_list, batch_request.partitioner)
 
         return batch_list
 
