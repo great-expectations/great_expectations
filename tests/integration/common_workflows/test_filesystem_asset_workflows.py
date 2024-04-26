@@ -13,10 +13,9 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.partitioners import PartitionerYearAndMonth
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.datasource.fluent.pandas_file_path_datasource import CSVAsset
@@ -63,24 +62,17 @@ def filesystem_whole_table_batch_definition(file_system_asset: CSVAsset) -> Batc
 
 @pytest.fixture
 def filesystem_monthly_batch_definition(file_system_asset: CSVAsset) -> BatchDefinition:
-    return file_system_asset.add_batch_definition(
-        name="monthly",
-        partitioner=PartitionerYearAndMonth(
-            column_name="CHANGE ME"
-        ),  # The column name will be going away with the file-based fluent batch definition API
-        batching_regex=re.compile(BATCHING_REGEX),
+    return file_system_asset._add_batch_definition_monthly(
+        "monthly",
+        re.compile(BATCHING_REGEX),
     )
 
 
 @pytest.fixture
 def filesystem_monthly_batch_definition_descending(file_system_asset: CSVAsset) -> BatchDefinition:
-    return file_system_asset.add_batch_definition(
-        name="monthly",
-        partitioner=PartitionerYearAndMonth(
-            column_name="CHANGE ME",
-            sort_ascending=False,
-        ),  # The column name will be going away with the file-based fluent batch definition API
-        batching_regex=re.compile(BATCHING_REGEX),
+    return file_system_asset._add_batch_definition_monthly(
+        "monthly",
+        re.compile(BATCHING_REGEX),
     )
 
 
