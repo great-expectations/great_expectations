@@ -52,7 +52,7 @@ class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(Column
             predict_options={"show_confidences": True},
         )
 
-        if data_label.upper() in labeler.label_mapping.keys():
+        if data_label.upper() in labeler.label_mapping:
             data_label_ind = labeler.label_mapping[data_label.upper()]
         else:
             raise ValueError(  # noqa: TRY003

@@ -206,7 +206,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
 
         if n_features:
             n_features_success = []
-            for i in importances.keys():
+            for i in importances:
                 if importances[i] >= threshold:
                     n_features_success.append(True)
             n_features_success = len(n_features_success) == int(n_features)

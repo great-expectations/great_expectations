@@ -112,7 +112,7 @@ class SlackRenderer(Renderer):
 
         if notify_with:
             for docs_link_key in notify_with:
-                if docs_link_key in data_docs_pages.keys():
+                if docs_link_key in data_docs_pages:
                     docs_link = data_docs_pages[docs_link_key]
                     report_element = self._get_report_element(docs_link)
                 else:
@@ -133,7 +133,7 @@ class SlackRenderer(Renderer):
                 if report_element:
                     return report_element
         else:
-            for docs_link_key in data_docs_pages.keys():
+            for docs_link_key in data_docs_pages:
                 if docs_link_key == "class":
                     continue
                 docs_link = data_docs_pages[docs_link_key]

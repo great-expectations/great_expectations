@@ -245,7 +245,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 reader_options: dict = batch_spec.reader_options or {}
                 path: str = batch_spec.path
                 s3_url = S3Url(path)
-                if "compression" not in reader_options.keys():
+                if "compression" not in reader_options:
                     inferred_compression_param = sniff_s3_compression(s3_url)
                     if inferred_compression_param is not None:
                         reader_options["compression"] = inferred_compression_param
