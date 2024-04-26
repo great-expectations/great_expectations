@@ -105,6 +105,7 @@ class Validator:
             expectation_configs, suite_parameters
         )
 
+        runtime_configuration: dict
         if isinstance(self.result_format, ResultFormat):
             runtime_configuration = {"result_format": self.result_format.value}
         else:
