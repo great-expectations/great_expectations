@@ -136,7 +136,7 @@ def context_sources_cleanup() -> Generator[_SourceFactories, None, None]:
         # setup
         sources_copy = copy.deepcopy(_SourceFactories._SourceFactories__crud_registry)  # type: ignore[attr-defined]
         type_lookup_copy = copy.deepcopy(_SourceFactories.type_lookup)
-        sources = get_context().sources
+        sources = get_context().data_sources
 
         assert (
             "add_datasource" not in sources.factories
