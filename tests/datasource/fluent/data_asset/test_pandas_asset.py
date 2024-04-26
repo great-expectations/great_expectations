@@ -46,79 +46,91 @@ def _asset_parameters():
             id="ClipboardAsset",
         ),
         pytest.param(
-            CSVAsset(name="test_asset", type="csv"),
+            CSVAsset(name="test_asset", filepath_or_buffer="./test/file", type="csv"),  # type: ignore[call-arg]
             id="CSVAsset",
         ),
         pytest.param(
-            ExcelAsset(name="test_asset", type="excel"),
+            ExcelAsset(name="test_asset", io="./test/file", type="excel"),  # type: ignore[call-arg]
             id="ExcelAsset",
         ),
         pytest.param(
-            FeatherAsset(name="test_asset", type="feather"),
+            FeatherAsset(name="test_asset", path="./test/file", type="feather"),  # type: ignore[call-arg]
             id="FeatherAsset",
         ),
         pytest.param(
-            FWFAsset(name="test_asset", type="fwf"),
+            FWFAsset(name="test_asset", filepath_or_buffer="./test/file", type="fwf"),  # type: ignore[call-arg]
             id="FWFAsset",
         ),
         pytest.param(
-            GBQAsset(name="test_asset", type="gbq"),
+            GBQAsset(name="test_asset", query="select * from my_table;", type="gbq"),  # type: ignore[call-arg]
             id="GBQAsset",
         ),
         pytest.param(
-            HDFAsset(name="test_asset", type="hdf"),
+            HDFAsset(name="test_asset", path_or_buf="./test/file", type="hdf"),  # type: ignore[call-arg]
             id="HDFAsset",
         ),
         pytest.param(
-            HTMLAsset(name="test_asset", type="html"),
+            HTMLAsset(name="test_asset", io="./test/file", type="html"),  # type: ignore[call-arg]
             id="HTMLAsset",
         ),
         pytest.param(
-            JSONAsset(name="test_asset", type="json"),
+            JSONAsset(name="test_asset", path_or_buf="./test/file", type="json"),  # type: ignore[call-arg]
             id="JSONAsset",
         ),
         pytest.param(
-            ORCAsset(name="test_asset", type="orca"),
+            ORCAsset(name="test_asset", path="./test/file", type="orc"),  # type: ignore[call-arg]
             id="ORCAsset",
         ),
         pytest.param(
-            ParquetAsset(name="test_asset", type="parquet"),
+            ParquetAsset(name="test_asset", path="./test/file", type="parquet"),  # type: ignore[call-arg]
             id="ParquetAsset",
         ),
         pytest.param(
-            PickleAsset(name="test_asset", type="pickle"),
+            PickleAsset(name="test_asset", filepath_or_buffer="./test/file", type="pickle"),  # type: ignore[call-arg]
             id="PickleAsset",
         ),
         pytest.param(
-            SQLAsset(name="test_asset", type="sql"),
+            SQLAsset(
+                name="test_asset", sql="select * from my_table;", con="connection:url", type="sql"
+            ),  # type: ignore[call-arg]
             id="SQLAsset",
         ),
         pytest.param(
-            SQLQueryAsset(name="test_asset", type="sql_query"),
+            SQLQueryAsset(
+                name="test_asset",
+                sql="select * from my_table;",
+                con="connection:url",
+                type="sql_query",
+            ),  # type: ignore[call-arg]
             id="SQLQueryAsset",
         ),
         pytest.param(
-            SQLTableAsset(name="test_asset", type="sql_table"),
+            SQLTableAsset(
+                name="test_asset",
+                table_name="my_table",
+                con="connection:url",
+                type="sql_table",
+            ),  # type: ignore[call-arg]
             id="SQLTableAsset",
         ),
         pytest.param(
-            SASAsset(name="test_asset", type="sas"),
+            SASAsset(name="test_asset", filepath_or_buffer="./test/file", type="sas"),  # type: ignore[call-arg]
             id="SASAsset",
         ),
         pytest.param(
-            SPSSAsset(name="test_asset", type="spss"),
+            SPSSAsset(name="test_asset", path="./test/file", type="spss"),  # type: ignore[call-arg]
             id="SPSSAsset",
         ),
         pytest.param(
-            StataAsset(name="test_asset", type="stata"),
+            StataAsset(name="test_asset", filepath_or_buffer="./test/file", type="stata"),  # type: ignore[call-arg]
             id="StataAsset",
         ),
         pytest.param(
-            TableAsset(name="test_asset", type="table"),
+            TableAsset(name="test_asset", filepath_or_buffer="./test/file", type="table"),  # type: ignore[call-arg]
             id="TableAsset",
         ),
         pytest.param(
-            XMLAsset(name="test_asset", type="xml"),
+            XMLAsset(name="test_asset", path_or_buffer="./test/file", type="xml"),  # type: ignore[call-arg]
             id="XMLAsset",
         ),
     ]
