@@ -11,6 +11,7 @@ from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import FileDataContext
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 
 
 @pytest.fixture
@@ -75,6 +76,31 @@ def expect_column_values_to_be_in_set():
     return gxe.ExpectColumnValuesToBeInSet(column="animals", value_set=["cat", "fish", "dog"])
 
 
+def _build_checkpoint(
+    context: AbstractDataContext,
+    expectations: list[gxe.Expectation],
+    asset_name: str,
+    result_format: dict,
+):
+    suite = context.suites.add(
+        suite=ExpectationSuite(name="metrics_exp", expectations=expectations)
+    )
+
+    ds = context.get_datasource("my_datasource")
+    asset = ds.get_asset(asset_name)
+    batch_definition = asset.add_batch_definition(name="my_batch_def")
+
+    validation_definition = ValidationDefinition(
+        name="my_validation_def", suite=suite, data=batch_definition
+    )
+
+    return Checkpoint(
+        name="my_checkpoint",
+        validation_definitions=[validation_definition],
+        result_format=result_format,
+    )
+
+
 @pytest.mark.filesystem
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
@@ -89,29 +115,16 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
           `partial_unexpected_index_list`
         - 1 Expectations added to suite
     """
-    context = data_context_with_connection_to_metrics_db
-
-    suite = context.suites.add(
-        suite=ExpectationSuite(name="metrics_exp", expectations=[expect_column_values_to_be_in_set])
-    )
-
-    ds = context.get_datasource("my_datasource")
-    asset = ds.get_asset("animals_names_asset")
-    batch_definition = asset.add_batch_definition(name="my_batch_def")
-
-    validation_definition = ValidationDefinition(
-        name="my_validation_def", suite=suite, data=batch_definition
-    )
-
-    checkpoint = Checkpoint(
-        name="my_checkpoint",
-        validation_definitions=[validation_definition],
+    checkpoint = _build_checkpoint(
+        context=data_context_with_connection_to_metrics_db,
+        expectations=[expect_column_values_to_be_in_set],
+        asset_name="animals_names_asset",
         result_format={"result_format": "COMPLETE", "unexpected_index_column_names": ["pk_1"]},
     )
 
     result = checkpoint.run()
-
     evrs = list(result.run_results.values())
+
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
     assert index_column_names == ["pk_1"]
 
@@ -122,4 +135,46 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     assert first_result_partial_list == expected_unexpected_indices_output
 
     unexpected_index_query: str = evrs[0]["results"][0]["result"]["unexpected_index_query"]
+    assert unexpected_index_query == expected_sql_query_output
+
+
+@pytest.mark.filesystem
+def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_with_query(
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_sql_query_output: str,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - COMPLETE output, which means we have `unexpected_index_list` and
+         `partial_unexpected_index_list`
+        - 1 Expectations added to suite
+        - return_unexpected_index_query flag set to True
+    """
+    checkpoint = _build_checkpoint(
+        context=data_context_with_connection_to_metrics_db,
+        expectations=[expect_column_values_to_be_in_set],
+        asset_name="animals_names_asset",
+        result_format={
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+            "return_unexpected_index_query": True,
+        },
+    )
+
+    result = checkpoint.run()
+    evrs = list(result.run_results.values())
+
+    index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    assert first_result_full_list == expected_unexpected_indices_output
+
+    first_result_partial_list = evrs[0]["results"][0]["result"]["partial_unexpected_index_list"]
+    assert first_result_partial_list == expected_unexpected_indices_output
+
+    unexpected_index_query = evrs[0]["results"][0]["result"]["unexpected_index_query"]
     assert unexpected_index_query == expected_sql_query_output
