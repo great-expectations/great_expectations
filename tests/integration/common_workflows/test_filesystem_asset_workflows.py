@@ -124,7 +124,6 @@ def _create_test_cases():
             "filesystem_monthly_batch_definition",
             MY_FAVORITE_MONTH,
             id="pandas: batch params",
-            marks=[pytest.mark.xfail(reason="Fix in V1-299", strict=True)],
         ),
     ]
 
