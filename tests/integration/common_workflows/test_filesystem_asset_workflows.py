@@ -21,11 +21,14 @@ from great_expectations.data_context.data_context.abstract_data_context import A
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset as PandasCSVAsset,
 )
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    CSVAsset as SparkCSVAsset,
+)
 
 pytestmark = pytest.mark.filesystem
 
 
-DATASOURCE_NAME = "spark file system"
+DATASOURCE_NAME = "file system"
 ASSET_NAME = "first ten trips in each file"
 
 # constants for what we know about the test data
@@ -47,7 +50,7 @@ EXPECT_10_ROWS = gxe.ExpectTableRowCountToEqual(value=10)
 
 
 @pytest.fixture
-def file_system_asset(context: AbstractDataContext) -> PandasCSVAsset:
+def pandas_file_system_asset(context: AbstractDataContext) -> PandasCSVAsset:
     datasource = context.sources.add_pandas_filesystem(
         DATASOURCE_NAME,
         base_directory="tests/test_sets/taxi_yellow_tripdata_samples/first_ten_trips_in_each_file",  # type: ignore [arg-type]
@@ -58,23 +61,66 @@ def file_system_asset(context: AbstractDataContext) -> PandasCSVAsset:
 
 
 @pytest.fixture
-def filesystem_whole_table_batch_definition(file_system_asset: PandasCSVAsset) -> BatchDefinition:
-    return file_system_asset.add_batch_definition("no batching regex")
+def pandas_filesystem_whole_table_batch_definition(
+    pandas_file_system_asset: PandasCSVAsset,
+) -> BatchDefinition:
+    return pandas_file_system_asset.add_batch_definition("no batching regex")
 
 
 @pytest.fixture
-def filesystem_monthly_batch_definition(file_system_asset: PandasCSVAsset) -> BatchDefinition:
-    return file_system_asset.add_batch_definition_monthly(
+def pandas_filesystem_monthly_batch_definition(
+    pandas_file_system_asset: PandasCSVAsset,
+) -> BatchDefinition:
+    return pandas_file_system_asset.add_batch_definition_monthly(
         "monthly",
         re.compile(BATCHING_REGEX),
     )
 
 
 @pytest.fixture
-def filesystem_monthly_batch_definition_descending(
-    file_system_asset: PandasCSVAsset,
+def pandas_filesystem_monthly_batch_definition_descending(
+    pandas_file_system_asset: PandasCSVAsset,
 ) -> BatchDefinition:
-    return file_system_asset.add_batch_definition_monthly(
+    return pandas_file_system_asset.add_batch_definition_monthly(
+        "monthly",
+        re.compile(BATCHING_REGEX),
+        sort_ascending=False,
+    )
+
+
+@pytest.fixture
+def spark_file_system_asset(context: AbstractDataContext) -> SparkCSVAsset:
+    datasource = context.sources.add_spark_filesystem(
+        DATASOURCE_NAME,
+        base_directory="tests/test_sets/taxi_yellow_tripdata_samples/first_ten_trips_in_each_file",  # type: ignore [arg-type]
+    )
+    data_asset = datasource.add_csv_asset(name=ASSET_NAME, batching_regex=BATCHING_REGEX)
+
+    return data_asset
+
+
+@pytest.fixture
+def spark_filesystem_whole_table_batch_definition(
+    spark_file_system_asset: SparkCSVAsset,
+) -> BatchDefinition:
+    return spark_file_system_asset.add_batch_definition("no batching regex")
+
+
+@pytest.fixture
+def spark_filesystem_monthly_batch_definition(
+    spark_file_system_asset: SparkCSVAsset,
+) -> BatchDefinition:
+    return spark_file_system_asset.add_batch_definition_monthly(
+        "monthly",
+        re.compile(BATCHING_REGEX),
+    )
+
+
+@pytest.fixture
+def spark_filesystem_monthly_batch_definition_descending(
+    spark_file_system_asset: PandasCSVAsset,
+) -> BatchDefinition:
+    return spark_file_system_asset.add_batch_definition_monthly(
         "monthly",
         re.compile(BATCHING_REGEX),
         sort_ascending=False,
@@ -92,40 +138,46 @@ def _create_test_cases():
     - The fixture name for the batch definition
     - The batch_parameters to pass in during validation
     """
-    return [
-        pytest.param(
-            gxe.ExpectColumnDistinctValuesToEqualSet(
-                column=COLUMN_NAME, value_set=VALUES_FOR_MOST_RECENT_DATE
-            ),
-            "filesystem_whole_table_batch_definition",
-            None,  # no batch parameters
-            id="pandas: no batching regex - takes the last file",
-        ),
-        pytest.param(
-            gxe.ExpectColumnDistinctValuesToEqualSet(
-                column=COLUMN_NAME, value_set=VALUES_FOR_MOST_RECENT_DATE
-            ),
-            "filesystem_monthly_batch_definition",
-            None,  # no batch parameters
-            id="pandas: ascending",
-        ),
-        pytest.param(
-            gxe.ExpectColumnDistinctValuesToEqualSet(
-                column=COLUMN_NAME, value_set=VALUES_FOR_OLDEST_DATE
-            ),
-            "filesystem_monthly_batch_definition_descending",
-            None,  # no batch parameters
-            id="pandas: descending",
-        ),
-        pytest.param(
-            gxe.ExpectColumnDistinctValuesToEqualSet(
-                column=COLUMN_NAME, value_set=VALUES_ON_MY_FAVORITE_MONTH
-            ),
-            "filesystem_monthly_batch_definition",
-            MY_FAVORITE_MONTH,
-            id="pandas: batch params",
-        ),
-    ]
+    test_cases = []
+
+    for datasource_type in ["pandas", "spark"]:
+        test_cases.extend(
+            [
+                pytest.param(
+                    gxe.ExpectColumnDistinctValuesToEqualSet(
+                        column=COLUMN_NAME, value_set=VALUES_FOR_MOST_RECENT_DATE
+                    ),
+                    f"{datasource_type}_filesystem_whole_table_batch_definition",
+                    None,  # no batch parameters
+                    id=f"{datasource_type}: no batching regex - takes the last file",
+                ),
+                pytest.param(
+                    gxe.ExpectColumnDistinctValuesToEqualSet(
+                        column=COLUMN_NAME, value_set=VALUES_FOR_MOST_RECENT_DATE
+                    ),
+                    f"{datasource_type}_filesystem_monthly_batch_definition",
+                    None,  # no batch parameters
+                    id=f"{datasource_type}: ascending",
+                ),
+                pytest.param(
+                    gxe.ExpectColumnDistinctValuesToEqualSet(
+                        column=COLUMN_NAME, value_set=VALUES_FOR_OLDEST_DATE
+                    ),
+                    f"{datasource_type}_filesystem_monthly_batch_definition_descending",
+                    None,  # no batch parameters
+                    id=f"{datasource_type}: descending",
+                ),
+                pytest.param(
+                    gxe.ExpectColumnDistinctValuesToEqualSet(
+                        column=COLUMN_NAME, value_set=VALUES_ON_MY_FAVORITE_MONTH
+                    ),
+                    f"{datasource_type}_filesystem_monthly_batch_definition",
+                    MY_FAVORITE_MONTH,
+                    id=f"{datasource_type}: batch params",
+                ),
+            ]
+        )
+    return test_cases
 
 
 @pytest.mark.parametrize(
