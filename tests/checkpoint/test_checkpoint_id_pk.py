@@ -459,3 +459,114 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
 
     unexpected_index_query = evrs[0]["results"][0]["result"]["unexpected_index_query"]
     assert unexpected_index_query == expected_sql_query_output
+
+
+@pytest.mark.filesystem
+def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - SUMMARY output, which means we have `partial_unexpected_index_list` only
+        - 1 Expectations added to suite
+    """
+    checkpoint = _build_checkpoint(
+        context=data_context_with_connection_to_metrics_db,
+        expectations=[
+            expect_column_values_to_be_in_set,
+        ],
+        asset_name=ANIMAL_ASSET,
+        result_format={
+            "result_format": "SUMMARY",
+            "unexpected_index_column_names": ["pk_1"],
+        },
+    )
+
+    result = checkpoint.run()
+    evrs = list(result.run_results.values())
+
+    index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list = evrs[0]["results"][0]["result"].get("unexpected_index_list")
+    assert not first_result_full_list
+
+    first_result_partial_list = evrs[0]["results"][0]["result"]["partial_unexpected_index_list"]
+    assert first_result_partial_list == expected_unexpected_indices_output
+
+
+@pytest.mark.filesystem
+def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - BASIC output, which means we have no unexpected_index_list output
+        - 1 Expectations added to suite
+    """
+    checkpoint = _build_checkpoint(
+        context=data_context_with_connection_to_metrics_db,
+        expectations=[
+            expect_column_values_to_be_in_set,
+        ],
+        asset_name=ANIMAL_ASSET,
+        result_format={
+            "result_format": "BASIC",
+            "unexpected_index_column_names": ["pk_1"],
+        },
+    )
+
+    result = checkpoint.run()
+    evrs = list(result.run_results.values())
+
+    index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list = evrs[0]["results"][0]["result"].get("unexpected_index_list")
+    assert not first_result_full_list
+
+    first_result_partial_list = evrs[0]["results"][0]["result"].get("partial_unexpected_index_list")
+    assert not first_result_partial_list
+
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
+
+
+@pytest.mark.filesystem
+def test_sql_complete_output_no_id_pk_fallback(
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
+):
+    checkpoint = _build_checkpoint(
+        context=data_context_with_connection_to_metrics_db,
+        expectations=[
+            expect_column_values_to_be_in_set,
+        ],
+        asset_name=ANIMAL_ASSET,
+        result_format={
+            "result_format": "COMPLETE",
+        },
+    )
+
+    result = checkpoint.run()
+    evrs = list(result.run_results.values())
+
+    index_column_names = evrs[0]["results"][0]["result"].get("unexpected_index_column_names")
+    assert not index_column_names
+
+    first_result_full_list = evrs[0]["results"][0]["result"].get("unexpected_index_list")
+    assert not first_result_full_list
+
+    first_result_partial_list = evrs[0]["results"][0]["result"].get("partial_unexpected_index_list")
+    assert not first_result_partial_list
+
+    unexpected_index_query = evrs[0]["results"][0]["result"].get("unexpected_index_query")
+    # query does not contain id_pk column
+    assert (
+        unexpected_index_query
+        == "SELECT animals \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"  # noqa: E501
+    )
