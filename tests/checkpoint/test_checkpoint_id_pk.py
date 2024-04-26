@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pathlib
 
 import pytest
@@ -53,6 +55,22 @@ def data_context_with_connection_to_metrics_db(
 
 
 @pytest.fixture
+def expected_unexpected_indices_output() -> list[dict]:
+    return [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
+
+
+@pytest.fixture
+def expected_sql_query_output() -> str:
+    return "SELECT pk_1, animals \n\
+FROM animal_names \n\
+WHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
+
+
+@pytest.fixture
 def expect_column_values_to_be_in_set():
     return gxe.ExpectColumnValuesToBeInSet(column="animals", value_set=["cat", "fish", "dog"])
 
@@ -61,6 +79,8 @@ def expect_column_values_to_be_in_set():
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
+    expected_unexpected_indices_output: list[dict],
+    expected_sql_query_output: str,
 ):
     """
     What does this test?
@@ -91,22 +111,15 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
     result = checkpoint.run()
 
-    print(result)
     evrs = list(result.run_results.values())
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
     assert index_column_names == ["pk_1"]
 
-    # first_result_full_list = evrs[0]["results"][0]["result"][
-    #     "unexpected_index_list"
-    # ]
-    # assert first_result_full_list == expected_unexpected_indices_output
+    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    assert first_result_full_list == expected_unexpected_indices_output
 
-    # first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
-    #     "partial_unexpected_index_list"
-    # ]
-    # assert first_result_partial_list == expected_unexpected_indices_output
+    first_result_partial_list = evrs[0]["results"][0]["result"]["partial_unexpected_index_list"]
+    assert first_result_partial_list == expected_unexpected_indices_output
 
-    # unexpected_index_query: str = evrs[0]["results"][0]["result"][
-    #     "unexpected_index_query"
-    # ]
-    # assert unexpected_index_query == expected_sql_query_output
+    unexpected_index_query: str = evrs[0]["results"][0]["result"]["unexpected_index_query"]
+    assert unexpected_index_query == expected_sql_query_output

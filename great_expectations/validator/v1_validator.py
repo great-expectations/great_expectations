@@ -108,7 +108,7 @@ class Validator:
         if isinstance(self.result_format, ResultFormat):
             runtime_configuration = {"result_format": self.result_format.value}
         else:
-            runtime_configuration = self.result_format
+            runtime_configuration = {"result_format": self.result_format}
 
         results = self._wrapped_validator.graph_validate(
             configurations=processed_expectation_configs,
