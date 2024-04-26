@@ -4,7 +4,7 @@ title: 'Get support'
 description: Learn what resources are available to help you resolve issues with GX Cloud and GX OSS.
 ---
 
-Using the appropriate support channels can save time and improve response times.
+Knowing how and where to request GX support can reduce downtime and improve response times.
 
 ## GX Cloud support
 
@@ -25,7 +25,6 @@ Use one of the following methods to request support:
 
 The following are some recommendations for resolving issues on your own. Resolving issues on your own builds your knowledge and allows you to share that knowledge with the community.
 
-### Try solving your issue first
 
 The following are some recommendations for resolving issues on your own. Resolving issues on your own builds your knowledge and allows you to share that knowledge with the community.
 
