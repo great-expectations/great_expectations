@@ -55,9 +55,7 @@ def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):  # noqa:
 
     Whitelisted docstrings contain the WHITELISTED_TAG.
     """
-    if obj.__doc__ is not None and WHITELISTED_TAG in obj.__doc__:
-        return False
-    return True
+    return not (obj.__doc__ is not None and WHITELISTED_TAG in obj.__doc__)
 
 
 def custom_process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913

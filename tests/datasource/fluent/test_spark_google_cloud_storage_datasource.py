@@ -430,5 +430,5 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
         batch_metadata=asset_specified_metadata,
         gcs_recursive_file_discovery=True,
     )
-    assert "recursive" in mock_list_keys.call_args.kwargs.keys()
+    assert "recursive" in mock_list_keys.call_args.kwargs
     assert mock_list_keys.call_args.kwargs["recursive"] is True

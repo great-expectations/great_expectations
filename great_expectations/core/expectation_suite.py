@@ -104,8 +104,8 @@ class ExpectationSuite(SerializableDictDot):
         if meta is None:
             meta = {"great_expectations_version": ge_version}
         if (
-            "great_expectations.__version__" not in meta.keys()
-            and "great_expectations_version" not in meta.keys()
+            "great_expectations.__version__" not in meta
+            and "great_expectations_version" not in meta
         ):
             meta["great_expectations_version"] = ge_version
         # We require meta information to be serializable, but do not convert until necessary

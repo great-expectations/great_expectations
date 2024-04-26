@@ -18,10 +18,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_india_zip(zip: str):
     if len(zip) != 6 or zip.isnumeric() is False:
         return False
-    elif indiapins.isvalid(zip):
-        return True
-    else:
-        return False
+    return bool(indiapins.isvalid(zip))
 
 
 # This class defines a Metric to support your Expectation.

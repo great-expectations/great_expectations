@@ -165,7 +165,7 @@ class CheckpointResult(SerializableDictDot):
             self._expectation_suite_names = list(
                 {
                     validation_result_identifier.expectation_suite_identifier.name
-                    for validation_result_identifier in self.run_results.keys()
+                    for validation_result_identifier in self.run_results
                 }
             )
         return self._expectation_suite_names

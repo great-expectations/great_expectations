@@ -19,10 +19,7 @@ def imsi_country_code(imsi_num: str, country_code) -> bool:
     try:
         imsi.validate(imsi_num)
         country = imsi.info(imsi_num)["cc"].lower()
-        if country_code.lower() == country:
-            return True
-        else:
-            return False
+        return country_code.lower() == country
     except Exception:
         return False
 

@@ -51,7 +51,10 @@ from great_expectations.datasource.fluent.fluent_base_model import (
     GenericBaseModel,
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
-from great_expectations.exceptions.exceptions import DataContextError, MissingDataContextError
+from great_expectations.exceptions.exceptions import (
+    DataContextError,
+    MissingDataContextError,
+)
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
@@ -197,15 +200,11 @@ SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 def _is_sorter_list(
     sorters: SortersDefinition,
 ) -> TypeGuard[list[Sorter]]:
-    if len(sorters) == 0 or isinstance(sorters[0], Sorter):
-        return True
-    return False
+    return len(sorters) == 0 or isinstance(sorters[0], Sorter)
 
 
 def _is_str_sorter_list(sorters: SortersDefinition) -> TypeGuard[list[str]]:
-    if len(sorters) > 0 and isinstance(sorters[0], str):
-        return True
-    return False
+    return len(sorters) > 0 and isinstance(sorters[0], str)
 
 
 def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
@@ -220,7 +219,9 @@ def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
 
     # This should never be reached because of static typing but is necessary because
     # mypy doesn't know of the if conditions must evaluate to True.
-    raise ValueError(f"sorters is a not a SortersDefinition but is a {type(sorters)}")  # noqa: TRY003
+    raise ValueError(  # noqa: TRY003
+        f"sorters is a not a SortersDefinition but is a {type(sorters)}"
+    )
 
 
 def _sorter_from_str(sort_key: str) -> Sorter:
@@ -412,9 +413,13 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
             if batch_definition.name == batch_definition_name
         ]
         if len(batch_definitions) == 0:
-            raise KeyError(f"BatchDefinition {batch_definition_name} not found")  # noqa: TRY003
+            raise KeyError(  # noqa: TRY003
+                f"BatchDefinition {batch_definition_name} not found"
+            )
         elif len(batch_definitions) > 1:
-            raise KeyError(f"Multiple keys for {batch_definition_name} found")  # noqa: TRY003
+            raise KeyError(  # noqa: TRY003
+                f"Multiple keys for {batch_definition_name} found"
+            )
         return batch_definitions[0]
 
     def _batch_parameters_are_valid(
@@ -593,7 +598,9 @@ class Datasource(
     ) -> BatchDefinition[PartitionerT]:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
-            raise DataContextError("Cannot save datasource without a data context.")  # noqa: TRY003
+            raise DataContextError(  # noqa: TRY003
+                "Cannot save datasource without a data context."
+            )
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
@@ -615,7 +622,9 @@ class Datasource(
     def delete_batch_definition(self, batch_definition: BatchDefinition[PartitionerT]) -> None:
         asset_name = batch_definition.data_asset.name
         if not self.data_context:
-            raise DataContextError("Cannot save datasource without a data context.")  # noqa: TRY003
+            raise DataContextError(  # noqa: TRY003
+                "Cannot save datasource without a data context."
+            )
 
         loaded_datasource = self.data_context.get_datasource(self.name)
         if loaded_datasource is not self:
@@ -804,7 +813,9 @@ class Datasource(
             for idx, sorter in enumerate(order_by):
                 if isinstance(sorter, str):
                     if not sorter:
-                        raise ValueError('"order_by" list cannot contain an empty string')  # noqa: TRY003
+                        raise ValueError(  # noqa: TRY003
+                            '"order_by" list cannot contain an empty string'
+                        )
                     order_by_sorters.append(_sorter_from_str(sorter))
                 elif isinstance(sorter, dict):
                     key: Optional[Any] = sorter.get("key")
@@ -814,7 +825,9 @@ class Datasource(
                     elif key:
                         order_by_sorters.append(Sorter(key=key))
                     else:
-                        raise ValueError('"order_by" list dict must have a key named "key"')  # noqa: TRY003
+                        raise ValueError(  # noqa: TRY003
+                            '"order_by" list dict must have a key named "key"'
+                        )
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
@@ -884,7 +897,7 @@ class Datasource(
 
 
 # This is used to prevent passing things like `type`, `assets` etc. to the execution engine
-_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__.keys()}
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1083,9 +1096,14 @@ class Batch:
             raise ValueError(  # noqa: TRY003
                 "We can't validate batches that are attached to datasources without a data context"
             )
-        batch_definition = self.data_asset.add_batch_definition(
-            name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())])
+
+        # note: batch definition is created but NOT added to the asset, as it should not persist
+        batch_definition = BatchDefinition(
+            name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())]),
+            partitioner=self.batch_request.partitioner,
         )
+        batch_definition.set_data_asset(self.data_asset)
+
         return V1Validator(
             batch_definition=batch_definition,
             batch_parameters=self.batch_request.options,
