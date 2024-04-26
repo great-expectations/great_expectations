@@ -323,7 +323,7 @@ class HtmlSiteStore:
         if not isinstance(key, SiteSectionIdentifier):
             raise TypeError(f"key: {key!r} must be a SiteSectionIdentifier, not {type(key)!r}")  # noqa: TRY003
 
-        for key_class in self.store_backends.keys():
+        for key_class in self.store_backends:
             try:
                 if isinstance(key.resource_identifier, key_class):
                     return

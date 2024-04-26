@@ -200,5 +200,5 @@ def test_profile_data_profiler_structured_data_assistant_result_batch_id_to_batc
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY]
             if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
             else {}
-        ).keys()
+        )
     )

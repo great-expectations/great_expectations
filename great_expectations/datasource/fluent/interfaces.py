@@ -897,7 +897,7 @@ class Datasource(
 
 
 # This is used to prevent passing things like `type`, `assets` etc. to the execution engine
-_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__.keys()}
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__}
 
 
 @dataclasses.dataclass(frozen=True)

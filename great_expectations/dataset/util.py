@@ -284,25 +284,25 @@ def infer_distribution_parameters(data, distribution, params=None):  # noqa: C90
     elif not isinstance(params, dict):
         raise TypeError("params must be a dictionary object, see great_expectations documentation")  # noqa: TRY003
 
-    if "mean" not in params.keys():
+    if "mean" not in params:
         params["mean"] = data.mean()
 
-    if "std_dev" not in params.keys():
+    if "std_dev" not in params:
         params["std_dev"] = data.std()
 
     if distribution == "beta":
         # scipy cdf(x, a, b, loc=0, scale=1)
-        if "alpha" not in params.keys():
+        if "alpha" not in params:
             # from https://stats.stackexchange.com/questions/12232/calculating-the-parameters-of-a-beta-distribution-using-the-mean-and-variance
             params["alpha"] = (params["mean"] ** 2) * (
                 ((1 - params["mean"]) / params["std_dev"] ** 2) - (1 / params["mean"])
             )
-        if "beta" not in params.keys():
+        if "beta" not in params:
             params["beta"] = params["alpha"] * ((1 / params["mean"]) - 1)
 
     elif distribution == "gamma":
         # scipy cdf(x, a, loc=0, scale=1)
-        if "alpha" not in params.keys():
+        if "alpha" not in params:
             # Using https://en.wikipedia.org/wiki/Gamma_distribution
             params["alpha"] = params["mean"] / params.get("scale", 1)
 
@@ -312,20 +312,20 @@ def infer_distribution_parameters(data, distribution, params=None):  # noqa: C90
 
     elif distribution == "uniform":
         # scipy cdf(x, loc=0, scale=1)
-        if "min" not in params.keys():
-            if "loc" in params.keys():
+        if "min" not in params:
+            if "loc" in params:
                 params["min"] = params["loc"]
             else:
                 params["min"] = min(data)
-        if "max" not in params.keys():
-            if "scale" in params.keys():
+        if "max" not in params:
+            if "scale" in params:
                 params["max"] = params["scale"]
             else:
                 params["max"] = max(data) - params["min"]
 
     elif distribution == "chi2":
         # scipy cdf(x, df, loc=0, scale=1)
-        if "df" not in params.keys():
+        if "df" not in params:
             # from https://en.wikipedia.org/wiki/Chi-squared_distribution
             params["df"] = params["mean"]
 
