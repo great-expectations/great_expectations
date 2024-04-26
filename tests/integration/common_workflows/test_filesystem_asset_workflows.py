@@ -94,6 +94,7 @@ def spark_file_system_asset(context: AbstractDataContext) -> SparkCSVAsset:
     data_asset = datasource.add_csv_asset(
         name=ASSET_NAME,
         batching_regex=BATCHING_REGEX,
+        header=True,
         infer_schema=True,
     )
 
