@@ -10,7 +10,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
@@ -62,7 +62,7 @@ def postgres_daily_batch_definition_descending(postgres_asset: _SQLAsset) -> Bat
     )
 
 
-def _create_test_cases(skip_daily_batch_definitions: bool = False):
+def _create_test_cases():
     """Create our test cases.
 
     With each flow, we want to see that we can validate an entire asset,
@@ -87,9 +87,6 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
             "postgres_daily_batch_definition",
             None,  # no batch parameters
             id="ascending",
-            marks=[
-                pytest.mark.xfail(skip_daily_batch_definitions, reason="Fix in V1-297", strict=True)
-            ],
         ),
         pytest.param(
             gxe.ExpectColumnDistinctValuesToEqualSet(
@@ -98,9 +95,6 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
             "postgres_daily_batch_definition_descending",
             None,  # no batch parameters
             id="descending",
-            marks=[
-                pytest.mark.xfail(skip_daily_batch_definitions, reason="Fix in V1-297", strict=True)
-            ],
         ),
         pytest.param(
             gxe.ExpectColumnDistinctValuesToEqualSet(
@@ -109,16 +103,13 @@ def _create_test_cases(skip_daily_batch_definitions: bool = False):
             "postgres_daily_batch_definition",
             MY_FAVORITE_DAY,
             id="batch params",
-            marks=[
-                pytest.mark.xfail(skip_daily_batch_definitions, reason="Fix in V1-297", strict=True)
-            ],
         ),
     ]
 
 
 @pytest.mark.parametrize(
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
-    _create_test_cases(skip_daily_batch_definitions=True),
+    _create_test_cases(),
 )
 def test_batch_validate_expectation(
     expectation: gxe.Expectation,
@@ -128,7 +119,7 @@ def test_batch_validate_expectation(
 ) -> None:
     """Ensure Batch::validate(Epectation) works"""
 
-    batch_definition = request.getfixturevalue(batch_definition_fixture_name)
+    batch_definition: BatchDefinition = request.getfixturevalue(batch_definition_fixture_name)
     batch = batch_definition.get_batch(batch_parameters=batch_parameters)
     result = batch.validate(expectation)
 
@@ -137,7 +128,7 @@ def test_batch_validate_expectation(
 
 @pytest.mark.parametrize(
     ("expectation", "batch_definition_fixture_name", "batch_parameters"),
-    _create_test_cases(skip_daily_batch_definitions=True),
+    _create_test_cases(),
 )
 def test_batch_validate_expectation_suite(
     expectation: gxe.Expectation,

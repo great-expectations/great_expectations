@@ -2,11 +2,17 @@ import os
 from unittest import mock
 
 import pytest
+import pytest_mock
 
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.checkpoint.checkpoint import CheckpointResult
+from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResult
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.exceptions import DataContextError
 
@@ -394,9 +400,17 @@ def test_get_site_names_with_three_sites(tmpdir, basic_data_context_config):
 
 @pytest.mark.filesystem
 def test_view_validation_result(
-    checkpoint_result: CheckpointResult,
+    mocker: pytest_mock.MockFixture,
 ):
     context = get_context()
+    run_results = {
+        ValidationResultIdentifier(
+            expectation_suite_identifier=ExpectationSuiteIdentifier(name="my_suite"),
+            run_id=None,
+            batch_identifier="abc123",
+        ): mocker.Mock(spec=ExpectationSuiteValidationResult)
+    }
+    checkpoint_result = mocker.Mock(spec=CheckpointResult, run_results=run_results)
 
     with mock.patch("webbrowser.open") as mock_open, mock.patch(
         "great_expectations.data_context.store.StoreBackend.has_key", return_value=True
@@ -407,4 +421,4 @@ def test_view_validation_result(
 
     url_used = mock_open.call_args[0][0]
     assert url_used.startswith("file:///")
-    assert url_used.endswith("default_pandas_datasource-%23ephemeral_pandas_asset.html")
+    assert url_used.endswith("abc123.html")

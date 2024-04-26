@@ -336,7 +336,7 @@ class BaseDatasource:
                 """
             )
 
-        if batch_request.data_connector_name not in self.data_connectors.keys():
+        if batch_request.data_connector_name not in self.data_connectors:
             raise ValueError(  # noqa: TRY003
                 f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" is not configured for DataSource: "{self.name}".
                     """  # noqa: E501

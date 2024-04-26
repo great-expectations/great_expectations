@@ -21,6 +21,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -155,14 +156,14 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     )
 
 
-@pytest.mark.filesystem
+@pytest.mark.cloud
 def test_save_expectation_suite_include_rendered_content(
-    data_context_parameterized_expectation_suite,
+    empty_cloud_data_context: CloudDataContext,
 ):
-    expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.add_expectation_suite(
-            "this_data_asset_config_does_not_exist.default"
-        )
+    context = empty_cloud_data_context
+
+    expectation_suite: ExpectationSuite = context.add_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
     )
     expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
@@ -171,16 +172,14 @@ def test_save_expectation_suite_include_rendered_content(
     )
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
-    data_context_parameterized_expectation_suite.save_expectation_suite(
+    context.save_expectation_suite(
         expectation_suite,
-        include_rendered_content=True,
     )
-    expectation_suite_saved: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            "this_data_asset_config_does_not_exist.default"
-        )
+    expectation_suite_saved: ExpectationSuite = context.get_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
     )
     for expectation in expectation_suite_saved.expectation_configurations:
+        assert expectation.rendered_content
         for rendered_content_block in expectation.rendered_content:
             assert isinstance(
                 rendered_content_block,
@@ -188,14 +187,14 @@ def test_save_expectation_suite_include_rendered_content(
             )
 
 
-@pytest.mark.filesystem
+@pytest.mark.cloud
 def test_get_expectation_suite_include_rendered_content(
-    data_context_parameterized_expectation_suite,
+    empty_cloud_data_context: CloudDataContext,
 ):
-    expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.add_expectation_suite(
-            "this_data_asset_config_does_not_exist.default"
-        )
+    context = empty_cloud_data_context
+
+    expectation_suite: ExpectationSuite = context.add_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
     )
     expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
@@ -204,25 +203,19 @@ def test_get_expectation_suite_include_rendered_content(
     )
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
-    data_context_parameterized_expectation_suite.save_expectation_suite(
+    context.save_expectation_suite(
         expectation_suite,
     )
-    (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            "this_data_asset_config_does_not_exist.default"
-        )
-    )
+    (context.get_expectation_suite("this_data_asset_config_does_not_exist.default"))
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
 
-    expectation_suite_retrieved: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            "this_data_asset_config_does_not_exist.default",
-            include_rendered_content=True,
-        )
+    expectation_suite_retrieved: ExpectationSuite = context.get_expectation_suite(
+        "this_data_asset_config_does_not_exist.default",
     )
 
     for expectation in expectation_suite_retrieved.expectation_configurations:
+        assert expectation.rendered_content
         for rendered_content_block in expectation.rendered_content:
             assert isinstance(
                 rendered_content_block,
@@ -354,7 +347,7 @@ def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
 
 @pytest.mark.unit
 def test_add_store(empty_data_context):
-    assert "my_new_store" not in empty_data_context.stores.keys()
+    assert "my_new_store" not in empty_data_context.stores
     assert "my_new_store" not in empty_data_context.get_config()["stores"]
     new_store = empty_data_context.add_store(
         "my_new_store",
@@ -363,7 +356,7 @@ def test_add_store(empty_data_context):
             "class_name": "ExpectationsStore",
         },
     )
-    assert "my_new_store" in empty_data_context.stores.keys()
+    assert "my_new_store" in empty_data_context.stores
     assert "my_new_store" in empty_data_context.get_config()["stores"]
 
     assert isinstance(new_store, ExpectationsStore)
@@ -1319,7 +1312,6 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     )
 
     # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.  # noqa: E501
-    context.variables.include_rendered_content.expectation_suite = True
     expectation_suite = context.suites.get(name=expectation_suite_name)
     for expectation_configuration in expectation_suite.expectation_configurations:
         assert all(

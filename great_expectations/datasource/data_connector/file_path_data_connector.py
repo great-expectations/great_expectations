@@ -369,7 +369,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             # data_asset_name: str = batch_request.data_asset_name
             regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
             group_names: List[str] = regex_config["group_names"]
-            if any(sorter_name not in group_names for sorter_name in self.sorters.keys()):
+            if any(sorter_name not in group_names for sorter_name in self.sorters):
                 raise gx_exceptions.DataConnectorError(  # noqa: TRY003
                     f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 configured group_name.

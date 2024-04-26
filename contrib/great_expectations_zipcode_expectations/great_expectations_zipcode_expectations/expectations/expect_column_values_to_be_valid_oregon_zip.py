@@ -13,10 +13,7 @@ def is_valid_oregon_zip(zip: str):
     list_of_oregon_zips = [d["zip_code"] for d in list_of_dicts_of_oregon_zips]
     if len(zip) > 10 or type(zip) != str:  # noqa: E721
         return False
-    elif zip in list_of_oregon_zips:
-        return True
-    else:
-        return False
+    return zip in list_of_oregon_zips
 
 
 # This class defines a Metric to support your Expectation.

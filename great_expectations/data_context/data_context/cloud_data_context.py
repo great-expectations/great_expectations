@@ -68,7 +68,7 @@ from great_expectations.exceptions.exceptions import DataContextError, StoreBack
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.data_context.types.resource_identifiers import (
         ExpectationSuiteIdentifier,
     )
@@ -262,9 +262,10 @@ class CloudDataContext(SerializableDataContext):
 
     @classmethod
     def _prepare_v1_config(cls, config: dict) -> dict:
-        # Both notebooks and concurrency are no longer top-level keys in V1
+        # Various context variables are no longer top-level keys in V1
         config.pop("notebooks", None)
         config.pop("concurrency", None)
+        config.pop("include_rendered_content", None)
 
         # FluentDatasources are nested under the "datasources" key and need to be separated
         # to prevent downstream issues
@@ -527,6 +528,12 @@ class CloudDataContext(SerializableDataContext):
         return self._cloud_config
 
     @override
+    @property
+    def _include_rendered_content(self) -> bool:
+        # Cloud contexts always want rendered content
+        return True
+
+    @override
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self.ge_cloud_config.base_url
         ge_cloud_organization_id: str = self.ge_cloud_config.organization_id  # type: ignore[assignment]
@@ -701,14 +708,11 @@ class CloudDataContext(SerializableDataContext):
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
-        include_rendered_content: Optional[bool] = None,
         id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GX Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
-            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
-                ExpectationConfiguration.
             id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
@@ -733,14 +737,9 @@ class CloudDataContext(SerializableDataContext):
                 f"Unable to load Expectation Suite {key.resource_name or key.id}"
             )
 
-        if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_suite_include_rendered_content()
-            )
-
         # create the ExpectationSuite from constructor
         expectation_suite = ExpectationSuite(**expectations_schema_dict)
-        if include_rendered_content:
+        if self._include_rendered_content:
             expectation_suite.render()
         return expectation_suite
 
@@ -750,7 +749,6 @@ class CloudDataContext(SerializableDataContext):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         id = expectation_suite.id
@@ -764,10 +762,7 @@ class CloudDataContext(SerializableDataContext):
             self._validate_suite_unique_constaints_before_save(key)
 
         self._suite_parameter_dependencies_compiled = False
-        include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
-            include_rendered_content=include_rendered_content
-        )
-        if include_rendered_content:
+        if self._include_rendered_content:
             expectation_suite.render()
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)
@@ -888,7 +883,7 @@ class CloudDataContext(SerializableDataContext):
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
-        url = result.validation_result_url
+        url = result.result_url
         assert url, "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"  # noqa: E501
         self._open_url_in_browser(url)
 

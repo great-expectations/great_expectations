@@ -76,11 +76,6 @@ def construct_data_context_config():
                 "data_context_id": data_context_id,
                 "enabled": True,
             },
-            "include_rendered_content": {
-                "globally": False,
-                "expectation_suite": False,
-                "expectation_validation_result": False,
-            },
         }
 
     return _construct_data_context_config
@@ -1514,11 +1509,6 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         "config_version": 3.0,
         "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "expectations_store",
-        "include_rendered_content": {
-            "expectation_suite": False,
-            "expectation_validation_result": False,
-            "globally": False,
-        },
         "stores": {
             "checkpoint_store": {
                 "class_name": "CheckpointStore",
@@ -1580,11 +1570,6 @@ def test_data_context_config_defaults():
         "suite_parameter_store_name": None,
         "expectations_store_name": None,
         "fluent_datasources": {},
-        "include_rendered_content": {
-            "expectation_suite": False,
-            "expectation_validation_result": False,
-            "globally": False,
-        },
         "plugins_directory": None,
         "profiler_store_name": None,
         "progress_bars": None,

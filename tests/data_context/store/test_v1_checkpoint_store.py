@@ -8,7 +8,7 @@ import pytest
 
 from great_expectations import set_context
 from great_expectations.checkpoint.actions import SlackNotificationAction
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.core.expectation_suite import ExpectationSuite

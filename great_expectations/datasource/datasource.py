@@ -218,7 +218,7 @@ class LegacyDatasource:
             None
         """
         try:
-            for generator in self._datasource_config["batch_kwargs_generators"].keys():
+            for generator in self._datasource_config["batch_kwargs_generators"]:
                 self.get_batch_kwargs_generator(generator)
         except KeyError:
             pass

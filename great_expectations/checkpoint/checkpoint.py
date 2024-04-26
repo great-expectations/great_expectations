@@ -207,7 +207,7 @@ class Checkpoint(BaseModel):
         action_context = ActionContext()
         sorted_actions = self._sort_actions()
         for action in sorted_actions:
-            action_result = action.v1_run(
+            action_result = action.run(
                 checkpoint_result=checkpoint_result,
                 action_context=action_context,
             )
@@ -244,6 +244,7 @@ class CheckpointResult(BaseModel):
     run_id: RunIdentifier
     run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
     checkpoint_config: Checkpoint
+    result_url: Optional[str] = None
     success: Optional[bool] = None
 
     class Config:

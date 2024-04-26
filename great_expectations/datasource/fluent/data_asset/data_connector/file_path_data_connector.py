@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from typing import DefaultDict
 
     from great_expectations.alias_types import PathStr
+    from great_expectations.core.partitioners import RegexPartitioner
     from great_expectations.datasource.fluent import BatchRequest
 
 logger = logging.getLogger(__name__)
@@ -148,7 +149,7 @@ class FilePathDataConnector(DataConnector):
 
     # Interface Method
     @override
-    def get_matched_data_references(self) -> List[str]:
+    def get_matched_data_references(self, regex: re.Pattern | None = None) -> List[str]:
         """
         Returns the list of data_references matched by configuration by looping through items in
         _data_references_cache and returning data_references that have an associated data_asset.
@@ -156,7 +157,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are matched by configuration.
         """
-        return self._get_data_references(matched=True)
+        return self._get_data_references(matched=True, regex=regex)
 
     # Interface Method
     @override
@@ -193,7 +194,7 @@ class FilePathDataConnector(DataConnector):
         return len(self.get_unmatched_data_references())
 
     def _get_unfiltered_batch_definition_list(
-        self, batch_request: BatchRequest
+        self, batch_request: BatchRequest[RegexPartitioner]
     ) -> list[LegacyBatchDefinition]:
         """Get all batch definitions for all files from a data connector
          using the supplied batch request.
@@ -215,7 +216,10 @@ class FilePathDataConnector(DataConnector):
         batch_definition_list: list[LegacyBatchDefinition] = list()
         batch_definition_set = set()
         # if the batch request hasn't specified a batching_regex, fallback to a default
-        batching_regex = batch_request.batching_regex or self._batching_regex
+        if batch_request.partitioner:
+            batching_regex = batch_request.partitioner.regex
+        else:
+            batching_regex = self._batching_regex
         for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
             if (
                 self._batch_definition_matches_batch_request(
@@ -239,7 +243,7 @@ class FilePathDataConnector(DataConnector):
         )
         return [batch_definition]
 
-    def _get_data_references(self, matched: bool) -> List[str]:
+    def _get_data_references(self, matched: bool, regex: re.Pattern | None = None) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in
         _data_references_cache and returning data_references that do not have an associated data_asset.
@@ -247,6 +251,9 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """  # noqa: E501
+
+        if not regex:
+            regex = self._batching_regex
 
         def _matching_criterion(
             batch_definition_list: Union[List[LegacyBatchDefinition], None],
@@ -256,7 +263,7 @@ class FilePathDataConnector(DataConnector):
             )
 
         data_reference_mapped_element: Tuple[str, Union[List[LegacyBatchDefinition], None]]
-        data_references = self._get_data_references_cache(batching_regex=self._batching_regex)
+        data_references = self._get_data_references_cache(batching_regex=regex)
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
@@ -295,7 +302,7 @@ class FilePathDataConnector(DataConnector):
             regex_pattern=batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
         )
-        group_names: List[str] = regex_parser.get_all_group_names()
+        group_names: List[str] = regex_parser.group_names()
         path: str = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
             regex_pattern=batching_regex,
@@ -318,7 +325,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             regex_pattern=regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
         )
-        group_names: List[str] = regex_parser.get_all_group_names()
+        group_names: List[str] = regex_parser.group_names()
         if FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY not in group_names:
             pattern: str = regex.pattern
             pattern = f"(?P<{FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY}>{pattern})"

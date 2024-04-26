@@ -16,7 +16,8 @@ from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.core.partitioners import (
     PartitionerColumnValue,
-    PartitionerYearAndMonth,
+    PartitionerMonthly,
+    PartitionerYearly,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -1333,24 +1334,29 @@ class TestPartitionerFileAsset:
     def test_add_file_csv_asset_with_partitioner_conflicting_identifier_batch_parameters(
         self, file_asset_with_no_partitioner: CSVAsset
     ):
+        regex = re.compile(
+            r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+        )
         asset_with_conflicting_partitioner = file_asset_with_no_partitioner
-        partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+        partitioner = PartitionerYearly(regex=regex)
         assert asset_with_conflicting_partitioner.get_batch_parameters_keys(
             partitioner=partitioner
         ) == (
             "year",
             "month",
             "path",
-            "year",
-            "month",
         )
 
     @pytest.mark.unit
     def test_add_file_csv_asset_with_partitioner_conflicting_identifier_gets_one_batch(
         self, file_asset_with_no_partitioner: CSVAsset
     ):
+        regex = re.compile(
+            r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+        )
+
         asset = file_asset_with_no_partitioner
-        partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+        partitioner = PartitionerMonthly(regex=regex)
 
         post_partitioner_batch_request = asset.build_batch_request(
             options={"year": "2020", "month": "11"}, partitioner=partitioner
@@ -1367,8 +1373,11 @@ class TestPartitionerFileAsset:
         file_asset_with_no_partitioner: CSVAsset,
         expected_num_records_file_asset_no_partitioner_2020_10: int,
     ):
+        regex = re.compile(
+            r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+        )
         asset = file_asset_with_no_partitioner
-        partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+        partitioner = PartitionerMonthly(regex=regex)
 
         post_partitioner_batch_request = asset.build_batch_request(
             options={"year": "2020", "month": "11"}, partitioner=partitioner

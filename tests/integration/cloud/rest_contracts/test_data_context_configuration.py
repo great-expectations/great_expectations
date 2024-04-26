@@ -23,11 +23,6 @@ GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY: Final[dict] = {
         }
     ),
     "datasources": pact.Like({}),
-    "include_rendered_content": {
-        "globally": True,
-        "expectation_validation_result": True,
-        "expectation_suite": True,
-    },
 }
 
 
