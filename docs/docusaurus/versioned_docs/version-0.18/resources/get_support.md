@@ -4,6 +4,8 @@ title: 'Get support'
 description: Learn what resources are available to help you resolve issues with GX Cloud and GX OSS.
 ---
 
+Knowing how and where to request GX support can improve response times.
+
 ## GX Cloud support
 
 Use one of the following methods to request support:
@@ -21,10 +23,6 @@ Use one of the following methods to request support:
 
 ## How to effectively get support
 
-Strategies to ensure your questions get resolved quicly.
-
-### Try solving your issue first
-
 The following are some recommendations for resolving issues on your own. Resolving issues on your own builds your knowledge and allows you to share that knowledge with the community.
 
 ### Search the GX documentation
@@ -34,10 +32,6 @@ Search the docs you're using currently for an answer to your issue or question.
 If you're new to GX Cloud, review [About GX Cloud](/cloud/about_gx.md).
 
 If you're new to GX OSS, try the [Quickstart](/oss/tutorials/quickstart.md) or one of the specific getting started guides such as [Get started with Great Expectations and Databricks](/oss/tutorials/getting_started/how_to_use_great_expectations_in_databricks.md) or [Get started with Great Expectations and SQL](/oss/tutorials/getting_started/how_to_use_great_expectations_with_sql.md).
-
-## Ask the right questions and provide the right information
-
-Formulating your questions properly and providing all the relevant background information can save time and improve response times. The following recommendations will help the GX Developer Advocates (DAs) and other community members assist you.
 
 ### Include all the relevant information
 
