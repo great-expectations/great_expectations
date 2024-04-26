@@ -141,6 +141,7 @@ def _asset_parameters():
     ]
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
 def test_add_batch_definition_whole_dataframe(asset, datasource):
     # arrange
