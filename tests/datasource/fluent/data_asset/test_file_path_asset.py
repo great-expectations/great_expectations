@@ -191,19 +191,17 @@ def _asset_parameters():
     ],
 )
 @pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
-@pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_path_success(
     datasource,
     asset,
     path: PathStr,
     file_path_data_connector,
-    sort,
 ):
     # arrange
     name = "batch_def_name"
     expected_regex = re.compile(str(path))
     expected_batch_definition = BatchDefinition(
-        name=name, partitioner=PartitionerPath(regex=expected_regex, sort_ascending=sort)
+        name=name, partitioner=PartitionerPath(regex=expected_regex)
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
     file_path_data_connector.get_matched_data_references.return_value = [PATH_NAME]
