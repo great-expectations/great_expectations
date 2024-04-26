@@ -64,6 +64,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypeAlias
 
+    from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.core.partitioners import Partitioner
 
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
@@ -209,6 +210,13 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options={},
+        )
+
+    @public_api
+    def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
         )
 
     @override

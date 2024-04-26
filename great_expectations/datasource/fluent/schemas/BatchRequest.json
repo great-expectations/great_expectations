@@ -56,6 +56,9 @@
                 },
                 {
                     "$ref": "#/definitions/PartitionerDaily"
+                },
+                {
+                    "$ref": "#/definitions/PartitionerPath"
                 }
             ]
         },
@@ -450,6 +453,25 @@
                     ],
                     "type": "array",
                     "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "PartitionerPath": {
+            "title": "PartitionerPath",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
                 }
             },
             "required": [

@@ -897,7 +897,7 @@ class Datasource(
 
 
 # This is used to prevent passing things like `type`, `assets` etc. to the execution engine
-_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__.keys()}
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {name for name in Datasource.__fields__}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1096,10 +1096,14 @@ class Batch:
             raise ValueError(  # noqa: TRY003
                 "We can't validate batches that are attached to datasources without a data context"
             )
-        batch_definition = self.data_asset.add_batch_definition(
+
+        # note: batch definition is created but NOT added to the asset, as it should not persist
+        batch_definition = BatchDefinition(
             name="-".join([self.datasource.name, self.data_asset.name, str(uuid.uuid4())]),
             partitioner=self.batch_request.partitioner,
         )
+        batch_definition.set_data_asset(self.data_asset)
+
         return V1Validator(
             batch_definition=batch_definition,
             batch_parameters=self.batch_request.options,

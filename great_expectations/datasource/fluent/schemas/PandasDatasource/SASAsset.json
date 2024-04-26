@@ -475,6 +475,25 @@
                 "regex"
             ]
         },
+        "PartitionerPath": {
+            "title": "PartitionerPath",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
         "BatchDefinition": {
             "title": "BatchDefinition",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
@@ -526,6 +545,9 @@
                         },
                         {
                             "$ref": "#/definitions/PartitionerDaily"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerPath"
                         }
                     ]
                 }

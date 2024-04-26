@@ -72,7 +72,7 @@ def replace_code_in_notebook(
         )
     )
 
-    for idx in cells_of_interest_dict.keys():
+    for idx in cells_of_interest_dict:
         nb["cells"].insert(idx, cells_of_interest_dict[idx])
 
     return nb

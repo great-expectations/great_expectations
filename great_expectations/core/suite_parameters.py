@@ -45,7 +45,7 @@ SuiteParameterDict: TypeAlias = dict
 
 def is_suite_parameter(value: Any) -> TypeGuard[SuiteParameterDict]:
     """Typeguard to check if a value is an suite parameter."""
-    return isinstance(value, dict) and "$PARAMETER" in value.keys()
+    return isinstance(value, dict) and "$PARAMETER" in value
 
 
 def get_suite_parameter_key(suite_parameter: SuiteParameterDict) -> str:

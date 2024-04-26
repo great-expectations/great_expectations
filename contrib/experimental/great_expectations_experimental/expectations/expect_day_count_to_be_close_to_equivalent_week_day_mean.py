@@ -272,7 +272,7 @@ def get_counts_per_day_as_dict(
     day_counts_dict = {i[0]: i[1] for i in counts_per_days}
 
     for day in all_days_list:
-        if day not in day_counts_dict.keys():
+        if day not in day_counts_dict:
             day_counts_dict.update({day: 0})
 
     return day_counts_dict
