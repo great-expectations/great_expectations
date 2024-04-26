@@ -13,11 +13,13 @@ from great_expectations.core.partitioners import (
     PartitionerYearly,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import FilePathDataConnector
-from great_expectations.datasource.fluent.file_path_data_asset import (
+from great_expectations.datasource.fluent.file_path_asset_mixins import (
     AmbiguousPathError,
     PathNotFoundError,
     RegexMissingRequiredGroupsError,
     RegexUnknownGroupsError,
+)
+from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
