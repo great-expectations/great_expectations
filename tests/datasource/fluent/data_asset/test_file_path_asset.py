@@ -14,7 +14,7 @@ from great_expectations.core.partitioners import (
 )
 from great_expectations.datasource.fluent import Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import FilePathDataConnector
-from great_expectations.datasource.fluent.file_path_asset_mixins import (
+from great_expectations.datasource.fluent.file_path_asset_base import (
     AmbiguousPathError,
     PathNotFoundError,
     RegexMissingRequiredGroupsError,

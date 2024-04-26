@@ -31,8 +31,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _DirectoryDataAssetMixin(_FilePathDataAsset):
-    """Mixin encapsulating logic specific to directory-based FilePathDataAssets"""
+class _DirectoryDataAssetBase(_FilePathDataAsset):
+    """Base class for FilePathDataAssets which batch by combining the contents of a directory."""
 
     data_directory: pathlib.Path
 
@@ -46,7 +46,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
             batch_request: Batch request used to generate batch definitions.
 
         Returns:
-            List of batch definitions, in the case of a _DirectoryDataAssetMixin the list contains a single item.
+            List of batch definitions, in the case of a _DirectoryDataAssetBase the list contains a single item.
         """  # noqa: E501
         if batch_request.partitioner:
             # Currently non-sql asset partitioners do not introspect the datasource for available
@@ -124,8 +124,8 @@ class AmbiguousPathError(ValueError):
         self.path = path
 
 
-class _RegexDataAssetMixin(_FilePathDataAsset):
-    """Mixin encapsulating logic specific to regex-based FilePathDataAssets"""
+class _RegexDataAssetBase(_FilePathDataAsset):
+    """Base class for FilePathDataAssets which batch by applying a regex to file names."""
 
     @public_api
     def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
