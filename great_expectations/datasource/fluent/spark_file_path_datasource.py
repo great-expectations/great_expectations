@@ -61,8 +61,6 @@ class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
 
 
 class CSVAssetBase(_SparkGenericFilePathAssetMixin):
-    type: Literal["csv"] = "csv"
-
     # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0) appear in comment above  # noqa: E501
     # parameter for reference (from https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)
     # See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
@@ -225,7 +223,8 @@ class CSVAssetBase(_SparkGenericFilePathAssetMixin):
         return parent_reader_options.union(reader_options)
 
 
-class CSVAsset(_RegexDataAssetMixin, CSVAssetBase): ...
+class CSVAsset(_RegexDataAssetMixin, CSVAssetBase):
+    type: Literal["csv"] = "csv"
 
 
 class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAssetBase):
@@ -249,7 +248,6 @@ class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAssetBase):
 
 
 class ParquetAssetBase(_SparkGenericFilePathAssetMixin):
-    type: Literal["parquet"] = "parquet"
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
     merge_schema: Optional[Union[bool, str]] = Field(None, alias="mergeSchema")
@@ -288,7 +286,8 @@ class ParquetAssetBase(_SparkGenericFilePathAssetMixin):
         )
 
 
-class ParquetAsset(_RegexDataAssetMixin, ParquetAssetBase): ...
+class ParquetAsset(_RegexDataAssetMixin, ParquetAssetBase):
+    type: Literal["parquet"] = "parquet"
 
 
 class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAssetBase):
@@ -314,7 +313,6 @@ class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAssetBase):
 class ORCAssetBase(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
-    type: Literal["orc"] = "orc"
     merge_schema: Optional[Union[bool, str]] = Field(False, alias="mergeSchema")
 
     class Config:
@@ -335,7 +333,8 @@ class ORCAssetBase(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"merge_schema"})
 
 
-class ORCAsset(_RegexDataAssetMixin, ORCAssetBase): ...
+class ORCAsset(_RegexDataAssetMixin, ORCAssetBase):
+    type: Literal["orc"] = "orc"
 
 
 class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAssetBase):
@@ -359,8 +358,6 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAssetBase):
 
 
 class JSONAssetBase(_SparkGenericFilePathAssetMixin):
-    type: Literal["json"] = "json"
-
     # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0) appear in comment above  # noqa: E501
     # parameter for reference (from https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309)
     # path: Union[str, List[str], RDD[str]],
@@ -491,7 +488,8 @@ class JSONAssetBase(_SparkGenericFilePathAssetMixin):
         )
 
 
-class JSONAsset(_RegexDataAssetMixin, JSONAssetBase): ...
+class JSONAsset(_RegexDataAssetMixin, JSONAssetBase):
+    type: Literal["json"] = "json"
 
 
 class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAssetBase):
@@ -517,7 +515,6 @@ class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAssetBase):
 class TextAssetBase(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
-    type: Literal["text"] = "text"
     wholetext: bool = Field(False)
     line_sep: Optional[str] = Field(None, alias="lineSep")
 
@@ -539,7 +536,8 @@ class TextAssetBase(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"wholetext", "line_sep"})
 
 
-class TextAsset(_RegexDataAssetMixin, TextAssetBase): ...
+class TextAsset(_RegexDataAssetMixin, TextAssetBase):
+    type: Literal["text"] = "text"
 
 
 class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAssetBase):
@@ -565,7 +563,6 @@ class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAssetBase):
 class DeltaAssetBase(_FilePathDataAsset):
     # The options below are available as of 2023-05-12
     # See https://docs.databricks.com/delta/tutorial.html for more info.
-    type: Literal["delta"] = "delta"
 
     timestamp_as_of: Optional[str] = Field(None, alias="timestampAsOf")
     version_as_of: Optional[str] = Field(None, alias="versionAsOf")
@@ -588,7 +585,8 @@ class DeltaAssetBase(_FilePathDataAsset):
         return {"timestamp_as_of", "version_as_of"}
 
 
-class DeltaAsset(_RegexDataAssetMixin, DeltaAssetBase): ...
+class DeltaAsset(_RegexDataAssetMixin, DeltaAssetBase):
+    type: Literal["delta"] = "delta"
 
 
 class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAssetBase):
