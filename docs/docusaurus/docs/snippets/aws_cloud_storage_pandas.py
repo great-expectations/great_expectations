@@ -221,7 +221,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py add_s3_datasource">
-datasource = context.sources.add_or_update_pandas_s3(
+datasource = context.data_sources.add_or_update_pandas_s3(
     name="s3_datasource", bucket="taxi-data-sample-test"
 )
 # </snippet>

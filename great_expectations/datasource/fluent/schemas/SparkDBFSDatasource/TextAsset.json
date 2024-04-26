@@ -1,6 +1,6 @@
 {
     "title": "TextAsset",
-    "description": "Mixin encapsulating logic specific to regex-based FilePathDataAssets",
+    "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
     "type": "object",
     "properties": {
         "name": {

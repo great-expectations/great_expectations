@@ -337,7 +337,7 @@ class _SourceFactories:
         existing_datasource = datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if not existing_datasource:
-            return self._data_context.sources.add_pandas(name=DEFAULT_PANDAS_DATASOURCE_NAME)
+            return self._data_context.data_sources.add_pandas(name=DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if isinstance(existing_datasource, PandasDatasource):
             return existing_datasource

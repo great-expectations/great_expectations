@@ -122,7 +122,7 @@ if not SQLAlchemyError:
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -290,7 +290,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         submit_event(event=DataContextInitializedEvent())
 
     def _init_factories(self) -> None:
-        self._sources: _SourceFactories = _SourceFactories(self)
+        self._data_sources: _SourceFactories = _SourceFactories(self)
 
         self._suites: SuiteFactory | None = None
         if expectations_store := self.stores.get(self.expectations_store_name):
@@ -619,8 +619,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._assistants
 
     @property
-    def sources(self) -> _SourceFactories:
-        return self._sources
+    def data_sources(self) -> _SourceFactories:
+        return self._data_sources
 
     @property
     def _include_rendered_content(self) -> bool:
@@ -3395,7 +3395,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._view_validation_result(result)
 
     def _view_validation_result(self, result: CheckpointResult) -> None:
-        validation_result_identifier = result.list_validation_result_identifiers()[0]
+        validation_result_identifier = tuple(result.run_results.keys())[0]
         self.open_data_docs(resource_identifier=validation_result_identifier)  # type: ignore[arg-type]
 
     def escape_all_config_variables(

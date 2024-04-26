@@ -43,7 +43,7 @@ def test_dataframe_asset(
     errors_dict = exc_info.value.errors()[0]
     assert errors_dict["loc"][0] == "dataframe"
 
-    datasource = empty_data_context.sources.add_spark(name="my_spark_datasource")
+    datasource = empty_data_context.data_sources.add_spark(name="my_spark_datasource")
 
     pandas_df = test_df_pandas
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
@@ -83,7 +83,7 @@ def test_spark_data_asset_batch_metadata(
 
     spark_df = spark_df_from_pandas_df(spark_session, test_df_pandas)
 
-    spark_datasource = empty_data_context.sources.add_spark("my_spark_datasource")
+    spark_datasource = empty_data_context.data_sources.add_spark("my_spark_datasource")
 
     batch_metadata = {
         "no_curly_pipeline_filename": "$pipeline_filename",
@@ -123,7 +123,7 @@ def test_spark_config_passed_to_execution_engine(
         "spark.default.parallelism": 4,
         "spark.master": "local[*]",
     }
-    datasource = empty_data_context.sources.add_spark(
+    datasource = empty_data_context.data_sources.add_spark(
         name="my_spark_datasource",
         spark_config=spark_config,
         persist=persist,
@@ -140,7 +140,7 @@ def test_build_batch_request_raises_if_missing_dataframe(
     empty_data_context: AbstractDataContext,
     spark_session,
 ):
-    dataframe_asset = empty_data_context.sources.add_spark(
+    dataframe_asset = empty_data_context.data_sources.add_spark(
         name="my_spark_datasource"
     ).add_dataframe_asset(name="my_dataframe_asset")
 
@@ -157,7 +157,7 @@ def test_unmodifiable_config_option_warning(
 ):
     spark_config = {"spark.executor.memory": "700m"}
     with pytest.warns(RuntimeWarning):
-        _ = empty_data_context.sources.add_spark(
+        _ = empty_data_context.data_sources.add_spark(
             name="my_spark_datasource",
             spark_config=spark_config,  # type: ignore[arg-type]
         )
@@ -169,4 +169,4 @@ def test_spark_test_connection(
 ):
     # no spark marker means pyspark is not installed when this is run
     with pytest.raises(TestConnectionError):
-        _ = empty_data_context.sources.add_spark(name="my_spark_datasource")
+        _ = empty_data_context.data_sources.add_spark(name="my_spark_datasource")

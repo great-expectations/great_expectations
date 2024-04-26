@@ -23,7 +23,7 @@ context = gx.get_context()
 # Configure your datasource (if you aren't using one that already exists)
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py datasource_config">
-datasource = context.sources.add_pandas_filesystem(
+datasource = context.data_sources.add_pandas_filesystem(
     name="taxi_multi_batch_datasource",  # custom name to assign to new datasource, can be used to retrieve datasource later
     base_directory="./data",  # replace with your data directory
 )
