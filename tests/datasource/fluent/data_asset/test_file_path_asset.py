@@ -1,6 +1,6 @@
 import pathlib
 import re
-from typing import List
+from typing import Final, List
 
 import pytest
 
@@ -12,6 +12,7 @@ from great_expectations.core.partitioners import (
     PartitionerPath,
     PartitionerYearly,
 )
+from great_expectations.datasource.fluent import Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import FilePathDataConnector
 from great_expectations.datasource.fluent.file_path_asset_mixins import (
     AmbiguousPathError,
@@ -46,6 +47,12 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     DeltaAsset,
+    DirectoryCSVAsset,
+    DirectoryDeltaAsset,
+    DirectoryJSONAsset,
+    DirectoryORCAsset,
+    DirectoryParquetAsset,
+    DirectoryTextAsset,
     TextAsset,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
@@ -140,7 +147,8 @@ def test_get_batch_list_from_batch_request__sort_descending(
 
 @pytest.fixture
 def datasource(mocker):
-    return mocker.Mock(spec=PandasFilesystemDatasource)
+    # the API required by these tests is not specific to Spark or Pandas
+    return mocker.Mock(spec=Datasource)
 
 
 @pytest.fixture
@@ -162,7 +170,7 @@ def asset(request, datasource, file_path_data_connector) -> _FilePathDataAsset:
 PATH_NAME = "data_2022-01.csv"
 
 
-def _asset_parameters():
+def _path_asset_parameters():
     return [
         # Spark Assets
         pytest.param(SparkCSVAsset(name="test_asset"), id="Spark CSV Asset"),
@@ -189,7 +197,7 @@ def _asset_parameters():
         pytest.param(pathlib.Path(PATH_NAME), id="Pathlib Path"),
     ],
 )
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_path_success(
     datasource,
     asset,
@@ -224,7 +232,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_path_succes
         pytest.param(pathlib.Path(PATH_NAME), id="Pathlib Path"),
     ],
 )
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_path_fails_if_no_file_is_found(
     datasource, asset, path: PathStr, file_path_data_connector
 ):
@@ -255,7 +263,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_path_fails_
         pytest.param(pathlib.Path(PATH_NAME), id="Pathlib Path"),
     ],
 )
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_path_fails_if_multiple_files_are_found(  # noqa: E501
     datasource, asset, path: PathStr, file_path_data_connector
 ):
@@ -283,7 +291,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_path_fails_
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_success(
     datasource, asset, sort
@@ -308,7 +316,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_succ
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fails_if_required_group_is_missing(  # noqa: E501
     datasource, asset, sort
@@ -328,7 +336,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fail
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fails_if_unknown_groups_are_found(  # noqa: E501
     datasource, asset, sort
@@ -348,7 +356,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fail
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_success(
     datasource, asset, sort
@@ -373,7 +381,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_suc
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_fails_if_required_group_is_missing(  # noqa: E501
     datasource, asset, sort
@@ -393,7 +401,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_fai
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_fails_if_unknown_groups_are_found(  # noqa: E501
     datasource, asset, sort
@@ -413,7 +421,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_fai
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_success(
     datasource, asset, sort
@@ -438,7 +446,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_succe
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails_if_required_group_is_missing(  # noqa: E501
     datasource, asset, sort
@@ -458,7 +466,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("asset", _asset_parameters(), indirect=["asset"])
+@pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
 def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails_if_unknown_groups_are_found(  # noqa: E501
     datasource, asset, sort
@@ -477,3 +485,49 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails
         assert error.unknown_groups == {"foo"}
 
     datasource.add_batch_definition.assert_not_called()
+
+
+DATA_DIRECTORY: Final[pathlib.Path] = pathlib.Path("/data/my_directory")
+
+
+def _directory_asset_parameters():
+    return [
+        pytest.param(
+            DirectoryCSVAsset(name="test_asset", data_directory=DATA_DIRECTORY), id="CSV Asset"
+        ),
+        pytest.param(
+            DirectoryParquetAsset(name="test_asset", data_directory=DATA_DIRECTORY),
+            id="Parquet Asset",
+        ),
+        pytest.param(
+            DirectoryORCAsset(name="test_asset", data_directory=DATA_DIRECTORY), id="ORC Asset"
+        ),
+        pytest.param(
+            DirectoryJSONAsset(name="test_asset", data_directory=DATA_DIRECTORY), id="JSON Asset"
+        ),
+        pytest.param(
+            DirectoryTextAsset(name="test_asset", data_directory=DATA_DIRECTORY), id="Text Asset"
+        ),
+        pytest.param(
+            DirectoryDeltaAsset(name="test_asset", data_directory=DATA_DIRECTORY), id="Delta Asset"
+        ),
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("asset", _directory_asset_parameters(), indirect=["asset"])
+def test_add_batch_definition_whole_directory_success(
+    datasource,
+    asset,
+):
+    # arrange
+    name = "batch_def_name"
+    expected_batch_definition = BatchDefinition(name=name, partitioner=None)
+    datasource.add_batch_definition.return_value = expected_batch_definition
+
+    # act
+    batch_definition = asset.add_batch_definition_whole_directory(name=name)
+
+    # assert
+    assert batch_definition == expected_batch_definition
+    datasource.add_batch_definition.assert_called_once_with(expected_batch_definition)
