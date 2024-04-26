@@ -11,6 +11,7 @@ from typing import (
 from great_expectations.datasource.fluent.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
+from great_expectations.datasource.fluent.file_path_asset_mixins import _RegexDataAssetMixin
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
@@ -48,7 +49,7 @@ _PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST = (
 )
 
 _FILE_PATH_ASSET_MODELS = _generate_pandas_data_asset_models(
-    _FilePathDataAsset,
+    _RegexDataAssetMixin,
     blacklist=_PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST,
     use_docstring_from_method=True,
     skip_first_param=True,

@@ -68,7 +68,7 @@ from great_expectations.exceptions.exceptions import DataContextError, StoreBack
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.data_context.types.resource_identifiers import (
         ExpectationSuiteIdentifier,
     )
@@ -883,7 +883,7 @@ class CloudDataContext(SerializableDataContext):
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
-        url = result.validation_result_url
+        url = result.result_url
         assert url, "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"  # noqa: E501
         self._open_url_in_browser(url)
 
