@@ -97,7 +97,7 @@ def expect_multicolumn_sum_to_equal() -> gxe.ExpectMulticolumnSumToEqual:
     return gxe.ExpectMulticolumnSumToEqual(column_list=["a", "b", "c"], sum_total=30)
 
 
-def _build_checkpoint(
+def _build_checkpoint_and_run(
     context: AbstractDataContext,
     expectations: list[gxe.Expectation],
     asset_name: str,
@@ -115,11 +115,13 @@ def _build_checkpoint(
         name="my_validation_def", suite=suite, data=batch_definition
     )
 
-    return Checkpoint(
+    checkpoint = Checkpoint(
         name="my_checkpoint",
         validation_definitions=[validation_definition],
         result_format=result_format,
     )
+
+    return checkpoint.run()
 
 
 @pytest.mark.filesystem
@@ -136,14 +138,12 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
           `partial_unexpected_index_list`
         - 1 Expectations added to suite
     """
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[expect_column_values_to_be_in_set],
         asset_name=ANIMAL_ASSET,
         result_format={"result_format": "COMPLETE", "unexpected_index_column_names": ["pk_1"]},
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -174,7 +174,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         - 1 Expectations added to suite
         - return_unexpected_index_query flag set to True
     """
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[expect_column_values_to_be_in_set],
         asset_name=ANIMAL_ASSET,
@@ -184,8 +184,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
             "return_unexpected_index_query": True,
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -206,7 +204,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_pair_values_to_be_equal: gxe.ExpectColumnPairValuesToBeEqual,
 ):
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[expect_column_pair_values_to_be_equal],
         asset_name=COLUMN_PAIR_ASSET,
@@ -215,8 +213,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
             "unexpected_index_column_names": ["pk_1"],
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -248,7 +244,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summ
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_pair_values_to_be_equal: gxe.ExpectColumnPairValuesToBeEqual,
 ):
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[expect_column_pair_values_to_be_equal],
         asset_name=COLUMN_PAIR_ASSET,
@@ -257,8 +253,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summ
             "unexpected_index_column_names": ["pk_1"],
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -290,7 +284,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
         - 1 Expectations added to suite
         - return_unexpected_index_query flag set to True
     """
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[expect_multicolumn_sum_to_equal],
         asset_name=MULTI_COLUMN_SUM_ASSET,
@@ -300,8 +294,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
             "return_unexpected_index_query": True,
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -337,7 +329,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_multicolumn_sum_to_equal: gxe.ExpectMulticolumnSumToEqual,
 ):
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[expect_multicolumn_sum_to_equal],
         asset_name=MULTI_COLUMN_SUM_ASSET,
@@ -346,8 +338,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
             "unexpected_index_column_names": ["pk_1"],
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -382,7 +372,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         - 1 Expectations added to suite
         - return_unexpected_index_query flag set to False
     """
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[expect_column_values_to_be_in_set],
         asset_name=ANIMAL_ASSET,
@@ -392,8 +382,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
             "return_unexpected_index_query": False,
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -424,7 +412,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
           `partial_unexpected_index_list`
         - 2 Expectations added to suite
     """
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[
             expect_column_values_to_be_in_set,
@@ -436,8 +424,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
             "unexpected_index_column_names": ["pk_1"],
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -473,7 +459,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
         - SUMMARY output, which means we have `partial_unexpected_index_list` only
         - 1 Expectations added to suite
     """
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[
             expect_column_values_to_be_in_set,
@@ -484,8 +470,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
             "unexpected_index_column_names": ["pk_1"],
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -509,7 +493,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
         - BASIC output, which means we have no unexpected_index_list output
         - 1 Expectations added to suite
     """
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[
             expect_column_values_to_be_in_set,
@@ -520,8 +504,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
             "unexpected_index_column_names": ["pk_1"],
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
@@ -541,7 +523,7 @@ def test_sql_complete_output_no_id_pk_fallback(
     data_context_with_connection_to_metrics_db: FileDataContext,
     expect_column_values_to_be_in_set: gxe.ExpectColumnValuesToBeInSet,
 ):
-    checkpoint = _build_checkpoint(
+    result = _build_checkpoint_and_run(
         context=data_context_with_connection_to_metrics_db,
         expectations=[
             expect_column_values_to_be_in_set,
@@ -551,8 +533,6 @@ def test_sql_complete_output_no_id_pk_fallback(
             "result_format": "COMPLETE",
         },
     )
-
-    result = checkpoint.run()
     evrs = list(result.run_results.values())
 
     index_column_names = evrs[0]["results"][0]["result"].get("unexpected_index_column_names")
