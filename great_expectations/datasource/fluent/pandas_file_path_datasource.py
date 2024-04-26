@@ -12,14 +12,14 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
 from great_expectations.datasource.fluent.file_path_asset_mixins import _RegexDataAssetMixin
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.pandas_datasource import (
     _PandasDatasource,
 )
 
 if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.file_path_data_asset import (
+        _FilePathDataAsset,
+    )
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
@@ -48,6 +48,7 @@ _PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_xml",
 )
 
+
 _FILE_PATH_ASSET_MODELS = _generate_pandas_data_asset_models(
     _RegexDataAssetMixin,
     blacklist=_PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST,
@@ -55,12 +56,14 @@ _FILE_PATH_ASSET_MODELS = _generate_pandas_data_asset_models(
     skip_first_param=True,
 )
 
-CSVAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("csv", _FilePathDataAsset)
-ExcelAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("excel", _FilePathDataAsset)
-FWFAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("fwf", _FilePathDataAsset)
-JSONAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("json", _FilePathDataAsset)
-ORCAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("orc", _FilePathDataAsset)
-ParquetAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get("parquet", _FilePathDataAsset)
+CSVAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("csv", _RegexDataAssetMixin)
+ExcelAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("excel", _RegexDataAssetMixin)
+FWFAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("fwf", _RegexDataAssetMixin)
+JSONAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("json", _RegexDataAssetMixin)
+ORCAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("orc", _RegexDataAssetMixin)
+ParquetAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get(
+    "parquet", _RegexDataAssetMixin
+)
 
 
 class _PandasFilePathDatasource(_PandasDatasource):
