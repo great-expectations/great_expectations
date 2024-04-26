@@ -13,6 +13,11 @@ from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 
+DATASOURCE_NAME = "my_datasource"
+ANIMAL_ASSET = "animals_names_asset"
+COLUMN_PAIR_ASSET = "column_pair_asset"
+MULTI_COLUMN_SUM_ASSET = "multi_column_sum_asset"
+
 
 @pytest.fixture
 def data_context_with_connection_to_metrics_db(
@@ -44,15 +49,14 @@ def data_context_with_connection_to_metrics_db(
     assert sqlite_path.exists()
 
     ds = context.sources.add_sqlite(
-        name="my_datasource", connection_string=f"sqlite:///{sqlite_path}"
+        name=DATASOURCE_NAME, connection_string=f"sqlite:///{sqlite_path}"
     )
-    ds.add_table_asset(name="animals_names_asset", table_name="animal_names")
-    ds.add_table_asset(name="column_pair_asset", table_name="column_pairs")
-    ds.add_table_asset(name="multi_column_sum_asset", table_name="multi_column_sums")
+    ds.add_table_asset(name=ANIMAL_ASSET, table_name="animal_names")
+    ds.add_table_asset(name=COLUMN_PAIR_ASSET, table_name="column_pairs")
+    ds.add_table_asset(name=MULTI_COLUMN_SUM_ASSET, table_name="multi_column_sums")
 
-    context._save_project_config()
     project_manager.set_project(context)
-    return context  # type: ignore[return-value]
+    return context
 
 
 @pytest.fixture
@@ -74,6 +78,16 @@ WHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
 @pytest.fixture
 def expect_column_values_to_be_in_set():
     return gxe.ExpectColumnValuesToBeInSet(column="animals", value_set=["cat", "fish", "dog"])
+
+
+@pytest.fixture
+def expect_column_pair_values_to_be_equal() -> gxe.ExpectColumnPairValuesToBeEqual:
+    return gxe.ExpectColumnPairValuesToBeEqual(column_A="ordered_item", column_B="received_item")
+
+
+@pytest.fixture
+def expect_multicolumn_sum_to_equal() -> gxe.ExpectMulticolumnSumToEqual:
+    return gxe.ExpectMulticolumnSumToEqual(column_list=["a", "b", "c"], sum_total=30)
 
 
 def _build_checkpoint(
@@ -118,7 +132,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     checkpoint = _build_checkpoint(
         context=data_context_with_connection_to_metrics_db,
         expectations=[expect_column_values_to_be_in_set],
-        asset_name="animals_names_asset",
+        asset_name=ANIMAL_ASSET,
         result_format={"result_format": "COMPLETE", "unexpected_index_column_names": ["pk_1"]},
     )
 
@@ -156,7 +170,7 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     checkpoint = _build_checkpoint(
         context=data_context_with_connection_to_metrics_db,
         expectations=[expect_column_values_to_be_in_set],
-        asset_name="animals_names_asset",
+        asset_name=ANIMAL_ASSET,
         result_format={
             "result_format": "COMPLETE",
             "unexpected_index_column_names": ["pk_1"],
@@ -178,3 +192,134 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
     unexpected_index_query = evrs[0]["results"][0]["result"]["unexpected_index_query"]
     assert unexpected_index_query == expected_sql_query_output
+
+
+@pytest.mark.filesystem
+def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_complete_output_with_query(  # noqa: E501
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    expect_column_pair_values_to_be_equal: gxe.ExpectColumnPairValuesToBeEqual,
+):
+    checkpoint = _build_checkpoint(
+        context=data_context_with_connection_to_metrics_db,
+        expectations=[expect_column_pair_values_to_be_equal],
+        asset_name=COLUMN_PAIR_ASSET,
+        result_format={
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+        },
+    )
+
+    result = checkpoint.run()
+    evrs = list(result.run_results.values())
+
+    index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    assert first_result_full_list == [
+        {"pk_1": 3, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 4, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 5, "ordered_item": "eraser", "received_item": "desk"},
+    ]
+
+    first_result_partial_list = evrs[0]["results"][0]["result"]["partial_unexpected_index_list"]
+    assert first_result_partial_list == [
+        {"pk_1": 3, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 4, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 5, "ordered_item": "eraser", "received_item": "desk"},
+    ]
+
+    unexpected_index_query = evrs[0]["results"][0]["result"]["unexpected_index_query"]
+    assert (
+        unexpected_index_query
+        == "SELECT pk_1, ordered_item, received_item \nFROM column_pairs \nWHERE NOT (ordered_item = received_item AND NOT (ordered_item IS NULL OR received_item IS NULL));"  # noqa: E501
+    )
+
+
+@pytest.mark.filesystem
+def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summary_output(
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    expect_column_pair_values_to_be_equal: gxe.ExpectColumnPairValuesToBeEqual,
+):
+    checkpoint = _build_checkpoint(
+        context=data_context_with_connection_to_metrics_db,
+        expectations=[expect_column_pair_values_to_be_equal],
+        asset_name=COLUMN_PAIR_ASSET,
+        result_format={
+            "result_format": "SUMMARY",
+            "unexpected_index_column_names": ["pk_1"],
+        },
+    )
+
+    result = checkpoint.run()
+    evrs = list(result.run_results.values())
+
+    index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
+    assert index_column_names == ["pk_1"]
+    first_result_full_list = evrs[0]["results"][0]["result"].get("unexpected_index_list")
+    assert not first_result_full_list
+
+    first_result_partial_list = evrs[0]["results"][0]["result"]["partial_unexpected_index_list"]
+    assert first_result_partial_list == [
+        {"pk_1": 3, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 4, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 5, "ordered_item": "eraser", "received_item": "desk"},
+    ]
+
+    unexpected_index_query = evrs[0]["results"][0]["result"].get("unexpected_index_query")
+    assert not unexpected_index_query
+
+
+@pytest.mark.filesystem
+def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_complete_output_with_query(  # noqa: E501
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    expect_multicolumn_sum_to_equal: gxe.ExpectMulticolumnSumToEqual,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - COMPLETE output, which means we have `unexpected_index_list` and
+          `partial_unexpected_index_list`
+        - 1 Expectations added to suite
+        - return_unexpected_index_query flag set to True
+    """
+    checkpoint = _build_checkpoint(
+        context=data_context_with_connection_to_metrics_db,
+        expectations=[expect_multicolumn_sum_to_equal],
+        asset_name=MULTI_COLUMN_SUM_ASSET,
+        result_format={
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+            "return_unexpected_index_query": True,
+        },
+    )
+
+    result = checkpoint.run()
+    evrs = list(result.run_results.values())
+
+    index_column_names = evrs[0]["results"][0]["result"]["unexpected_index_column_names"]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
+    assert first_result_full_list == [
+        {"pk_1": 1, "a": 20, "b": 20, "c": 20},
+        {"pk_1": 2, "a": 30, "b": 30, "c": 30},
+        {"pk_1": 3, "a": 40, "b": 40, "c": 40},
+        {"pk_1": 4, "a": 50, "b": 50, "c": 50},
+        {"pk_1": 5, "a": 60, "b": 60, "c": 60},
+    ]
+
+    first_result_partial_list = evrs[0]["results"][0]["result"]["partial_unexpected_index_list"]
+    assert first_result_partial_list == [
+        {"pk_1": 1, "a": 20, "b": 20, "c": 20},
+        {"pk_1": 2, "a": 30, "b": 30, "c": 30},
+        {"pk_1": 3, "a": 40, "b": 40, "c": 40},
+        {"pk_1": 4, "a": 50, "b": 50, "c": 50},
+        {"pk_1": 5, "a": 60, "b": 60, "c": 60},
+    ]
+
+    unexpected_index_query = evrs[0]["results"][0]["result"]["unexpected_index_query"]
+    assert (
+        unexpected_index_query
+        == "SELECT pk_1, a, b, c \nFROM multi_column_sums \nWHERE 0 + a + b + c != 30.0;"
+    )
