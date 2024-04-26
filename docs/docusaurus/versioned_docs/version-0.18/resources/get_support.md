@@ -25,8 +25,6 @@ Use one of the following methods to request support:
 
 The following are some recommendations for resolving issues on your own. Resolving issues on your own builds your knowledge and allows you to share that knowledge with the community.
 
-The following are some recommendations for resolving issues on your own. Resolving issues on your own builds your knowledge and allows you to share that knowledge with the community.
-
 ### Search the GX documentation
 
 Search the docs you're using currently for an answer to your issue or question.
