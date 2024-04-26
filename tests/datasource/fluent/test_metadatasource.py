@@ -74,15 +74,15 @@ class DataContext:
     @validate_arguments
     def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
         self.root_directory = context_root_dir
-        self._sources: _SourceFactories = _SourceFactories(self)  # type: ignore[arg-type]
+        self._data_sources: _SourceFactories = _SourceFactories(self)  # type: ignore[arg-type]
         self._datasources: Dict[str, Datasource] = {}
         self.config_provider: _ConfigurationProvider | None = None
-        logger.info(f"Available Factories - {self._sources.factories}")
-        logger.debug(f"`type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
+        logger.info(f"Available Factories - {self._data_sources.factories}")
+        logger.debug(f"`type_lookup` mapping ->\n{pf(self._data_sources.type_lookup)}")
 
     @property
-    def sources(self) -> _SourceFactories:
-        return self._sources
+    def data_sources(self) -> _SourceFactories:
+        return self._data_sources
 
     @property
     def datasources(self) -> DatasourceDict:
