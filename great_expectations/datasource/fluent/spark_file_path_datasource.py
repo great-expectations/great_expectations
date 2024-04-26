@@ -17,8 +17,8 @@ from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.file_path_asset_mixins import (
-    _DirectoryDataAssetMixin,
-    _RegexDataAssetMixin,
+    _DirectoryDataAssetBase,
+    _RegexDataAssetBase,
 )
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
@@ -223,11 +223,11 @@ class CSVAssetBase(_SparkGenericFilePathAssetMixin):
         return parent_reader_options.union(reader_options)
 
 
-class CSVAsset(_RegexDataAssetMixin, CSVAssetBase):
+class CSVAsset(_RegexDataAssetBase, CSVAssetBase):
     type: Literal["csv"] = "csv"
 
 
-class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAssetBase):
+class DirectoryCSVAsset(_DirectoryDataAssetBase, CSVAssetBase):
     type: Literal["directory_csv"] = "directory_csv"
 
     @classmethod
@@ -243,7 +243,7 @@ class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAssetBase):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
@@ -286,11 +286,11 @@ class ParquetAssetBase(_SparkGenericFilePathAssetMixin):
         )
 
 
-class ParquetAsset(_RegexDataAssetMixin, ParquetAssetBase):
+class ParquetAsset(_RegexDataAssetBase, ParquetAssetBase):
     type: Literal["parquet"] = "parquet"
 
 
-class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAssetBase):
+class DirectoryParquetAsset(_DirectoryDataAssetBase, ParquetAssetBase):
     type: Literal["directory_parquet"] = "directory_parquet"
 
     @classmethod
@@ -306,7 +306,7 @@ class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAssetBase):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
@@ -333,11 +333,11 @@ class ORCAssetBase(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"merge_schema"})
 
 
-class ORCAsset(_RegexDataAssetMixin, ORCAssetBase):
+class ORCAsset(_RegexDataAssetBase, ORCAssetBase):
     type: Literal["orc"] = "orc"
 
 
-class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAssetBase):
+class DirectoryORCAsset(_DirectoryDataAssetBase, ORCAssetBase):
     type: Literal["directory_orc"] = "directory_orc"
 
     @classmethod
@@ -353,7 +353,7 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAssetBase):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
@@ -488,11 +488,11 @@ class JSONAssetBase(_SparkGenericFilePathAssetMixin):
         )
 
 
-class JSONAsset(_RegexDataAssetMixin, JSONAssetBase):
+class JSONAsset(_RegexDataAssetBase, JSONAssetBase):
     type: Literal["json"] = "json"
 
 
-class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAssetBase):
+class DirectoryJSONAsset(_DirectoryDataAssetBase, JSONAssetBase):
     type: Literal["directory_json"] = "directory_json"
 
     @classmethod
@@ -508,7 +508,7 @@ class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAssetBase):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
@@ -536,11 +536,11 @@ class TextAssetBase(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"wholetext", "line_sep"})
 
 
-class TextAsset(_RegexDataAssetMixin, TextAssetBase):
+class TextAsset(_RegexDataAssetBase, TextAssetBase):
     type: Literal["text"] = "text"
 
 
-class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAssetBase):
+class DirectoryTextAsset(_DirectoryDataAssetBase, TextAssetBase):
     type: Literal["directory_text"] = "directory_text"
 
     @classmethod
@@ -556,7 +556,7 @@ class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAssetBase):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
@@ -585,11 +585,11 @@ class DeltaAssetBase(_FilePathDataAsset):
         return {"timestamp_as_of", "version_as_of"}
 
 
-class DeltaAsset(_RegexDataAssetMixin, DeltaAssetBase):
+class DeltaAsset(_RegexDataAssetBase, DeltaAssetBase):
     type: Literal["delta"] = "delta"
 
 
-class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAssetBase):
+class DirectoryDeltaAsset(_DirectoryDataAssetBase, DeltaAssetBase):
     type: Literal["directory_delta"] = "directory_delta"
 
     @classmethod
@@ -605,7 +605,7 @@ class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAssetBase):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 

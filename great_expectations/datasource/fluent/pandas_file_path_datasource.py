@@ -11,7 +11,7 @@ from typing import (
 from great_expectations.datasource.fluent.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
-from great_expectations.datasource.fluent.file_path_asset_mixins import _RegexDataAssetMixin
+from great_expectations.datasource.fluent.file_path_asset_mixins import _RegexDataAssetBase
 from great_expectations.datasource.fluent.pandas_datasource import (
     _PandasDatasource,
 )
@@ -47,20 +47,20 @@ _PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST = (
 
 
 _FILE_PATH_ASSET_MODELS = _generate_pandas_data_asset_models(
-    _RegexDataAssetMixin,
+    _RegexDataAssetBase,
     blacklist=_PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST,
     use_docstring_from_method=True,
     skip_first_param=True,
 )
 
 
-CSVAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("csv", _RegexDataAssetMixin)
-ExcelAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("excel", _RegexDataAssetMixin)
-FWFAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("fwf", _RegexDataAssetMixin)
-JSONAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("json", _RegexDataAssetMixin)
-ORCAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get("orc", _RegexDataAssetMixin)
-ParquetAsset: Type[_RegexDataAssetMixin] = _FILE_PATH_ASSET_MODELS.get(
-    "parquet", _RegexDataAssetMixin
+CSVAsset: Type[_RegexDataAssetBase] = _FILE_PATH_ASSET_MODELS.get("csv", _RegexDataAssetBase)
+ExcelAsset: Type[_RegexDataAssetBase] = _FILE_PATH_ASSET_MODELS.get("excel", _RegexDataAssetBase)
+FWFAsset: Type[_RegexDataAssetBase] = _FILE_PATH_ASSET_MODELS.get("fwf", _RegexDataAssetBase)
+JSONAsset: Type[_RegexDataAssetBase] = _FILE_PATH_ASSET_MODELS.get("json", _RegexDataAssetBase)
+ORCAsset: Type[_RegexDataAssetBase] = _FILE_PATH_ASSET_MODELS.get("orc", _RegexDataAssetBase)
+ParquetAsset: Type[_RegexDataAssetBase] = _FILE_PATH_ASSET_MODELS.get(
+    "parquet", _RegexDataAssetBase
 )
 
 
@@ -69,4 +69,4 @@ class _PandasFilePathDatasource(_PandasDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_FILE_PATH_ASSET_MODELS.values())
 
     # instance attributes
-    assets: List[_RegexDataAssetMixin] = []
+    assets: List[_RegexDataAssetBase] = []
