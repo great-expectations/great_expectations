@@ -122,7 +122,7 @@ if not SQLAlchemyError:
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -3395,7 +3395,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._view_validation_result(result)
 
     def _view_validation_result(self, result: CheckpointResult) -> None:
-        validation_result_identifier = result.list_validation_result_identifiers()[0]
+        validation_result_identifier = tuple(result.run_results.keys())[0]
         self.open_data_docs(resource_identifier=validation_result_identifier)  # type: ignore[arg-type]
 
     def escape_all_config_variables(
