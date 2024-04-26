@@ -228,7 +228,7 @@ class CSVAsset(_RegexDataAssetMixin, CSVAssetBase):
 
 
 class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAssetBase):
-    type: Literal["directory_csv"] = "directory_csv"  # type: ignore[assignment]
+    type: Literal["directory_csv"] = "directory_csv"
 
     @classmethod
     @override
@@ -291,7 +291,7 @@ class ParquetAsset(_RegexDataAssetMixin, ParquetAssetBase):
 
 
 class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAssetBase):
-    type: Literal["directory_parquet"] = "directory_parquet"  # type: ignore[assignment]
+    type: Literal["directory_parquet"] = "directory_parquet"
 
     @classmethod
     @override
@@ -338,7 +338,7 @@ class ORCAsset(_RegexDataAssetMixin, ORCAssetBase):
 
 
 class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAssetBase):
-    type: Literal["directory_orc"] = "directory_orc"  # type: ignore[assignment]
+    type: Literal["directory_orc"] = "directory_orc"
 
     @classmethod
     @override
@@ -493,7 +493,7 @@ class JSONAsset(_RegexDataAssetMixin, JSONAssetBase):
 
 
 class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAssetBase):
-    type: Literal["directory_json"] = "directory_json"  # type: ignore[assignment]
+    type: Literal["directory_json"] = "directory_json"
 
     @classmethod
     @override
@@ -541,7 +541,7 @@ class TextAsset(_RegexDataAssetMixin, TextAssetBase):
 
 
 class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAssetBase):
-    type: Literal["directory_text"] = "directory_text"  # type: ignore[assignment]
+    type: Literal["directory_text"] = "directory_text"
 
     @classmethod
     @override
@@ -590,7 +590,7 @@ class DeltaAsset(_RegexDataAssetMixin, DeltaAssetBase):
 
 
 class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAssetBase):
-    type: Literal["directory_delta"] = "directory_delta"  # type: ignore[assignment]
+    type: Literal["directory_delta"] = "directory_delta"
 
     @classmethod
     @override
