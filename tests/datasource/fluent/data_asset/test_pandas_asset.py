@@ -1,3 +1,5 @@
+from typing import Final
+
 import pytest
 
 from great_expectations.core.batch_definition import BatchDefinition
@@ -39,6 +41,11 @@ def asset(request, datasource) -> _PandasDataAsset:
     return asset
 
 
+PATH_LIKE_STR: Final[str] = "./test/file"
+QUERY: Final[str] = "select * from my_table;"
+CONNECTION_URL: Final[str] = "connection:url"
+
+
 def _asset_parameters():
     return [
         pytest.param(
@@ -46,60 +53,58 @@ def _asset_parameters():
             id="ClipboardAsset",
         ),
         pytest.param(
-            CSVAsset(name="test_asset", filepath_or_buffer="./test/file", type="csv"),
+            CSVAsset(name="test_asset", filepath_or_buffer=PATH_LIKE_STR, type="csv"),
             id="CSVAsset",
         ),
         pytest.param(
-            ExcelAsset(name="test_asset", io="./test/file", type="excel"),
+            ExcelAsset(name="test_asset", io=PATH_LIKE_STR, type="excel"),
             id="ExcelAsset",
         ),
         pytest.param(
-            FeatherAsset(name="test_asset", path="./test/file", type="feather"),
+            FeatherAsset(name="test_asset", path=PATH_LIKE_STR, type="feather"),
             id="FeatherAsset",
         ),
         pytest.param(
-            FWFAsset(name="test_asset", filepath_or_buffer="./test/file", type="fwf"),
+            FWFAsset(name="test_asset", filepath_or_buffer=PATH_LIKE_STR, type="fwf"),
             id="FWFAsset",
         ),
         pytest.param(
-            GBQAsset(name="test_asset", query="select * from my_table;", type="gbq"),
+            GBQAsset(name="test_asset", query=QUERY, type="gbq"),
             id="GBQAsset",
         ),
         pytest.param(
-            HDFAsset(name="test_asset", path_or_buf="./test/file", type="hdf"),
+            HDFAsset(name="test_asset", path_or_buf=PATH_LIKE_STR, type="hdf"),
             id="HDFAsset",
         ),
         pytest.param(
-            HTMLAsset(name="test_asset", io="./test/file", type="html"),
+            HTMLAsset(name="test_asset", io=PATH_LIKE_STR, type="html"),
             id="HTMLAsset",
         ),
         pytest.param(
-            JSONAsset(name="test_asset", path_or_buf="./test/file", type="json"),
+            JSONAsset(name="test_asset", path_or_buf=PATH_LIKE_STR, type="json"),
             id="JSONAsset",
         ),
         pytest.param(
-            ORCAsset(name="test_asset", path="./test/file", type="orc"),
+            ORCAsset(name="test_asset", path=PATH_LIKE_STR, type="orc"),
             id="ORCAsset",
         ),
         pytest.param(
-            ParquetAsset(name="test_asset", path="./test/file", type="parquet"),
+            ParquetAsset(name="test_asset", path=PATH_LIKE_STR, type="parquet"),
             id="ParquetAsset",
         ),
         pytest.param(
-            PickleAsset(name="test_asset", filepath_or_buffer="./test/file", type="pickle"),
+            PickleAsset(name="test_asset", filepath_or_buffer=PATH_LIKE_STR, type="pickle"),
             id="PickleAsset",
         ),
         pytest.param(
-            SQLAsset(
-                name="test_asset", sql="select * from my_table;", con="connection:url", type="sql"
-            ),
+            SQLAsset(name="test_asset", sql=QUERY, con=CONNECTION_URL, type="sql"),
             id="SQLAsset",
         ),
         pytest.param(
             SQLQueryAsset(
                 name="test_asset",
-                sql="select * from my_table;",
-                con="connection:url",
+                sql=QUERY,
+                con=CONNECTION_URL,
                 type="sql_query",
             ),
             id="SQLQueryAsset",
@@ -108,29 +113,29 @@ def _asset_parameters():
             SQLTableAsset(
                 name="test_asset",
                 table_name="my_table",
-                con="connection:url",
+                con=CONNECTION_URL,
                 type="sql_table",
             ),
             id="SQLTableAsset",
         ),
         pytest.param(
-            SASAsset(name="test_asset", filepath_or_buffer="./test/file", type="sas"),
+            SASAsset(name="test_asset", filepath_or_buffer=PATH_LIKE_STR, type="sas"),
             id="SASAsset",
         ),
         pytest.param(
-            SPSSAsset(name="test_asset", path="./test/file", type="spss"),
+            SPSSAsset(name="test_asset", path=PATH_LIKE_STR, type="spss"),
             id="SPSSAsset",
         ),
         pytest.param(
-            StataAsset(name="test_asset", filepath_or_buffer="./test/file", type="stata"),
+            StataAsset(name="test_asset", filepath_or_buffer=PATH_LIKE_STR, type="stata"),
             id="StataAsset",
         ),
         pytest.param(
-            TableAsset(name="test_asset", filepath_or_buffer="./test/file", type="table"),
+            TableAsset(name="test_asset", filepath_or_buffer=PATH_LIKE_STR, type="table"),
             id="TableAsset",
         ),
         pytest.param(
-            XMLAsset(name="test_asset", path_or_buffer="./test/file", type="xml"),
+            XMLAsset(name="test_asset", path_or_buffer=PATH_LIKE_STR, type="xml"),
             id="XMLAsset",
         ),
     ]
