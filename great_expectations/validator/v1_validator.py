@@ -30,7 +30,7 @@ class Validator:
     def __init__(
         self,
         batch_definition: BatchDefinition,
-        result_format: ResultFormat = ResultFormat.SUMMARY,
+        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         batch_parameters: Optional[BatchParameters] = None,
     ) -> None:
         self._batch_definition = batch_definition
