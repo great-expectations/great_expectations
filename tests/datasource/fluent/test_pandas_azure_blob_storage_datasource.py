@@ -487,5 +487,5 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
         abs_container="my_container",
         abs_recursive_file_discovery=True,
     )
-    assert "recursive" in mock_list_keys.call_args.kwargs.keys()
+    assert "recursive" in mock_list_keys.call_args.kwargs
     assert mock_list_keys.call_args.kwargs["recursive"] is True

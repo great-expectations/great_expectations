@@ -456,7 +456,7 @@ def test_get_compute_domain_with_row_condition(
 
     # Ensuring compute kwargs have not been modified
     assert (
-        "row_condition" in compute_kwargs.keys()
+        "row_condition" in compute_kwargs
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {}
 
@@ -481,7 +481,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(
     assert data.collect() == expected_df.collect()
 
     # Ensuring compute kwargs have not been modified
-    assert "row_condition" in compute_kwargs.keys()
+    assert "row_condition" in compute_kwargs
     assert accessor_kwargs == {}
 
 
@@ -942,7 +942,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session)
 
     # Ensuring compute kwargs have not been modified
     assert (
-        "row_condition" in compute_kwargs.keys()
+        "row_condition" in compute_kwargs
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {"column": "b"}, "Accessor kwargs have been modified"
 
