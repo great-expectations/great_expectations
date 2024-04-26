@@ -916,7 +916,7 @@ def test_adding_partitioner_persists_results(
         strict=True
     )
 
-    empty_data_context.sources.add_postgres(
+    empty_data_context.data_sources.add_postgres(
         name="my_datasource",
         connection_string="postgresql://postgres:@localhost/not_a_real_db",
     ).add_query_asset(

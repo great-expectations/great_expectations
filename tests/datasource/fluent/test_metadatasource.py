@@ -412,7 +412,7 @@ def context_with_fluent_datasource(
 ) -> Tuple[AbstractDataContext, pathlib.Path, pathlib.Path]:
     context, config_file_path, data_dir = context_config_data
     assert 0 == len(context.datasources)
-    context.sources.add_pandas_filesystem(
+    context.data_sources.add_pandas_filesystem(
         name=DEFAULT_CRUD_DATASOURCE_NAME,
         base_directory=data_dir,
         data_context_root_directory=config_file_path.parent,

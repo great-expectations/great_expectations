@@ -1266,7 +1266,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     path_to_folder_containing_csv_files = pathlib.Path(data_path)
 
     datasource_name = "my_pandas_filesystem_datasource"
-    datasource = context.sources.add_pandas_filesystem(
+    datasource = context.data_sources.add_pandas_filesystem(
         name=datasource_name, base_directory=path_to_folder_containing_csv_files
     )
 
@@ -1283,7 +1283,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
 
     datasource_name = "my_pandas_dataframes_datasource"
-    datasource = context.sources.add_pandas(name=datasource_name)
+    datasource = context.data_sources.add_pandas(name=datasource_name)
 
     csv_source_path = pathlib.Path(
         context_path,
@@ -2564,7 +2564,7 @@ def fds_data_context(
     sqlite_connection_string: str,
 ) -> AbstractDataContext:
     context = empty_data_context
-    datasource = context.sources.add_sqlite(
+    datasource = context.data_sources.add_sqlite(
         name=fds_data_context_datasource_name,
         connection_string=sqlite_connection_string,
         create_temp_table=True,

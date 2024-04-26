@@ -20,7 +20,7 @@ bucket_or_name = "test_docs_data"
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_data_on_gcs_using_spark.py create_datasource">
-datasource = context.sources.add_spark_gcs(
+datasource = context.data_sources.add_spark_gcs(
     name=datasource_name, bucket_or_name=bucket_or_name, gcs_options=gcs_options
 )
 # </snippet>

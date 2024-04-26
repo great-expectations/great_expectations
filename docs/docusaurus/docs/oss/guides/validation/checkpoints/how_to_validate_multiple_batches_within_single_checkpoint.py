@@ -5,7 +5,7 @@ from great_expectations.expectations.expectation_configuration import (
 
 context = gx.get_context()
 
-datasource = context.sources.add_pandas_filesystem(
+datasource = context.data_sources.add_pandas_filesystem(
     name="example_datasource", base_directory="./data"
 )
 

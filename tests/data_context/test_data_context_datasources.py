@@ -232,7 +232,7 @@ def test_list_datasources() -> None:
     context = gx.get_context(project_config=project_config)
 
     datasource_name = "my_experimental_datasource_awaiting_migration"
-    context.sources.add_pandas(datasource_name)
+    context.data_sources.add_pandas(datasource_name)
 
     assert len(context.list_datasources()) == 2
 
