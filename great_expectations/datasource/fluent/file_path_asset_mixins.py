@@ -5,6 +5,7 @@ import pathlib
 import re
 from typing import TYPE_CHECKING
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
@@ -73,12 +74,14 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
     ) -> PathStr:
         return self.data_directory
 
+    @public_api
+    def add_batch_definition_whole_directory(self, name: str) -> BatchDefinition:
+        """Add a BatchDefinition which creates a single batch for the entire directory."""
+        return self.add_batch_definition(name=name, partitioner=None)
+
     @override
     def _get_reader_method(self) -> str:
-        raise NotImplementedError(
-            """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
-work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""  # noqa: E501
-        )
+        raise NotImplementedError
 
     @override
     def _get_reader_options_include(self) -> set[str]:
@@ -124,10 +127,11 @@ class AmbiguousPathError(ValueError):
 class _RegexDataAssetMixin(_FilePathDataAsset):
     """Mixin encapsulating logic specific to regex-based FilePathDataAssets"""
 
+    @public_api
     def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
-        """Adds a BatchDefinition which matches a single Path.
+        """Add a BatchDefinition which matches a single Path.
 
-        Parameters:
+        Args:
             name: BatchDefinition name
             path: File path relative to the Asset
 
@@ -147,12 +151,13 @@ class _RegexDataAssetMixin(_FilePathDataAsset):
             partitioner=PartitionerPath(regex=regex),
         )
 
+    @public_api
     def add_batch_definition_yearly(
         self, name: str, regex: re.Pattern, sort_ascending: bool = True
     ) -> BatchDefinition:
-        """Adds a BatchDefinition which defines yearly batches by file name.
+        """Add a BatchDefinition which defines yearly batches by file name.
 
-        Parameters:
+        Args:
             name: BatchDefinition name
             regex: Regular Expression used to define batches by file name.
                 Must contain a single group `year`
@@ -168,12 +173,13 @@ class _RegexDataAssetMixin(_FilePathDataAsset):
             partitioner=PartitionerYearly(regex=regex, sort_ascending=sort_ascending),
         )
 
+    @public_api
     def add_batch_definition_monthly(
         self, name: str, regex: re.Pattern, sort_ascending: bool = True
     ) -> BatchDefinition:
-        """Adds a BatchDefinition which defines monthly batches by file name.
+        """Add a BatchDefinition which defines monthly batches by file name.
 
-        Parameters:
+        Args:
             name: BatchDefinition name
             regex: Regular Expression used to define batches by file name.
                 Must contain the groups `year` and `month`.
@@ -189,12 +195,13 @@ class _RegexDataAssetMixin(_FilePathDataAsset):
             partitioner=PartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
         )
 
+    @public_api
     def add_batch_definition_daily(
         self, name: str, regex: re.Pattern, sort_ascending: bool = True
     ) -> BatchDefinition:
-        """Adds a BatchDefinition which defines daily batches by file name.
+        """Add a BatchDefinition which defines daily batches by file name.
 
-        Parameters:
+        Args:
             name: BatchDefinition name
             regex: Regular Expression used to define batches by file name.
                 Must contain the groups `year`, `month`, and `day`.
