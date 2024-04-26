@@ -1,6 +1,6 @@
 {
     "title": "DirectoryJSONAsset",
-    "description": "Used for accessing all the files in a directory as a single batch.",
+    "description": "Mixin encapsulating logic specific to directory-based FilePathDataAssets",
     "type": "object",
     "properties": {
         "name": {
