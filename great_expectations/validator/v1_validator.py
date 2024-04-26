@@ -105,9 +105,14 @@ class Validator:
             expectation_configs, suite_parameters
         )
 
+        if isinstance(self.result_format, ResultFormat):
+            runtime_configuration = {"result_format": self.result_format.value}
+        else:
+            runtime_configuration = self.result_format
+
         results = self._wrapped_validator.graph_validate(
             configurations=processed_expectation_configs,
-            runtime_configuration={"result_format": self.result_format.value},
+            runtime_configuration=runtime_configuration,
         )
 
         if self._include_rendered_content:
