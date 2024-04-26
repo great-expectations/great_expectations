@@ -26,7 +26,7 @@
             "default": [],
             "type": "array",
             "items": {
-                "$ref": "#/definitions/_FilePathDataAsset"
+                "$ref": "#/definitions/_RegexDataAssetBase"
             }
         },
         "bucket_or_name": {
@@ -211,9 +211,9 @@
                 "name"
             ]
         },
-        "_FilePathDataAsset": {
-            "title": "_FilePathDataAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+        "_RegexDataAssetBase": {
+            "title": "_RegexDataAssetBase",
+            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
