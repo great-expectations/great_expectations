@@ -18,7 +18,9 @@ from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
-from great_expectations.datasource.fluent.pandas_file_path_datasource import CSVAsset
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    CSVAsset as PandasCSVAsset,
+)
 
 pytestmark = pytest.mark.filesystem
 
@@ -45,7 +47,7 @@ EXPECT_10_ROWS = gxe.ExpectTableRowCountToEqual(value=10)
 
 
 @pytest.fixture
-def file_system_asset(context: AbstractDataContext) -> CSVAsset:
+def file_system_asset(context: AbstractDataContext) -> PandasCSVAsset:
     datasource = context.sources.add_pandas_filesystem(
         DATASOURCE_NAME,
         base_directory="tests/test_sets/taxi_yellow_tripdata_samples/first_ten_trips_in_each_file",  # type: ignore [arg-type]
@@ -56,23 +58,26 @@ def file_system_asset(context: AbstractDataContext) -> CSVAsset:
 
 
 @pytest.fixture
-def filesystem_whole_table_batch_definition(file_system_asset: CSVAsset) -> BatchDefinition:
+def filesystem_whole_table_batch_definition(file_system_asset: PandasCSVAsset) -> BatchDefinition:
     return file_system_asset.add_batch_definition("no batching regex")
 
 
 @pytest.fixture
-def filesystem_monthly_batch_definition(file_system_asset: CSVAsset) -> BatchDefinition:
-    return file_system_asset._add_batch_definition_monthly(
+def filesystem_monthly_batch_definition(file_system_asset: PandasCSVAsset) -> BatchDefinition:
+    return file_system_asset.add_batch_definition_monthly(
         "monthly",
         re.compile(BATCHING_REGEX),
     )
 
 
 @pytest.fixture
-def filesystem_monthly_batch_definition_descending(file_system_asset: CSVAsset) -> BatchDefinition:
-    return file_system_asset._add_batch_definition_monthly(
+def filesystem_monthly_batch_definition_descending(
+    file_system_asset: PandasCSVAsset,
+) -> BatchDefinition:
+    return file_system_asset.add_batch_definition_monthly(
         "monthly",
         re.compile(BATCHING_REGEX),
+        sort_ascending=False,
     )
 
 
@@ -94,7 +99,7 @@ def _create_test_cases():
             ),
             "filesystem_whole_table_batch_definition",
             None,  # no batch parameters
-            id="no batching regex - takes the last file",
+            id="pandas: no batching regex - takes the last file",
         ),
         pytest.param(
             gxe.ExpectColumnDistinctValuesToEqualSet(
@@ -102,7 +107,7 @@ def _create_test_cases():
             ),
             "filesystem_monthly_batch_definition",
             None,  # no batch parameters
-            id="ascending",
+            id="pandas: ascending",
         ),
         pytest.param(
             gxe.ExpectColumnDistinctValuesToEqualSet(
@@ -110,7 +115,7 @@ def _create_test_cases():
             ),
             "filesystem_monthly_batch_definition_descending",
             None,  # no batch parameters
-            id="descending",
+            id="pandas: descending",
         ),
         pytest.param(
             gxe.ExpectColumnDistinctValuesToEqualSet(
@@ -118,7 +123,7 @@ def _create_test_cases():
             ),
             "filesystem_monthly_batch_definition",
             MY_FAVORITE_MONTH,
-            id="batch params",
+            id="pandas: batch params",
             marks=[pytest.mark.xfail(reason="Fix in V1-299", strict=True)],
         ),
     ]
