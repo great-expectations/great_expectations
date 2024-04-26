@@ -240,7 +240,7 @@ def test_list_datasources() -> None:
 @pytest.mark.filesystem
 def test_get_available_data_assets_names(empty_data_context) -> None:
     datasource_name = "my_fluent_pandas_datasource"
-    datasource = empty_data_context.sources.add_pandas(datasource_name)
+    datasource = empty_data_context.data_sources.add_pandas(datasource_name)
     asset_name = "test_data_frame"
     datasource.add_dataframe_asset(name=asset_name)
 

@@ -163,7 +163,7 @@ def test_checkpoint_factory_add_success_cloud(empty_cloud_context_fluent):
 def _test_checkpoint_factory_add_success(context):
     # Arrange
     name = "test-checkpoint"
-    ds = context.sources.add_pandas("my_datasource")
+    ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_def = asset.add_batch_definition("my_batch_definition")
     suite = ExpectationSuite(name="my_suite")
@@ -197,7 +197,7 @@ def test_checkpoint_factory_delete_success_cloud(empty_cloud_context_fluent):
 def _test_checkpoint_factory_delete_success(context):
     # Arrange
     name = "test-checkpoint"
-    ds = context.sources.add_pandas("my_datasource")
+    ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_def = asset.add_batch_definition("my_batch_definition")
     suite = ExpectationSuite(name="my_suite")

@@ -1192,7 +1192,7 @@ slug: /core/changelog
 * [BUGFIX] Change GXSqlDialect.AWSATHENA to awsathena ([#7950](https://github.com/great-expectations/great_expectations/pull/7950)) (thanks @calabozo)
 * [BUGFIX] Setting maximum on `typing-extension` package version ([#7970](https://github.com/great-expectations/great_expectations/pull/7970))
 * [BUGFIX] Resolve Issue 7335 ([#7339](https://github.com/great-expectations/great_expectations/pull/7339)) (thanks @richardohara)
-* [BUGFIX] Cloud - Fix `context.sources.update_*()` `POST` instead of `PUT` calls ([#7989](https://github.com/great-expectations/great_expectations/pull/7989))
+* [BUGFIX] Cloud - Fix `context.data_sources.update_*()` `POST` instead of `PUT` calls ([#7989](https://github.com/great-expectations/great_expectations/pull/7989))
 * [BUGFIX] `meta_notes` rendered inline can fail schema validation for a valid configuration ([#7995](https://github.com/great-expectations/great_expectations/pull/7995))
 * [BUGFIX] `xfail` two cloud tests that are blocking release 0.16.14 ([#8008](https://github.com/great-expectations/great_expectations/pull/8008))
 * [DOCS] Technical tags in Versioned Docs reference correct version ([#7935](https://github.com/great-expectations/great_expectations/pull/7935))
@@ -2400,7 +2400,7 @@ slug: /core/changelog
 ### 0.15.36
 * [BUGFIX] Contrib Expectation tracebacks ([#6471](https://github.com/great-expectations/great_expectations/pull/6471))
 * [BUGFIX] Add additional error checking to `ExpectationAnonymizer` ([#6467](https://github.com/great-expectations/great_expectations/pull/6467))
-* [MAINTENANCE] Add docstring for context.sources.add_postgres ([#6459](https://github.com/great-expectations/great_expectations/pull/6459))
+* [MAINTENANCE] Add docstring for context.data_sources.add_postgres ([#6459](https://github.com/great-expectations/great_expectations/pull/6459))
 * [MAINTENANCE] fixing type hints in metrics utils module ([#6469](https://github.com/great-expectations/great_expectations/pull/6469))
 * [MAINTENANCE] Moving tutorials to great-expectations repo ([#6464](https://github.com/great-expectations/great_expectations/pull/6464))
 
