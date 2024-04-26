@@ -25,9 +25,6 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset as SparkCSVAsset,
 )
 
-pytestmark = pytest.mark.filesystem
-
-
 DATASOURCE_NAME = "file system"
 ASSET_NAME = "first ten trips in each file"
 
