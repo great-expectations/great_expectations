@@ -16,10 +16,7 @@ def is_valid_state_or_territory(state: str, dc_statehood: bool):
         pass
     if len(state) > 24 or type(state) != str:  # noqa: E721
         return False
-    elif state in list_of_states_and_territories:
-        return True
-    else:
-        return False
+    return state in list_of_states_and_territories
 
 
 # This class defines a Metric to support your Expectation.

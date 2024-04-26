@@ -28,10 +28,7 @@ def is_not_a_future_date(date_in: str) -> bool:
         else:
             d = date_in
         d = d.date()
-        if d > today:
-            return False
-        else:
-            return True
+        return not d > today
     except Exception:
         return False
 

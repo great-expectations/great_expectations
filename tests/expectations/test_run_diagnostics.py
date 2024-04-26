@@ -403,7 +403,7 @@ def test_expectation__get_renderers():
     # }
 
     # Expectation with no new renderers specified
-    print([x for x in _registered_expectations.keys() if "second" in x])
+    print([x for x in _registered_expectations if "second" in x])
     expectation_name = "expect_column_values_to_equal_three___second_iteration"
     my_expectation = _registered_expectations[expectation_name]()
 
@@ -452,7 +452,7 @@ def test_expectation__get_renderers():
     }
 
     # Expectation with no renderers specified
-    print([x for x in _registered_expectations.keys() if "second" in x])
+    print([x for x in _registered_expectations if "second" in x])
     expectation_name = "expect_column_values_to_equal_three___third_iteration"
     my_expectation = _registered_expectations[expectation_name]()
 

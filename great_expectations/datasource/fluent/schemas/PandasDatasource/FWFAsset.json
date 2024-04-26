@@ -391,6 +391,109 @@
                 "date_format_string"
             ]
         },
+        "PartitionerYearly": {
+            "title": "PartitionerYearly",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year"
+                    ],
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "PartitionerMonthly": {
+            "title": "PartitionerMonthly",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year",
+                        "month"
+                    ],
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "PartitionerDaily": {
+            "title": "PartitionerDaily",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year",
+                        "month",
+                        "day"
+                    ],
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "PartitionerPath": {
+            "title": "PartitionerPath",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
         "BatchDefinition": {
             "title": "BatchDefinition",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
@@ -433,13 +536,20 @@
                         },
                         {
                             "$ref": "#/definitions/PartitionerConvertedDatetime"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerYearly"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerMonthly"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerDaily"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerPath"
                         }
                     ]
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [

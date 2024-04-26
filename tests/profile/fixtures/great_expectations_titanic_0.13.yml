@@ -42,33 +42,6 @@ config_variables_file_path: uncommitted/config_variables.yml
 # used to override and extend Great Expectations.
 plugins_directory: plugins/
 
-# Validation Operators are customizable workflows that bundle the validation of
-# one or more expectation suites and subsequent actions. The example below
-# stores validations and send a slack notification. To read more about
-# customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html
-validation_operators:
-  action_list_operator:
-    # To learn how to configure sending Slack notifications during evaluation
-    # (and other customizations), read: https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/validation_operators/index.html#great_expectations.validation_operators.ActionListValidationOperator
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-        # - name: send_slack_notification_on_validation_result
-        #   action:
-        #     class_name: SlackNotificationAction
-        #     # put the actual webhook URL in the uncommitted/config_variables.yml file
-        #     slack_webhook: ${validation_notification_slack_webhook}
-        #     notify_on: all # possible values: "all", "failure", "success"
-        #     notify_with: # optional list containing the DataDocs sites to include in the notification.
-        #     renderer:
-        #       module_name: great_expectations.render.renderer.slack_renderer
-        #       class_name: SlackRenderer
-
 stores:
   # Stores are configurable places to store things like Expectations, Validations
   # Data Docs, and more. These are for advanced users only - most users can simply

@@ -1,5 +1,4 @@
 import os
-import re
 import sqlite3
 import typing
 from logging import Logger
@@ -36,6 +35,7 @@ from great_expectations._docs_decorators import (
 from great_expectations.compatibility import pydantic, sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import Partitioner
 from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 from great_expectations.datasource.fluent.dynamic_pandas import (
@@ -79,8 +79,8 @@ class _PandasDataAsset(DataAsset):
         options: Optional[BatchParameters] = ...,
         batch_slice: Optional[BatchSlice] = ...,
         partitioner: Optional[Partitioner] = ...,
-        batching_regex: Optional[re.Pattern] = ...,
     ) -> BatchRequest: ...
+    def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition: ...
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...
     @override

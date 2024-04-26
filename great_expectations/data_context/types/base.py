@@ -40,7 +40,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import deprecated_argument, public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
@@ -53,7 +53,6 @@ if TYPE_CHECKING:
     from io import TextIOWrapper
 
     from great_expectations.alias_types import JSONValues, PathStr
-    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.core.batch import BatchRequestBase
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest as FluentBatchRequest,
@@ -1358,24 +1357,6 @@ class ProgressBarsConfigSchema(Schema):
     metric_calculations = fields.Boolean()
 
 
-class IncludeRenderedContentConfig(DictDot):
-    def __init__(
-        self,
-        globally: bool = False,
-        expectation_suite: bool = False,
-        expectation_validation_result: bool = False,
-    ) -> None:
-        self.globally = globally
-        self.expectation_suite = expectation_suite
-        self.expectation_validation_result = expectation_validation_result
-
-
-class IncludeRenderedContentConfigSchema(Schema):
-    globally = fields.Boolean(default=False)
-    expectation_suite = fields.Boolean(default=False)
-    expectation_validation_result = fields.Boolean(default=False)
-
-
 class GXCloudConfig(DictDot):
     def __init__(
         self,
@@ -1431,23 +1412,16 @@ class DataContextConfigSchema(Schema):
     checkpoint_store_name = fields.Str(required=False, allow_none=True)
     profiler_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
-    validation_operators = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
-    )
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
     progress_bars = fields.Nested(ProgressBarsConfigSchema, required=False, allow_none=True)
-    include_rendered_content = fields.Nested(
-        IncludeRenderedContentConfigSchema, required=False, allow_none=True
-    )
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
     # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook  # noqa: E501
     REMOVE_KEYS_IF_NONE = [
         "progress_bars",  # 0.13.49
-        "include_rendered_content",  # 0.15.19,
         "fluent_datasources",
     ]
 
@@ -1467,7 +1441,7 @@ class DataContextConfigSchema(Schema):
             exc
             and exc.messages
             and isinstance(exc.messages, dict)
-            and all(key is None for key in exc.messages.keys())
+            and all(key is None for key in exc.messages)
         ):
             exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
 
@@ -1604,13 +1578,6 @@ class DataContextConfigDefaults(enum.Enum):
             "action": {"class_name": "UpdateDataDocsAction"},
         },
     ]
-    DEFAULT_VALIDATION_OPERATORS = {
-        "action_list_operator": {
-            "class_name": "ActionListValidationOperator",
-            "action_list": DEFAULT_ACTION_LIST,
-        }
-    }
-
     DEFAULT_EXPECTATIONS_STORE = {
         "class_name": "ExpectationsStore",
         "store_backend": {
@@ -1688,7 +1655,6 @@ class BaseStoreBackendDefaults(DictDot):
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-        validation_operators: Optional[dict] = None,
         stores: Optional[dict] = None,
         data_docs_sites: Optional[dict] = None,
     ) -> None:
@@ -1700,7 +1666,6 @@ class BaseStoreBackendDefaults(DictDot):
         self.validation_definition_store_name = (
             DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value
         )
-        self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
 
@@ -2189,7 +2154,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
 
 
 @public_api
-@deprecated_argument(argument_name="validation_operators", version="0.14.0")
 class DataContextConfig(BaseYamlConfig):
     """Config class for DataContext.
 
@@ -2212,7 +2176,6 @@ class DataContextConfig(BaseYamlConfig):
         checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
         profiler_store_name (Optional[str]): name of ProfilerStore to be used by DataContext.
         plugins_directory (Optional[str]): the directory in which custom plugin modules should be placed.
-        validation_operators: list of validation operators configured by this DataContext.
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
@@ -2225,11 +2188,9 @@ class DataContextConfig(BaseYamlConfig):
             instantiating with yml file.
         progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally, for
             profilers, or metrics calculations.
-        include_rendered_content (Optional[IncludedRenderedContentConfig]): allows rendered content to be configured
-            globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """  # noqa: E501
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913
+    def __init__(  # noqa: C901, PLR0913
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2245,7 +2206,6 @@ class DataContextConfig(BaseYamlConfig):
         checkpoint_store_name: Optional[str] = None,
         profiler_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
-        validation_operators=None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
@@ -2253,7 +2213,6 @@ class DataContextConfig(BaseYamlConfig):
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
-        include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
         # Set defaults
         if config_version is None:
@@ -2288,7 +2247,6 @@ class DataContextConfig(BaseYamlConfig):
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
-        self.validation_operators = validation_operators
         self.stores = self._init_stores(stores)
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
@@ -2300,11 +2258,6 @@ class DataContextConfig(BaseYamlConfig):
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
         self.progress_bars = progress_bars
-        if include_rendered_content is None:
-            include_rendered_content = IncludeRenderedContentConfig()
-        elif isinstance(include_rendered_content, dict):
-            include_rendered_content = IncludeRenderedContentConfig(**include_rendered_content)
-        self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
 
@@ -2568,7 +2521,7 @@ class CheckpointConfig(BaseYamlConfig):
         name: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[Sequence[ActionDict]] = None,
+        action_list: Optional[Sequence[dict]] = None,
         suite_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[CheckpointValidationDefinition]] = None,
@@ -2656,11 +2609,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_name = value
 
     @property
-    def action_list(self) -> Sequence[ActionDict]:
+    def action_list(self) -> Sequence[dict]:
         return self._action_list
 
     @action_list.setter
-    def action_list(self, value: Sequence[ActionDict]) -> None:
+    def action_list(self, value: Sequence[dict]) -> None:
         self._action_list = value
 
     @property

@@ -75,7 +75,7 @@ class TestAddDataDocsSite:
 class TestListDataDocsSites:
     @pytest.mark.unit
     def test_list_data_docs_sites(self, ephemeral_context_with_defaults: EphemeralDataContext):
-        site_names = [d for d in ephemeral_context_with_defaults.list_data_docs_sites().keys()]
+        site_names = [d for d in ephemeral_context_with_defaults.list_data_docs_sites()]
         assert site_names == ["local_site"]
 
 
