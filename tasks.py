@@ -918,7 +918,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, etc. Can be specified multiple times.",  # noqa: E501
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud, etc. Can be specified multiple times.",  # noqa: E501
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
@@ -941,9 +941,9 @@ def deps(
 
     Example usage:
     Installing the needed dependencies for running the `external_sqldialect` tests and
-    the 'requirements-dev-snowflake.txt' dependencies.
+    the 'requirements-dev-cloud.txt' dependencies.
 
-    $ invoke deps -m external_sqldialect -r snowflake
+    $ invoke deps -m external_sqldialect -r cloud
     """  # noqa: E501
     cmds = ["pip", "install"]
     if editable_install:
