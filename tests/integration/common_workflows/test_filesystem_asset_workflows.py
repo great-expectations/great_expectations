@@ -48,7 +48,7 @@ EXPECT_10_ROWS = gxe.ExpectTableRowCountToEqual(value=10)
 
 @pytest.fixture
 def pandas_file_system_asset(context: AbstractDataContext) -> PandasCSVAsset:
-    datasource = context.sources.add_pandas_filesystem(
+    datasource = context.data_sources.add_pandas_filesystem(
         DATASOURCE_NAME,
         base_directory="tests/test_sets/taxi_yellow_tripdata_samples/first_ten_trips_in_each_file",  # type: ignore [arg-type]
     )
@@ -87,7 +87,7 @@ def pandas_filesystem_monthly_batch_definition_descending(
 
 @pytest.fixture
 def spark_file_system_asset(context: AbstractDataContext) -> SparkCSVAsset:
-    datasource = context.sources.add_spark_filesystem(
+    datasource = context.data_sources.add_spark_filesystem(
         DATASOURCE_NAME,
         base_directory="tests/test_sets/taxi_yellow_tripdata_samples/first_ten_trips_in_each_file",  # type: ignore [arg-type]
     )
