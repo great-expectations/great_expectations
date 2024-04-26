@@ -25,11 +25,37 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset as PandasCSVAsset,
 )
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    ExcelAsset,
+    FWFAsset,
+)
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    JSONAsset as PandasJSONAsset,
+)
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    ORCAsset as PandasORCAsset,
+)
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    ParquetAsset as PandasParquetAsset,
+)
 from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset as SparkCSVAsset,
+)
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    DeltaAsset,
+    TextAsset,
+)
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    JSONAsset as SparkJSONAsset,
+)
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    ORCAsset as SparkORCAsset,
+)
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    ParquetAsset as SparkParquetAsset,
 )
 
 
@@ -139,8 +165,20 @@ PATH_NAME = "data_2022-01.csv"
 
 def _asset_parameters():
     return [
-        pytest.param(SparkCSVAsset(name="test_asset", type="_sql_asset"), id="Spark CSV Asset"),
-        pytest.param(PandasCSVAsset(name="test_asset", type="_sql_asset"), id="Spark CSV Asset"),
+        # Spark Assets
+        pytest.param(SparkCSVAsset(name="test_asset"), id="Spark CSV Asset"),
+        pytest.param(SparkParquetAsset(name="test_asset"), id="Spark Parquet Asset"),
+        pytest.param(SparkORCAsset(name="test_asset"), id="Spark ORC Asset"),
+        pytest.param(SparkJSONAsset(name="test_asset"), id="Spark JSON Asset"),
+        pytest.param(TextAsset(name="test_asset"), id="Spark Text Asset"),
+        pytest.param(DeltaAsset(name="test_asset"), id="Spark Delta Asset"),
+        # Pandas Assets
+        pytest.param(PandasCSVAsset(name="test_asset"), id="Pandas CSV Asset"),
+        pytest.param(ExcelAsset(name="test_asset"), id="Pandas Excel Asset"),
+        pytest.param(PandasJSONAsset(name="test_asset"), id="Pandas JSON Asset"),
+        pytest.param(PandasORCAsset(name="test_asset"), id="Pandas ORC Asset"),
+        pytest.param(PandasParquetAsset(name="test_asset"), id="Pandas Parquet Asset"),
+        pytest.param(FWFAsset(name="test_asset"), id="Pandas FWF Asset"),
     ]
 
 
