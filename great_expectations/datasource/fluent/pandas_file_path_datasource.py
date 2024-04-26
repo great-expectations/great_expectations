@@ -11,7 +11,7 @@ from typing import (
 from great_expectations.datasource.fluent.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
-from great_expectations.datasource.fluent.file_path_asset_mixins import _RegexDataAssetBase
+from great_expectations.datasource.fluent.file_path_asset_base import _RegexDataAssetBase
 from great_expectations.datasource.fluent.pandas_datasource import (
     _PandasDatasource,
 )

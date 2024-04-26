@@ -16,7 +16,7 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import _SparkDatasource
-from great_expectations.datasource.fluent.file_path_asset_mixins import (
+from great_expectations.datasource.fluent.file_path_asset_base import (
     _DirectoryDataAssetBase,
     _RegexDataAssetBase,
 )
