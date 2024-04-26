@@ -31,7 +31,7 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=GxDatasourceWarning)
     # TODO: Remove create_temp_table=True once the bug fix goes in to develop that's equivalent of this PR for 0.18.6:
     #       https://github.com/great-expectations/great_expectations/pull/9148
-    datasource = context.sources.add_sql(
+    datasource = context.data_sources.add_sql(
         name="my_datasource",
         connection_string=connection_string,
         create_temp_table=True,

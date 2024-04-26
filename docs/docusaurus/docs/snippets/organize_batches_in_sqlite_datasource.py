@@ -22,7 +22,7 @@ import great_expectations as gx
 context = gx.get_context()
 
 sql_connection_string = f"sqlite:///{yellow_tripdata_db_file}"
-my_datasource = context.sources.add_sqlite(
+my_datasource = context.data_sources.add_sqlite(
     name="my_datasource", connection_string=sql_connection_string
 )
 

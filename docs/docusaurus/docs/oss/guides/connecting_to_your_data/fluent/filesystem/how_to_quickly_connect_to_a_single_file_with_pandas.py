@@ -11,7 +11,7 @@ context = gx.get_context()
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas.py get_validator">
-batch = context.sources.pandas_default.read_csv(
+batch = context.data_sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>
