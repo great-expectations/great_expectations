@@ -128,7 +128,7 @@ def test_statistics_data_assistant_result_batch_id_to_batch_identifier_display_n
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY]
             if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
             else {}
-        ).keys()
+        )
     )
 
 

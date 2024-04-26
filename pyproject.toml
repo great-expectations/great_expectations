@@ -327,7 +327,6 @@ lint.ignore = [
     "RUF015", # unnecessary-iterable-allocation-for-first-element - requires more careful review
     "TRY300", # Consider moving this statement to an `else` block - we don't use this; this is kind of weird
     # TODO: enable these a few at a time (ordered by number of violations)
-    "SIM118", # in-dict-keys
     "SIM108", # if-else-block-instead-of-if-exp
     "SIM211", # if-expr-with-false-true
     "SIM102", # collapsible-if

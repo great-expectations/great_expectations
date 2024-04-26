@@ -1163,7 +1163,7 @@ def test_expectation_suite_deepcopy(baseline_suite):
 @pytest.mark.unit
 def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided():
     suite = ExpectationSuite("foo")
-    assert "great_expectations_version" in suite.meta.keys()
+    assert "great_expectations_version" in suite.meta
 
 
 @pytest.mark.unit
@@ -1172,13 +1172,13 @@ def test_suite_does_not_overwrite_existing_version_metadata():
         "foo",
         meta={"great_expectations_version": "0.0.0"},
     )
-    assert "great_expectations_version" in suite.meta.keys()
+    assert "great_expectations_version" in suite.meta
     assert suite.meta["great_expectations_version"] == "0.0.0"
 
 
 @pytest.mark.unit
 def test_suite_with_metadata_includes_ge_version_metadata(baseline_suite):
-    assert "great_expectations_version" in baseline_suite.meta.keys()
+    assert "great_expectations_version" in baseline_suite.meta
 
 
 @pytest.mark.unit

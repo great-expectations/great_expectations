@@ -333,7 +333,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             column_name: 1.0
             * sum(intra_batch_adherence_by_column_name[column_name])
             / num_batch_ids
-            for column_name in intra_batch_adherence_by_column_name.keys()
+            for column_name in intra_batch_adherence_by_column_name
         }
 
         inter_batch_unexpected_values_proportion: float

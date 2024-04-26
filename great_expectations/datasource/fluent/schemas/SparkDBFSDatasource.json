@@ -215,8 +215,27 @@
                 "regex"
             ]
         },
-        "BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__": {
-            "title": "BatchDefinition[Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily]]",
+        "PartitionerPath": {
+            "title": "PartitionerPath",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__": {
+            "title": "BatchDefinition[Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily, PartitionerPath]]",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
@@ -239,6 +258,9 @@
                         },
                         {
                             "$ref": "#/definitions/PartitionerDaily"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerPath"
                         }
                     ]
                 }
@@ -249,7 +271,7 @@
         },
         "CSVAsset": {
             "title": "CSVAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Mixin encapsulating logic specific to regex-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -285,7 +307,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -556,7 +578,7 @@
         },
         "DirectoryCSVAsset": {
             "title": "DirectoryCSVAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Mixin encapsulating logic specific to directory-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -592,7 +614,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -869,7 +891,7 @@
         },
         "ParquetAsset": {
             "title": "ParquetAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Mixin encapsulating logic specific to regex-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -905,7 +927,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -1000,7 +1022,7 @@
         },
         "DirectoryParquetAsset": {
             "title": "DirectoryParquetAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Mixin encapsulating logic specific to directory-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -1036,7 +1058,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -1137,7 +1159,7 @@
         },
         "ORCAsset": {
             "title": "ORCAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Mixin encapsulating logic specific to regex-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -1173,7 +1195,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -1251,7 +1273,7 @@
         },
         "DirectoryORCAsset": {
             "title": "DirectoryORCAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Mixin encapsulating logic specific to directory-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -1287,7 +1309,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -1371,7 +1393,7 @@
         },
         "JSONAsset": {
             "title": "JSONAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Mixin encapsulating logic specific to regex-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -1407,7 +1429,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -1649,7 +1671,7 @@
         },
         "DirectoryJSONAsset": {
             "title": "DirectoryJSONAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Mixin encapsulating logic specific to directory-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -1685,7 +1707,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -1933,7 +1955,7 @@
         },
         "TextAsset": {
             "title": "TextAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Mixin encapsulating logic specific to regex-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -1969,7 +1991,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -2044,7 +2066,7 @@
         },
         "DirectoryTextAsset": {
             "title": "DirectoryTextAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Mixin encapsulating logic specific to directory-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -2080,7 +2102,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -2161,7 +2183,7 @@
         },
         "DeltaAsset": {
             "title": "DeltaAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Mixin encapsulating logic specific to regex-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -2197,7 +2219,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
@@ -2227,7 +2249,7 @@
         },
         "DirectoryDeltaAsset": {
             "title": "DirectoryDeltaAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Mixin encapsulating logic specific to directory-based FilePathDataAssets",
             "type": "object",
             "properties": {
                 "name": {
@@ -2263,7 +2285,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
                 "batching_regex": {
