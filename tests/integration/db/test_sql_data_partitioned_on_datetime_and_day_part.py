@@ -37,4 +37,5 @@ if __name__ == "test_script_module":
             taxi_partitioning_test_cases=taxi_partitioning_test_cases,
             connection_string=connection_string,
             table_name=table_name,
+            add_datasource_method_name="add_postgres",
         )
