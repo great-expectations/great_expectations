@@ -23,7 +23,7 @@ Use one of the following methods to request support:
 
 ## How to effectively get support
 
-Strategies to ensure your questions get resolved quickly.
+The following are some recommendations for resolving issues on your own. Resolving issues on your own builds your knowledge and allows you to share that knowledge with the community.
 
 ### Try solving your issue first
 
