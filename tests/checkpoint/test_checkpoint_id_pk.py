@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -10,8 +11,11 @@ from great_expectations import project_manager
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
-from great_expectations.data_context import FileDataContext
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.datasource.fluent.interfaces import Datasource
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.data_context import AbstractDataContext, FileDataContext
 
 DATASOURCE_NAME = "my_datasource"
 ANIMAL_ASSET = "animals_names_asset"
@@ -102,12 +106,13 @@ def _build_checkpoint_and_run(
     expectations: list[gxe.Expectation],
     asset_name: str,
     result_format: dict,
-) -> Checkpoint:
+) -> CheckpointResult:
     suite = context.suites.add(
         suite=ExpectationSuite(name="metrics_exp", expectations=expectations)
     )
 
     ds = context.get_datasource("my_datasource")
+    assert isinstance(ds, Datasource)
     asset = ds.get_asset(asset_name)
     batch_definition = asset.add_batch_definition(name="my_batch_def")
 
