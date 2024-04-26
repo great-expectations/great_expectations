@@ -147,7 +147,9 @@ class _RegexDataAssetMixin(_FilePathDataAsset):
             partitioner=PartitionerPath(regex=regex),
         )
 
-    def add_batch_definition_yearly(self, name: str, regex: re.Pattern) -> BatchDefinition:
+    def add_batch_definition_yearly(
+        self, name: str, regex: re.Pattern, sort_ascending: bool = True
+    ) -> BatchDefinition:
         """Adds a BatchDefinition which defines yearly batches by file name.
 
         Parameters:
@@ -163,10 +165,12 @@ class _RegexDataAssetMixin(_FilePathDataAsset):
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAME)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearly(regex=regex),
+            partitioner=PartitionerYearly(regex=regex, sort_ascending=sort_ascending),
         )
 
-    def add_batch_definition_monthly(self, name: str, regex: re.Pattern) -> BatchDefinition:
+    def add_batch_definition_monthly(
+        self, name: str, regex: re.Pattern, sort_ascending: bool = True
+    ) -> BatchDefinition:
         """Adds a BatchDefinition which defines monthly batches by file name.
 
         Parameters:
@@ -182,10 +186,12 @@ class _RegexDataAssetMixin(_FilePathDataAsset):
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerMonthly(regex=regex),
+            partitioner=PartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
         )
 
-    def add_batch_definition_daily(self, name: str, regex: re.Pattern) -> BatchDefinition:
+    def add_batch_definition_daily(
+        self, name: str, regex: re.Pattern, sort_ascending: bool = True
+    ) -> BatchDefinition:
         """Adds a BatchDefinition which defines daily batches by file name.
 
         Parameters:
@@ -202,7 +208,7 @@ class _RegexDataAssetMixin(_FilePathDataAsset):
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerDaily(regex=regex),
+            partitioner=PartitionerDaily(regex=regex, sort_ascending=sort_ascending),
         )
 
     @classmethod
