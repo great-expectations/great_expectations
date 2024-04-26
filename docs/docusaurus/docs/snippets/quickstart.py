@@ -11,7 +11,7 @@ context = gx.get_context()
 
 # Connect to data
 # <snippet name="tutorials/quickstart/quickstart.py connect_to_data">
-batch = context.sources.pandas_default.read_csv(
+batch = context.data_sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>

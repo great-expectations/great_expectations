@@ -57,7 +57,7 @@ Warning: These docs assume that you have completed the Great Expectations onboar
 
 ```
 freshness_expectation_suite = context.assistants.freshness.profile_data_asset(
-    context.sources.my_db.assets.my_table
+    context.data_sources.my_db.assets.my_table
 )
 ```
 
@@ -65,7 +65,7 @@ freshness_expectation_suite = context.assistants.freshness.profile_data_asset(
 
 ```
 volume_expectation_suite = context.assistants.volume.profile_data_asset(
-    context.sources.my_db.assets.my_table
+    context.data_sources.my_db.assets.my_table
 )
 ```
 
@@ -73,13 +73,13 @@ volume_expectation_suite = context.assistants.volume.profile_data_asset(
 
 ```
 time_series_expectation_suite = context.assistants.time_series_by_batch.profile_data_asset(
-    context.sources.my_db.assets.my_table,
+    context.data_sources.my_db.assets.my_table,
     columns=["foo", "bar", "baz"],
     metrics=["mean", "median", "sum", "percent_null"]
 )
 
 time_series_expectation_suite = context.assistants.time_series_by_batch.profile_data_asset(
-    context.sources.my_db.assets.my_table,
+    context.data_sources.my_db.assets.my_table,
     columns=["foo", "bar", "baz"],
     metric="percent_matching_regex",
     kwargs={
@@ -91,7 +91,7 @@ time_series_expectation_suite = context.assistants.time_series_by_batch.profile_
 - RowLevelTimeSeries: "I have numeric time series data in a table, file, etc. I want to learn what patterns are normal in that data, and then monitor it for anomalies"
 
 time_series_expectation_suite = context.assistants.time_series_by_row.profile_data_asset(
-context.sources.my_db.assets.my_table,
+context.data_sources.my_db.assets.my_table,
 date_column="created_at",
 columns=["foo", "bar", "baz"],
 metrics=["mean", "median", "sum", "percent_null"]

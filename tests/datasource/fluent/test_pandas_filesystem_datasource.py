@@ -259,7 +259,7 @@ class TestDynamicPandasAssets:
         extra_kwargs: dict,
     ):
         batch_request = (
-            empty_data_context.sources.add_pandas_filesystem(  # .build_batch_request
+            empty_data_context.data_sources.add_pandas_filesystem(  # .build_batch_request
                 "my_pandas",
                 base_directory=csv_path,
             )

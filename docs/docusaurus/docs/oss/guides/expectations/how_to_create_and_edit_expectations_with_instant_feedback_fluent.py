@@ -4,7 +4,7 @@ import great_expectations as gx
 context = gx.get_context()
 # </snippet>
 
-context.sources.add_pandas(
+context.data_sources.add_pandas(
     name="my_datasource",
 ).add_csv_asset(
     name="my_data_asset",

@@ -287,7 +287,7 @@ def sqlite_datasource(
 ) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_sqlite_datasource"
-    return context.sources.add_sqlite(
+    return context.data_sources.add_sqlite(
         datasource_name, connection_string=f"sqlite:///{taxi_db_path}"
     )
 

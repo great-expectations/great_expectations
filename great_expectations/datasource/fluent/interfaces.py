@@ -518,7 +518,7 @@ class Datasource(
     # The important part of defining `assets` is setting the Dict type correctly.
     # In addition, one must define the methods in the `Abstract Methods` section below.
     # If one writes a class level docstring, this will become the documenation for the
-    # data context method `data_context.sources.add_my_datasource` method.
+    # data context method `data_context.data_sources.add_my_datasource` method.
 
     # class attrs
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []

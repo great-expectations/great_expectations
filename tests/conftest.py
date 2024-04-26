@@ -1265,7 +1265,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     path_to_folder_containing_csv_files = pathlib.Path(data_path)
 
     datasource_name = "my_pandas_filesystem_datasource"
-    datasource = context.sources.add_pandas_filesystem(
+    datasource = context.data_sources.add_pandas_filesystem(
         name=datasource_name, base_directory=path_to_folder_containing_csv_files
     )
 
@@ -1282,7 +1282,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
 
     datasource_name = "my_pandas_dataframes_datasource"
-    datasource = context.sources.add_pandas(name=datasource_name)
+    datasource = context.data_sources.add_pandas(name=datasource_name)
 
     csv_source_path = pathlib.Path(
         context_path,
@@ -1319,7 +1319,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     )
 
     datasource_name = "my_spark_filesystem_datasource"
-    datasource = context.sources.add_spark_filesystem(
+    datasource = context.data_sources.add_spark_filesystem(
         name=datasource_name, base_directory=path_to_folder_containing_csv_files
     )
 
@@ -1336,7 +1336,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     )
 
     datasource_name = "my_spark_dataframes_datasource"
-    datasource = context.sources.add_spark(name=datasource_name)
+    datasource = context.data_sources.add_spark(name=datasource_name)
 
     csv_source_path = pathlib.Path(
         context_path,
@@ -1368,7 +1368,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
 
     datasource_name = "my_sqlite_datasource"
     connection_string = f"sqlite:///{db_file}"
-    datasource = context.sources.add_sqlite(
+    datasource = context.data_sources.add_sqlite(
         name=datasource_name,
         connection_string=connection_string,
     )
@@ -1943,7 +1943,7 @@ def data_context_with_fluent_datasource(
     empty_data_context,
     filesystem_csv_2,
 ) -> FileDataContext:
-    empty_data_context.sources.add_pandas_filesystem(
+    empty_data_context.data_sources.add_pandas_filesystem(
         name="my_pandas_datasource", base_directory=filesystem_csv_2
     )
     # noinspection PyProtectedMember
@@ -1956,7 +1956,7 @@ def data_context_with_fluent_datasource_and_block_datasource(
     empty_data_context,
     filesystem_csv_2,
 ) -> FileDataContext:
-    empty_data_context.sources.add_pandas_filesystem(
+    empty_data_context.data_sources.add_pandas_filesystem(
         name="my_fluent_datasource", base_directory=filesystem_csv_2
     )
     empty_data_context.add_datasource(
@@ -2250,7 +2250,7 @@ def fds_data_context(
     sqlite_connection_string: str,
 ) -> AbstractDataContext:
     context = empty_data_context
-    datasource = context.sources.add_sqlite(
+    datasource = context.data_sources.add_sqlite(
         name=fds_data_context_datasource_name,
         connection_string=sqlite_connection_string,
         create_temp_table=True,

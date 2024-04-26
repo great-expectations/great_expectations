@@ -290,7 +290,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         submit_event(event=DataContextInitializedEvent())
 
     def _init_factories(self) -> None:
-        self._sources: _SourceFactories = _SourceFactories(self)
+        self._data_sources: _SourceFactories = _SourceFactories(self)
 
         self._suites: SuiteFactory | None = None
         if expectations_store := self.stores.get(self.expectations_store_name):
@@ -619,8 +619,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._assistants
 
     @property
-    def sources(self) -> _SourceFactories:
-        return self._sources
+    def data_sources(self) -> _SourceFactories:
+        return self._data_sources
 
     @property
     def _include_rendered_content(self) -> bool:

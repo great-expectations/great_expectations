@@ -57,7 +57,7 @@ def validation_definition(
 ) -> ValidationDefinition:
     context = in_memory_runtime_context
     batch_definition = (
-        context.sources.add_pandas("my_datasource")
+        context.data_sources.add_pandas("my_datasource")
         .add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
         .add_batch_definition("my_batch_definition")
     )

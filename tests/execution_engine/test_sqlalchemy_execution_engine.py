@@ -152,7 +152,7 @@ def test_instantiation_via_fluent_data_sources_with_kwargs(
     connection_string = "sqlite:///" + db_file
     context = empty_data_context
 
-    datasource = context.sources.add_sql(
+    datasource = context.data_sources.add_sql(
         name="test_datasource",
         connection_string=connection_string,
         kwargs={"connect_args": {"check_same_thread": False}},

@@ -26,7 +26,7 @@ spark = SparkDFExecutionEngine.get_or_create_spark_session()
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_spark.py datasource">
-datasource = context.sources.add_spark("my_spark_datasource")
+datasource = context.data_sources.add_spark("my_spark_datasource")
 # </snippet>
 
 

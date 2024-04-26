@@ -87,7 +87,7 @@ rules:
 
 context = gx.get_context()
 
-context.sources.add_pandas_filesystem(
+context.data_sources.add_pandas_filesystem(
     "taxi_multi_batch_datasource",
     base_directory="./data",
 ).add_csv_asset(

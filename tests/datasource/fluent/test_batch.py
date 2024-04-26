@@ -18,7 +18,7 @@ ASSET_NAME = "my_csv"
 @pytest.fixture
 def pandas_setup(csv_path: pathlib.Path) -> Tuple[AbstractDataContext, Batch]:
     context = gx.get_context(mode="ephemeral")
-    source = context.sources.add_pandas(DATASOURCE_NAME)
+    source = context.data_sources.add_pandas(DATASOURCE_NAME)
     filepath = (
         csv_path
         / "ten_trips_from_each_month"
