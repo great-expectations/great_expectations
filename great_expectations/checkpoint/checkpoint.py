@@ -244,6 +244,7 @@ class CheckpointResult(BaseModel):
     run_id: RunIdentifier
     run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]
     checkpoint_config: Checkpoint
+    result_url: Optional[str] = None
     success: Optional[bool] = None
 
     class Config:

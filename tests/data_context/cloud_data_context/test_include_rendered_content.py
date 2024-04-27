@@ -106,7 +106,7 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
     df = pd.DataFrame([1, 2, 3, 4, 5])
     suite_name = f"test_suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"  # noqa: E501
 
-    data_asset = context.sources.pandas_default.add_dataframe_asset(
+    data_asset = context.data_sources.pandas_default.add_dataframe_asset(
         name="my_dataframe_asset",
         dataframe=df,
     )

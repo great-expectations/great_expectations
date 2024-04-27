@@ -39,7 +39,9 @@ def context() -> AbstractDataContext:
 def postgres_asset(context: AbstractDataContext) -> _SQLAsset:
     DATASOURCE_NAME = "postgres"
     ASSET_NAME = "ten trips"
-    datasource = context.sources.add_postgres(DATASOURCE_NAME, connection_string=CONNECTION_STRING)
+    datasource = context.data_sources.add_postgres(
+        DATASOURCE_NAME, connection_string=CONNECTION_STRING
+    )
     data_asset = datasource.add_table_asset(name=ASSET_NAME, table_name=TABLE_NAME)
 
     return data_asset

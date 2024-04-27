@@ -1486,8 +1486,8 @@ def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
         resource_type=DataContextVariableSchema.DATASOURCES,
     )
 
-    datasource_config_a = empty_data_context.sources.add_pandas(name="a")
-    datasource_config_b = empty_data_context.sources.add_pandas(name="b")
+    datasource_config_a = empty_data_context.data_sources.add_pandas(name="a")
+    datasource_config_b = empty_data_context.data_sources.add_pandas(name="b")
 
     inline_store_backend.set(DataContextVariableKey("a").to_tuple(), datasource_config_a)
     inline_store_backend.set(DataContextVariableKey("b").to_tuple(), datasource_config_b)

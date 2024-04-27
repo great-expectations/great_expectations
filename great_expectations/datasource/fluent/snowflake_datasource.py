@@ -114,7 +114,7 @@ class SnowflakeDatasource(SQLDatasource):
         This preserves backwards compatibility with the previous implementation of SnowflakeDatasource.
 
         It also allows for users to continue to provide connection details in the
-        `context.sources.add_snowflake()` factory functions without nesting it in a
+        `context.data_sources.add_snowflake()` factory functions without nesting it in a
         `connection_string` dict.
         """  # noqa: E501
         connection_detail_fields: set[str] = {

@@ -278,7 +278,7 @@ def table_factory() -> Generator[TableFactory, None, None]:  # noqa: C901
 
 @pytest.fixture
 def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
-    ds = context.sources.add_sql(
+    ds = context.data_sources.add_sql(
         "trino",
         connection_string="trino://user:@localhost:8088/tpch/sf1",
     )
@@ -287,7 +287,7 @@ def trino_ds(context: EphemeralDataContext) -> SQLDatasource:
 
 @pytest.fixture
 def postgres_ds(context: EphemeralDataContext) -> PostgresDatasource:
-    ds = context.sources.add_postgres(
+    ds = context.data_sources.add_postgres(
         "postgres",
         connection_string="postgresql+psycopg2://postgres:postgres@localhost:5432/test_ci",
     )
@@ -309,7 +309,7 @@ def databricks_sql_ds(
 ) -> DatabricksSQLDatasource:
     if not databricks_creds_populated:
         pytest.skip("no databricks credentials")
-    ds = context.sources.add_databricks_sql(
+    ds = context.data_sources.add_databricks_sql(
         "databricks_sql",
         connection_string="databricks://token:"
         "${DATABRICKS_TOKEN}@${DATABRICKS_HOST}:443"
@@ -330,7 +330,7 @@ def snowflake_ds(
 ) -> SnowflakeDatasource:
     if not snowflake_creds_populated:
         pytest.skip("no snowflake credentials")
-    ds = context.sources.add_snowflake(
+    ds = context.data_sources.add_snowflake(
         "snowflake",
         connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
         # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account  # noqa: E501
@@ -341,7 +341,9 @@ def snowflake_ds(
 
 @pytest.fixture
 def sqlite_ds(context: EphemeralDataContext, tmp_path: pathlib.Path) -> SqliteDatasource:
-    ds = context.sources.add_sqlite("sqlite", connection_string=f"sqlite:///{tmp_path}/test.db")
+    ds = context.data_sources.add_sqlite(
+        "sqlite", connection_string=f"sqlite:///{tmp_path}/test.db"
+    )
     return ds
 
 
