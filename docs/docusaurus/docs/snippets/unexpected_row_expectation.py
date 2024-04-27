@@ -43,7 +43,7 @@ class UnexpectedTripDistance(UnexpectedRowsExpectation):
 
 # <snippet name="docs/docusaurus/docs/snippets/unexpected_row_expectation.py define_batch_definition">
 batch_definition = (
-    context.sources.add_postgres(
+    context.data_sources.add_postgres(
         name="pg_datasource", connection_string=PG_CONNECTION_STRING
     )
     .add_table_asset(name="postgres_taxi_data", table_name="postgres_taxi_data")

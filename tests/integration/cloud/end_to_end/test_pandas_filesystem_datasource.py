@@ -56,11 +56,11 @@ def datasource(
     Those assertions can be found in the datasource_name fixture."""
     original_base_dir = base_dir
 
-    datasource = context.sources.add_pandas_filesystem(
+    datasource = context.data_sources.add_pandas_filesystem(
         name=datasource_name, base_directory=original_base_dir
     )
     datasource.base_directory = updated_base_dir
-    datasource = context.sources.add_or_update_pandas_filesystem(datasource=datasource)
+    datasource = context.data_sources.add_or_update_pandas_filesystem(datasource=datasource)
     assert (
         datasource.base_directory == updated_base_dir
     ), "The datasource was not updated in the previous method call."

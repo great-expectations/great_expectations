@@ -16,8 +16,9 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import _SparkDatasource
-from great_expectations.datasource.fluent.directory_data_asset import (
-    _DirectoryDataAssetMixin,
+from great_expectations.datasource.fluent.file_path_asset_base import (
+    _DirectoryDataAssetBase,
+    _RegexDataAssetBase,
 )
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
@@ -59,9 +60,7 @@ class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
         }
 
 
-class CSVAsset(_SparkGenericFilePathAssetMixin):
-    type: Literal["csv"] = "csv"
-
+class CSVAssetBase(_SparkGenericFilePathAssetMixin):
     # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0) appear in comment above  # noqa: E501
     # parameter for reference (from https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)
     # See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
@@ -224,8 +223,12 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
         return parent_reader_options.union(reader_options)
 
 
-class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
-    type: Literal["directory_csv"] = "directory_csv"  # type: ignore[assignment]
+class CSVAsset(_RegexDataAssetBase, CSVAssetBase):
+    type: Literal["csv"] = "csv"
+
+
+class DirectoryCSVAsset(_DirectoryDataAssetBase, CSVAssetBase):
+    type: Literal["directory_csv"] = "directory_csv"
 
     @classmethod
     @override
@@ -240,12 +243,11 @@ class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
-class ParquetAsset(_SparkGenericFilePathAssetMixin):
-    type: Literal["parquet"] = "parquet"
+class ParquetAssetBase(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
     merge_schema: Optional[Union[bool, str]] = Field(None, alias="mergeSchema")
@@ -284,8 +286,12 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
         )
 
 
-class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
-    type: Literal["directory_parquet"] = "directory_parquet"  # type: ignore[assignment]
+class ParquetAsset(_RegexDataAssetBase, ParquetAssetBase):
+    type: Literal["parquet"] = "parquet"
+
+
+class DirectoryParquetAsset(_DirectoryDataAssetBase, ParquetAssetBase):
+    type: Literal["directory_parquet"] = "directory_parquet"
 
     @classmethod
     @override
@@ -300,14 +306,13 @@ class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
-class ORCAsset(_SparkGenericFilePathAssetMixin):
+class ORCAssetBase(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
-    type: Literal["orc"] = "orc"
     merge_schema: Optional[Union[bool, str]] = Field(False, alias="mergeSchema")
 
     class Config:
@@ -328,8 +333,12 @@ class ORCAsset(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"merge_schema"})
 
 
-class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
-    type: Literal["directory_orc"] = "directory_orc"  # type: ignore[assignment]
+class ORCAsset(_RegexDataAssetBase, ORCAssetBase):
+    type: Literal["orc"] = "orc"
+
+
+class DirectoryORCAsset(_DirectoryDataAssetBase, ORCAssetBase):
+    type: Literal["directory_orc"] = "directory_orc"
 
     @classmethod
     @override
@@ -344,13 +353,11 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
-class JSONAsset(_SparkGenericFilePathAssetMixin):
-    type: Literal["json"] = "json"
-
+class JSONAssetBase(_SparkGenericFilePathAssetMixin):
     # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0) appear in comment above  # noqa: E501
     # parameter for reference (from https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309)
     # path: Union[str, List[str], RDD[str]],
@@ -481,8 +488,12 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
         )
 
 
-class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
-    type: Literal["directory_json"] = "directory_json"  # type: ignore[assignment]
+class JSONAsset(_RegexDataAssetBase, JSONAssetBase):
+    type: Literal["json"] = "json"
+
+
+class DirectoryJSONAsset(_DirectoryDataAssetBase, JSONAssetBase):
+    type: Literal["directory_json"] = "directory_json"
 
     @classmethod
     @override
@@ -497,14 +508,13 @@ class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
-class TextAsset(_SparkGenericFilePathAssetMixin):
+class TextAssetBase(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
-    type: Literal["text"] = "text"
     wholetext: bool = Field(False)
     line_sep: Optional[str] = Field(None, alias="lineSep")
 
@@ -526,8 +536,12 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"wholetext", "line_sep"})
 
 
-class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
-    type: Literal["directory_text"] = "directory_text"  # type: ignore[assignment]
+class TextAsset(_RegexDataAssetBase, TextAssetBase):
+    type: Literal["text"] = "text"
+
+
+class DirectoryTextAsset(_DirectoryDataAssetBase, TextAssetBase):
+    type: Literal["directory_text"] = "directory_text"
 
     @classmethod
     @override
@@ -542,14 +556,13 @@ class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 
-class DeltaAsset(_FilePathDataAsset):
+class DeltaAssetBase(_FilePathDataAsset):
     # The options below are available as of 2023-05-12
     # See https://docs.databricks.com/delta/tutorial.html for more info.
-    type: Literal["delta"] = "delta"
 
     timestamp_as_of: Optional[str] = Field(None, alias="timestampAsOf")
     version_as_of: Optional[str] = Field(None, alias="versionAsOf")
@@ -572,8 +585,12 @@ class DeltaAsset(_FilePathDataAsset):
         return {"timestamp_as_of", "version_as_of"}
 
 
-class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAsset):
-    type: Literal["directory_delta"] = "directory_delta"  # type: ignore[assignment]
+class DeltaAsset(_RegexDataAssetBase, DeltaAssetBase):
+    type: Literal["delta"] = "delta"
+
+
+class DirectoryDeltaAsset(_DirectoryDataAssetBase, DeltaAssetBase):
+    type: Literal["directory_delta"] = "directory_delta"
 
     @classmethod
     @override
@@ -588,7 +605,7 @@ class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAsset):
         """
         return (
             super()._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetBase, self)._get_reader_options_include()
         )
 
 

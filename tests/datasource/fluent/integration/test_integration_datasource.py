@@ -527,7 +527,7 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
 
     context = empty_cloud_context_fluent
 
-    dataframe_asset: PandasDataFrameAsset = context.sources.add_or_update_pandas(
+    dataframe_asset: PandasDataFrameAsset = context.data_sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
@@ -542,7 +542,7 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
 
     context = empty_file_context
 
-    datasource = context.sources.add_or_update_pandas(name="fluent_pandas_datasource")
+    datasource = context.data_sources.add_or_update_pandas(name="fluent_pandas_datasource")
     dataframe_asset: PandasDataFrameAsset = datasource.add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
     assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
@@ -567,7 +567,7 @@ def test_spark_data_adding_dataframe_in_cloud_context(
 
     context = empty_cloud_context_fluent
 
-    dataframe_asset: SparkDataFrameAsset = context.sources.add_or_update_spark(
+    dataframe_asset: SparkDataFrameAsset = context.data_sources.add_or_update_spark(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
@@ -585,13 +585,13 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
 
     context = empty_file_context
 
-    dataframe_asset: SparkDataFrameAsset = context.sources.add_or_update_spark(
+    dataframe_asset: SparkDataFrameAsset = context.data_sources.add_or_update_spark(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
     assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
-    datasource = context.sources.add_or_update_spark(name="fluent_pandas_datasource")
+    datasource = context.data_sources.add_or_update_spark(name="fluent_pandas_datasource")
     dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
     assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]

@@ -232,7 +232,7 @@ class TestCheckpointSerialization:
         validation_definition_name_2 = "my_validation2"
         cp_name = "my_checkpoint"
 
-        ds = context.sources.add_pandas(ds_name)
+        ds = context.data_sources.add_pandas(ds_name)
         asset = ds.add_csv_asset(asset_name, "my_file.csv")  # type: ignore[arg-type]
 
         bc1 = asset.add_batch_definition(batch_definition_name_1)
@@ -638,7 +638,7 @@ class TestCheckpointResult:
         with working_directory(tmp_path):
             context = gx.get_context(mode="file")
 
-        ds = context.sources.add_pandas(self.datasource_name)
+        ds = context.data_sources.add_pandas(self.datasource_name)
         csv_path = (
             pathlib.Path(__file__).parent.parent
             / "test_sets"

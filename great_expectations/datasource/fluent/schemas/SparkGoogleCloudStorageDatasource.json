@@ -280,7 +280,7 @@
         },
         "CSVAsset": {
             "title": "CSVAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -587,7 +587,7 @@
         },
         "DirectoryCSVAsset": {
             "title": "DirectoryCSVAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -900,7 +900,7 @@
         },
         "ParquetAsset": {
             "title": "ParquetAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1031,7 +1031,7 @@
         },
         "DirectoryParquetAsset": {
             "title": "DirectoryParquetAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1168,7 +1168,7 @@
         },
         "ORCAsset": {
             "title": "ORCAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1282,7 +1282,7 @@
         },
         "DirectoryORCAsset": {
             "title": "DirectoryORCAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1402,7 +1402,7 @@
         },
         "JSONAsset": {
             "title": "JSONAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1680,7 +1680,7 @@
         },
         "DirectoryJSONAsset": {
             "title": "DirectoryJSONAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1964,7 +1964,7 @@
         },
         "TextAsset": {
             "title": "TextAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2075,7 +2075,7 @@
         },
         "DirectoryTextAsset": {
             "title": "DirectoryTextAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2192,7 +2192,7 @@
         },
         "DeltaAsset": {
             "title": "DeltaAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2258,7 +2258,7 @@
         },
         "DirectoryDeltaAsset": {
             "title": "DirectoryDeltaAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {

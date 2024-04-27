@@ -22,7 +22,7 @@ context = gx.get_context()
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource">
 # data_directory is the full path to a directory containing csv files
-my_datasource = context.sources.add_pandas_filesystem(
+my_datasource = context.data_sources.add_pandas_filesystem(
     name="my_datasource", base_directory=data_directory
 )
 # </snippet>
@@ -36,7 +36,7 @@ my_asset = my_datasource.add_csv_asset(
 import pandas as pd
 
 dataframe = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
-my_ephemeral_datasource = context.sources.add_pandas(name="my_pandas_datasource")
+my_ephemeral_datasource = context.data_sources.add_pandas(name="my_pandas_datasource")
 my_asset = my_ephemeral_datasource.add_dataframe_asset(name="my_ephemeral_asset")
 
 # Python

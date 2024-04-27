@@ -216,7 +216,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
     ```
    Replace `user_access_token` and `organization_id` with the values you copied previously. 
 
-3. In GX Cloud, confirm the GX Agent status is **Active** and the icon is green. This indicates the GX Agent is active. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
+3. In GX Cloud, confirm the GX Agent status is **Active Agent** and the icon is green. This indicates the GX Agent is active. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
 
     ![GX Agent status](/img/gx_agent_status.png)
 

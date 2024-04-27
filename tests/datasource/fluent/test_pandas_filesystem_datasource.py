@@ -20,11 +20,11 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (  # type: ignore[attr-defined] # is defined but private
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
     JSONAsset,
-    _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.sources import _get_field_details
 
@@ -259,7 +259,7 @@ class TestDynamicPandasAssets:
         extra_kwargs: dict,
     ):
         batch_request = (
-            empty_data_context.sources.add_pandas_filesystem(  # .build_batch_request
+            empty_data_context.data_sources.add_pandas_filesystem(  # .build_batch_request
                 "my_pandas",
                 base_directory=csv_path,
             )

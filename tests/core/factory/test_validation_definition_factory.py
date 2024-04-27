@@ -324,7 +324,7 @@ def test_validation_definition_factory_all(
     context: AbstractDataContext = request.getfixturevalue(context_fixture_name)
 
     # Arrange
-    ds = context.sources.add_pandas("my_datasource")
+    ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
     suite = ExpectationSuite(name="my_suite")
     validation_definition_a = ValidationDefinition(
@@ -358,7 +358,7 @@ def test_validation_definition_factory_round_trip(
     # Arrange
     context = empty_data_context
 
-    ds = context.sources.add_pandas("my_ds")
+    ds = context.data_sources.add_pandas("my_ds")
     csv_path = pathlib.Path(
         __file__, "..", "..", "..", "test_sets", "quickstart", "yellow_tripdata_sample_2022-01.csv"
     ).resolve()
