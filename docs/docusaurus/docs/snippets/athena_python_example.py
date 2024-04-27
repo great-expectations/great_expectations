@@ -26,7 +26,7 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/athena_python_example.py Connect and Build Batch Request">
-athena_source: SQLDatasource = context.sources.add_or_update_sql(
+athena_source: SQLDatasource = context.data_sources.add_or_update_sql(
     "my_awsathena_datasource", connection_string=connection_string
 )
 athena_table = athena_source.add_table_asset("taxitable", table_name="taxitable")

@@ -53,7 +53,7 @@ def datasource_name(
     try:
         _ = context.get_datasource(datasource_name=datasource_name)
     except ValueError:
-        _ = context.sources.add_pandas(name=datasource_name)
+        _ = context.data_sources.add_pandas(name=datasource_name)
         context.get_datasource(datasource_name=datasource_name)
     context.delete_datasource(datasource_name=datasource_name)
     with pytest.raises(ValueError):

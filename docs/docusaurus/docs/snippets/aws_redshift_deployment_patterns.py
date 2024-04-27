@@ -230,7 +230,7 @@ connection_string = "redshift+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<D
 connection_string = CONNECTION_STRING
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py datasource">
-datasource = context.sources.add_or_update_sql(
+datasource = context.data_sources.add_or_update_sql(
     name=datasource_name,
     connection_string=connection_string,
 )

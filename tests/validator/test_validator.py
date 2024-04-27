@@ -864,7 +864,7 @@ def test_validator_validate_substitutes_suite_parameters(
     context = get_context(mode="ephemeral")
     suite_name = "my_suite"
     column_name = "my_column"
-    datasource = context.sources.add_pandas(name="my_datasource")
+    datasource = context.data_sources.add_pandas(name="my_datasource")
     asset = datasource.add_dataframe_asset(
         "my_asset", dataframe=pd.DataFrame({column_name: [0, 1, 2, 3, 4]})
     )
@@ -893,7 +893,7 @@ def test_validator_validate_substitutes_suite_parameters(
 @pytest.mark.parametrize("result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}])
 def test_rendered_content_bool_only_respected(result_format: str | dict):
     context = get_context()
-    csv_asset = context.sources.pandas_default.add_dataframe_asset(
+    csv_asset = context.data_sources.pandas_default.add_dataframe_asset(
         "df",
         dataframe=pd.DataFrame(
             data=[1, 2, 3],

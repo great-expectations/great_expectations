@@ -65,7 +65,7 @@ def ephemeral_context():
 def validation_definition(ephemeral_context: EphemeralDataContext) -> ValidationDefinition:
     context = ephemeral_context
     batch_definition = (
-        context.sources.add_pandas(DATA_SOURCE_NAME)
+        context.data_sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
         .add_batch_definition(BATCH_DEFINITION_NAME)
     )
@@ -81,7 +81,7 @@ def cloud_validation_definition(
     empty_cloud_data_context: CloudDataContext,
 ) -> ValidationDefinition:
     batch_definition = (
-        empty_cloud_data_context.sources.add_pandas(DATA_SOURCE_NAME)
+        empty_cloud_data_context.data_sources.add_pandas(DATA_SOURCE_NAME)
         .add_csv_asset(ASSET_NAME, "taxi.csv")  # type: ignore
         .add_batch_definition(BATCH_DEFINITION_NAME)
     )
@@ -282,7 +282,7 @@ class TestValidationDefinitionSerialization:
     ) -> tuple[PandasDatasource, CSVAsset, BatchDefinition]:
         context = in_memory_runtime_context
 
-        ds = context.sources.add_pandas(self.ds_name)
+        ds = context.data_sources.add_pandas(self.ds_name)
         asset = ds.add_csv_asset(self.asset_name, "data.csv")
         batch_definition = asset.add_batch_definition(self.batch_definition_name)
 
