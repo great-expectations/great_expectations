@@ -52,7 +52,7 @@ def data_context_with_connection_to_metrics_db(
     sqlite_path = pathlib.Path(__file__).parent / ".." / "test_sets/metrics_test.db"
     assert sqlite_path.exists()
 
-    ds = context.sources.add_sqlite(
+    ds = context.data_sources.add_sqlite(
         name=DATASOURCE_NAME, connection_string=f"sqlite:///{sqlite_path}"
     )
     ds.add_table_asset(name=ANIMAL_ASSET, table_name="animal_names")
