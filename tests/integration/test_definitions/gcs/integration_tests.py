@@ -1,3 +1,5 @@
+from typing import List
+
 from tests.integration.backend_dependencies import BackendDependencies
 from tests.integration.integration_test_fixture import IntegrationTestFixture
 
@@ -72,14 +74,21 @@ how_to_configure_metadata_store = [
     # ),
 ]
 
-partition_data = []
+partition_data = [
+    IntegrationTestFixture(
+        name="partition_data_on_datetime_gcs",
+        user_flow_script="tests/integration/test_definitions/gcs/partitioned_on_datetime.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
+]
 
-sample_data = []
+sample_data: List[IntegrationTestFixture] = []
 
 deployment_patterns = [
     IntegrationTestFixture(
         name="deployment_patterns_file_gcs",
-        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py",
+        user_flow_script="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/partitioned_on_datetime_gcs.py",
         data_context_dir=None,
         backend_dependencies=[BackendDependencies.GCS],
     ),
