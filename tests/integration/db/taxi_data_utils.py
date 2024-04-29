@@ -110,7 +110,7 @@ def _execute_taxi_partitioning_test_cases(
         column_names: List[str] = taxi_partitioning_test_cases.test_column_names
 
         # 2. Set partitioner in DataConnector config
-        datasource = context.sources.add_postgres(
+        datasource = context.data_sources.add_postgres(
             name=datasource_name, connection_string=connection_string
         )
         asset = datasource.add_table_asset(data_asset_name, table_name=table_name)
