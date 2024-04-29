@@ -16,7 +16,7 @@ data_directory = pathlib.Path(
 
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_suite_parameters.py get validators">
-datasource = context.sources.add_pandas_filesystem(
+datasource = context.data_sources.add_pandas_filesystem(
     name="demo_pandas", base_directory=data_directory
 )
 

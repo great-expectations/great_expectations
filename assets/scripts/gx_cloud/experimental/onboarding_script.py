@@ -26,7 +26,7 @@ datasource_name = None
 assert datasource_name, "Please set datasource_name."
 
 # Get or add Datasource
-datasource: Datasource = context.sources.add_or_update_pandas(datasource_name)
+datasource: Datasource = context.data_sources.add_or_update_pandas(datasource_name)
 
 # Provide an Asset name
 asset_name = None

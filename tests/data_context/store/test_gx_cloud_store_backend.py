@@ -10,7 +10,6 @@ matter here but we leverage an existing fixture to mimic the contents of request
 in production. The same logic applies to all UUIDs in this test.
 """
 
-from collections import OrderedDict
 from typing import Callable, Optional, Set, Union
 from unittest import mock
 
@@ -25,7 +24,6 @@ from great_expectations.data_context.cloud_constants import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations.data_context.types.base import CheckpointConfig
 
 # module level markers
 pytestmark = pytest.mark.cloud
@@ -237,47 +235,6 @@ def test_construct_json_payload_raises_error_with_V1_resource_and_wrong_attribut
             organization_id=organization_id,
             attributes_key="",
             attributes_value=attributes_value_of_legacy_type,
-        )
-
-
-def test_set(
-    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
-) -> None:
-    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
-
-    my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
-        name="my_minimal_simple_checkpoint",
-    )
-    my_simple_checkpoint_config_serialized = my_simple_checkpoint_config.get_schema_class()().dump(
-        my_simple_checkpoint_config
-    )
-
-    with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        store_backend.set(("checkpoint", None, None), my_simple_checkpoint_config_serialized)
-        mock_post.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "attributes": {
-                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-                        "checkpoint_config": OrderedDict(
-                            [
-                                ("name", "my_minimal_simple_checkpoint"),
-                                ("expectation_suite_name", None),
-                                ("batch_request", {}),
-                                ("action_list", []),
-                                ("suite_parameters", {}),
-                                ("runtime_configuration", {}),
-                                ("validations", []),
-                                ("id", None),
-                                ("expectation_suite_id", None),
-                            ]
-                        ),
-                    },
-                }
-            },
         )
 
 

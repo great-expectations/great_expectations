@@ -11,7 +11,7 @@ context = gx.get_context()
 
 # Python
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.py datasource">
-datasource = context.sources.add_pandas(name="my_pandas_datasource")
+datasource = context.data_sources.add_pandas(name="my_pandas_datasource")
 # </snippet>
 
 

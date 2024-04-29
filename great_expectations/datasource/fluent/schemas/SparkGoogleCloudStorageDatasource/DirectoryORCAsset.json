@@ -1,6 +1,6 @@
 {
     "title": "DirectoryORCAsset",
-    "description": "Used for accessing all the files in a directory as a single batch.",
+    "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
     "type": "object",
     "properties": {
         "name": {
@@ -36,7 +36,7 @@
             "title": "Batch Definitions",
             "type": "array",
             "items": {
-                "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__"
+                "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
             }
         },
         "batching_regex": {
@@ -220,8 +220,27 @@
                 "regex"
             ]
         },
-        "BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__": {
-            "title": "BatchDefinition[Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily]]",
+        "PartitionerPath": {
+            "title": "PartitionerPath",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__": {
+            "title": "BatchDefinition[Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily, PartitionerPath]]",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
@@ -244,6 +263,9 @@
                         },
                         {
                             "$ref": "#/definitions/PartitionerDaily"
+                        },
+                        {
+                            "$ref": "#/definitions/PartitionerPath"
                         }
                     ]
                 }

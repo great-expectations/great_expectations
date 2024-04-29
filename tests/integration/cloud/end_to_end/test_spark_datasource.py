@@ -32,12 +32,12 @@ def datasource(
     """Test Adding and Updating the Datasource associated with this module.
     Note: There is no need to test Get or Delete Datasource.
     Those assertions can be found in the datasource_name fixture."""
-    datasource = context.sources.add_spark(
+    datasource = context.data_sources.add_spark(
         name=datasource_name,
         persist=True,
     )
     datasource.persist = False
-    datasource = context.sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
+    datasource = context.data_sources.add_or_update_spark(datasource=datasource)  # type: ignore[call-arg]
     assert (
         datasource.persist is False
     ), "The datasource was not updated in the previous method call."
@@ -46,7 +46,7 @@ def datasource(
     assert datasource.persist is True, "The datasource was not updated in the previous method call."
     datasource.persist = False
     datasource_dict = datasource.dict()
-    datasource = context.sources.add_or_update_spark(**datasource_dict)
+    datasource = context.data_sources.add_or_update_spark(**datasource_dict)
     assert (
         datasource.persist is False
     ), "The datasource was not updated in the previous method call."

@@ -90,7 +90,9 @@ class NotNullSchema(Schema):
             A cleaned dictionary that has no null values
         """  # noqa: E501
         # noinspection PyArgumentList
-        for key in original.keys():
+        for (  # noqa: SIM118  # DictDot does not inherit from dict.
+            key
+        ) in original.keys():
             if key not in output and not key.startswith("_"):
                 # noinspection PyUnresolvedReferences
                 output[key] = original[key]

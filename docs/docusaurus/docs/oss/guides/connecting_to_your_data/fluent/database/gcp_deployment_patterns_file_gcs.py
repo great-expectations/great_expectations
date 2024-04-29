@@ -243,7 +243,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # adding datasource
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py datasource">
-datasource = context.sources.add_pandas_gcs(
+datasource = context.data_sources.add_pandas_gcs(
     name="gcs_datasource", bucket_or_name="test_docs_data"
 )
 # </snippet>
