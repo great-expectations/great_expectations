@@ -81,6 +81,12 @@ partition_data = [
         data_context_dir=None,
         backend_dependencies=[BackendDependencies.GCS],
     ),
+    IntegrationTestFixture(
+        name="gcs_by_path",
+        user_flow_script="tests/integration/test_definitions/gcs/by_path.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
 ]
 
 sample_data: List[IntegrationTestFixture] = []
