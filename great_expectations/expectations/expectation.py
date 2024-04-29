@@ -338,7 +338,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         expectation_type: str = camel_to_snake(cls.__name__)
 
         for candidate_renderer_fn_name in dir(cls):
-            attr_obj: Callable = getattr(cls, candidate_renderer_fn_name)
+            attr_obj: Callable | None = getattr(cls, candidate_renderer_fn_name, None)
+            # attrs are not guaranteed to exist https://docs.python.org/3.10/library/functions.html#dir
+            if attr_obj is None:
+                continue
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
             register_renderer(object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj)
