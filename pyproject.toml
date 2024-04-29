@@ -327,10 +327,8 @@ lint.ignore = [
     "RUF015", # unnecessary-iterable-allocation-for-first-element - requires more careful review
     "TRY300", # Consider moving this statement to an `else` block - we don't use this; this is kind of weird
     # TODO: enable these a few at a time (ordered by number of violations)
-    "SIM108", # if-else-block-instead-of-if-exp
-    "SIM211", # if-expr-with-false-true
+    "SIM108", # if-else-block-instead-of-if-exp # Not enabling: This is not compatible with type narrowing
     "SIM102", # collapsible-if
-    "SIM300", # yoda-conditions
     "SIM105", # suppressible-exception
     "SIM117", # multiple-with-statements
     "SIM910", # dict-get-with-none-default
