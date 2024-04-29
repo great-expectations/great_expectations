@@ -134,10 +134,8 @@ def _execute_taxi_partitioning_test_cases(
 
         if test_case.table_domain_test_case:
             expected_batch_metadata = [{}]
-        elif column_name:
-            expected_batch_metadata = [data for data in test_case.expected_column_values]
-        elif column_names:
-            # TODO: colapse this and the next branch
+        elif column_name or column_names:
+            # This condition is a smell. Consider refactoring.
             expected_batch_metadata = [data for data in test_case.expected_column_values]
         else:
             raise ValueError("Missing test_column_names or test_column_names attribute.")
