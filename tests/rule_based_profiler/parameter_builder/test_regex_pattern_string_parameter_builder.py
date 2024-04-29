@@ -92,7 +92,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults(
 
     assert regex_pattern_string_parameter.threshold == 1.0
     assert regex_pattern_string_parameter.candidate_regexes == candidate_regexes
-    assert regex_pattern_string_parameter.CANDIDATE_REGEX == candidate_regexes
+    assert candidate_regexes == regex_pattern_string_parameter.CANDIDATE_REGEX
 
 
 @mock.patch("great_expectations.data_context.data_context.EphemeralDataContext")
@@ -115,7 +115,7 @@ def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
     )
     assert regex_pattern_string_parameter.threshold == 0.5
     assert regex_pattern_string_parameter.candidate_regexes == candidate_regexes
-    assert regex_pattern_string_parameter.CANDIDATE_REGEX != candidate_regexes
+    assert candidate_regexes != regex_pattern_string_parameter.CANDIDATE_REGEX
 
 
 @pytest.mark.slow  # 1.34s
@@ -218,7 +218,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         data_context=data_context,
     )
 
-    assert regex_parameter.CANDIDATE_REGEX != candidate_regexes
+    assert candidate_regexes != regex_parameter.CANDIDATE_REGEX
     assert regex_parameter.candidate_regexes == candidate_regexes
     assert regex_parameter.threshold == 0.9
 

@@ -438,7 +438,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_parameters(
                 options={"month": month, "year": year}, partitioner=partitioner
             )
         )
-        assert 1 == len(batches)
+        assert len(batches) == 1
         assert batches[0].metadata == {"month": month, "year": year}
 
 

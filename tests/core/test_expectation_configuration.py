@@ -136,7 +136,7 @@ def test_expectation_configuration_get_suite_parameter_dependencies():
         dependencies["profile"][0]["metric_kwargs_id"]["column=norm"]
     )
 
-    assert {
+    assert dependencies == {
         "profile": [
             {
                 "metric_kwargs_id": {
@@ -147,7 +147,7 @@ def test_expectation_configuration_get_suite_parameter_dependencies():
                 }
             }
         ]
-    } == dependencies
+    }
 
 
 @pytest.mark.unit

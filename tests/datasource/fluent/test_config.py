@@ -767,7 +767,7 @@ def test_yaml_config_round_trip_ordering(
 ):
     dumped: str = from_yaml_gx_config.yaml()
 
-    assert PG_CONFIG_YAML_STR == dumped
+    assert dumped == PG_CONFIG_YAML_STR
 
 
 @pytest.mark.xfail(reason="Custom Sorter serialization logic needs to be implemented")
