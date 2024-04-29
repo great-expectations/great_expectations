@@ -331,7 +331,6 @@ lint.ignore = [
     "SIM102", # collapsible-if
     "SIM105", # suppressible-exception
     "SIM117", # multiple-with-statements
-    "SIM201", # negate-equal-op
     "SIM910", # dict-get-with-none-default
     "SIM401", # if-else-block-instead-of-dict-get
     "SIM115", # open-file-with-context-handler

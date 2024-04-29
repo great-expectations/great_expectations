@@ -156,7 +156,7 @@ def test_semantic_domain_equivalence():
         rule_name="my_rule",
     )
 
-    assert not (domain_a == domain_b)
+    assert domain_a != domain_b
     assert domain_b == domain_c
 
     domain_a = Domain(
@@ -190,7 +190,7 @@ def test_semantic_domain_equivalence():
         rule_name="my_rule",
     )
 
-    assert not (domain_a == domain_b)
+    assert domain_a != domain_b
     assert domain_b == domain_c
 
     domain_d = Domain(
