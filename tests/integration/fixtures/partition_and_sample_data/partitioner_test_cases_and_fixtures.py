@@ -269,7 +269,7 @@ class TaxiPartitioningTestCasesWholeTable(TaxiPartitioningTestCasesBase):
         return [
             TaxiPartitioningTestCase(
                 table_domain_test_case=True,
-                num_expected_batch_definitions=2,
+                num_expected_batch_definitions=1,
                 num_expected_rows_in_first_batch_definition=360,
                 expected_column_values=[],
                 add_batch_definition_method_name="add_batch_definition_whole_table",
