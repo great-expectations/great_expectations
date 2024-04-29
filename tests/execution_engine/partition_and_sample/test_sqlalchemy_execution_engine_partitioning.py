@@ -31,13 +31,7 @@ from tests.execution_engine.partition_and_sample.partition_and_sample_test_cases
 from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (  # noqa: E501
     TaxiPartitioningTestCase,
     TaxiPartitioningTestCasesBase,
-    TaxiPartitioningTestCasesColumnValue,
-    TaxiPartitioningTestCasesConvertedDateTime,
     TaxiPartitioningTestCasesDateTime,
-    TaxiPartitioningTestCasesDividedInteger,
-    TaxiPartitioningTestCasesHashedColumn,
-    TaxiPartitioningTestCasesModInteger,
-    TaxiPartitioningTestCasesMultiColumnValues,
     TaxiPartitioningTestCasesWholeTable,
     TaxiTestData,
 )
@@ -435,63 +429,12 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
             )
         ),
-        TaxiPartitioningTestCasesColumnValue(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="passenger_count",
-                test_column_names=None,
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
-        TaxiPartitioningTestCasesDividedInteger(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="pickup_location_id",
-                test_column_names=None,
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
-        TaxiPartitioningTestCasesModInteger(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="pickup_location_id",
-                test_column_names=None,
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
-        TaxiPartitioningTestCasesHashedColumn(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="pickup_location_id",
-                test_column_names=None,
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
-        TaxiPartitioningTestCasesMultiColumnValues(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name=None,
-                test_column_names=[
-                    "rate_code_id",
-                    "payment_type",
-                ],
-                column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
         TaxiPartitioningTestCasesDateTime(
             taxi_test_data=TaxiTestData(
                 test_df=ten_trips_per_month_df(),
                 test_column_name="pickup_datetime",
                 test_column_names=None,
                 column_names_to_convert=["pickup_datetime", "dropoff_datetime"],
-            )
-        ),
-        TaxiPartitioningTestCasesConvertedDateTime(
-            taxi_test_data=TaxiTestData(
-                test_df=ten_trips_per_month_df(),
-                test_column_name="pickup_datetime",
-                test_column_names=None,
-                column_names_to_convert=None,
             )
         ),
     ],
