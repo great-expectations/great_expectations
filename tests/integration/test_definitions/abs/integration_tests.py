@@ -1,3 +1,5 @@
+from typing import List
+
 from tests.integration.backend_dependencies import BackendDependencies
 from tests.integration.integration_test_fixture import IntegrationTestFixture
 
@@ -43,9 +45,22 @@ connecting_to_your_data = [
     # ),
 ]
 
-partition_data = []
+partition_data = [
+    IntegrationTestFixture(
+        name="partition_data_on_whole_table_azure_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
+    IntegrationTestFixture(
+        name="partition_data_on_datetime_azure_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
+]
 
-sample_data = []
+sample_data: List[IntegrationTestFixture] = []
 
 fluent_datasources = [
     IntegrationTestFixture(
