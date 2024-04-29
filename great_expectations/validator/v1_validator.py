@@ -30,7 +30,7 @@ class Validator:
     def __init__(
         self,
         batch_definition: BatchDefinition,
-        result_format: ResultFormat = ResultFormat.SUMMARY,
+        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         batch_parameters: Optional[BatchParameters] = None,
     ) -> None:
         self._batch_definition = batch_definition
@@ -105,9 +105,15 @@ class Validator:
             expectation_configs, suite_parameters
         )
 
+        runtime_configuration: dict
+        if isinstance(self.result_format, ResultFormat):
+            runtime_configuration = {"result_format": self.result_format.value}
+        else:
+            runtime_configuration = {"result_format": self.result_format}
+
         results = self._wrapped_validator.graph_validate(
             configurations=processed_expectation_configs,
-            runtime_configuration={"result_format": self.result_format.value},
+            runtime_configuration=runtime_configuration,
         )
 
         if self._include_rendered_content:

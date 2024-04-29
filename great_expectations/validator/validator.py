@@ -757,19 +757,20 @@ class Validator:
         configurations: List[ExpectationConfiguration],
         runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
-        """Obtains validation dependencies for each metric using the implementation of their associated expectation,
-        then proceeds to add these dependencies to the validation graph, supply readily available metric implementations
-        to fulfill current metric requirements, and validate these metrics.
+        """Obtains validation dependencies for each metric using the implementation of their
+        associated expectation, then proceeds to add these dependencies to the validation graph,
+        supply readily available metric implementations to fulfill current metric requirements,
+        and validate these metrics.
 
         Args:
-            configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will be
-            used to supply domain and values for metrics.
-            runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics, such as the
-            result_format.
+            configurations(List[ExpectationConfiguration]): A list of needed Expectation
+            Configurations that will be used to supply domain and values for metrics.
+            runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling
+            semantics, such as the result_format.
 
         Returns:
             A list of Validations, validating that all necessary metrics are available.
-        """  # noqa: E501
+        """
         if runtime_configuration is None:
             runtime_configuration = {}
 
