@@ -118,7 +118,7 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
         if run_name is None:
             return False
         regex_match = re.search(regex, run_name)
-        return False if regex_match is None else True
+        return regex_match is not None
 
 
 @public_api
