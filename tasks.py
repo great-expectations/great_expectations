@@ -550,7 +550,7 @@ def type_schema(  # noqa: C901 - too complex
 
         if (
             datasource_dir.name.startswith("Pandas")
-            and _PANDAS_SCHEMA_VERSION != pandas.__version__
+            and pandas.__version__ != _PANDAS_SCHEMA_VERSION
         ):
             print(
                 f"🙈  {name} - was generated with pandas"

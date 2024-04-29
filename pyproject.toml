@@ -330,7 +330,6 @@ lint.ignore = [
     "SIM108", # if-else-block-instead-of-if-exp
     "SIM211", # if-expr-with-false-true
     "SIM102", # collapsible-if
-    "SIM300", # yoda-conditions
     "SIM105", # suppressible-exception
     "SIM117", # multiple-with-statements
     "SIM201", # negate-equal-op

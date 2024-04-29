@@ -37,7 +37,7 @@ def test_database_store_backend_schema_spec(caplog, sa, test_backends):
     key = ("2",)
 
     store_backend.set(key, "hello")
-    assert "hello" == store_backend.get(key)
+    assert store_backend.get(key) == "hello"
 
     # clean up values
     with store_backend.engine.begin() as connection:
@@ -63,11 +63,11 @@ def test_database_store_backend_get_url_for_key(caplog, sa, test_backends):
 
     # existing key
     key = ("1",)
-    assert "postgresql://test_ci/1" == store_backend.get_url_for_key(key)
+    assert store_backend.get_url_for_key(key) == "postgresql://test_ci/1"
 
     # non-existing key : should still work
     key = ("not_here",)
-    assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
+    assert store_backend.get_url_for_key(key) == "postgresql://test_ci/not_here"
 
 
 def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backends):
@@ -89,11 +89,11 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backend
     key = ("1", "2", "3")
 
     store_backend.set(key, "hello")
-    assert "hello" == store_backend.get(key)
+    assert store_backend.get(key) == "hello"
 
     # default behavior doesn't throw an error because the key is updated
     store_backend.set(key, "hello")
-    assert "hello" == store_backend.get(key)
+    assert store_backend.get(key) == "hello"
 
     assert len(caplog.messages) == 0
     caplog.set_level(logging.INFO, "great_expectations")
@@ -121,11 +121,11 @@ def test_database_store_backend_url_instantiation(caplog, sa, test_backends):
 
     # existing key
     key = ("1",)
-    assert "postgresql://test_ci/1" == store_backend.get_url_for_key(key)
+    assert store_backend.get_url_for_key(key) == "postgresql://test_ci/1"
 
     # non-existing key : should still work
     key = ("not_here",)
-    assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
+    assert store_backend.get_url_for_key(key) == "postgresql://test_ci/not_here"
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     store_backend = DatabaseStoreBackend(
@@ -136,11 +136,11 @@ def test_database_store_backend_url_instantiation(caplog, sa, test_backends):
 
     # existing key
     key = ("1",)
-    assert "postgresql://test_ci/1" == store_backend.get_url_for_key(key)
+    assert store_backend.get_url_for_key(key) == "postgresql://test_ci/1"
 
     # non-existing key : should still work
     key = ("not_here",)
-    assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
+    assert store_backend.get_url_for_key(key) == "postgresql://test_ci/not_here"
 
 
 def test_database_store_backend_id_initialization(caplog, sa, test_backends):
