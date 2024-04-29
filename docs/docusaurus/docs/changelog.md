@@ -10,6 +10,12 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.13
+* [FEATURE] Remove [cloud] optional dependency ([#9814](https://github.com/great-expectations/great_expectations/pull/9814))
+* [BUGFIX] `scrapy` compatibility - handle `dir()` inconsistencies ([#9830](https://github.com/great-expectations/great_expectations/pull/9830))
+* [MAINTENANCE] Export `great_expectations.data_context` types ([#9738](https://github.com/great-expectations/great_expectations/pull/9738))
+* [MAINTENANCE] Retire ColumnDescriptiveMetrics - 0.18 ([#9789](https://github.com/great-expectations/great_expectations/pull/9789))
+
 ### 0.18.12
 * [FEATURE] MetricListMetricRetriever - 0.18.x ([#9615](https://github.com/great-expectations/great_expectations/pull/9615))
 * [MAINTENANCE] TableMetrics - BatchInspector updates (0.18.x) ([#9630](https://github.com/great-expectations/great_expectations/pull/9630))
