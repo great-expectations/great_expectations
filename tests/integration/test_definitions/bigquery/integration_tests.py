@@ -30,77 +30,6 @@ partition_data = [
         backend_dependencies=[BackendDependencies.BIGQUERY],
     ),
     IntegrationTestFixture(
-        name="partition_data_on_column_value_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_column_value.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/partition_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="partition_data_on_divided_integer_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_divided_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/partition_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="partition_data_on_mod_integer_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_mod_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/partition_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for BIGQUERY is implemented.</Alex>  # noqa: E501
-    # IntegrationTestFixture(
-    #     name="split_data_on_hashed_column_bigquery",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.BIGQUERY],
-    # ),
-    IntegrationTestFixture(
-        name="partition_data_on_multi_column_values_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_partitioned_on_multi_column_values.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/partition_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
         name="partition_data_on_datetime_bigquery",
         user_flow_script="tests/integration/db/test_sql_data_partitioned_on_datetime_and_day_part.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -114,21 +43,6 @@ partition_data = [
         ),
         backend_dependencies=[BackendDependencies.BIGQUERY],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>  # noqa: E501
-    # IntegrationTestFixture(
-    #     name="split_data_on_converted_datetime_bigquery",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.BIGQUERY],
-    # ),
 ]
 
 sample_data = [
