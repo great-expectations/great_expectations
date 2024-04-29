@@ -14,10 +14,7 @@ def is_valid_powerful_number(num: str) -> bool:
         n = int(num)
         unique_factors = {f for f in primefac(n)}
 
-        for p in unique_factors:
-            if n % (p * p) != 0:
-                return False
-        return True
+        return all(n % (p * p) == 0 for p in unique_factors)
     except ValueError:
         return False
 

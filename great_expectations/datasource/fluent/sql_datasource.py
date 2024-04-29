@@ -868,10 +868,7 @@ class TableAsset(_SQLAsset):
         Returns:
             True if the target string is bracketed by quotes.
         """
-        for quote in ["'", '"']:
-            if target.startswith(quote) and target.endswith(quote):
-                return True
-        return False
+        return any(target.startswith(quote) and target.endswith(quote) for quote in ["'", '"'])
 
 
 def _warn_for_more_specific_datasource_type(connection_string: str) -> None:

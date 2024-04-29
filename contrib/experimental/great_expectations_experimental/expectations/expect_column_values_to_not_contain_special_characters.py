@@ -48,10 +48,7 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
                 char for char in special_characters if char not in allowed_characters
             ]
 
-            for c in special_characters:
-                if c in str(val):
-                    return False
-            return True
+            return all(c not in str(val) for c in special_characters)
 
         return column.apply(not_contain_special_character, args=(list(string.punctuation)))
 
@@ -63,10 +60,7 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
                 char for char in list(string.punctuation) if char not in allowed_characters
             ]
 
-            for c in special_characters:
-                if c in str(val):
-                    return False
-            return True
+            return all(c not in str(val) for c in special_characters)
 
         # Register the UDF
         not_contain_special_character_udf = F.udf(
