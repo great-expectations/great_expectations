@@ -333,7 +333,6 @@ lint.ignore = [
     "SIM300", # yoda-conditions
     "SIM105", # suppressible-exception
     "SIM117", # multiple-with-statements
-    "SIM110", # reimplemented-builtin
     "SIM910", # dict-get-with-none-default
     "SIM401", # if-else-block-instead-of-dict-get
     "SIM115", # open-file-with-context-handler
