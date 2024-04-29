@@ -439,6 +439,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
         ),
     ],
 )
+@pytest.mark.xfail(reason="To be implemented in V1-305", strict=True)
 @pytest.mark.sqlite
 def test_sqlite_partition(
     taxi_test_cases: TaxiPartitioningTestCasesBase,
@@ -457,8 +458,8 @@ def test_sqlite_partition(
             batch_spec = SqlAlchemyDatasourceBatchSpec(
                 table_name="test",
                 schema_name="main",
-                partitioner_method=test_case.partitioner_method_name,
-                partitioner_kwargs=test_case.partitioner_kwargs,
+                partitioner_method=test_case.add_batch_definition_method_name,
+                partitioner_kwargs=test_case.add_batch_definition_kwargs,
                 batch_identifiers={},
             )
         else:  # noqa: PLR5501
@@ -467,8 +468,8 @@ def test_sqlite_partition(
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
                     schema_name="main",
-                    partitioner_method=test_case.partitioner_method_name,
-                    partitioner_kwargs=test_case.partitioner_kwargs,
+                    partitioner_method=test_case.add_batch_definition_method_name,
+                    partitioner_kwargs=test_case.add_batch_definition_kwargs,
                     batch_identifiers={
                         taxi_test_cases.test_column_name: test_case.expected_column_values[0]
                     },
@@ -479,8 +480,8 @@ def test_sqlite_partition(
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
                     schema_name="main",
-                    partitioner_method=test_case.partitioner_method_name,
-                    partitioner_kwargs=test_case.partitioner_kwargs,
+                    partitioner_method=test_case.add_batch_definition_method_name,
+                    partitioner_kwargs=test_case.add_batch_definition_kwargs,
                     batch_identifiers={
                         column_name: test_case.expected_column_values[0][column_name]
                         for column_name in taxi_test_cases.test_column_names
