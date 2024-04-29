@@ -143,9 +143,11 @@ def _execute_taxi_partitioning_test_cases(
             raise ValueError("Missing test_column_names or test_column_names attribute.")
 
         actual_batch_metadata = [batch.metadata for batch in batch_list]
-        assert (
-            actual_batch_metadata == expected_batch_metadata
-        ), f"Batch metadata lists don't match\n\nbatch_list:\n{batch_list}\n\nexpected_batch metadaata:\n{expected_batch_metadata}"  # noqa: E501
+        assert actual_batch_metadata == expected_batch_metadata, (
+            f"Batch metadata lists don't match\n\n"
+            f"batch_list:\n{batch_list}\n\n"
+            f"expected_batch metadaata:\n{expected_batch_metadata}"
+        )
 
         # 4. Check that loaded data is as expected, using correctness
         # of the first batch as a proxy for correctness of the whole list
