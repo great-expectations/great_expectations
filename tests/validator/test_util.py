@@ -2,19 +2,15 @@ import datetime
 import decimal
 import platform
 import sys
-from functools import wraps
 
 import numpy as np
 import pytest
 from numpy.lib.npyio import DataSource
 
-import great_expectations as gx
+from great_expectations import validator
 
 
 @pytest.mark.big
-@pytest.mark.filterwarnings(
-    "ignore:partition_data*:DeprecationWarning:great_expectations.dataset.util"
-)
 def test_recursively_convert_to_json_serializable(tmp_path):
     x = {
         "w": ["aaaa", "bbbb", 1.3, 5, 6, 7],
@@ -46,7 +42,7 @@ def test_recursively_convert_to_json_serializable(tmp_path):
     if hasattr(np, "float128") and platform.system() != "Windows":
         x["np.float128"] = np.float128([5.999999999998786324399999999, 20.4])
 
-    x = gx.data_asset.util.recursively_convert_to_json_serializable(x)
+    x = validator.util.recursively_convert_to_json_serializable(x)
     assert isinstance(x["x"], list)
 
     assert isinstance(x["np.bool"][0], bool)
@@ -79,63 +75,4 @@ def test_recursively_convert_to_json_serializable(tmp_path):
     # TypeError when non-serializable numpy object is in dataset.
     with pytest.raises(TypeError):
         y = {"p": DataSource(tmp_path)}
-        gx.data_asset.util.recursively_convert_to_json_serializable(y)
-
-
-"""
-The following Parent and Child classes are used for testing documentation inheritance.
-"""
-
-
-class Parent:
-    """Parent class docstring"""
-
-    @classmethod
-    def expectation(cls, func):
-        """Manages configuration and running of expectation objects."""
-
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            # wrapper logic
-            func(*args, **kwargs)
-
-        return wrapper
-
-    def override_me(self):
-        """Parent method docstring
-        Returns:
-            Unattainable abiding satisfaction.
-        """
-        raise NotImplementedError
-
-
-class Child(Parent):
-    """
-    Child class docstring
-    """
-
-    @gx.data_asset.util.DocInherit
-    @Parent.expectation
-    def override_me(self):
-        """Child method docstring
-        Returns:
-            Real, instantiable, abiding satisfaction.
-        """
-
-
-@pytest.mark.unit
-def test_doc_inheritance():
-    c = Child()
-
-    assert (
-        c.__getattribute__("override_me").__doc__
-        == """Child method docstring
-        Returns:
-            Real, instantiable, abiding satisfaction.
-        """
-        + "\n"
-        """Parent method docstring
-        Returns:
-            Unattainable abiding satisfaction.
-        """
-    )
+        validator.util.recursively_convert_to_json_serializable(y)
