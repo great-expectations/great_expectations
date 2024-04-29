@@ -1640,8 +1640,6 @@ class Validator:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(name=expectation_suite_name)
 
-        self._expectation_suite.execution_engine_type = type(self._execution_engine)
-
     def _get_runtime_configuration(
         self,
         catch_exceptions: Optional[bool] = None,

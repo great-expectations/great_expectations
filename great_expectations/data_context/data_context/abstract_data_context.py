@@ -22,7 +22,6 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -1755,7 +1754,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
         suite_parameters: dict | None = ...,
-        execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: None = ...,
     ) -> ExpectationSuite:
@@ -1772,7 +1770,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
         suite_parameters: dict | None = ...,
-        execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: ExpectationSuite = ...,
     ) -> ExpectationSuite:
@@ -1790,7 +1787,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
         suite_parameters: dict | None = None,
-        execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         expectation_suite: ExpectationSuite | None = None,
     ) -> ExpectationSuite:
@@ -1823,7 +1819,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id: Identifier to associate with this suite.
             expectations: Expectation Configurations to associate with this suite.
             suite_parameters: Suite parameters to be substituted when evaluating Expectations.
-            execution_engine_type: Name of the execution engine type.
             meta: Metadata related to the suite.
 
         Returns:
@@ -1838,7 +1833,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
             expectations=expectations,
             suite_parameters=suite_parameters,
-            execution_engine_type=execution_engine_type,
             meta=meta,
             expectation_suite=expectation_suite,
             overwrite_existing=False,  # `add` does not resolve collisions
@@ -1850,7 +1844,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         id: str | None = None,
         expectations: Sequence[dict | ExpectationConfiguration] | None = None,
         suite_parameters: dict | None = None,
-        execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         overwrite_existing: bool = False,
         expectation_suite: ExpectationSuite | None = None,
@@ -1874,7 +1867,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 id=id,
                 expectations=expectations,
                 suite_parameters=suite_parameters,
-                execution_engine_type=execution_engine_type,
                 meta=meta,
             )
 
@@ -1942,7 +1934,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
         suite_parameters: dict | None = ...,
-        execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: None = ...,
     ) -> ExpectationSuite:
@@ -1960,7 +1951,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         id: str | None = ...,
         expectations: list[dict | ExpectationConfiguration] | None = ...,
         suite_parameters: dict | None = ...,
-        execution_engine_type: Type[ExecutionEngine] | None = ...,
         meta: dict | None = ...,
         expectation_suite: ExpectationSuite = ...,
     ) -> ExpectationSuite:
@@ -1979,7 +1969,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
         suite_parameters: dict | None = None,
-        execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         expectation_suite: ExpectationSuite | None = None,
     ) -> ExpectationSuite:
@@ -1990,7 +1979,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             id: Identifier to associate with this suite (ignored if updating existing suite).
             expectations: Expectation Configurations to associate with this suite.
             suite_parameters: Suite parameters to be substituted when evaluating Expectations.
-            execution_engine_type: Name of the Execution Engine type.
             meta: Metadata related to the suite.
             expectation_suite: The `ExpectationSuite` object you wish to persist.
 
@@ -2012,7 +2000,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 id=id,
                 expectations=expectations,
                 suite_parameters=suite_parameters,
-                execution_engine_type=execution_engine_type,
                 meta=meta,
             )
 

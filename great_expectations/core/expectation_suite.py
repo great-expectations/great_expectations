@@ -15,7 +15,6 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    Type,
     TypeVar,
     Union,
 )
@@ -56,7 +55,6 @@ from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
-    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
@@ -75,7 +73,6 @@ class ExpectationSuite(SerializableDictDot):
         name: Name of the Expectation Suite
         expectations: Expectation Configurations to associate with this Expectation Suite.
         suite_parameters: Suite parameters to be substituted when evaluating Expectations.
-        execution_engine_type: Name of the execution engine type.
         meta: Metadata related to the suite.
         id: Great Expectations Cloud id for this Expectation Suite.
     """
@@ -85,7 +82,6 @@ class ExpectationSuite(SerializableDictDot):
         name: Optional[str] = None,
         expectations: Optional[Sequence[Union[dict, ExpectationConfiguration, Expectation]]] = None,
         suite_parameters: Optional[dict] = None,
-        execution_engine_type: Optional[Type[ExecutionEngine]] = None,
         meta: Optional[dict] = None,
         notes: str | list[str] | None = None,
         id: Optional[str] = None,
@@ -100,7 +96,6 @@ class ExpectationSuite(SerializableDictDot):
         if suite_parameters is None:
             suite_parameters = {}
         self.suite_parameters = suite_parameters
-        self.execution_engine_type = execution_engine_type
         if meta is None:
             meta = {"great_expectations_version": ge_version}
         if (
