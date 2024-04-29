@@ -47,14 +47,14 @@ connecting_to_your_data = [
 
 partition_data = [
     IntegrationTestFixture(
-        name="partition_data_on_whole_table_azure_pandas",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
+        name="azure_pandas_by_path",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/by_path.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[BackendDependencies.AZURE],
     ),
     IntegrationTestFixture(
         name="partition_data_on_datetime_azure_pandas",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/partitioned_on_datetime.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[BackendDependencies.AZURE],
     ),

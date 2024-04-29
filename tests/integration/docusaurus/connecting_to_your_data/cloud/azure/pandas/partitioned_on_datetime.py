@@ -21,7 +21,7 @@ datasource = context.data_sources.add_pandas_abs(
     },
 )
 
-data_asset_name = "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
+data_asset_name = "data/taxi_yellow_tripdata_samples"
 asset = datasource.add_csv_asset(
     name=data_asset_name,
     batching_regex="(.*)\\.csv",
@@ -34,10 +34,18 @@ batch_definition = asset.add_batch_definition_monthly(
     regex=re.compile(r"yellow_tripdata_sample_(?P<year>.*)-(?P<month>.*)\.csv"),
 )
 
+# first batch request: not passing any parameters
 batch_request = batch_definition.build_batch_request()
 batch_list = asset.get_batch_list_from_batch_request(batch_request)
 
 assert len(batch_list) == 3
 
-first_batch = batch_list[0]
-assert first_batch.metadata == "foo"
+# second batch request: passing in parameters
+second_batch_request = batch_definition.build_batch_request(
+    batch_parameters={"year": "2019", "month": "02"}
+)
+second_batch_list = asset.get_batch_list_from_batch_request(batch_request)
+assert len(second_batch_list) == 1
+
+assert batch_list[0].metadata == "foo"
+assert second_batch_list[0].metadata == "foo"
