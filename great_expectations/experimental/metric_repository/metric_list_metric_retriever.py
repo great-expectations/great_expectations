@@ -229,10 +229,7 @@ class MetricListMetricRetriever(MetricRetriever):
         Returns:
             bool: True if all the metric types in the list are valid, False otherwise.
         """  # noqa: E501
-        for metric in metric_list:
-            if metric not in MetricTypes:
-                return False
-        return True
+        return all(metric in MetricTypes for metric in metric_list)
 
     def _column_metrics_in_metric_list(self, metric_list: List[MetricTypes]) -> bool:
         """Helper method to check whether any column metrics are present in the metric list.
@@ -250,7 +247,4 @@ class MetricListMetricRetriever(MetricRetriever):
             MetricTypes.COLUMN_MEAN,
             MetricTypes.COLUMN_NULL_COUNT,
         ]
-        for metric in column_metrics:
-            if metric in metric_list:
-                return True
-        return False
+        return any(metric in metric_list for metric in column_metrics)

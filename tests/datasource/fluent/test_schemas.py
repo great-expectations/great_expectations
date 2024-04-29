@@ -48,7 +48,7 @@ def _models_and_schema_dirs() -> (
 
 
 @pytest.mark.skipif(
-    PYTHON_VERSION > min_supported_python(),
+    min_supported_python() < PYTHON_VERSION,
     reason=f"_sort_any_of() keys needs to be fixed for py {PYTHON_VERSION}",
 )
 @pytest.mark.timeout(
