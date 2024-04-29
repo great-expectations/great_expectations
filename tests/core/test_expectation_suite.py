@@ -28,7 +28,6 @@ from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -97,7 +96,6 @@ class TestInit:
         assert suite.name == fake_expectation_suite_name
         assert suite.expectations == []
         assert suite.suite_parameters == {}
-        assert suite.execution_engine_type is None
         assert suite.meta == default_meta
         assert suite.id is None
 
@@ -111,7 +109,6 @@ class TestInit:
             pass
 
         test_suite_parameters = {"$PARAMETER": "test_suite_parameters"}
-        dummy_execution_engine_type = type(DummyExecutionEngine())
         default_meta = {"great_expectations_version": ge_version}
         test_meta_base = {"test_key": "test_value"}
         test_meta = {**default_meta, **test_meta_base}
@@ -121,7 +118,6 @@ class TestInit:
             name=fake_expectation_suite_name,
             expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
             suite_parameters=test_suite_parameters,
-            execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
             meta=test_meta,
             id=test_id,
         )
@@ -130,7 +126,6 @@ class TestInit:
             expect_column_values_to_be_in_set_col_a_with_meta
         ]
         assert suite.suite_parameters == test_suite_parameters
-        assert suite.execution_engine_type == dummy_execution_engine_type
         assert suite.meta == test_meta
         assert suite.id == test_id
 
@@ -942,15 +937,6 @@ class TestEqDunder:
             ),
             pytest.param("expectations", []),
             pytest.param("suite_parameters", {"different": "suite_parameters"}),
-            pytest.param(
-                "execution_engine_type",
-                type(ExecutionEngine),
-                marks=pytest.mark.xfail(
-                    strict=True,
-                    raises=AssertionError,
-                    reason="Currently execution_engine_type is not considered in ExpectationSuite equality",  # noqa: E501
-                ),
-            ),
             pytest.param("meta", {"notes": "Different meta."}),
             pytest.param(
                 "id",
