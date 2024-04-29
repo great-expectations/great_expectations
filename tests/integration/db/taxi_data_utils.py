@@ -14,6 +14,7 @@ from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases
 )
 from tests.test_utils import (
     LoadedTable,
+    add_datasource,
     clean_up_tables_with_prefix,
     load_and_concatenate_csvs,
     load_data_into_test_database,
@@ -110,8 +111,8 @@ def _execute_taxi_partitioning_test_cases(
         column_names: List[str] = taxi_partitioning_test_cases.test_column_names
 
         # 2. Set partitioner in DataConnector config
-        datasource = context.data_sources.add_postgres(
-            name=datasource_name, connection_string=connection_string
+        datasource = add_datasource(
+            context, name=datasource_name, connection_string=connection_string
         )
         asset = datasource.add_table_asset(data_asset_name, table_name=table_name)
         add_batch_definition_method = getattr(
@@ -126,7 +127,7 @@ def _execute_taxi_partitioning_test_cases(
         batch_list = asset.get_batch_list_from_batch_request(batch_request)
         assert len(batch_list) == test_case.num_expected_batch_definitions, (
             f"Found {len(batch_list)} batch definitions "
-            "but expected {test_case.num_expected_batch_definitions}"
+            f"but expected {test_case.num_expected_batch_definitions}"
         )
 
         expected_batch_metadata: List[dict]
