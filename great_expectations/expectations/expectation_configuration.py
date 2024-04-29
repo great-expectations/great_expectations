@@ -344,7 +344,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def applies_to_same_domain(
         self, other_expectation_configuration: ExpectationConfiguration
     ) -> bool:
-        if not self.expectation_type == other_expectation_configuration.expectation_type:
+        if self.expectation_type != other_expectation_configuration.expectation_type:
             return False
         return self.get_domain_kwargs() == other_expectation_configuration.get_domain_kwargs()
 
