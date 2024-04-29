@@ -1,15 +1,14 @@
 import datetime
 import decimal
-import json
 import platform
 import sys
 from functools import wraps
 
 import numpy as np
 import pytest
+from numpy.lib.npyio import DataSource
 
 import great_expectations as gx
-from great_expectations.self_check.util import expectationSuiteSchema
 
 
 @pytest.mark.big
@@ -35,13 +34,13 @@ def test_recursively_convert_to_json_serializable(tmp_path):
         "np.uint": np.uint([20, 5, 6]),
         "np.uint8": np.uint8([40, 10, 12]),
         "np.uint64": np.uint64([80, 20, 24]),
-        "np.float_": np.float_([3.2, 5.6, 7.8]),
+        "np.float_": np.float64([3.2, 5.6, 7.8]),
         "np.float32": np.float32([5.999999999, 5.6]),
         "np.float64": np.float64([5.9999999999999999999, 10.2]),
         # 'np.complex64': np.complex64([10.9999999 + 4.9999999j, 11.2+7.3j]),
         # 'np.complex128': np.complex128([20.999999999978335216827+10.99999999j, 22.4+14.6j]),
         # 'np.complex256': np.complex256([40.99999999 + 20.99999999j, 44.8+29.2j]),
-        "np.str": np.unicode_(["hello"]),
+        "np.str": np.str_(["hello"]),
         "yyy": decimal.Decimal(123.456),
     }
     if hasattr(np, "float128") and platform.system() != "Windows":
@@ -79,7 +78,7 @@ def test_recursively_convert_to_json_serializable(tmp_path):
 
     # TypeError when non-serializable numpy object is in dataset.
     with pytest.raises(TypeError):
-        y = {"p": np.DataSource(tmp_path)}
+        y = {"p": DataSource(tmp_path)}
         gx.data_asset.util.recursively_convert_to_json_serializable(y)
 
 
