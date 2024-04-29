@@ -144,9 +144,9 @@ def _execute_taxi_partitioning_test_cases(
 
         actual_batch_metadata = [batch.metadata for batch in batch_list]
         assert actual_batch_metadata == expected_batch_metadata, (
-            f"Batch metadata lists don't match\n\n"
+            f"Batch metadata lists don't match.\n\n"
             f"batch_list:\n{batch_list}\n\n"
-            f"expected_batch metadaata:\n{expected_batch_metadata}"
+            f"expected_batch metadata:\n{expected_batch_metadata}"
         )
 
         # 4. Check that loaded data is as expected, using correctness
