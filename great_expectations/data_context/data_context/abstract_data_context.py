@@ -629,10 +629,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _add_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
     ) -> FluentDatasource:
-        if datasource:
-            datasource_name = datasource.name
-        else:
-            datasource_name = kwargs.get("name", "")
+        datasource_name = datasource.name if datasource else kwargs.get("name", "")
 
         if not datasource_name:
             raise gx_exceptions.DataContextError(  # noqa: TRY003
@@ -661,10 +658,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
     ) -> FluentDatasource:
-        if datasource:
-            datasource_name = datasource.name
-        else:
-            datasource_name = kwargs.get("name", "")
+        datasource_name = datasource.name if datasource else kwargs.get("name", "")
 
         if not datasource_name:
             raise gx_exceptions.DataContextError(  # noqa: TRY003

@@ -203,10 +203,7 @@ class MetricIdentifier(DataContextKey):
         return self.to_tuple()
 
     def to_tuple(self):
-        if self._metric_kwargs_id is None:
-            tuple_metric_kwargs_id = "__"
-        else:
-            tuple_metric_kwargs_id = self._metric_kwargs_id
+        tuple_metric_kwargs_id = "__" if self._metric_kwargs_id is None else self._metric_kwargs_id
         return tuple(
             (self.metric_name, tuple_metric_kwargs_id)
         )  # We use the placeholder in to_tuple
@@ -261,10 +258,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         return self._expectation_suite_identifier
 
     def to_tuple(self):
-        if self.data_asset_name is None:
-            tuple_data_asset_name = "__"
-        else:
-            tuple_data_asset_name = self.data_asset_name
+        tuple_data_asset_name = "__" if self.data_asset_name is None else self.data_asset_name
         return tuple(
             list(self.run_id.to_tuple())
             + [tuple_data_asset_name]
@@ -273,10 +267,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
         )
 
     def to_fixed_length_tuple(self):
-        if self.data_asset_name is None:
-            tuple_data_asset_name = "__"
-        else:
-            tuple_data_asset_name = self.data_asset_name
+        tuple_data_asset_name = "__" if self.data_asset_name is None else self.data_asset_name
         return tuple(
             list(self.run_id.to_tuple())
             + [tuple_data_asset_name]
@@ -301,10 +292,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "ValidationMetricIdentifier tuple must have at least six components."
             )
-        if tuple_[2] == "__":
-            tuple_data_asset_name = None
-        else:
-            tuple_data_asset_name = tuple_[2]
+        tuple_data_asset_name = None if tuple_[2] == "__" else tuple_[2]
         metric_id = MetricIdentifier.from_tuple(tuple_[-2:])
         return cls(
             run_id=RunIdentifier.from_tuple((tuple_[0], tuple_[1])),
@@ -320,10 +308,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             raise gx_exceptions.GreatExpectationsError(  # noqa: TRY003
                 "ValidationMetricIdentifier fixed length tuple must have exactly six " "components."
             )
-        if tuple_[2] == "__":
-            tuple_data_asset_name = None
-        else:
-            tuple_data_asset_name = tuple_[2]
+        tuple_data_asset_name = None if tuple_[2] == "__" else tuple_[2]
         metric_id = MetricIdentifier.from_tuple(tuple_[-2:])
         return cls(
             run_id=RunIdentifier.from_fixed_length_tuple((tuple_[0], tuple_[1])),

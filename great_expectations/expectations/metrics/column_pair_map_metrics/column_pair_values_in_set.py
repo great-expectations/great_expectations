@@ -43,15 +43,9 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
 
         results = []
         for i, t in temp_df.iterrows():
-            if pd.isnull(t["A"]):
-                a = None
-            else:
-                a = t["A"]
+            a = None if pd.isnull(t["A"]) else t["A"]
 
-            if pd.isnull(t["B"]):
-                b = None
-            else:
-                b = t["B"]
+            b = None if pd.isnull(t["B"]) else t["B"]
 
             results.append((a, b) in value_pairs_set)
 

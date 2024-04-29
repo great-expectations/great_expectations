@@ -949,10 +949,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             path_url = "/".join((self.bucket, self.prefix, path))
         else:  # noqa: PLR5501
             if self.base_public_path:
-                if self.base_public_path[-1] != "/":
-                    path_url = f"/{path}"
-                else:
-                    path_url = path
+                path_url = f"/{path}" if self.base_public_path[-1] != "/" else path
             else:
                 path_url = "/".join((self.bucket, path))
         return path_url

@@ -35,10 +35,7 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 
         # choose the operator to use for comparison of consecutive items
         # could be easily adapted for other comparisons, perhaps of custom objects
-        if reverse:
-            compare_function = operator.ge
-        else:
-            compare_function = operator.le
+        compare_function = operator.ge if reverse else operator.le
 
         output = [True]  # first value is automatically in order
         for i in range(1, column_length):

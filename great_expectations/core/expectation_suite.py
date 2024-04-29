@@ -989,10 +989,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation: ExpectationConfiguration
         expectation_configurations = [exp.configuration for exp in self.expectations]
         for expectation in expectation_configurations:
-            if "column" in expectation.kwargs:
-                column = expectation.kwargs["column"]
-            else:
-                column = "_nocolumn"
+            column = expectation.kwargs["column"] if "column" in expectation.kwargs else "_nocolumn"
 
             if column not in expectations_by_column:
                 expectations_by_column[column] = []

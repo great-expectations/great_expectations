@@ -211,10 +211,7 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         invoke docstrings -p=great_expectations/core -p=great_expectations/util.py
     """
 
-    if paths:
-        select_paths = [pathlib.Path(p) for p in paths]
-    else:
-        select_paths = None
+    select_paths = [pathlib.Path(p) for p in paths] if paths else None
     try:
         check_public_api_docstrings.main(select_paths=select_paths)
     except AssertionError as err:
@@ -295,10 +292,7 @@ def type_check(  # noqa: C901, PLR0912
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
-    if daemon:
-        bin = "dmypy run --"
-    else:
-        bin = "mypy"
+    bin = "dmypy run --" if daemon else "mypy"
 
     cmds = [bin]
 

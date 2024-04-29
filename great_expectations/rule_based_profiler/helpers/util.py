@@ -621,10 +621,7 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
         )
 
     if quantile_statistic_interpolation_method == "auto":
-        if round_decimals == 0:
-            quantile_statistic_interpolation_method = "nearest"
-        else:
-            quantile_statistic_interpolation_method = "linear"
+        quantile_statistic_interpolation_method = "nearest" if round_decimals == 0 else "linear"
 
     return quantile_statistic_interpolation_method
 

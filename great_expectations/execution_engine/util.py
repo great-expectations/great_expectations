@@ -115,10 +115,7 @@ def build_continuous_partition_object(
     bins = execution_engine.resolve_metrics([partition_metric_configuration])[
         partition_metric_configuration.id
     ]
-    if isinstance(bins, np.ndarray):
-        bins = bins.tolist()
-    else:
-        bins = list(bins)
+    bins = bins.tolist() if isinstance(bins, np.ndarray) else list(bins)
 
     hist_metric_configuration = MetricConfiguration(
         "column.histogram",

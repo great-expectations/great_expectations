@@ -919,10 +919,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             column for column in df.columns if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
+        batch_type = AltairDataTypes.ORDINAL.value if sequential else AltairDataTypes.NOMINAL.value
         batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
@@ -999,10 +996,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             column for column in df.columns if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
+        batch_type = AltairDataTypes.ORDINAL.value if sequential else AltairDataTypes.NOMINAL.value
         batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
@@ -1288,10 +1282,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             column for column in df.columns if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
+        batch_type = AltairDataTypes.ORDINAL.value if sequential else AltairDataTypes.NOMINAL.value
         batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
@@ -1327,7 +1318,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
                 )
 
     @staticmethod
-    def _get_expect_domain_values_to_be_between_chart(  # noqa: C901, PLR0912, PLR0915
+    def _get_expect_domain_values_to_be_between_chart(  # noqa: C901, PLR0912
         expectation_type: str,
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
@@ -1346,10 +1337,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             An altair line chart with confidence intervals corresponding to "between" expectations
         """  # noqa: E501
         domain_type: MetricDomainTypes
-        if subtitle:
-            domain_type = MetricDomainTypes.COLUMN
-        else:
-            domain_type = MetricDomainTypes.TABLE
+        domain_type = MetricDomainTypes.COLUMN if subtitle else MetricDomainTypes.TABLE
 
         column_name: str = "column"
         batch_name: str = "batch"
@@ -1379,10 +1367,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         ]
 
         batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
+        batch_type = AltairDataTypes.ORDINAL.value if sequential else AltairDataTypes.NOMINAL.value
         batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
@@ -1526,10 +1511,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             if column not in (sanitized_metric_names | {batch_name})
         ]
         batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
+        batch_type = AltairDataTypes.ORDINAL.value if sequential else AltairDataTypes.NOMINAL.value
         batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
@@ -1634,10 +1616,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             )
         ]
         batch_type: alt.StandardType
-        if sequential:
-            batch_type = AltairDataTypes.ORDINAL.value
-        else:
-            batch_type = AltairDataTypes.NOMINAL.value
+        batch_type = AltairDataTypes.ORDINAL.value if sequential else AltairDataTypes.NOMINAL.value
         batch_plot_component = BatchPlotComponent(
             name=batch_name,
             alt_type=batch_type,
@@ -1645,10 +1624,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         )
 
         y_axis_title: Optional[str]
-        if len(sanitized_metric_names) > 1:
-            y_axis_title = "Column Values"
-        else:
-            y_axis_title = None
+        y_axis_title = "Column Values" if len(sanitized_metric_names) > 1 else None
 
         metric_plot_component: MetricPlotComponent
         metric_plot_components: List[MetricPlotComponent] = []

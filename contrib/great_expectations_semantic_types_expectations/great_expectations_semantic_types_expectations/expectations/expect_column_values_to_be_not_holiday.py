@@ -18,10 +18,7 @@ from great_expectations.expectations.metrics import (
 def is_not_holiday(date, country_code) -> bool:
     try:
         holidays_list = country_holidays(country_code.upper())
-        if isinstance(date, str):
-            d = parse(date)
-        else:
-            d = date
+        d = parse(date) if isinstance(date, str) else date
     except Exception:
         return False
     return d not in holidays_list

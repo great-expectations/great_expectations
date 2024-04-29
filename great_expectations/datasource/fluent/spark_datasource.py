@@ -242,10 +242,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
                 "partitioner is not currently supported and must be None for this DataAsset."
             )
 
-        if dataframe is None:
-            df = self.dataframe
-        else:
-            df = dataframe
+        df = self.dataframe if dataframe is None else dataframe
 
         if df is None:
             raise ValueError("Cannot build batch request for dataframe asset without a dataframe")  # noqa: TRY003

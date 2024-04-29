@@ -56,10 +56,7 @@ from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as BigQueryDialect,
 )
 
-if GEOGRAPHY:
-    BIGQUERY_GEO_SUPPORT = True
-else:
-    BIGQUERY_GEO_SUPPORT = False
+BIGQUERY_GEO_SUPPORT = True if GEOGRAPHY else False
 
 try:
     import teradatasqlalchemy.dialect

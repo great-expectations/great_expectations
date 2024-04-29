@@ -238,10 +238,7 @@ def get_expectations_info_dict(  # noqa: C901 - too complex
             if match:
                 if not line.strip().startswith("#"):
                     exp_type_set.add(match.group(1))
-        if file_path.startswith("great_expectations"):
-            _prefix = "Core "
-        else:
-            _prefix = "Contrib "
+        _prefix = "Core " if file_path.startswith("great_expectations") else "Contrib "
         result[expectation_name]["exp_type"] = _prefix + sorted(exp_type_set)[0]
         logger.debug(
             f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {expectation_name} in {file_path}"

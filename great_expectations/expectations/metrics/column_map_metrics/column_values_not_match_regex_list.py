@@ -55,9 +55,6 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
     def _spark(cls, column, regex_list, **kwargs):
         compound = None
         for regex in regex_list:
-            if compound is None:
-                compound = ~column.rlike(regex)
-            else:
-                compound = compound & ~column.rlike(regex)
+            compound = ~column.rlike(regex) if compound is None else compound & ~column.rlike(regex)
 
         return compound

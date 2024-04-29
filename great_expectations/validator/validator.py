@@ -773,10 +773,7 @@ class Validator:
         if runtime_configuration is None:
             runtime_configuration = {}
 
-        if runtime_configuration.get("catch_exceptions", True):
-            catch_exceptions = True
-        else:
-            catch_exceptions = False
+        catch_exceptions = True if runtime_configuration.get("catch_exceptions", True) else False
 
         expectation_validation_graphs: List[ExpectationValidationGraph]
 

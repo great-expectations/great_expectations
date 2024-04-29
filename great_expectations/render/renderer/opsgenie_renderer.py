@@ -37,10 +37,7 @@ class OpsgenieRenderer(Renderer):
         batch_id = result.batch_id or "__no_batch_id__"
         check_details_text = f"{n_checks_succeeded} of {n_checks} expectations were met"
 
-        if result.success:
-            status = "Success 🎉"
-        else:
-            status = "Failed ❌"
+        status = "Success 🎉" if result.success else "Failed ❌"
 
         return f"""Batch Validation Status: {status}
 Expectation Suite Name: {suite_name}

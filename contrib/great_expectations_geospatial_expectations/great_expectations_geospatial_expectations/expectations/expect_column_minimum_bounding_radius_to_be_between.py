@@ -204,7 +204,7 @@ class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnAggregateExpectation):
     }
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
-    def _validate(  # noqa: C901 - too complex
+    def _validate(  # - too complex
         self,
         metrics: Dict,
         runtime_configuration: dict = None,
@@ -219,23 +219,14 @@ class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnAggregateExpectation):
         strict_min = success_kwargs.get("strict_min")
         strict_max = success_kwargs.get("strict_max")
 
-        if diameter_flag:
-            distance = radius * 2
-        else:
-            distance = radius
+        distance = radius * 2 if diameter_flag else radius
 
         # Evaluate the between statement (from column_values_between.py)
         if min_value is None:
-            if strict_max:
-                success = distance < max_value
-            else:
-                success = distance <= max_value
+            success = distance < max_value if strict_max else distance <= max_value
 
         elif max_value is None:
-            if strict_min:
-                success = min_value < distance
-            else:
-                success = min_value <= distance
+            success = min_value < distance if strict_min else min_value <= distance
 
         else:
             if strict_min and strict_max:

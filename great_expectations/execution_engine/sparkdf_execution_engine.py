@@ -813,10 +813,7 @@ illegal.  Please check your config."""  # noqa: E501
 
         new_domain_kwargs = copy.deepcopy(domain_kwargs)
         assert "column" in domain_kwargs or column_name is not None
-        if column_name is not None:
-            column = column_name
-        else:
-            column = domain_kwargs["column"]
+        column = column_name if column_name is not None else domain_kwargs["column"]
 
         filter_conditions: List[RowCondition] = []
         if filter_null:

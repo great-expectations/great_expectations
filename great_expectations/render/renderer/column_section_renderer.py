@@ -41,10 +41,7 @@ class ColumnSectionRenderer(Renderer):
     @classmethod
     def _get_column_name(cls, ge_object):
         # This is broken out for ease of locating future validation here
-        if isinstance(ge_object, list):
-            candidate_object = ge_object[0]
-        else:
-            candidate_object = ge_object
+        candidate_object = ge_object[0] if isinstance(ge_object, list) else ge_object
         try:
             if isinstance(candidate_object, ExpectationConfiguration):
                 return candidate_object.kwargs["column"]
@@ -92,10 +89,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
     # Note: Seems awkward to pass section_name and column_type into this renderer.
     # Can't we figure that out internally?
     def render(self, evrs, section_name=None, column_type=None):
-        if section_name is None:
-            column = self._get_column_name(evrs)
-        else:
-            column = section_name
+        column = self._get_column_name(evrs) if section_name is None else section_name
 
         content_blocks = []
 

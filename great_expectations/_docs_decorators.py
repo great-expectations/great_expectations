@@ -42,10 +42,7 @@ class _PublicApiIntrospector:
             # We use an if statement instead of a ternary to work around
             # mypy's inability to type narrow inside a ternary.
             f: F
-            if isinstance(func, classmethod):
-                f = func.__func__
-            else:
-                f = func
+            f = func.__func__ if isinstance(func, classmethod) else func
 
             info = _PublicApiInfo(
                 name=f.__name__,

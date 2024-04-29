@@ -16,10 +16,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_daytime(ts, lat, lon) -> bool:
-    if isinstance(ts, str):
-        d = parse(ts)
-    else:
-        d = ts
+    d = parse(ts) if isinstance(ts, str) else ts
     try:
         obs = ephem.Observer()
         obs.lat = float(lat)

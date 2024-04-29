@@ -1550,18 +1550,12 @@ representation."""  # noqa: E501
 
         # Checking if mean lies between thresholds
         if min_value is not None:
-            if strict_min:
-                above_min = metric_value > min_value
-            else:
-                above_min = metric_value >= min_value
+            above_min = metric_value > min_value if strict_min else metric_value >= min_value
         else:
             above_min = True
 
         if max_value is not None:
-            if strict_max:
-                below_max = metric_value < max_value
-            else:
-                below_max = metric_value <= max_value
+            below_max = metric_value < max_value if strict_max else metric_value <= max_value
         else:
             below_max = True
 

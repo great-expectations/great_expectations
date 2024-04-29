@@ -113,10 +113,7 @@ class TableHead(TableMetricProvider):
                 if metric_value_kwargs.get("n_rows") is not None
                 else cls.default_kwarg_values["n_rows"]
             )
-            if n_rows >= 0:
-                rows = df.head(n=n_rows)
-            else:
-                rows = df.head(n=df.count() + n_rows)
+            rows = df.head(n=n_rows) if n_rows >= 0 else df.head(n=df.count() + n_rows)
 
         rows = [element.asDict() for element in rows]
         df = pd.DataFrame(data=rows)  # type: ignore[assignment]

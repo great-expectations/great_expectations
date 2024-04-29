@@ -60,10 +60,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         # The specific way we render the render_object is contingent on the type of the object
         render_fn: Callable
-        if isinstance(render_object, list):
-            render_fn = cls._render_list
-        else:
-            render_fn = cls._render_other
+        render_fn = cls._render_list if isinstance(render_object, list) else cls._render_other
 
         result = render_fn(
             render_object,

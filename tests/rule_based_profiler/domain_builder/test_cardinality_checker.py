@@ -135,10 +135,7 @@ def test_exhaustively_cardinality_within_limit_for_all_supported_cardinality_lim
     )
     if isinstance(cardinality_limit_mode, AbsoluteCardinalityLimit):
         cardinality_limit = cardinality_limit_mode.max_unique_values
-        if cardinality_limit > 0:
-            passing_cardinality = cardinality_limit - 1
-        else:
-            passing_cardinality = 0
+        passing_cardinality = cardinality_limit - 1 if cardinality_limit > 0 else 0
         failing_cardinality = cardinality_limit + 1
     elif isinstance(cardinality_limit_mode, RelativeCardinalityLimit):
         cardinality_limit = cardinality_limit_mode.max_proportion_unique

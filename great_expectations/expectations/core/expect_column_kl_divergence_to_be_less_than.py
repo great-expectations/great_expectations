@@ -579,10 +579,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
             else:
                 observed_value = kl_divergence
 
-            if threshold is None:
-                success = True
-            else:
-                success = kl_divergence <= threshold
+            success = True if threshold is None else kl_divergence <= threshold
 
             return_obj = {
                 "success": success,
@@ -785,10 +782,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
             else:
                 observed_value = kl_divergence
 
-            if threshold is None:
-                success = True
-            else:
-                success = kl_divergence <= threshold
+            success = True if threshold is None else kl_divergence <= threshold
 
             return_obj = {
                 "success": success,

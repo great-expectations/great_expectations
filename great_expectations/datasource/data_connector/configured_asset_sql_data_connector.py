@@ -489,10 +489,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             "include_schema_name", self.include_schema_name
         )
 
-        if schema_name is not None and include_schema_name:
-            schema_name = f"{schema_name}."
-        else:
-            schema_name = ""
+        schema_name = f"{schema_name}." if schema_name is not None and include_schema_name else ""
 
         data_asset_name: str = f"{schema_name}{data_asset_name}"
 

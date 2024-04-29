@@ -846,10 +846,7 @@ class CloudDataContext(SerializableDataContext):
         **kwargs,
     ) -> ExpectationSuite:
         cloud_id: str | None
-        if expectation_suite.id:
-            cloud_id = expectation_suite.id
-        else:
-            cloud_id = None
+        cloud_id = expectation_suite.id if expectation_suite.id else None
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,

@@ -122,7 +122,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     ) -> Union[str, Union[List[str], Set[str]]]:
         return self._candidate_regexes
 
-    def _build_parameters(  # noqa: C901
+    def _build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -175,10 +175,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_values = metric_values[:, 0]
 
         nonnull_count: int
-        if pd.isnull(metric_values).any():
-            nonnull_count = 0
-        else:
-            nonnull_count = sum(metric_values)
+        nonnull_count = 0 if pd.isnull(metric_values).any() else sum(metric_values)
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.  # noqa: E501
         candidate_regexes: Union[

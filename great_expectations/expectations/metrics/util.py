@@ -772,7 +772,7 @@ def verify_column_names_exist(
     )
 
 
-def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noqa: C901
+def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
     column_names: List[str] | str,
     batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',  # noqa: E501
@@ -791,10 +791,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(  # noq
         List of tuples having mapping from string-valued column name to typed column name; None if "verify_only" is set.
     """  # noqa: E501
     column_names_list: List[str]
-    if isinstance(column_names, list):
-        column_names_list = column_names
-    else:
-        column_names_list = [column_names]
+    column_names_list = column_names if isinstance(column_names, list) else [column_names]
 
     def _get_normalized_column_name_mapping_if_exists(
         column_name: str,

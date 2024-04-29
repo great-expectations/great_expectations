@@ -208,10 +208,7 @@ def build_continuous_partition_object(
             See :ref:`partition_object`.
     """  # noqa: E501
     bins = dataset.get_column_partition(column, bins, n_bins, allow_relative_error)
-    if isinstance(bins, np.ndarray):
-        bins = bins.tolist()
-    else:
-        bins = list(bins)
+    bins = bins.tolist() if isinstance(bins, np.ndarray) else list(bins)
     weights = list(
         np.array(dataset.get_column_hist(column, tuple(bins)))
         / dataset.get_column_nonnull_count(column)

@@ -56,10 +56,7 @@ def get_user_friendly_error_message(
 
     try:
         error_json: ErrorPayload = http_exc.response.json()
-        if isinstance(error_json, list):
-            errors = error_json
-        else:
-            errors = error_json.get("errors")
+        errors = error_json if isinstance(error_json, list) else error_json.get("errors")
         if errors:
             support_message.append(json.dumps(errors))
 

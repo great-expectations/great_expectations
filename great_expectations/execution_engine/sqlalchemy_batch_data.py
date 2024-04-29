@@ -198,7 +198,7 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(  # noqa: C901, PLR0912, PLR0915
+    def _create_temporary_table(  # noqa: C901, PLR0912
         self,
         dialect: GXSqlDialect,
         query: str,
@@ -252,10 +252,7 @@ class SqlAlchemyBatchData(BatchData):
             if isinstance(query, sa.dialects.mssql.base.MSSQLCompiler):
                 query = query.string  # extracting string from MSSQLCompiler object
 
-            if "from" in query:
-                strsep = "from"
-            else:
-                strsep = "FROM"
+            strsep = "from" if "from" in query else "FROM"
             querymod = query.split(strsep, maxsplit=1)
             stmt = f"{querymod[0]}into {{temp_table_name}} from{querymod[1]}".format(
                 temp_table_name=temp_table_name
