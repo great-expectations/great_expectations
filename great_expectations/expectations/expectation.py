@@ -366,7 +366,7 @@ class Expectation(metaclass=MetaExpectation):
         expectation_type: str = camel_to_snake(cls.__name__)
 
         for candidate_renderer_fn_name in dir(cls):
-            attr_obj: Callable = getattr(cls, candidate_renderer_fn_name, None)
+            attr_obj: Callable | None = getattr(cls, candidate_renderer_fn_name, None)
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
             register_renderer(
