@@ -107,18 +107,6 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
-        reason="ValidationOperators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
-        filepath=pathlib.Path(
-            "great_expectations/validation_operators/types/validation_operator_result.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
-        reason="ValidationOperators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
-        filepath=pathlib.Path(
-            "great_expectations/validation_operators/validation_operators.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
         reason="ValidationActions are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
         name="run",
         filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
@@ -334,7 +322,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="False match for datasource self_check",
         name="self_check",
         filepath=pathlib.Path(
-            "great_expectations/data_context/store/validations_store.py"
+            "great_expectations/data_context/store/validation_results_store.py"
         ),
     ),
     IncludeExcludeDefinition(

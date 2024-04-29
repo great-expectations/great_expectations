@@ -406,9 +406,11 @@ def list_registered_expectation_implementations(
         expectation_name,
         expectation_implementation,
     ) in _registered_expectations.items():
-        if expectation_root is None:
-            registered_expectation_implementations.append(expectation_name)
-        elif expectation_root and issubclass(expectation_implementation, expectation_root):
+        if (
+            expectation_root is None
+            or expectation_root
+            and issubclass(expectation_implementation, expectation_root)
+        ):
             registered_expectation_implementations.append(expectation_name)
 
     return registered_expectation_implementations

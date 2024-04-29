@@ -17,7 +17,7 @@ plugins_directory: plugins/
 
 expectations_store_name: expectations_store
 suite_parameter_store_name: suite_parameter_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 
 stores:
   expectations_store:
@@ -25,14 +25,14 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
   fixture_validation_results_store:
-    class_name: ValidationsStore
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: fixtures/validations
@@ -57,7 +57,7 @@ data_docs_sites:
   team_site:
     # "team_site" is meant to support the "shared source of truth for a team" use case.
     # By default only the expectations section is enabled.
-    #  Users have to configure the profiling and the validations sections (and the corresponding validations_store and validations_store attributes based on the team's decisions where these are stored (a local filesystem or S3).
+    #  Users have to configure the profiling and the validations sections (and the corresponding validation_results_store and validation_results_store attributes based on the team's decisions where these are stored (a local filesystem or S3).
     # Reach out on Slack (https://greatexpectations.io/slack>) if you would like to discuss the best way to configure a team site.
 
     class_name: SiteBuilder
@@ -67,34 +67,3 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/team_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-
-validation_operators:
-  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
-  default:
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-      # Uncomment the notify_slack action below to send notifications during evaluation
-      # - name: notify_slack
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     slack_webhook: ${validation_notification_slack_webhook}
-      #     notify_on: all
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
-  action_list_operator:
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          target_store_name: validations_store
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction

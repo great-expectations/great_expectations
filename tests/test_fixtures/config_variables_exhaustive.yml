@@ -18,7 +18,7 @@ k:
 l: plugins/
 m: suite_parameter_store
 n: expectations_store
-o: validations_store
+o: validation_results_store
 p: SiteBuilder
 q: true
 r: TupleFilesystemStoreBackend
@@ -29,11 +29,11 @@ v: TupleFilesystemStoreBackend
 w: expectations/
 x: great_expectations.data_context.store
 y: SuiteParameterStore
-z: ValidationsStore
+z: ValidationResultsStore
 aa: ActionListValidationOperator
 bb: store_validation_result
 cc: StoreValidationResultAction
-dd: validations_store
+dd: validation_results_store
 ee: notify_slack
 ff: SlackNotificationAction
 gg: www.fake-slack-webhook.net

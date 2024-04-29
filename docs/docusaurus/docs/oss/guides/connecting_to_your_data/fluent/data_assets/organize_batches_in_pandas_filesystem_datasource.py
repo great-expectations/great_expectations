@@ -20,7 +20,7 @@ import great_expectations as gx
 context = gx.get_context()
 
 # data_directory is the full path to a directory containing csv files
-context.sources.add_pandas_filesystem(
+context.data_sources.add_pandas_filesystem(
     name="my_datasource", base_directory=data_directory
 )
 
@@ -39,11 +39,6 @@ my_batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.c
 my_asset = my_datasource.add_csv_asset(
     name="my_taxi_data_asset", batching_regex=my_batching_regex
 )
-# </snippet>
-
-# Python
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/data_assets/organize_batches_in_pandas_filesystem_datasource.py add_sorters">
-my_asset = my_asset.add_sorters(["+year", "-month"])
 # </snippet>
 
 assert my_asset.get_batch_parameters_keys() == ("year", "month", "path")

@@ -81,12 +81,6 @@ def mock_cloud_data_context() -> CloudDataContext:
         )
 
     assert isinstance(mock_cloud_data_context, CloudDataContext)
-    assert mock_cloud_data_context.variables.include_rendered_content.globally is True
-    assert mock_cloud_data_context.variables.include_rendered_content.expectation_suite is True
-    assert (
-        mock_cloud_data_context.variables.include_rendered_content.expectation_validation_result
-        is True
-    )
     return mock_cloud_data_context
 
 
@@ -119,7 +113,7 @@ def mock_cloud_pandas_datasource(
                 return_value=mock_get_response,
             ):
                 mock_cloud_pandas_datasource: PandasDatasource = (
-                    mock_cloud_data_context.sources.add_pandas(name=datasource_name)
+                    mock_cloud_data_context.data_sources.add_pandas(name=datasource_name)
                 )
 
     assert isinstance(mock_cloud_pandas_datasource, PandasDatasource)

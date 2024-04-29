@@ -17,17 +17,13 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 from ruamel.yaml import YAML
 
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
-from great_expectations.checkpoint import Checkpoint
 from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.base import (
-    CheckpointConfig,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler import RuleBasedProfiler  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
     from ruamel.yaml.comments import CommentedMap
@@ -52,7 +48,7 @@ class _YamlConfigValidator:
 
     TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES = [
         "ExpectationsStore",
-        "ValidationsStore",
+        "ValidationResultsStore",
         "HtmlSiteStore",
         "SuiteParameterStore",
         "MetricStore",
@@ -76,9 +72,6 @@ class _YamlConfigValidator:
         "InferredAssetSqlDataConnector",
         "ConfiguredAssetSqlDataConnector",
     ]
-    TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES = [
-        "Checkpoint",
-    ]
     TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
         "RuleBasedProfiler",
     ]
@@ -92,7 +85,6 @@ class _YamlConfigValidator:
         TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
     )
 
@@ -186,12 +178,6 @@ class _YamlConfigValidator:
                     name=name,
                     class_name=class_name,
                     config=config,  # Uses original config as substitutions are done downstream
-                )
-            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
-                instantiated_class = self._test_instantiation_of_checkpoint_from_yaml_config(
-                    name=name,
-                    class_name=class_name,
-                    config=config_with_substitutions,
                 )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
                 instantiated_class = self._test_instantiation_of_data_connector_from_yaml_config(
@@ -298,38 +284,6 @@ class _YamlConfigValidator:
                 config=datasource_config
             )
         )
-
-        return instantiated_class
-
-    def _test_instantiation_of_checkpoint_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
-    ) -> Checkpoint:
-        """
-        Helper to create checkpoint instance and update usage stats payload.
-        See `test_yaml_config` for more details.
-        """
-        print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
-
-        checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
-
-        checkpoint_config: Union[CheckpointConfig, dict]
-
-        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
-        checkpoint_config_dict: dict[str, JSONValues] = checkpoint_config.to_json_dict()
-        checkpoint_config_dict.update({"name": checkpoint_name})
-
-        checkpoint_class_args: dict = filter_properties_dict(  # type: ignore[assignment]
-            properties=checkpoint_config_dict,
-            delete_fields={"class_name", "module_name"},
-            clean_falsy=True,
-        )
-
-        if class_name == "Checkpoint":
-            instantiated_class = Checkpoint(
-                data_context=self._data_context, **checkpoint_class_args
-            )
-        else:
-            raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')  # noqa: TRY003
 
         return instantiated_class
 

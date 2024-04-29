@@ -11,14 +11,9 @@ from great_expectations.expectations.metrics import (
 def is_valid_hawaii_zip(zip: str):
     list_of_dicts_of_hawaii_zips = zipcodes.filter_by(state="HI")
     list_of_hawaii_zips = [d["zip_code"] for d in list_of_dicts_of_hawaii_zips]
-    if len(zip) > 10:
+    if len(zip) > 10 or type(zip) != str:  # noqa: E721
         return False
-    elif type(zip) != str:  # noqa: E721
-        return False
-    elif zip in list_of_hawaii_zips:
-        return True
-    else:
-        return False
+    return zip in list_of_hawaii_zips
 
 
 # This class defines a Metric to support your Expectation.

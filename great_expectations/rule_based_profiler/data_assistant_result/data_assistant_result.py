@@ -380,11 +380,7 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_metric_expectation_map(self) -> dict[tuple[str, ...], str]:
         if not all(
-            [
-                isinstance(metric_names, str)  # noqa: PLR1701
-                or isinstance(metric_names, tuple)
-            ]
-            for metric_names in self.metric_expectation_map.keys()
+            [isinstance(metric_names, (str, tuple))] for metric_names in self.metric_expectation_map
         ):
             raise gx_exceptions.DataAssistantResultExecutionError(  # noqa: TRY003
                 "All metric_expectation_map keys must be of type str or tuple."
@@ -3027,7 +3023,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         ]
 
         table_based_metric_names: Set[tuple[str, ...]] = set()
-        for metrics in metric_expectation_map.keys():
+        for metrics in metric_expectation_map:
             if all(metric.startswith("table") for metric in metrics):
                 table_based_metric_names.add(tuple(metrics))
 
@@ -3124,7 +3120,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             return [], []
 
         column_based_metric_names: Set[tuple[str, ...]] = set()
-        for metrics in metric_expectation_map.keys():
+        for metrics in metric_expectation_map:
             if all(metric.startswith("column") for metric in metrics):
                 if plot_mode == PlotMode.DIAGNOSTIC:
                     column_based_metric_names.add(tuple(metrics))
@@ -3199,10 +3195,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             if exclude_column_names and column_name in exclude_column_names:
                 return False
 
-            if include_column_names and column_name not in include_column_names:
-                return False
-
-            return True
+            return not (include_column_names and column_name not in include_column_names)
 
         column_based_expectation_configurations: List[ExpectationConfiguration] = list(
             filter(
@@ -3231,10 +3224,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
             if exclude_column_names and column_name in exclude_column_names:
                 return False
 
-            if include_column_names and column_name not in include_column_names:
-                return False
-
-            return True
+            return not (include_column_names and column_name not in include_column_names)
 
         domains: Set[Domain] = set(filter(lambda m: _filter(m), list(attributed_metrics.keys())))
         filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {
@@ -3253,7 +3243,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         for domain, attributed_metric_values in attributed_metrics.items():
             filtered_attributed_metrics[domain] = {}
             for metric_name in metric_names:
-                if metric_name in attributed_metric_values.keys():
+                if metric_name in attributed_metric_values:
                     filtered_attributed_metrics[domain][metric_name] = attributed_metric_values[
                         metric_name
                     ]
@@ -3854,7 +3844,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""  # n
         metric_types: Dict[str, AltairDataTypes] = self.metric_types
         return {
             sanitize_parameter_name(name=metric, suffix=None)
-            for metric in metric_types.keys()
+            for metric in metric_types
             if metric_types[metric] == altair_type
         }
 

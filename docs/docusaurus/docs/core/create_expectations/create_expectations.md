@@ -1,12 +1,17 @@
 ---
 title: 'Create and manage Expectations and Expectation Suites'
 description: Create and manage Expectations and Expectation Suites.
+hide_feedback_survey: true
+hide_title: true
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
+import OverviewCard from '@site/src/components/OverviewCard';
 
-<p class="DocItem__header-description">Create, edit, and implement Expectations and Expectation Suites. An Expectation is a verifiable assertion about your data, and an  Expectation Suite is a collection of Expectations that describe the ideal state of a set of data.</p>
+<OverviewCard title={frontMatter.title}>
+  Create, edit, and implement Expectations and Expectation Suites. An Expectation is a verifiable assertion about your data, and an Expectation Suite is a collection of Expectations that describe the ideal state of a set of data.
+</OverviewCard>
 
 ## Manage Expectations
 

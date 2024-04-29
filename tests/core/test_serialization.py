@@ -10,26 +10,21 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-from great_expectations.checkpoint import Checkpoint
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
     AbstractConfig,
     AssetConfig,
-    CheckpointConfig,
-    CheckpointValidationDefinition,
     DataConnectorConfig,
     DatasourceConfig,
     ExecutionEngineConfig,
     assetConfigSchema,
-    checkpointConfigSchema,
     dataConnectorConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
-    filter_properties_dict,
     requires_lossy_conversion,
 )
 
@@ -45,53 +40,6 @@ def spark_schema(spark_session: pyspark.SparkSession) -> pyspark.types.StructTyp
             pyspark.types.StructField("a", pyspark.types.IntegerType(), True, None),
             pyspark.types.StructField("b", pyspark.types.IntegerType(), True, None),
         ]
-    )
-
-
-# The following fixtures are used by parameterized tests for serializing
-# Spark schemas. They follow the pattern described in:
-# https://miguendes.me/how-to-use-fixtures-as-arguments-in-pytestmarkparametrize
-@pytest.fixture
-def checkpoint_config_spark(
-    spark_session: pyspark.SparkSession,
-) -> CheckpointConfig:
-    return CheckpointConfig(
-        name="my_nested_checkpoint",
-        expectation_suite_name="users.delivery",
-        validations=[
-            CheckpointValidationDefinition(
-                batch_request={
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
-                    "batch_spec_passthrough": {"reader_options": {"header": True}},
-                },
-                id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
-            ),
-        ],
-    )
-
-
-@pytest.fixture
-def checkpoint_config_with_schema_spark(
-    spark_session: pyspark.SparkSession, spark_schema
-) -> CheckpointConfig:
-    return CheckpointConfig(
-        name="my_nested_checkpoint",
-        expectation_suite_name="users.delivery",
-        validations=[
-            CheckpointValidationDefinition(
-                batch_request={
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
-                    "batch_spec_passthrough": {"reader_options": {"schema": spark_schema}},
-                },
-                id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
-            ),
-        ],
     )
 
 
@@ -337,334 +285,6 @@ def test_batch_request_deepcopy():
     )
 
 
-@pytest.mark.filesystem
-def test_checkpoint_config_deepcopy():
-    nested_checkpoint_config = CheckpointConfig(
-        name="my_nested_checkpoint",
-        expectation_suite_name="users.delivery",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -2},
-                }
-            },
-        ],
-    )
-    nested_checkpoint: Checkpoint = Checkpoint(
-        **filter_properties_dict(
-            properties=nested_checkpoint_config.to_json_dict(),
-            delete_fields={"class_name", "module_name"},
-            clean_falsy=True,
-        ),
-    )
-    config_dict: dict = nested_checkpoint.config.to_json_dict()
-    config_dict_copy: dict = copy.deepcopy(config_dict)
-
-    assert deep_filter_properties_iterable(
-        properties=config_dict_copy,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=config_dict,
-        clean_falsy=True,
-    )
-
-
-@pytest.mark.parametrize(
-    "checkpoint_config,expected_serialized_checkpoint_config",
-    [
-        pytest.param(
-            CheckpointConfig(
-                name="my_nested_checkpoint",
-                expectation_suite_name="users.delivery",
-                validations=[
-                    CheckpointValidationDefinition(
-                        batch_request={
-                            "datasource_name": "my_datasource",
-                            "data_connector_name": "my_data_connector",
-                            "data_asset_name": "users",
-                            "data_connector_query": {"partition_index": -1},
-                        },
-                    ),
-                ],
-            ),
-            {
-                "action_list": [],
-                "batch_request": {},
-                "suite_parameters": {},
-                "expectation_suite_id": None,
-                "expectation_suite_name": "users.delivery",
-                "id": None,
-                "name": "my_nested_checkpoint",
-                "runtime_configuration": {},
-                "validations": [
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "my_data_connector",
-                            "data_connector_query": {
-                                "partition_index": -1,
-                            },
-                            "datasource_name": "my_datasource",
-                        },
-                    },
-                ],
-            },
-            id="config_without_any_ids",
-        ),
-        pytest.param(
-            CheckpointConfig(
-                name="my_nested_checkpoint",
-                default_validation_id="93e015ee-6405-4d5e-894c-741dc763f509",
-                expectation_suite_name="users.delivery",
-                validations=[
-                    CheckpointValidationDefinition(
-                        batch_request={
-                            "datasource_name": "my_datasource",
-                            "data_connector_name": "my_data_connector",
-                            "data_asset_name": "users",
-                            "data_connector_query": {"partition_index": -1},
-                        },
-                    ),
-                ],
-            ),
-            {
-                "action_list": [],
-                "batch_request": {},
-                "default_validation_id": "93e015ee-6405-4d5e-894c-741dc763f509",
-                "suite_parameters": {},
-                "expectation_suite_id": None,
-                "expectation_suite_name": "users.delivery",
-                "id": None,
-                "name": "my_nested_checkpoint",
-                "runtime_configuration": {},
-                "validations": [
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "my_data_connector",
-                            "data_connector_query": {
-                                "partition_index": -1,
-                            },
-                            "datasource_name": "my_datasource",
-                        },
-                    },
-                ],
-            },
-            id="config_with_top_level_validation_id",
-        ),
-        pytest.param(
-            CheckpointConfig(
-                name="my_nested_checkpoint",
-                default_validation_id="e3ff7a3a-3529-4c2a-be22-598493269680",
-                expectation_suite_name="users.delivery",
-                validations=[
-                    CheckpointValidationDefinition(
-                        batch_request={
-                            "datasource_name": "my_datasource",
-                            "data_connector_name": "my_data_connector",
-                            "data_asset_name": "users",
-                            "data_connector_query": {"partition_index": -1},
-                        },
-                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
-                    ),
-                ],
-            ),
-            {
-                "action_list": [],
-                "batch_request": {},
-                "default_validation_id": "e3ff7a3a-3529-4c2a-be22-598493269680",
-                "suite_parameters": {},
-                "expectation_suite_id": None,
-                "expectation_suite_name": "users.delivery",
-                "id": None,
-                "name": "my_nested_checkpoint",
-                "runtime_configuration": {},
-                "validations": [
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "my_data_connector",
-                            "data_connector_query": {
-                                "partition_index": -1,
-                            },
-                            "datasource_name": "my_datasource",
-                        },
-                        "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
-                    },
-                ],
-            },
-            id="config_with_nested_validation_id",
-        ),
-        pytest.param(
-            CheckpointConfig(
-                name="my_nested_checkpoint",
-                expectation_suite_name="users.delivery",
-                validations=[
-                    CheckpointValidationDefinition(
-                        batch_request={
-                            "datasource_name": "my_datasource",
-                            "data_connector_name": "my_data_connector",
-                            "data_asset_name": "users",
-                            "data_connector_query": {"partition_index": -1},
-                        },
-                        id="06871341-f028-4f1f-b8e8-a559ab9f62e1",
-                    ),
-                ],
-            ),
-            {
-                "action_list": [],
-                "batch_request": {},
-                "suite_parameters": {},
-                "expectation_suite_id": None,
-                "expectation_suite_name": "users.delivery",
-                "id": None,
-                "name": "my_nested_checkpoint",
-                "runtime_configuration": {},
-                "validations": [
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "my_data_connector",
-                            "data_connector_query": {
-                                "partition_index": -1,
-                            },
-                            "datasource_name": "my_datasource",
-                        },
-                        "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
-                    },
-                ],
-            },
-            id="config_with_top_level_and_nested_validation_ids",
-        ),
-    ],
-)
-@pytest.mark.unit
-def test_checkpoint_config_and_nested_objects_are_serialized(
-    checkpoint_config: CheckpointConfig, expected_serialized_checkpoint_config: dict
-) -> None:
-    """CheckpointConfig and nested objects like CheckpointValidationDefinition should be serialized appropriately with/without optional params."""  # noqa: E501
-    observed_dump = checkpointConfigSchema.dump(checkpoint_config)
-    assert observed_dump == expected_serialized_checkpoint_config
-
-    loaded_data = checkpointConfigSchema.load(observed_dump)
-    observed_load = CheckpointConfig(**loaded_data)
-    assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
-        checkpoint_config
-    )
-
-
-@pytest.mark.parametrize(
-    "checkpoint_config_fixture_name,expected_serialized_checkpoint_config",
-    [
-        pytest.param(
-            "checkpoint_config_spark",
-            {
-                "action_list": [],
-                "batch_request": {},
-                "suite_parameters": {},
-                "expectation_suite_id": None,
-                "expectation_suite_name": "users.delivery",
-                "id": None,
-                "name": "my_nested_checkpoint",
-                "runtime_configuration": {},
-                "validations": [
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "my_data_connector",
-                            "data_connector_query": {
-                                "partition_index": -1,
-                            },
-                            "batch_spec_passthrough": {"reader_options": {"header": True}},
-                            "datasource_name": "my_datasource",
-                        },
-                        "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
-                    },
-                ],
-            },
-            id="config_no_schema",
-        ),
-        pytest.param(
-            "checkpoint_config_with_schema_spark",
-            {
-                "action_list": [],
-                "batch_request": {},
-                "suite_parameters": {},
-                "expectation_suite_id": None,
-                "expectation_suite_name": "users.delivery",
-                "id": None,
-                "name": "my_nested_checkpoint",
-                "runtime_configuration": {},
-                "validations": [
-                    {
-                        "batch_request": {
-                            "data_asset_name": "users",
-                            "data_connector_name": "my_data_connector",
-                            "data_connector_query": {
-                                "partition_index": -1,
-                            },
-                            "batch_spec_passthrough": {
-                                "reader_options": {
-                                    "schema": {
-                                        "fields": [
-                                            {
-                                                "metadata": {},
-                                                "name": "a",
-                                                "nullable": True,
-                                                "type": "integer",
-                                            },
-                                            {
-                                                "metadata": {},
-                                                "name": "b",
-                                                "nullable": True,
-                                                "type": "integer",
-                                            },
-                                        ],
-                                        "type": "struct",
-                                    }
-                                }
-                            },
-                            "datasource_name": "my_datasource",
-                        },
-                        "id": "06871341-f028-4f1f-b8e8-a559ab9f62e1",
-                    },
-                ],
-            },
-            id="config_with_schema",
-        ),
-    ],
-)
-@pytest.mark.spark
-def test_checkpoint_config_and_nested_objects_are_serialized_spark(
-    checkpoint_config_fixture_name: str,
-    expected_serialized_checkpoint_config: dict,
-    spark_session: pyspark.SparkSession,
-    request: FixtureRequest,
-):
-    # when using a fixture value in a parmeterized test, we need to call
-    # request.getfixturevalue()
-    checkpoint_config = request.getfixturevalue(checkpoint_config_fixture_name)
-
-    observed_dump = checkpointConfigSchema.dump(checkpoint_config)
-    assert observed_dump == expected_serialized_checkpoint_config
-    loaded_data = checkpointConfigSchema.load(observed_dump)
-    observed_load = CheckpointConfig(**loaded_data)
-    assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
-        checkpoint_config
-    )
-
-
 @pytest.mark.parametrize(
     "datasource_config,expected_serialized_datasource_config",
     [
@@ -808,11 +428,6 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
 
     observed_dump = datasourceConfigSchema.dump(obj=datasource_config)
     assert observed_dump == expected_serialized_datasource_config
-    loaded_data = datasourceConfigSchema.load(observed_dump)
-    observed_load = DatasourceConfig(**loaded_data)
-    assert checkpointConfigSchema.dump(observed_load) == checkpointConfigSchema.dump(
-        datasource_config
-    )
 
 
 @pytest.mark.parametrize(

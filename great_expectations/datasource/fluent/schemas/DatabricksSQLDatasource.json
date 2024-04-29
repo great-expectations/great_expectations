@@ -374,8 +374,8 @@
                 "date_format_string"
             ]
         },
-        "BatchDefinition": {
-            "title": "BatchDefinition",
+        "BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__": {
+            "title": "BatchDefinition[Union[PartitionerColumnValue, PartitionerMultiColumnValue, PartitionerDividedInteger, PartitionerModInteger, PartitionerYear, PartitionerYearAndMonth, PartitionerYearAndMonthAndDay, PartitionerDatetimePart, PartitionerConvertedDatetime]]",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
@@ -418,11 +418,6 @@
                             "$ref": "#/definitions/PartitionerConvertedDatetime"
                         }
                     ]
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -467,7 +462,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
                 },
                 "table_name": {
@@ -524,7 +519,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
                 },
                 "query": {

@@ -236,26 +236,26 @@ IGNORED_VIOLATIONS = [
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py build_docs",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py create_checkpoint",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py existing_expectations_store",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py existing_validations_store",
+    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py existing_validation_results_store",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_batch_list",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_batch_request",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_validator",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py imports",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py new_expectations_store",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py new_validations_store",
+    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py new_validation_results_store",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py run checkpoint",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py save_expectations",
-    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py set_new_validations_store",
+    "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py set_new_validation_results_store",
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py add_data_docs_store",
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py create_checkpoint",
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py existing_expectations_store",
-    "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py existing_validations_store",
+    "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py existing_validation_results_store",  # noqa: E501
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py imports",
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py new_expectations_store",
-    "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py new_validations_store",
+    "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py new_validation_results_store",  # noqa: E501
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py run checkpoint",
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py save_expectations",
-    "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py set_new_validations_store",
+    "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py set_new_validation_results_store",  # noqa: E501
     "docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py validator_calls",
     "docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py choose context_root_dir",  # noqa: E501
     "docs/docusaurus/docs/snippets/databricks_deployment_patterns_dataframe_python_configs.py imports",  # noqa: E501
@@ -344,8 +344,8 @@ IGNORED_VIOLATIONS = [
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_GCS_store",  # noqa: E501
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_store_name",  # noqa: E501
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml gs_site",
-    "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store",  # noqa: E501
-    "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_store_name",  # noqa: E501
+    "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validation_results_GCS_store",  # noqa: E501
+    "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validation_results_store_name",  # noqa: E501
 ]
 
 

@@ -13,14 +13,9 @@ def is_valid_country(country: str):
     dict_of_countries = geocache.get_countries()
     list_of_countries = [d for d in dict_of_countries.values()]
     list_of_country_names = [item["name"] for item in list_of_countries]
-    if len(country) > 252:
+    if len(country) > 252 or type(country) != str:  # noqa: E721
         return False
-    elif type(country) != str:  # noqa: E721
-        return False
-    elif country in list_of_country_names:
-        return True
-    else:
-        return False
+    return country in list_of_country_names
 
 
 # This class defines a Metric to support your Expectation.

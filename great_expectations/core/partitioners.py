@@ -1,4 +1,7 @@
-from typing import List, Literal, Union
+from __future__ import annotations
+
+import re
+from typing import Final, List, Literal, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
@@ -84,3 +87,30 @@ Partitioner = Union[
     PartitionerDatetimePart,
     PartitionerConvertedDatetime,
 ]
+
+
+class PartitionerYearly(pydantic.BaseModel):
+    regex: re.Pattern
+    param_names = ["year"]
+    sort_ascending: bool = True
+
+
+class PartitionerMonthly(pydantic.BaseModel):
+    regex: re.Pattern
+    param_names = ["year", "month"]
+    sort_ascending: bool = True
+
+
+class PartitionerDaily(pydantic.BaseModel):
+    regex: re.Pattern
+    param_names = ["year", "month", "day"]
+    sort_ascending: bool = True
+
+
+class PartitionerPath(pydantic.BaseModel):
+    regex: re.Pattern
+    param_names: Final[List[str]] = []
+    sort_ascending: bool = True
+
+
+RegexPartitioner = Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily, PartitionerPath]

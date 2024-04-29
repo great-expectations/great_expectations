@@ -18,10 +18,7 @@ def is_ip_asn_country_code_in_set(addr: str, country_codes) -> bool:
     obj = IPWhois(addr)
     res = obj.lookup_rdap()
     asn_country_code = res["asn_country_code"].lower()
-    if asn_country_code in country_codes:
-        return True
-    else:
-        return False
+    return asn_country_code in country_codes
 
 
 # This class defines a Metric to support your Expectation.

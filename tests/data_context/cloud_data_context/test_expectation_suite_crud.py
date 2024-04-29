@@ -540,11 +540,9 @@ def test_expectation_suite_gx_cloud_identifier_requires_id_or_resource_name(
         context.expectations_store._validate_key(key=key)
 
 
-@pytest.mark.big
-def test_get_expectation_suite_include_rendered_content_prescriptive(
-    empty_data_context,
-):
-    context = empty_data_context
+@pytest.mark.cloud
+def test_get_expectation_suite_include_rendered_content_prescriptive(empty_cloud_data_context):
+    context = empty_cloud_data_context
 
     expectation_suite_name = "validating_taxi_data"
 
@@ -560,14 +558,6 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
     context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name,
         expectations=[expectation_configuration],
-    )
-
-    expectation_suite_exclude_rendered_content: ExpectationSuite = context.suites.get(
-        name=expectation_suite_name,
-    )
-    assert (
-        expectation_suite_exclude_rendered_content.expectation_configurations[0].rendered_content
-        is None
     )
 
     expected_expectation_configuration_prescriptive_rendered_content = [
@@ -597,7 +587,6 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
 
     expectation_suite_include_rendered_content: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name,
-        include_rendered_content=True,
     )
     assert (
         expectation_suite_include_rendered_content.expectation_configurations[0].rendered_content

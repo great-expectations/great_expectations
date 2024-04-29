@@ -17,10 +17,7 @@ from great_expectations.expectations.metrics import (
 def is_btc_tx_confirmed(tx: str) -> bool:
     try:
         cnt = blockcypher.get_num_confirmations(tx)
-        if cnt > 0:
-            return True
-        else:
-            return False
+        return cnt > 0
     except Exception as e:
         print(e)
         return False

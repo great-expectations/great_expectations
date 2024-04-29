@@ -29,7 +29,7 @@ def file_context(empty_data_context: AbstractDataContext) -> AbstractDataContext
 @pytest.fixture
 def file_context_with_assets(file_context: AbstractDataContext) -> AbstractDataContext:
     """Context with a datasource that has 2 assets. one of the assets has a batch config."""
-    datasource = file_context.sources.add_pandas(DATASOURCE_NAME)
+    datasource = file_context.data_sources.add_pandas(DATASOURCE_NAME)
     datasource.add_csv_asset(EMPTY_DATA_ASSET_NAME, "taxi.csv")  # type: ignore [arg-type]
     datasource.add_csv_asset(
         DATA_ASSET_WITH_BATCH_DEFINITION_NAME,
@@ -45,7 +45,7 @@ def file_context_with_assets(file_context: AbstractDataContext) -> AbstractDataC
 
 @pytest.fixture
 def cloud_context(empty_cloud_context_fluent: CloudDataContext) -> AbstractDataContext:
-    datasource = empty_cloud_context_fluent.sources.add_pandas(DATASOURCE_NAME)
+    datasource = empty_cloud_context_fluent.data_sources.add_pandas(DATASOURCE_NAME)
     datasource.add_csv_asset(EMPTY_DATA_ASSET_NAME, "taxi.csv")  # type: ignore [arg-type]
     datasource.add_csv_asset(
         DATA_ASSET_WITH_BATCH_DEFINITION_NAME,
@@ -266,7 +266,7 @@ def test_delete_batch_definition__persists(
 
 @pytest.mark.unit
 def test_delete_batch_definition__unsaved_batch_definition(empty_data_asset: DataAsset):
-    batch_definition = BatchDefinition(name="uh oh")
+    batch_definition = BatchDefinition[None](name="uh oh")
 
     with pytest.raises(ValueError, match="does not exist"):
         empty_data_asset.delete_batch_definition(batch_definition)

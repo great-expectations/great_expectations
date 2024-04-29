@@ -8,8 +8,8 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -28,7 +28,7 @@ stores:
       suppress_store_backend_id: true
       base_directory: profilers/
 expectations_store_name: expectations_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 data_docs_sites:
@@ -48,10 +48,6 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-include_rendered_content:
-  expectation_validation_result: false
-  globally: false
-  expectation_suite: false
 fluent_datasources:
   taxi_datasource:
     type: pandas_filesystem

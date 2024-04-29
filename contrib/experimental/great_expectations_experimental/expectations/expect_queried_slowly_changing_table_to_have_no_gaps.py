@@ -221,7 +221,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
             threshold = self._get_default_value("threshold")
 
         try:
-            assert isinstance(threshold, int) or isinstance(threshold, float)
+            assert isinstance(threshold, (int, float))
             assert threshold >= 0
             assert threshold <= 1
 

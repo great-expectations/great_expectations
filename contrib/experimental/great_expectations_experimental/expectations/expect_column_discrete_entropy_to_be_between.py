@@ -110,9 +110,7 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
             {"table.row_count": MetricConfiguration("table.row_count", table_domain_kwargs)}
         )
 
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine) or isinstance(
-            execution_engine, SparkDFExecutionEngine
-        ):
+        if isinstance(execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)):
             dependencies["column_values.nonnull.count"] = MetricConfiguration(
                 "column_values.nonnull.count", metric.metric_domain_kwargs
             )

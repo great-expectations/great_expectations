@@ -1,13 +1,13 @@
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.store.checkpoint_store import (
-    V1CheckpointStore as CheckpointStore,
+    CheckpointStore,
 )
 from great_expectations.exceptions import DataContextError
 
@@ -163,7 +163,7 @@ def test_checkpoint_factory_add_success_cloud(empty_cloud_context_fluent):
 def _test_checkpoint_factory_add_success(context):
     # Arrange
     name = "test-checkpoint"
-    ds = context.sources.add_pandas("my_datasource")
+    ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_def = asset.add_batch_definition("my_batch_definition")
     suite = ExpectationSuite(name="my_suite")
@@ -197,7 +197,7 @@ def test_checkpoint_factory_delete_success_cloud(empty_cloud_context_fluent):
 def _test_checkpoint_factory_delete_success(context):
     # Arrange
     name = "test-checkpoint"
-    ds = context.sources.add_pandas("my_datasource")
+    ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")
     batch_def = asset.add_batch_definition("my_batch_definition")
     suite = ExpectationSuite(name="my_suite")
@@ -234,7 +234,7 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
     context: AbstractDataContext = request.getfixturevalue(context_fixture_name)
 
     # Arrange
-    ds = context.sources.add_pandas("my_datasource")
+    ds = context.data_sources.add_pandas("my_datasource")
     asset = ds.add_csv_asset("my_asset", "data.csv")  # type: ignore[arg-type]
     batch_def = asset.add_batch_definition("my_batch_definition")
     suite = ExpectationSuite(name="my_suite")
