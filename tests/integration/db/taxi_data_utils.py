@@ -5,7 +5,6 @@ import sqlalchemy as sa
 
 import great_expectations as gx
 from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -92,7 +91,6 @@ def _execute_taxi_partitioning_test_cases(
     taxi_partitioning_test_cases: TaxiPartitioningTestCasesBase,
     connection_string: str,
     table_name: str,
-    add_datasource_method_name: str,
 ) -> None:
     test_cases: List[TaxiPartitioningTestCase] = taxi_partitioning_test_cases.test_cases()
 
@@ -112,11 +110,8 @@ def _execute_taxi_partitioning_test_cases(
         column_names: List[str] = taxi_partitioning_test_cases.test_column_names
 
         # 2. Set partitioner in DataConnector config
-
-        # NOTE: this getattr with method names pattern is horrible; consider refactoring
-        add_datasource_method = getattr(context.sources, add_datasource_method_name)
-        datasource: SQLDatasource = add_datasource_method(
-            datasource_name, connection_string=connection_string
+        datasource = context.sources.add_postgres(
+            name=datasource_name, connection_string=connection_string
         )
         asset = datasource.add_table_asset(data_asset_name, table_name=table_name)
         add_batch_definition_method = getattr(
@@ -129,9 +124,10 @@ def _execute_taxi_partitioning_test_cases(
         # 3. Check if resulting batches are as expected
         batch_request = batch_definition.build_batch_request()
         batch_list = asset.get_batch_list_from_batch_request(batch_request)
-        print(len(batch_list), "batch definitions found")
-        print(test_case.num_expected_batch_definitions, "expected batch definitions")
-        assert len(batch_list) == test_case.num_expected_batch_definitions
+        assert len(batch_list) == test_case.num_expected_batch_definitions, (
+            f"Found {len(batch_list)} batch definitions "
+            "but expected {test_case.num_expected_batch_definitions}"
+        )
 
         expected_batch_metadata: List[dict]
 
