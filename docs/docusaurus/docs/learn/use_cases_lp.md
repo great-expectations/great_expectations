@@ -2,11 +2,7 @@
 sidebar_label: 'Use cases'
 title: 'Use cases'
 hide_title: true
-id: use_cases
 description: Example use cases and implementations with GX Cloud and GX OSS.
-slug: '/learn/'
-displayed_sidebar: 'Use cases'
-hide_table_of_contents: true
 hide_feedback_survey: true
 ---
 
