@@ -693,6 +693,11 @@ module.exports = {
         type: 'category',
         label: 'Use cases',
         link: { type: 'doc', id: 'learn/use_cases_lp' },
+        items: [
+          'learn/use_case_1',
+          'learn/use_case_2',
+          'learn/use_case_3',
+        ]
       },
   ],
 }
