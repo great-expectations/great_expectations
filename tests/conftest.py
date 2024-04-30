@@ -1767,22 +1767,6 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
         os.path.join(context_path, "plugins"),  # noqa: PTH118
         exist_ok=True,
     )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
-    )
     return get_context(context_root_dir=context_path)
 
 
@@ -1815,22 +1799,6 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
         os.path.join(context_path, "plugins"),  # noqa: PTH118
         exist_ok=True,
     )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
-    )
     return get_context(context_root_dir=context_path, cloud_mode=False)
 
 
@@ -1862,22 +1830,6 @@ def data_context_simple_expectation_suite(tmp_path_factory):
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "plugins"),  # noqa: PTH118
         exist_ok=True,
-    )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
     )
     return get_context(context_root_dir=context_path)
 
