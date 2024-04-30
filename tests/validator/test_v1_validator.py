@@ -7,7 +7,6 @@ import pytest
 import great_expectations.expectations as gxe
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.partitioners import PartitionerYearAndMonthAndDay
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -68,19 +67,14 @@ def fds_data_asset_with_event_type_partitioner(
 def batch_definition(
     fds_data_asset: DataAsset,
 ) -> BatchDefinition:
-    batch_definition = BatchDefinition[None](name="test_batch_definition")
-    batch_definition.set_data_asset(fds_data_asset)
-    return batch_definition
+    return fds_data_asset.add_batch_definition_whole_table(name="test_batch_definition")
 
 
 @pytest.fixture
 def batch_definition_with_yearly_partitioner(
-    fds_data_asset_with_event_type_partitioner: DataAsset,
+    fds_data_asset: DataAsset,
 ) -> BatchDefinition:
-    partitioner = PartitionerYearAndMonthAndDay(column_name="date")
-    batch_definition = BatchDefinition(name="test_batch_definition", partitioner=partitioner)
-    batch_definition.set_data_asset(fds_data_asset_with_event_type_partitioner)
-    return batch_definition
+    return fds_data_asset.add_batch_definition_daily(name="test_batch_definition", column="date")
 
 
 @pytest.fixture
