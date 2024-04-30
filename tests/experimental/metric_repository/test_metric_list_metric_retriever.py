@@ -468,7 +468,16 @@ def test_get_metrics_with_exception(mocker: MockerFixture):
     ]
 
 
-def test_get_metrics_with_column_type_missing(mocker: MockerFixture):
+@pytest.mark.parametrize(
+    "col_to_exclude",
+    [
+        {
+            "name": "col2",
+        },
+        {"name": "col2", "type": "TIME"},
+    ],
+)
+def test_get_metrics_with_excluded_column(mocker: MockerFixture, col_to_exclude: dict):
     """This test is meant to simulate failed metrics in the computed metrics."""
     mock_context = mocker.Mock(spec=CloudDataContext)
     mock_validator = mocker.Mock(spec=Validator)
@@ -498,9 +507,7 @@ def test_get_metrics_with_column_type_missing(mocker: MockerFixture):
         ("table.columns", (), ()): ["col1", "col2"],
         ("table.column_types", (), "include_nested=True"): [
             {"name": "col1", "type": "float"},
-            {
-                "name": "col2",
-            },  # Missing type for col2
+            col_to_exclude,  # Missing type for col2
         ],
         # ("column.min", "column=col1", ()): 2.5, # Error in column.min metric for col1
         ("column.min", "column=col2", ()): 2.7,
