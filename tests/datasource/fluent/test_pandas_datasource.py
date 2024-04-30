@@ -417,11 +417,12 @@ def test_default_pandas_datasource_get_and_set(
             assert asset["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_default_pandas_datasource_name_conflict(
     empty_data_context: AbstractDataContext,
 ):
-    empty_data_context.data_sources.add_pandas(name=DEFAULT_PANDAS_DATASOURCE_NAME)
+    # empty_data_context.data_sources.add_spark(name=DEFAULT_PANDAS_DATASOURCE_NAME)
+    empty_data_context.data_sources.add_spark(name=DEFAULT_PANDAS_DATASOURCE_NAME)
     with pytest.raises(DefaultPandasDatasourceError):
         _ = empty_data_context.data_sources.pandas_default
 

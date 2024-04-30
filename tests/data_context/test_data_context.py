@@ -36,7 +36,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource import Datasource
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -52,11 +51,6 @@ from great_expectations.util import (
     gen_directory_tree_str,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
-
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
 
 yaml = YAMLHandler()
 
@@ -284,21 +278,6 @@ def test_compile_suite_parameter_dependencies_broken_suite(
         ],
         "source_patient_data.default": ["expect_table_row_count_to_equal.result.observed_value"],
     }
-
-
-@pytest.mark.filesystem
-@mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
-def test_update_datasource_persists_changes_with_store(
-    mock_update_by_name: mock.MagicMock,  # noqa: TID251
-    data_context_parameterized_expectation_suite,
-) -> None:
-    context = data_context_parameterized_expectation_suite
-
-    datasource_to_update: Datasource = tuple(context.datasources.values())[0]
-
-    context.update_datasource(datasource=datasource_to_update)
-
-    assert mock_update_by_name.call_count == 1
 
 
 @pytest.mark.filesystem
@@ -548,7 +527,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
+    empty_context.data_sources.add_pandas("arthur")
     assert FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is True
 
 
@@ -594,7 +573,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
 ):
     context = empty_context
     ge_dir = context.root_directory
-    context.add_datasource("arthur", class_name="PandasDatasource")
+    context.data_sources.add_pandas("arthur")
     context.add_expectation_suite("dent")
     assert len(context.list_expectation_suites()) == 1
 
@@ -607,7 +586,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
 ):
     context = empty_context
     ge_dir = context.root_directory
-    context.add_datasource("arthur", class_name="PandasDatasource")
+    context.data_sources.add_pandas("arthur")
     assert len(context.list_expectation_suites()) == 0
 
     assert FileDataContext.is_project_initialized(ge_dir) is False
