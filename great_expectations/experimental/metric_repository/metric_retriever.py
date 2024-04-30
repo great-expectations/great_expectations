@@ -134,7 +134,7 @@ class MetricRetriever(abc.ABC):
 
     def _get_columns_to_exclude(self, table_column_types: Metric) -> List[str]:
         """
-        Excludes columns that are unsuppoted or missing type metadata
+        Excludes columns that are unsupported or missing type metadata
         """
         columns_to_skip: List[str] = []
         UNSUPPORTED_COLUMN_TYPES = ["TIME"]
