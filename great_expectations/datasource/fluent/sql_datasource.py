@@ -36,7 +36,7 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.core.partitioners import (
-    Partitioner,
+    ColumnPartitioner,
     PartitionerColumnValue,
     PartitionerConvertedDatetime,
     PartitionerDatetimePart,
@@ -423,7 +423,7 @@ SqlPartitioner = Union[
 ]
 
 
-class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
+class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT]):
     """A _SQLAsset Mixin
 
     This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
@@ -436,23 +436,25 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
     name: str
-    _partitioner_implementation_map: Dict[Type[Partitioner], Optional[Type[SqlPartitioner]]] = (
-        pydantic.PrivateAttr(
-            default={
-                PartitionerYear: SqlPartitionerYear,
-                PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
-                PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
-                PartitionerColumnValue: SqlPartitionerColumnValue,
-                PartitionerDatetimePart: SqlPartitionerDatetimePart,
-                PartitionerDividedInteger: SqlPartitionerDividedInteger,
-                PartitionerModInteger: SqlPartitionerModInteger,
-                PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
-                PartitionerConvertedDatetime: None,  # only implemented for sqlite backend
-            }
-        )
+    _partitioner_implementation_map: Dict[
+        Type[ColumnPartitioner], Optional[Type[SqlPartitioner]]
+    ] = pydantic.PrivateAttr(
+        default={
+            PartitionerYear: SqlPartitionerYear,
+            PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
+            PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
+            PartitionerColumnValue: SqlPartitionerColumnValue,
+            PartitionerDatetimePart: SqlPartitionerDatetimePart,
+            PartitionerDividedInteger: SqlPartitionerDividedInteger,
+            PartitionerModInteger: SqlPartitionerModInteger,
+            PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
+            PartitionerConvertedDatetime: None,  # only implemented for sqlite backend
+        }
     )
 
-    def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SqlPartitioner:
+    def get_partitioner_implementation(
+        self, abstract_partitioner: ColumnPartitioner
+    ) -> SqlPartitioner:
         PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
         if not PartitionerClass:
             raise ValueError(  # noqa: TRY003
@@ -464,7 +466,7 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: Tuple[str, ...] = tuple()
         if partitioner:
@@ -597,7 +599,7 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -687,7 +689,7 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
                 option: None
                 for option in self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             }
-            expect_batch_request_form = BatchRequest[Partitioner](
+            expect_batch_request_form = BatchRequest[ColumnPartitioner](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,

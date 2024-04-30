@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.core.batch_definition import BatchDefinition
-    from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.partitioners import ColumnPartitioner
 
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
@@ -117,7 +117,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
     @override
     def get_batch_parameters_keys(
-        self, partitioner: Optional[Partitioner] = None
+        self, partitioner: Optional[ColumnPartitioner] = None
     ) -> Tuple[str, ...]:
         return tuple()
 
@@ -177,7 +177,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -397,7 +397,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 

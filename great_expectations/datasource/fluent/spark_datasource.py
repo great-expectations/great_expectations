@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.compatibility.pyspark import SparkSession
-    from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.partitioners import ColumnPartitioner
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
@@ -186,7 +186,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
     @override
     def get_batch_parameters_keys(
-        self, partitioner: Optional[Partitioner] = None
+        self, partitioner: Optional[ColumnPartitioner] = None
     ) -> tuple[str, ...]:
         return tuple()
 
@@ -212,7 +212,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         dataframe: Optional[_SparkDataFrameT] = None,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
