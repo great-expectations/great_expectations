@@ -4,6 +4,8 @@ title: 'Use cases'
 hide_title: true
 description: Example use cases and implementations with GX Cloud and GX OSS.
 hide_feedback_survey: true
+pagination_next: null
+pagination_prev: null
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
