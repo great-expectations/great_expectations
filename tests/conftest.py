@@ -22,11 +22,6 @@ from freezegun import freeze_time
 import great_expectations as gx
 from great_expectations import project_manager, set_context
 from great_expectations.analytics.config import ENV_CONFIG
-from great_expectations.checkpoint.configurator import (
-    ActionDetails,
-    ActionDict,
-    ActionDicts,
-)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -64,7 +59,6 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
-    CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
     GXCloudConfig,
@@ -1091,262 +1085,6 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
 
 
 @pytest.fixture
-def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates(  # noqa: E501
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
-
-    # add simple template config
-    simple_checkpoint_template_config = CheckpointConfig(
-        name="my_simple_template_checkpoint",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
-        suite_parameters={
-            "environment": "$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-        },
-        runtime_configuration={
-            "result_format": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 20,
-            }
-        },
-    )
-    simple_checkpoint_template_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_template_config.name
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_template_config_key,
-        value=simple_checkpoint_template_config,
-    )
-
-    # add nested template configs
-    nested_checkpoint_template_config_1 = CheckpointConfig(
-        name="my_nested_checkpoint_template_1",
-        expectation_suite_name="suite_from_template_1",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
-        suite_parameters={
-            "environment": "FOO",
-            "tolerance": "FOOBOO",
-            "aux_param_0": "FOOBARBOO",
-            "aux_param_1": "FOOBARBOO",
-            "template_1_key": 456,
-        },
-        runtime_configuration={
-            "result_format": "FOOBARBOO",
-            "partial_unexpected_count": "FOOBARBOO",
-            "template_1_key": 123,
-        },
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource_template_1",
-                    "data_connector_name": "my_special_data_connector_template_1",
-                    "data_asset_name": "users_from_template_1",
-                    "data_connector_query": {"partition_index": -999},
-                }
-            }
-        ],
-    )
-    nested_checkpoint_template_config_1_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_1.name
-    )
-    context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_1_key,
-        value=nested_checkpoint_template_config_1,
-    )
-
-    nested_checkpoint_template_config_2 = CheckpointConfig(
-        name="my_nested_checkpoint_template_2",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-            {
-                "name": "new_action_from_template_2",
-                "action": {"class_name": "Template2SpecialAction"},
-            },
-        ],
-        suite_parameters={
-            "environment": "$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-        },
-        runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 20,
-        },
-    )
-    nested_checkpoint_template_config_2_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_2.name
-    )
-    context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_2_key,
-        value=nested_checkpoint_template_config_2,
-    )
-
-    nested_checkpoint_template_config_3 = CheckpointConfig(
-        name="my_nested_checkpoint_template_3",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-            {
-                "name": "new_action_from_template_3",
-                "action": {"class_name": "Template3SpecialAction"},
-            },
-        ],
-        suite_parameters={
-            "environment": "$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-            "template_3_key": 123,
-        },
-        runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 20,
-            "template_3_key": "bloopy!",
-        },
-    )
-    nested_checkpoint_template_config_3_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_3.name
-    )
-    context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_3_key,
-        value=nested_checkpoint_template_config_3,
-    )
-
-    # add minimal Checkpoint
-    simple_checkpoint_config = CheckpointConfig(
-        name="my_minimal_simple_checkpoint",
-        action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.UPDATE_DATA_DOCS,
-        ],
-    )
-    simple_checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_config.name
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_config_key,
-        value=simple_checkpoint_config,
-    )
-
-    simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
-        name="my_simple_checkpoint_with_slack",
-        action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.UPDATE_DATA_DOCS,
-            ActionDicts.build_slack_action(
-                webhook="https://hooks.slack.com/foo/bar",
-                notify_on="all",
-                notify_with="all",
-            ),
-        ],
-    )
-    simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(configuration_key=simple_checkpoint_with_slack_webhook_config.name)
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_with_slack_webhook_config_key,
-        value=simple_checkpoint_with_slack_webhook_config,
-    )
-
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
-        name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.UPDATE_DATA_DOCS,
-            ActionDicts.build_slack_action(
-                webhook="https://hooks.slack.com/foo/bar",
-                notify_on="all",
-                notify_with="all",
-            ),
-        ],
-    )
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key,
-        value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
-    )
-
-    simple_checkpoint_with_site_names_config = CheckpointConfig(
-        name="my_simple_checkpoint_with_site_names",
-        action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDict(
-                name="update_data_docs",
-                action=ActionDetails(
-                    class_name="UpdateDataDocsAction",
-                    site_names=["local_site"],
-                ),
-            ),
-        ],
-    )
-    simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_with_site_names_config.name
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_with_site_names_config_key,
-        value=simple_checkpoint_with_site_names_config,
-    )
-
-    # noinspection PyProtectedMember
-    context._save_project_config()
-    project_manager.set_project(context)
-    return context
-
-
-@pytest.fixture
 def deterministic_asset_data_connector_context(
     tmp_path_factory,
     monkeypatch,
@@ -1527,7 +1265,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     path_to_folder_containing_csv_files = pathlib.Path(data_path)
 
     datasource_name = "my_pandas_filesystem_datasource"
-    datasource = context.sources.add_pandas_filesystem(
+    datasource = context.data_sources.add_pandas_filesystem(
         name=datasource_name, base_directory=path_to_folder_containing_csv_files
     )
 
@@ -1544,7 +1282,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     )
 
     datasource_name = "my_pandas_dataframes_datasource"
-    datasource = context.sources.add_pandas(name=datasource_name)
+    datasource = context.data_sources.add_pandas(name=datasource_name)
 
     csv_source_path = pathlib.Path(
         context_path,
@@ -1581,7 +1319,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     )
 
     datasource_name = "my_spark_filesystem_datasource"
-    datasource = context.sources.add_spark_filesystem(
+    datasource = context.data_sources.add_spark_filesystem(
         name=datasource_name, base_directory=path_to_folder_containing_csv_files
     )
 
@@ -1598,7 +1336,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     )
 
     datasource_name = "my_spark_dataframes_datasource"
-    datasource = context.sources.add_spark(name=datasource_name)
+    datasource = context.data_sources.add_spark(name=datasource_name)
 
     csv_source_path = pathlib.Path(
         context_path,
@@ -1630,348 +1368,7 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
 
     datasource_name = "my_sqlite_datasource"
     connection_string = f"sqlite:///{db_file}"
-    datasource = context.sources.add_sqlite(
-        name=datasource_name,
-        connection_string=connection_string,
-    )
-
-    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
-    datasource.add_query_asset(
-        name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query
-    )
-
-    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-    datasource.add_query_asset(
-        name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
-    )
-
-    # noinspection PyProtectedMember
-    context._save_project_config()
-    project_manager.set_project(context)
-    return context
-
-
-@pytest.fixture
-def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates(  # noqa: E501
-    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
-):
-    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
-
-    # add simple template config
-    simple_checkpoint_template_config = CheckpointConfig(
-        name="my_simple_template_checkpoint",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
-        suite_parameters={
-            "environment": "$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-        },
-        runtime_configuration={
-            "result_format": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 20,
-            }
-        },
-    )
-    simple_checkpoint_template_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_template_config.name
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_template_config_key,
-        value=simple_checkpoint_template_config,
-    )
-
-    # add nested template configs
-    nested_checkpoint_template_config_1 = CheckpointConfig(
-        name="my_nested_checkpoint_template_1",
-        expectation_suite_name="suite_from_template_1",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
-        suite_parameters={
-            "environment": "FOO",
-            "tolerance": "FOOBOO",
-            "aux_param_0": "FOOBARBOO",
-            "aux_param_1": "FOOBARBOO",
-            "template_1_key": 456,
-        },
-        runtime_configuration={
-            "result_format": "FOOBARBOO",
-            "partial_unexpected_count": "FOOBARBOO",
-            "template_1_key": 123,
-        },
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource_template_1",
-                    "data_connector_name": "my_special_data_connector_template_1",
-                    "data_asset_name": "users_from_template_1",
-                    "data_connector_query": {"partition_index": -999},
-                }
-            }
-        ],
-    )
-    nested_checkpoint_template_config_1_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_1.name
-    )
-    context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_1_key,
-        value=nested_checkpoint_template_config_1,
-    )
-
-    nested_checkpoint_template_config_2 = CheckpointConfig(
-        name="my_nested_checkpoint_template_2",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-            {
-                "name": "new_action_from_template_2",
-                "action": {"class_name": "Template2SpecialAction"},
-            },
-        ],
-        suite_parameters={
-            "environment": "$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-        },
-        runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 20,
-        },
-    )
-    nested_checkpoint_template_config_2_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_2.name
-    )
-    context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_2_key,
-        value=nested_checkpoint_template_config_2,
-    )
-
-    nested_checkpoint_template_config_3 = CheckpointConfig(
-        name="my_nested_checkpoint_template_3",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-            {
-                "name": "new_action_from_template_3",
-                "action": {"class_name": "Template3SpecialAction"},
-            },
-        ],
-        suite_parameters={
-            "environment": "$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-            "template_3_key": 123,
-        },
-        runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 20,
-            "template_3_key": "bloopy!",
-        },
-    )
-    nested_checkpoint_template_config_3_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_3.name
-    )
-    context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_3_key,
-        value=nested_checkpoint_template_config_3,
-    )
-
-    simple_checkpoint_config = CheckpointConfig(
-        name="my_minimal_simple_checkpoint",
-        action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.UPDATE_DATA_DOCS,
-        ],
-    )
-    simple_checkpoint_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_config.name
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_config_key,
-        value=simple_checkpoint_config,
-    )
-
-    simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
-        name="my_simple_checkpoint_with_slack",
-        action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.UPDATE_DATA_DOCS,
-            ActionDicts.build_slack_action(
-                webhook="https://hooks.slack.com/foo/bar",
-                notify_on="all",
-                notify_with="all",
-            ),
-        ],
-    )
-    simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
-        ConfigurationIdentifier(configuration_key=simple_checkpoint_with_slack_webhook_config.name)
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_with_slack_webhook_config_key,
-        value=simple_checkpoint_with_slack_webhook_config,
-    )
-
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
-        name="my_simple_checkpoint_with_slack_and_notify_with_all",
-        action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDicts.UPDATE_DATA_DOCS,
-            ActionDicts.build_slack_action(
-                webhook="https://hooks.slack.com/foo/bar",
-                notify_on="all",
-                notify_with="all",
-            ),
-        ],
-    )
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key,
-        value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
-    )
-
-    simple_checkpoint_with_site_names_config = CheckpointConfig(
-        name="my_simple_checkpoint_with_site_names",
-        action_list=[
-            ActionDicts.STORE_VALIDATION_RESULT,
-            ActionDict(
-                name="update_data_docs",
-                action=ActionDetails(
-                    class_name="UpdateDataDocsAction",
-                    site_names=["local_site"],
-                ),
-            ),
-        ],
-    )
-    simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_with_site_names_config.name
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_with_site_names_config_key,
-        value=simple_checkpoint_with_site_names_config,
-    )
-
-    # noinspection PyProtectedMember
-    context._save_project_config()
-    project_manager.set_project(context)
-    return context
-
-
-@pytest.fixture
-def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates(  # noqa: E501
-    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
-    spark_df_from_pandas_df,
-    spark_session,
-):
-    context = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates  # noqa: E501
-    context_path: str = context.root_directory
-    path_to_folder_containing_csv_files = pathlib.Path(
-        context_path,
-        "..",
-        "data",
-        "titanic",
-    )
-
-    datasource_name = "my_spark_filesystem_datasource"
-    datasource = context.sources.add_spark_filesystem(
-        name=datasource_name, base_directory=path_to_folder_containing_csv_files
-    )
-
-    batching_regex = r"(?P<name>.+)\.csv"
-    glob_directive = "*.csv"
-    datasource.add_csv_asset(
-        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
-    )
-
-    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
-    glob_directive = "*.csv"
-    datasource.add_csv_asset(
-        name="users", batching_regex=batching_regex, glob_directive=glob_directive
-    )
-
-    datasource_name = "my_spark_dataframes_datasource"
-    datasource = context.sources.add_spark(name=datasource_name)
-
-    csv_source_path = pathlib.Path(
-        context_path,
-        "..",
-        "data",
-        "titanic",
-        "Titanic_1911.csv",
-    )
-    pandas_df = pd.read_csv(filepath_or_buffer=csv_source_path)
-    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
-
-    dataframe_asset_name = "my_dataframe_asset"
-    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
-    _ = asset.build_batch_request(dataframe=spark_df)
-
-    # noinspection PyProtectedMember
-    context._save_project_config()
-    project_manager.set_project(context)
-    return context
-
-
-@pytest.fixture
-def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates(  # noqa: E501
-    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
-    db_file,
-    sa,
-):
-    context = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates  # noqa: E501
-
-    datasource_name = "my_sqlite_datasource"
-    connection_string = f"sqlite:///{db_file}"
-    datasource = context.sources.add_sqlite(
+    datasource = context.data_sources.add_sqlite(
         name=datasource_name,
         connection_string=connection_string,
     )
@@ -2546,7 +1943,7 @@ def data_context_with_fluent_datasource(
     empty_data_context,
     filesystem_csv_2,
 ) -> FileDataContext:
-    empty_data_context.sources.add_pandas_filesystem(
+    empty_data_context.data_sources.add_pandas_filesystem(
         name="my_pandas_datasource", base_directory=filesystem_csv_2
     )
     # noinspection PyProtectedMember
@@ -2559,7 +1956,7 @@ def data_context_with_fluent_datasource_and_block_datasource(
     empty_data_context,
     filesystem_csv_2,
 ) -> FileDataContext:
-    empty_data_context.sources.add_pandas_filesystem(
+    empty_data_context.data_sources.add_pandas_filesystem(
         name="my_fluent_datasource", base_directory=filesystem_csv_2
     )
     empty_data_context.add_datasource(
@@ -2853,7 +2250,7 @@ def fds_data_context(
     sqlite_connection_string: str,
 ) -> AbstractDataContext:
     context = empty_data_context
-    datasource = context.sources.add_sqlite(
+    datasource = context.data_sources.add_sqlite(
         name=fds_data_context_datasource_name,
         connection_string=sqlite_connection_string,
         create_temp_table=True,
@@ -3194,9 +2591,6 @@ expectations_store_name: default_expectations_store
 validation_results_store_name: default_validation_results_store
 checkpoint_store_name: default_checkpoint_store
 profiler_store_name: default_profiler_store
-
-include_rendered_content:
-    globally: True
 """
     data_context_config_dict = yaml.load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)

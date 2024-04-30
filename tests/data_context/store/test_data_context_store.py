@@ -30,11 +30,6 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 2.0,
         "data_docs_sites": {},
-        "include_rendered_content": {
-            "expectation_suite": False,
-            "expectation_validation_result": False,
-            "globally": False,
-        },
         "profiler_store_name": None,
         "plugins_directory": "plugins/",
         "stores": {

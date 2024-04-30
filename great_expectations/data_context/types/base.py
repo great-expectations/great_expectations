@@ -17,7 +17,6 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Sequence,
     Set,
     Type,
     TypeVar,
@@ -40,12 +39,12 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import deprecated_argument, public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
+from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -53,7 +52,6 @@ if TYPE_CHECKING:
     from io import TextIOWrapper
 
     from great_expectations.alias_types import JSONValues, PathStr
-    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.core.batch import BatchRequestBase
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest as FluentBatchRequest,
@@ -1358,24 +1356,6 @@ class ProgressBarsConfigSchema(Schema):
     metric_calculations = fields.Boolean()
 
 
-class IncludeRenderedContentConfig(DictDot):
-    def __init__(
-        self,
-        globally: bool = False,
-        expectation_suite: bool = False,
-        expectation_validation_result: bool = False,
-    ) -> None:
-        self.globally = globally
-        self.expectation_suite = expectation_suite
-        self.expectation_validation_result = expectation_validation_result
-
-
-class IncludeRenderedContentConfigSchema(Schema):
-    globally = fields.Boolean(default=False)
-    expectation_suite = fields.Boolean(default=False)
-    expectation_validation_result = fields.Boolean(default=False)
-
-
 class GXCloudConfig(DictDot):
     def __init__(
         self,
@@ -1431,23 +1411,16 @@ class DataContextConfigSchema(Schema):
     checkpoint_store_name = fields.Str(required=False, allow_none=True)
     profiler_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
-    validation_operators = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
-    )
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
     progress_bars = fields.Nested(ProgressBarsConfigSchema, required=False, allow_none=True)
-    include_rendered_content = fields.Nested(
-        IncludeRenderedContentConfigSchema, required=False, allow_none=True
-    )
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
     # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook  # noqa: E501
     REMOVE_KEYS_IF_NONE = [
         "progress_bars",  # 0.13.49
-        "include_rendered_content",  # 0.15.19,
         "fluent_datasources",
     ]
 
@@ -1467,7 +1440,7 @@ class DataContextConfigSchema(Schema):
             exc
             and exc.messages
             and isinstance(exc.messages, dict)
-            and all(key is None for key in exc.messages.keys())
+            and all(key is None for key in exc.messages)
         ):
             exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
 
@@ -1604,13 +1577,6 @@ class DataContextConfigDefaults(enum.Enum):
             "action": {"class_name": "UpdateDataDocsAction"},
         },
     ]
-    DEFAULT_VALIDATION_OPERATORS = {
-        "action_list_operator": {
-            "class_name": "ActionListValidationOperator",
-            "action_list": DEFAULT_ACTION_LIST,
-        }
-    }
-
     DEFAULT_EXPECTATIONS_STORE = {
         "class_name": "ExpectationsStore",
         "store_backend": {
@@ -1688,7 +1654,6 @@ class BaseStoreBackendDefaults(DictDot):
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-        validation_operators: Optional[dict] = None,
         stores: Optional[dict] = None,
         data_docs_sites: Optional[dict] = None,
     ) -> None:
@@ -1700,7 +1665,6 @@ class BaseStoreBackendDefaults(DictDot):
         self.validation_definition_store_name = (
             DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value
         )
-        self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
 
@@ -2189,7 +2153,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
 
 
 @public_api
-@deprecated_argument(argument_name="validation_operators", version="0.14.0")
 class DataContextConfig(BaseYamlConfig):
     """Config class for DataContext.
 
@@ -2212,7 +2175,6 @@ class DataContextConfig(BaseYamlConfig):
         checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
         profiler_store_name (Optional[str]): name of ProfilerStore to be used by DataContext.
         plugins_directory (Optional[str]): the directory in which custom plugin modules should be placed.
-        validation_operators: list of validation operators configured by this DataContext.
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
@@ -2225,11 +2187,9 @@ class DataContextConfig(BaseYamlConfig):
             instantiating with yml file.
         progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally, for
             profilers, or metrics calculations.
-        include_rendered_content (Optional[IncludedRenderedContentConfig]): allows rendered content to be configured
-            globally, at the ExpectationSuite or ExpectationValidationResults-level.
     """  # noqa: E501
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913
+    def __init__(  # noqa: C901, PLR0913
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2245,7 +2205,6 @@ class DataContextConfig(BaseYamlConfig):
         checkpoint_store_name: Optional[str] = None,
         profiler_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
-        validation_operators=None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
@@ -2253,7 +2212,6 @@ class DataContextConfig(BaseYamlConfig):
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
-        include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
         # Set defaults
         if config_version is None:
@@ -2288,7 +2246,6 @@ class DataContextConfig(BaseYamlConfig):
         self.checkpoint_store_name = checkpoint_store_name
         self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
-        self.validation_operators = validation_operators
         self.stores = self._init_stores(stores)
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
@@ -2300,11 +2257,6 @@ class DataContextConfig(BaseYamlConfig):
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
         self.progress_bars = progress_bars
-        if include_rendered_content is None:
-            include_rendered_content = IncludeRenderedContentConfig()
-        elif isinstance(include_rendered_content, dict):
-            include_rendered_content = IncludeRenderedContentConfig(**include_rendered_content)
-        self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
 
@@ -2461,292 +2413,6 @@ class CheckpointValidationDefinitionSchema(AbstractConfigSchema):
         return data
 
 
-class CheckpointConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-        fields = (
-            "name",
-            "expectation_suite_name",
-            "batch_request",
-            "action_list",
-            "suite_parameters",
-            "runtime_configuration",
-            "validations",
-            "default_validation_id",
-            "profilers",
-            # Next fields are used by configurators
-            "site_names",
-            "id",
-            "expectation_suite_id",
-        )
-        ordered = True
-
-    # if keys have None value, remove in post_dump
-    REMOVE_KEYS_IF_NONE = [
-        "default_validation_id",
-    ]
-
-    id = fields.UUID(required=False, allow_none=True)
-    name = fields.String(required=False, allow_none=True)
-    expectation_suite_name = fields.String(required=False, allow_none=True)
-    expectation_suite_id = fields.UUID(required=False, allow_none=True)
-    batch_request = fields.Dict(required=False, allow_none=True)
-    action_list = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
-    suite_parameters = fields.Dict(required=False, allow_none=True)
-    runtime_configuration = fields.Dict(required=False, allow_none=True)
-    validations = fields.List(
-        cls_or_instance=fields.Nested(CheckpointValidationDefinitionSchema),
-        required=False,
-        allow_none=True,
-    )
-    default_validation_id = fields.String(required=False, allow_none=True)
-
-    profilers = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
-
-    # noinspection PyUnusedLocal
-    @validates_schema
-    def validate_schema(self, data, **kwargs) -> None:
-        if not ("name" in data or "validation_operator_name" in data or "batches" in data):
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                """Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
-                continue.
-                """  # noqa: E501
-            )
-
-        if data.get("config_version"):
-            if "name" not in data:
-                raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                    """Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
-                    configuration to continue.
-                    """  # noqa: E501
-                )
-
-    # noinspection PyUnusedLocal
-    @pre_dump
-    def prepare_dump(self, data, **kwargs):
-        data = copy.deepcopy(data)
-        for key, value in data.items():
-            data[key] = convert_to_json_serializable(data=value)
-
-        return data
-
-    # noinspection PyUnusedLocal
-    @post_dump
-    def remove_keys_if_none(self, data, **kwargs):
-        data = copy.deepcopy(data)
-        for key in self.REMOVE_KEYS_IF_NONE:
-            if key in data and data[key] is None:
-                data.pop(key)
-
-        return data
-
-
-@public_api
-class CheckpointConfig(BaseYamlConfig):
-    # TODO: <Alex>ALEX (does not work yet)</Alex>
-    # _config_schema_class = CheckpointConfigSchema
-    """Initializes the CheckpointConfig using a BaseYamlConfig.
-
-    Args:
-        name: The name of the checkpoint.
-        expectation_suite_name: The expectation suite name of your checkpoint
-        batch_request: The batch request
-        action_list: The action list
-        suite_parameters: The suite parameters
-        runtime_configuration: The runtime configuration for your checkpoint
-        validations: An optional list of validations in your checkpoint
-        default_validation_id: The default validation id of your checkpoint
-        validation_operator_name: The validation operator name
-        batches: An optional list of batches
-        commented_map: The commented map
-        id: Your GE Cloud ID
-        expectation_suite_id: Your expectation suite
-    """
-
-    def __init__(  # noqa: PLR0913
-        self,
-        name: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
-        action_list: Optional[Sequence[ActionDict]] = None,
-        suite_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationDefinition]] = None,
-        default_validation_id: Optional[str] = None,
-        commented_map: Optional[CommentedMap] = None,
-        id: Optional[str] = None,
-        expectation_suite_id: Optional[str] = None,
-    ) -> None:
-        self._name = name
-        self._expectation_suite_name = expectation_suite_name
-        self._expectation_suite_id = expectation_suite_id
-        self._batch_request = batch_request or {}
-        self._action_list = action_list or []
-        self._suite_parameters = suite_parameters or {}
-        self._runtime_configuration = runtime_configuration or {}
-        self._validations = validations or []
-        self._default_validation_id = default_validation_id
-        self._id = id
-
-        super().__init__(commented_map=commented_map)
-
-    # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
-    @classmethod
-    def get_config_class(cls):
-        return cls  # CheckpointConfig
-
-    @classmethod
-    def get_schema_class(cls):
-        return CheckpointConfigSchema
-
-    @property
-    def id(self) -> Optional[str]:
-        return self._id
-
-    @id.setter
-    def id(self, value: str) -> None:
-        self._id = value
-
-    @property
-    def expectation_suite_id(self) -> Optional[str]:
-        return self._expectation_suite_id
-
-    @expectation_suite_id.setter
-    def expectation_suite_id(self, value: str) -> None:
-        self._expectation_suite_id = value
-
-    @property
-    def name(self) -> str:
-        return self._name  # type: ignore[return-value]
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
-
-    @property
-    def validations(self) -> List[CheckpointValidationDefinition]:
-        return self._validations
-
-    @validations.setter
-    def validations(self, value: List[CheckpointValidationDefinition]) -> None:
-        self._validations = value
-
-    @property
-    def default_validation_id(self) -> Optional[str]:
-        return self._default_validation_id
-
-    @default_validation_id.setter
-    def default_validation_id(self, validation_id: str) -> None:
-        self._default_validation_id = validation_id
-
-    @property
-    def batch_request(self) -> dict:
-        return self._batch_request
-
-    @batch_request.setter
-    def batch_request(self, value: dict) -> None:
-        self._batch_request = value
-
-    @property
-    def expectation_suite_name(self) -> str:
-        return self._expectation_suite_name  # type: ignore[return-value]
-
-    @expectation_suite_name.setter
-    def expectation_suite_name(self, value: str) -> None:
-        self._expectation_suite_name = value
-
-    @property
-    def action_list(self) -> Sequence[ActionDict]:
-        return self._action_list
-
-    @action_list.setter
-    def action_list(self, value: Sequence[ActionDict]) -> None:
-        self._action_list = value
-
-    @property
-    def suite_parameters(self) -> dict:
-        return self._suite_parameters
-
-    @suite_parameters.setter
-    def suite_parameters(self, value: dict) -> None:
-        self._suite_parameters = value
-
-    @property
-    def runtime_configuration(self) -> dict:
-        return self._runtime_configuration
-
-    @runtime_configuration.setter
-    def runtime_configuration(self, value: dict) -> None:
-        self._runtime_configuration = value
-
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-
-        memo[id(self)] = result
-
-        attributes_to_copy = set(CheckpointConfigSchema().fields.keys())
-        for key in attributes_to_copy:
-            try:
-                value = self[key]
-                value_copy = safe_deep_copy(data=value, memo=memo)
-                setattr(result, key, value_copy)
-            except AttributeError:
-                pass
-
-        return result
-
-    @public_api
-    @override
-    def to_json_dict(self) -> Dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this CheckpointConfig.
-
-        Returns:
-            A JSON-serializable dict representation of this CheckpointConfig.
-        """
-        # # TODO: <Alex>2/4/2022</Alex>
-        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the  # noqa: E501
-        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,  # noqa: E501
-        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules  # noqa: E501
-        # make this refactoring infeasible at the present time.
-        dict_obj: dict = self.to_dict()
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
-        return serializeable_dict
-
-    @override
-    def __repr__(self) -> str:
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
-        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
-        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
-        refactoring infeasible at the present time.
-        """  # noqa: E501
-        json_dict: dict = self.to_json_dict()
-        deep_filter_properties_iterable(
-            properties=json_dict,
-            inplace=True,
-        )
-
-        keys: List[str] = sorted(list(json_dict.keys()))
-
-        key: str
-        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
-
-        return json.dumps(sorted_json_dict, indent=2)
-
-    @override
-    def __str__(self) -> str:
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
-        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
-        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
-        refactoring infeasible at the present time.
-        """  # noqa: E501
-        return self.__repr__()
-
-
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
@@ -2755,5 +2421,4 @@ assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 # noinspection SpellCheckingInspection
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
-checkpointConfigSchema = CheckpointConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

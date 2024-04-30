@@ -230,7 +230,7 @@ awscreds = {
 }
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_s3_datasource">
-datasource = context.sources.add_or_update_spark_s3(
+datasource = context.data_sources.add_or_update_spark_s3(
     name="s3_datasource", bucket="taxi-data-sample-test", boto3_options=awscreds
 )
 # </snippet>

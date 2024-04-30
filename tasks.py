@@ -11,9 +11,11 @@ To show task help page `invoke <NAME> --help`
 
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 import pathlib
+import pkgutil
 import shutil
 import sys
 from collections.abc import Generator, Mapping, Sequence
@@ -548,7 +550,7 @@ def type_schema(  # noqa: C901 - too complex
 
         if (
             datasource_dir.name.startswith("Pandas")
-            and _PANDAS_SCHEMA_VERSION != pandas.__version__
+            and pandas.__version__ != _PANDAS_SCHEMA_VERSION
         ):
             print(
                 f"🙈  {name} - was generated with pandas"
@@ -637,7 +639,7 @@ def docs(
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
-        docs_builder.create_version(version=parse_version(version))  # type: ignore[arg-type]
+        docs_builder.create_version(version=parse_version(version))
     elif start:
         ctx.run(" ".join(["yarn start"]), echo=True)
     elif clear:
@@ -918,7 +920,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",  # noqa: E501
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud, etc. Can be specified multiple times.",  # noqa: E501
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
@@ -1169,3 +1171,15 @@ def service(
         ctx.run("sleep 15")
     else:
         print("  No matching services to start")
+
+
+@invoke.task()
+def print_public_api(ctx: Context):
+    """Prints to STDOUT all of our public api."""
+    # Walk the GX package to make sure we import all submodules to ensure we
+    # retrieve all things decorated with our public api decorator.
+    import great_expectations
+
+    for module_info in pkgutil.walk_packages(["great_expectations"], prefix="great_expectations."):
+        importlib.import_module(module_info.name)
+    print(great_expectations._docs_decorators.public_api_introspector)

@@ -47,7 +47,6 @@ def totally_empty_data_context(tmp_path_factory):
             },
         },
         "data_docs_sites": {},
-        "validation_operators": {},
     }
     with open(
         os.path.join(project_root_dir, "gx/great_expectations.yml"),  # noqa: PTH118
@@ -83,7 +82,7 @@ def test_add_store(totally_empty_data_context):
             "class_name": "ValidationResultsStore",
         },
     )
-    assert "my_new_store" in totally_empty_data_context.stores.keys()
+    assert "my_new_store" in totally_empty_data_context.stores
     assert len(totally_empty_data_context.stores.keys()) == 7
 
 

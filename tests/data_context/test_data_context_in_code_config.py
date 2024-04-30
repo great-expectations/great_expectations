@@ -89,21 +89,6 @@ def build_in_code_data_context_project_config(
                 },
             }
         },
-        validation_operators={
-            "action_list_operator": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {"class_name": "StoreValidationResultAction"},
-                    },
-                    {
-                        "name": "update_data_docs",
-                        "action": {"class_name": "UpdateDataDocsAction"},
-                    },
-                ],
-            }
-        },
         anonymous_usage_statistics={
             "enabled": True,
             # NOTE: No data_context_id set here

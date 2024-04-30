@@ -48,10 +48,7 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
                 char for char in special_characters if char not in allowed_characters
             ]
 
-            for c in special_characters:
-                if c in str(val):
-                    return False
-            return True
+            return all(c not in str(val) for c in special_characters)
 
         return column.apply(not_contain_special_character, args=(list(string.punctuation)))
 
@@ -63,10 +60,7 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
                 char for char in list(string.punctuation) if char not in allowed_characters
             ]
 
-            for c in special_characters:
-                if c in str(val):
-                    return False
-            return True
+            return all(c not in str(val) for c in special_characters)
 
         # Register the UDF
         not_contain_special_character_udf = F.udf(
@@ -242,9 +236,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

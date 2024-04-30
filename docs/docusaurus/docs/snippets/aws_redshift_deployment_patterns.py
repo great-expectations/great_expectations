@@ -230,7 +230,7 @@ connection_string = "redshift+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<D
 connection_string = CONNECTION_STRING
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py datasource">
-datasource = context.sources.add_or_update_sql(
+datasource = context.data_sources.add_or_update_sql(
     name=datasource_name,
     connection_string=connection_string,
 )
@@ -268,17 +268,3 @@ validator.expect_column_values_to_be_between(
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py save_expectations">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
-
-# build Checkpoint
-# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py create_checkpoint">
-checkpoint = context.add_or_update_checkpoint(
-    name="my_checkpoint",
-    validations=[{"batch_request": request, "expectation_suite_name": "test_suite"}],
-)
-# </snippet>
-
-# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py run checkpoint">
-checkpoint_result = checkpoint.run()
-# </snippet>
-
-assert checkpoint_result.success is True

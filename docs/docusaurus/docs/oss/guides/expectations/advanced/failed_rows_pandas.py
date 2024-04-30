@@ -23,7 +23,7 @@ context = gx.get_context(project_root_dir=".")
 # </snippet>
 
 # add datasource and asset
-data_asset = context.sources.add_pandas(name="visits_datasource").add_csv_asset(
+data_asset = context.data_sources.add_pandas(name="visits_datasource").add_csv_asset(
     name="visits", filepath_or_buffer=file_path, sep="\t"
 )
 

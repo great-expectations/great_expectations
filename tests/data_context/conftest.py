@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import datetime as dt
 import json
 import os
 import pathlib
@@ -15,11 +14,6 @@ import pytest
 import requests
 
 import great_expectations as gx
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
-from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -28,13 +22,8 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
-    CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
@@ -189,12 +178,6 @@ def basic_data_context_config():
                 },
             },
             "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
             "anonymous_usage_statistics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
@@ -349,12 +332,6 @@ def data_context_config_with_datasources(conn_string_password):
                 },
             },
             "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
             "anonymous_usage_statistics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
@@ -426,12 +403,6 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                 },
             },
             "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
             "anonymous_usage_statistics": {
                 "enabled": True,
                 "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
@@ -670,35 +641,6 @@ def checkpoint_config() -> dict:
         ],
     }
     return checkpoint_config
-
-
-@pytest.fixture
-def checkpoint_result(checkpoint_config: dict) -> CheckpointResult:
-    timestamp = dt.datetime(1996, 6, 1)
-    run_id = RunIdentifier(run_time=timestamp)
-    run_results = {
-        ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier("my_suite"),
-            run_id=RunIdentifier(run_time=timestamp),
-            batch_identifier="default_pandas_datasource-#ephemeral_pandas_asset",
-        ): {
-            "validation_result": ExpectationSuiteValidationResult(
-                success=True, results=[], suite_name="my_suite"
-            ),
-            "actions_results": {"my_action": {"class": "StoreValidationResultAction"}},
-        }
-    }
-
-    config = CheckpointConfig(**checkpoint_config)
-
-    validation_result_url = "https://my.cloud.app/validation-result/123"
-
-    return CheckpointResult(
-        run_id=run_id,
-        run_results=run_results,  # type: ignore[arg-type]
-        checkpoint_config=config,
-        validation_result_url=validation_result_url,
-    )
 
 
 @pytest.fixture

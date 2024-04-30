@@ -152,7 +152,7 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
         "test__normalize_absolute_or_relative_path__dir"
         not in context._normalize_absolute_or_relative_path("/yikes")
     )
-    assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
+    assert context._normalize_absolute_or_relative_path("/yikes") == "/yikes"
 
 
 @pytest.mark.filesystem
@@ -223,7 +223,6 @@ def test_get_config(empty_data_context):
         "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
-        "include_rendered_content",
     }
 
 
@@ -421,21 +420,6 @@ def test_in_memory_data_context_configuration(
         mode=ConfigOutputModes.DICT
     )
     project_config_dict["plugins_directory"] = None
-    project_config_dict["validation_operators"] = {
-        "action_list_operator": {
-            "class_name": "ActionListValidationOperator",
-            "action_list": [
-                {
-                    "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction"},
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": {"class_name": "UpdateDataDocsAction"},
-                },
-            ],
-        }
-    }
 
     # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.  # noqa: E501
     project_config_dict = dataContextConfigSchema.dump(project_config_dict)

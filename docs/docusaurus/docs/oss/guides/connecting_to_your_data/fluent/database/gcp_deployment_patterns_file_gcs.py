@@ -243,7 +243,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # adding datasource
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py datasource">
-datasource = context.sources.add_pandas_gcs(
+datasource = context.data_sources.add_pandas_gcs(
     name="gcs_datasource", bucket_or_name="test_docs_data"
 )
 # </snippet>
@@ -290,19 +290,3 @@ validator.expect_column_values_to_be_between(
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py save_expectation_suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
-
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py checkpoint">
-checkpoint = context.add_or_update_checkpoint(
-    name="gcs_checkpoint",
-    validations=[
-        {"batch_request": batch_request, "expectation_suite_name": "test_gcs_suite"}
-    ],
-)
-# </snippet>
-
-
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py run_checkpoint">
-checkpoint_result = checkpoint.run()
-# </snippet>
-
-assert checkpoint_result.success is True

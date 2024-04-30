@@ -14,10 +14,7 @@ def is_valid_us_county_name(county: str):
     list_of_counties = [d["name"] for d in dict_of_counties if "name" in d]
     if len(county) > 33 or type(county) != str:  # noqa: E721
         return False
-    if county in list_of_counties:
-        return True
-    else:
-        return False
+    return county in list_of_counties
 
 
 # This class defines a Metric to support your Expectation.
