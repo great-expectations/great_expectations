@@ -133,9 +133,15 @@ class MetricRetriever(abc.ABC):
         return batch_id, computed_metrics, aborted_metrics
 
     def _get_columns_to_exclude(self, table_column_types: Metric) -> List[str]:
+        """
+        Excludes columns that are unsuppoted or missing type metadata
+        """
         columns_to_skip: List[str] = []
+        UNSUPPORTED_COLUMN_TYPES = ["TIME"]
         for column_type in table_column_types.value:
             if not column_type.get("type"):
+                columns_to_skip.append(column_type["name"])
+            if column_type.get("type") in UNSUPPORTED_COLUMN_TYPES:
                 columns_to_skip.append(column_type["name"])
         return columns_to_skip
 
