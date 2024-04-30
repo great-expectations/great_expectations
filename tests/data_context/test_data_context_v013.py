@@ -152,7 +152,7 @@ def test__normalize_absolute_or_relative_path(tmp_path_factory, basic_data_conte
         "test__normalize_absolute_or_relative_path__dir"
         not in context._normalize_absolute_or_relative_path("/yikes")
     )
-    assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
+    assert context._normalize_absolute_or_relative_path("/yikes") == "/yikes"
 
 
 @pytest.mark.filesystem

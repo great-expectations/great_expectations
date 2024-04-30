@@ -550,7 +550,7 @@ def type_schema(  # noqa: C901 - too complex
 
         if (
             datasource_dir.name.startswith("Pandas")
-            and _PANDAS_SCHEMA_VERSION != pandas.__version__
+            and pandas.__version__ != _PANDAS_SCHEMA_VERSION
         ):
             print(
                 f"🙈  {name} - was generated with pandas"
@@ -639,7 +639,7 @@ def docs(
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
-        docs_builder.create_version(version=parse_version(version))  # type: ignore[arg-type]
+        docs_builder.create_version(version=parse_version(version))
     elif start:
         ctx.run(" ".join(["yarn start"]), echo=True)
     elif clear:
@@ -920,7 +920,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",  # noqa: E501
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud, etc. Can be specified multiple times.",  # noqa: E501
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )

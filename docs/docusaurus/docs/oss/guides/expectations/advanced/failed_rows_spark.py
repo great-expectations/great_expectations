@@ -21,7 +21,7 @@ context = gx.get_context(project_root_dir=".")
 # </snippet>
 
 # add datasource and asset
-data_asset = context.sources.add_spark_filesystem(
+data_asset = context.data_sources.add_spark_filesystem(
     name="visits_datasource", base_directory=folder_path
 ).add_csv_asset(
     name="visits",

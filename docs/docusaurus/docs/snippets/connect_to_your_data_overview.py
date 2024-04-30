@@ -2,7 +2,7 @@
 import great_expectations as gx
 
 context = gx.get_context()
-context.sources.add_pandas_filesystem(
+context.data_sources.add_pandas_filesystem(
     name="my_pandas_datasource", base_directory="./data"
 )
 # </snippet>

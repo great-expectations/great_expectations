@@ -50,7 +50,7 @@ class TestSnowflake:
         then we should expect a TestConnectionError.
         https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#connection-parameters
         """  # noqa: E501
-        snowflake_ds: SnowflakeDatasource = context.sources.add_snowflake(
+        snowflake_ds: SnowflakeDatasource = context.data_sources.add_snowflake(
             "my_ds", connection_string=connection_string
         )
 
@@ -96,7 +96,7 @@ class TestSnowflake:
     def test_queryable_asset_should_pass_test_connection(
         self, context: DataContext, connection_string: str
     ):
-        snowflake_ds: SnowflakeDatasource = context.sources.add_snowflake(
+        snowflake_ds: SnowflakeDatasource = context.data_sources.add_snowflake(
             "my_ds", connection_string=connection_string
         )
 

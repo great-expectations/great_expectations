@@ -767,7 +767,7 @@ def test_yaml_config_round_trip_ordering(
 ):
     dumped: str = from_yaml_gx_config.yaml()
 
-    assert PG_CONFIG_YAML_STR == dumped
+    assert dumped == PG_CONFIG_YAML_STR
 
 
 @pytest.mark.xfail(reason="Custom Sorter serialization logic needs to be implemented")
@@ -952,7 +952,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     )
 
     # add a new datasource
-    context.sources.add_sqlite("my_new_one", connection_string="sqlite://")
+    context.data_sources.add_sqlite("my_new_one", connection_string="sqlite://")
 
     # add a new asset to an existing data
     sqlite_ds_w_subs: SqliteDatasource = context.get_datasource(  # type: ignore[assignment]

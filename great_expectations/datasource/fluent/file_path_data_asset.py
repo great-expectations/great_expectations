@@ -20,7 +20,9 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.partitioners import RegexPartitioner
+from great_expectations.core.partitioners import (
+    RegexPartitioner,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
@@ -28,6 +30,7 @@ from great_expectations.datasource.fluent.batch_request import (
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
+    FilePathDataConnector,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
@@ -43,9 +46,6 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
-        DataConnector,
-    )
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -89,7 +89,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
     _all_group_names: List[str] = pydantic.PrivateAttr()
 
     # `_data_connector`` should be set inside `_build_data_connector()`
-    _data_connector: DataConnector = pydantic.PrivateAttr()
+    _data_connector: FilePathDataConnector = pydantic.PrivateAttr()
     # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
     _test_connection_error_message: str = pydantic.PrivateAttr("Could not connect to your asset")
 
@@ -117,7 +117,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
         self._all_group_index_to_group_name_mapping = (
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
-        self._all_group_names = self._regex_parser.get_all_group_names()
+        self._all_group_names = self._regex_parser.group_names()
 
     @override
     def get_batch_parameters_keys(

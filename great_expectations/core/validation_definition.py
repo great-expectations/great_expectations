@@ -202,7 +202,7 @@ class ValidationDefinition(BaseModel):
         *,
         batch_parameters: Optional[BatchParameters] = None,
         suite_parameters: Optional[dict[str, Any]] = None,
-        result_format: ResultFormat = ResultFormat.SUMMARY,
+        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(

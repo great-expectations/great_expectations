@@ -125,10 +125,7 @@ def remove_but_not_in(line_working_contents, phrase):
 
 
 def phrase_in_line(line_working_contents, phrase):
-    for possible_phrase in phrase.one_of_these:
-        if possible_phrase in line_working_contents:
-            return True
-    return False
+    return any(possible_phrase in line_working_contents for possible_phrase in phrase.one_of_these)
 
 
 def phrase_is_tagged_in_line(line_working_contents, phrase):

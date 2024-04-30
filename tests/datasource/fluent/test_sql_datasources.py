@@ -113,7 +113,7 @@ class TestConfigPasstrough:
         monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
         context = ephemeral_context_with_defaults
-        ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
+        ds = context.data_sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
         print(ds)
         ds.test_connection()
 
@@ -136,7 +136,7 @@ class TestConfigPasstrough:
         monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
         context = ephemeral_context_with_defaults
-        ds = context.sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
+        ds = context.data_sources.add_or_update_sql(name="my_datasource", **ds_kwargs)
         print(ds)
         gx_execution_engine: SqlAlchemyExecutionEngine = ds.get_execution_engine()
         print(f"{gx_execution_engine=}")
@@ -322,11 +322,11 @@ def test_specific_datasource_warnings(
 
     if suggested_datasource_class:
         with pytest.warns(GxDatasourceWarning, match=suggested_datasource_class):
-            context.sources.add_sql(name="my_datasource", connection_string=connection_string)
+            context.data_sources.add_sql(name="my_datasource", connection_string=connection_string)
     else:
         with warnings.catch_warnings():
             warnings.simplefilter("error")  # should already be the default
-            context.sources.add_sql(
+            context.data_sources.add_sql(
                 name="my_datasource", connection_string=connection_string
             ).test_connection()
 

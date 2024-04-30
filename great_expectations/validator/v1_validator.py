@@ -30,7 +30,7 @@ class Validator:
     def __init__(
         self,
         batch_definition: BatchDefinition,
-        result_format: ResultFormat = ResultFormat.SUMMARY,
+        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         batch_parameters: Optional[BatchParameters] = None,
     ) -> None:
         self._batch_definition = batch_definition
@@ -82,6 +82,12 @@ class Validator:
     def active_batch_id(self) -> Optional[str]:
         return self._wrapped_validator.active_batch_id
 
+    @property
+    def _include_rendered_content(self) -> bool:
+        from great_expectations import project_manager
+
+        return project_manager.is_using_cloud()
+
     @cached_property
     def _wrapped_validator(self) -> OldValidator:
         batch_request = self._batch_definition.build_batch_request(
@@ -99,9 +105,19 @@ class Validator:
             expectation_configs, suite_parameters
         )
 
+        runtime_configuration: dict
+        if isinstance(self.result_format, ResultFormat):
+            runtime_configuration = {"result_format": self.result_format.value}
+        else:
+            runtime_configuration = {"result_format": self.result_format}
+
         results = self._wrapped_validator.graph_validate(
             configurations=processed_expectation_configs,
-            runtime_configuration={"result_format": self.result_format.value},
+            runtime_configuration=runtime_configuration,
         )
+
+        if self._include_rendered_content:
+            for result in results:
+                result.render()
 
         return results

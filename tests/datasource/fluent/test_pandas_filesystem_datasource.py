@@ -20,11 +20,11 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (  # type: ignore[attr-defined] # is defined but private
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
     JSONAsset,
-    _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.sources import _get_field_details
 
@@ -210,13 +210,13 @@ class TestDynamicPandasAssets:
             )
 
         errors_dict = exc_info.value.errors()
-        assert {
+        assert errors_dict[  # the extra keyword error will always be the last error
+            -1  # we don't care about any other errors for this test
+        ] == {
             "loc": ("invalid_keyword_arg",),
             "msg": "extra fields not permitted",
             "type": "value_error.extra",
-        } == errors_dict[  # the extra keyword error will always be the last error
-            -1  # we don't care about any other errors for this test
-        ]
+        }
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
@@ -259,7 +259,7 @@ class TestDynamicPandasAssets:
         extra_kwargs: dict,
     ):
         batch_request = (
-            empty_data_context.sources.add_pandas_filesystem(  # .build_batch_request
+            empty_data_context.data_sources.add_pandas_filesystem(  # .build_batch_request
                 "my_pandas",
                 base_directory=csv_path,
             )
@@ -341,13 +341,13 @@ def test_invalid_connect_options(
 
     error_dicts = exc_info.value.errors()
     print(pf(error_dicts))
-    assert [
+    assert error_dicts == [
         {
             "loc": ("glob_foobar",),
             "msg": "extra fields not permitted",
             "type": "value_error.extra",
         }
-    ] == error_dicts
+    ]
 
 
 @pytest.mark.unit
@@ -375,13 +375,13 @@ def test_invalid_connect_options_value(
     if isinstance(exc_info.value, pydantic.ValidationError):
         error_dicts = exc_info.value.errors()
         print(pf(error_dicts))
-        assert [
+        assert error_dicts == [
             {
                 "loc": ("glob_directive",),
                 "msg": "str type expected",
                 "type": "type_error.str",
             }
-        ] == error_dicts
+        ]
 
 
 @pytest.mark.unit

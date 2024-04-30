@@ -1902,7 +1902,7 @@ def should_we_generate_this_test(  # noqa: C901, PLR0911, PLR0912, PLR0913
         if backend not in expectation_test_case.only_for:
             if "sqlalchemy" in expectation_test_case.only_for and backend in SQL_DIALECT_NAMES:
                 return True
-            elif "pandas" == backend:
+            elif backend == "pandas":
                 major, minor, *_ = pd.__version__.split(".")
                 if (
                     "pandas_022" in expectation_test_case.only_for

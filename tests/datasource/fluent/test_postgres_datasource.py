@@ -438,7 +438,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_parameters(
                 options={"month": month, "year": year}, partitioner=partitioner
             )
         )
-        assert 1 == len(batches)
+        assert len(batches) == 1
         assert batches[0].metadata == {"month": month, "year": year}
 
 
@@ -916,7 +916,7 @@ def test_adding_partitioner_persists_results(
         strict=True
     )
 
-    empty_data_context.sources.add_postgres(
+    empty_data_context.data_sources.add_postgres(
         name="my_datasource",
         connection_string="postgresql://postgres:@localhost/not_a_real_db",
     ).add_query_asset(

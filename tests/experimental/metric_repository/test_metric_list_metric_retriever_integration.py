@@ -25,7 +25,7 @@ def cloud_context_and_batch_request_with_simple_dataframe(
     empty_cloud_context_fluent: CloudDataContext,  # used as a fixture
 ):
     context = empty_cloud_context_fluent
-    datasource = context.sources.add_pandas(name="my_pandas_datasource")
+    datasource = context.data_sources.add_pandas(name="my_pandas_datasource")
 
     d = {
         "numeric_with_nulls_1": [1, 2, None],
