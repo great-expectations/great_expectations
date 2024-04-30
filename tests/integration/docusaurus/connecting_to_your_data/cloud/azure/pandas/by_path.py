@@ -28,7 +28,7 @@ asset = datasource.add_csv_asset(
 
 batch_definition = asset.add_batch_definition_path(
     "abs batch definition",
-    path="yellow_tripdata_sample_2019-02.csv",
+    path=f"{NAME_STARTS_WITH}yellow_tripdata_sample_2019-02.csv",
 )
 
 batch_request = batch_definition.build_batch_request()

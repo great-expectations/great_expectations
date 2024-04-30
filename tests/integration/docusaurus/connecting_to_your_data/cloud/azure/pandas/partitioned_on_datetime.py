@@ -38,6 +38,7 @@ batch_definition = asset.add_batch_definition_monthly(
 batch_request = batch_definition.build_batch_request()
 batch_list = asset.get_batch_list_from_batch_request(batch_request)
 
+print(len(batch_list))
 assert len(batch_list) == 3
 
 # second batch request: passing in parameters
