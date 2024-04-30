@@ -7,7 +7,7 @@ import pytest
 import great_expectations.expectations as gxe
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.partitioners import PartitionerYear
+from great_expectations.core.partitioners import PartitionerYearAndMonthAndDay
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -77,7 +77,7 @@ def batch_definition(
 def batch_definition_with_yearly_partitioner(
     fds_data_asset_with_event_type_partitioner: DataAsset,
 ) -> BatchDefinition:
-    partitioner = PartitionerYear(column_name="event_type")
+    partitioner = PartitionerYearAndMonthAndDay(column_name="date")
     batch_definition = BatchDefinition(name="test_batch_definition", partitioner=partitioner)
     batch_definition.set_data_asset(fds_data_asset_with_event_type_partitioner)
     return batch_definition
@@ -156,19 +156,19 @@ def test_validate_expectation_failure(validator: Validator, failing_expectation:
 @pytest.mark.unit
 def test_validate_expectation_with_batch_asset_options(
     fds_data_context: AbstractDataContext,
-        batch_definition_with_yearly_partitioner,
+    batch_definition_with_yearly_partitioner,
 ):
-    desired_event_type = "start"
+    YEAR = 2020
+    MONTH = 1
+    DAY = 1
+    EXPECTED_ROW_COUNT = 4
     validator = Validator(
         batch_definition=batch_definition_with_yearly_partitioner,
-        batch_parameters={"event_type": desired_event_type},
+        batch_parameters={"year": YEAR, "month": MONTH, "day": DAY},
     )
 
     result = validator.validate_expectation(
-        gxe.ExpectColumnValuesToBeInSet(
-            column="event_type",
-            value_set=[desired_event_type],
-        )
+        gxe.ExpectTableRowCountToEqual(value=EXPECTED_ROW_COUNT)
     )
     print(f"Result dict ->\n{pf(result)}")
     assert result.success
