@@ -126,13 +126,11 @@ Create a Data Asset to define the data you want GX Cloud to access within Snowfl
 
 6. Click **Connect**.
 
-7. Select **Table Asset** or **Query Asset** and complete the following fields:
+7. Complete the following fields:
 
-    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    - **Table name**: Enter a name for the table you're creating in the Data Asset.
     
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
-
-    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
 
 8. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
@@ -167,13 +165,11 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 5. Click **Connect**.
 
-6. Select **Table Asset** or **Query Asset** and complete the following fields:
+6. Complete the following fields:
 
-    - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
+    - **Table name**: Enter a name for the table you're creating in the Data Asset.
     
-    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
-
-    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
+    - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
 
 7. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
