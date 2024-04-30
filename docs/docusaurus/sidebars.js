@@ -688,7 +688,13 @@ module.exports = {
   ],
   learn: [
       'reference/learn/usage_statistics',
-      'reference/learn/glossary'
+      'reference/learn/glossary',
+      {
+        type: 'category',
+        label: 'Use cases',
+        link: { type: 'doc', id: 'learn/use_cases_lp' },
+        description: 'Example use cases and implementations with GX Cloud and GX OSS.',
+      },
   ],
 }
 
