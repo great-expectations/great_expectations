@@ -2163,7 +2163,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     # handle the edge case of a non-existent datasource
                     data_asset_names[datasource_name] = {}
 
-        fluent_and_config_data_asset_names = {
+        fluent_and_config_data_asset_names: Dict[Any, Any] = {
             **data_asset_names,
             **fluent_data_asset_names,
         }
