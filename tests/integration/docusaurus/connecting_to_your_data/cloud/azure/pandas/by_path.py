@@ -20,17 +20,15 @@ datasource = context.data_sources.add_pandas_abs(
     },
 )
 
-data_asset_name = "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 asset = datasource.add_csv_asset(
-    name=data_asset_name,
-    batching_regex="(.*)\\.csv",
+    name="taxi_yellow_tripdata_samples",
     abs_container=CONTAINER,
     abs_name_starts_with=NAME_STARTS_WITH,
 )
 
 batch_definition = asset.add_batch_definition_path(
     "abs batch definition",
-    path="yellow_tripdata_sample_2019-01.csv",
+    path="yellow_tripdata_sample_2019-02.csv",
 )
 
 batch_request = batch_definition.build_batch_request()
