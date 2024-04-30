@@ -672,7 +672,7 @@ def test_get_metrics_with_timestamp_columns_exclude_time(mocker: MockerFixture):
     mock_context.get_validator.return_value = mock_validator
     computed_metrics = {
         ("table.row_count", (), ()): 2,
-        ("table.columns", (), ()): ["timestamp_col","time_col"],
+        ("table.columns", (), ()): ["timestamp_col", "time_col"],
         ("table.column_types", (), "include_nested=True"): [
             {"name": "timestamp_col", "type": "TIMESTAMP_NTZ"},
             {"name": "time_col", "type": "TIME"},
@@ -725,13 +725,16 @@ def test_get_metrics_with_timestamp_columns_exclude_time(mocker: MockerFixture):
         TableMetric[List[str]](
             batch_id="batch_id",
             metric_name="table.columns",
-            value=["timestamp_col","time_col"],
+            value=["timestamp_col", "time_col"],
             exception=None,
         ),
         TableMetric[List[str]](
             batch_id="batch_id",
             metric_name="table.column_types",
-            value=[{"name": "timestamp_col", "type": "TIMESTAMP_NTZ"},{"name": "time_col", "type": "TIME"}],
+            value=[
+                {"name": "timestamp_col", "type": "TIMESTAMP_NTZ"},
+                {"name": "time_col", "type": "TIME"},
+            ],
             exception=None,
         ),
         ColumnMetric[str](
