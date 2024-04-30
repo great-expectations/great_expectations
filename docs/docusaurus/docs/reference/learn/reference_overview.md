@@ -21,6 +21,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
 ## Supplemental Information
 
 <LinkCardGrid>
+  <LinkCard topIcon label="Use cases" description="Example use cases and implementations with GX Cloud and GX OSS." to="/learn/use_cases_lp" icon="/img/use_case_icon.svg.svg" />
   <LinkCard topIcon label="Usage statistics" description="Learn what usage statistics are collected and how they are used" to="/reference/learn/usage_statistics" icon="/img/statistics_icon.svg" />
   <LinkCard topIcon label="Glossary" description="An alphabetical list of GX terms and words with definitions" to="/reference/learn/glossary" icon="/img/glossary_icon.svg" />
 </LinkCardGrid>
