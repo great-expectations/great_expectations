@@ -36,10 +36,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource import (
-    Datasource,
-    LegacyDatasource,
-)
+from great_expectations.datasource import Datasource
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -302,11 +299,6 @@ def test_update_datasource_persists_changes_with_store(
     context.update_datasource(datasource=datasource_to_update)
 
     assert mock_update_by_name.call_count == 1
-
-
-@pytest.mark.unit
-def test_data_context_get_datasource(titanic_data_context):
-    isinstance(titanic_data_context.get_datasource("mydatasource"), LegacyDatasource)
 
 
 @pytest.mark.filesystem
