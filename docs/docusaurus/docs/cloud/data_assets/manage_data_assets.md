@@ -75,11 +75,9 @@ Define the data you want GX Cloud to access within Snowflake.
 
     - **Role**: Enter your Snowflake role.
 
-7. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+7. Click **Connect**.
 
-8. Click **Continue**.
-
-9. Select **Table Asset** or **Query Asset** and complete the following fields:
+8. Select **Table Asset** or **Query Asset** and complete the following fields:
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
     
@@ -87,17 +85,17 @@ Define the data you want GX Cloud to access within Snowflake.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-10. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+9. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
     - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
 
     - **Column of datetime type** - Enter the name of the column containing the date and time data.
 
-11. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-12. Click **Finish**.
+11. Click **Finish**.
 
-13. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+12. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 </TabItem>
 <TabItem value="PostgreSQL">
@@ -132,11 +130,9 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 5. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
 
-6. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+6. Click **Connect**.
 
-7. Click **Continue**.
-
-8. Select **Table Asset** or **Query Asset** and complete the following fields:
+7. Select **Table Asset** or **Query Asset** and complete the following fields:
 
     - **Table name**: When **Table Asset** is selected, enter a name for the table you're creating in the Data Asset.
     
@@ -144,17 +140,17 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the table. 
 
-9. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+8. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
     - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
 
     - **Column of datetime type** - Enter the name of the column containing the date and time data.
 
-10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+9. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-11. Click **Finish**.
+10. Click **Finish**.
 
-12. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+11. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
 </TabItem>
 </Tabs>
@@ -272,13 +268,13 @@ Edit Data Source settings to update Data Source connection information or access
 
 4. Optional. Edit the Data Source name.
 
-5. Optional. If you used a connection string to connect to the Data Source, click the **Use connection string** slider and edit the Data Source connection string.
+5. Optional. If you used a connection string to connect to the Data Source, click the **Connection string** tab and edit the Data Source connection string.
 
 6. Optional. If you're not using a connection string, edit the following fields:
     
+     - **Account identifier**: Enter new Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
+     
      - **Username**: Enter a new Snowflake username.
-
-    - **Account identifier**: Enter new Snowflake account or locator information. The locator value must include the geographical region. For example, `us-east-1`. To locate these values see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier).
 
     - **Password**: Enter the password for the Snowflake user you're connecting to GX Cloud. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 

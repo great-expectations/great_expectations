@@ -47,11 +47,9 @@ To validate data stored in a PostgreSQL database from GX Cloud, you must add the
 
 6. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
 
-7. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+7. Click **Connect**.
 
-8. Click **Continue**.
-
-9. Select **Table Asset** or **Query Asset** and complete the following fields:
+8. Select **Table Asset** or **Query Asset** and complete the following fields:
 
     - **Table name**: When **Table Asset** is selected, enter the name of the Data Source table you're connecting to.
     
@@ -59,14 +57,14 @@ To validate data stored in a PostgreSQL database from GX Cloud, you must add the
 
     - **Query**: When **Query Asset** is selected, enter the query that you want to run on the Data Asset. 
 
-10. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+9. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
     - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
 
     - **Column of datetime type** - Enter the name of the column containing the date and time data.
 
-11. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+10. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-12. Click **Finish**.
+11. Click **Finish**.
 
-13. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+12. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
