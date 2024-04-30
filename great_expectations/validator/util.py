@@ -4,7 +4,6 @@ from __future__ import annotations
 import datetime
 import decimal
 import sys
-from functools import wraps
 from typing import Any
 
 import numpy as np
@@ -12,73 +11,6 @@ import pandas as pd
 
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot, SerializableDotDict
-
-
-def parse_result_format(result_format):
-    """This is a simple helper utility that can be used to parse a string result_format into the dict format used
-    internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
-    there is no need to specify a custom partial_unexpected_count."""  # noqa: E501
-    if isinstance(result_format, str):
-        result_format = {"result_format": result_format, "partial_unexpected_count": 20}
-    else:  # noqa: PLR5501
-        if "partial_unexpected_count" not in result_format:
-            result_format["partial_unexpected_count"] = 20
-
-    return result_format
-
-
-"""Docstring inheriting descriptor. Note that this is not a docstring so that this is not added to @DocInherit-\
-decorated functions' hybrid docstrings.
-
-Usage::
-
-    class Foo(object):
-        def foo(self):
-            "Frobber"
-            pass
-
-    class Bar(Foo):
-        @DocInherit
-        def foo(self):
-            pass
-
-    Now, Bar.foo.__doc__ == Bar().foo.__doc__ == Foo.foo.__doc__ == "Frobber"
-
-    Original implementation cribbed from:
-    https://stackoverflow.com/questions/2025562/inherit-docstrings-in-python-class-inheritance,
-    following a discussion on comp.lang.python that resulted in:
-    http://code.activestate.com/recipes/576862/. Unfortunately, the
-    original authors did not anticipate deep inheritance hierarchies, and
-    we ran into a recursion issue when implementing custom subclasses of
-    PandasDataset:
-    https://github.com/great-expectations/great_expectations/issues/177.
-
-    Our new homegrown implementation directly searches the MRO, instead
-    of relying on super, and concatenates documentation together.
-"""  # noqa: E501
-
-
-class DocInherit:
-    def __init__(self, mthd) -> None:
-        self.mthd = mthd
-        self.name = mthd.__name__
-        self.mthd_doc = mthd.__doc__
-
-    def __get__(self, obj, cls):
-        doc = self.mthd_doc if self.mthd_doc is not None else ""
-
-        for parent in cls.mro():
-            if self.name not in parent.__dict__:
-                continue
-            if parent.__dict__[self.name].__doc__ is not None:
-                doc = f"{doc}\n{parent.__dict__[self.name].__doc__}"
-
-        @wraps(self.mthd, assigned=("__name__", "__module__"))
-        def f(*args, **kwargs):
-            return self.mthd(obj, *args, **kwargs)
-
-        f.__doc__ = doc
-        return f
 
 
 def recursively_convert_to_json_serializable(

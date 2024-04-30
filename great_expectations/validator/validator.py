@@ -40,7 +40,6 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.data_context.types.base import CheckpointValidationDefinition
 from great_expectations.exceptions import (
     GreatExpectationsError,
@@ -71,6 +70,7 @@ from great_expectations.validator.metrics_calculator import (
     _AbortedMetricsInfoDict,
     _MetricsDict,
 )
+from great_expectations.validator.util import recursively_convert_to_json_serializable
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
     MetricEdge,
