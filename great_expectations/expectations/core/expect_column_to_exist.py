@@ -112,7 +112,7 @@ class ExpectColumnToExist(BatchExpectation):
     """  # noqa: E501
 
     column: str
-    column_index: Union[int, SuiteParameterDict, None]
+    column_index: Union[int, SuiteParameterDict, None] = None
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
