@@ -12,6 +12,7 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+from great_expectations.datasource.fluent.sql_datasource import _SQLAsset
 from great_expectations.expectations.expectation import Expectation
 from great_expectations.validator.v1_validator import Validator
 
@@ -60,19 +61,21 @@ def fds_data_asset_with_event_type_partitioner(
 ) -> DataAsset:
     datasource = fds_data_context.get_datasource(fds_data_context_datasource_name)
     assert isinstance(datasource, Datasource)
-    return datasource.get_asset("trip_asset_partition_by_event_type")
+    asset = datasource.get_asset("trip_asset_partition_by_event_type")
+    assert isinstance(asset, _SQLAsset)
+    return asset
 
 
 @pytest.fixture
 def batch_definition(
-    fds_data_asset: DataAsset,
+    fds_data_asset: _SQLAsset,
 ) -> BatchDefinition:
     return fds_data_asset.add_batch_definition_whole_table(name="test_batch_definition")
 
 
 @pytest.fixture
 def batch_definition_with_yearly_partitioner(
-    fds_data_asset: DataAsset,
+    fds_data_asset: _SQLAsset,
 ) -> BatchDefinition:
     return fds_data_asset.add_batch_definition_daily(name="test_batch_definition", column="date")
 
