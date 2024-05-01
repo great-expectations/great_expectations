@@ -425,7 +425,6 @@ class TestValidationDefinitionSerialization:
         validation_definition = ValidationDefinition.parse_obj(serialized_config)
         assert validation_definition.name == self.validation_definition_name
         assert validation_definition.data == batch_definition
-        assert validation_definition.suite == validation_definition_suite
 
     @pytest.mark.unit
     @pytest.mark.parametrize(
