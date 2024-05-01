@@ -32,9 +32,6 @@ from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._data_assistants.data_assistant.data_assistant_dispatcher import (
-    DataAssistantDispatcher,
-)
 from great_expectations._docs_decorators import (
     deprecated_method_or_class,
     new_argument,
@@ -121,6 +118,9 @@ if not SQLAlchemyError:
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
+    from great_expectations._data_assistants.data_assistant.data_assistant_dispatcher import (
+        DataAssistantDispatcher,
+    )
     from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
@@ -280,8 +280,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._suite_parameter_dependencies_compiled = False
         self._suite_parameter_dependencies: dict = {}
 
-        self._assistants = DataAssistantDispatcher(data_context=self)
-
+        self._init_assistants()
         self._init_factories()
 
         self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
@@ -306,6 +305,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._validation_definitions: ValidationDefinitionFactory = ValidationDefinitionFactory(
             store=self.validation_definition_store
         )
+
+    def _init_assistants(self) -> None:
+        from great_expectations._data_assistants.data_assistant.data_assistant_dispatcher import (
+            DataAssistantDispatcher,
+        )
+
+        self._assistants = DataAssistantDispatcher(data_context=self)
 
     def _init_analytics(self) -> None:
         init_analytics(
