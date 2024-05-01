@@ -19,11 +19,6 @@ from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.partitioners import (
     ColumnPartitioner,
-    PartitionerColumnValue,
-    PartitionerDatetimePart,
-    PartitionerDividedInteger,
-    PartitionerModInteger,
-    PartitionerMultiColumnValue,
     PartitionerYear,
     PartitionerYearAndMonth,
     PartitionerYearAndMonthAndDay,
@@ -475,21 +470,6 @@ def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
         (
             PartitionerYearAndMonthAndDay,
             {"column_name": "my_col"},
-            (None, None, {"bad": None}),
-        ),
-        (
-            PartitionerDatetimePart,
-            {"column_name": "my_col", "datetime_parts": ["year"]},
-            (None, None, {"bad": None}),
-        ),
-        (
-            PartitionerColumnValue,
-            {"column_name": "my_col"},
-            (None, None, {"bad": None}),
-        ),
-        (
-            PartitionerDividedInteger,
-            {"column_name": "my_col", "divisor": 3},
             (None, None, {"bad": None}),
         ),
     ],
@@ -1112,64 +1092,6 @@ def test_partitioner_year_and_month_and_day(
             1,
             {"year": 2020, "month": 2, "day": 10},
             id="year_and_month_and_day",
-        ),
-        pytest.param(
-            PartitionerDatetimePart,
-            {
-                "column_name": "pickup_datetime",
-                "datetime_parts": ["year", "month", "day"],
-            },
-            [
-                {"year": 2020, "month": 2, "day": 10},
-                {"year": 2020, "month": 2, "day": 12},
-            ],
-            2,
-            {"year": 2020, "month": 2},
-            2,
-            {"year": 2020, "month": 2, "day": 12},
-            id="datetime_part",
-        ),
-        pytest.param(
-            PartitionerColumnValue,
-            {"column_name": "passenger_count"},
-            [(1,), (None,), (2,)],
-            3,
-            {"passenger_count": 2},
-            1,
-            {"passenger_count": 2},
-            id="column_value",
-        ),
-        pytest.param(
-            PartitionerDividedInteger,
-            {"column_name": "passenger_count", "divisor": 3},
-            [(1,), (2,)],
-            2,
-            {"quotient": 2},
-            1,
-            {"quotient": 2},
-            id="divisor",
-        ),
-        pytest.param(
-            PartitionerModInteger,
-            {"column_name": "passenger_count", "mod": 3},
-            [(1,), (2,)],
-            2,
-            {"remainder": 2},
-            1,
-            {"remainder": 2},
-            id="mod_integer",
-        ),
-        pytest.param(
-            PartitionerMultiColumnValue,
-            {"column_names": ["passenger_count", "payment_type"]},
-            # These types are (passenger_count, payment_type), that is in column_names order.
-            # datetime partitioners return dicts while all other partitioners return tuples.
-            [(3, 1), (1, 1), (1, 2)],
-            3,
-            {"passenger_count": 1},
-            2,
-            {"passenger_count": 1, "payment_type": 2},
-            id="multi_column_values",
         ),
     ],
 )
