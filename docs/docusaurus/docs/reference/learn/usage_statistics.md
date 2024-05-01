@@ -1,8 +1,8 @@
 ---
-title: Usage statistics
+title: What we track
 ---
 
-To help us improve Great Expectations, by default we track event data when certain Data Context-enabled commands are run. Our [blog post from April 2020](https://greatexpectations.io/blog/anonymized-usage-statistics) explains a little bit more about what we want to capture with usage statistics and why! The usage statistics include things like the OS and python version, and which GX features are used. You can see the exact schemas for all of our messages [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/usage_statistics/schemas.py).
+To help us improve Great Expectations, by default we track event data when certain Data Context-enabled commands are run. Our [blog post from April 2020](https://greatexpectations.io/blog/anonymized-usage-statistics) explains more about what we want to capture with usage statistics and why! The usage statistics include things like the OS and python version, and which GX features are used. You can see the exact schemas for all of our messages [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/usage_statistics/schemas.py).
 
 While we hope you'll leave them on, you can easily disable usage statistics for a Data Context by adding the following to your data context configuration:
 

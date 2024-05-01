@@ -172,6 +172,10 @@ module.exports = {
               label: 'Community',
               to: 'https://greatexpectations.io/community',
             },
+            {
+              label: 'What we track',
+              to: '/docs/reference/learn/usage_statistics',
+            },
           ],
           position: 'right',
         },
