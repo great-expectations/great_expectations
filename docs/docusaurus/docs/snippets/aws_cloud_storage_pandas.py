@@ -16,7 +16,7 @@ yaml: YAMLHandler = YAMLHandler()
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py imports">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context(mode="file", project_root_dir=full_path_to_project_directory)
 # </snippet>
 
 # parse great_expectations.yml for comparison

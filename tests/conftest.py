@@ -758,7 +758,7 @@ def empty_data_context(
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
-    context = gx.data_context.FileDataContext.create(project_path)
+    context = gx.get_context(mode="file", project_root_dir=project_path)
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
@@ -793,7 +793,7 @@ def data_context_with_connection_to_metrics_db(
     project_path = tmp_path / "test_configuration"
     project_path.mkdir()
     project_path = str(project_path)
-    context = gx.data_context.FileDataContext.create(project_path)
+    context = gx.get_context(mode="file", project_root_dir=project_path)
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
@@ -1409,7 +1409,7 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
-    context = gx.data_context.FileDataContext.create(project_path)
+    context = gx.get_context(mode="file", project_root_dir=project_path)
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
@@ -1742,7 +1742,7 @@ def v20_project_directory(tmp_path_factory):
 def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
-    created with DataContext.create()
+    created with gx.get_context()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
@@ -1774,7 +1774,7 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
 def data_context_parameterized_expectation_suite(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
-    created with DataContext.create()
+    created with gx.get_context()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
@@ -1806,7 +1806,7 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
 def data_context_simple_expectation_suite(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
-    created with DataContext.create()
+    created with gx.get_context()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
