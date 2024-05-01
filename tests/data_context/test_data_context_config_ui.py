@@ -1,6 +1,6 @@
 import copy
 import os
-from typing import Dict, Final, Optional
+from typing import Any, Dict, Final, Optional
 from unittest import mock
 
 import pytest
@@ -1451,8 +1451,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
     )
 
     data_context_config_schema = DataContextConfigSchema()
+    dumped_schema: Any = data_context_config_schema.dump(data_context_config)
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config),
+        properties=dumped_schema,
         clean_falsy=True,
     ) == filter_properties_dict(
         properties=desired_config,
