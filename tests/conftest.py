@@ -764,7 +764,7 @@ def empty_data_context(
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
     project_manager.set_project(context)
-    return context  # type: ignore[return-value]
+    return context
 
 
 @pytest.fixture(scope="function")
@@ -824,7 +824,7 @@ def data_context_with_connection_to_metrics_db(
 
     context._save_project_config()
     project_manager.set_project(context)
-    return context  # type: ignore[return-value]
+    return context
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import great_expectations as gx
 from great_expectations.data_context.data_context.file_data_context import (
@@ -76,9 +76,7 @@ class FileMigrator:
 
     def _scaffold_filesystem(self) -> FileDataContext:
         path = pathlib.Path.cwd().absolute()
-        target_context = cast(
-            FileDataContext, gx.get_context(mode="file", project_root_dir=str(path))
-        )
+        target_context = gx.get_context(mode="file", project_root_dir=str(path))
         logger.info("Scaffolded necessary directories for a file-backed context")
 
         return target_context
