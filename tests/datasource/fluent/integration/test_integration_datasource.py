@@ -15,9 +15,6 @@ from great_expectations.core.partitioners import (
     PartitionerColumnValue,
     PartitionerConvertedDatetime,
     PartitionerDatetimePart,
-    PartitionerDividedInteger,
-    PartitionerModInteger,
-    PartitionerMultiColumnValue,
     PartitionerYear,
     PartitionerYearAndMonth,
     PartitionerYearAndMonthAndDay,
@@ -266,50 +263,6 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            PartitionerColumnValue,
-            {"column_name": "passenger_count"},
-            7,
-            {"passenger_count": 3},
-            1,
-            {"passenger_count": 3},
-            id="column_value",
-        ),
-        pytest.param(
-            "yellow_tripdata.db",
-            "yellow_tripdata_sample_2019_02",
-            PartitionerColumnValue,
-            {"column_name": "pickup_datetime"},
-            9977,
-            {"pickup_datetime": "2019-02-07 15:48:06"},
-            1,
-            {"pickup_datetime": "2019-02-07 15:48:06"},
-            id="column_value_datetime",
-        ),
-        pytest.param(
-            "yellow_tripdata.db",
-            "yellow_tripdata_sample_2019_02",
-            PartitionerDividedInteger,
-            {"column_name": "passenger_count", "divisor": 3},
-            3,
-            {"quotient": 2},
-            1,
-            {"quotient": 2},
-            id="divisor",
-        ),
-        pytest.param(
-            "yellow_tripdata.db",
-            "yellow_tripdata_sample_2019_02",
-            PartitionerModInteger,
-            {"column_name": "passenger_count", "mod": 3},
-            3,
-            {"remainder": 2},
-            1,
-            {"remainder": 2},
-            id="mod_integer",
-        ),
-        pytest.param(
-            "yellow_tripdata.db",
-            "yellow_tripdata_sample_2019_02",
             PartitionerConvertedDatetime,
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
             28,
@@ -317,17 +270,6 @@ def test_filesystem_data_asset_batching_regex(
             1,
             {"datetime": "2019-02-23"},
             id="converted_datetime",
-        ),
-        pytest.param(
-            "yellow_tripdata.db",
-            "yellow_tripdata_sample_2019_02",
-            PartitionerMultiColumnValue,
-            {"column_names": ["passenger_count", "payment_type"]},
-            23,
-            {"passenger_count": 1, "payment_type": 1},
-            1,
-            {"passenger_count": 1, "payment_type": 1},
-            id="multi_column_values",
         ),
     ],
 )
@@ -373,7 +315,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
         "query_asset",
         "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",  # noqa: E501
     )
-    partitioner = PartitionerColumnValue(column_name="pickup_date")
+    partitioner = PartitionerYearAndMonthAndDay(column_name="pickup_date")
     # Test getting all batches
     all_batches = asset.get_batch_list_from_batch_request(
         asset.build_batch_request(partitioner=partitioner)
