@@ -388,11 +388,9 @@ def test_add_expectation(
     domain_success_runtime_suite,
 ):
     assert len(single_expectation_suite.expectations) == 1
-    # assert not single_expectation_suite.isEquivalentTo(baseline_suite)
     single_expectation_suite.add_expectation_configuration(
         exp2, match_type="runtime", overwrite_existing=False
     )
-    # assert single_expectation_suite.isEquivalentTo(baseline_suite)
     assert len(single_expectation_suite.expectations) == 2
 
     # Should raise if overwrite_existing=False and a matching expectation is found
@@ -401,11 +399,9 @@ def test_add_expectation(
             exp4, match_type="domain", overwrite_existing=False
         )
 
-    # assert not single_expectation_suite.isEquivalentTo(different_suite)
     single_expectation_suite.add_expectation_configuration(
         exp4, match_type="domain", overwrite_existing=True
     )
-    # assert single_expectation_suite.isEquivalentTo(different_suite)
     assert len(single_expectation_suite.expectations) == 2
 
     # Should raise if more than one matching expectation is found
