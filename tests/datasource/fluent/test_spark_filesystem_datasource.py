@@ -15,8 +15,8 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.core.partitioners import (
-    PartitionerColumnValue,
     PartitionerMonthly,
+    PartitionerYear,
     PartitionerYearly,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -55,9 +55,6 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def spark_filesystem_datasource(empty_data_context, test_backends) -> SparkFilesystemDatasource:
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
     base_directory_rel_path = pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     base_directory_abs_path = (
         pathlib.Path(__file__).parent.joinpath(base_directory_rel_path).resolve(strict=True)
@@ -769,7 +766,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         asset.build_batch_request({"year": 2018, "month": "04"})
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 @pytest.mark.parametrize(
     "path",
     [
@@ -795,7 +792,7 @@ def test_get_batch_list_from_directory_one_batch(
     assert len(batches) == 1
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 @pytest.mark.parametrize(
     "path",
     [
@@ -827,7 +824,7 @@ def test_get_batch_list_from_directory_merges_files(
     assert batch_data.dataframe.count() == 12 * 10000  # type: ignore[attr-defined]
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 def test_get_batch_list_from_fully_specified_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -851,7 +848,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert batch.id == "spark_filesystem_datasource-csv_asset-year_2018-month_04"
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 def test_get_batch_list_from_partially_specified_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -891,7 +888,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     assert expected_year_month == batch_year_month
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 @pytest.mark.parametrize(
     "order_by",
     [
@@ -975,7 +972,7 @@ def test_spark_sorter(
             assert metadata[key2] == range2
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 @pytest.mark.parametrize(
     "batch_slice, expected_batch_count",
     [
@@ -1064,7 +1061,7 @@ def test_test_connection_failures(
     assert str(e.value) == str(test_connection_error)
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 def test_get_batch_list_from_batch_request_does_not_modify_input_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -1084,7 +1081,7 @@ def test_get_batch_list_from_batch_request_does_not_modify_input_batch_request(
     assert len(batches) == 12
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 def test_add_csv_asset_with_batch_metadata(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -1129,7 +1126,7 @@ def expected_num_records_directory_asset_no_partitioner_2020_passenger_count_2(
     )
     pre_partitioner_batch_data = pre_partitioner_batches[0].data
     expected_num_records = pre_partitioner_batch_data.dataframe.filter(  # type: ignore[attr-defined]
-        F.col("passenger_count") == 2
+        F.col("pickup_datetime") == 2
     ).count()
     assert expected_num_records == 37, "Check that the referenced data hasn't changed"
     return expected_num_records
@@ -1149,26 +1146,26 @@ def directory_asset(
 
 
 @pytest.fixture
-def column_value_partitioner():
-    return PartitionerColumnValue(column_name="passenger_count")
+def year_partitioner():
+    return PartitionerYear(column_name="passenger_count")
 
 
 class TestPartitionerDirectoryAsset:
     @pytest.mark.unit
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_batch_parameters(
-        self, directory_asset, column_value_partitioner
+        self, directory_asset, year_partitioner
     ):
-        assert directory_asset.get_batch_parameters_keys(partitioner=column_value_partitioner) == (
+        assert directory_asset.get_batch_parameters_keys(partitioner=year_partitioner) == (
             "path",
-            "passenger_count",
+            "year",
         )
 
     @pytest.mark.unit
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_one_batch(
-        self, directory_asset, column_value_partitioner
+        self, directory_asset, year_partitioner
     ):
         post_passenger_count_partitioner_batch_request = directory_asset.build_batch_request(
-            options={"passenger_count": 2}, partitioner=column_value_partitioner
+            options={"year": 2020}, partitioner=year_partitioner
         )
         post_passenger_count_partitioner_batch_list = (
             directory_asset.get_batch_list_from_batch_request(
@@ -1185,12 +1182,12 @@ class TestPartitionerDirectoryAsset:
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_one_batch_size(
         self,
         directory_asset,
-        column_value_partitioner,
+        year_partitioner,
         expected_num_records_directory_asset_no_partitioner_2020_passenger_count_2: int,
     ):
         post_partitioner_batch_request = directory_asset.build_batch_request(
-            options={"passenger_count": 2},
-            partitioner=column_value_partitioner,
+            options={"year": 2020},
+            partitioner=year_partitioner,
         )
         post_partitioner_batch_list = directory_asset.get_batch_list_from_batch_request(
             post_partitioner_batch_request
@@ -1278,9 +1275,9 @@ def file_asset(
 class TestPartitionerFileAsset:
     @pytest.mark.unit
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_batch_parameters(
-        self, file_asset, column_value_partitioner
+        self, file_asset, year_partitioner
     ):
-        assert file_asset.get_batch_parameters_keys(partitioner=column_value_partitioner) == (
+        assert file_asset.get_batch_parameters_keys(partitioner=year_partitioner) == (
             "year",
             "month",
             "path",
@@ -1289,11 +1286,11 @@ class TestPartitionerFileAsset:
 
     @pytest.mark.unit
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_one_batch(
-        self, file_asset, column_value_partitioner
+        self, file_asset, year_partitioner
     ):
         post_passenger_count_partitioner_batch_request = file_asset.build_batch_request(
             options={"year": "2020", "month": "11", "passenger_count": 2},
-            partitioner=column_value_partitioner,
+            partitioner=year_partitioner,
         )
         post_passenger_count_partitioner_batch_list = file_asset.get_batch_list_from_batch_request(
             post_passenger_count_partitioner_batch_request
@@ -1308,12 +1305,12 @@ class TestPartitionerFileAsset:
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_one_batch_size(
         self,
         file_asset,
-        column_value_partitioner,
+        year_partitioner,
         expected_num_records_file_asset_no_partitioner_2020_10_passenger_count_2: int,
     ):
         post_partitioner_batch_request = file_asset.build_batch_request(
             options={"year": "2020", "month": "11", "passenger_count": 2},
-            partitioner=column_value_partitioner,
+            partitioner=year_partitioner,
         )
         post_partitioner_batch_list = file_asset.get_batch_list_from_batch_request(
             post_partitioner_batch_request
