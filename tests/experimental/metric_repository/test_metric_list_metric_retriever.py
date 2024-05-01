@@ -137,14 +137,8 @@ def test_get_metrics_full_list(mocker: MockerFixture, mock_context, mock_validat
         aborted_metrics,
     )
 
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
-        return_value=["col1", "col2"],
-    )
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
-        return_value=[],
-    )
+    patch_get_numeric_column_names_with(mocker, ["col1", "col2"])
+    patch_get_timestamp_column_names_with(mocker, [])
     metrics = metric_retriever.get_metrics(
         batch_request=mock_batch_request,
         metric_list=metrics_list,
@@ -262,14 +256,7 @@ def test_column_metrics_not_returned_if_column_types_missing(mocker: MockerFixtu
         aborted_metrics,
     )
 
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
-        return_value=[],
-    )
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
-        return_value=["timestamp_col"],
-    )
+    patch_get_numeric_column_names_with(mocker, ["timestamp_col"])
     metrics = metric_retriever.get_metrics(
         batch_request=mock_batch_request, metric_list=metrics_list
     )
@@ -289,6 +276,13 @@ def test_column_metrics_not_returned_if_column_types_missing(mocker: MockerFixtu
         ),
     ]
     assert "TABLE_COLUMN_TYPES metric is required to compute column metrics." in caplog.text
+
+
+def patch_get_numeric_column_names_with(mocker, return_value):
+    mocker.patch(
+        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
+        return_value=return_value,
+    )
 
 
 def test_get_metrics_metrics_missing(mocker: MockerFixture, mock_context, mock_validator, mock_batch_request, metric_retriever):
@@ -315,14 +309,8 @@ def test_get_metrics_metrics_missing(mocker: MockerFixture, mock_context, mock_v
         mock_computed_metrics,
         mock_aborted_metrics,
     )
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
-        return_value=["col1", "col2"],
-    )
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
-        return_value=[],
-    )
+    patch_get_numeric_column_names_with(mocker, ["col1", "col2"])
+    patch_get_timestamp_column_names_with(mocker,[])
     metrics = metric_retriever.get_metrics(
         batch_request=mock_batch_request, metric_list=metrics_list
     )
@@ -369,6 +357,13 @@ def test_get_metrics_metrics_missing(mocker: MockerFixture, mock_context, mock_v
             column="col2",
         ),
     ]
+
+
+def patch_get_timestamp_column_names_with(mocker, return_value):
+    mocker.patch(
+        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
+        return_value=return_value,
+    )
 
 
 def test_get_metrics_with_exception(mocker: MockerFixture, mock_context, mock_validator, mock_batch_request, metric_retriever):
@@ -483,14 +478,9 @@ def test_get_metrics_with_column_type_missing(mocker: MockerFixture, mock_contex
         MetricTypes.COLUMN_MIN,
     ]
 
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
-        return_value=["col1", "col2"],
-    )
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
-        return_value=[],
-    )
+    patch_get_numeric_column_names_with(mocker, ["col1", "col2"])
+    patch_get_timestamp_column_names_with(mocker, [])
+
     metrics = metric_retriever.get_metrics(
         batch_request=mock_batch_request, metric_list=metrics_list
     )
@@ -559,14 +549,9 @@ def test_get_metrics_with_timestamp_columns(mocker: MockerFixture, mock_context,
         computed_metrics,
         aborted_metrics,
     )
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
-        return_value=[],
-    )
-    mocker.patch(
-        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
-        return_value=["timestamp_col"],
-    )
+    patch_get_numeric_column_names_with(mocker, [])
+    patch_get_timestamp_column_names_with(mocker, ["timestamp_col"])
+
     metrics = metric_retriever.get_metrics(
         batch_request=mock_batch_request, metric_list=metrics_list
     )
