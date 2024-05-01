@@ -121,7 +121,7 @@ def test_get_metrics_full_list(mocker: MockerFixture, mock_context, mock_validat
         ("column_values.null.count", "column=col1", ()): 1,
         ("column_values.null.count", "column=col2", ()): 1,
     }
-    cdm_metrics_list = [
+    metrics_list = [
         MetricTypes.TABLE_ROW_COUNT,
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
@@ -147,7 +147,7 @@ def test_get_metrics_full_list(mocker: MockerFixture, mock_context, mock_validat
     )
     metrics = metric_retriever.get_metrics(
         batch_request=mock_batch_request,
-        metric_list=cdm_metrics_list,
+        metric_list=metrics_list,
     )
 
     assert metrics == [
@@ -248,7 +248,7 @@ def test_column_metrics_not_returned_if_column_types_missing(mocker: MockerFixtu
         ("table.row_count", (), ()): 2,
         ("table.columns", (), ()): ["timestamp_col"],
     }
-    cdm_metrics_list: List[MetricTypes] = [
+    metrics_list: List[MetricTypes] = [
         MetricTypes.TABLE_ROW_COUNT,
         MetricTypes.TABLE_COLUMNS,
         # MetricTypes.TABLE_COLUMN_TYPES,
@@ -271,7 +271,7 @@ def test_column_metrics_not_returned_if_column_types_missing(mocker: MockerFixtu
         return_value=["timestamp_col"],
     )
     metrics = metric_retriever.get_metrics(
-        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+        batch_request=mock_batch_request, metric_list=metrics_list
     )
 
     assert metrics == [
@@ -304,7 +304,7 @@ def test_get_metrics_metrics_missing(mocker: MockerFixture, mock_context, mock_v
         ("column.min", "column=col2", ()): 2.7,
     }
 
-    cdm_metrics_list: List[MetricTypes] = [
+    metrics_list: List[MetricTypes] = [
         MetricTypes.TABLE_ROW_COUNT,
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
@@ -324,7 +324,7 @@ def test_get_metrics_metrics_missing(mocker: MockerFixture, mock_context, mock_v
         return_value=[],
     )
     metrics = metric_retriever.get_metrics(
-        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+        batch_request=mock_batch_request, metric_list=metrics_list
     )
     assert metrics == [
         TableMetric[int](
@@ -403,14 +403,14 @@ def test_get_metrics_with_exception(mocker: MockerFixture, mock_context, mock_va
         computed_metrics,
         aborted_metrics,
     )
-    cdm_metrics_list: List[MetricTypes] = [
+    metrics_list: List[MetricTypes] = [
         MetricTypes.TABLE_ROW_COUNT,
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
     ]
 
     metrics = metric_retriever.get_metrics(
-        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+        batch_request=mock_batch_request, metric_list=metrics_list
     )
 
     assert metrics == [
@@ -476,7 +476,7 @@ def test_get_metrics_with_column_type_missing(mocker: MockerFixture, mock_contex
         computed_metrics,
         aborted_metrics,
     )
-    cdm_metrics_list: List[MetricTypes] = [
+    metrics_list: List[MetricTypes] = [
         MetricTypes.TABLE_ROW_COUNT,
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
@@ -492,7 +492,7 @@ def test_get_metrics_with_column_type_missing(mocker: MockerFixture, mock_contex
         return_value=[],
     )
     metrics = metric_retriever.get_metrics(
-        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+        batch_request=mock_batch_request, metric_list=metrics_list
     )
     assert metrics == [
         TableMetric[int](
@@ -546,7 +546,7 @@ def test_get_metrics_with_timestamp_columns(mocker: MockerFixture, mock_context,
         ("column.max", "column=timestamp_col", ()): "2023-12-31T00:00:00",
         ("column_values.null.count", "column=timestamp_col", ()): 1,
     }
-    cdm_metrics_list: List[MetricTypes] = [
+    metrics_list: List[MetricTypes] = [
         MetricTypes.TABLE_ROW_COUNT,
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
@@ -568,7 +568,7 @@ def test_get_metrics_with_timestamp_columns(mocker: MockerFixture, mock_context,
         return_value=["timestamp_col"],
     )
     metrics = metric_retriever.get_metrics(
-        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+        batch_request=mock_batch_request, metric_list=metrics_list
     )
 
     assert metrics == [
@@ -626,7 +626,7 @@ def test_get_metrics_only_gets_a_validator_once(mocker: MockerFixture, mock_cont
             {"name": "col2", "type": "float"},
         ],
     }
-    cdm_metrics_list: List[MetricTypes] = [
+    metrics_list: List[MetricTypes] = [
         MetricTypes.TABLE_ROW_COUNT,
         MetricTypes.TABLE_COLUMNS,
         MetricTypes.TABLE_COLUMN_TYPES,
@@ -639,21 +639,21 @@ def test_get_metrics_only_gets_a_validator_once(mocker: MockerFixture, mock_cont
         f"{ColumnDomainBuilder.__module__}.{ColumnDomainBuilder.__name__}.get_effective_column_names",
         return_value=["col1", "col2"],
     )
-    metric_retriever.get_metrics(batch_request=mock_batch_request, metric_list=cdm_metrics_list)
+    metric_retriever.get_metrics(batch_request=mock_batch_request, metric_list=metrics_list)
 
     mock_context.get_validator.assert_called_once_with(batch_request=mock_batch_request)
 
 
 def test_get_metrics_with_no_metrics(mock_context, mock_validator, mock_batch_request, metric_retriever):
     computed_metrics = {}
-    cdm_metrics_list: List[MetricTypes] = []
+    metrics_list: List[MetricTypes] = []
     aborted_metrics = {}
     mock_validator.compute_metrics.return_value = (
         computed_metrics,
         aborted_metrics,
     )
     with pytest.raises(ValueError):
-        metric_retriever.get_metrics(batch_request=mock_batch_request, metric_list=cdm_metrics_list)
+        metric_retriever.get_metrics(batch_request=mock_batch_request, metric_list=metrics_list)
 
 
 def test_valid_metric_types_true(mock_context, metric_retriever):
