@@ -18,6 +18,7 @@ Use one of the following methods to request support:
 
 Use one of the following methods to request support:
 
+- Create a new topic on the [GX Cloud Discourse forum](https://discourse.greatexpectations.io/c/oss-support/11).
 - Post a message in the [GX Slack community channel](https://greatexpectationstalk.slack.com/archives/CUTCNHN82).
 - Open an issue in the [GX GitHub repository](https://github.com/great-expectations/great_expectations) when you encounter a bug.
 

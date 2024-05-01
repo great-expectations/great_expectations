@@ -13,6 +13,7 @@ import pandas as pd
 import pytest
 from typing_extensions import override
 
+import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import (
     expectationSuiteSchema,
@@ -60,8 +61,7 @@ parameterized_expectation_suite_name = "my_dag_node.default"
 @pytest.fixture
 def data_context_with_bad_datasource(tmp_path_factory):
     """
-    This data_context is *manually* created to have the config we want, vs
-    created with DataContext.create()
+    This data_context is *manually* created to have the config we want.
 
     This DataContext has a connection to a datasource named my_postgres_db
     which is not a valid datasource.
@@ -483,20 +483,19 @@ def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    FileDataContext.create(project_path)
+    gx.get_context(mode="file", project_root_dir=project_path)
 
 
 @pytest.fixture()
 def empty_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    FileDataContext.create(project_path)
     ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
+    context = get_context(context_root_dir=ge_dir)
+    assert isinstance(context, FileDataContext)
     assert os.path.isdir(ge_dir)  # noqa: PTH112
     assert os.path.isfile(  # noqa: PTH113
         os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
     )
-    context = get_context(context_root_dir=ge_dir)
-    assert isinstance(context, FileDataContext)
     return context
 
 
@@ -674,13 +673,12 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    FileDataContext.create(project_path)
+    gx.get_context(mode="file", project_root_dir=project_path)
     ge_yml = os.path.join(project_path, "gx/great_expectations.yml")  # noqa: PTH118
     with open(ge_yml, "a") as ff:
         ff.write("# LOOK I WAS MODIFIED")
 
-    with pytest.warns(UserWarning):
-        FileDataContext.create(project_path)
+    gx.get_context(mode="file", project_root_dir=project_path)
 
     with open(ge_yml) as ff:
         obs = ff.read()
@@ -692,16 +690,15 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    FileDataContext.create(project_path)
+    gx.get_context(mode="file", project_root_dir=project_path)
 
     # mangle the existing setup
     ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     shutil.rmtree(uncommitted_dir)
 
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
-        # re-run create to simulate onboarding
-        FileDataContext.create(project_path)
+    # re-run create to simulate onboarding
+    gx.get_context(mode="file", project_root_dir=project_path)
     obs = gen_directory_tree_str(ge_dir)
 
     assert os.path.isdir(  # noqa: PTH112
@@ -761,14 +758,13 @@ gx/
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
 
-    FileDataContext.create(project_path)
+    gx.get_context(mode="file", project_root_dir=project_path)
     fixture = gen_directory_tree_str(ge_dir)
 
     assert fixture == expected
 
-    with pytest.warns(UserWarning, match="Warning. An existing `great_expectations.yml` was found"):
-        # re-run create to simulate onboarding
-        FileDataContext.create(project_path)
+    # re-run create to simulate onboarding
+    gx.get_context(mode="file", project_root_dir=project_path)
 
     obs = gen_directory_tree_str(ge_dir)
     assert obs == expected
@@ -786,7 +782,7 @@ uncommitted/
     project_path = str(tmp_path_factory.mktemp("stuff"))
     ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
-    FileDataContext.create(project_path)
+    gx.get_context(mode="file", project_root_dir=project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
     assert fixture == expected
 
@@ -804,7 +800,7 @@ uncommitted/
 @pytest.mark.filesystem
 def test_data_context_create_builds_base_directories(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context = FileDataContext.create(project_path)
+    context = gx.get_context(mode="file", project_root_dir=project_path)
     assert isinstance(context, FileDataContext)
 
     for directory in [
@@ -823,7 +819,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    FileDataContext.create(project_path)
+    gx.get_context(mode="file", project_root_dir=project_path)
     ge_dir = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     config_vars_yml = os.path.join(  # noqa: PTH118
@@ -835,8 +831,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
         ff.write("# LOOK I WAS MODIFIED")
 
     # re-run create to simulate onboarding
-    with pytest.warns(UserWarning):
-        FileDataContext.create(project_path)
+    gx.get_context(mode="file", project_root_dir=project_path)
 
     with open(config_vars_yml) as ff:
         obs = ff.read()

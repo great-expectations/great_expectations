@@ -14,7 +14,7 @@ yaml: YAMLHandler = YAMLHandler()
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py get_context">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context(mode="file", project_root_dir=full_path_to_project_directory)
 # </snippet>
 
 # NOTE: The following code is only for testing and depends on an environment

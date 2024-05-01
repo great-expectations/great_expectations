@@ -1,21 +1,16 @@
 import datetime
 import decimal
-import json
 import platform
 import sys
-from functools import wraps
 
 import numpy as np
 import pytest
+from numpy.lib.npyio import DataSource
 
-import great_expectations as gx
-from great_expectations.self_check.util import expectationSuiteSchema
+from great_expectations import validator
 
 
 @pytest.mark.big
-@pytest.mark.filterwarnings(
-    "ignore:partition_data*:DeprecationWarning:great_expectations.dataset.util"
-)
 def test_recursively_convert_to_json_serializable(tmp_path):
     x = {
         "w": ["aaaa", "bbbb", 1.3, 5, 6, 7],
@@ -35,19 +30,19 @@ def test_recursively_convert_to_json_serializable(tmp_path):
         "np.uint": np.uint([20, 5, 6]),
         "np.uint8": np.uint8([40, 10, 12]),
         "np.uint64": np.uint64([80, 20, 24]),
-        "np.float_": np.float_([3.2, 5.6, 7.8]),
+        "np.float_": np.float64([3.2, 5.6, 7.8]),
         "np.float32": np.float32([5.999999999, 5.6]),
         "np.float64": np.float64([5.9999999999999999999, 10.2]),
         # 'np.complex64': np.complex64([10.9999999 + 4.9999999j, 11.2+7.3j]),
         # 'np.complex128': np.complex128([20.999999999978335216827+10.99999999j, 22.4+14.6j]),
         # 'np.complex256': np.complex256([40.99999999 + 20.99999999j, 44.8+29.2j]),
-        "np.str": np.unicode_(["hello"]),
+        "np.str": np.str_(["hello"]),
         "yyy": decimal.Decimal(123.456),
     }
     if hasattr(np, "float128") and platform.system() != "Windows":
         x["np.float128"] = np.float128([5.999999999998786324399999999, 20.4])
 
-    x = gx.data_asset.util.recursively_convert_to_json_serializable(x)
+    x = validator.util.recursively_convert_to_json_serializable(x)
     assert isinstance(x["x"], list)
 
     assert isinstance(x["np.bool"][0], bool)
@@ -79,64 +74,5 @@ def test_recursively_convert_to_json_serializable(tmp_path):
 
     # TypeError when non-serializable numpy object is in dataset.
     with pytest.raises(TypeError):
-        y = {"p": np.DataSource(tmp_path)}
-        gx.data_asset.util.recursively_convert_to_json_serializable(y)
-
-
-"""
-The following Parent and Child classes are used for testing documentation inheritance.
-"""
-
-
-class Parent:
-    """Parent class docstring"""
-
-    @classmethod
-    def expectation(cls, func):
-        """Manages configuration and running of expectation objects."""
-
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            # wrapper logic
-            func(*args, **kwargs)
-
-        return wrapper
-
-    def override_me(self):
-        """Parent method docstring
-        Returns:
-            Unattainable abiding satisfaction.
-        """
-        raise NotImplementedError
-
-
-class Child(Parent):
-    """
-    Child class docstring
-    """
-
-    @gx.data_asset.util.DocInherit
-    @Parent.expectation
-    def override_me(self):
-        """Child method docstring
-        Returns:
-            Real, instantiable, abiding satisfaction.
-        """
-
-
-@pytest.mark.unit
-def test_doc_inheritance():
-    c = Child()
-
-    assert (
-        c.__getattribute__("override_me").__doc__
-        == """Child method docstring
-        Returns:
-            Real, instantiable, abiding satisfaction.
-        """
-        + "\n"
-        """Parent method docstring
-        Returns:
-            Unattainable abiding satisfaction.
-        """
-    )
+        y = {"p": DataSource(tmp_path)}
+        validator.util.recursively_convert_to_json_serializable(y)
