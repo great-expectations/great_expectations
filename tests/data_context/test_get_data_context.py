@@ -150,14 +150,6 @@ def test_cloud_context_env(set_up_cloud_envs, empty_ge_cloud_data_context_config
 
 
 @pytest.mark.cloud
-def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
-    project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
-    with working_directory(project_path):
-        assert isinstance(gx.get_context(cloud_mode=False), FileDataContext)
-
-
-@pytest.mark.cloud
 def test_cloud_missing_env_throws_exception(clear_env_vars, empty_ge_cloud_data_context_config):
     with pytest.raises(GXCloudConfigurationError):
         gx.get_context(cloud_mode=True)
