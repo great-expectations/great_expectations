@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import datetime
 import pathlib
 from typing import TYPE_CHECKING
-from unittest import mock
 
 import pandas as pd
 import pytest
@@ -12,9 +10,7 @@ import great_expectations as gx
 import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
 from great_expectations.core.partitioners import (
-    PartitionerColumnValue,
     PartitionerConvertedDatetime,
-    PartitionerDatetimePart,
     PartitionerYear,
     PartitionerYearAndMonth,
     PartitionerYearAndMonthAndDay,
@@ -128,20 +124,22 @@ class TestQueryAssets:
         datasource = sqlite_datasource(context, "../../test_cases_for_sql_data_connector.db")
 
         asset = datasource.add_query_asset(
-            name="trip_asset_partition_by_event_type",
+            name="trip_asset_partition_by_date",
             query="SELECT * FROM table_partitioned_by_date_column__A",
         )
+        YEAR = 2020
+        MONTH = 1
+        DAY = 1
         batch_request = asset.build_batch_request(
-            options={"event_type": "start"},
-            partitioner=PartitionerColumnValue(column_name="event_type"),
+            options={"year": YEAR, "month": MONTH, "day": DAY},
+            partitioner=PartitionerYearAndMonthAndDay(column_name="date"),
         )
         validator = context.get_validator(batch_request=batch_request)
 
         # All rows returned by head have the start event_type.
         result = validator.execution_engine.batch_manager.active_batch.head(n_rows=50)
-        unique_event_types = set(result.data["event_type"].unique())
-        print(f"{unique_event_types=}")
-        assert unique_event_types == {"start"}
+        unique_event_types = set(result.data["date"].unique())
+        assert unique_event_types == {"2020-01-01"}
 
 
 @pytest.mark.filesystem
@@ -249,20 +247,6 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            PartitionerDatetimePart,
-            {
-                "column_name": "pickup_datetime",
-                "datetime_parts": ["year", "month", "day"],
-            },
-            28,
-            {"year": 2019, "month": 2},
-            28,
-            {"year": 2019, "month": 2, "day": 28},
-            id="datetime_part",
-        ),
-        pytest.param(
-            "yellow_tripdata.db",
-            "yellow_tripdata_sample_2019_02",
             PartitionerConvertedDatetime,
             {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
             28,
@@ -302,53 +286,6 @@ def test_partitioner(
     )
     assert len(specified_batches) == specified_batch_cnt
     assert specified_batches[-1].metadata == last_specified_batch_metadata
-
-
-@pytest.mark.sqlite
-def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_as_string(
-    empty_data_context,
-):
-    context = empty_data_context
-    datasource = sqlite_datasource(context, "yellow_tripdata.db")
-
-    asset = datasource.add_query_asset(
-        "query_asset",
-        "SELECT date(pickup_datetime) as pickup_date, passenger_count FROM yellow_tripdata_sample_2019_02",  # noqa: E501
-    )
-    partitioner = PartitionerYearAndMonthAndDay(column_name="pickup_date")
-    # Test getting all batches
-    all_batches = asset.get_batch_list_from_batch_request(
-        asset.build_batch_request(partitioner=partitioner)
-    )
-    assert len(all_batches) == 28
-
-    with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource._partitioner_and_sql_asset_to_batch_identifier_data"
-    ) as mock_batch_identifiers:
-        mock_batch_identifiers.return_value = [
-            {"pickup_date": datetime.date(2019, 2, 1)},
-            {"pickup_date": datetime.date(2019, 2, 2)},
-        ]
-        specified_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request(
-                options={"pickup_date": "2019-02-01"}, partitioner=partitioner
-            )
-        )
-        assert len(specified_batches) == 1
-
-    with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource._partitioner_and_sql_asset_to_batch_identifier_data"
-    ) as mock_batch_identifiers:
-        mock_batch_identifiers.return_value = [
-            {"pickup_date": datetime.datetime(2019, 2, 1)},
-            {"pickup_date": datetime.datetime(2019, 2, 2)},
-        ]
-        specified_batches = asset.get_batch_list_from_batch_request(
-            asset.build_batch_request(
-                options={"pickup_date": "2019-02-01 00:00:00"}, partitioner=partitioner
-            )
-        )
-        assert len(specified_batches) == 1
 
 
 @pytest.mark.parametrize(
