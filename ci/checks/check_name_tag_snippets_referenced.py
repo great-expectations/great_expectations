@@ -92,42 +92,11 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py datasource_config",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py python batch_request name table",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py batch request table name",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py datasource_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py test_yaml_config",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py add_datasource",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py datasource_config",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py get_context",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py yaml",
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory validator",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request validator",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py python",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py runtime_batch_request validator",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py runtime_batch_request",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py test_yaml_config",  # noqa: E501
     "docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config_2",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml_2",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py batch_request 1",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py batch_request example 2",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py datasource_config yaml",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py get_validator 1",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py get_validator example 2",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py import pandas",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py path",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py python datasource_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py python imports",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py yaml imports",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py batch_request 2019-02",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config add an InferredAssetDataConnector to a Datasource configuration",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config basic configuration with more than one Data Asset",  # noqa: E501
@@ -170,15 +139,6 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py runtime_batch_request",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py runtime_batch_request_2",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py validator_head",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py all batches",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py data_connector_query",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py first 5 batches from 2020",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py get_batch_list",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py get_validator",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py index data_connector_query",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py print(validator.batches)",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py print(validator.head())",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py twelve batches from 2020",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py add_datasource",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_filter_parameters",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_request",  # noqa: E501
@@ -189,46 +149,9 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py sampling batch size",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py split_on_column_value passenger_count",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add configureed asset data connector to datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py another_buggy_data_connector_yaml",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py buggy_data_connector_yaml",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml add granular group_names",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml only by filename and type",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py datasource_yaml",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_available_data_asset_names",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_context",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py imports",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py assertions",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py batch_request",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py datasource_yaml",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py get_context",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py imports",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py add_datasource_2",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py buggy_datasource_yaml",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_introspection",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables_partitioners",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py get_available_data_asset_names",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py get_context",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py imports",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_2",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_3",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_4",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py add_datasource",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py datasource_config",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py add datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py batch request",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py config",
-    "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py test yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py validator",  # noqa: E501
     "docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_batch_list",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_batch_request",
     "docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_data_docs_store",
@@ -333,14 +256,6 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py get_context",
     "tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py import_gx",
     "tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py update_expectation",
-    "tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py build_batch_request",  # noqa: E501
-    "tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py get_context",  # noqa: E501
-    "tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py get_validator_and_inspect_data",  # noqa: E501
-    "tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py imports",  # noqa: E501
-    "tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py inspect_data_no_jupyter",  # noqa: E501
-    "tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py interactive_validation",  # noqa: E501
-    "tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py interactive_validation_no_jupyter",  # noqa: E501
-    "tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py save_expectation_suite",  # noqa: E501
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_GCS_store",  # noqa: E501
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_store_name",  # noqa: E501
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml gs_site",
