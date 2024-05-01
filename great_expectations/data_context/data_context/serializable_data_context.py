@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -164,9 +163,8 @@ class SerializableDataContext(AbstractDataContext):
             and context_config_usage_stats.usage_statistics_url != global_usage_stats_url
         )
 
-    @public_api
     @classmethod
-    def create(
+    def _create(
         cls,
         project_root_dir: Optional[PathStr] = None,
         runtime_environment: Optional[dict] = None,
