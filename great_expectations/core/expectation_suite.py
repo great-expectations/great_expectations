@@ -19,7 +19,7 @@ from typing import (
     Union,
 )
 
-from marshmallow import Schema, ValidationError, fields, post_dump, post_load, pre_dump
+from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
@@ -315,59 +315,6 @@ class ExpectationSuite(SerializableDictDot):
         }
         gx.util.filter_properties_dict(properties=citation, clean_falsy=True, inplace=True)
         self.meta["citations"].append(citation)
-
-    # noinspection PyPep8Naming
-    def isEquivalentTo(self, other):
-        """
-        ExpectationSuite equivalence relies only on expectations and suite parameters. It does not include:
-        - data_asset_name
-        - name
-        - meta
-        """  # noqa: E501
-        if not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                try:
-                    # noinspection PyNoneFunctionAssignment,PyTypeChecker
-                    other_dict: dict = expectationSuiteSchema.load(other)
-                    other = ExpectationSuite(**other_dict)
-                except ValidationError:
-                    logger.debug(
-                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "  # noqa: E501
-                        "dict other could not be instantiated as an ExpectationConfiguration"
-                    )
-                    return NotImplemented
-            else:
-                # Delegate comparison to the other instance
-                return NotImplemented
-
-        exp_count_is_equal = len(self.expectations) == len(other.expectations)
-
-        exp_configs_are_equal = all(
-            mine.isEquivalentTo(theirs)
-            for (mine, theirs) in zip(
-                self.expectation_configurations, other.expectation_configurations
-            )
-        )
-
-        return exp_count_is_equal and exp_configs_are_equal
-
-    def __eq__(self, other):
-        """ExpectationSuite equality ignores instance identity, relying only on properties."""
-        if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
-        return all(
-            (
-                self.name == other.name,
-                self.expectations == other.expectations,
-                self.suite_parameters == other.suite_parameters,
-                self.meta == other.meta,
-            )
-        )
-
-    def __ne__(self, other):
-        # By using the == operator, the returned NotImplemented is handled correctly.
-        return not self == other
 
     def __repr__(self):
         return json.dumps(self.to_json_dict(), indent=2)

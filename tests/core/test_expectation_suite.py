@@ -5,7 +5,7 @@ import itertools
 from copy import copy, deepcopy
 from typing import Any, Dict, List, Union
 from unittest import mock
-from unittest.mock import MagicMock, Mock  # noqa: TID251
+from unittest.mock import Mock  # noqa: TID251
 from uuid import UUID, uuid4
 
 import pytest
@@ -22,7 +22,6 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
-    expectationSuiteSchema,
 )
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -806,166 +805,6 @@ class TestAddCitation:
         assert citation_keys == {"comment", "citation_date", "profiler_config"}
 
 
-class TestIsEquivalentTo:
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_and_dict_true(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """Suite should be equivalent to its dict representation."""
-        suite_with_single_expectation_dict: dict = expectationSuiteSchema.dump(
-            suite_with_single_expectation
-        )
-
-        assert suite_with_single_expectation.isEquivalentTo(suite_with_single_expectation_dict)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_and_dict_false(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        modified_suite = deepcopy(suite_with_single_expectation)
-        modified_suite.expectations[0].value_set[0] = -1
-
-        modified_suite_dict: dict = expectationSuiteSchema.dump(modified_suite)
-
-        assert not suite_with_single_expectation.isEquivalentTo(modified_suite_dict)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_invalid_expectation_config_dict_returns_notimplemented(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        return_value = suite_with_single_expectation.isEquivalentTo(
-            {"not_valid": "expectation_suite_config_dict"}
-        )
-        assert return_value == NotImplemented
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_unsupported_class_returns_notimplemented(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """If we are not comparing to an ExpectationSuite or dict then we should return NotImplemented."""  # noqa: E501
-
-        class UnsupportedClass:
-            pass
-
-        return_value = suite_with_single_expectation.isEquivalentTo(UnsupportedClass())
-        assert return_value == NotImplemented
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes(  # noqa: E501
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""  # noqa: E501
-        different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
-        different_but_equivalent_suite.name = "different_name"
-        different_but_equivalent_suite.meta = {"notes": "Different meta."}
-        different_but_equivalent_suite.id = "different_id"
-
-        assert suite_with_single_expectation.isEquivalentTo(different_but_equivalent_suite)
-        assert different_but_equivalent_suite.isEquivalentTo(suite_with_single_expectation)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_false(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""  # noqa: E501
-        different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
-        # Set different column in expectation kwargs
-        expectation = different_and_not_equivalent_suite.expectations[0]
-        expectation.column = "b"
-        expectation.value_set = [1, 2, 3]
-
-        assert not suite_with_single_expectation.isEquivalentTo(different_and_not_equivalent_suite)
-        assert not different_and_not_equivalent_suite.isEquivalentTo(suite_with_single_expectation)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_false_multiple_equivalent_expectations(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """Only expectation equivalence is considered for suite equivalence, and the same number of expectations in the suite is required for equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""  # noqa: E501
-        different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
-        # Add a copy of the existing expectation, using list .append() to bypass add_expectation logic to handle overwrite  # noqa: E501
-        different_and_not_equivalent_suite.expectations.append(
-            different_and_not_equivalent_suite._build_expectation(
-                expectation_configuration=different_and_not_equivalent_suite.expectation_configurations[
-                    0
-                ]
-            )
-        )
-        assert len(suite_with_single_expectation.expectations) == 1
-        assert len(different_and_not_equivalent_suite.expectations) == 2
-
-        assert not suite_with_single_expectation.isEquivalentTo(different_and_not_equivalent_suite)
-        assert not different_and_not_equivalent_suite.isEquivalentTo(suite_with_single_expectation)
-
-
-class TestEqDunder:
-    @pytest.mark.unit
-    def test_equality_to_unsupported_class_is_false(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """If we are not comparing to an ExpectationSuite or dict then we should return False."""
-
-        class UnsupportedClass:
-            pass
-
-        return_value = suite_with_single_expectation == UnsupportedClass()
-        assert not return_value
-
-    @pytest.mark.unit
-    def test_expectation_suite_equality_single_expectation_true(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
-        assert suite_with_single_expectation == different_but_equivalent_suite
-        assert different_but_equivalent_suite == suite_with_single_expectation
-
-        assert not suite_with_single_expectation != different_but_equivalent_suite
-        assert not different_but_equivalent_suite != suite_with_single_expectation
-
-    @pytest.mark.parametrize(
-        "attribute,new_value",
-        [
-            pytest.param("name", "different_name"),
-            pytest.param(
-                "data_context",
-                MagicMock(),
-                marks=pytest.mark.xfail(
-                    strict=True,
-                    raises=AssertionError,
-                    reason="Currently data_context is not considered in ExpectationSuite equality",
-                ),
-            ),
-            pytest.param("expectations", []),
-            pytest.param("suite_parameters", {"different": "suite_parameters"}),
-            pytest.param("meta", {"notes": "Different meta."}),
-            pytest.param(
-                "id",
-                "different_id",
-                marks=pytest.mark.xfail(
-                    strict=True,
-                    raises=AssertionError,
-                    reason="Currently id is not considered in ExpectationSuite equality",
-                ),
-            ),
-        ],
-    )
-    @pytest.mark.unit
-    def test_expectation_suite_equality_false(
-        self,
-        attribute: str,
-        new_value: Union[str, Dict[str, str]],
-        suite_with_single_expectation: ExpectationSuite,
-    ):
-        different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
-
-        setattr(different_but_equivalent_suite, attribute, new_value)
-
-        assert suite_with_single_expectation != different_but_equivalent_suite
-        assert different_but_equivalent_suite != suite_with_single_expectation
-        assert suite_with_single_expectation != different_but_equivalent_suite
-        assert different_but_equivalent_suite != suite_with_single_expectation
-
-
 # ### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up  # noqa: E501
 
 
@@ -1130,7 +969,6 @@ def profiler_config():
 @pytest.mark.unit
 def test_expectation_suite_copy(baseline_suite):
     suite_copy = copy(baseline_suite)
-    assert suite_copy == baseline_suite
     suite_copy.name = "blarg!"
     assert baseline_suite.name != "blarg"  # copy on primitive properties shouldn't propagate
 
@@ -1138,7 +976,6 @@ def test_expectation_suite_copy(baseline_suite):
 @pytest.mark.unit
 def test_expectation_suite_deepcopy(baseline_suite):
     suite_deepcopy = deepcopy(baseline_suite)
-    assert suite_deepcopy == baseline_suite
     suite_deepcopy.name = "blarg!"
     assert baseline_suite.name != "blarg"  # copy on primitive properties shouldn't propagate
     suite_deepcopy.expectation_configurations[0].meta["notes"] = "a different note"
