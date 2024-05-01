@@ -204,6 +204,17 @@ class SnowflakeDatasource(SQLDatasource):
 
     @override
     def get_engine(self) -> sqlalchemy.Engine:
+        # This import is here to avoid a circular import
+        from great_expectations.data_context import CloudDataContext
+
+        # This is used to set the application query parameter, which provides attribution to GX
+        # for the Snowflake Partner program.
+        if isinstance(self._data_context, CloudDataContext):
+            # TODO: Change this value to ""great_expectations_cloud" once configured in Snowflake partner account
+            snowflake_partner_application = "great_expectations_oss"
+        else:
+            snowflake_partner_application = "great_expectations_oss"
+
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 model_dict = self.dict(
@@ -218,10 +229,14 @@ class SnowflakeDatasource(SQLDatasource):
                 connection_string: str | dict = model_dict.pop("connection_string")
 
                 if isinstance(connection_string, str):
-                    self._engine = sa.create_engine(connection_string, **kwargs)
+                    self._engine = sa.create_engine(
+                        connection_string,
+                        connect_args={"application": snowflake_partner_application},
+                        **kwargs,
+                    )
                 else:
                     self._engine = self._build_engine_with_connect_args(
-                        **connection_string
+                        application=snowflake_partner_application, **connection_string
                     )
 
             except Exception as e:
