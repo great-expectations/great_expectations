@@ -271,7 +271,8 @@ def test_column_metrics_not_returned_if_column_types_missing(
         aborted_metrics,
     )
 
-    patch_get_numeric_column_names_with(mocker, ["timestamp_col"])
+    patch_get_numeric_column_names_with(mocker, [])
+    patch_get_timestamp_column_names_with(mocker, ["timestamp_col"])
     metrics = metric_retriever.get_metrics(
         batch_request=mock_batch_request, metric_list=metrics_list
     )
