@@ -19,7 +19,7 @@ path_to_project_root = "./my_project/"
 
 project_root_dir = pathlib.Path.cwd().absolute()
 path_to_context_root_folder = project_root_dir / FileDataContext.GX_DIR
-context = gx.data_context.FileDataContext.create(project_root_dir=project_root_dir)
+context = gx.get_context(mode="file", project_root_dir=project_root_dir)
 assert context
 assert context.root_directory == str(path_to_context_root_folder)
 

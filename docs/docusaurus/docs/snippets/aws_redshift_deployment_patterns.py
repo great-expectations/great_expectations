@@ -17,7 +17,7 @@ CONNECTION_STRING = get_redshift_connection_url()
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py imports">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context(mode="file", project_root_dir=full_path_to_project_directory)
 # </snippet>
 
 # parse great_expectations.yml for comparison

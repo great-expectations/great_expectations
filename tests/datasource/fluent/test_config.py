@@ -20,6 +20,7 @@ from typing import (  # TODO: revert use of cast
 
 import pytest
 
+import great_expectations as gx
 from great_expectations.compatibility import pydantic
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import PartitionerYearAndMonth
@@ -859,7 +860,7 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     """
     gx_yml = tmp_path / FileDataContext.GX_DIR / FileDataContext.GX_YML
     assert gx_yml.exists() is False
-    FileDataContext.create(tmp_path)
+    gx.get_context(mode="file", project_root_dir=tmp_path)
     assert gx_yml.exists()
 
     tmp_gx_dir = gx_yml.parent.absolute()
