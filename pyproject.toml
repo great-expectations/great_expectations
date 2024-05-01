@@ -103,20 +103,20 @@ exclude = [
     'render/renderer/profiling_results_overview_section_renderer\.py',                                     # 2
     'render/renderer/site_builder\.py',                                                                    # 3
     'render/renderer/slack_renderer\.py',                                                                  # 9
-    'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',                             # 8
-    'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',                                # 8
-    'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',                                      # 7
-    'rule_based_profiler/expectation_configuration_builder',                                               # 13
-    'rule_based_profiler/helpers/util\.py',                                                                # 46
-    'rule_based_profiler/parameter_builder/unexpected_count_statistics_multi_batch_parameter_builder\.py', # 69
-    'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
-    'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',                      # 15
-    'rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',        # 27
-    'rule_based_profiler/parameter_builder/parameter_builder\.py',                                         # 40
-    'rule_based_profiler/parameter_builder/partition_parameter_builder\.py',                               # 9
-    'rule_based_profiler/parameter_builder/regex_pattern_string_parameter_builder\.py',                    # 21
-    'rule_based_profiler/parameter_builder/simple_date_format_string_parameter_builder\.py',               # 20
-    'rule_based_profiler/rule_based_profiler\.py',                                                         # 40
+    '_data_assistants/domain_builder/map_metric_column_domain_builder\.py',                             # 8
+    '_data_assistants/estimators/bootstrap_numeric_range_estimator\.py',                                # 8
+    '_data_assistants/estimators/kde_numeric_range_estimator\.py',                                      # 7
+    '_data_assistants/expectation_configuration_builder',                                               # 13
+    '_data_assistants/helpers/util\.py',                                                                # 46
+    '_data_assistants/parameter_builder/unexpected_count_statistics_multi_batch_parameter_builder\.py', # 69
+    '_data_assistants/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
+    '_data_assistants/parameter_builder/metric_multi_batch_parameter_builder\.py',                      # 15
+    '_data_assistants/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',        # 27
+    '_data_assistants/parameter_builder/parameter_builder\.py',                                         # 40
+    '_data_assistants/parameter_builder/partition_parameter_builder\.py',                               # 9
+    '_data_assistants/parameter_builder/regex_pattern_string_parameter_builder\.py',                    # 21
+    '_data_assistants/parameter_builder/simple_date_format_string_parameter_builder\.py',               # 20
+    '_data_assistants/rule_based_profiler\.py',                                                         # 40
     # tests
     'tests/actions/test_core_actions\.py',
     'tests/checkpoint/test_checkpoint_result_format\.py',
