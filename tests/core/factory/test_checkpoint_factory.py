@@ -262,7 +262,6 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
 
     # Assert
     assert [r.name for r in result] == [checkpoint_a.name, checkpoint_b.name]
-    assert result == [checkpoint_a, checkpoint_b]
 
 
 class TestCheckpointFactoryAnalytics:

@@ -19,10 +19,11 @@ from great_expectations.exceptions import DataContextError
 def test_suite_factory_get_uses_store_get():
     # Arrange
     name = "test-suite"
+    id = "3a758816-64c8-46cb-8f7e-03c12cea1d67"
     store = Mock(spec=ExpectationsStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
-    suite_dict = {"name": name, "id": "3a758816-64c8-46cb-8f7e-03c12cea1d67"}
+    suite_dict = {"name": name, "id": id}
     store.get.return_value = suite_dict
     factory = SuiteFactory(store=store)
     context = Mock(spec=AbstractDataContext)
@@ -33,7 +34,8 @@ def test_suite_factory_get_uses_store_get():
 
     # Assert
     store.get.assert_called_once_with(key=key)
-    assert result == ExpectationSuite(name=name)
+    assert result.name == name
+    assert result.id == id
 
 
 @pytest.mark.unit

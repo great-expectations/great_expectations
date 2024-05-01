@@ -79,7 +79,9 @@ def test_add(request, store_fixture: str, validation_definition: ValidationDefin
     store.add(key=key, value=validation_definition)
     assert validation_definition.id
 
-    actual = store.get(key).dict()
+    actual_obj = store.get(key)
+    assert isinstance(actual_obj, ValidationDefinition)
+    actual = actual_obj.dict()
     expected = validation_definition.dict()
 
     # Suite equality not supported until migration to Pydantic
