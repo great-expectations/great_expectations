@@ -349,13 +349,6 @@ filterwarnings = [
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
     "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
 
-    # the pkg_resources module distributed with setuptools has been deprecated
-    # we should never use it but it is used in some of our dependencies
-    # https://setuptools.pypa.io/en/latest/pkg_resources.html
-    "once:pkg_resources is deprecated as an API:DeprecationWarning",
-    # ruamel, google, etc.
-    "once:Deprecated call to `pkg_resources.declare_namespace:DeprecationWarning",
-
     # --------------------------------------- Great Expectations Warnings ----------------------------------
     # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
     # but is still useful for building the configuration.
