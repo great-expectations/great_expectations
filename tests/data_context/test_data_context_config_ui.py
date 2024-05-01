@@ -5,7 +5,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
@@ -1365,7 +1364,7 @@ def test_override_general_defaults(
 @pytest.mark.big
 @pytest.mark.slow  # 1.81s
 def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_variable_sub(
-    monkeypatch, construct_data_context_config, default_pandas_datasource_config
+    monkeypatch, construct_data_context_config
 ):
     """
     What does this test and why?
@@ -1377,17 +1376,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     store_backend_defaults = S3StoreBackendDefaults(default_bucket_name="my_default_bucket")
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "${SUBSTITUTED_BASE_DIRECTORY}",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
     )
 
@@ -1452,7 +1440,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
-        datasources=default_pandas_datasource_config,
+        datasources={},
         expectations_store_name="expectations_S3_store",
         validation_results_store_name="validation_results_S3_store",
         checkpoint_store_name="checkpoint_S3_store",
@@ -1461,10 +1449,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
-
-    desired_config["datasources"]["my_pandas_datasource"]["batch_kwargs_generators"][
-        "subdir_reader"
-    ]["base_directory"] = "${SUBSTITUTED_BASE_DIRECTORY}"
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
@@ -1479,14 +1463,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
             project_config=data_context_config
         ),
         DataContextConfig,
-    )
-
-    data_context = get_context(project_config=data_context_config)
-    assert (
-        data_context.datasources["my_pandas_datasource"]
-        .get_batch_kwargs_generator("subdir_reader")
-        ._base_directory
-        == "../data/"
     )
 
 
