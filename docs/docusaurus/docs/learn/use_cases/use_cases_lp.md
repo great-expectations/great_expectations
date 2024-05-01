@@ -17,9 +17,9 @@ import OverviewCard from '@site/src/components/OverviewCard';
 </OverviewCard>
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Use case 1" description="Use case 1" to="/learn/use_case_1" icon="/img/use_case_icon.svg" />
-  <LinkCard topIcon label="Use case 2" description="Use case 2" to="/learn/use_case_2" icon="/img/use_case_icon.svg" />
-  <LinkCard topIcon label="Use case 3" description="Use case 3" to="/learn/use_case_3" icon="/img/use_case_icon.svg" />
+  <LinkCard topIcon label="Use case 1" description="Use case 1" to="/learn/use_cases/use_case_1" icon="/img/use_case_icon.svg" />
+  <LinkCard topIcon label="Use case 2" description="Use case 2" to="/learn/use_cases/use_case_2" icon="/img/use_case_icon.svg" />
+  <LinkCard topIcon label="Use case 3" description="Use case 3" to="/learn/use_cases/use_case_3" icon="/img/use_case_icon.svg" />
 </LinkCardGrid>
 
 
