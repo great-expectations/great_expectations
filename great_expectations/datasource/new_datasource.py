@@ -5,7 +5,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchMarkers,
@@ -23,7 +22,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class BaseDatasource:
     """A Datasource is the glue between an `ExecutionEngine` and a `DataConnector`. This class should be considered
     abstract and not directly instantiated; please use `Datasource` instead.
@@ -232,7 +230,6 @@ class BaseDatasource:
         self.data_connectors[name] = new_data_connector
         return new_data_connector
 
-    @public_api
     def get_available_data_asset_names(
         self, data_connector_names: Optional[Union[list, str]] = None
     ) -> Dict[str, List[str]]:
@@ -375,7 +372,6 @@ NOT_FLUENT_ERROR_MSG: str = (
 )
 
 
-@public_api
 class Datasource(BaseDatasource):
     """A Datasource is the glue between an `ExecutionEngine` and a `DataConnector`.
 

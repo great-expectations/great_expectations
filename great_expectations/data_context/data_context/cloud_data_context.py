@@ -72,7 +72,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         ExpectationSuiteIdentifier,
     )
-    from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
@@ -892,9 +891,9 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
+        datasource: BaseDatasource | FluentDatasource | None = None,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | None:
         if datasource and not isinstance(datasource, FluentDatasource):
             raise TypeError(  # noqa: TRY003
                 "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."  # noqa: E501

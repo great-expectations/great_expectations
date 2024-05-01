@@ -4,7 +4,7 @@ import pytest
 
 from great_expectations.compatibility import pyarrow, pyspark
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.datasource import BaseDatasource, LegacyDatasource
+from great_expectations.datasource import BaseDatasource
 
 pytestmark = pytest.mark.filesystem
 
@@ -71,6 +71,4 @@ def test_instantiation_from_datasource(
         name="my_datasource",
         **data_source_config_with_aws_glue_catalog_data_connectors,
     )
-    _: Union[LegacyDatasource, BaseDatasource, None] = context.get_datasource(
-        datasource_name="my_datasource"
-    )
+    _: Union[BaseDatasource, None] = context.get_datasource(datasource_name="my_datasource")
