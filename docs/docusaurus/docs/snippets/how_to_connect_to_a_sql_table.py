@@ -9,7 +9,7 @@ import pathlib
 import warnings
 
 import great_expectations as gx
-from great_expectations.core.partitioners import PartitionerColumnValue
+from great_expectations.core.partitioners import PartitionerYear
 from great_expectations.datasource.fluent import GxDatasourceWarning
 
 sqlite_database_path = str(
@@ -78,12 +78,12 @@ assert set(batches[0].columns()) == {
 }
 
 # <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py add_vendor_id_splitter">
-partitioner = PartitionerColumnValue(column_name="vendor_id")
+partitioner = PartitionerYear(column_name="pickup_datetime")
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/how_to_connect_to_a_sql_table.py build_vendor_id_batch_request">
 my_batch_request = my_asset.build_batch_request(
-    options={"vendor_id": 1},
+    options={"year": 2020},
     partitioner=partitioner,
 )
 # </snippet>
