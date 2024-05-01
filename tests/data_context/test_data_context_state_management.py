@@ -495,7 +495,8 @@ def test_add_expectation_suite_success(
 
     suite = context.add_expectation_suite(**kwargs)
 
-    assert suite == expected_suite
+    assert suite.name == expected_suite.name
+    assert suite.expectations == expected_suite.expectations
     assert context.expectations_store.save_count == 1
 
 

@@ -79,7 +79,14 @@ def test_add(request, store_fixture: str, validation_definition: ValidationDefin
     store.add(key=key, value=validation_definition)
     assert validation_definition.id
 
-    assert store.get(key) == validation_definition
+    actual = store.get(key).dict()
+    expected = validation_definition.dict()
+
+    # Suite equality not supported until migration to Pydantic
+    actual.pop("suite")
+    expected.pop("suite")
+
+    assert actual == expected
 
 
 @pytest.mark.cloud

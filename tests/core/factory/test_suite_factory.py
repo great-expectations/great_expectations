@@ -221,7 +221,7 @@ def test_suite_factory_all(context_fixture_name: str, request: pytest.FixtureReq
 
     # Assert
     assert [r.name for r in result] == [suite_a.name, suite_b.name]
-    assert result == [suite_a, suite_b]
+    assert [r.to_dict() for r in result] == [suite_a.to_dict(), suite_b.to_dict()]
 
 
 class TestSuiteFactoryAnalytics:
