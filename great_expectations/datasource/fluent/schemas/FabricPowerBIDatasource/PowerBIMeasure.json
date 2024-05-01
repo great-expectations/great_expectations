@@ -108,127 +108,6 @@
                 "key"
             ]
         },
-        "PartitionerColumnValue": {
-            "title": "PartitionerColumnValue",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_column_value",
-                    "enum": [
-                        "partition_on_column_value"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name"
-            ]
-        },
-        "PartitionerMultiColumnValue": {
-            "title": "PartitionerMultiColumnValue",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "column_names": {
-                    "title": "Column Names",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_multi_column_values",
-                    "enum": [
-                        "partition_on_multi_column_values"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_names"
-            ]
-        },
-        "PartitionerDividedInteger": {
-            "title": "PartitionerDividedInteger",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "divisor": {
-                    "title": "Divisor",
-                    "type": "integer"
-                },
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_divided_integer",
-                    "enum": [
-                        "partition_on_divided_integer"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "divisor",
-                "column_name"
-            ]
-        },
-        "PartitionerModInteger": {
-            "title": "PartitionerModInteger",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "mod": {
-                    "title": "Mod",
-                    "type": "integer"
-                },
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_mod_integer",
-                    "enum": [
-                        "partition_on_mod_integer"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "mod",
-                "column_name"
-            ]
-        },
         "PartitionerYear": {
             "title": "PartitionerYear",
             "description": "--Public API--",
@@ -307,41 +186,6 @@
                 }
             },
             "required": [
-                "column_name"
-            ]
-        },
-        "PartitionerDatetimePart": {
-            "title": "PartitionerDatetimePart",
-            "description": "--Public API--",
-            "type": "object",
-            "properties": {
-                "datetime_parts": {
-                    "title": "Datetime Parts",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "sort_ascending": {
-                    "title": "Sort Ascending",
-                    "default": true,
-                    "type": "boolean"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "partition_on_date_parts",
-                    "enum": [
-                        "partition_on_date_parts"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "datetime_parts",
                 "column_name"
             ]
         },
@@ -497,18 +341,6 @@
                     "title": "Partitioner",
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/PartitionerColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerMultiColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerModInteger"
-                        },
-                        {
                             "$ref": "#/definitions/PartitionerYear"
                         },
                         {
@@ -516,9 +348,6 @@
                         },
                         {
                             "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/PartitionerDatetimePart"
                         },
                         {
                             "$ref": "#/definitions/PartitionerConvertedDatetime"
