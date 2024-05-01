@@ -30,7 +30,7 @@ pytestmark = pytest.mark.big
 
 @pytest.fixture
 def expected_config_dict():
-    """Used to validate `self_check()` and `test_yaml_config()` outputs."""
+    """Used to validate `self_check()`."""
     config = {
         "class_name": "ConfiguredAssetGCSDataConnector",
         "data_asset_count": 1,
