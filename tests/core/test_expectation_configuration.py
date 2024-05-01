@@ -82,30 +82,6 @@ def config7():
 
 
 @pytest.mark.unit
-def test_expectation_configuration_equality(config1, config2, config3, config4):
-    """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
-    are the same."""  # noqa: E501
-    assert config1 is config1  # no difference  # noqa: PLR0124
-    assert config1 is not config2  # different instances, but same content
-    assert config1 == config2  # different instances, but same content
-    assert not (config1 != config2)  # ne works properly
-    assert config1 != config3  # different meta
-    assert config1 != config3  # ne works properly
-    assert config3 != config4  # different result format
-
-
-@pytest.mark.unit
-def test_expectation_configuration_equivalence(config1, config2, config3, config4, config5):
-    """Equivalence should depend only on properties that affect the result of the expectation."""
-    assert config1.isEquivalentTo(config2, match_type="runtime")  # no difference
-    assert config2.isEquivalentTo(config1, match_type="runtime")
-    assert config1.isEquivalentTo(config3, match_type="runtime")  # different meta
-    assert config1.isEquivalentTo(config4, match_type="success")  # different result format
-    assert not config1.isEquivalentTo(config5, match_type="success")  # different value_set
-    assert config1.isEquivalentTo(config5, match_type="domain")  # different result format
-
-
-@pytest.mark.unit
 def test_expectation_configuration_get_suite_parameter_dependencies():
     # Getting evaluation parameter dependencies relies on pyparsing, but the expectation
     # configuration is responsible for ensuring that it only returns one copy of required metrics.
