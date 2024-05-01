@@ -37,11 +37,7 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.partitioners import (
     ColumnPartitioner,
-    PartitionerColumnValue,
     PartitionerConvertedDatetime,
-    PartitionerDatetimePart,
-    PartitionerDividedInteger,
-    PartitionerModInteger,
     PartitionerMultiColumnValue,
     PartitionerYear,
     PartitionerYearAndMonth,
@@ -443,10 +439,6 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             PartitionerYear: SqlPartitionerYear,
             PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
             PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
-            PartitionerColumnValue: SqlPartitionerColumnValue,
-            PartitionerDatetimePart: SqlPartitionerDatetimePart,
-            PartitionerDividedInteger: SqlPartitionerDividedInteger,
-            PartitionerModInteger: SqlPartitionerModInteger,
             PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
             PartitionerConvertedDatetime: None,  # only implemented for sqlite backend
         }

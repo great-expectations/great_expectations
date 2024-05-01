@@ -31,30 +31,6 @@ class PartitionerYearAndMonthAndDay(pydantic.BaseModel):
 
 
 @public_api
-class PartitionerDatetimePart(pydantic.BaseModel):
-    datetime_parts: List[str]
-    column_name: str
-    sort_ascending: bool = True
-    method_name: Literal["partition_on_date_parts"] = "partition_on_date_parts"
-
-
-@public_api
-class PartitionerDividedInteger(pydantic.BaseModel):
-    divisor: int
-    column_name: str
-    sort_ascending: bool = True
-    method_name: Literal["partition_on_divided_integer"] = "partition_on_divided_integer"
-
-
-@public_api
-class PartitionerModInteger(pydantic.BaseModel):
-    mod: int
-    column_name: str
-    sort_ascending: bool = True
-    method_name: Literal["partition_on_mod_integer"] = "partition_on_mod_integer"
-
-
-@public_api
 class PartitionerColumnValue(pydantic.BaseModel):
     column_name: str
     sort_ascending: bool = True
