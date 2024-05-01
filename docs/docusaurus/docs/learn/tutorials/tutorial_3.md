@@ -1,7 +1,7 @@
 ---
-sidebar_label: 'Use case 3'
-title: 'Use case 3'
-description: Use case 3.
+sidebar_label: 'Tutorial 3'
+title: 'Tutorial 3'
+description: Tutorial 3.
 ---
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac massa sed ligula vulputate luctus in et augue. Cras convallis odio quis ex tincidunt ornare. Sed et malesuada lacus, non commodo magna. Integer condimentum tortor nunc, quis elementum ante ultricies at. Mauris hendrerit imperdiet pellentesque. Donec varius ornare scelerisque. Quisque nec lacinia tellus, sed tempus velit. Donec id eros felis. Nulla nec viverra est.

@@ -18,8 +18,6 @@ import OverviewCard from '@site/src/components/OverviewCard';
   Use longer format conceptual information to learn more about GX features and functionality.
 </OverviewCard>
 
-## Supplemental Information
-
 <LinkCardGrid>
   <LinkCard topIcon label="Use cases" description="Example use cases and implementations with GX Cloud and GX OSS." to="/learn/use_cases/use_cases_lp" icon="/img/use_case_icon.svg" />
   <LinkCard topIcon label="Tutorials" description="Step-by-step guides for integrating and running GX Cloud and GX OSS with third-party applications." to="/learn/tutorials/tutorials_lp" icon="/img/tutorial_icon.svg" />
