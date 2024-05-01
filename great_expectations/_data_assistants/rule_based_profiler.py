@@ -223,9 +223,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         domain_builder: DomainBuilder = instantiate_class_from_config(
             config=domain_builder_config,
             runtime_environment={"data_context": data_context},
-            config_defaults={
-                "module_name": "great_expectations.rule_based_profiler.domain_builder"
-            },
+            config_defaults={"module_name": "great_expectations._data_assistants.domain_builder"},
         )
 
         return domain_builder
@@ -1202,7 +1200,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 "data_context": data_context,
             },
             config_defaults={
-                "module_name": "great_expectations.rule_based_profiler",
+                "module_name": "great_expectations._data_assistants",
                 "class_name": "RuleBasedProfiler",
             },
         )
@@ -1326,7 +1324,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 "data_context": data_context,
             },
             config_defaults={
-                "module_name": "great_expectations.rule_based_profiler",
+                "module_name": "great_expectations._data_assistants",
                 "class_name": "RuleBasedProfiler",
             },
         )

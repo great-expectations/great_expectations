@@ -247,7 +247,7 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     max_user_id: int = 999999999999
 
     min_user_id_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        module_name="great_expectations._data_assistants.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_min_user_id",
         metric_name="column.min",

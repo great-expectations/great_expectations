@@ -196,7 +196,7 @@ def init_expectation_configuration_builder(
         runtime_environment={"data_context": data_context},
         config_defaults={
             "class_name": "DefaultExpectationConfigurationBuilder",
-            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
+            "module_name": "great_expectations._data_assistants.expectation_configuration_builder",
         },
     )
     return expectation_configuration_builder

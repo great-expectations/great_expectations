@@ -18,46 +18,46 @@ rules:
     parameter_builders:
       - name: my_min_user_id
         class_name: MetricSingleBatchParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
       - name: my_max_user_id
         class_name: MetricSingleBatchParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_of_type
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         type_: $variables.integer_type
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         min_value: $variables.very_small_user_id
         max_value: $variables.very_large_user_id
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_values_to_not_be_null
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
   my_rule_for_timestamps:
     domain_builder:
       class_name: ColumnDomainBuilder
-      module_name: great_expectations.rule_based_profiler.domain_builder
+      module_name: great_expectations._data_assistants.domain_builder
       include_column_name_suffixes:
         - _ts
     parameter_builders:
       # unused parameter my_max_ts
       - name: my_max_ts
         class_name: MetricSingleBatchParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
       - name: my_max_event_ts
         class_name: MetricSingleBatchParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         metric_name: column.max
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
@@ -65,32 +65,32 @@ rules:
       # unused parameter my_min_ts
       - name: my_min_ts
         class_name: MetricSingleBatchParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
       - name: my_date_format
         class_name: SimpleDateFormatStringParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
           column: event_ts
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_of_type
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         type_: $variables.timestamp_type
       - expectation_type: expect_column_values_to_be_increasing
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_values_to_be_dateutil_parseable
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_min_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $variables.min_timestamp
         max_value: $variables.min_timestamp
@@ -103,7 +103,7 @@ rules:
         # to confirm that the event_ts contains the latest timestamp of all _ts domains
       - expectation_type: expect_column_max_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $variables.min_timestamp
         max_value: $parameter.my_max_event_ts.value
@@ -114,7 +114,7 @@ rules:
               - "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
       - expectation_type: expect_column_values_to_match_strftime_format
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         strftime_format: $parameter.my_date_format.value
         meta:
@@ -126,16 +126,16 @@ rules:
   my_rule_for_one_cardinality:
     domain_builder:
       class_name: CategoricalColumnDomainBuilder
-      module_name: great_expectations.rule_based_profiler.domain_builder
+      module_name: great_expectations._data_assistants.domain_builder
       cardinality_limit_mode: ONE
     parameter_builders:
       - name: my_user_agent_value_set
         class_name: ValueSetMultiBatchParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_in_set
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         value_set: $parameter.my_user_agent_value_set.value

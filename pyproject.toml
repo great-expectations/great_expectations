@@ -187,7 +187,7 @@ module = [
     "great_expectations.expectations.metrics.column_map_metrics.*",
     "great_expectations.expectations.metrics.column_pair_map_metrics.*",
     "great_expectations.render.renderer.*",
-    "great_expectations.rule_based_profiler.*",
+    "great_expectations._data_assistants.*",
     "great_expectations.self_check.*",
     "tests.rule_based_profiler.*",
     "tests.test_utils",

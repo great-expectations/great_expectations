@@ -315,7 +315,7 @@ class ColumnDomainBuilder(DomainBuilder):
         )
         if semantic_type_filter_module_name is None:
             semantic_type_filter_module_name = (
-                "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter"
+                "great_expectations._data_assistants.helpers.simple_semantic_type_filter"
             )
 
         # Obtain semantic_type_filter_class_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501

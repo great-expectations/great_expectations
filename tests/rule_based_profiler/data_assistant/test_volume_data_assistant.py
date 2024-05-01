@@ -972,13 +972,13 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     },
                     "domain_builder": {
                         "class_name": "TableDomainBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",  # noqa: E501
+                        "module_name": "great_expectations._data_assistants.domain_builder.table_domain_builder",  # noqa: E501
                     },
                     "parameter_builders": [
                         {
                             "replace_nan_with_zero": True,
                             "name": "table_row_count",
-                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
+                            "module_name": "great_expectations._data_assistants.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                             "single_batch_mode": False,
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
@@ -993,7 +993,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                 {
                                     "replace_nan_with_zero": True,
                                     "name": "table_row_count_range",
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
+                                    "module_name": "great_expectations._data_assistants.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                                     "truncate_values": "$variables.truncate_values",
                                     "enforce_numeric_metric": True,
                                     "n_resamples": "$variables.n_resamples",
@@ -1018,7 +1018,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "class_name": "MetricMultiBatchParameterBuilder",
                                             "suite_parameter_builder_configs": None,
                                             "metric_value_kwargs": None,
-                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
+                                            "module_name": "great_expectations._data_assistants.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                                             "metric_domain_kwargs": None,
                                             "single_batch_mode": False,
                                             "reduce_scalar_metric": True,
@@ -1028,7 +1028,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                 },
                             ],
                             "expectation_type": "expect_table_row_count_to_be_between",
-                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                            "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                             "meta": {
                                 "profiler_details": "$parameter.table_row_count_range.details"
                             },
@@ -1057,7 +1057,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                     },
                     "domain_builder": {
                         "exclude_column_name_suffixes": ["_id", "_ID"],
-                        "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",  # noqa: E501
+                        "module_name": "great_expectations._data_assistants.domain_builder.categorical_column_domain_builder",  # noqa: E501
                         "allowed_semantic_types_passthrough": ["logic"],
                         "exclude_column_names": sorted(
                             [
@@ -1076,7 +1076,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                             "metric_domain_kwargs": "$domain.domain_kwargs",
                             "replace_nan_with_zero": True,
                             "name": "column_distinct_values_count",
-                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
+                            "module_name": "great_expectations._data_assistants.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                             "enforce_numeric_metric": True,
                             "class_name": "MetricMultiBatchParameterBuilder",
                             "single_batch_mode": False,
@@ -1088,7 +1088,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                         {
                             "min_value": "$parameter.column_distinct_values_count_range.value[0]",
                             "class_name": "DefaultExpectationConfigurationBuilder",
-                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                            "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                             "meta": {
                                 "profiler_details": "$parameter.column_distinct_values_count_range.details"  # noqa: E501
                             },
@@ -1114,7 +1114,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                     "quantile_bias_std_error_ratio_threshold": "$variables.quantile_bias_std_error_ratio_threshold",  # noqa: E501
                                     "replace_nan_with_zero": True,
                                     "n_resamples": "$variables.n_resamples",
-                                    "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
+                                    "module_name": "great_expectations._data_assistants.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                                     "include_estimator_samples_histogram_in_details": "$variables.include_estimator_samples_histogram_in_details",  # noqa: E501
                                     "truncate_values": "$variables.truncate_values",
                                     "suite_parameter_builder_configs": [
@@ -1125,7 +1125,7 @@ def quentin_expected_rule_based_profiler_configuration() -> Callable:
                                             "class_name": "MetricMultiBatchParameterBuilder",
                                             "suite_parameter_builder_configs": None,
                                             "metric_value_kwargs": None,
-                                            "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
+                                            "module_name": "great_expectations._data_assistants.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                                             "metric_domain_kwargs": "$domain.domain_kwargs",
                                             "single_batch_mode": False,
                                             "reduce_scalar_metric": True,

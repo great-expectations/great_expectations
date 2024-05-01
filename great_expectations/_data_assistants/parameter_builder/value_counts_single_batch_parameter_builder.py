@@ -67,7 +67,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         """  # noqa: E501
         self._column_value_counts_metric_single_batch_parameter_builder_config = (
             ParameterBuilderConfig(
-                module_name="great_expectations.rule_based_profiler.parameter_builder",
+                module_name="great_expectations._data_assistants.parameter_builder",
                 class_name="MetricSingleBatchParameterBuilder",
                 name="column_value_counts_metric_single_batch_parameter_builder",
                 metric_name="column.value_counts",
@@ -83,7 +83,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         )
         self._column_values_nonnull_count_metric_single_batch_parameter_builder_config = (
             ParameterBuilderConfig(
-                module_name="great_expectations.rule_based_profiler.parameter_builder",
+                module_name="great_expectations._data_assistants.parameter_builder",
                 class_name="MetricSingleBatchParameterBuilder",
                 name="column_values_nonnull_count_metric_single_batch_parameter_builder",
                 metric_name="column_values.nonnull.count",

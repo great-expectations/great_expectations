@@ -105,7 +105,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
     data_context: AbstractDataContext = bobby_columnar_table_multi_batch_deterministic_data_context
 
     my_null_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        module_name="great_expectations._data_assistants.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_null_count",
         metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
@@ -117,7 +117,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         suite_parameter_builder_configs=None,
     )
     my_total_count_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        module_name="great_expectations._data_assistants.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_total_count",
         metric_name="table.row_count",

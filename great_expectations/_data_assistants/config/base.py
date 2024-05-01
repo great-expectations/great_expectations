@@ -178,7 +178,7 @@ class DomainBuilderConfigSchema(NotNullSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.rule_based_profiler.domain_builder",
+        missing="great_expectations._data_assistants.domain_builder",
     )
     class_name = fields.String(
         required=True,
@@ -268,7 +268,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.rule_based_profiler.parameter_builder",
+        missing="great_expectations._data_assistants.parameter_builder",
     )
     class_name = fields.String(
         required=True,
@@ -366,7 +366,7 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
+        missing="great_expectations._data_assistants.expectation_configuration_builder",
     )
     class_name = fields.String(
         required=True,
@@ -508,7 +508,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ) -> None:
-        self.module_name = "great_expectations.rule_based_profiler"
+        self.module_name = "great_expectations._data_assistants"
         self.class_name = "RuleBasedProfiler"
 
         self.config_version = config_version
@@ -720,7 +720,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.rule_based_profiler",
+        missing="great_expectations._data_assistants",
     )
     class_name = fields.String(
         required=False,

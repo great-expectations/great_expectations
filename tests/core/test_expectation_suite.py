@@ -1115,7 +1115,7 @@ def profiler_config():
         expectation_configuration_builders:
          - expectation_type: expect_table_row_count_to_be_between
            class_name: DefaultExpectationConfigurationBuilder
-           module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+           module_name: great_expectations._data_assistants.expectation_configuration_builder
            min_value: $parameter.row_count_range.value.min_value
            max_value: $parameter.row_count_range.value.max_value
            mostly: $variables.mostly

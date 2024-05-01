@@ -25,7 +25,7 @@ rules:
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         min_value: $parameter.row_count_range.value[0]
         max_value: $parameter.row_count_range.value[1]
         meta:
@@ -53,7 +53,7 @@ rules:
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $parameter.min_range.value[0]
         max_value: $parameter.min_range.value[1]
@@ -62,7 +62,7 @@ rules:
           profiler_details: $parameter.min_range.details
       - expectation_type: expect_column_max_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $parameter.max_range.value[0]
         max_value: $parameter.max_range.value[1]
@@ -77,7 +77,7 @@ rules:
     parameter_builders:
       - name: my_date_format
         class_name: SimpleDateFormatStringParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
           column: pickup_datetime
@@ -88,7 +88,7 @@ rules:
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_match_strftime_format
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         strftime_format: $parameter.my_date_format.value
         meta:
@@ -105,7 +105,7 @@ rules:
     parameter_builders:
       - name: my_regex
         class_name: RegexPatternStringParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
           column: VendorID
@@ -117,7 +117,7 @@ rules:
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_match_regex
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         regex: $parameter.my_regex.value
         meta:
@@ -129,7 +129,7 @@ rules:
   my_rule_for_very_few_cardinality:
     domain_builder:
       class_name: CategoricalColumnDomainBuilder
-      module_name: great_expectations.rule_based_profiler.domain_builder
+      module_name: great_expectations._data_assistants.domain_builder
       cardinality_limit_mode: VERY_FEW
       exclude_column_names:
         - DOLocationID
@@ -143,11 +143,11 @@ rules:
     parameter_builders:
       - name: my_pickup_location_id_value_set
         class_name: ValueSetMultiBatchParameterBuilder
-        module_name: great_expectations.rule_based_profiler.parameter_builder
+        module_name: great_expectations._data_assistants.parameter_builder
         metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_in_set
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        module_name: great_expectations._data_assistants.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         value_set: $parameter.my_pickup_location_id_value_set.value

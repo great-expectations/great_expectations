@@ -78,7 +78,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
 
         self._column_partition_metric_single_batch_parameter_builder_config = (
             ParameterBuilderConfig(
-                module_name="great_expectations.rule_based_profiler.parameter_builder",
+                module_name="great_expectations._data_assistants.parameter_builder",
                 class_name="MetricSingleBatchParameterBuilder",
                 name="column_partition_metric_single_batch_parameter_builder",
                 metric_name="column.partition",
