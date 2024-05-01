@@ -80,6 +80,7 @@ ColumnPartitioner = Union[
     PartitionerYear,
     PartitionerYearAndMonth,
     PartitionerYearAndMonthAndDay,
+    PartitionerConvertedDatetime,  # sqlite specific
 ]
 
 
