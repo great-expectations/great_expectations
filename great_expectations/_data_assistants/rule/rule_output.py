@@ -2,22 +2,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+from great_expectations._data_assistants.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     ParameterNode,
     get_fully_qualified_parameter_names,
     get_parameter_values_for_fully_qualified_parameter_names,
 )
 
 if TYPE_CHECKING:
+    from great_expectations._data_assistants.rule.rule_state import (
+        RuleState,
+    )
     from great_expectations.core.domain import Domain
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
-    )
-    from great_expectations.rule_based_profiler.rule.rule_state import (
-        RuleState,
     )
 
 

@@ -3,6 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._data_assistants.domain_builder import ColumnDomainBuilder
+from great_expectations._data_assistants.parameter_container import (
+    ParameterContainer,  # noqa: TCH001
+)
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -10,10 +14,6 @@ from great_expectations.core.domain import (
     SemanticDomainTypes,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,  # noqa: TCH001
-)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

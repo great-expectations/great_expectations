@@ -2,17 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional
 
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.domain import Domain
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.domain_builder import DomainBuilder
+from great_expectations._data_assistants.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     VARIABLES_KEY,
     ParameterContainer,
 )
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from great_expectations._data_assistants import RuleBasedProfilerResult
+from great_expectations._data_assistants.rule_based_profiler import RuleBasedProfiler
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.rule_based_profiler import RuleBasedProfilerResult
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:

@@ -14,7 +14,7 @@ from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
-    from great_expectations.rule_based_profiler.metric_computation_result import (
+    from great_expectations._data_assistants.metric_computation_result import (
         MetricValues,
     )
     from great_expectations.types.attributes import Attributes

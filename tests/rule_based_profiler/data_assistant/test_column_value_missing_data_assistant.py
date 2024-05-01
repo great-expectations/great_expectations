@@ -4,14 +4,14 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from great_expectations.rule_based_profiler.data_assistant import (
+from great_expectations._data_assistants.data_assistant import (
     ColumnValueMissingDataAssistant,
 )
-from great_expectations.rule_based_profiler.data_assistant_result import (
+from great_expectations._data_assistants.data_assistant_result import (
     ColumnValueMissingDataAssistantResult,
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
+from great_expectations._data_assistants.data_assistant_result.plot_result import (
     PlotResult,
 )
 

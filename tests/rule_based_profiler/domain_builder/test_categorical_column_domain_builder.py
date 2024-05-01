@@ -4,6 +4,13 @@ from typing import TYPE_CHECKING, List
 
 import pytest
 
+from great_expectations._data_assistants.domain_builder import DomainBuilder
+from great_expectations._data_assistants.domain_builder.categorical_column_domain_builder import (
+    CategoricalColumnDomainBuilder,
+)
+from great_expectations._data_assistants.helpers.cardinality_checker import (
+    CardinalityLimitMode,
+)
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -12,13 +19,6 @@ from great_expectations.core.domain import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import ProfilerConfigurationError
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (  # noqa: E501
-    CategoricalColumnDomainBuilder,
-)
-from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
-    CardinalityLimitMode,
-)
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext

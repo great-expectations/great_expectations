@@ -21,6 +21,14 @@ from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations import project_manager, set_context
+from great_expectations._data_assistants.config import RuleBasedProfilerConfig
+from great_expectations._data_assistants.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+from great_expectations._data_assistants.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (  # noqa: E501
+    NumericMetricRangeMultiBatchParameterBuilder,
+)
+from great_expectations._data_assistants.parameter_container import ParameterNode
 from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
@@ -83,14 +91,6 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (  # noqa: E501
-    NumericMetricRangeMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )

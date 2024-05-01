@@ -7,28 +7,28 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Uni
 from makefun import create_function
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchRequestBase
-from great_expectations.core.config_peer import ConfigOutputModes
-from great_expectations.data_context.types.base import BaseYamlConfig  # noqa: TCH001
-from great_expectations.rule_based_profiler import BaseRuleBasedProfiler  # noqa: TCH001
-from great_expectations.rule_based_profiler.data_assistant import (
+from great_expectations._data_assistants import BaseRuleBasedProfiler  # noqa: TCH001
+from great_expectations._data_assistants.data_assistant import (
     DataAssistant,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.data_assistant_result import (
+from great_expectations._data_assistants.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain_builder import (
+from great_expectations._data_assistants.domain_builder import (
     DomainBuilder,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.helpers.util import (
     convert_variables_to_dict,
     get_validator_with_expectation_suite,
 )
-from great_expectations.rule_based_profiler.rule import Rule  # noqa: TCH001
+from great_expectations._data_assistants.rule import Rule  # noqa: TCH001
+from great_expectations.core.batch import BatchRequestBase
+from great_expectations.core.config_peer import ConfigOutputModes
+from great_expectations.data_context.types.base import BaseYamlConfig  # noqa: TCH001
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 
-from great_expectations.rule_based_profiler.helpers.runtime_environment import (  # isort:skip
+from great_expectations._data_assistants.helpers.runtime_environment import (  # isort:skip
     RuntimeEnvironmentVariablesDirectives,
     RuntimeEnvironmentDomainTypeDirectives,
     build_domain_type_directives,

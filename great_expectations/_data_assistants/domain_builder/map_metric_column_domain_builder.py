@@ -2,19 +2,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
-from great_expectations.core.domain import Domain, SemanticDomainTypes  # noqa: TCH001
-from great_expectations.core.metric_function_types import (
-    SummarizationMetricNameSuffixes,
-)
-from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.domain_builder import ColumnDomainBuilder
+from great_expectations._data_assistants.helpers.util import (
     NP_EPSILON,
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     ParameterContainer,  # noqa: TCH001
+)
+from great_expectations.core.domain import Domain, SemanticDomainTypes  # noqa: TCH001
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
 )
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration

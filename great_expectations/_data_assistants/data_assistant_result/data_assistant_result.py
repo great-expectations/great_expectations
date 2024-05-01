@@ -28,6 +28,28 @@ from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
+from great_expectations._data_assistants.altair import AltairDataTypes, AltairThemes
+from great_expectations._data_assistants.data_assistant_result.plot_components import (
+    BatchPlotComponent,
+    DomainPlotComponent,
+    ExpectationKwargPlotComponent,
+    MetricPlotComponent,
+    PlotComponent,
+    determine_plot_title,
+)
+from great_expectations._data_assistants.data_assistant_result.plot_result import (
+    PlotMode,
+    PlotResult,
+)
+from great_expectations._data_assistants.helpers.util import (
+    get_or_create_expectation_suite,
+    sanitize_parameter_name,
+)
+from great_expectations._data_assistants.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    ParameterNode,
+)
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain
@@ -36,28 +58,6 @@ from great_expectations.core.util import (
     convert_to_json_serializable,
     in_jupyter_notebook,
     nested_update,
-)
-from great_expectations.rule_based_profiler.altair import AltairDataTypes, AltairThemes
-from great_expectations.rule_based_profiler.data_assistant_result.plot_components import (
-    BatchPlotComponent,
-    DomainPlotComponent,
-    ExpectationKwargPlotComponent,
-    MetricPlotComponent,
-    PlotComponent,
-    determine_plot_title,
-)
-from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
-    PlotMode,
-    PlotResult,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_or_create_expectation_suite,
-    sanitize_parameter_name,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    ParameterNode,
 )
 from great_expectations.types import (
     FontFamily,
@@ -68,18 +68,18 @@ from great_expectations.types import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations._data_assistants.config import (
+        RuleBasedProfilerConfig,
+        RuleConfig,
+    )
+    from great_expectations._data_assistants.metric_computation_result import (
+        MetricValues,
+    )
     from great_expectations.core import (
         ExpectationSuite,
     )
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
-    )
-    from great_expectations.rule_based_profiler.config import (
-        RuleBasedProfilerConfig,
-        RuleConfig,
-    )
-    from great_expectations.rule_based_profiler.metric_computation_result import (
-        MetricValues,
     )
 
 

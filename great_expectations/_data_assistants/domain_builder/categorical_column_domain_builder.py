@@ -14,30 +14,30 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.domain import Domain, SemanticDomainTypes
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
-from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
+from great_expectations._data_assistants.domain_builder import ColumnDomainBuilder
+from great_expectations._data_assistants.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,
     CardinalityChecker,
     CardinalityLimitMode,
     RelativeCardinalityLimit,
     validate_input_parameters,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.helpers.util import (
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain, SemanticDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
+    from great_expectations._data_assistants.parameter_container import (
+        ParameterContainer,
+    )
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
-    )
-    from great_expectations.rule_based_profiler.parameter_container import (
-        ParameterContainer,
     )
     from great_expectations.validator.computed_metric import MetricValue
     from great_expectations.validator.validator import Validator

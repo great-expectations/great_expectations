@@ -4,17 +4,15 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 
 import numpy as np
 
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.config import ParameterBuilderConfig
+from great_expectations._data_assistants.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations._data_assistants.parameter_builder import (
     MetricSingleBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
@@ -22,6 +20,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.types.attributes import Attributes
 
 if TYPE_CHECKING:

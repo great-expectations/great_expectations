@@ -4,24 +4,24 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 
-from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.rule_based_profiler.config import (
+from great_expectations._data_assistants.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.metric_computation_result import (
+from great_expectations._data_assistants.metric_computation_result import (
     MetricComputationDetails,  # noqa: TCH001
     MetricComputationResult,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_builder import ParameterBuilder
+from great_expectations._data_assistants.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
 )
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.types.attributes import Attributes
 
 if TYPE_CHECKING:

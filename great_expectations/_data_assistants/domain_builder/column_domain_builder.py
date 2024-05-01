@@ -13,21 +13,21 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._data_assistants.domain_builder import DomainBuilder
+from great_expectations._data_assistants.helpers.util import (
+    build_domains_from_column_names,
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations._data_assistants.parameter_container import (
+    ParameterContainer,  # noqa: TCH001
+)
+from great_expectations._data_assistants.semantic_type_filter import (
+    SemanticTypeFilter,  # noqa: TCH001
+)
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.helpers.util import (
-    build_domains_from_column_names,
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,  # noqa: TCH001
-)
-from great_expectations.rule_based_profiler.semantic_type_filter import (
-    SemanticTypeFilter,  # noqa: TCH001
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:

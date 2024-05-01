@@ -5,28 +5,28 @@ import numpy as np
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import IDDict
-from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+from great_expectations._data_assistants.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
 )
-from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
+from great_expectations._data_assistants.estimators.bootstrap_numeric_range_estimator import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
-from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+from great_expectations._data_assistants.estimators.numeric_range_estimation_result import (
     NumericRangeEstimationResult,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.helpers.util import (
     compute_bootstrap_quantiles_point_estimate,
     sanitize_parameter_name,
 )
 
 # Allowable tolerance for how closely a bootstrap method approximates the sample
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations._data_assistants.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
+from great_expectations.core import IDDict
 
 if TYPE_CHECKING:
     import pandas as pd

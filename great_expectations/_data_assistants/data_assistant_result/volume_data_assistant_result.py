@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Dict, Tuple, Union
 
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.rule_based_profiler.altair import AltairDataTypes
-from great_expectations.rule_based_profiler.data_assistant_result import (
+from great_expectations._data_assistants.altair import AltairDataTypes
+from great_expectations._data_assistants.data_assistant_result import (
     DataAssistantResult,
 )
+from great_expectations.compatibility.typing_extensions import override
 
 
 class VolumeDataAssistantResult(DataAssistantResult):

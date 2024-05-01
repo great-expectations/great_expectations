@@ -27,6 +27,18 @@ import numpy as np
 from scipy import stats
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._data_assistants.estimators.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
+    NumericRangeEstimationResult,
+)
+from great_expectations._data_assistants.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    VARIABLES_PREFIX,
+    ParameterContainer,
+    ParameterNode,
+    get_parameter_value_by_fully_qualified_parameter_name,
+    is_fully_qualified_parameter_name_prefix_in_literal,
+)
 from great_expectations.compatibility import numpy
 from great_expectations.core import Domain, ExpectationSuite
 from great_expectations.core.batch import (
@@ -42,18 +54,6 @@ from great_expectations.core.domain import (
 )
 from great_expectations.core.metric_domain_types import (
     MetricDomainTypes,  # noqa: TCH001
-)
-from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
-    NUM_HISTOGRAM_BINS,
-    NumericRangeEstimationResult,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    VARIABLES_PREFIX,
-    ParameterContainer,
-    ParameterNode,
-    get_parameter_value_by_fully_qualified_parameter_name,
-    is_fully_qualified_parameter_name_prefix_in_literal,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import (

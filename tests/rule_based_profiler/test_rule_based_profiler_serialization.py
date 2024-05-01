@@ -2,7 +2,7 @@
 
 import pytest
 
-from great_expectations.rule_based_profiler.config.base import (
+from great_expectations._data_assistants.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
 )

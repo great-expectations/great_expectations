@@ -4,32 +4,32 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import numpy as np
 
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.rule_based_profiler.config import (
+from great_expectations._data_assistants.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations._data_assistants.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.types.attributes import Attributes
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 if TYPE_CHECKING:
+    from great_expectations._data_assistants.metric_computation_result import (
+        MetricValues,
+    )
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
-    )
-    from great_expectations.rule_based_profiler.metric_computation_result import (
-        MetricValues,
     )
 
 

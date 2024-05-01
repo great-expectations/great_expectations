@@ -9,6 +9,41 @@ import traceback
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._data_assistants import RuleBasedProfilerResult
+from great_expectations._data_assistants.config.base import (
+    DomainBuilderConfig,
+    ExpectationConfigurationBuilderConfig,
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+    domainBuilderConfigSchema,
+    expectationConfigurationBuilderConfigSchema,
+    parameterBuilderConfigSchema,
+    ruleBasedProfilerConfigSchema,
+)
+from great_expectations._data_assistants.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
+    init_rule_expectation_configuration_builders,
+)
+from great_expectations._data_assistants.helpers.configuration_reconciliation import (
+    DEFAULT_RECONCILATION_DIRECTIVES,
+    ReconciliationDirectives,
+    ReconciliationStrategy,
+    reconcile_rule_variables,
+)
+from great_expectations._data_assistants.helpers.util import (
+    convert_variables_to_dict,
+)
+from great_expectations._data_assistants.parameter_builder import (
+    ParameterBuilder,
+    init_rule_parameter_builders,
+)
+from great_expectations._data_assistants.parameter_container import (
+    ParameterContainer,
+    ParameterNode,
+    build_parameter_container_for_variables,
+)
+from great_expectations._data_assistants.rule import Rule, RuleOutput
+from great_expectations._data_assistants.rule.rule_state import RuleState
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -27,57 +62,22 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.rule_based_profiler import RuleBasedProfilerResult
-from great_expectations.rule_based_profiler.config.base import (
-    DomainBuilderConfig,
-    ExpectationConfigurationBuilderConfig,
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-    domainBuilderConfigSchema,
-    expectationConfigurationBuilderConfigSchema,
-    parameterBuilderConfigSchema,
-    ruleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    ExpectationConfigurationBuilder,
-    init_rule_expectation_configuration_builders,
-)
-from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
-    DEFAULT_RECONCILATION_DIRECTIVES,
-    ReconciliationDirectives,
-    ReconciliationStrategy,
-    reconcile_rule_variables,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_variables_to_dict,
-)
-from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,
-    init_rule_parameter_builders,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
-    ParameterNode,
-    build_parameter_container_for_variables,
-)
-from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
-from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.exception_info import ExceptionInfo
 
 if TYPE_CHECKING:
+    from great_expectations._data_assistants.domain_builder.domain_builder import (
+        DomainBuilder,
+    )
+    from great_expectations._data_assistants.helpers.runtime_environment import (
+        RuntimeEnvironmentDomainTypeDirectives,
+        RuntimeEnvironmentVariablesDirectives,
+    )
     from great_expectations.core.domain import Domain
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.data_context.store.profiler_store import ProfilerStore
     from great_expectations.expectations.expectation_configuration import (
         ExpectationConfiguration,
-    )
-    from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
-        DomainBuilder,
-    )
-    from great_expectations.rule_based_profiler.helpers.runtime_environment import (
-        RuntimeEnvironmentDomainTypeDirectives,
-        RuntimeEnvironmentVariablesDirectives,
     )
 
 

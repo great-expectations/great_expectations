@@ -4,29 +4,29 @@ import logging
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.core.metric_function_types import (
-    SummarizationMetricNameSuffixes,
-)
-from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+from great_expectations._data_assistants.attributed_resolved_metrics import (
     AttributedResolvedMetrics,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.config import (
+from great_expectations._data_assistants.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.metric_computation_result import (
+from great_expectations._data_assistants.metric_computation_result import (
     MetricComputationResult,  # noqa: TCH001
     MetricValues,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_builder import ParameterBuilder
+from great_expectations._data_assistants.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
+)
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
 )
 from great_expectations.types.attributes import Attributes
 

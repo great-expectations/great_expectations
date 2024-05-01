@@ -32,6 +32,9 @@ from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._data_assistants.data_assistant.data_assistant_dispatcher import (
+    DataAssistantDispatcher,
+)
 from great_expectations._docs_decorators import (
     deprecated_method_or_class,
     new_argument,
@@ -105,9 +108,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-    DataAssistantDispatcher,
-)
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
 

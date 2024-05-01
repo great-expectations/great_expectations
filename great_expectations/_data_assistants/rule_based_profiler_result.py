@@ -3,6 +3,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional
 
+from great_expectations._data_assistants.helpers.util import (
+    get_or_create_expectation_suite,
+)
+from great_expectations._data_assistants.parameter_container import (
+    ParameterNode,  # noqa: TCH001
+)
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import (
@@ -12,12 +18,6 @@ from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_or_create_expectation_suite,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterNode,  # noqa: TCH001
 )
 from great_expectations.types import SerializableDictDot
 

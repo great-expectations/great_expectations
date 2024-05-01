@@ -2,21 +2,21 @@ from typing import Any, Collection, Dict, List, Optional, Set, cast
 
 import pytest
 
-from great_expectations.core.domain import Domain
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.data_context import AbstractDataContext
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (  # noqa: E501
+from great_expectations._data_assistants.parameter_builder import ParameterBuilder
+from great_expectations._data_assistants.parameter_builder.value_set_multi_batch_parameter_builder import (  # noqa: E501
     ValueSetMultiBatchParameterBuilder,
     _get_unique_values_from_nested_collection_of_sets,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.core.domain import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.data_context import AbstractDataContext
 
 
 @pytest.mark.big

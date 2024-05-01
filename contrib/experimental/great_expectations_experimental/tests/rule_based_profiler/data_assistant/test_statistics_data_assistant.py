@@ -13,24 +13,24 @@ from contrib.experimental.great_expectations_experimental.tests.test_utils impor
     CONNECTION_STRING,
     load_data_into_postgres_database,
 )
+from great_expectations._data_assistants.data_assistant_result import (
+    DataAssistantResult,
+)
+from great_expectations._data_assistants.helpers.util import (
+    convert_metric_values_to_float_dtype_best_effort,
+)
+from great_expectations._data_assistants.metric_computation_result import (
+    MetricValues,
+)
+from great_expectations._data_assistants.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    ParameterNode,
+)
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.rule_based_profiler.data_assistant_result import (
-    DataAssistantResult,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_metric_values_to_float_dtype_best_effort,
-)
-from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValues,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    ParameterNode,
-)
 
 # noinspection PyUnresolvedReferences
 

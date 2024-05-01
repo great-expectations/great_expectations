@@ -20,49 +20,49 @@ from typing import (
 import numpy as np
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.rule_based_profiler.config import (
+from great_expectations._data_assistants.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
+from great_expectations._data_assistants.estimators.bootstrap_numeric_range_estimator import (
     BootstrapNumericRangeEstimator,
 )
-from great_expectations.rule_based_profiler.estimators.exact_numeric_range_estimator import (
+from great_expectations._data_assistants.estimators.exact_numeric_range_estimator import (
     ExactNumericRangeEstimator,
 )
-from great_expectations.rule_based_profiler.estimators.kde_numeric_range_estimator import (
+from great_expectations._data_assistants.estimators.kde_numeric_range_estimator import (
     KdeNumericRangeEstimator,
 )
-from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+from great_expectations._data_assistants.estimators.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
     NumericRangeEstimationResult,
 )
-from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
+from great_expectations._data_assistants.estimators.numeric_range_estimator import (
     NumericRangeEstimator,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_estimator import (
+from great_expectations._data_assistants.estimators.quantiles_numeric_range_estimator import (
     QuantilesNumericRangeEstimator,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.helpers.util import (
     NP_EPSILON,
     build_numeric_range_estimation_result,
     datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
     integer_semantic_domain_type,
 )
-from great_expectations.rule_based_profiler.metric_computation_result import (
+from great_expectations._data_assistants.metric_computation_result import (
     MetricValues,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations._data_assistants.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     RAW_PARAMETER_KEY,
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import (
     convert_ndarray_decimal_to_float_dtype,

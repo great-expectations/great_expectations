@@ -10,6 +10,7 @@ from typing import (
     Sequence,
 )
 
+from great_expectations._data_assistants.domain_builder import ColumnDomainBuilder
 from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.experimental.metric_repository.metrics import (
@@ -18,7 +19,6 @@ from great_expectations.experimental.metric_repository.metrics import (
     MetricTypes,
     TableMetric,
 )
-from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 

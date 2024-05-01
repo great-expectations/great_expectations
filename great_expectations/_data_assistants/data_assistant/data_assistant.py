@@ -4,6 +4,48 @@ from abc import ABCMeta, abstractmethod
 from inspect import isabstract
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
+from great_expectations._data_assistants import (
+    RuleBasedProfilerResult,  # noqa: TCH001
+)
+from great_expectations._data_assistants.config import ParameterBuilderConfig
+from great_expectations._data_assistants.data_assistant_result import (
+    DataAssistantResult,
+)
+from great_expectations._data_assistants.domain_builder import (
+    MapMetricColumnDomainBuilder,
+)
+from great_expectations._data_assistants.expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
+    ExpectationConfigurationBuilder,
+)
+from great_expectations._data_assistants.helpers.configuration_reconciliation import (
+    DEFAULT_RECONCILATION_DIRECTIVES,
+)
+from great_expectations._data_assistants.helpers.util import sanitize_parameter_name
+from great_expectations._data_assistants.parameter_builder import (
+    HistogramSingleBatchParameterBuilder,
+    MeanUnexpectedMapMetricMultiBatchParameterBuilder,
+    MetricMultiBatchParameterBuilder,
+    MetricSingleBatchParameterBuilder,
+    NumericMetricRangeMultiBatchParameterBuilder,
+    ParameterBuilder,
+)
+from great_expectations._data_assistants.parameter_builder.regex_pattern_string_parameter_builder import (  # noqa: E501
+    RegexPatternStringParameterBuilder,
+)
+from great_expectations._data_assistants.parameter_container import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    VARIABLES_KEY,
+    ParameterNode,
+)
+from great_expectations._data_assistants.rule import Rule
+from great_expectations._data_assistants.rule_based_profiler import (
+    BaseRuleBasedProfiler,
+    RuleBasedProfiler,
+)
 from great_expectations._docs_decorators import public_api
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
@@ -13,56 +55,14 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.datasource.fluent.interfaces import (
     Batch as FluentBatch,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler import (
-    RuleBasedProfilerResult,  # noqa: TCH001
-)
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.data_assistant_result import (
-    DataAssistantResult,
-)
-from great_expectations.rule_based_profiler.domain_builder import (
-    MapMetricColumnDomainBuilder,
-)
-from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    DefaultExpectationConfigurationBuilder,
-    ExpectationConfigurationBuilder,
-)
-from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
-    DEFAULT_RECONCILATION_DIRECTIVES,
-)
-from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
-from great_expectations.rule_based_profiler.parameter_builder import (
-    HistogramSingleBatchParameterBuilder,
-    MeanUnexpectedMapMetricMultiBatchParameterBuilder,
-    MetricMultiBatchParameterBuilder,
-    MetricSingleBatchParameterBuilder,
-    NumericMetricRangeMultiBatchParameterBuilder,
-    ParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (  # noqa: E501
-    RegexPatternStringParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    VARIABLES_KEY,
-    ParameterNode,
-)
-from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-    RuleBasedProfiler,
-)
 from great_expectations.util import camel_to_snake, measure_execution_time
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import Batch, BatchRequestBase
-    from great_expectations.rule_based_profiler.helpers.runtime_environment import (
+    from great_expectations._data_assistants.helpers.runtime_environment import (
         RuntimeEnvironmentDomainTypeDirectives,
         RuntimeEnvironmentVariablesDirectives,
     )
+    from great_expectations.core.batch import Batch, BatchRequestBase
     from great_expectations.validator.validator import Validator
 
 # noinspection PyMethodParameters
@@ -88,7 +88,7 @@ class MetaDataAssistant(ABCMeta):
 
             alias: Optional[str] = getattr(newclass, "__alias__", None)
             if alias and not alias.startswith("_"):
-                from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (  # noqa: E501
+                from great_expectations._data_assistants.data_assistant.data_assistant_dispatcher import (  # noqa: E501
                     DataAssistantDispatcher,
                 )
 

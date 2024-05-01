@@ -4,7 +4,7 @@ import pytest
 from marshmallow.exceptions import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.rule_based_profiler.config import (
+from great_expectations._data_assistants.config import (
     DomainBuilderConfig,
     DomainBuilderConfigSchema,
     ExpectationConfigurationBuilderConfig,
@@ -17,10 +17,10 @@ from great_expectations.rule_based_profiler.config import (
     RuleConfig,
     RuleConfigSchema,
 )
-from great_expectations.rule_based_profiler.config.base import (
+from great_expectations._data_assistants.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations._data_assistants.rule_based_profiler import RuleBasedProfiler
 
 # module level markers
 pytestmark = pytest.mark.unit

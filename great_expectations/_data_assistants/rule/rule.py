@@ -4,29 +4,29 @@ import copy
 import json
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
+from great_expectations._data_assistants.config.base import (
+    domainBuilderConfigSchema,
+    expectationConfigurationBuilderConfigSchema,
+    parameterBuilderConfigSchema,
+)
+from great_expectations._data_assistants.helpers.configuration_reconciliation import (
+    DEFAULT_RECONCILATION_DIRECTIVES,
+    ReconciliationDirectives,
+    reconcile_rule_variables,
+)
+from great_expectations._data_assistants.helpers.util import (
+    convert_variables_to_dict,
+)
+from great_expectations._data_assistants.parameter_container import (
+    ParameterContainer,
+    build_parameter_container_for_variables,
+)
+from great_expectations._data_assistants.rule.rule_state import RuleState
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import (
     convert_to_json_serializable,
     determine_progress_bar_method_by_environment,
 )
-from great_expectations.rule_based_profiler.config.base import (
-    domainBuilderConfigSchema,
-    expectationConfigurationBuilderConfigSchema,
-    parameterBuilderConfigSchema,
-)
-from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
-    DEFAULT_RECONCILATION_DIRECTIVES,
-    ReconciliationDirectives,
-    reconcile_rule_variables,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_variables_to_dict,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
-    build_parameter_container_for_variables,
-)
-from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -34,17 +34,17 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import Batch, BatchRequestBase
-    from great_expectations.core.domain import Domain
-    from great_expectations.rule_based_profiler.domain_builder import (
+    from great_expectations._data_assistants.domain_builder import (
         DomainBuilder,
     )
-    from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    from great_expectations._data_assistants.expectation_configuration_builder import (
         ExpectationConfigurationBuilder,
     )
-    from great_expectations.rule_based_profiler.parameter_builder import (
+    from great_expectations._data_assistants.parameter_builder import (
         ParameterBuilder,
     )
+    from great_expectations.core.batch import Batch, BatchRequestBase
+    from great_expectations.core.domain import Domain
 
 
 class Rule(SerializableDictDot):

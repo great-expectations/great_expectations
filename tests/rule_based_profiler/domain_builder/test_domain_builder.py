@@ -4,6 +4,17 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._data_assistants.domain_builder import (
+    ColumnDomainBuilder,
+    ColumnPairDomainBuilder,
+    DomainBuilder,
+    MultiColumnDomainBuilder,
+    TableDomainBuilder,
+)
+from great_expectations._data_assistants.parameter_container import (
+    ParameterContainer,
+    build_parameter_container_for_variables,
+)
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -11,17 +22,6 @@ from great_expectations.core.domain import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.rule_based_profiler.domain_builder import (
-    ColumnDomainBuilder,
-    ColumnPairDomainBuilder,
-    DomainBuilder,
-    MultiColumnDomainBuilder,
-    TableDomainBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
-    build_parameter_container_for_variables,
-)
 
 yaml = YAMLHandler()
 

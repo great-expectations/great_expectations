@@ -7,36 +7,36 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations._data_assistants import (
+    BaseRuleBasedProfiler,
+    RuleBasedProfiler,
+)
+from great_expectations._data_assistants.config import (
+    DomainBuilderConfig,
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations._data_assistants.domain_builder import TableDomainBuilder
+from great_expectations._data_assistants.expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
+)
+from great_expectations._data_assistants.helpers.configuration_reconciliation import (
+    ReconciliationDirectives,
+    ReconciliationStrategy,
+)
+from great_expectations._data_assistants.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
+)
+from great_expectations._data_assistants.parameter_container import (
+    ParameterContainer,
+)
+from great_expectations._data_assistants.rule import Rule
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
 from great_expectations.exceptions.exceptions import InvalidConfigError
-from great_expectations.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-    RuleBasedProfiler,
-)
-from great_expectations.rule_based_profiler.config import (
-    DomainBuilderConfig,
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-)
-from great_expectations.rule_based_profiler.domain_builder import TableDomainBuilder
-from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    DefaultExpectationConfigurationBuilder,
-)
-from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
-    ReconciliationDirectives,
-    ReconciliationStrategy,
-)
-from great_expectations.rule_based_profiler.parameter_builder import (
-    MetricMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
-)
-from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:

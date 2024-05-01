@@ -2,12 +2,12 @@ from typing import Dict, List
 
 import pytest
 
+from great_expectations._data_assistants.parameter_container import ParameterNode
+from great_expectations._data_assistants.rule import RuleOutput
 from great_expectations.core.domain import Domain
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.rule_based_profiler.parameter_container import ParameterNode
-from great_expectations.rule_based_profiler.rule import RuleOutput
 
 
 @pytest.mark.unit

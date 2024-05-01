@@ -11,13 +11,13 @@ from great_expectations.types import SerializableDictDot
 if TYPE_CHECKING:
     import numpy as np
 
-    from great_expectations.core.domain import Domain
-    from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+    from great_expectations._data_assistants.estimators.numeric_range_estimation_result import (
         NumericRangeEstimationResult,
     )
-    from great_expectations.rule_based_profiler.parameter_container import (
+    from great_expectations._data_assistants.parameter_container import (
         ParameterContainer,
     )
+    from great_expectations.core.domain import Domain
     from great_expectations.types.attributes import Attributes
 
 logger = logging.getLogger(__name__)

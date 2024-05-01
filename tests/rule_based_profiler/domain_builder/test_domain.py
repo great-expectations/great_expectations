@@ -2,15 +2,15 @@ from typing import Optional
 
 import pytest
 
+from great_expectations._data_assistants.helpers.util import (
+    integer_semantic_domain_type,
+)
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.helpers.util import (
-    integer_semantic_domain_type,
-)
 
 # module level markers
 pytestmark = pytest.mark.unit

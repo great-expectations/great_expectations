@@ -2,21 +2,21 @@ from typing import List, Optional
 
 import pytest
 
+from great_expectations._data_assistants.config import ParameterBuilderConfig
+from great_expectations._data_assistants.parameter_builder import (
+    ParameterBuilder,
+    UnexpectedCountStatisticsMultiBatchParameterBuilder,
+)
+from great_expectations._data_assistants.parameter_builder.unexpected_count_statistics_multi_batch_parameter_builder import (  # noqa: E501
+    _standardize_mostly_for_single_batch,
+)
+from great_expectations._data_assistants.parameter_container import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+)
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,
-    UnexpectedCountStatisticsMultiBatchParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.unexpected_count_statistics_multi_batch_parameter_builder import (  # noqa: E501
-    _standardize_mostly_for_single_batch,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-)
 
 
 @pytest.mark.big

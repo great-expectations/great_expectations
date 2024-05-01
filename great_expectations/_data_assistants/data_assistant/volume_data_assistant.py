@@ -2,38 +2,38 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.data_assistant import DataAssistant
-from great_expectations.rule_based_profiler.data_assistant_result import (
+from great_expectations._data_assistants.config import ParameterBuilderConfig
+from great_expectations._data_assistants.data_assistant import DataAssistant
+from great_expectations._data_assistants.data_assistant_result import (
     DataAssistantResult,
     VolumeDataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain_builder import (
+from great_expectations._data_assistants.domain_builder import (
     CategoricalColumnDomainBuilder,
     TableDomainBuilder,
 )
-from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+from great_expectations._data_assistants.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
     ExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
+from great_expectations._data_assistants.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations._data_assistants.parameter_builder import (
     ParameterBuilder,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     VARIABLES_KEY,
 )
-from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations._data_assistants.rule import Rule
+from great_expectations.compatibility.typing_extensions import override
 
 if TYPE_CHECKING:
-    from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+    from great_expectations._data_assistants.domain_builder import DomainBuilder
     from great_expectations.validator.validator import Validator
 
 

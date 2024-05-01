@@ -27,6 +27,17 @@ import pandas as pd
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
+from great_expectations._data_assistants.config import RuleBasedProfilerConfig
+from great_expectations._data_assistants.domain_builder import (
+    ColumnDomainBuilder,
+)
+from great_expectations._data_assistants.helpers.configuration_reconciliation import (
+    ReconciliationDirectives,
+    ReconciliationStrategy,
+)
+from great_expectations._data_assistants.rule_based_profiler import (
+    BaseRuleBasedProfiler,
+)
 from great_expectations._docs_decorators import deprecated_argument, public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_suite import (
@@ -53,17 +64,6 @@ from great_expectations.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.domain_builder import (
-    ColumnDomainBuilder,
-)
-from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
-    ReconciliationDirectives,
-    ReconciliationStrategy,
-)
-from great_expectations.rule_based_profiler.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-)
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
@@ -85,6 +85,16 @@ logging.captureWarnings(True)
 
 
 if TYPE_CHECKING:
+    from great_expectations._data_assistants.expectation_configuration_builder import (
+        ExpectationConfigurationBuilder,
+    )
+    from great_expectations._data_assistants.parameter_builder import (
+        ParameterBuilder,
+    )
+    from great_expectations._data_assistants.parameter_container import (
+        ParameterContainer,
+    )
+    from great_expectations._data_assistants.rule import Rule
     from great_expectations.core.batch import (
         AnyBatch,
         Batch,
@@ -96,16 +106,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-        ExpectationConfigurationBuilder,
-    )
-    from great_expectations.rule_based_profiler.parameter_builder import (
-        ParameterBuilder,
-    )
-    from great_expectations.rule_based_profiler.parameter_container import (
-        ParameterContainer,
-    )
-    from great_expectations.rule_based_profiler.rule import Rule
     from great_expectations.validator.metric_configuration import MetricConfiguration
 
 

@@ -2,6 +2,7 @@ from typing import Dict, List
 
 import pytest
 
+from great_expectations._data_assistants.domain_builder import ColumnDomainBuilder
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.interfaces import Batch
@@ -14,7 +15,6 @@ from great_expectations.experimental.metric_repository.metrics import (
     MetricTypes,
     TableMetric,
 )
-from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.validator import Validator
 

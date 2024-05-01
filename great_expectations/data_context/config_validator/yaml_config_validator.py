@@ -17,13 +17,13 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 from ruamel.yaml import YAML
 
+from great_expectations._data_assistants import RuleBasedProfiler  # noqa: TCH001
+from great_expectations._data_assistants.config import RuleBasedProfilerConfig
 from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.rule_based_profiler import RuleBasedProfiler  # noqa: TCH001
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 if TYPE_CHECKING:
     from ruamel.yaml.comments import CommentedMap

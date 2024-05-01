@@ -3,23 +3,23 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
+from great_expectations._data_assistants.builder import Builder
+from great_expectations._data_assistants.helpers.util import (
+    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
+)
+from great_expectations._data_assistants.helpers.util import (
+    get_resolved_metrics_by_key,
+)
+from great_expectations._data_assistants.helpers.util import (
+    get_validator as get_validator_using_batch_list_or_batch_request,
+)
+from great_expectations._data_assistants.parameter_container import (
+    ParameterContainer,  # noqa: TCH001
+)
 from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_domain_types import (
     MetricDomainTypes,  # noqa: TCH001
-)
-from great_expectations.rule_based_profiler.builder import Builder
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_resolved_metrics_by_key,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_validator as get_validator_using_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,  # noqa: TCH001
 )
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration

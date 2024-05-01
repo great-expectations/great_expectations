@@ -3,12 +3,11 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.domain import Domain
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations._data_assistants.config import ParameterBuilderConfig
+from great_expectations._data_assistants.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
@@ -17,6 +16,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     get_fully_qualified_parameter_names,
 )
+from great_expectations.core.domain import Domain
 from great_expectations.types.attributes import Attributes
 
 """

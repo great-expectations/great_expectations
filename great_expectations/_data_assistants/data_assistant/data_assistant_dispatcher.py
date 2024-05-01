@@ -3,13 +3,13 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, List, Set, Type
 
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.rule_based_profiler.data_assistant import (
+from great_expectations._data_assistants.data_assistant import (
     DataAssistant,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
+from great_expectations._data_assistants.data_assistant.data_assistant_runner import (
     DataAssistantRunner,
 )
+from great_expectations.compatibility.typing_extensions import override
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

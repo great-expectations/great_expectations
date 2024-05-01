@@ -9,6 +9,27 @@ import nbformat
 import pytest
 from freezegun import freeze_time
 
+from great_expectations._data_assistants.altair import AltairDataTypes
+from great_expectations._data_assistants.config import RuleBasedProfilerConfig
+from great_expectations._data_assistants.data_assistant import VolumeDataAssistant
+from great_expectations._data_assistants.data_assistant.data_assistant_runner import (
+    NumericRangeEstimatorType,
+)
+from great_expectations._data_assistants.data_assistant_result import (
+    DataAssistantResult,
+    VolumeDataAssistantResult,
+)
+from great_expectations._data_assistants.data_assistant_result.plot_result import (
+    PlotResult,
+)
+from great_expectations._data_assistants.helpers.util import (
+    get_validator_with_expectation_suite,
+)
+from great_expectations._data_assistants.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    RAW_PARAMETER_KEY,
+    ParameterNode,
+)
 from great_expectations.core import (
     ExpectationSuite,
 )
@@ -21,27 +42,6 @@ from great_expectations.core.domain import (
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
-)
-from great_expectations.rule_based_profiler.altair import AltairDataTypes
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.data_assistant import VolumeDataAssistant
-from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
-    NumericRangeEstimatorType,
-)
-from great_expectations.rule_based_profiler.data_assistant_result import (
-    DataAssistantResult,
-    VolumeDataAssistantResult,
-)
-from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
-    PlotResult,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_validator_with_expectation_suite,
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    RAW_PARAMETER_KEY,
-    ParameterNode,
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
@@ -1582,12 +1582,12 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     import great_expectations as gx
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.validator.validator import Validator
-    from great_expectations.rule_based_profiler.data_assistant import (
+    from great_expectations._data_assistants.data_assistant import (
         DataAssistant,
         VolumeDataAssistant,
     )
-    from great_expectations.rule_based_profiler.data_assistant_result import DataAssistantResult
-    from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
+    from great_expectations._data_assistants.data_assistant_result import DataAssistantResult
+    from great_expectations._data_assistants.helpers.util import get_validator_with_expectation_suite
     import great_expectations.exceptions as gx_exceptions
 
     context = gx.get_context()

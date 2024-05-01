@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     ParameterContainer,
 )
+from great_expectations.core.domain import Domain  # noqa: TCH001
 
 if TYPE_CHECKING:
-    from great_expectations.rule_based_profiler.rule.rule import Rule
+    from great_expectations._data_assistants.rule.rule import Rule
     from great_expectations.validator.exception_info import ExceptionInfo
 
 

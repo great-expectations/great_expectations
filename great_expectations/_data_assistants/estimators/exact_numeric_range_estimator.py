@@ -5,21 +5,21 @@ from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+from great_expectations._data_assistants.estimators.numeric_range_estimation_result import (
     NumericRangeEstimationResult,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
+from great_expectations._data_assistants.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations._data_assistants.helpers.util import (
     build_numeric_range_estimation_result,
     datetime_semantic_domain_type,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations._data_assistants.parameter_container import (
     ParameterContainer,  # noqa: TCH001
 )
+from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
 
 if TYPE_CHECKING:
