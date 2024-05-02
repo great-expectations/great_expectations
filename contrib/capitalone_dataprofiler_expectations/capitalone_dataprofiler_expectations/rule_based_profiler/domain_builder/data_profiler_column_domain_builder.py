@@ -7,12 +7,12 @@ from great_expectations.core.domain import (
     Domain,
     SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
-from great_expectations.rule_based_profiler.helpers.util import (
+from great_expectations.experimental.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.experimental.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations.experimental.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
     ParameterContainer,
 )
