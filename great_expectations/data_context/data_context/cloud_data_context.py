@@ -273,7 +273,6 @@ class CloudDataContext(SerializableDataContext):
 
         # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
         # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
-
         cls._change_key_from_v0_to_v1(
             config,
             "evaluation_parameter_store_name",
@@ -282,19 +281,36 @@ class CloudDataContext(SerializableDataContext):
         cls._change_key_from_v0_to_v1(
             config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
         )
+
+        config = cls._prepare_stores_config(config=config)
+
+        return config
+
+    @classmethod
+    def _prepare_stores_config(cls, config) -> dict:
         stores = config.get("stores")
-        if stores:
-            for store in stores.values():
-                if store:
-                    cls._change_value_from_v0_to_v1(
-                        store,
-                        "class_name",
-                        "EvaluationParameterStore",
-                        SuiteParameterStore.__name__,
-                    )
-                    cls._change_value_from_v0_to_v1(
-                        store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
-                    )
+        if not stores:
+            return config
+
+        to_delete: list[str] = []
+        for name, store in stores.items():
+            # Certain stores have been renamed in V1
+            cls._change_value_from_v0_to_v1(
+                store,
+                "class_name",
+                "EvaluationParameterStore",
+                SuiteParameterStore.__name__,
+            )
+            cls._change_value_from_v0_to_v1(
+                store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
+            )
+
+            # Profiler stores are no longer supported in V1
+            if store.get("class_name") == "ProfilerStore":
+                to_delete.append(name)
+
+        for name in to_delete:
+            config["stores"].pop(name)
 
         return config
 
