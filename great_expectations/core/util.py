@@ -377,7 +377,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
         return str(data)
 
-    if isinstance(data, Row):
+    if Row and isinstance(data, Row):
         return str(data)
 
     if isinstance(data, decimal.Decimal):
