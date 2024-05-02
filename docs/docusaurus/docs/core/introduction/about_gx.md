@@ -65,8 +65,6 @@ GX is NOT a data versioning tool.
 
 GX does not store data itself. Instead, it deals in metadata about data: Expectations, Validation Results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/), [Quilt](https://github.com/quiltdata/quilt), and [lakeFS](https://github.com/treeverse/lakeFS/).
 
-GX currently works best in a Python environment.
-
 GX is Python-based. You can invoke it from the command line without using a Python programming environment, but if you’re working in another ecosystem, other tools might be a better choice. If you’re running in a pure R environment, you might consider [assertR](https://github.com/ropensci/assertr)  as an alternative. Within the TensorFlow ecosystem, [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) fulfills a similar function as GX.
 
 ## GX Cloud
