@@ -43,11 +43,7 @@ As the arguments for each Expectation are different, they are implemented as dif
 
 Column Expectations operate on individual columns. ColumnPair and Multicolumn Expectations operate on column pairs, in the same Batch, but not necessarily adjacent to each other.
 
-![Column and Multicolumn Expectations](/docs/oss/images/domain_types1.png)
-
 GX doesn’t have a TableExpectation type because you can get the same functionality from a BatchExpectation. If you want to run Expectations on an entire table, you configure a DataAsset to use an entire table as its domain.
-
-![BatchExpectation](/docs/oss/images/batch_expectation.png)
 
 ## Aggregate Expectations
 
@@ -57,7 +53,6 @@ A common pattern is to calculate a numeric Metric, and then verify that it falls
 
 Some Expectations don’t use a numeric Metric for the observed_value. For example, [`expect_column_distinct_values_to_equal_set`](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set?filterType=Backend%20support&gotoPage=1&showFilters=true&viewType=Summary) creates a set of distinct column values, that is then compared against a specified set and [`expect_column_to_have_no_days_missing`](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set?filterType=Backend%20support&gotoPage=1&showFilters=true&viewType=Summary) looks for continuity within the column’s values.
 
-![Aggregate Expectations](/docs/oss/images/aggregate_expectations.png)
 
 Aggregate Expectations calculate summary statistics across Batches of data. As a result, they can be a computationally efficient way to gain insight into the overall behavior of a dataset and can provide a useful foundation for identifying trends, patterns, and outliers. However, because Aggregate Expectations do not verify individual rows of data, they can't identify specific data issues.
 
@@ -65,7 +60,6 @@ Aggregate Expectations calculate summary statistics across Batches of data. As a
 
 Map Expectations are evaluated on a row-by-row basis and each row is checked independently. For example, [`expect_column_values_to_not_be_null`](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null?filterType=Backend%20support&gotoPage=1&showFilters=true&viewType=Summary), [`expect_column_values_to_be_in_set`](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null?filterType=Backend%20support&gotoPage=1&showFilters=true&viewType=Summary), [` expect_column_pair_values_to_be_equal`](https://greatexpectations.io/expectations/expect_column_pair_values_to_be_equal?filterType=Backend%20support&gotoPage=1&showFilters=true&viewType=Summary).
 
-![Map Expectations](/docs/oss/images/map_expectations.png)
 
 Map Expectations are useful when you want to be certain that the content of a given dataset is correct. If you’re validating data within a pipeline, Map Expectations can help you identify invalid rows, remove invalid rows from the dataset, and process the remaining data. Unfortunately, because Map Expectations evaluate every row of data, they can be computationally intensive.
 
@@ -77,7 +71,7 @@ Row Expectations was considered as an alternative name for Map Expectations, but
 
 ## Subclasses
 
-Beyond the `[Domain][Approach]Expectation` naming convention, the specialized subclasses `RegexBasedColumnMapExpectation` and `SetBasedColumnMapExpectation` are supported. These extend `ColumnMapExpectation` and make it easier to define Expectations based on regexes and sets. For more information, see [How to create a Custom Regex-Based Column Map Expectation](/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations.md) and [How to create a Custom Set-Based Column Map Expectation](/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations.md).
+Beyond the `[Domain][Approach]Expectation` naming convention, the specialized subclasses `RegexBasedColumnMapExpectation` and `SetBasedColumnMapExpectation` are supported. These extend `ColumnMapExpectation` and make it easier to define Expectations based on regexes and sets. For more information, see How to create a Custom Regex-Based Column Map Expectation and How to create a Custom Set-Based Column Map Expectation.
 
 ## BatchExpectations
 
@@ -86,8 +80,6 @@ BatchExpectations do not currently have a special subclass for Map Expectations.
 ## QueryExpectations
 
 QueryExpectations allow you to set Expectations against the results of custom SQL or Spark queries. QueryExpectations can be useful if you’re comfortable working in SQL or Spark or a specific dialect. They can also allow you to embed arbitrarily complex logic in your Expectations, such as combining data from multiple tables, or applying complex logic within a query.
-
-![QueryExpectations](/docs/oss/images/query_expectations.png)
 
 QueryExpectations bypass most of the logic that GX uses for grouping queries on related Domains. As a result, QueryExpectations can increase database traffic and consume computational resources. If you’re not careful when you construct your Expectation, you can also misattribute results to the wrong Domain.
 
@@ -112,13 +104,3 @@ This concludes the review of GX Expectation classes. You've learned:
 Now that you've learned about Expectation classes, you can use the following resources to learn how to put them into practice:
 
 - [Explore Expectations](https://greatexpectations.io/expectations/?filterType=Backend%20support&gotoPage=1&showFilters=true&viewType=Summary)
-
-- [How to create and edit Expectations based on domain knowledge, without inspecting data directly](/oss/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md)
-
-- [Create and manage Custom Expectations](/oss/guides/expectations/custom_expectations_lp.md)
-
-- [Expectations naming conventions](/oss/contributing/style_guides/code_style.md#expectations)
-
-- [Standard arguments for Expectations](/reference/learn/expectations/standard_arguments.md)
-
-- [Result format](/reference/learn/expectations/result_format.md)
