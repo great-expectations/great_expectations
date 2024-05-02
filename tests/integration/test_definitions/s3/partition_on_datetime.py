@@ -23,7 +23,6 @@ batch_definition = data_asset.add_batch_definition_monthly("monthly", regex=batc
 # Get all batches by month
 batch_request = batch_definition.build_batch_request()
 batch_list = data_asset.get_batch_list_from_batch_request(batch_request)
-
 assert len(batch_list) == 3
 assert batch_list[0].metadata == {
     "year": "2019",
@@ -32,10 +31,9 @@ assert batch_list[0].metadata == {
 }
 
 # Get a specific batch by month
-batch_request = data_asset.build_batch_request({"year": "2019", "month": "03"})
+batch_request = batch_definition.build_batch_request({"year": "2019", "month": "02"})
 batch_list = data_asset.get_batch_list_from_batch_request(batch_request)
 assert len(batch_list) == 1
-assert batch_list[0].metadata == "foo"
 assert batch_list[0].metadata == {
     "year": "2019",
     "month": "02",
