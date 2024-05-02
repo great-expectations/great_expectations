@@ -22,13 +22,12 @@ data_asset = datasource.add_csv_asset(
 
 batch_definition = data_asset.add_batch_definition_monthly(
     "monthly",
-    regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"),
+    regex=re.compile(gcs_prefix + r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"),
 )
 
 # not passing in batch parameters
 my_batch_request = batch_definition.build_batch_request()
 batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
-print(len(batches))
 assert len(batches) == 3
 
 # passing in batch parameters

@@ -13,14 +13,13 @@ assert datasource_name in context.datasources
 
 asset_name = "my_taxi_data_asset"
 gcs_prefix = "data/taxi_yellow_tripdata_samples/"
-batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 data_asset = datasource.add_csv_asset(
     name=asset_name,
     gcs_prefix=gcs_prefix,
 )
 
 batch_definition = data_asset.add_batch_definition_path(
-    "monthly", path="yellow_tripdata_sample_2019-02.csv"
+    "monthly", path=gcs_prefix + "yellow_tripdata_sample_2019-02.csv"
 )
 
 my_batch_request = batch_definition.build_batch_request()
