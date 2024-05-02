@@ -125,14 +125,9 @@ BLOCK_CONFIG_DATASOURCE_NAME = "my_pandas_datasource"
 
 @pytest.fixture
 def in_memory_data_context(
-    block_config_datasource_config: DatasourceConfig,
     fluent_datasource_config: dict,
 ) -> EphemeralDataContextSpy:
-    datasources = {
-        BLOCK_CONFIG_DATASOURCE_NAME: block_config_datasource_config,
-    }
     config = DataContextConfig(
-        datasources=datasources,
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
     context = EphemeralDataContextSpy(project_config=config)
