@@ -684,8 +684,8 @@ module.exports = {
       label: 'Concepts',
       link: { type: 'doc', id: 'learn/concepts/concepts_lp' },
       items: [
-        'reference/learn/conceptual_guides/expectation_classes',
-        'reference/learn/conceptual_guides/metricproviders',
+        'learn/expectation_classes',
+        'learn/metricproviders',
         'learn/concepts/concept_3',
       ]
     },

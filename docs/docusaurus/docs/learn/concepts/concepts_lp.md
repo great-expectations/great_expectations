@@ -17,8 +17,8 @@ import OverviewCard from '@site/src/components/OverviewCard';
 </OverviewCard>
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Expectation classes" description="Learn more about Expectation classes" to="/reference/learn/conceptual_guides/expectation_classes" icon="/img/concepts_icon.svg" />
-  <LinkCard topIcon label="MetricProviders" description="Learn more about MetricProviders" to="/reference/learn/conceptual_guides/metricproviders" icon="/img/concepts_icon.svg" />
+  <LinkCard topIcon label="Expectation classes" description="Learn more about Expectation classes" to="/learn/expectation_classes" icon="/img/concepts_icon.svg" />
+  <LinkCard topIcon label="MetricProviders" description="Learn more about MetricProviders" to="/learn/metricproviders" icon="/img/concepts_icon.svg" />
   <LinkCard topIcon label="Concept 3" description="Concept 3" to="/learn/integrations/integration_3" icon="/img/concepts_icon.svg" />
 </LinkCardGrid>
 
