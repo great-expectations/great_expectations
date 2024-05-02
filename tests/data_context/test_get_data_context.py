@@ -71,7 +71,6 @@ def test_base_context(clear_env_vars):
 def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_vars):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    gx.data_context.FileDataContext.create(project_path)
     context_path = project_path / FileDataContext.GX_DIR
     context = gx.get_context(context_root_dir=context_path)
     assert isinstance(context, FileDataContext)
@@ -99,22 +98,12 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
 
 
 @pytest.mark.unit
-def test_data_context(tmp_path: pathlib.Path, clear_env_vars):
-    project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
-    FileDataContext.create(project_path)
-    with working_directory(project_path):
-        assert isinstance(gx.get_context(), FileDataContext)
-
-
-@pytest.mark.unit
 def test_data_context_root_dir_returns_data_context(
     tmp_path: pathlib.Path,
     clear_env_vars,
 ):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    gx.data_context.FileDataContext.create(project_path)
     context_path = project_path / FileDataContext.GX_DIR
     assert isinstance(gx.get_context(context_root_dir=str(context_path)), FileDataContext)
 
@@ -158,15 +147,6 @@ def test_cloud_context_env(set_up_cloud_envs, empty_ge_cloud_data_context_config
             gx.get_context(cloud_mode=ge_cloud_mode),
             CloudDataContext,
         )
-
-
-@pytest.mark.cloud
-def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
-    project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
-    gx.data_context.FileDataContext.create(project_path)
-    with working_directory(project_path):
-        assert isinstance(gx.get_context(cloud_mode=False), FileDataContext)
 
 
 @pytest.mark.cloud

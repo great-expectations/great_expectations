@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 import pytest
 
+import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
@@ -605,7 +606,8 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     """  # noqa: E501
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context = FileDataContext.create(
+    context = gx.get_context(
+        mode="file",
         project_root_dir=project_path,
     )
 
