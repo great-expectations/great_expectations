@@ -325,13 +325,6 @@ fluent_datasources = [
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[],
     # ),
-    # IntegrationTestFixture(
-    #     name="rule_base_profiler_multi_batch_example",
-    #     data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",  # noqa: E501
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",  # noqa: E501
-    #     backend_dependencies=[BackendDependencies.PANDAS],
-    # ),
     IntegrationTestFixture(
         name="glossary_batch_request",
         data_context_dir=None,

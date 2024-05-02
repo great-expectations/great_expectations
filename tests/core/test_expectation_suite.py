@@ -25,7 +25,6 @@ from great_expectations.core.expectation_suite import (
     expectationSuiteSchema,
 )
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import Expectation
@@ -1081,50 +1080,6 @@ def baseline_suite(expect_column_values_to_be_in_set_col_a_with_meta, exp2) -> E
         expectations=[expect_column_values_to_be_in_set_col_a_with_meta, exp2],
         meta={"notes": "This is an expectation suite."},
     )
-
-
-@pytest.fixture
-def profiler_config():
-    # Profiler configuration is pulled from the Bobster use case in tests/rule_based_profiler/
-    yaml_config = """
-    # This profiler is meant to be used on the NYC taxi data:
-    # tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_20(18|19|20)-*.csv
-    variables:
-      # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
-      jan_2018_thru_nov_2020_monthly_tripdata_batch_request:
-        datasource_name: taxi_pandas
-        data_connector_name: monthly
-        data_asset_name: my_reports
-        data_connector_query:
-          index: ":-1"
-      confidence_level: 9.5e-1
-      mostly: 1.0
-
-    rules:
-      row_count_range_rule:
-        domain_builder:
-          class_name: TableDomainBuilder
-        parameter_builders:
-          - parameter_name: row_count_range
-            class_name: NumericMetricRangeMultiBatchParameterBuilder
-            metric_name: table.row_count
-            confidence_level: $variables.confidence_level
-            truncate_values:
-              lower_bound: 0
-            round_decimals: 0
-        expectation_configuration_builders:
-         - expectation_type: expect_table_row_count_to_be_between
-           class_name: DefaultExpectationConfigurationBuilder
-           module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-           min_value: $parameter.row_count_range.value.min_value
-           max_value: $parameter.row_count_range.value.max_value
-           mostly: $variables.mostly
-           meta:
-             profiler_details: $parameter.row_count_range.details
-    """
-
-    yaml = YAMLHandler()
-    return yaml.load(yaml_config)
 
 
 @pytest.mark.unit
