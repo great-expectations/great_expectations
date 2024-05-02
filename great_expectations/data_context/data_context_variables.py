@@ -42,7 +42,6 @@ class DataContextVariableSchema(str, enum.Enum):
     VALIDATIONS_STORE_NAME = "validation_results_store_name"
     SUITE_PARAMETER_STORE_NAME = "suite_parameter_store_name"
     CHECKPOINT_STORE_NAME = "checkpoint_store_name"
-    PROFILER_STORE_NAME = "profiler_store_name"
     PLUGINS_DIRECTORY = "plugins_directory"
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
@@ -183,17 +182,6 @@ class DataContextVariables(ABC):
         self._set(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             checkpoint_store_name,
-        )
-
-    @property
-    def profiler_store_name(self) -> Optional[str]:
-        return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
-
-    @profiler_store_name.setter
-    def profiler_store_name(self, profiler_store_name: str) -> None:
-        self._set(
-            DataContextVariableSchema.PROFILER_STORE_NAME,
-            profiler_store_name,
         )
 
     @property

@@ -91,9 +91,6 @@ SUITE_PARAMETER_STORE_STRING = yaml.dump(
 CHECKPOINT_STORE_STRING = yaml.dump(
     {"checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value["checkpoint_store"]}
 ).replace("\n", "\n  ")[:-2]
-PROFILER_STORE_STRING = yaml.dump(
-    {"profiler_store": DataContextConfigDefaults.DEFAULT_STORES.value["profiler_store"]}
-).replace("\n", "\n  ")[:-2]
 VALIDATION_DEFINITION_STORE_STRING = yaml.dump(
     {
         "validation_definition_store": DataContextConfigDefaults.DEFAULT_STORES.value[
@@ -126,7 +123,6 @@ stores:
     # https://docs.greatexpectations.io/docs/reference/suite_parameters/
     {SUITE_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
-  {PROFILER_STORE_STRING}
   {VALIDATION_DEFINITION_STORE_STRING}
 expectations_store_name: expectations_store
 validation_results_store_name: validation_results_store

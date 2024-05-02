@@ -30,7 +30,6 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 2.0,
         "data_docs_sites": {},
-        "profiler_store_name": None,
         "plugins_directory": "plugins/",
         "stores": {
             "checkpoint_store": {
@@ -50,9 +49,6 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
                     "base_directory": "expectations/",
                     "class_name": "TupleFilesystemStoreBackend",
                 },
-            },
-            "profiler_store": {
-                "class_name": "ProfilerStore",
             },
             "validation_definition_store": {
                 "class_name": "ValidationDefinitionStore",

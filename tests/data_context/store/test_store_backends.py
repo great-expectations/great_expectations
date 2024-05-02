@@ -1347,7 +1347,6 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("expectations_store_name",),
         ("fluent_datasources",),
         ("plugins_directory",),
-        ("profiler_store_name",),
         ("progress_bars",),
         ("stores",),
         ("suite_parameter_store_name",),

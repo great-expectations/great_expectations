@@ -1,7 +1,7 @@
 from typing import Dict, Tuple, Union
 
-from great_expectations.rule_based_profiler.altair import AltairDataTypes
-from great_expectations.rule_based_profiler.data_assistant_result import (
+from great_expectations.experimental.rule_based_profiler.altair import AltairDataTypes
+from great_expectations.experimental.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
 
