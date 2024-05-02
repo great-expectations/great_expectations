@@ -2583,7 +2583,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     # Try to return the most common values, if possible.
     partial_unexpected_count: Optional[int] = result_format.get("partial_unexpected_count")
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
-    if partial_unexpected_count is not None and 0 < partial_unexpected_count:
+    if partial_unexpected_count is not None and partial_unexpected_count > 0:
         try:
             if not exclude_unexpected_values:
                 partial_unexpected_counts = [

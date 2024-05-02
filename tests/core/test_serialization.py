@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import copy
-import inspect
 import logging
 from decimal import Decimal
 from typing import TYPE_CHECKING, Union
-from unittest import mock
 
 import pandas as pd
 import pytest
@@ -191,30 +189,6 @@ def test_lossy_serialization_warning(caplog):
     assert caplog.messages[0].startswith(
         "Using lossy conversion for decimal 12345.678901234567890123456789"
     )
-
-    caplog.clear()
-    d = Decimal("0.1")
-    convert_to_json_serializable(d)
-    print(caplog.messages)
-    assert len(caplog.messages) == 0
-
-
-@pytest.mark.unit
-def test_lossy_serialization_rule_based_profiler_no_warning(caplog):
-    caplog.set_level(logging.WARNING, logger="great_expectations.core")
-
-    with mock.patch.multiple(
-        inspect.FrameInfo,
-        filename="great_expectations/rule_based_profiler/parameter_builder/parameter_builder.py",
-        function="get_metrics",
-        frame=inspect.FrameInfo.frame,
-        lineno=260,
-        code_context=None,
-        index=None,
-    ):
-        d = Decimal("12345.678901234567890123456789")
-        convert_to_json_serializable(d)
-        assert len(caplog.messages) == 0
 
     caplog.clear()
     d = Decimal("0.1")

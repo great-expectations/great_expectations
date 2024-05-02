@@ -17,7 +17,7 @@ CONNECTION_STRING = get_redshift_connection_url()
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py imports">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context(mode="file", project_root_dir=full_path_to_project_directory)
 # </snippet>
 
 # parse great_expectations.yml for comparison
@@ -31,7 +31,6 @@ pop_stores = [
     "checkpoint_store",
     "suite_parameter_store",
     "validation_results_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -111,7 +110,6 @@ pop_stores = [
     "suite_parameter_store",
     "expectations_store",
     "expectations_S3_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:

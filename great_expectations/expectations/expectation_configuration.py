@@ -48,7 +48,6 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.expectations.expectation import Expectation
-    from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 logger = logging.getLogger(__name__)
 
 
@@ -101,7 +100,7 @@ class ExpectationContextSchema(Schema):
 class KWargDetailsDict(TypedDict):
     domain_kwargs: tuple[str, ...]
     success_kwargs: tuple[str, ...]
-    default_kwarg_values: dict[str, str | bool | float | RuleBasedProfilerConfig | None]
+    default_kwarg_values: dict[str, str | bool | float | None]
 
 
 class ExpectationConfiguration(SerializableDictDot):
@@ -292,9 +291,7 @@ class ExpectationConfiguration(SerializableDictDot):
         Returns:
             A dictionary with the success and domain kwargs of an expectation.
         """
-        default_kwarg_values: Mapping[
-            str, str | bool | float | RuleBasedProfilerConfig | object | None
-        ]
+        default_kwarg_values: Mapping[str, str | bool | float | object | None]
         try:
             impl = self._get_expectation_impl()
         except ExpectationNotFoundError:
@@ -315,9 +312,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def get_runtime_kwargs(self, runtime_configuration: Optional[dict] = None) -> dict:
         runtime_keys: tuple[str, ...]
-        default_kwarg_values: Mapping[
-            str, str | bool | float | RuleBasedProfilerConfig | object | None
-        ]
+        default_kwarg_values: Mapping[str, str | bool | float | object | None]
         try:
             impl = self._get_expectation_impl()
         except ExpectationNotFoundError:
@@ -344,7 +339,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def applies_to_same_domain(
         self, other_expectation_configuration: ExpectationConfiguration
     ) -> bool:
-        if not self.expectation_type == other_expectation_configuration.expectation_type:
+        if self.expectation_type != other_expectation_configuration.expectation_type:
             return False
         return self.get_domain_kwargs() == other_expectation_configuration.get_domain_kwargs()
 

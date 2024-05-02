@@ -64,16 +64,8 @@ def totally_empty_data_context(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-def test_create(tmp_path_factory):
-    project_path = str(tmp_path_factory.mktemp("path_001"))
-    context = gx.data_context.FileDataContext.create(project_path)
-
-    assert isinstance(context, gx.data_context.FileDataContext)
-
-
-@pytest.mark.filesystem
 def test_add_store(totally_empty_data_context):
-    assert len(totally_empty_data_context.stores.keys()) == 6
+    assert len(totally_empty_data_context.stores.keys()) == 5
 
     totally_empty_data_context.add_store(
         "my_new_store",
@@ -83,19 +75,18 @@ def test_add_store(totally_empty_data_context):
         },
     )
     assert "my_new_store" in totally_empty_data_context.stores
-    assert len(totally_empty_data_context.stores.keys()) == 7
+    assert len(totally_empty_data_context.stores.keys()) == 6
 
 
 @pytest.mark.filesystem
 def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("totally_empty_data_context"))
-    context = gx.data_context.FileDataContext.create(project_path)
+    context = gx.get_context(project_root_dir=project_path)
 
     assert set(context.stores.keys()) == {
         "expectations_store",
         "validation_results_store",
         "suite_parameter_store",
-        "profiler_store",
         "checkpoint_store",
         "validation_definition_store",
     }
@@ -113,7 +104,6 @@ def test_default_config_yml_stores(tmp_path_factory):
         "expectations_store",
         "validation_results_store",
         "suite_parameter_store",
-        "profiler_store",
         "validation_definition_store",
         "my_new_validation_results_store",
     }

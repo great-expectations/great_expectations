@@ -324,9 +324,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     def _validate_for_include_column_name(cls, values: dict) -> dict:
         if values.get("runtime_configuration"):
             values["include_column_name"] = (
-                False
-                if values["runtime_configuration"].get("include_column_name") is False
-                else True
+                values["runtime_configuration"].get("include_column_name") is not False
             )
         return values
 
