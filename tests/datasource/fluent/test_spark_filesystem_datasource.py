@@ -24,7 +24,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 from great_expectations.datasource.fluent.interfaces import (
-    SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
@@ -64,6 +63,24 @@ def spark_filesystem_datasource(empty_data_context, test_backends) -> SparkFiles
         base_directory=base_directory_abs_path,
     )
     spark_filesystem_datasource._data_context = empty_data_context
+
+    # Verify test directory has files we expect
+    years = ["2018", "2019", "2020"]
+    months = [format(m, "02d") for m in range(1, 13)]
+    file_name: PathStr
+    all_files: List[str] = [
+        file_name.stem
+        for file_name in list(pathlib.Path(spark_filesystem_datasource.base_directory).iterdir())
+    ]
+    # assert there are 12 files for each year
+    for year in years:
+        files_for_year = [
+            file_name
+            for file_name in all_files
+            if file_name.find(f"yellow_tripdata_sample_{year}") == 0
+        ]
+        assert len(files_for_year) == 12
+
     return spark_filesystem_datasource
 
 
@@ -883,87 +900,36 @@ def test_get_batch_list_from_partially_specified_batch_request(
 
 @pytest.mark.spark
 @pytest.mark.parametrize(
-    "order_by",
-    [
-        ["+year", "month"],
-        ["+year", "+month"],
-        ["+year", "-month"],
-        ["year", "month"],
-        ["year", "+month"],
-        ["year", "-month"],
-        ["-year", "month"],
-        ["-year", "+month"],
-        ["-year", "-month"],
-        ["month", "+year"],
-        ["+month", "+year"],
-        ["-month", "+year"],
-        ["month", "year"],
-        ["+month", "year"],
-        ["-month", "year"],
-        ["month", "-year"],
-        ["+month", "-year"],
-        ["-month", "-year"],
-    ],
+    "sort_ascending",
+    [pytest.param(True), pytest.param(False)],
 )
-@pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
-def test_spark_sorter(
-    spark_filesystem_datasource: SparkFilesystemDatasource,
-    order_by: SortersDefinition,
-):
-    # Verify test directory has files we expect
-    years = ["2018", "2019", "2020"]
-    months = [format(m, "02d") for m in range(1, 13)]
-    file_name: PathStr
-    all_files: List[str] = [
-        file_name.stem
-        for file_name in list(pathlib.Path(spark_filesystem_datasource.base_directory).iterdir())
-    ]
-    # assert there are 12 files for each year
-    for year in years:
-        files_for_year = [
-            file_name
-            for file_name in all_files
-            if file_name.find(f"yellow_tripdata_sample_{year}") == 0
-        ]
-        assert len(files_for_year) == 12
-
+def test_spark_sorter(spark_filesystem_datasource: SparkFilesystemDatasource, sort_ascending: bool):
+    # arrange
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        batching_regex=".*",
         header=True,
         infer_schema=True,
-        order_by=order_by,
     )
-    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+    batch_def = asset.add_batch_definition_monthly(
+        name="test-batch-def", regex=regex, sort_ascending=sort_ascending
+    )
+    batch_request = batch_def.build_batch_request()
+
+    # act
+    batches = asset.get_batch_list_from_batch_request(batch_request)
+
+    # assert
     assert (len(batches)) == 36
 
-    @dataclass(frozen=True)
-    class TimeRange:
-        key: str
-        range: List[str]
-
-    ordered_years = reversed(years) if "-year" in order_by else years
-    ordered_months = reversed(months) if "-month" in order_by else months
-    if "year" in order_by[0]:  # type: ignore[operator]
-        ordered = [
-            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
-            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
-        ]
-    else:
-        ordered = [
-            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
-            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
-        ]
-
-    batch_index = -1
-    for range1 in ordered[0].range:
-        key1 = ordered[0].key
-        for range2 in ordered[1].range:
-            key2 = ordered[1].key
-            batch_index += 1
-            metadata = batches[batch_index].metadata
-            assert metadata[key1] == range1
-            assert metadata[key2] == range2
+    reverse = sort_ascending is False
+    sorted_batches = sorted(
+        batches,
+        key=lambda batch: (batch.metadata.get("year"), batch.metadata.get("month")),
+        reverse=reverse,
+    )
+    assert sorted_batches == batches
 
 
 @pytest.mark.spark
