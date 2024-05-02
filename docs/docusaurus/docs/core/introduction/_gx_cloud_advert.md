@@ -1,3 +1,1 @@
-Not interested in managing your own configuration or infrastructure? 
-
-Learn more about GX Cloud, a fully managed SaaS offering. Sign up for [the weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to preview the latest features and participate in the private Alpha program!
+[Check out GX Cloud](https://greatexpectations.io/cloud), our SaaS platform—it's now in public preview! [Sign up here](https://greatexpectations.io/cloud) and you could be validating your data in minutes. We also offer regular GX Cloud workshops: [click here to get more information and register](https://pages.greatexpectations.io/gx-cloud-workshops).

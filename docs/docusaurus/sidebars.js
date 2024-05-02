@@ -3,7 +3,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Introduction to Great Expectations',
-      link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
+      link: {type: 'doc', id: 'core/introduction/introduction'},
       items: [
         {
           type: 'doc',
