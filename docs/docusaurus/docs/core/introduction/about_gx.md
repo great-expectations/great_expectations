@@ -2,6 +2,7 @@
 title: About Great Expectations
 ---
 import GxData from '../_core_components/_data.jsx'
+import PythonVersion from '../_core_components/_python_version.md'
 import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
 Great Expectations (GX) is the leading tool for validating and documenting your data. {GxData.product_name} is the open source Python library that supports this tool.  With
@@ -65,7 +66,9 @@ GX is NOT a data versioning tool.
 
 GX does not store data itself. Instead, it deals in metadata about data: Expectations, Validation Results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/), [Quilt](https://github.com/quiltdata/quilt), and [lakeFS](https://github.com/treeverse/lakeFS/).
 
-GX is Python-based. You can invoke it from the command line without using a Python programming environment, but if you’re working in another ecosystem, other tools might be a better choice. If you’re running in a pure R environment, you might consider [assertR](https://github.com/ropensci/assertr)  as an alternative. Within the TensorFlow ecosystem, [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) fulfills a similar function as GX.
+GX is NOT an independent executable.
+
+{GxData.product_name} is a Python library.  To use GX, you will need an installation of <PythonVersion/>.  Ideally, you will also configure a Python virtual environment to use GX from.  Guidance on setting up your Python environment and installing the GX Python library is provided under [Set up a GX environment](/core/installation_and_setup/installation_and_setup) in the GX docs.
 
 ## GX Cloud
 
