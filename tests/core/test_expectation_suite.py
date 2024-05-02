@@ -748,7 +748,6 @@ class TestAddCitation:
             batch_definition={"fake": "batch_definition"},
             batch_spec={"fake": "batch_spec"},
             batch_markers={"fake": "batch_markers"},
-            profiler_config={"fake": "profiler_config"},
             citation_date="2022-09-08",
         )
         assert "citations" in empty_suite_with_meta.meta
@@ -761,7 +760,6 @@ class TestAddCitation:
             "batch_definition",
             "batch_spec",
             "batch_markers",
-            "profiler_config",
         }
 
     @pytest.mark.parametrize(
@@ -790,19 +788,6 @@ class TestAddCitation:
         assert len(empty_suite_with_meta.meta["citations"]) == 1
         empty_suite_with_meta.add_citation("fake_comment2")
         assert len(empty_suite_with_meta.meta["citations"]) == 2
-
-    @pytest.mark.unit
-    def test_add_citation_with_profiler_config(self, empty_suite_with_meta: ExpectationSuite):
-        empty_suite_with_meta.add_citation(
-            "fake_comment",
-            profiler_config={"fake": "profiler_config"},
-        )
-
-        assert empty_suite_with_meta.meta["citations"][0]["profiler_config"] == {
-            "fake": "profiler_config"
-        }
-        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
-        assert citation_keys == {"comment", "citation_date", "profiler_config"}
 
 
 class TestIsEquivalentTo:
@@ -1203,45 +1188,6 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
         {
             "citation_date": "2001-01-01T00:00:00.000000Z",
             "batch_kwargs": {"path": "second"},
-            "comment": "second",
-        },
-    ]
-
-
-@pytest.mark.unit
-def test_get_citations_with_multiple_citations_containing_profiler_config(
-    baseline_suite, profiler_config
-):
-    assert "citations" not in baseline_suite.meta
-
-    baseline_suite.add_citation(
-        "first",
-        citation_date="2000-01-01",
-        profiler_config=profiler_config,
-    )
-    baseline_suite.add_citation(
-        "second",
-        citation_date="2001-01-01",
-        profiler_config=profiler_config,
-    )
-    baseline_suite.add_citation("third", citation_date="2002-01-01")
-
-    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(
-        sort=True, require_profiler_config=True
-    )
-    for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, clean_falsy=True, inplace=True)
-        properties_dict.pop("interactive", None)
-
-    assert properties_dict_list == [
-        {
-            "citation_date": "2000-01-01T00:00:00.000000Z",
-            "profiler_config": profiler_config,
-            "comment": "first",
-        },
-        {
-            "citation_date": "2001-01-01T00:00:00.000000Z",
-            "profiler_config": profiler_config,
             "comment": "second",
         },
     ]
