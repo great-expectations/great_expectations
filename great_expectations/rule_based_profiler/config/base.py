@@ -178,7 +178,7 @@ class DomainBuilderConfigSchema(NotNullSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.rule_based_profiler.domain_builder",
+        load_default="great_expectations.rule_based_profiler.domain_builder",
     )
     class_name = fields.String(
         required=True,
@@ -268,7 +268,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.rule_based_profiler.parameter_builder",
+        load_default="great_expectations.rule_based_profiler.parameter_builder",
     )
     class_name = fields.String(
         required=True,
@@ -366,7 +366,7 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
+        load_default="great_expectations.rule_based_profiler.expectation_configuration_builder",
     )
     class_name = fields.String(
         required=True,
@@ -720,12 +720,12 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     module_name = fields.String(
         required=False,
         allow_none=True,
-        missing="great_expectations.rule_based_profiler",
+        load_default="great_expectations.rule_based_profiler",
     )
     class_name = fields.String(
         required=False,
         allow_none=True,
-        missing="RuleBasedProfiler",
+        load_default="RuleBasedProfiler",
     )
     variables = fields.Dict(
         keys=fields.String(
