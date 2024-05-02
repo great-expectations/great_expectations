@@ -202,7 +202,6 @@ def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
 def progress_bars() -> ProgressBarsConfig:
     return ProgressBarsConfig(
         globally=True,
-        profilers=False,
     )
 
 
@@ -487,7 +486,6 @@ def test_file_data_context_variables_e2e(
     # Prepare updated progress_bars to set and serialize to disk
     updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
     updated_progress_bars.globally = False
-    updated_progress_bars.profilers = True
 
     # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)  # noqa: E501
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
