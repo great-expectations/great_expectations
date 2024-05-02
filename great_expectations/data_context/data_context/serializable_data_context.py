@@ -46,7 +46,6 @@ class SerializableDataContext(AbstractDataContext):
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.VALIDATION_DEFINITIONS_BASE_DIRECTORY.value,
         GX_UNCOMMITTED_DIR,
     ]
