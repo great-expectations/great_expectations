@@ -128,7 +128,7 @@ To review additional options for configuring the ``config_variables.yml`` file o
  Since the container is named ``$web``, setting ``container: $web`` in ``great_expectations.yml`` would cause GX to unsuccessfully try to find the ``web`` variable in ``config_variables.yml``. Use an escape char ``\`` before the ``$`` so the [substitute_config_variable](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/util/index.html?highlight=substitute_config_variable#great_expectations.data_context.util.substitute_config_variable) can locate the ``$web`` container.
 :::
 
-You can also configure GX to store your Expectations and Validation Results in the Azure Storage account. See [Configure Expectation Stores](/core/installation_and_setup/manage_metadata_stores.md) and [Configure Validation Result Stores](/core/installation_and_setup/manage_metadata_stores.md). Make sure you set ``container: \$web`` correctly.
+You can also configure GX to store your Expectations and Validation Results in the Azure Storage account. See [Configure Expectation Stores](/core/installation_and_setup/manage_metadata_stores/manage_metadata_stores.md) and [Configure Validation Result Stores](/core/installation_and_setup/manage_metadata_stores/manage_metadata_stores.md). Make sure you set ``container: \$web`` correctly.
 
 The following options are available:
 

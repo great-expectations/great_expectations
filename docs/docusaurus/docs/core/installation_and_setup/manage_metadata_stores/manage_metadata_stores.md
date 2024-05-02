@@ -18,7 +18,6 @@ When a Data Context initializes it includes a default location for metadata Stor
 
 If multiple File Data Contexts need access to shared metadata it may be necessary to configure alternative Store locations that they can all access.  In other cases, the default Store configuration is typically sufficient.
 
-
 ## Configure Validation Result Stores
 
 A Validation Results Store is a connector that is used to store and retrieve information about objects generated when data is Validated against an Expectation. By default, Validation Results are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``gx/`` folder. Use the information provided here to configure a store for your Validation Results.
