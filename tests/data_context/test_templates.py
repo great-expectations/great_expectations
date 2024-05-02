@@ -49,13 +49,6 @@ stores:
       suppress_store_backend_id: true
       base_directory: checkpoints/
 
-  profiler_store:
-    class_name: ProfilerStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      suppress_store_backend_id: true
-      base_directory: profilers/
-
   validation_definition_store:
     class_name: ValidationDefinitionStore
     store_backend:

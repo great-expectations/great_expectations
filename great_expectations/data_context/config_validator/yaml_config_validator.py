@@ -13,7 +13,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 from ruamel.yaml import YAML
 
@@ -22,8 +22,6 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.rule_based_profiler import RuleBasedProfiler  # noqa: TCH001
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 if TYPE_CHECKING:
     from ruamel.yaml.comments import CommentedMap
@@ -54,7 +52,6 @@ class _YamlConfigValidator:
         "MetricStore",
         "SqlAlchemyQueryStore",
         "CheckpointStore",
-        "ProfilerStore",
     ]
     TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES = [
         "Datasource",
@@ -72,9 +69,6 @@ class _YamlConfigValidator:
         "InferredAssetSqlDataConnector",
         "ConfiguredAssetSqlDataConnector",
     ]
-    TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
-        "RuleBasedProfiler",
-    ]
     ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
         "__substitution_error__",
         "__yaml_parse_error__",
@@ -85,7 +79,6 @@ class _YamlConfigValidator:
         TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
-        + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
     )
 
     def __init__(
@@ -103,7 +96,7 @@ class _YamlConfigValidator:
     def config_variables(self):
         return self._data_context.config_variables
 
-    def test_yaml_config(  # noqa: C901, PLR0912, PLR0913
+    def test_yaml_config(  # noqa: C901, PLR0913
         self,
         yaml_config: str,
         name: Optional[str] = None,
@@ -185,12 +178,6 @@ class _YamlConfigValidator:
                     class_name=class_name,
                     config=config_with_substitutions,
                     runtime_environment=runtime_environment,
-                )
-            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
-                instantiated_class = self._test_instantiation_of_profiler_from_yaml_config(
-                    name=name,
-                    class_name=class_name,
-                    config=config_with_substitutions,
                 )
             else:
                 instantiated_class = self._test_instantiation_of_misc_class_from_yaml_config(
@@ -308,34 +295,6 @@ class _YamlConfigValidator:
                 },
             },
             config_defaults={},
-        )
-
-        return instantiated_class
-
-    def _test_instantiation_of_profiler_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
-    ) -> RuleBasedProfiler:
-        """
-        Helper to create profiler instance and update usage stats payload.
-        See `test_yaml_config` for more details.
-        """
-        print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
-
-        profiler_name: str = name or config.get("name") or "my_temp_profiler"
-
-        profiler_config: Union[RuleBasedProfilerConfig, dict] = (
-            RuleBasedProfilerConfig.from_commented_map(commented_map=config)
-        )
-        profiler_config = profiler_config.to_json_dict()  # type: ignore[union-attr]
-        profiler_config.update({"name": profiler_name})
-
-        instantiated_class = instantiate_class_from_config(
-            config=profiler_config,
-            runtime_environment={"data_context": self._data_context},
-            config_defaults={
-                "module_name": "great_expectations.rule_based_profiler",
-                "class_name": "RuleBasedProfiler",
-            },
         )
 
         return instantiated_class

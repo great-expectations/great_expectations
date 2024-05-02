@@ -105,9 +105,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-    DataAssistantDispatcher,
-)
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
 
@@ -278,8 +275,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._suite_parameter_dependencies_compiled = False
         self._suite_parameter_dependencies: dict = {}
-
-        self._assistants = DataAssistantDispatcher(data_context=self)
 
         self._init_factories()
 
@@ -611,10 +606,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def checkpoint_store(self) -> CheckpointStore:
         return self.stores[self.checkpoint_store_name]
-
-    @property
-    def assistants(self) -> DataAssistantDispatcher:
-        return self._assistants
 
     @property
     def data_sources(self) -> _SourceFactories:

@@ -87,7 +87,6 @@ def test_default_config_yml_stores(tmp_path_factory):
         "expectations_store",
         "validation_results_store",
         "suite_parameter_store",
-        "profiler_store",
         "checkpoint_store",
         "validation_definition_store",
     }
@@ -105,7 +104,6 @@ def test_default_config_yml_stores(tmp_path_factory):
         "expectations_store",
         "validation_results_store",
         "suite_parameter_store",
-        "profiler_store",
         "validation_definition_store",
         "my_new_validation_results_store",
     }

@@ -26,7 +26,6 @@ from great_expectations.data_context.data_context.abstract_data_context import A
 from great_expectations.data_context.store import (
     CheckpointStore,
     ConfigurationStore,
-    ProfilerStore,
     Store,
     StoreBackend,
 )
@@ -214,38 +213,6 @@ def build_checkpoint_store_using_filesystem(
         store_backend=store_backend_obj,
         overwrite_existing=overwrite_existing,
     )
-
-
-def build_profiler_store_using_store_backend(
-    store_name: str,
-    store_backend: Union[StoreBackend, dict],
-    overwrite_existing: bool = False,
-) -> ProfilerStore:
-    return cast(
-        ProfilerStore,
-        build_configuration_store(
-            class_name="ProfilerStore",
-            module_name="great_expectations.data_context.store",
-            store_name=store_name,
-            store_backend=store_backend,
-            overwrite_existing=overwrite_existing,
-        ),
-    )
-
-
-def build_profiler_store_using_filesystem(
-    store_name: str,
-    base_directory: str,
-    overwrite_existing: bool = False,
-) -> ProfilerStore:
-    store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
-    store = build_profiler_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend_obj,
-        overwrite_existing=overwrite_existing,
-    )
-    return store
 
 
 def save_config_to_filesystem(

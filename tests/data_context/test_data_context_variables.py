@@ -56,7 +56,6 @@ def data_context_config_dict() -> dict:
         "validation_results_store_name": "validation_results_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
-        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -336,11 +335,6 @@ def test_data_context_variables_get_with_substitutions(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store setter",
         ),
-        pytest.param(
-            "my_profiler_store",
-            DataContextVariableSchema.PROFILER_STORE_NAME,
-            id="profiler_store setter",
-        ),
         pytest.param(stores, DataContextVariableSchema.STORES, id="stores setter"),
         pytest.param(
             data_docs_sites,
@@ -434,11 +428,9 @@ def test_data_context_variables_save_config(
                 "class_name": "SuiteParameterStore",
             },
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "profiler_store": {"class_name": "ProfilerStore"},
             "validation_results_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
-        "profiler_store_name": "profiler_store",
     }
 
     assert mock_put.call_count == 1
