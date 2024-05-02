@@ -75,27 +75,10 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py batch_request",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py datasource_config",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py add datasource config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py datasource config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py test datasource config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py datasource_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py batch_request with query",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py batch_request with table",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py datasource_yaml",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py get_context",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py imports",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py test_yaml_config",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py add_datasource",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py datasource_config",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py python batch_request name table",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py test_yaml_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py add_datasource",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py datasource_config",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py get_context",  # noqa: E501
-    "tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py test_yaml_config",  # noqa: E501
     "docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py batch_request 2019-02",  # noqa: E501
     "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config add an InferredAssetDataConnector to a Datasource configuration",  # noqa: E501

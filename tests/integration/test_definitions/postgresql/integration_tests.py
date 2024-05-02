@@ -12,22 +12,6 @@ connecting_to_your_data = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
-    IntegrationTestFixture(
-        name="postgres_yaml_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
-    ),
-    IntegrationTestFixture(
-        name="postgres_python_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
-    ),
 ]
 
 partition_data = [
