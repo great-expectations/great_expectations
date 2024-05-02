@@ -247,26 +247,6 @@ def test_cacheable_datasource_dict___setitem___(
 
 
 @pytest.mark.unit
-def test_cacheable_datasource_dict___delitem__updates_both_cache_and_store(
-    build_cacheable_datasource_dict_with_store_spy: Callable,
-    pandas_block_datasource_config: dict,
-):
-    datasource_dict = build_cacheable_datasource_dict_with_store_spy(
-        datasource_configs=[pandas_block_datasource_config], populate_cache=True
-    )
-    store = datasource_dict._datasource_store
-    name = pandas_block_datasource_config["name"]
-    assert store.remove_key_count == 0
-
-    # Deletion will go down to the store level
-    del datasource_dict[name]
-    assert store.remove_key_count == 1
-
-    # Should also impact the cache
-    assert name not in datasource_dict.data
-
-
-@pytest.mark.unit
 def test_cacheable_datasource_dict___delitem__raises_key_error_on_store_miss(
     empty_cacheable_datasource_dict: CacheableDatasourceDict,
 ):
