@@ -1,7 +1,5 @@
 import os
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 
@@ -34,8 +32,6 @@ def test_ge():
     # Please note this override is only to provide good UX for docs and tests.
     # In normal usage you'd set your path directly in the yaml above.
     datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
-
-    context.test_yaml_config(yaml.dump(datasource_config))
 
     context.add_datasource(**datasource_config)
 
