@@ -917,13 +917,18 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
     datasource_name = "my_test_datasource"
     datasource: Datasource
-    if sa_engine_name == "snowflake":
+    if sa_engine_name == "postgres":
+        assert connection_string
+        datasource = context.data_sources.add_postgres(
+            name=datasource_name, connection_string=connection_string
+        )
+    elif sa_engine_name == "snowflake":
         datasource = context.data_sources.add_snowflake(
             name=datasource_name, connection_string=connection_string
         )
-    elif sa_engine_name == "postgres":
+    elif sa_engine_name == "sqlite":
         assert connection_string
-        datasource = context.data_sources.add_postgres(
+        datasource = context.data_sources.add_sqlite(
             name=datasource_name, connection_string=connection_string
         )
     else:
