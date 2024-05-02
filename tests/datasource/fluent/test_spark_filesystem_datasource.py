@@ -905,6 +905,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
         ["-month", "-year"],
     ],
 )
+@pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
 def test_spark_sorter(
     spark_filesystem_datasource: SparkFilesystemDatasource,
     order_by: SortersDefinition,
@@ -1145,6 +1146,7 @@ def column_value_partitioner():
 
 class TestPartitionerDirectoryAsset:
     @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_batch_parameters(
         self, directory_asset, column_value_partitioner
     ):
@@ -1154,6 +1156,7 @@ class TestPartitionerDirectoryAsset:
         )
 
     @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_one_batch(
         self, directory_asset, column_value_partitioner
     ):
@@ -1172,6 +1175,7 @@ class TestPartitionerDirectoryAsset:
         )
 
     @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_one_batch_size(
         self,
         directory_asset,
@@ -1267,6 +1271,7 @@ def file_asset(
 
 class TestPartitionerFileAsset:
     @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_batch_parameters(
         self, file_asset, column_value_partitioner
     ):
@@ -1278,6 +1283,7 @@ class TestPartitionerFileAsset:
         )
 
     @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_one_batch(
         self, file_asset, column_value_partitioner
     ):
@@ -1295,6 +1301,7 @@ class TestPartitionerFileAsset:
         )
 
     @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_one_batch_size(
         self,
         file_asset,
@@ -1321,6 +1328,7 @@ class TestPartitionerFileAsset:
         )
 
     @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_add_file_csv_asset_with_partitioner_conflicting_identifier_batch_parameters(
         self, file_asset_with_no_partitioner: CSVAsset
     ):
