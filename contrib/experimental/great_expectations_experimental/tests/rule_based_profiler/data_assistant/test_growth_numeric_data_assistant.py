@@ -17,10 +17,10 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.rule_based_profiler.data_assistant_result import (
+from great_expectations.experimental.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations.experimental.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )

@@ -406,7 +406,6 @@ ATHENA_TYPES: Dict[str, Any] = (
 
 import tempfile
 
-# from tests.rule_based_profiler.conftest import ATOL, RTOL
 RTOL: float = 1.0e-7
 ATOL: float = 5.0e-2
 

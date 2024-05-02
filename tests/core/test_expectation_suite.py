@@ -25,7 +25,6 @@ from great_expectations.core.expectation_suite import (
     expectationSuiteSchema,
 )
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import Expectation
@@ -749,7 +748,6 @@ class TestAddCitation:
             batch_definition={"fake": "batch_definition"},
             batch_spec={"fake": "batch_spec"},
             batch_markers={"fake": "batch_markers"},
-            profiler_config={"fake": "profiler_config"},
             citation_date="2022-09-08",
         )
         assert "citations" in empty_suite_with_meta.meta
@@ -762,7 +760,6 @@ class TestAddCitation:
             "batch_definition",
             "batch_spec",
             "batch_markers",
-            "profiler_config",
         }
 
     @pytest.mark.parametrize(
@@ -791,19 +788,6 @@ class TestAddCitation:
         assert len(empty_suite_with_meta.meta["citations"]) == 1
         empty_suite_with_meta.add_citation("fake_comment2")
         assert len(empty_suite_with_meta.meta["citations"]) == 2
-
-    @pytest.mark.unit
-    def test_add_citation_with_profiler_config(self, empty_suite_with_meta: ExpectationSuite):
-        empty_suite_with_meta.add_citation(
-            "fake_comment",
-            profiler_config={"fake": "profiler_config"},
-        )
-
-        assert empty_suite_with_meta.meta["citations"][0]["profiler_config"] == {
-            "fake": "profiler_config"
-        }
-        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
-        assert citation_keys == {"comment", "citation_date", "profiler_config"}
 
 
 class TestIsEquivalentTo:
@@ -1083,50 +1067,6 @@ def baseline_suite(expect_column_values_to_be_in_set_col_a_with_meta, exp2) -> E
     )
 
 
-@pytest.fixture
-def profiler_config():
-    # Profiler configuration is pulled from the Bobster use case in tests/rule_based_profiler/
-    yaml_config = """
-    # This profiler is meant to be used on the NYC taxi data:
-    # tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_20(18|19|20)-*.csv
-    variables:
-      # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
-      jan_2018_thru_nov_2020_monthly_tripdata_batch_request:
-        datasource_name: taxi_pandas
-        data_connector_name: monthly
-        data_asset_name: my_reports
-        data_connector_query:
-          index: ":-1"
-      confidence_level: 9.5e-1
-      mostly: 1.0
-
-    rules:
-      row_count_range_rule:
-        domain_builder:
-          class_name: TableDomainBuilder
-        parameter_builders:
-          - parameter_name: row_count_range
-            class_name: NumericMetricRangeMultiBatchParameterBuilder
-            metric_name: table.row_count
-            confidence_level: $variables.confidence_level
-            truncate_values:
-              lower_bound: 0
-            round_decimals: 0
-        expectation_configuration_builders:
-         - expectation_type: expect_table_row_count_to_be_between
-           class_name: DefaultExpectationConfigurationBuilder
-           module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-           min_value: $parameter.row_count_range.value.min_value
-           max_value: $parameter.row_count_range.value.max_value
-           mostly: $variables.mostly
-           meta:
-             profiler_details: $parameter.row_count_range.details
-    """
-
-    yaml = YAMLHandler()
-    return yaml.load(yaml_config)
-
-
 @pytest.mark.unit
 def test_expectation_suite_copy(baseline_suite):
     suite_copy = copy(baseline_suite)
@@ -1248,45 +1188,6 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
         {
             "citation_date": "2001-01-01T00:00:00.000000Z",
             "batch_kwargs": {"path": "second"},
-            "comment": "second",
-        },
-    ]
-
-
-@pytest.mark.unit
-def test_get_citations_with_multiple_citations_containing_profiler_config(
-    baseline_suite, profiler_config
-):
-    assert "citations" not in baseline_suite.meta
-
-    baseline_suite.add_citation(
-        "first",
-        citation_date="2000-01-01",
-        profiler_config=profiler_config,
-    )
-    baseline_suite.add_citation(
-        "second",
-        citation_date="2001-01-01",
-        profiler_config=profiler_config,
-    )
-    baseline_suite.add_citation("third", citation_date="2002-01-01")
-
-    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(
-        sort=True, require_profiler_config=True
-    )
-    for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, clean_falsy=True, inplace=True)
-        properties_dict.pop("interactive", None)
-
-    assert properties_dict_list == [
-        {
-            "citation_date": "2000-01-01T00:00:00.000000Z",
-            "profiler_config": profiler_config,
-            "comment": "first",
-        },
-        {
-            "citation_date": "2001-01-01T00:00:00.000000Z",
-            "profiler_config": profiler_config,
             "comment": "second",
         },
     ]

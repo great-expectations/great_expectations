@@ -192,13 +192,6 @@ local_tests = [
     #     backend_dependencies=[],
     # ),
     # IntegrationTestFixture(
-    #     name="how_to_create_an_expectation_suite_with_the_missingness_data_assistant",
-    #     user_flow_script="docs/docusaurus/docs/oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py",  # noqa: E501
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-    #     backend_dependencies=[],
-    # ),
-    # IntegrationTestFixture(
     #     name="data_docs",
     #     user_flow_script="docs/docusaurus/docs/oss/guides/setup/configuring_data_docs/data_docs.py",  # noqa: E501
     #     data_context_dir="tests/integration/fixtures/yellow_trip_data_fluent_pandas/great_expectations",  # noqa: E501
@@ -256,13 +249,6 @@ fluent_datasources = [
     #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     backend_dependencies=[],
-    # ),
-    # IntegrationTestFixture(
-    #     name="rule_base_profiler_multi_batch_example",
-    #     data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",  # noqa: E501
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",  # noqa: E501
-    #     backend_dependencies=[BackendDependencies.PANDAS],
     # ),
     IntegrationTestFixture(
         name="glossary_batch_request",

@@ -178,44 +178,38 @@ def test_instantiate_class_from_config_with_config_defaults():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "progress_bars_config,expect_global,expect_profilers,expect_metric_calculations",
+    "progress_bars_config,expect_global,expect_metric_calculations",
     [
-        (ProgressBarsConfig(), True, True, True),
-        (ProgressBarsConfig(metric_calculations=False), True, True, False),
+        (ProgressBarsConfig(), True, True),
+        (ProgressBarsConfig(metric_calculations=False), True, False),
         (
-            ProgressBarsConfig(profilers=False, metric_calculations=False),
+            ProgressBarsConfig(metric_calculations=False),
             True,
-            False,
             False,
         ),
         (
-            ProgressBarsConfig(globally=True, profilers=False, metric_calculations=False),
+            ProgressBarsConfig(globally=True, metric_calculations=False),
             True,
-            False,
             False,
         ),
         (
-            ProgressBarsConfig(globally=False, profilers=True, metric_calculations=True),
+            ProgressBarsConfig(globally=False, metric_calculations=True),
             False,
             True,
-            True,
         ),
-        (ProgressBarsConfig(globally=False), False, False, False),
+        (ProgressBarsConfig(globally=False), False, False),
     ],
 )
 def test_config_pbar_option(
     progress_bars_config: ProgressBarsConfig,
     expect_global: bool,
-    expect_profilers: bool,
     expect_metric_calculations: bool,
 ):
     enabled_pbars = [
         progress_bars_config.globally,
-        progress_bars_config.profilers,
         progress_bars_config.metric_calculations,
     ]
     assert enabled_pbars == [
         expect_global,
-        expect_profilers,
         expect_metric_calculations,
     ]
