@@ -1,14 +1,26 @@
 module.exports = {
   gx_core: [
     {
-      type: 'doc',
-      id: 'core/introduction/about_gx',
-      label: 'About GX'
-    },
-    {
-      type: 'doc',
-      id: 'core/introduction/try_gx',
-      label: '🚧 Try GX'
+      type: 'category',
+      label: 'Introduction to Great Expectations',
+      link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
+      items: [
+        {
+          type: 'doc',
+          id: 'core/introduction/about_gx',
+          label: 'About GX'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/community_resources',
+          label: 'Community Resources'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/try_gx',
+          label: '🚧 Try GX'
+        },
+      ],
     },
     {
       type: 'category',
