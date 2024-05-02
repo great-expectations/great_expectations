@@ -66,7 +66,6 @@ def spark_filesystem_datasource(empty_data_context, test_backends) -> SparkFiles
 
     # Verify test directory has files we expect
     years = ["2018", "2019", "2020"]
-    months = [format(m, "02d") for m in range(1, 13)]
     file_name: PathStr
     all_files: List[str] = [
         file_name.stem
