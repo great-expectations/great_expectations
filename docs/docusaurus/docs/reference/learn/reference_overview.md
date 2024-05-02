@@ -19,7 +19,7 @@ import OverviewCard from '@site/src/components/OverviewCard';
 </OverviewCard>
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Concepts" description="Learn about fundamental GX Cloud and GX OSS concepts." to="/learn/concepts/cancepts_lp" icon="/img/concepts_icon.svg" />
+  <LinkCard topIcon label="Concepts" description="Learn about fundamental GX Cloud and GX OSS concepts." to="/learn/concepts/concepts_lp" icon="/img/concepts_icon.svg" />
   <LinkCard topIcon label="Tutorials" description="Step-by-step guides for integrating and running GX Cloud and GX OSS with third-party applications." to="/learn/tutorials/tutorials_lp" icon="/img/tutorial_icon.svg" />
    <LinkCard topIcon label="Integrations" description="Integrate GX Cloud and GX OSS with commonly used data engineering applications." to="/learn/integrations/integrations_lp" icon="/img/integrations_icon.svg" />
   <LinkCard topIcon label="Use cases" description="Example use cases and implementations with GX Cloud and GX OSS." to="/learn/use_cases/use_cases_lp" icon="/img/use_case_icon.svg" />
