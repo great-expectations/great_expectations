@@ -6,20 +6,20 @@ import pytest
 from scipy import stats
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._data_assistants.config import ParameterBuilderConfig
-from great_expectations._data_assistants.helpers.util import NP_EPSILON
-from great_expectations._data_assistants.parameter_builder import (
+from great_expectations.core.domain import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
+from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
 )
-from great_expectations._data_assistants.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     ParameterContainer,
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-from great_expectations.core.domain import Domain
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 
 # module level markers
 pytestmark = pytest.mark.big
@@ -458,7 +458,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
     fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
 
     my_column_min_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
-        module_name="great_expectations._data_assistants.parameter_builder",
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_column_min",
         metric_name="column.min",

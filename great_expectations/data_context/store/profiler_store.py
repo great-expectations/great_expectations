@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._data_assistants.config import RuleBasedProfilerConfig
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 
 class ProfilerStore(ConfigurationStore):

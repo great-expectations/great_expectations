@@ -38,6 +38,30 @@ def files_with_deprecation_warnings() -> List[str]:
 
 
 @pytest.mark.unit
+def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
+    regex_for_deprecation_comments: Pattern,
+    files_with_deprecation_warnings: List[str],
+):
+    """
+    What does this test do and why?
+
+    For every invocation of 'DeprecationWarning', there must be a corresponding
+    comment with the following format: 'deprecated-v<MAJOR>.<MINOR>.<PATCH>'.
+
+    This test is meant to capture instances where one or the other is missing.
+    """
+    for file in files_with_deprecation_warnings:
+        with open(file) as f:
+            contents = f.read()
+
+        matches: List[str] = regex_for_deprecation_comments.findall(contents)
+        warning_count: int = contents.count("DeprecationWarning")
+        assert (
+            len(matches) == warning_count
+        ), f"Either a 'deprecated-v...' comment or 'DeprecationWarning' call is missing from {file}"
+
+
+@pytest.mark.unit
 def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
     regex_for_deprecation_comments: Pattern,
     files_with_deprecation_warnings: List[str],

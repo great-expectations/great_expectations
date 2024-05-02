@@ -4,14 +4,14 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from great_expectations._data_assistants.data_assistant import (
+from great_expectations.rule_based_profiler.data_assistant import (
     ColumnValueMissingDataAssistant,
 )
-from great_expectations._data_assistants.data_assistant_result import (
+from great_expectations.rule_based_profiler.data_assistant_result import (
     ColumnValueMissingDataAssistantResult,
     DataAssistantResult,
 )
-from great_expectations._data_assistants.data_assistant_result.plot_result import (
+from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotResult,
 )
 
@@ -90,7 +90,7 @@ def test_column_value_missing_data_assistant_uses_multi_batch_mode_for_multi_bat
     }
 
     with patch(
-        "great_expectations._data_assistants.data_assistant.data_assistant.run_profiler_on_data"
+        "great_expectations.rule_based_profiler.data_assistant.data_assistant.run_profiler_on_data"
     ) as mock_run_profiler_on_data:
         context.assistants.missingness.run(batch_request=batch_request)
 
@@ -124,7 +124,7 @@ def test_column_value_missing_data_assistant_uses_single_batch_mode_for_single_b
     batch_request = asset.build_batch_request(dataframe=df)
 
     with patch(
-        "great_expectations._data_assistants.data_assistant.data_assistant.run_profiler_on_data"
+        "great_expectations.rule_based_profiler.data_assistant.data_assistant.run_profiler_on_data"
     ) as mock_run_profiler_on_data:
         context.assistants.missingness.run(batch_request=batch_request)
 

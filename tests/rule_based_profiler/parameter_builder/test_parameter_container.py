@@ -2,7 +2,9 @@ from typing import Dict, List
 
 import pytest
 
-from great_expectations._data_assistants.parameter_container import (
+from great_expectations.core.domain import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
     build_parameter_container,
@@ -10,8 +12,6 @@ from great_expectations._data_assistants.parameter_container import (
     get_fully_qualified_parameter_names,
     get_parameter_values_for_fully_qualified_parameter_names,
 )
-from great_expectations.core.domain import Domain
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 
 # module level markers
 pytestmark = pytest.mark.unit

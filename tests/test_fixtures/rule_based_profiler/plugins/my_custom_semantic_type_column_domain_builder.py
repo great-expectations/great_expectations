@@ -1,14 +1,14 @@
 from typing import List, Optional, Union
 
-from great_expectations._data_assistants.domain_builder import DomainBuilder
-from great_expectations._data_assistants.helpers.util import (
-    build_domains_from_column_names,
-)
-from great_expectations._data_assistants.parameter_container import (
-    ParameterContainer,
-)
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_domains_from_column_names,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 

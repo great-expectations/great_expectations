@@ -7,27 +7,27 @@ from capitalone_dataprofiler_expectations.rule_based_profiler.domain_builder.dat
     DataProfilerColumnDomainBuilder,
 )
 
-from great_expectations._data_assistants.config import ParameterBuilderConfig
-from great_expectations._data_assistants.data_assistant import DataAssistant
-from great_expectations._data_assistants.data_assistant_result import (
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.data_assistant import DataAssistant
+from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations._data_assistants.domain_builder import (
+from great_expectations.rule_based_profiler.domain_builder import (
     DomainBuilder,
 )
-from great_expectations._data_assistants.expectation_configuration_builder import (
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
     ExpectationConfigurationBuilder,
 )
-from great_expectations._data_assistants.parameter_builder import ParameterBuilder
-from great_expectations._data_assistants.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     VARIABLES_KEY,
 )
-from great_expectations._data_assistants.rule import Rule
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
 
 

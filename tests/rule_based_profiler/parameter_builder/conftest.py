@@ -6,11 +6,11 @@ import pandas as pd
 import pytest
 from scipy import stats
 
-from great_expectations._data_assistants.parameter_container import (
-    ParameterContainer,
-)
 from great_expectations.core import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
 
 RANDOM_SEED: int = 43792
 RANDOM_STATE: np.random.Generator = np.random.Generator(np.random.PCG64(RANDOM_SEED))

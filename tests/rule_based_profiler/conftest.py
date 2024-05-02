@@ -2,23 +2,23 @@ from typing import Any, Dict
 
 import pytest
 
-from great_expectations._data_assistants import RuleBasedProfiler
-from great_expectations._data_assistants.config.base import RuleBasedProfilerConfig
-from great_expectations._data_assistants.domain_builder import ColumnDomainBuilder
-from great_expectations._data_assistants.expectation_configuration_builder import (
+from great_expectations.core.domain import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
 )
-from great_expectations._data_assistants.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
     ParameterContainer,
     ParameterNode,
 )
-from great_expectations._data_assistants.rule import Rule, RuleOutput
-from great_expectations._data_assistants.rule.rule_state import RuleState
-from great_expectations.core.domain import Domain
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 
 yaml = YAMLHandler()
 

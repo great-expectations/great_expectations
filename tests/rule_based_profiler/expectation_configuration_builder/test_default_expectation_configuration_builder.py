@@ -3,22 +3,22 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._data_assistants.config import ParameterBuilderConfig
-from great_expectations._data_assistants.expectation_configuration_builder import (
-    DefaultExpectationConfigurationBuilder,
-)
-from great_expectations._data_assistants.parameter_builder import (
-    MetricMultiBatchParameterBuilder,
-)
-from great_expectations._data_assistants.parameter_container import (
-    ParameterContainer,
-    build_parameter_container_for_variables,
-    get_parameter_value_by_fully_qualified_parameter_name,
-)
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
+)
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+    build_parameter_container_for_variables,
+    get_parameter_value_by_fully_qualified_parameter_name,
 )
 
 # module level markers
@@ -247,7 +247,7 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
     max_user_id: int = 999999999999
 
     min_user_id_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
-        module_name="great_expectations._data_assistants.parameter_builder",
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_min_user_id",
         metric_name="column.min",

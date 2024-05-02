@@ -2,7 +2,7 @@ from typing import Callable, Tuple
 
 import pytest
 
-from great_expectations._data_assistants.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from tests.data_context.conftest import MockResponse
 
 

@@ -20,16 +20,6 @@ import pytest
 from freezegun import freeze_time
 from packaging import version
 
-from great_expectations._data_assistants import RuleBasedProfilerResult
-from great_expectations._data_assistants.config.base import (
-    RuleBasedProfilerConfig,
-    ruleBasedProfilerConfigSchema,
-)
-from great_expectations._data_assistants.helpers.util import (
-    get_validator_with_expectation_suite,
-)
-from great_expectations._data_assistants.parameter_container import ParameterNode
-from great_expectations._data_assistants.rule_based_profiler import RuleBasedProfiler
 from great_expectations.core import (
     ExpectationSuite,
 )
@@ -46,6 +36,16 @@ from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
+from great_expectations.rule_based_profiler.config.base import (
+    RuleBasedProfilerConfig,
+    ruleBasedProfilerConfigSchema,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator_with_expectation_suite,
+)
+from great_expectations.rule_based_profiler.parameter_container import ParameterNode
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.rule_based_profiler.conftest import ATOL, RTOL

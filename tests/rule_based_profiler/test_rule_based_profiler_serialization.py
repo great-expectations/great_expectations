@@ -2,7 +2,7 @@
 
 import pytest
 
-from great_expectations._data_assistants.config.base import (
+from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
 )
@@ -20,7 +20,7 @@ from great_expectations._data_assistants.config.base import (
             {
                 "class_name": "RuleBasedProfiler",
                 "config_version": 1.0,
-                "module_name": "great_expectations._data_assistants",
+                "module_name": "great_expectations.rule_based_profiler",
                 "name": "my_rbp",
                 "rules": {},
                 "variables": None,
@@ -38,7 +38,7 @@ from great_expectations._data_assistants.config.base import (
                 "class_name": "RuleBasedProfiler",
                 "config_version": 1.0,
                 "id": "dd223ad9-as12-d823-239a-382sadaf8112",
-                "module_name": "great_expectations._data_assistants",
+                "module_name": "great_expectations.rule_based_profiler",
                 "name": "my_rbp",
                 "rules": {},
                 "variables": None,

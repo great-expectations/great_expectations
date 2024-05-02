@@ -105,6 +105,9 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+    DataAssistantDispatcher,
+)
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import Validator
 
@@ -118,9 +121,6 @@ if not SQLAlchemyError:
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations._data_assistants.data_assistant.data_assistant_dispatcher import (
-        DataAssistantDispatcher,
-    )
     from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
@@ -279,7 +279,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._suite_parameter_dependencies_compiled = False
         self._suite_parameter_dependencies: dict = {}
 
-        self._init_assistants()
+        self._assistants = DataAssistantDispatcher(data_context=self)
+
         self._init_factories()
 
         self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
@@ -304,13 +305,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._validation_definitions: ValidationDefinitionFactory = ValidationDefinitionFactory(
             store=self.validation_definition_store
         )
-
-    def _init_assistants(self) -> None:
-        from great_expectations._data_assistants.data_assistant.data_assistant_dispatcher import (
-            DataAssistantDispatcher,
-        )
-
-        self._assistants = DataAssistantDispatcher(data_context=self)
 
     def _init_analytics(self) -> None:
         init_analytics(

@@ -1,12 +1,12 @@
 from typing import List
 
 import great_expectations as gx
-from great_expectations._data_assistants import RuleBasedProfilerResult
-from great_expectations._data_assistants.rule_based_profiler import RuleBasedProfiler
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 yaml = YAMLHandler()
 
@@ -37,7 +37,7 @@ rules:
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations._data_assistants.expectation_configuration_builder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         min_value: $parameter.row_count_range.value[0]
         max_value: $parameter.row_count_range.value[1]
         mostly: $variables.mostly
@@ -65,7 +65,7 @@ rules:
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations._data_assistants.expectation_configuration_builder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $parameter.min_range.value[0]
         max_value: $parameter.min_range.value[1]
@@ -74,7 +74,7 @@ rules:
           profiler_details: $parameter.min_range.details
       - expectation_type: expect_column_max_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations._data_assistants.expectation_configuration_builder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $parameter.max_range.value[0]
         max_value: $parameter.max_range.value[1]

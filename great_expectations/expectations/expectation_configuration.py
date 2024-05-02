@@ -45,10 +45,10 @@ from great_expectations.types import SerializableDictDot
 if TYPE_CHECKING:
     from pyparsing import ParseResults
 
-    from great_expectations._data_assistants.config import RuleBasedProfilerConfig
     from great_expectations.alias_types import JSONValues
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.expectations.expectation import Expectation
+    from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 logger = logging.getLogger(__name__)
 
 

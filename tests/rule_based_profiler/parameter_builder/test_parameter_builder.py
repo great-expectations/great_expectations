@@ -3,11 +3,12 @@ from unittest import mock
 
 import pytest
 
-from great_expectations._data_assistants.config import ParameterBuilderConfig
-from great_expectations._data_assistants.parameter_builder import (
+from great_expectations.core.domain import Domain
+from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations._data_assistants.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
@@ -16,7 +17,6 @@ from great_expectations._data_assistants.parameter_container import (
     ParameterContainer,
     get_fully_qualified_parameter_names,
 )
-from great_expectations.core.domain import Domain
 from great_expectations.types.attributes import Attributes
 
 """
@@ -174,7 +174,7 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
 # noinspection PyUnresolvedReferences,PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
-    "great_expectations._data_assistants.parameter_builder.parameter_builder.convert_to_json_serializable",
+    "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
     return_value="my_json_string",
 )
 def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if_precomputed(
@@ -279,7 +279,7 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
 # noinspection PyUnresolvedReferences,PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
-    "great_expectations._data_assistants.parameter_builder.parameter_builder.convert_to_json_serializable",
+    "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
     return_value="my_json_string",
 )
 def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_precomputed(
@@ -344,7 +344,7 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
 # noinspection PyUnresolvedReferences,PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
-    "great_expectations._data_assistants.parameter_builder.parameter_builder.convert_to_json_serializable",
+    "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
     return_value="my_json_string",
 )
 def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precomputed(

@@ -5,20 +5,6 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._data_assistants.helpers.util import (
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations._data_assistants.parameter_builder import (
-    ParameterBuilder,
-    RegexPatternStringParameterBuilder,
-)
-from great_expectations._data_assistants.parameter_container import (
-    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    ParameterContainer,
-    ParameterNode,
-    get_parameter_value_by_fully_qualified_parameter_name,
-)
 from great_expectations.core.batch import (
     Batch,
     BatchMarkers,
@@ -29,6 +15,20 @@ from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import BatchSpec, IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.parameter_builder import (
+    ParameterBuilder,
+    RegexPatternStringParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    ParameterContainer,
+    ParameterNode,
+    get_parameter_value_by_fully_qualified_parameter_name,
+)
 from great_expectations.validator.validator import Validator
 
 

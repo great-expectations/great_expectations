@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from great_expectations._data_assistants.helpers.simple_semantic_type_filter import (
-    SimpleSemanticTypeFilter,
-)
-from great_expectations._data_assistants.helpers.util import get_batch_ids
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter import (
+    SimpleSemanticTypeFilter,
+)
+from great_expectations.rule_based_profiler.helpers.util import get_batch_ids
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.test_utils import load_data_into_test_database
 

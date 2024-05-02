@@ -21,14 +21,6 @@ from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations import project_manager, set_context
-from great_expectations._data_assistants.config import RuleBasedProfilerConfig
-from great_expectations._data_assistants.config.base import (
-    ruleBasedProfilerConfigSchema,
-)
-from great_expectations._data_assistants.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (  # noqa: E501
-    NumericMetricRangeMultiBatchParameterBuilder,
-)
-from great_expectations._data_assistants.parameter_container import ParameterNode
 from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
@@ -91,6 +83,14 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (  # noqa: E501
+    NumericMetricRangeMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -3115,7 +3115,7 @@ def alice_columnar_table_single_batch():
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
                         "class_name": "MetricSingleBatchParameterBuilder",
                         "name": "my_min_user_id",
                         "metric_name": "column.min",
@@ -3127,7 +3127,7 @@ def alice_columnar_table_single_batch():
                         "suite_parameter_builder_configs": None,
                     },
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
                         "class_name": "MetricSingleBatchParameterBuilder",
                         "name": "my_max_user_id",
                         "metric_name": "column.max",
@@ -3146,7 +3146,7 @@ def alice_columnar_table_single_batch():
                         "expectation_type": "expect_column_values_to_be_of_type",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                         "type_": "$variables.integer_type",
                     },
@@ -3158,7 +3158,7 @@ def alice_columnar_table_single_batch():
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "min_value": "$variables.very_small_user_id",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                     },
                     {
@@ -3167,7 +3167,7 @@ def alice_columnar_table_single_batch():
                         "expectation_type": "expect_column_values_to_not_be_null",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                     },
                 ],
@@ -3183,12 +3183,12 @@ def alice_columnar_table_single_batch():
                     "include_semantic_types": None,
                     "exclude_column_name_suffixes": None,
                     "include_column_names": None,
-                    "module_name": "great_expectations._data_assistants.domain_builder.column_domain_builder",  # noqa: E501
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                     "semantic_type_filter_module_name": None,
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
                         "class_name": "MetricSingleBatchParameterBuilder",
                         "name": "my_max_ts",
                         "metric_name": "column.max",
@@ -3200,7 +3200,7 @@ def alice_columnar_table_single_batch():
                         "suite_parameter_builder_configs": None,
                     },
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_single_batch_parameter_builder",  # noqa: E501
                         "class_name": "MetricSingleBatchParameterBuilder",
                         "name": "my_max_event_ts",
                         "metric_name": "column.max",
@@ -3212,7 +3212,7 @@ def alice_columnar_table_single_batch():
                         "suite_parameter_builder_configs": None,
                     },
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder",  # noqa: E501
                         "class_name": "MetricMultiBatchParameterBuilder",
                         "name": "my_min_ts",
                         "metric_name": "column.min",
@@ -3224,7 +3224,7 @@ def alice_columnar_table_single_batch():
                         "suite_parameter_builder_configs": None,
                     },
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.simple_date_format_string_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",  # noqa: E501
                         "class_name": "SimpleDateFormatStringParameterBuilder",
                         "name": "my_date_format",
                         "metric_domain_kwargs": {"column": "event_ts"},
@@ -3301,7 +3301,7 @@ def alice_columnar_table_single_batch():
                         "expectation_type": "expect_column_values_to_be_of_type",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                         "type_": "$variables.timestamp_type",
                     },
@@ -3311,7 +3311,7 @@ def alice_columnar_table_single_batch():
                         "expectation_type": "expect_column_values_to_be_increasing",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                     },
                     {
@@ -3320,7 +3320,7 @@ def alice_columnar_table_single_batch():
                         "expectation_type": "expect_column_values_to_be_dateutil_parseable",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                     },
                     {
@@ -3338,7 +3338,7 @@ def alice_columnar_table_single_batch():
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "min_value": "$variables.min_timestamp",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                     },
                     {
@@ -3356,7 +3356,7 @@ def alice_columnar_table_single_batch():
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "min_value": "$variables.min_timestamp",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                     },
                     {
@@ -3374,7 +3374,7 @@ def alice_columnar_table_single_batch():
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "strftime_format": "$parameter.my_date_format.value",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                     },
                 ],
@@ -3394,12 +3394,12 @@ def alice_columnar_table_single_batch():
                     "exclude_column_name_suffixes": None,
                     "include_column_names": None,
                     "cardinality_limit_mode": "ONE",
-                    "module_name": "great_expectations._data_assistants.domain_builder.categorical_column_domain_builder",  # noqa: E501
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",  # noqa: E501
                     "semantic_type_filter_module_name": None,
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.value_set_multi_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder",  # noqa: E501
                         "class_name": "ValueSetMultiBatchParameterBuilder",
                         "name": "my_user_agent_value_set",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
@@ -3415,7 +3415,7 @@ def alice_columnar_table_single_batch():
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "value_set": "$parameter.my_user_agent_value_set.value",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                         "validation_parameter_builder_configs": None,
                     }
                 ],
@@ -4443,12 +4443,12 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             "row_count_range_rule": {
                 "variables": {},
                 "domain_builder": {
-                    "module_name": "great_expectations._data_assistants.domain_builder.table_domain_builder",  # noqa: E501
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",  # noqa: E501
                     "class_name": "TableDomainBuilder",
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                         "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "name": "row_count_range",
                         "metric_name": "table.row_count",
@@ -4479,7 +4479,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "validation_parameter_builder_configs": None,
                         "max_value": "$parameter.row_count_range.value[1]",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     }
                 ],
             },
@@ -4488,7 +4488,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "domain_builder": {
                     "exclude_column_names": None,
                     "semantic_type_filter_module_name": None,
-                    "module_name": "great_expectations._data_assistants.domain_builder.column_domain_builder",  # noqa: E501
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                     "include_column_names": None,
                     "class_name": "ColumnDomainBuilder",
                     "include_column_name_suffixes": None,
@@ -4499,7 +4499,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                         "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "name": "min_range",
                         "metric_name": "column.min",
@@ -4521,7 +4521,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "suite_parameter_builder_configs": None,
                     },
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder",  # noqa: E501
                         "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
                         "name": "max_range",
                         "metric_name": "column.max",
@@ -4554,7 +4554,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "validation_parameter_builder_configs": None,
                         "max_value": "$parameter.min_range.value[1]",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     },
                     {
                         "column": "$domain.domain_kwargs.column",
@@ -4566,7 +4566,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "validation_parameter_builder_configs": None,
                         "max_value": "$parameter.max_range.value[1]",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     },
                 ],
             },
@@ -4575,7 +4575,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "domain_builder": {
                     "exclude_column_names": None,
                     "semantic_type_filter_module_name": None,
-                    "module_name": "great_expectations._data_assistants.domain_builder.column_domain_builder",  # noqa: E501
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                     "include_column_names": None,
                     "class_name": "ColumnDomainBuilder",
                     "include_column_name_suffixes": ["_datetime"],
@@ -4586,7 +4586,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.simple_date_format_string_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder",  # noqa: E501
                         "class_name": "SimpleDateFormatStringParameterBuilder",
                         "name": "my_date_format",
                         "metric_domain_kwargs": {"column": "pickup_datetime"},
@@ -4613,7 +4613,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "expectation_type": "expect_column_values_to_match_strftime_format",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "validation_parameter_builder_configs": None,
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     }
                 ],
             },
@@ -4622,7 +4622,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "domain_builder": {
                     "exclude_column_names": None,
                     "semantic_type_filter_module_name": None,
-                    "module_name": "great_expectations._data_assistants.domain_builder.column_domain_builder",  # noqa: E501
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.column_domain_builder",  # noqa: E501
                     "include_column_names": None,
                     "class_name": "ColumnDomainBuilder",
                     "include_column_name_suffixes": ["ID"],
@@ -4633,7 +4633,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.regex_pattern_string_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder",  # noqa: E501
                         "class_name": "RegexPatternStringParameterBuilder",
                         "name": "my_regex",
                         "metric_domain_kwargs": {"column": "VendorID"},
@@ -4660,7 +4660,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "validation_parameter_builder_configs": None,
                         "regex": "$parameter.my_regex.value",
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     }
                 ],
             },
@@ -4669,7 +4669,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "domain_builder": {
                     "exclude_column_names": "DOLocationID, RatecodeID, store_and_fwd_flag, payment_type, extra, mta_tax, improvement_surcharge, congestion_surcharge",  # noqa: E501
                     "semantic_type_filter_module_name": None,
-                    "module_name": "great_expectations._data_assistants.domain_builder.categorical_column_domain_builder",  # noqa: E501
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder",  # noqa: E501
                     "include_column_names": None,
                     "class_name": "CategoricalColumnDomainBuilder",
                     "include_column_name_suffixes": None,
@@ -4684,7 +4684,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 },
                 "parameter_builders": [
                     {
-                        "module_name": "great_expectations._data_assistants.parameter_builder.value_set_multi_batch_parameter_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder",  # noqa: E501
                         "class_name": "ValueSetMultiBatchParameterBuilder",
                         "name": "my_pickup_location_id_value_set",
                         "metric_domain_kwargs": "$domain.domain_kwargs",
@@ -4701,7 +4701,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                         "value_set": "$parameter.my_pickup_location_id_value_set.value",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "validation_parameter_builder_configs": None,
-                        "module_name": "great_expectations._data_assistants.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",  # noqa: E501
                     }
                 ],
             },

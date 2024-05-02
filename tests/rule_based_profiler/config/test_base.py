@@ -4,7 +4,7 @@ import pytest
 from marshmallow.exceptions import ValidationError
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations._data_assistants.config import (
+from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
     DomainBuilderConfigSchema,
     ExpectationConfigurationBuilderConfig,
@@ -17,10 +17,10 @@ from great_expectations._data_assistants.config import (
     RuleConfig,
     RuleConfigSchema,
 )
-from great_expectations._data_assistants.config.base import (
+from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations._data_assistants.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 # module level markers
 pytestmark = pytest.mark.unit
@@ -40,7 +40,7 @@ def test_not_null_schema_removes_null_values_when_dumping():
     schema = DomainBuilderConfigSchema()
     config = DomainBuilderConfig(
         class_name="DomainBuilder",
-        module_name="great_expectations._data_assistants.domain_builder",
+        module_name="great_expectations.rule_based_profiler.domain_builder",
         batch_request=None,
     )
 
@@ -58,13 +58,13 @@ def test_domain_builder_config_successfully_loads_with_required_args():
     config = schema.load(data)
     assert isinstance(config, DomainBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
-    assert config.module_name == "great_expectations._data_assistants.domain_builder"
+    assert config.module_name == "great_expectations.rule_based_profiler.domain_builder"
 
 
 def test_domain_builder_config_successfully_loads_with_optional_args():
     data = {
         "class_name": "DomainBuilder",
-        "module_name": "great_expectations._data_assistants.domain_builder",
+        "module_name": "great_expectations.rule_based_profiler.domain_builder",
         "batch_request": {"datasource_name": "my_datasource"},
     }
     schema = DomainBuilderConfigSchema()
@@ -79,14 +79,14 @@ def test_parameter_builder_config_successfully_loads_with_required_args():
     config = schema.load(data)
     assert isinstance(config, ParameterBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
-    assert config.module_name == "great_expectations._data_assistants.parameter_builder"
+    assert config.module_name == "great_expectations.rule_based_profiler.parameter_builder"
 
 
 def test_parameter_builder_config_successfully_loads_with_optional_args():
     data = {
         "name": "my_parameter_builder",
         "class_name": "ParameterBuilder",
-        "module_name": "great_expectations._data_assistants.parameter_builder",
+        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
         "batch_request": {"datasource_name": "my_datasource"},
     }
     schema = ParameterBuilderConfigSchema()
@@ -116,7 +116,7 @@ def test_expectation_configuration_builder_config_successfully_loads_with_requir
     assert all(getattr(config, k) == v for k, v in data.items())
     assert (
         config.module_name
-        == "great_expectations._data_assistants.expectation_configuration_builder"
+        == "great_expectations.rule_based_profiler.expectation_configuration_builder"
     )
 
 
@@ -124,7 +124,7 @@ def test_expectation_configuration_builder_config_successfully_loads_with_option
     data = {
         "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
         "class_name": "ExpectationConfigurationBuilder",
-        "module_name": "great_expectations._data_assistants.expectation_configuration_builder",
+        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
         "mostly": 0.9,
         "meta": {"foo": "bar"},
     }
@@ -313,12 +313,12 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
     runtime_override_rule: dict = {
         "domain_builder": {
             "class_name": "TableDomainBuilder",
-            "module_name": "great_expectations._data_assistants.domain_builder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder",
         },
         "parameter_builders": [
             {
                 "class_name": "MetricMultiBatchParameterBuilder",
-                "module_name": "great_expectations._data_assistants.parameter_builder",
+                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                 "metric_name": "my_other_metric",
                 "name": "my_additional_parameter",
             },
@@ -326,7 +326,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
         "expectation_configuration_builders": [
             {
                 "class_name": "DefaultExpectationConfigurationBuilder",
-                "module_name": "great_expectations._data_assistants.expectation_configuration_builder",  # noqa: E501
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                 "expectation_type": "expect_column_values_to_be_between",
                 "meta": {
                     "details": {
@@ -357,12 +357,12 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
     runtime_override_rule: dict = {
         "domain_builder": {
             "class_name": "TableDomainBuilder",
-            "module_name": "great_expectations._data_assistants.domain_builder",
+            "module_name": "great_expectations.rule_based_profiler.domain_builder",
         },
         "parameter_builders": [
             {
                 "class_name": "MetricMultiBatchParameterBuilder",
-                "module_name": "great_expectations._data_assistants.parameter_builder",
+                "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                 "metric_name": "my_other_metric",
                 "name": "my_additional_parameter",
             },
@@ -370,7 +370,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
         "expectation_configuration_builders": [
             {
                 "class_name": "DefaultExpectationConfigurationBuilder",
-                "module_name": "great_expectations._data_assistants.expectation_configuration_builder",  # noqa: E501
+                "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",  # noqa: E501
                 "expectation_type": "expect_column_values_to_be_between",
                 "meta": {
                     "details": {
@@ -395,5 +395,5 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
 
     assert domain_builder == {
         "class_name": "TableDomainBuilder",
-        "module_name": "great_expectations._data_assistants.domain_builder.table_domain_builder",
+        "module_name": "great_expectations.rule_based_profiler.domain_builder.table_domain_builder",
     }

@@ -3,18 +3,18 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, List, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._data_assistants.domain_builder import ColumnDomainBuilder
-from great_expectations._data_assistants.helpers.util import (
-    build_domains_from_column_names,
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations._data_assistants.parameter_container import (
-    VARIABLES_KEY,
-    ParameterContainer,
-)
 from great_expectations.core.domain import (
     Domain,
     SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_domains_from_column_names,
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    VARIABLES_KEY,
+    ParameterContainer,
 )
 from great_expectations.util import is_candidate_subset_of_target
 from great_expectations.validator.metric_configuration import MetricConfiguration

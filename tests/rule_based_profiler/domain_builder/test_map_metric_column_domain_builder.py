@@ -2,12 +2,12 @@ from typing import List
 
 import pytest
 
-from great_expectations._data_assistants.domain_builder import (
-    MapMetricColumnDomainBuilder,
-)
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain_builder import (
+    MapMetricColumnDomainBuilder,
+)
 
 # module level markers
 pytestmark = pytest.mark.big

@@ -2,13 +2,13 @@ from typing import Union
 
 import pytest
 
-from great_expectations._data_assistants.domain_builder.categorical_column_domain_builder import (
+from great_expectations.exceptions import ProfilerConfigurationError
+from great_expectations.rule_based_profiler.domain_builder.categorical_column_domain_builder import (  # noqa: E501
     AbsoluteCardinalityLimit,
     CardinalityChecker,
     CardinalityLimitMode,
     RelativeCardinalityLimit,
 )
-from great_expectations.exceptions import ProfilerConfigurationError
 
 # module level markers
 pytestmark = pytest.mark.unit

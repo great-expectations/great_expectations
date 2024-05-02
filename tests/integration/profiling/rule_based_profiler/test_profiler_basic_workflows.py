@@ -2,19 +2,6 @@ from typing import List
 
 import pytest
 
-from great_expectations._data_assistants import RuleBasedProfilerResult
-from great_expectations._data_assistants.domain_builder import (
-    ColumnDomainBuilder,
-    DomainBuilder,
-)
-from great_expectations._data_assistants.expectation_configuration_builder import (
-    DefaultExpectationConfigurationBuilder,
-)
-from great_expectations._data_assistants.parameter_builder import (
-    MetricMultiBatchParameterBuilder,
-)
-from great_expectations._data_assistants.rule.rule import Rule
-from great_expectations._data_assistants.rule_based_profiler import RuleBasedProfiler
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -26,6 +13,19 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
+from great_expectations.rule_based_profiler import RuleBasedProfilerResult
+from great_expectations.rule_based_profiler.domain_builder import (
+    ColumnDomainBuilder,
+    DomainBuilder,
+)
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.rule.rule import Rule
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 yaml = YAMLHandler()
 

@@ -12,16 +12,16 @@ from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_res
     DataProfilerStructuredDataAssistantResult,
 )
 
-from great_expectations._data_assistants.data_assistant_result import (
-    DataAssistantResult,
-)
-from great_expectations._data_assistants.parameter_container import (
-    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
-    ParameterNode,
-)
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.data_assistant_result import (
+    DataAssistantResult,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    ParameterNode,
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext

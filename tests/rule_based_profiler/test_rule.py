@@ -1,7 +1,7 @@
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._data_assistants.parameter_container import (
+from great_expectations.rule_based_profiler.parameter_container import (
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 

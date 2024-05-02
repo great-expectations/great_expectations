@@ -2,20 +2,20 @@ from typing import Dict, Optional
 
 import pytest
 
-from great_expectations._data_assistants.helpers.util import (
-    get_parameter_value_and_validate_return_type,
-)
-from great_expectations._data_assistants.parameter_builder import (
-    ParameterBuilder,
-    ValueCountsSingleBatchParameterBuilder,
-)
-from great_expectations._data_assistants.parameter_container import (
-    ParameterContainer,
-    ParameterNode,
-)
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.parameter_builder import (
+    ParameterBuilder,
+    ValueCountsSingleBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+    ParameterNode,
+)
 
 # module level markers
 pytestmark = pytest.mark.big
