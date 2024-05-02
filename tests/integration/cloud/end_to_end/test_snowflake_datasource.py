@@ -11,8 +11,7 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
@@ -44,7 +43,7 @@ def datasource(
     """Test Adding and Updating the Datasource associated with this module.
     Note: There is no need to test Get or Delete Datasource.
     Those assertions can be found in the datasource_name fixture."""
-    datasource = context.sources.add_snowflake(
+    datasource = context.data_sources.add_snowflake(
         name=datasource_name,
         connection_string=connection_string,
         create_temp_table=False,
@@ -52,7 +51,7 @@ def datasource(
     updated_connection_string = f"{connection_string}&foo=bar"
 
     datasource.connection_string = updated_connection_string  # type: ignore[assignment] # is a str
-    datasource = context.sources.add_or_update_snowflake(datasource=datasource)
+    datasource = context.data_sources.add_or_update_snowflake(datasource=datasource)
     assert (
         datasource.connection_string == updated_connection_string
     ), "The datasource was not updated in the previous method call."
@@ -67,7 +66,7 @@ def datasource(
     # call to datasource.dict() results in a ConfigStr that fails pydantic
     # validation on SnowflakeDatasource
     datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
-    datasource = context.sources.add_or_update_snowflake(**datasource_dict)
+    datasource = context.data_sources.add_or_update_snowflake(**datasource_dict)
     assert (
         datasource.connection_string == updated_connection_string
     ), "The datasource was not updated in the previous method call."

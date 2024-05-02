@@ -11,14 +11,9 @@ from great_expectations.expectations.metrics import (
 def is_validarizonazip(zip: str):
     list_of_dicts_ofarizonazips = zipcodes.filter_by(state="AZ")
     list_ofarizonazips = [d["zip_code"] for d in list_of_dicts_ofarizonazips]
-    if len(zip) > 10:
+    if len(zip) > 10 or type(zip) != str:  # noqa: E721
         return False
-    elif type(zip) != str:  # noqa: E721
-        return False
-    elif zip in list_ofarizonazips:
-        return True
-    else:
-        return False
+    return zip in list_ofarizonazips
 
 
 # This class defines a Metric to support your Expectation.

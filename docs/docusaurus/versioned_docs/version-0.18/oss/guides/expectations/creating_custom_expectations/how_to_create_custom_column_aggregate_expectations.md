@@ -29,8 +29,8 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [ColumnAggregateExpectation here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py).
-Download the file, place it in the appropriate directory, and rename it to the appropriate name.
+You can find the template file for a custom [ColumnAggregateExpectation here](column_aggregate_expectation_template.py).
+Download the file, place it in a directory, and rename it.
 
 ```bash 
 cp column_aggregate_expectation_template.py /SOME_DIRECTORY/expect_column_max_to_be_between_custom.py

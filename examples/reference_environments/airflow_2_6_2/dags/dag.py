@@ -99,7 +99,7 @@ with DAG(
             site_name="local_site_for_hosting",
         )
         print("Connecting to data...")
-        datasource = context.sources.add_pandas(name="my_pandas_datasource")
+        datasource = context.data_sources.add_pandas(name="my_pandas_datasource")
         data_asset = datasource.add_dataframe_asset(name="my_df", dataframe=df)
         my_batch_request = data_asset.build_batch_request()
         print("Validating data...")

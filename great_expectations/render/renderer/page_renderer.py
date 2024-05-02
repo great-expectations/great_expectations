@@ -30,9 +30,6 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.validation_operators.types.validation_operator_result import (
-        ValidationOperatorResult,
-    )
 
 logger = logging.getLogger(__name__)
 
@@ -70,23 +67,6 @@ class ValidationResultsPageRenderer(Renderer):
         self.run_info_at_end = run_info_at_end
         self._data_context = data_context
 
-    def render_validation_operator_result(
-        self, validation_operator_result: ValidationOperatorResult
-    ) -> List[RenderedDocumentContent]:
-        """
-        Render a ValidationOperatorResult which can have multiple ExpectationSuiteValidationResult
-
-        Args:
-            validation_operator_result: ValidationOperatorResult
-
-        Returns:
-            List[RenderedDocumentContent]
-        """
-        return [
-            self.render(validation_result)
-            for validation_result in validation_operator_result.list_validation_results()
-        ]
-
     # TODO: deprecate dual batch api support in 0.14
     def render(
         self,
@@ -95,7 +75,7 @@ class ValidationResultsPageRenderer(Renderer):
     ):
         # Gather run identifiers
         run_name, run_time = self._parse_run_values(validation_results)
-        expectation_suite_name = validation_results.meta["expectation_suite_name"]
+        expectation_suite_name = validation_results.suite_name
         batch_kwargs = (
             validation_results.meta.get("batch_kwargs", {})
             or validation_results.meta.get("batch_spec", {})
@@ -356,7 +336,7 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_validation_header(cls, validation_results):
         success = validation_results.success
-        expectation_suite_name = validation_results.meta["expectation_suite_name"]
+        expectation_suite_name = validation_results.suite_name
         expectation_suite_path_components = (
             [".." for _ in range(len(expectation_suite_name.split(".")) + 3)]
             + ["expectations"]

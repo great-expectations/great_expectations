@@ -33,25 +33,39 @@ GX Core uses the Python library `boto3` to access objects stored in Amazon S3 bu
 
 ## Installation
 
+Python interacts with AWS through the boto3 library. GX Core makes use of this library in the background when working with AWS. Although you won't use boto3 directly, you'll need to install it in your virtual environment.
+
+To set up boto3 with AWS, and use boto3 within Python, see the [Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html).
+
 1. Run the following code to verify the AWS CLI version:
 
-  ```bash title="Terminal command"
+  ```bash title="Terminal input"
   aws --version
   ```
 
   If this command does not return AWS CLI version information, reinstall or update the AWS CLI.  See [Install or update to the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
-2. Run the following code to verify your AWS credentials are properly configured:
+2. Run one of the following pip commands to install boto3 in your virtual environment:
 
-  ```bash title="Terminal command"
+  ```bash title="Terminal input"
+  python -m pip install boto3
+  ```
+
+  or
+
+  ```bash title="Terminal input"
+  python3 -m pip install boto3
+  ```
+
+3. Run the following code to verify your AWS credentials are properly configured:
+
+  ```bash title="Terminal input"
   aws sts get-caller-identity
   ```
 
-  If your credentials are properly configured, the output `UserId`, `Account` and `Arn` appears.  If your credentials are not configured correctly, an error message appears.
-
-  If an error message appears, or if you can't use the AWS CLI to verify your credentials, see [Configure the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
+  When your credentials are properly configured, your `UserId`, `Account`, and `Arn` are returned. If your credentials are not configured correctly, an error message appears. If you received an error message, or you couldn't verify your credentials, see [Configure the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
   
-3. Install the Python dependencies for AWS S3 support.
+4. Install the Python dependencies for AWS S3 support.
 
   :::info 
   

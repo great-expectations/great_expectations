@@ -1,21 +1,19 @@
-import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Generic, Optional
 
 from typing_extensions import TypeAlias
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import StrictStr
-from great_expectations.core.partitioners import Partitioner
+from great_expectations.core.batch_definition import PartitionerT
 from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 
 BatchParameters: TypeAlias = Dict[StrictStr, Any]
 
-class BatchRequest(pydantic.BaseModel):
+class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
     datasource_name: StrictStr
     data_asset_name: StrictStr
     options: BatchParameters
-    partitioner: Optional[Partitioner] = None
-    batching_regex: Optional[re.Pattern] = None
+    partitioner: Optional[PartitionerT] = None
 
     def __init__(  # noqa: PLR0913
         self,
@@ -23,8 +21,7 @@ class BatchRequest(pydantic.BaseModel):
         data_asset_name: StrictStr,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
+        partitioner: Optional[PartitionerT] = None,
     ) -> None: ...
     @property
     def batch_slice(self) -> slice: ...

@@ -37,7 +37,7 @@ def default_pandas_data(
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    pandas_ds = context.sources.pandas_default
+    pandas_ds = context.data_sources.pandas_default
     pandas_ds.read_csv(
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
     )
@@ -58,7 +58,7 @@ def pandas_sql_data(
     )
     con = sa.create_engine("sqlite://")
     add_dataframe_to_db(df=df, name="my_table", con=con)
-    pandas_ds = context.sources.add_pandas("my_pandas")
+    pandas_ds = context.data_sources.add_pandas("my_pandas")
     pandas_ds.read_sql(
         sql=sa.text("SELECT * FROM my_table"),
         con=con,
@@ -74,7 +74,7 @@ def pandas_filesystem_datasource(
 ) -> PandasFilesystemDatasource:
     relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    pandas_ds = context.sources.add_pandas_filesystem(
+    pandas_ds = context.data_sources.add_pandas_filesystem(
         name="my_pandas",
         base_directory=csv_path,
     )
@@ -110,7 +110,7 @@ def sqlite_datasource(
         db_filename,
     )
     db_file = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    datasource = context.sources.add_sqlite(
+    datasource = context.data_sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
         # don't set `create_temp_table` so that we can test the default behavior
@@ -126,7 +126,7 @@ def sql_data(
     asset = datasource.add_table_asset(
         name="my_asset",
         table_name="yellow_tripdata_sample_2019_01",
-    ).add_sorters(["year", "month"])
+    )
     batch_request = asset.build_batch_request(
         options={"year": 2019, "month": 1},
         partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
@@ -143,7 +143,7 @@ def spark_filesystem_datasource(
 
     relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    spark_ds = context.sources.add_spark_filesystem(
+    spark_ds = context.data_sources.add_spark_filesystem(
         name="my_spark",
         base_directory=csv_path,
     )
@@ -175,7 +175,7 @@ def multibatch_pandas_data(
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    pandas_ds = context.sources.add_pandas_filesystem(
+    pandas_ds = context.data_sources.add_pandas_filesystem(
         name="my_pandas",
         base_directory=csv_path,
     )
@@ -196,7 +196,7 @@ def multibatch_sql_data(
     asset = datasource.add_table_asset(
         name="my_asset",
         table_name="yellow_tripdata_sample_2020",
-    ).add_sorters(["year", "month"])
+    )
     batch_request = asset.build_batch_request(
         options={"year": 2020},
         partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
@@ -213,7 +213,7 @@ def multibatch_spark_data(
 
     relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    spark_ds = context.sources.add_spark_filesystem(
+    spark_ds = context.data_sources.add_spark_filesystem(
         name="my_spark",
         base_directory=csv_path,
     )

@@ -5,7 +5,7 @@ import pytest
 import pytest_mock
 
 import great_expectations as gx
-from great_expectations.checkpoint.v1_checkpoint import Checkpoint, CheckpointResult
+from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
 from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResult
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.data_context.file_data_context import (

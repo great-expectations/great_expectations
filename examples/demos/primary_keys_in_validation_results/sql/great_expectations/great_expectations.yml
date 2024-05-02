@@ -52,8 +52,8 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
 
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
@@ -75,7 +75,7 @@ stores:
       base_directory: profilers/
 
 expectations_store_name: expectations_store
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 
@@ -111,7 +111,3 @@ fluent_datasources:
         table_name: event_names
         schema_name:
     connection_string: sqlite:///../../../data/visits.db
-include_rendered_content:
-  expectation_validation_result: false
-  globally: false
-  expectation_suite: false

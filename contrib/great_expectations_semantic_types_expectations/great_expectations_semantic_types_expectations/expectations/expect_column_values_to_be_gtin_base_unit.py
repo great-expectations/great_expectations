@@ -21,10 +21,7 @@ def is_gtin_base_unit(gtin_value: str) -> bool:
         gtin_obj = gtin.GTIN(gtin_value)
     except Exception:
         return False
-    if gtin_obj.indicator_digit == "0":
-        return True
-    else:
-        return False
+    return gtin_obj.indicator_digit == "0"
 
 
 # This class defines a Metric to support your Expectation.

@@ -38,7 +38,7 @@ def test_column_value_missing_data_assistant_result_plot_expectations_and_metric
 @pytest.mark.slow
 def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
     context = ephemeral_context_with_defaults
-    datasource = context.sources.add_or_update_pandas("my_datasource")
+    datasource = context.data_sources.add_or_update_pandas("my_datasource")
     asset = datasource.add_dataframe_asset("my_asset")
     # noinspection PyTypeChecker
     df = pd.DataFrame(
@@ -111,7 +111,7 @@ def test_column_value_missing_data_assistant_uses_single_batch_mode_for_single_b
     ephemeral_context_with_defaults,
 ):
     context = ephemeral_context_with_defaults
-    datasource = context.sources.add_or_update_pandas("my_datasource")
+    datasource = context.data_sources.add_or_update_pandas("my_datasource")
     asset = datasource.add_dataframe_asset("my_asset")
     # noinspection PyTypeChecker
     df = pd.DataFrame(
@@ -157,7 +157,7 @@ def test_missingness_data_assistant_numeric_column_containing_dot_spark(
     df = spark_session.createDataFrame(data=values, schema=columns)
 
     context = ephemeral_context_with_defaults
-    datasource = context.sources.add_or_update_spark("my_datasource")
+    datasource = context.data_sources.add_or_update_spark("my_datasource")
     asset = datasource.add_dataframe_asset("my_asset")
     batch_request = asset.build_batch_request(dataframe=df)
 

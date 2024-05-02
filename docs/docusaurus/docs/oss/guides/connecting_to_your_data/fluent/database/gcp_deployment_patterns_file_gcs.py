@@ -39,7 +39,7 @@ stores = great_expectations_yaml["stores"]
 pop_stores = [
     "checkpoint_store",
     "suite_parameter_store",
-    "validations_store",
+    "validation_results_store",
     "profiler_store",
     "validation_definition_store",
 ]
@@ -132,65 +132,71 @@ pop_stores = [
 for store in pop_stores:
     stores.pop(store)
 
-actual_existing_validations_store = {}
-actual_existing_validations_store["stores"] = stores
-actual_existing_validations_store["validations_store_name"] = great_expectations_yaml[
-    "validations_store_name"
-]
+actual_existing_validation_results_store = {}
+actual_existing_validation_results_store["stores"] = stores
+actual_existing_validation_results_store["validation_results_store_name"] = (
+    great_expectations_yaml["validation_results_store_name"]
+)
 
-expected_existing_validations_store_yaml = """
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py expected_validations_store">
+expected_existing_validation_results_store_yaml = """
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py expected_validation_results_store">
 stores:
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
 
-validations_store_name: validations_store
+validation_results_store_name: validation_results_store
 # </snippet>
 """
-assert actual_existing_validations_store == yaml.load(
-    expected_existing_validations_store_yaml
+assert actual_existing_validation_results_store == yaml.load(
+    expected_existing_validation_results_store_yaml
 )
 
 # adding validations store
-configured_validations_store_yaml = """
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py new_validations_store">
+configured_validation_results_store_yaml = """
+# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py new_validation_results_store">
 stores:
-  validations_GCS_store:
-    class_name: ValidationsStore
+  validation_results_GCS_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
 
-validations_store_name: validations_GCS_store
+validation_results_store_name: validation_results_GCS_store
 # </snippet>
 """
 
 # replace example code with integration test configuration
-configured_validations_store = yaml.load(configured_validations_store_yaml)
-configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
-    "project"
-] = gcp_project
-configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
-    "bucket"
-] = "test_metadata_store"
-configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
-    "prefix"
-] = "metadata/validations"
+configured_validation_results_store = yaml.load(
+    configured_validation_results_store_yaml
+)
+configured_validation_results_store["stores"]["validation_results_GCS_store"][
+    "store_backend"
+]["project"] = gcp_project
+configured_validation_results_store["stores"]["validation_results_GCS_store"][
+    "store_backend"
+]["bucket"] = "test_metadata_store"
+configured_validation_results_store["stores"]["validation_results_GCS_store"][
+    "store_backend"
+]["prefix"] = "metadata/validations"
 
 # add and set the new validation store
 context.add_store(
-    store_name=configured_validations_store["validations_store_name"],
-    store_config=configured_validations_store["stores"]["validations_GCS_store"],
+    store_name=configured_validation_results_store["validation_results_store_name"],
+    store_config=configured_validation_results_store["stores"][
+        "validation_results_GCS_store"
+    ],
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
-great_expectations_yaml["validations_store_name"] = "validations_GCS_store"
-great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
+great_expectations_yaml["validation_results_store_name"] = (
+    "validation_results_GCS_store"
+)
+great_expectations_yaml["stores"]["validation_results_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
@@ -237,7 +243,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # adding datasource
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py datasource">
-datasource = context.sources.add_pandas_gcs(
+datasource = context.data_sources.add_pandas_gcs(
     name="gcs_datasource", bucket_or_name="test_docs_data"
 )
 # </snippet>
@@ -284,19 +290,3 @@ validator.expect_column_values_to_be_between(
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py save_expectation_suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
-
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py checkpoint">
-checkpoint = context.add_or_update_checkpoint(
-    name="gcs_checkpoint",
-    validations=[
-        {"batch_request": batch_request, "expectation_suite_name": "test_gcs_suite"}
-    ],
-)
-# </snippet>
-
-
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py run_checkpoint">
-checkpoint_result = checkpoint.run()
-# </snippet>
-
-assert checkpoint_result.success is True

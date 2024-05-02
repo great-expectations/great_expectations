@@ -29,7 +29,7 @@ from great_expectations.data_context.store import (
     Store,
     StoreBackend,
 )
-from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
+from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
@@ -339,27 +339,6 @@ def delete_config_from_store_backend(
         configuration_key=configuration_key,
     )
     config_store.remove_key(key=key)
-
-
-def load_checkpoint_config_from_store_backend(
-    store_name: str,
-    store_backend: Union[StoreBackend, dict],
-    checkpoint_name: str,
-) -> CheckpointConfig:
-    config_store: CheckpointStore = build_checkpoint_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend,
-    )
-    key = ConfigurationIdentifier(
-        configuration_key=checkpoint_name,
-    )
-    try:
-        return config_store.get(key=key)  # type: ignore[return-value]
-    except gx_exceptions.InvalidBaseYamlConfigError as exc:
-        logger.error(exc.messages)  # noqa: TRY400
-        raise gx_exceptions.InvalidCheckpointConfigError(
-            "Error while processing DataContextConfig.", exc
-        )
 
 
 def delete_checkpoint_config_from_store_backend(

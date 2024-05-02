@@ -22,7 +22,7 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py create_validator">
-context.sources.pandas_default.read_csv(
+context.data_sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>

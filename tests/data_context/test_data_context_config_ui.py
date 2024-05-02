@@ -47,13 +47,12 @@ def construct_data_context_config():
         datasources: Dict,
         config_version: float = _DEFAULT_CONFIG_VERSION,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,  # noqa: E501
-        validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
+        validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
         suite_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,  # noqa: E501
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
-        validation_operators: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
     ):
         if stores is None:
@@ -65,23 +64,17 @@ def construct_data_context_config():
             "config_version": config_version,
             "datasources": datasources,
             "expectations_store_name": expectations_store_name,
-            "validations_store_name": validations_store_name,
+            "validation_results_store_name": validation_results_store_name,
             "suite_parameter_store_name": suite_parameter_store_name,
             "checkpoint_store_name": checkpoint_store_name,
             "profiler_store_name": profiler_store_name,
             "plugins_directory": plugins_directory,
-            "validation_operators": validation_operators,
             "stores": stores,
             "data_docs_sites": data_docs_sites,
             "config_variables_file_path": None,
             "anonymous_usage_statistics": {
                 "data_context_id": data_context_id,
                 "enabled": True,
-            },
-            "include_rendered_content": {
-                "globally": False,
-                "expectation_suite": False,
-                "expectation_validation_result": False,
             },
         }
 
@@ -194,8 +187,8 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
                 "prefix": "expectations",
             },
         },
-        "validations_S3_store": {
-            "class_name": "ValidationsStore",
+        "validation_results_S3_store": {
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",
@@ -246,7 +239,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_S3_store",
-        validations_store_name="validations_S3_store",
+        validation_results_store_name="validation_results_S3_store",
         suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         checkpoint_store_name="checkpoint_S3_store",
         profiler_store_name="profiler_S3_store",
@@ -283,17 +276,17 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
     store_backend_defaults = S3StoreBackendDefaults(
         default_bucket_name="custom_default_bucket_name",
         expectations_store_bucket_name="custom_expectations_store_bucket_name",
-        validations_store_bucket_name="custom_validations_store_bucket_name",
+        validation_results_store_bucket_name="custom_validation_results_store_bucket_name",
         data_docs_bucket_name="custom_data_docs_store_bucket_name",
         checkpoint_store_bucket_name="custom_checkpoint_store_bucket_name",
         profiler_store_bucket_name="custom_profiler_store_bucket_name",
         expectations_store_prefix="custom_expectations_store_prefix",
-        validations_store_prefix="custom_validations_store_prefix",
+        validation_results_store_prefix="custom_validation_results_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
         checkpoint_store_prefix="custom_checkpoint_store_prefix",
         profiler_store_prefix="custom_profiler_store_prefix",
         expectations_store_name="custom_expectations_S3_store_name",
-        validations_store_name="custom_validations_S3_store_name",
+        validation_results_store_name="custom_validation_results_S3_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_S3_store_name",
         profiler_store_name="custom_profiler_S3_store_name",
@@ -329,12 +322,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_expectations_store_prefix",
             },
         },
-        "custom_validations_S3_store_name": {
-            "class_name": "ValidationsStore",
+        "custom_validation_results_S3_store_name": {
+            "class_name": "ValidationResultsStore",
             "store_backend": {
-                "bucket": "custom_validations_store_bucket_name",
+                "bucket": "custom_validation_results_store_bucket_name",
                 "class_name": "TupleS3StoreBackend",
-                "prefix": "custom_validations_store_prefix",
+                "prefix": "custom_validation_results_store_prefix",
             },
         },
         "validation_definition_store": {
@@ -381,7 +374,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_S3_store_name",
-        validations_store_name="custom_validations_S3_store_name",
+        validation_results_store_name="custom_validation_results_S3_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_S3_store_name",
         profiler_store_name="custom_profiler_S3_store_name",
@@ -442,7 +435,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     desired_config["stores"][desired_config["expectations_store_name"]]["store_backend"][
         "root_directory"
     ] = test_root_directory
-    desired_config["stores"][desired_config["validations_store_name"]]["store_backend"][
+    desired_config["stores"][desired_config["validation_results_store_name"]]["store_backend"][
         "root_directory"
     ] = test_root_directory
     desired_config["stores"][desired_config["checkpoint_store_name"]]["store_backend"][
@@ -573,8 +566,8 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
                 "prefix": "expectations",
             },
         },
-        "validations_GCS_store": {
-            "class_name": "ValidationsStore",
+        "validation_results_GCS_store": {
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
                 "project": "my_default_project",
@@ -630,7 +623,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         data_context_id=data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_GCS_store",
-        validations_store_name="validations_GCS_store",
+        validation_results_store_name="validation_results_GCS_store",
         checkpoint_store_name="checkpoint_GCS_store",
         profiler_store_name="profiler_GCS_store",
         suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
@@ -668,22 +661,22 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         default_bucket_name="custom_default_bucket_name",
         default_project_name="custom_default_project_name",
         expectations_store_bucket_name="custom_expectations_store_bucket_name",
-        validations_store_bucket_name="custom_validations_store_bucket_name",
+        validation_results_store_bucket_name="custom_validation_results_store_bucket_name",
         data_docs_bucket_name="custom_data_docs_store_bucket_name",
         checkpoint_store_bucket_name="custom_checkpoint_store_bucket_name",
         profiler_store_bucket_name="custom_profiler_store_bucket_name",
         expectations_store_project_name="custom_expectations_store_project_name",
-        validations_store_project_name="custom_validations_store_project_name",
+        validation_results_store_project_name="custom_validation_results_store_project_name",
         data_docs_project_name="custom_data_docs_store_project_name",
         checkpoint_store_project_name="custom_checkpoint_store_project_name",
         profiler_store_project_name="custom_profiler_store_project_name",
         expectations_store_prefix="custom_expectations_store_prefix",
-        validations_store_prefix="custom_validations_store_prefix",
+        validation_results_store_prefix="custom_validation_results_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
         checkpoint_store_prefix="custom_checkpoint_store_prefix",
         profiler_store_prefix="custom_profiler_store_prefix",
         expectations_store_name="custom_expectations_GCS_store_name",
-        validations_store_name="custom_validations_GCS_store_name",
+        validation_results_store_name="custom_validation_results_GCS_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_GCS_store_name",
         profiler_store_name="custom_profiler_GCS_store_name",
@@ -720,13 +713,13 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_expectations_store_prefix",
             },
         },
-        "custom_validations_GCS_store_name": {
-            "class_name": "ValidationsStore",
+        "custom_validation_results_GCS_store_name": {
+            "class_name": "ValidationResultsStore",
             "store_backend": {
-                "bucket": "custom_validations_store_bucket_name",
-                "project": "custom_validations_store_project_name",
+                "bucket": "custom_validation_results_store_bucket_name",
+                "project": "custom_validation_results_store_project_name",
                 "class_name": "TupleGCSStoreBackend",
-                "prefix": "custom_validations_store_prefix",
+                "prefix": "custom_validation_results_store_prefix",
             },
         },
         "validation_definition_store": {
@@ -776,7 +769,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_GCS_store_name",
-        validations_store_name="custom_validations_GCS_store_name",
+        validation_results_store_name="custom_validation_results_GCS_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_GCS_store_name",
         profiler_store_name="custom_profiler_GCS_store_name",
@@ -857,8 +850,8 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                 },
             },
         },
-        "validations_database_store": {
-            "class_name": "ValidationsStore",
+        "validation_results_database_store": {
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
@@ -932,7 +925,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_database_store",
-        validations_store_name="validations_database_store",
+        validation_results_store_name="validation_results_database_store",
         checkpoint_store_name="checkpoint_database_store",
         profiler_store_name="profiler_database_store",
         suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
@@ -983,13 +976,13 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             "password": "custom_expectations_store_password",
             "database": "custom_expectations_store_database",
         },
-        validations_store_credentials={
-            "drivername": "custom_validations_store_drivername",
-            "host": "custom_validations_store_host",
-            "port": "custom_validations_store_port",
-            "username": "custom_validations_store_username",
-            "password": "custom_validations_store_password",
-            "database": "custom_validations_store_database",
+        validation_results_store_credentials={
+            "drivername": "custom_validation_results_store_drivername",
+            "host": "custom_validation_results_store_host",
+            "port": "custom_validation_results_store_port",
+            "username": "custom_validation_results_store_username",
+            "password": "custom_validation_results_store_password",
+            "database": "custom_validation_results_store_database",
         },
         checkpoint_store_credentials={
             "drivername": "custom_checkpoint_store_drivername",
@@ -1008,7 +1001,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             "database": "custom_profiler_store_database",
         },
         expectations_store_name="custom_expectations_database_store_name",
-        validations_store_name="custom_validations_database_store_name",
+        validation_results_store_name="custom_validation_results_database_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_database_store_name",
         profiler_store_name="custom_profiler_database_store_name",
@@ -1050,17 +1043,17 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
                 },
             },
         },
-        "custom_validations_database_store_name": {
-            "class_name": "ValidationsStore",
+        "custom_validation_results_database_store_name": {
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
-                    "database": "custom_validations_store_database",
-                    "drivername": "custom_validations_store_drivername",
-                    "host": "custom_validations_store_host",
-                    "password": "custom_validations_store_password",
-                    "port": "custom_validations_store_port",
-                    "username": "custom_validations_store_username",
+                    "database": "custom_validation_results_store_database",
+                    "drivername": "custom_validation_results_store_drivername",
+                    "host": "custom_validation_results_store_host",
+                    "password": "custom_validation_results_store_password",
+                    "port": "custom_validation_results_store_port",
+                    "username": "custom_validation_results_store_username",
                 },
             },
         },
@@ -1125,7 +1118,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_database_store_name",
-        validations_store_name="custom_validations_database_store_name",
+        validation_results_store_name="custom_validation_results_database_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_database_store_name",
         profiler_store_name="custom_profiler_database_store_name",
@@ -1192,16 +1185,16 @@ def test_override_general_defaults(
                     "prefix": "REPLACE_ME",
                 },
             },
-            "validations_S3_store": {
-                "class_name": "ValidationsStore",
+            "validation_results_S3_store": {
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
                     "bucket": "REPLACE_ME",
                     "prefix": "REPLACE_ME",
                 },
             },
-            "validations_S3_store2": {
-                "class_name": "ValidationsStore",
+            "validation_results_S3_store2": {
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
                     "bucket": "REPLACE_ME",
@@ -1227,7 +1220,7 @@ def test_override_general_defaults(
             },
         },
         expectations_store_name="custom_expectations_store_name",
-        validations_store_name="custom_validations_store_name",
+        validation_results_store_name="custom_validation_results_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="checkpoint_S3_store",
         profiler_store_name="profiler_S3_store",
@@ -1254,21 +1247,6 @@ def test_override_general_defaults(
                 },
             },
         },
-        validation_operators={
-            "custom_action_list_operator": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "custom_store_validation_result",
-                        "action": {"class_name": "CustomStoreValidationResultAction"},
-                    },
-                    {
-                        "name": "update_data_docs",
-                        "action": {"class_name": "UpdateDataDocsAction"},
-                    },
-                ],
-            }
-        },
         anonymous_usage_statistics={"enabled": True},
     )
 
@@ -1290,16 +1268,16 @@ def test_override_general_defaults(
                 "prefix": "REPLACE_ME",
             },
         },
-        "validations_S3_store": {
-            "class_name": "ValidationsStore",
+        "validation_results_S3_store": {
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "REPLACE_ME",
                 "class_name": "TupleS3StoreBackend",
                 "prefix": "REPLACE_ME",
             },
         },
-        "validations_S3_store2": {
-            "class_name": "ValidationsStore",
+        "validation_results_S3_store2": {
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "REPLACE_ME",
                 "class_name": "TupleS3StoreBackend",
@@ -1350,21 +1328,6 @@ def test_override_general_defaults(
             },
         },
     }
-    desired_validation_operators = {
-        "custom_action_list_operator": {
-            "class_name": "ActionListValidationOperator",
-            "action_list": [
-                {
-                    "name": "custom_store_validation_result",
-                    "action": {"class_name": "CustomStoreValidationResultAction"},
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": {"class_name": "UpdateDataDocsAction"},
-                },
-            ],
-        }
-    }
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
@@ -1373,12 +1336,11 @@ def test_override_general_defaults(
         },
         config_version=999.0,
         expectations_store_name="custom_expectations_store_name",
-        validations_store_name="custom_validations_store_name",
+        validation_results_store_name="custom_validation_results_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="checkpoint_S3_store",
         profiler_store_name="profiler_S3_store",
         stores=desired_stores,
-        validation_operators=desired_validation_operators,
         data_docs_sites=desired_data_docs_sites_config,
         plugins_directory="custom_plugins_directory",
     )
@@ -1440,8 +1402,8 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
                 "prefix": "expectations",
             },
         },
-        "validations_S3_store": {
-            "class_name": "ValidationsStore",
+        "validation_results_S3_store": {
+            "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",
@@ -1492,7 +1454,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_S3_store",
-        validations_store_name="validations_S3_store",
+        validation_results_store_name="validation_results_S3_store",
         checkpoint_store_name="checkpoint_S3_store",
         profiler_store_name="profiler_S3_store",
         suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
@@ -1547,11 +1509,6 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         "config_version": 3.0,
         "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "expectations_store",
-        "include_rendered_content": {
-            "expectation_suite": False,
-            "expectation_validation_result": False,
-            "globally": False,
-        },
         "stores": {
             "checkpoint_store": {
                 "class_name": "CheckpointStore",
@@ -1566,8 +1523,8 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
                 "class_name": "ExpectationsStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
-            "validations_store": {
-                "class_name": "ValidationsStore",
+            "validation_results_store": {
+                "class_name": "ValidationResultsStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
             "validation_definition_store": {
@@ -1575,7 +1532,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
         },
-        "validations_store_name": "validations_store",
+        "validation_results_store_name": "validation_results_store",
     }
 
     data_context_config_schema = DataContextConfigSchema()
@@ -1613,15 +1570,9 @@ def test_data_context_config_defaults():
         "suite_parameter_store_name": None,
         "expectations_store_name": None,
         "fluent_datasources": {},
-        "include_rendered_content": {
-            "expectation_suite": False,
-            "expectation_validation_result": False,
-            "globally": False,
-        },
         "plugins_directory": None,
         "profiler_store_name": None,
         "progress_bars": None,
         "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
-        "validation_operators": None,
-        "validations_store_name": None,
+        "validation_results_store_name": None,
     }

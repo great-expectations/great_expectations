@@ -22,7 +22,7 @@ import great_expectations as gx
 context = gx.get_context()
 
 sql_connection_string = f"sqlite:///{yellow_tripdata_db_file}"
-my_datasource = context.sources.add_sqlite(
+my_datasource = context.data_sources.add_sqlite(
     name="my_datasource", connection_string=sql_connection_string
 )
 
@@ -47,12 +47,7 @@ batches = my_table_asset.get_batch_list_from_batch_request(my_batch_request)
 
 assert len(batches) == 12
 
-# Python
-# <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_sorters">
-my_asset = my_table_asset.add_sorters(["+year", "-month"])
-# </snippet>
-
-assert my_asset.get_batch_parameters_keys(partitioner=partitioner) == (
+assert my_table_asset.get_batch_parameters_keys(partitioner=partitioner) == (
     "year",
     "month",
 )

@@ -104,8 +104,8 @@ class ExpectationSuite(SerializableDictDot):
         if meta is None:
             meta = {"great_expectations_version": ge_version}
         if (
-            "great_expectations.__version__" not in meta.keys()
-            and "great_expectations_version" not in meta.keys()
+            "great_expectations.__version__" not in meta
+            and "great_expectations_version" not in meta
         ):
             meta["great_expectations_version"] = ge_version
         # We require meta information to be serializable, but do not convert until necessary
@@ -1103,9 +1103,7 @@ class ExpectationSuiteSchema(Schema):
         elif len(data.suite_parameters) == 0:
             del data.suite_parameters
 
-        if not hasattr(data, "meta"):
-            pass
-        elif data.meta is None or data.meta == []:
+        if not hasattr(data, "meta") or (data.meta is None or data.meta == []):
             pass
         elif len(data.meta) == 0:
             del data.meta

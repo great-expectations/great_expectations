@@ -11,7 +11,6 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Sequence,
     Union,
     overload,
 )
@@ -23,7 +22,6 @@ from great_expectations import __version__
 from great_expectations._docs_decorators import public_api
 from great_expectations.analytics.client import init as init_analytics
 from great_expectations.analytics.config import ENV_CONFIG
-from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.config_provider import (
@@ -43,6 +41,7 @@ from great_expectations.data_context.data_context.serializable_data_context impo
 )
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
+    DataContextVariableSchema,
 )
 from great_expectations.data_context.store import DataAssetStore
 from great_expectations.data_context.store.datasource_store import (
@@ -51,9 +50,9 @@ from great_expectations.data_context.store.datasource_store import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
+from great_expectations.data_context.store.metric_store import SuiteParameterStore
+from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
 from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    CheckpointValidationDefinition,
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
@@ -69,16 +68,13 @@ from great_expectations.exceptions.exceptions import DataContextError, StoreBack
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-    from great_expectations.checkpoint.configurator import ActionDict
-    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.data_context.types.resource_identifiers import (
-        ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
     )
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
-    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -266,49 +262,57 @@ class CloudDataContext(SerializableDataContext):
 
     @classmethod
     def _prepare_v1_config(cls, config: dict) -> dict:
-        # Both notebooks and concurrency are no longer top-level keys in V1
+        # Various context variables are no longer top-level keys in V1
         config.pop("notebooks", None)
         config.pop("concurrency", None)
+        config.pop("include_rendered_content", None)
 
         # FluentDatasources are nested under the "datasources" key and need to be separated
         # to prevent downstream issues
         config["fluent_datasources"] = _extract_fluent_datasources(config)
 
-        # V1 renamed EvaluationParameters to SuiteParameters, so this is a temporary patch
-        # until Cloud implements a V1 endpoint for DataContextConfig
-        config = cls._replace_evaluation_parameters_with_suite_parameters(config)
+        # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
+        # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
+
+        cls._change_key_from_v0_to_v1(
+            config,
+            "evaluation_parameter_store_name",
+            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
+        )
+        cls._change_key_from_v0_to_v1(
+            config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
+        )
+        stores = config.get("stores")
+        if stores:
+            for store in stores.values():
+                if store:
+                    cls._change_value_from_v0_to_v1(
+                        store,
+                        "class_name",
+                        "EvaluationParameterStore",
+                        SuiteParameterStore.__name__,
+                    )
+                    cls._change_value_from_v0_to_v1(
+                        store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
+                    )
 
         return config
 
-    @classmethod
-    def _replace_evaluation_parameters_with_suite_parameters(cls, config: dict) -> dict:
-        """Ensure cloud config follows V1 conventions for SuiteParameters"""
-        # store name
-        V0_STORE_NAME_KEY = "evaluation_parameter_store_name"
-        V1_STORE_NAME_KEY = "suite_parameter_store_name"
-        if config.get(V0_STORE_NAME_KEY):
-            value = config.pop(V0_STORE_NAME_KEY)
-            if not config.get(V1_STORE_NAME_KEY):
-                config[V1_STORE_NAME_KEY] = value
+    @staticmethod
+    def _change_key_from_v0_to_v1(config: dict, v0_key: str, v1_key: str) -> Optional[dict]:
+        """Update the key if we have a V0 key and no V1 key in the config.
 
-        if not config.get("stores"):
-            return config  # no store dict to update
+        Mutates the config object and returns the value that was renamed
+        """
+        value = config.pop(v0_key, None)
+        if value and v1_key not in config:
+            config[v1_key] = value
+        return config.get(v1_key)
 
-        store_key_tuples = [
-            # (V0 Store Key, V1 Store Key)
-            ("default_evaluation_parameter_store", "default_suite_parameter_store"),
-            ("evaluation_parameter_store", "suite_parameter_store"),
-        ]
-        for v0_store_key, v1_store_key in store_key_tuples:
-            store_config = config["stores"].pop(v0_store_key, None)
-            if not store_config:
-                continue
-            # replace class name, if its legacy
-            if store_config["class_name"] == "EvaluationParameterStore":
-                store_config["class_name"] = "SuiteParameterStore"
-            # replace the config under the V1 key
-            config["stores"][v1_store_key] = store_config
-
+    @staticmethod
+    def _change_value_from_v0_to_v1(config: dict, key: str, v0_value: str, v1_value: str) -> dict:
+        if config.get(key) == v0_value:
+            config[key] = v1_value
         return config
 
     @classmethod
@@ -524,6 +528,12 @@ class CloudDataContext(SerializableDataContext):
         return self._cloud_config
 
     @override
+    @property
+    def _include_rendered_content(self) -> bool:
+        # Cloud contexts always want rendered content
+        return True
+
+    @override
     def _init_variables(self) -> CloudDataContextVariables:
         ge_cloud_base_url: str = self.ge_cloud_config.base_url
         ge_cloud_organization_id: str = self.ge_cloud_config.organization_id  # type: ignore[assignment]
@@ -698,14 +708,11 @@ class CloudDataContext(SerializableDataContext):
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
-        include_rendered_content: Optional[bool] = None,
         id: Optional[str] = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GX Cloud ID
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
-            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
-                ExpectationConfiguration.
             id (str): The GX Cloud ID for the Expectation Suite.
 
         Returns:
@@ -730,14 +737,9 @@ class CloudDataContext(SerializableDataContext):
                 f"Unable to load Expectation Suite {key.resource_name or key.id}"
             )
 
-        if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_suite_include_rendered_content()
-            )
-
         # create the ExpectationSuite from constructor
         expectation_suite = ExpectationSuite(**expectations_schema_dict)
-        if include_rendered_content:
+        if self._include_rendered_content:
             expectation_suite.render()
         return expectation_suite
 
@@ -747,7 +749,6 @@ class CloudDataContext(SerializableDataContext):
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
         id = expectation_suite.id
@@ -761,10 +762,7 @@ class CloudDataContext(SerializableDataContext):
             self._validate_suite_unique_constaints_before_save(key)
 
         self._suite_parameter_dependencies_compiled = False
-        include_rendered_content = self._determine_if_expectation_suite_include_rendered_content(
-            include_rendered_content=include_rendered_content
-        )
-        if include_rendered_content:
+        if self._include_rendered_content:
             expectation_suite.render()
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)
@@ -787,75 +785,6 @@ class CloudDataContext(SerializableDataContext):
                 f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "  # noqa: E501
                 "expectation_suite, set overwrite_existing=True."
             )
-
-    @override
-    def add_checkpoint(  # noqa: PLR0913
-        self,
-        name: str | None = None,
-        expectation_suite_name: str | None = None,
-        batch_request: dict | None = None,
-        action_list: Sequence[ActionDict] | None = None,
-        suite_parameters: dict | None = None,
-        runtime_configuration: dict | None = None,
-        validations: list[dict] | list[CheckpointValidationDefinition] | None = None,
-        id: str | None = None,
-        expectation_suite_id: str | None = None,
-        default_validation_id: str | None = None,
-        validator: Validator | None = None,
-        checkpoint: Checkpoint | None = None,
-    ) -> Checkpoint:
-        """
-        See `AbstractDataContext.add_checkpoint` for more information.
-        """
-        checkpoint = self._resolve_add_checkpoint_args(
-            name=name,
-            id=id,
-            expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
-            action_list=action_list,
-            suite_parameters=suite_parameters,
-            runtime_configuration=runtime_configuration,
-            validations=validations,
-            expectation_suite_id=expectation_suite_id,
-            default_validation_id=default_validation_id,
-            validator=validator,
-            checkpoint=checkpoint,
-        )
-
-        result: Checkpoint | CheckpointConfig
-        try:
-            result = self.checkpoint_store.add_checkpoint(checkpoint)
-        except gx_exceptions.CheckpointError as e:
-            # deprecated-v0.16.16
-            warnings.warn(
-                f"{e.message}; using add_checkpoint to overwrite an existing value is deprecated as of v0.16.16 "  # noqa: E501
-                "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
-                DeprecationWarning,
-            )
-            result = self.checkpoint_store.add_or_update_checkpoint(checkpoint)
-
-        if isinstance(result, CheckpointConfig):
-            result = Checkpoint.instantiate_from_config_with_runtime_args(
-                checkpoint_config=result,
-                data_context=self,
-                name=name,
-            )
-        return result
-
-    @override
-    def _determine_default_action_list(self) -> Sequence[ActionDict]:
-        default_actions = super()._determine_default_action_list()
-
-        # Data docs are not relevant to Cloud and should be excluded
-        return [
-            action
-            for action in default_actions
-            if action["action"]["class_name"] != "UpdateDataDocsAction"
-        ]
-
-    @override
-    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
-        return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
 
     @override
     def _init_site_builder_for_data_docs_site_creation(
@@ -954,7 +883,7 @@ class CloudDataContext(SerializableDataContext):
 
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
-        url = result.validation_result_url
+        url = result.result_url
         assert url, "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"  # noqa: E501
         self._open_url_in_browser(url)
 

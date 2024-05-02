@@ -1,11 +1,22 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any, Final
 
 import pytest
 
-from great_expectations.core.partitioners import PartitionerColumnValue
+from great_expectations.core.batch_definition import PartitionerT
+from great_expectations.core.partitioners import (
+    Partitioner,
+    PartitionerColumnValue,
+    PartitionerDaily,
+    PartitionerMonthly,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
+    PartitionerYearly,
+)
 from great_expectations.datasource.fluent import BatchRequest
 
 
@@ -68,10 +79,9 @@ def test_batch_request_config_serialization_round_trips(
         "datasource_name": datasource_name,
         "data_asset_name": data_asset_name,
         "partitioner": PartitionerColumnValue(column_name="my_column"),
-        "batching_regex": r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     }
     batch_request_config.update(optional_batch_request_config)
-    batch_request = BatchRequest(**batch_request_config)
+    batch_request = BatchRequest[Partitioner](**batch_request_config)
     assert batch_request.datasource_name == datasource_name
     assert batch_request.data_asset_name == data_asset_name
     # options is optional and an empty dict by default
@@ -113,7 +123,93 @@ def test_batch_request_config_serialization_round_trips(
         '"sort_ascending": true, '
         '"method_name": "partition_on_column_value"'
         "}, "
-        '"batching_regex": "data_(?P<year>\\\\d{4})-(?P<month>\\\\d{2}).csv", '
         f'"batch_slice": {batch_slice_json}'
         "}"
     )
+
+
+def _partitioner_test_cases():
+    return [
+        pytest.param(
+            PartitionerYearAndMonthAndDay(
+                column_name="foo",
+                sort_ascending=False,
+            ),
+            id="Sql Daily",
+        ),
+        pytest.param(
+            PartitionerYearAndMonth(
+                column_name="foo",
+                sort_ascending=False,
+            ),
+            id="Sql Monthly",
+        ),
+        pytest.param(
+            PartitionerYear(
+                column_name="foo",
+                sort_ascending=False,
+            ),
+            id="Sql Yearly",
+        ),
+        pytest.param(
+            PartitionerDaily(
+                regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}).csv"),
+                sort_ascending=False,
+            ),
+            id="Regex Daily",
+        ),
+        pytest.param(
+            PartitionerMonthly(
+                regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+                sort_ascending=False,
+            ),
+            id="Regex Monthly",
+        ),
+        pytest.param(
+            PartitionerYearly(
+                regex=re.compile(r"data_(?P<year>\d{4}).csv"),
+                sort_ascending=False,
+            ),
+            id="Regex Yearly",
+        ),
+        pytest.param(
+            None,
+            id="None",
+        ),
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "partitioner",
+    _partitioner_test_cases(),
+)
+def test_batch_request_config_partitioner_dict_round_trip_serialization(
+    partitioner: PartitionerT,
+) -> None:
+    # Using Any here effectively turns off type checking. This test demonstrates that the
+    # BatchRequest doesn't need to be parameterized for Pydantic to correctly deserialize from dict
+    batch_request = BatchRequest[Any](
+        datasource_name="test-datasource", data_asset_name="test-asset", partitioner=partitioner
+    )
+
+    batch_request_dict = batch_request.dict()
+    assert BatchRequest(**batch_request_dict) == batch_request
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "partitioner",
+    _partitioner_test_cases(),
+)
+def test_batch_request_config_partitioner_json_round_trip_serialization(
+    partitioner: PartitionerT,
+) -> None:
+    # Using Any here effectively turns off type checking. This test demonstrates that the
+    # BatchRequest doesn't need to be parameterized for Pydantic to correctly deserialize from JSON
+    batch_request = BatchRequest[Any](
+        datasource_name="test-datasource", data_asset_name="test-asset", partitioner=partitioner
+    )
+
+    batch_request_json = batch_request.json()
+    assert BatchRequest.parse_raw(batch_request_json) == batch_request

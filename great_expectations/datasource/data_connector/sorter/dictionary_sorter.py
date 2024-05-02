@@ -57,7 +57,7 @@ class DictionarySorter(Sorter):
             batch_keys = sorted(batch_identifiers[self.name].keys(), reverse=self.reverse_keys)
         else:
             batch_keys = [
-                key for key in self.key_reference_list if key in batch_identifiers[self.name].keys()
+                key for key in self.key_reference_list if key in batch_identifiers[self.name]
             ]
         batch_values: list[Any] = [batch_identifiers[self.name][key] for key in batch_keys]
         return batch_values

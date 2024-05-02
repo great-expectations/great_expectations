@@ -127,7 +127,7 @@ def test_file_context_add_and_save_fluent_datasource(
 
     context: FileDataContext = get_context(context_root_dir=config_file.parent, cloud_mode=False)
 
-    ds = context.sources.add_sqlite(
+    ds = context.data_sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
     )
 
@@ -151,7 +151,7 @@ def test_context_add_and_save_fluent_datasource(
 
     datasource_name = "save_ds_test"
 
-    context.sources.add_sqlite(
+    context.data_sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
     )
 
@@ -165,7 +165,7 @@ def test_context_add_or_update_datasource(
 ):
     context = empty_contexts
 
-    datasource: SqliteDatasource = context.sources.add_sqlite(
+    datasource: SqliteDatasource = context.data_sources.add_sqlite(
         name="save_ds_test", connection_string=f"sqlite:///{sqlite_database_path}"
     )
 
@@ -173,7 +173,7 @@ def test_context_add_or_update_datasource(
 
     # modify the datasource
     datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
-    context.sources.add_or_update_sqlite(datasource)
+    context.data_sources.add_or_update_sqlite(datasource)
 
     updated_datasource: SqliteDatasource = context.datasources[datasource.name]  # type: ignore[assignment]
     assert updated_datasource.connection_string == "sqlite:///"
@@ -193,7 +193,7 @@ def test_sources_delete_removes_datasource_from_yaml(
 ):
     print(f"Delete -> '{random_datasource.name}'\n")
 
-    seeded_file_context.sources.delete(random_datasource.name)
+    seeded_file_context.data_sources.delete(random_datasource.name)
 
     yaml_path = pathlib.Path(
         seeded_file_context.root_directory, seeded_file_context.GX_YML
@@ -219,64 +219,6 @@ def test_ctx_delete_removes_datasource_from_yaml(
     print(f"{pf(yaml_contents, depth=2)}")
 
     assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
-
-
-# Test marker comes from seeded_contexts
-def test_checkpoint_with_validator_workflow(
-    seeded_contexts: CloudDataContext | FileDataContext,
-):
-    context = seeded_contexts
-    if isinstance(context, CloudDataContext):
-        pytest.xfail("Checkpoint run fails in some cases on GE Cloud")
-
-    datasource_name = "sqlite_taxi"
-    asset_name = "my_asset"
-    month = 1
-    year = 2019
-
-    datasource = context.get_datasource(datasource_name)
-    assert isinstance(datasource, Datasource)
-
-    partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
-
-    batch_request = datasource.get_asset(asset_name).build_batch_request(
-        options={"year": year, "month": month}, partitioner=partitioner
-    )
-
-    validator = context.get_validator(batch_request=batch_request)
-    validator.save_expectation_suite()
-
-    checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
-
-    actual_validations = [v.to_dict() for v in checkpoint.validations]
-    actual_validations[0].pop("expectation_suite_id", None)
-
-    assert actual_validations == [
-        {
-            "name": None,
-            "id": None,
-            "batch_request": {
-                "data_asset_name": asset_name,
-                "datasource_name": datasource_name,
-                "options": {
-                    "month": month,
-                    "year": year,
-                },
-                "partitioner": {
-                    "method_name": "partition_on_year_and_month",
-                    "column_name": "pickup_datetime",
-                    "sort_ascending": True,
-                },
-                "batch_slice": None,
-                "batching_regex": None,
-            },
-            "expectation_suite_name": "default",
-        },
-    ]
-
-    result = checkpoint.run()
-
-    assert result.success
 
 
 # Test markers come from empty_contexts fixture
@@ -305,7 +247,7 @@ def test_quickstart_workflow(
     filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
     assert filepath.exists()
 
-    batch = context.sources.pandas_default.read_csv(filepath)
+    batch = context.data_sources.pandas_default.read_csv(filepath)
 
     # Create Expectations
     suite = context.add_expectation_suite("my_suite")

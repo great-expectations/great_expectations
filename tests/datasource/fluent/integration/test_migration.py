@@ -19,7 +19,7 @@ def test_convert_to_file_context(
     context = ephemeral_context_with_defaults
 
     datasource_name = "my_pandas"
-    context.sources.add_pandas(datasource_name)
+    context.data_sources.add_pandas(datasource_name)
 
     tmp_path.mkdir(exist_ok=True)
     with working_directory(str(tmp_path)):
