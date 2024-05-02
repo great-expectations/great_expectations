@@ -104,13 +104,13 @@ def test_suite_factory_delete_uses_store_remove_key():
     store = Mock(spec=ExpectationsStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
+    store.get.return_value = {"name": name}
     factory = SuiteFactory(store=store)
     context = Mock(spec=AbstractDataContext)
     set_context(context)
-    suite = ExpectationSuite(name=name)
 
     # Act
-    factory.delete(suite=suite)
+    factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_called_once_with(
@@ -127,14 +127,13 @@ def test_suite_factory_delete_raises_for_missing_suite():
     factory = SuiteFactory(store=store)
     context = Mock(spec=AbstractDataContext)
     set_context(context)
-    suite = ExpectationSuite(name=name)
 
     # Act
     with pytest.raises(
         DataContextError,
-        match=f"Cannot delete ExpectationSuite with name {suite.name} because it cannot be found.",
+        match=f"Cannot delete ExpectationSuite with name {name} because it cannot be found.",
     ):
-        factory.delete(suite=suite)
+        factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_not_called()
@@ -185,10 +184,11 @@ def test_suite_factory_delete_success_cloud(empty_cloud_context_fluent):
 def _test_suite_factory_delete_success(context):
     # Arrange
     name = "test-suite"
-    suite = ExpectationSuite(name=name)
-    suite = context.suites.add(suite=suite)
+    context.suites.add(suite=ExpectationSuite(name=name))
+
     # Act
-    context.suites.delete(suite)
+    context.suites.delete(name)
+
     # Assert
     with pytest.raises(
         DataContextError,
@@ -267,7 +267,7 @@ class TestSuiteFactoryAnalytics:
         with mock.patch(
             "great_expectations.core.factory.suite_factory.submit_event", autospec=True
         ) as mock_submit:
-            context.suites.delete(suite=suite)
+            context.suites.delete(name=name)
 
         # Assert
         mock_submit.assert_called_once_with(
