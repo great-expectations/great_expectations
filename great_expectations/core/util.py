@@ -64,6 +64,9 @@ except ImportError:
 if not LegacyRow:
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
 
+if not Row:
+    Row = SQLALCHEMY_NOT_IMPORTED
+
 SCHEMAS = {
     "api_np": {
         "NegativeInfinity": -np.inf,
