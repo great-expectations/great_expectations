@@ -309,14 +309,6 @@ module.exports = {
             },
           ]
         },
-        // {
-        //   type: 'category',
-        //   label: 'Data Assistants',
-        //   link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
-        //   items: [
-        //     'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
-        //   ]
-        // },
       ]
     },
     {

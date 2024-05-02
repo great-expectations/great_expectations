@@ -444,31 +444,35 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="False match for context.get_validator()",
         name="get_validator",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/domain_builder/domain_builder.py"
+            "great_expectations/experimental/rule_based_profiler/domain_builder/domain_builder.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="False match for context.get_validator()",
         name="get_validator",
-        filepath=pathlib.Path("great_expectations/rule_based_profiler/helpers/util.py"),
+        filepath=pathlib.Path(
+            "great_expectations/experimental/rule_based_profiler/helpers/util.py"
+        ),
     ),
     IncludeExcludeDefinition(
         reason="False match for context.get_validator()",
         name="get_validator",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/parameter_builder/parameter_builder.py"
+            "great_expectations/experimental/rule_based_profiler/parameter_builder/parameter_builder.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="Not used directly but from Data Assistant or RuleBasedProfiler",
         name="run",
-        filepath=pathlib.Path("great_expectations/rule_based_profiler/rule/rule.py"),
+        filepath=pathlib.Path(
+            "great_expectations/experimental/rule_based_profiler/rule/rule.py"
+        ),
     ),
     IncludeExcludeDefinition(
         reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
         name="self_check",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/rule_based_profiler.py"
+            "great_expectations/experimental/rule_based_profiler/rule_based_profiler.py"
         ),
     ),
     IncludeExcludeDefinition(
@@ -552,65 +556,71 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="to_json_dict is an internal helper method",
         name="to_json_dict",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/attributed_resolved_metrics.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
-        reason="to_json_dict is an internal helper method",
-        name="to_json_dict",
-        filepath=pathlib.Path("great_expectations/rule_based_profiler/builder.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="to_json_dict is an internal helper method",
-        name="to_json_dict",
-        filepath=pathlib.Path("great_expectations/rule_based_profiler/config/base.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="to_json_dict is an internal helper method",
-        name="to_json_dict",
-        filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/estimators/numeric_range_estimation_result.py"
+            "great_expectations/experimental/rule_based_profiler/attributed_resolved_metrics.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="to_json_dict is an internal helper method",
         name="to_json_dict",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/estimators/numeric_range_estimator.py"
+            "great_expectations/experimental/rule_based_profiler/builder.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="to_json_dict is an internal helper method",
         name="to_json_dict",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/helpers/cardinality_checker.py"
+            "great_expectations/experimental/rule_based_profiler/config/base.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="to_json_dict is an internal helper method",
         name="to_json_dict",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/helpers/configuration_reconciliation.py"
+            "great_expectations/experimental/rule_based_profiler/estimators/numeric_range_estimation_result.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="to_json_dict is an internal helper method",
         name="to_json_dict",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/helpers/runtime_environment.py"
+            "great_expectations/experimental/rule_based_profiler/estimators/numeric_range_estimator.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="to_json_dict is an internal helper method",
         name="to_json_dict",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/parameter_container.py"
+            "great_expectations/experimental/rule_based_profiler/helpers/cardinality_checker.py"
         ),
     ),
     IncludeExcludeDefinition(
         reason="to_json_dict is an internal helper method",
         name="to_json_dict",
-        filepath=pathlib.Path("great_expectations/rule_based_profiler/rule/rule.py"),
+        filepath=pathlib.Path(
+            "great_expectations/experimental/rule_based_profiler/helpers/configuration_reconciliation.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="to_json_dict is an internal helper method",
+        name="to_json_dict",
+        filepath=pathlib.Path(
+            "great_expectations/experimental/rule_based_profiler/helpers/runtime_environment.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="to_json_dict is an internal helper method",
+        name="to_json_dict",
+        filepath=pathlib.Path(
+            "great_expectations/experimental/rule_based_profiler/parameter_container.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="to_json_dict is an internal helper method",
+        name="to_json_dict",
+        filepath=pathlib.Path(
+            "great_expectations/experimental/rule_based_profiler/rule/rule.py"
+        ),
     ),
     IncludeExcludeDefinition(
         reason="to_json_dict is an internal helper method",
@@ -636,7 +646,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="False match for DataAssistant.run()",
         name="run",
         filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/data_assistant/data_assistant_runner.py"
+            "great_expectations/experimental/rule_based_profiler/data_assistant/data_assistant_runner.py"
         ),
     ),
     IncludeExcludeDefinition(

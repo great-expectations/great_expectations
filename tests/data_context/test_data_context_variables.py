@@ -56,7 +56,6 @@ def data_context_config_dict() -> dict:
         "validation_results_store_name": "validation_results_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
-        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -203,7 +202,6 @@ def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
 def progress_bars() -> ProgressBarsConfig:
     return ProgressBarsConfig(
         globally=True,
-        profilers=False,
     )
 
 
@@ -336,11 +334,6 @@ def test_data_context_variables_get_with_substitutions(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store setter",
         ),
-        pytest.param(
-            "my_profiler_store",
-            DataContextVariableSchema.PROFILER_STORE_NAME,
-            id="profiler_store setter",
-        ),
         pytest.param(stores, DataContextVariableSchema.STORES, id="stores setter"),
         pytest.param(
             data_docs_sites,
@@ -434,11 +427,9 @@ def test_data_context_variables_save_config(
                 "class_name": "SuiteParameterStore",
             },
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "profiler_store": {"class_name": "ProfilerStore"},
             "validation_results_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
-        "profiler_store_name": "profiler_store",
     }
 
     assert mock_put.call_count == 1
@@ -495,7 +486,6 @@ def test_file_data_context_variables_e2e(
     # Prepare updated progress_bars to set and serialize to disk
     updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
     updated_progress_bars.globally = False
-    updated_progress_bars.profilers = True
 
     # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)  # noqa: E501
     env_var_name: str = "MY_PLUGINS_DIRECTORY"

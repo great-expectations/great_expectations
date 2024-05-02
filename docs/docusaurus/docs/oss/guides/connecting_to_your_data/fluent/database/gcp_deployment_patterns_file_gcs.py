@@ -40,7 +40,6 @@ pop_stores = [
     "checkpoint_store",
     "suite_parameter_store",
     "validation_results_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -126,7 +125,6 @@ pop_stores = [
     "suite_parameter_store",
     "expectations_store",
     "expectations_GCS_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:

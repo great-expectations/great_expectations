@@ -12,7 +12,6 @@ from typing import (
     Union,
 )
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, StrictStr
 from great_expectations.compatibility.pydantic import json as pydantic_json
@@ -47,7 +46,6 @@ if TYPE_CHECKING:
 BatchParameters: TypeAlias = Dict[StrictStr, Any]
 
 
-@public_api
 class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
     """A BatchRequest is the way to specify which data Great Expectations will validate.
 
@@ -101,7 +99,6 @@ class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
         """A built-in slice that can be used to filter a list of batches by index."""
         return parse_batch_slice(batch_slice=self._batch_slice_input)
 
-    @public_api
     def update_batch_slice(self, value: Optional[BatchSlice] = None) -> None:
         """Updates the batch_slice on this BatchRequest.
 
@@ -139,7 +136,6 @@ class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
             raise TypeError("BatchParameters keys must all be strings.")  # noqa: TRY003
         return options
 
-    @public_api
     @override
     def json(  # noqa: PLR0913
         self,
@@ -172,7 +168,6 @@ class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
             **dumps_kwargs,
         )
 
-    @public_api
     @override
     def dict(  # noqa: PLR0913
         self,
