@@ -468,7 +468,7 @@ def test_get_metrics_with_exception(mocker: MockerFixture):
     ]
 
 
-def test_get_metrics_with_column_type_missing(mocker: MockerFixture):
+def test_get_metrics_with_excluded_column(mocker: MockerFixture):
     """This test is meant to simulate failed metrics in the computed metrics."""
     mock_context = mocker.Mock(spec=CloudDataContext)
     mock_validator = mocker.Mock(spec=Validator)
@@ -662,6 +662,108 @@ def test_get_metrics_with_timestamp_columns(mocker: MockerFixture):
             value=1,
             exception=None,
             column="timestamp_col",
+        ),
+    ]
+
+
+def test_get_metrics_with_timestamp_columns_exclude_time(mocker: MockerFixture):
+    mock_context = mocker.Mock(spec=CloudDataContext)
+    mock_validator = mocker.Mock(spec=Validator)
+    mock_context.get_validator.return_value = mock_validator
+    computed_metrics = {
+        ("table.row_count", (), ()): 2,
+        ("table.columns", (), ()): ["timestamp_col", "time_col"],
+        ("table.column_types", (), "include_nested=True"): [
+            {"name": "timestamp_col", "type": "TIMESTAMP_NTZ"},
+            {"name": "time_col", "type": "TIME"},
+        ],
+        ("column.min", "column=timestamp_col", ()): "2023-01-01T00:00:00",
+        ("column.max", "column=timestamp_col", ()): "2023-12-31T00:00:00",
+        ("column_values.null.count", "column=timestamp_col", ()): 1,
+        ("column_values.null.count", "column=time_col", ()): 1,
+    }
+    cdm_metrics_list: List[MetricTypes] = [
+        MetricTypes.TABLE_ROW_COUNT,
+        MetricTypes.TABLE_COLUMNS,
+        MetricTypes.TABLE_COLUMN_TYPES,
+        MetricTypes.COLUMN_MIN,
+        MetricTypes.COLUMN_MAX,
+        MetricTypes.COLUMN_NULL_COUNT,
+    ]
+    aborted_metrics = {}
+    mock_validator.compute_metrics.return_value = (
+        computed_metrics,
+        aborted_metrics,
+    )
+    mock_batch = mocker.Mock(spec=Batch)
+    mock_batch.id = "batch_id"
+    mock_validator.active_batch = mock_batch
+
+    metric_retriever = MetricListMetricRetriever(context=mock_context)
+
+    mock_batch_request = mocker.Mock(spec=BatchRequest)
+
+    mocker.patch(
+        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_numeric_column_names",
+        return_value=[],
+    )
+    mocker.patch(
+        f"{MetricListMetricRetriever.__module__}.{MetricListMetricRetriever.__name__}._get_timestamp_column_names",
+        return_value=["timestamp_col"],
+    )
+    metrics = metric_retriever.get_metrics(
+        batch_request=mock_batch_request, metric_list=cdm_metrics_list
+    )
+
+    assert metrics == [
+        TableMetric[int](
+            batch_id="batch_id",
+            metric_name="table.row_count",
+            value=2,
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.columns",
+            value=["timestamp_col", "time_col"],
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id="batch_id",
+            metric_name="table.column_types",
+            value=[
+                {"name": "timestamp_col", "type": "TIMESTAMP_NTZ"},
+                {"name": "time_col", "type": "TIME"},
+            ],
+            exception=None,
+        ),
+        ColumnMetric[str](
+            batch_id="batch_id",
+            metric_name="column.max",
+            value="2023-12-31T00:00:00",
+            exception=None,
+            column="timestamp_col",
+        ),
+        ColumnMetric[str](
+            batch_id="batch_id",
+            metric_name="column.min",
+            value="2023-01-01T00:00:00",
+            exception=None,
+            column="timestamp_col",
+        ),
+        ColumnMetric[int](
+            batch_id="batch_id",
+            metric_name="column_values.null.count",
+            value=1,
+            exception=None,
+            column="timestamp_col",
+        ),
+        ColumnMetric[int](
+            batch_id="batch_id",
+            metric_name="column_values.null.count",
+            value=1,
+            exception=None,
+            column="time_col",
         ),
     ]
 
