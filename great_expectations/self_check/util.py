@@ -936,7 +936,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         datasource = context.data_sources.add_sql(
             name=datasource_name, connection_string=connection_string
         )
-    datasource.add_table_asset("my_asset", table_name="animal_names")
+    datasource.add_table_asset("my_asset", table_name="animals_table")
 
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
     context.datasources["my_test_datasource"]._execution_engine = execution_engine
