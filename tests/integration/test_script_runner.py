@@ -165,68 +165,6 @@ local_tests = [
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
     IntegrationTestFixture(
-        name="how_to_get_one_or_more_batches_of_data_from_a_configured_datasource",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="connecting_to_your_data_pandas_yaml",
-        user_flow_script="docs/docusaurus/docs/snippets/pandas_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="connecting_to_your_data_pandas_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_introspect_and_partition_your_data_yaml_gradual",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_introspect_and_partition_your_data_yaml_complete",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="in_memory_pandas_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_choose_which_dataconnector_to_use",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_a_pandas_datasource",
-        user_flow_script="docs/docusaurus/docs/snippets/how_to_configure_a_pandas_datasource.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_a_runtimedataconnector",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
         name="expect_column_max_to_be_between_custom",
         user_flow_script="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py",
         backend_dependencies=[],
@@ -244,12 +182,6 @@ local_tests = [
     IntegrationTestFixture(
         name="how_to_configure_result_format_parameter",
         user_flow_script="docs/docusaurus/docs/snippets/result_format.py",
-        backend_dependencies=[],
-    ),
-    IntegrationTestFixture(
-        name="how_to_create_and_edit_expectations_with_instant_feedback_block_config",
-        user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[],
     ),
     # Fluent Datasources
@@ -494,19 +426,6 @@ pandas_integration_tests = [
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="pandas_execution_engine_with_gcp_installed",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/common_workflows/pandas_execution_engine_with_gcp_installed.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/cloud_provider_configs/gcp/my_example_creds.json",
-                ".gcs/my_example_creds.json",
-            ),
-        ),
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
 ]

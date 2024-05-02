@@ -69,9 +69,6 @@ from great_expectations.core.serializer import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.config_validator.yaml_config_validator import (
-    _YamlConfigValidator,
-)
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
@@ -3184,61 +3181,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                             f"metric {metric_name} was requested by another expectation suite but is not available in "  # noqa: E501
                             "this validation result."
                         )
-
-    @public_api
-    def test_yaml_config(  # noqa: PLR0913
-        self,
-        yaml_config: str,
-        name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        runtime_environment: Optional[dict] = None,
-        pretty_print: bool = True,
-        shorten_tracebacks: bool = False,
-    ):
-        """Convenience method for testing yaml configs.
-
-        test_yaml_config is a convenience method for configuring the moving
-        parts of a Great Expectations deployment. It allows you to quickly
-        test out configs for system components, especially Datasources,
-        Checkpoints, and Stores.
-
-        For many deployments of Great Expectations, these components (plus
-        Expectations) are the only ones you'll need.
-
-        `test_yaml_config` is mainly intended for use within notebooks and tests.
-
-        --Documentation--
-            - https://docs.greatexpectations.io/docs/terms/data_context
-
-        Args:
-            yaml_config: A string containing the yaml config to be tested
-            name: Optional name of the component to instantiate
-            class_name: Optional, overridden if provided in the config
-            runtime_environment: Optional override for config items
-            pretty_print: Determines whether to print human-readable output
-            shorten_tracebacks: If true, catch any errors during instantiation and print only the
-                last element of the traceback stack. This can be helpful for
-                rapid iteration on configs in a notebook, because it can remove
-                the need to scroll up and down a lot.
-
-        Returns:
-            The instantiated component (e.g. a Datasource)
-            OR
-            a json object containing metadata from the component's self_check method.
-            The returned object is determined by return_mode.
-
-        """
-        yaml_config_validator = _YamlConfigValidator(
-            data_context=self,
-        )
-        return yaml_config_validator.test_yaml_config(
-            yaml_config=yaml_config,
-            name=name,
-            class_name=class_name,
-            runtime_environment=runtime_environment,
-            pretty_print=pretty_print,
-            shorten_tracebacks=shorten_tracebacks,
-        )
 
     @public_api
     def build_data_docs(
