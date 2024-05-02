@@ -591,7 +591,6 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
             self.sort_batches(batch_list, sql_partitioner)
         return batch_list[batch_request.batch_slice]
 
-    @public_api
     @override
     def build_batch_request(
         self,

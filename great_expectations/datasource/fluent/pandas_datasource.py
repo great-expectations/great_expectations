@@ -171,7 +171,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
         return batch_list
 
-    @public_api
     @override
     def build_batch_request(
         self,
@@ -384,7 +383,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
-    @public_api
     # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>  # noqa: E501
     @new_argument(
         argument_name="dataframe",
