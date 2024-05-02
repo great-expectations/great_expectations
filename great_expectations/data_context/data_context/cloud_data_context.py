@@ -262,9 +262,10 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def _prepare_v1_config(cls, config: dict) -> dict:
         # Various context variables are no longer top-level keys in V1
-        config.pop("notebooks", None)
-        config.pop("concurrency", None)
-        config.pop("include_rendered_content", None)
+        for var in ("notebooks", "concurrency", "include_rendered_content", "profiler_store_name"):
+            val = config.pop(var, None)
+            if val:
+                logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
 
         # FluentDatasources are nested under the "datasources" key and need to be separated
         # to prevent downstream issues
