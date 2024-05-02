@@ -35,6 +35,6 @@ batch_request = batch_definition.build_batch_request()
 batch_list = asset.get_batch_list_from_batch_request(batch_request)
 
 assert len(batch_list) == 1
-
-first_batch = batch_list[0]
-assert first_batch.metadata == "foo"
+assert batch_list[0].metadata == {
+    "path": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02.csv"
+}

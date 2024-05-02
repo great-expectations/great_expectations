@@ -31,22 +31,27 @@ asset = datasource.add_csv_asset(
 
 batch_definition = asset.add_batch_definition_monthly(
     "abs batch definition",
-    regex=re.compile(r"yellow_tripdata_sample_(?P<year>.*)-(?P<month>.*)\.csv"),
+    regex=re.compile(NAME_STARTS_WITH + r"yellow_tripdata_sample_(?P<year>.*)-(?P<month>.*)\.csv"),
 )
 
 # first batch request: not passing any parameters
 batch_request = batch_definition.build_batch_request()
 batch_list = asset.get_batch_list_from_batch_request(batch_request)
-
-print(len(batch_list))
 assert len(batch_list) == 3
+assert batch_list[0].metadata == {
+    "year": "2019",
+    "month": "01",
+    "path": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
+}
 
 # second batch request: passing in parameters
 second_batch_request = batch_definition.build_batch_request(
     batch_parameters={"year": "2019", "month": "02"}
 )
-second_batch_list = asset.get_batch_list_from_batch_request(batch_request)
+second_batch_list = asset.get_batch_list_from_batch_request(second_batch_request)
 assert len(second_batch_list) == 1
-
-assert batch_list[0].metadata == "foo"
-assert second_batch_list[0].metadata == "foo"
+assert second_batch_list[0].metadata == {
+    "year": "2019",
+    "month": "02",
+    "path": "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02.csv",
+}
