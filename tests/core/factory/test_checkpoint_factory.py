@@ -122,9 +122,6 @@ def test_checkpoint_factory_delete_raises_for_missing_checkpoint(mocker: MockerF
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
     factory = CheckpointFactory(store=store)
-    # checkpoint = Checkpoint(
-    #     name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
-    # )
 
     # Act
     with pytest.raises(
