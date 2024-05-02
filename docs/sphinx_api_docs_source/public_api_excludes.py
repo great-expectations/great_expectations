@@ -640,31 +640,6 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
-        reason="LegacyDatasource is not included in the public API",
-        name="get_available_data_asset_names",
-        filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="LegacyDatasource is not included in the public API",
-        name="get_batch",
-        filepath=pathlib.Path("great_expectations/datasource/sqlalchemy_datasource.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="LegacyDatasource is not included in the public API",
-        name="get_batch",
-        filepath=pathlib.Path("great_expectations/datasource/sparkdf_datasource.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="LegacyDatasource is not included in the public API",
-        name="get_batch",
-        filepath=pathlib.Path("great_expectations/datasource/pandas_datasource.py"),
-    ),
-    IncludeExcludeDefinition(
-        reason="LegacyDatasource is not included in the public API",
-        name="get_batch",
-        filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
-    ),
-    IncludeExcludeDefinition(
         reason="Deprecated v2 api Dataset is not included in the public API",
         filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
     ),
