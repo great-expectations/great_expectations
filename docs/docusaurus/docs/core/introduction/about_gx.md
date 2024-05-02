@@ -2,7 +2,7 @@
 title: About Great Expectations
 ---
 import GxData from '../_core_components/_data.jsx'
-import GxCloudAdvert from './_gx_cloud_advert.md'
+import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
 Great Expectations (GX) is the leading tool for validating and documenting your data. {GxData.product_name} is the open source Python library that supports this tool.  With
 {GxData.product_name} you can further customize, automate, and expand on GX's processes to suite your specialized use cases.

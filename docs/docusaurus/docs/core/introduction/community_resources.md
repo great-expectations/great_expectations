@@ -1,7 +1,7 @@
 ---
 title: 'Community Resources'
 ---
-import GxCloudAdvert from './_gx_cloud_advert.md'
+import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
 Great Expectations (GX) is committed to supporting and growing the GX community. It’s not enough to build a great tool. GX wants to build a great community as well.
 
