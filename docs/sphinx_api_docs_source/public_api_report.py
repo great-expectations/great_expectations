@@ -109,12 +109,8 @@ class FileContents:
 
     @classmethod
     def create_from_local_file(cls, filepath: pathlib.Path) -> FileContents:
-        try:
-            with open(filepath) as f:
-                file_contents: str = f.read()
-        except Exception as e:
-            breakpoint()
-            print(e)
+        with open(filepath) as f:
+            file_contents: str = f.read()
         return cls(filepath=filepath, contents=file_contents)
 
     @classmethod
