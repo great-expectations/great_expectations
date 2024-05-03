@@ -1326,29 +1326,6 @@ class Validator:
             {parameter_name: convert_to_json_serializable(parameter_value)}
         )
 
-    def add_citation(  # noqa: PLR0913
-        self,
-        comment: str,
-        batch_spec: Optional[dict] = None,
-        batch_markers: Optional[dict] = None,
-        batch_definition: Optional[dict] = None,
-        citation_date: Optional[str] = None,
-    ) -> None:
-        """Adds a citation to an existing Expectation Suite within the validator"""
-        if batch_spec is None:
-            batch_spec = self.batch_spec
-        if batch_markers is None:
-            batch_markers = self.active_batch_markers
-        if batch_definition is None:
-            batch_definition = self.active_batch_definition  # type: ignore [assignment]
-        self._expectation_suite.add_citation(
-            comment,
-            batch_spec=batch_spec,
-            batch_markers=batch_markers,
-            batch_definition=batch_definition,
-            citation_date=citation_date,
-        )
-
     def test_expectation_function(self, function: Callable, *args, **kwargs) -> Callable:
         """Test a generic expectation function
 
