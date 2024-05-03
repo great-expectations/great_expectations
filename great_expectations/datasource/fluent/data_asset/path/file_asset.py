@@ -197,7 +197,3 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
     @override
     def _get_reader_method(self) -> str:
         raise NotImplementedError
-
-    @override
-    def _get_reader_options_include(self) -> set[str]:
-        raise NotImplementedError
