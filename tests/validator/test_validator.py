@@ -16,12 +16,12 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchRequest,
     LegacyBatchDefinition,
-    RuntimeBatchRequest,
 )
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
+from great_expectations.core.result_format import ResultFormat
 from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -32,6 +32,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -39,6 +40,16 @@ from great_expectations.expectations.expectation_configuration import (
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
+
+DATASOURCE_NAME = "my_datasource"
+DATA_ASSET_NAME = "IN_MEMORY_DATA_ASSET"
+
+
+@pytest.fixture
+def basic_datasource() -> PandasDatasource:
+    context = get_context(mode="ephemeral")
+    datasource = context.data_sources.add_pandas("my_datasource")
+    return datasource
 
 
 @pytest.fixture()
@@ -135,30 +146,20 @@ def yellow_trip_pandas_data_context(
 
 
 @pytest.mark.big
-def test_validator_default_expectation_args__pandas(basic_datasource):
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
+def test_validator_default_expectation_args__pandas(basic_datasource: PandasDatasource):
+    asset = basic_datasource.add_dataframe_asset(
+        "my_asset",
+        dataframe=pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]}),
     )
+    batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
+    batch = batch_definition.get_batch()
 
     my_validator = Validator(execution_engine=PandasExecutionEngine(), batches=[batch])
 
-    print(my_validator.get_default_expectation_arguments())
+    assert my_validator.get_default_expectation_arguments() == {
+        "catch_exceptions": False,
+        "result_format": ResultFormat.BASIC,
+    }
 
 
 @pytest.mark.big
@@ -588,27 +589,13 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
 
 
 @pytest.mark.big
-def test_graph_validate(in_memory_runtime_context, basic_datasource):
-    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
+def test_graph_validate(in_memory_runtime_context, basic_datasource: PandasDatasource):
+    asset = basic_datasource.add_dataframe_asset(
+        "my_asset",
+        dataframe=pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]}),
     )
+    batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
+    batch = batch_definition.get_batch()
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
@@ -620,7 +607,7 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource):
         },
     )
     result = Validator(
-        execution_engine=basic_datasource.execution_engine,
+        execution_engine=PandasExecutionEngine(),
         data_context=in_memory_runtime_context,
         batches=[batch],
     ).graph_validate(configurations=[expectation_configuration])
@@ -645,27 +632,17 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource):
 
 # Tests that runtime configuration actually works during graph validation
 @pytest.mark.big
-def test_graph_validate_with_runtime_config(in_memory_runtime_context, basic_datasource):
-    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
-    df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10, 2, 3], "b": [97, 332, 3, 4, 5, 6, 7, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
+def test_graph_validate_with_runtime_config(
+    in_memory_runtime_context, basic_datasource: PandasDatasource
+):
+    asset = basic_datasource.add_dataframe_asset(
+        "my_asset",
+        dataframe=pd.DataFrame(
+            {"a": [1, 5, 22, 3, 5, 10, 2, 3], "b": [97, 332, 3, 4, 5, 6, 7, None]}
+        ),
     )
+    batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
+    batch = batch_definition.get_batch()
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
@@ -674,7 +651,7 @@ def test_graph_validate_with_runtime_config(in_memory_runtime_context, basic_dat
     try:
         # noinspection PyTypeChecker
         result = Validator(
-            execution_engine=basic_datasource.execution_engine,
+            execution_engine=PandasExecutionEngine(),
             data_context=in_memory_runtime_context,
             batches=[batch],
         ).graph_validate(
@@ -718,30 +695,15 @@ def test_graph_validate_with_runtime_config(in_memory_runtime_context, basic_dat
 
 
 @pytest.mark.big
-def test_graph_validate_with_exception(basic_datasource):
+def test_graph_validate_with_exception(basic_datasource: PandasDatasource):
     # noinspection PyUnusedLocal
     def mock_error(*args, **kwargs):
         raise Exception("Mock Error")  # noqa: TRY002
 
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
+    asset = basic_datasource.add_dataframe_asset("my_asset", dataframe=df)
+    batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
+    batch = batch_definition.get_batch()
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
@@ -766,28 +728,12 @@ def test_graph_validate_with_exception(basic_datasource):
 
 @pytest.mark.big
 def test_graph_validate_with_bad_config_catch_exceptions_false(
-    in_memory_runtime_context, basic_datasource
+    in_memory_runtime_context, basic_datasource: PandasDatasource
 ):
-    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
+    asset = basic_datasource.add_dataframe_asset("my_asset", dataframe=df)
+    batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
+    batch = batch_definition.get_batch()
 
     expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_max_to_be_between",
@@ -798,7 +744,7 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
     ) as eee:
         # noinspection PyUnusedLocal
         _ = Validator(
-            execution_engine=basic_datasource.execution_engine,
+            execution_engine=PandasExecutionEngine(),
             data_context=in_memory_runtime_context,
             batches=[batch],
         ).graph_validate(
@@ -1068,7 +1014,7 @@ def test_validator_result_format_config_from_expectation(
 
 @pytest.mark.big
 def test_graph_validate_with_two_expectations_and_first_expectation_without_additional_configuration(  # noqa: E501
-    in_memory_runtime_context, basic_datasource
+    in_memory_runtime_context, basic_datasource: PandasDatasource
 ):
     in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
     df = pd.DataFrame(
@@ -1112,24 +1058,9 @@ def test_graph_validate_with_two_expectations_and_first_expectation_without_addi
         ],
         columns=["var"],
     )
-
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
+    asset = basic_datasource.add_dataframe_asset("my_asset", dataframe=df)
+    batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
+    batch = batch_definition.get_batch()
 
     expectation_configuration_expect_column_values_to_be_null = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_null",
@@ -1147,7 +1078,7 @@ def test_graph_validate_with_two_expectations_and_first_expectation_without_addi
         },
     )
     result = Validator(
-        execution_engine=basic_datasource.execution_engine,
+        execution_engine=PandasExecutionEngine(),
         data_context=in_memory_runtime_context,
         batches=[batch],
     ).graph_validate(
@@ -1231,7 +1162,7 @@ def test_graph_validate_with_two_expectations_and_first_expectation_without_addi
 
 @pytest.mark.big
 def test_graph_validate_with_two_expectations_and_first_expectation_with_result_format_complete(
-    in_memory_runtime_context, basic_datasource
+    in_memory_runtime_context, basic_datasource: PandasDatasource
 ):
     in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
     df = pd.DataFrame(
@@ -1276,23 +1207,9 @@ def test_graph_validate_with_two_expectations_and_first_expectation_with_result_
         columns=["var"],
     )
 
-    batch = basic_datasource.get_single_batch_from_batch_request(
-        RuntimeBatchRequest(
-            **{
-                "datasource_name": "my_datasource",
-                "data_connector_name": "test_runtime_data_connector",
-                "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "runtime_parameters": {
-                    "batch_data": df,
-                },
-                "batch_identifiers": {
-                    "pipeline_stage_name": 0,
-                    "airflow_run_id": 0,
-                    "custom_key_0": 0,
-                },
-            }
-        )
-    )
+    asset = basic_datasource.add_dataframe_asset("my_asset", dataframe=df)
+    batch_definition = asset.add_batch_definition_whole_dataframe("my batch definition")
+    batch = batch_definition.get_batch()
 
     expectation_configuration_expect_column_values_to_be_null = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_null",
@@ -1310,7 +1227,7 @@ def test_graph_validate_with_two_expectations_and_first_expectation_with_result_
         },
     )
     result = Validator(
-        execution_engine=basic_datasource.execution_engine,
+        execution_engine=PandasExecutionEngine(),
         data_context=in_memory_runtime_context,
         batches=[batch],
     ).graph_validate(
