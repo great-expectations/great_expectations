@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import Literal, Optional, Union
 
 from pydantic import Field
 
@@ -12,11 +12,9 @@ from great_expectations.datasource.fluent.data_asset.path.regex_asset import Reg
 from great_expectations.datasource.fluent.data_asset.path.spark.spark_generic import (
     _SparkGenericFilePathAssetMixin,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.serializable_types.pyspark import (
-        SerializableStructType,
-    )
+from great_expectations.datasource.fluent.serializable_types.pyspark import (
+    SerializableStructType,  # noqa: TCH001  # pydantic uses type at runtime
+)
 
 
 class JSONAssetBase(_SparkGenericFilePathAssetMixin):

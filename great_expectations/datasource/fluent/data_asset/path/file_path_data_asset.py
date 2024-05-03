@@ -25,6 +25,9 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
 )
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
+from great_expectations.datasource.fluent.data_connector import (
+    FilePathDataConnector,  # noqa: TCH001  # pydantic uses type at runtime
+)
 from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
 )
@@ -34,14 +37,11 @@ from great_expectations.datasource.fluent.interfaces import (
     DatasourceT,
     TestConnectionError,
 )
-from great_expectations.datasource.fluent.data_connector import (
-    FilePathDataConnector,
-)
+
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
     from great_expectations.core.id_dict import BatchSpec
-
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
