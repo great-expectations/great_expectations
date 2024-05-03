@@ -27,6 +27,8 @@ _MISSING: Final = object()
 if TYPE_CHECKING:
     from great_expectations.compatibility.azure import BlobServiceClient
     from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
+        SPARK_DIRECTORY_ASSET_UNION,
+        SPARK_FILE_ASSET_UNION,
         SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
@@ -150,7 +152,44 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             )
         if abs_container is _MISSING:
             raise TypeError(f"'{data_asset.name}' is missing required argument 'abs_container'")  # noqa: TRY003
+        if data_asset.get_whole_directory_path_override() is None:
+            self._build_file_data_connector(
+                data_asset=data_asset,
+                abs_container=abs_container,
+                abs_name_starts_with=abs_name_starts_with,
+                abs_delimiter=abs_delimiter,
+                abs_recursive_file_discovery=abs_recursive_file_discovery,
+            )
+        else:
+            self._build_directory_data_connector(
+                data_asset=data_asset,
+                abs_container=abs_container,
+                abs_name_starts_with=abs_name_starts_with,
+                abs_delimiter=abs_delimiter,
+                abs_recursive_file_discovery=abs_recursive_file_discovery,
+            )
 
+        # build a more specific `_test_connection_error_message`
+        data_asset._test_connection_error_message = (
+            self.data_connector_type.build_test_connection_error_message(
+                data_asset_name=data_asset.name,
+                batching_regex=data_asset.batching_regex,
+                account_name=self._account_name,
+                container=abs_container,
+                name_starts_with=abs_name_starts_with,
+                delimiter=abs_delimiter,
+                recursive_file_discovery=abs_recursive_file_discovery,
+            )
+        )
+
+    def _build_file_data_connector(  # noqa: PLR0913
+        self,
+        data_asset: SPARK_FILE_ASSET_UNION,
+        abs_container: str,
+        abs_name_starts_with: str,
+        abs_delimiter: str,
+        abs_recursive_file_discovery: bool,
+    ) -> None:
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
             data_asset_name=data_asset.name,
@@ -164,15 +203,22 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
         )
 
-        # build a more specific `_test_connection_error_message`
-        data_asset._test_connection_error_message = (
-            self.data_connector_type.build_test_connection_error_message(
-                data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
-                account_name=self._account_name,
-                container=abs_container,
-                name_starts_with=abs_name_starts_with,
-                delimiter=abs_delimiter,
-                recursive_file_discovery=abs_recursive_file_discovery,
-            )
+    def _build_directory_data_connector(  # noqa: PLR0913
+        self,
+        data_asset: SPARK_DIRECTORY_ASSET_UNION,
+        abs_container: str,
+        abs_name_starts_with: str,
+        abs_delimiter: str,
+        abs_recursive_file_discovery: bool,
+    ) -> None:
+        data_asset._data_connector = self.data_connector_type.build_data_connector(
+            datasource_name=self.name,
+            data_asset_name=data_asset.name,
+            azure_client=self._get_azure_client(),
+            account_name=self._account_name,
+            container=abs_container,
+            name_starts_with=abs_name_starts_with,
+            delimiter=abs_delimiter,
+            recursive_file_discovery=abs_recursive_file_discovery,
+            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
         )

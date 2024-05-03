@@ -124,7 +124,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
 
-        if isinstance(data_asset, SPARK_FILE_ASSET_UNION):
+        if data_asset.get_whole_directory_path_override() is None:
             self._build_file_data_connector(
                 data_asset=data_asset,
                 s3_prefix=s3_prefix,
@@ -140,19 +140,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 s3_max_keys=s3_max_keys,
                 s3_recursive_file_discovery=s3_recursive_file_discovery,
             )
-
-        data_asset._data_connector = self.data_connector_type.build_data_connector(
-            datasource_name=self.name,
-            data_asset_name=data_asset.name,
-            s3_client=self._get_s3_client(),
-            batching_regex=data_asset.batching_regex,
-            bucket=self.bucket,
-            prefix=s3_prefix,
-            delimiter=s3_delimiter,
-            max_keys=s3_max_keys,
-            recursive_file_discovery=s3_recursive_file_discovery,
-            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
-        )
 
         # build a more specific `_test_connection_error_message`
         data_asset._test_connection_error_message = (
