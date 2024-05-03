@@ -79,7 +79,7 @@ def test_valid_config(
     "connection_string, connect_args",
     [
         pytest.param(
-            "snowflake://<user_login_name>:<password>@<account_identifier>",
+            "snowflake://my_user:password@my_account?numpy=True",
             {"account": "my_account", "user": "my_user", "password": "123456"},
             id="both connection_string and connect_args",
         ),
