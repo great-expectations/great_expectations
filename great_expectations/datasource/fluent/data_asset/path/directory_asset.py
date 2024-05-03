@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, Optional
+from typing import TYPE_CHECKING, Generic, Optional, Pattern
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
@@ -11,7 +11,7 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.partitioners import RegexPartitioner
 from great_expectations.datasource.fluent import BatchRequest
-from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
+from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
@@ -29,6 +29,10 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
     """Base class for PathDataAssets which batch by combining the contents of a directory."""
 
     data_directory: pathlib.Path
+    # todo: remove. this is included to allow for an incremental refactor.
+    batching_regex: Pattern = (  # must use typing.Pattern for pydantic < v1.10
+        MATCH_ALL_PATTERN
+    )
 
     @override
     def _get_batch_definition_list(
