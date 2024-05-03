@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import DataAsset
 
 # New asset types should be added to the SPARK_FILE_PATH_ASSET_TYPES tuple,
-# and to SPARK_FILE_PATH_ASSET_TYPES_UNION
+# and to SPARK_PATH_ASSET_UNION
 # so that the schemas are generated and the assets are registered.
 
 
@@ -49,7 +49,7 @@ SPARK_FILE_PATH_ASSET_TYPES: Sequence[Type[DataAsset]] = (
     DeltaAsset,
     DirectoryDeltaAsset,
 )
-SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
+SPARK_PATH_ASSET_UNION = Union[
     CSVAsset,
     DirectoryCSVAsset,
     ParquetAsset,

@@ -13,7 +13,7 @@ from great_expectations.datasource.fluent.data_connector import (
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
-        SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        SPARK_PATH_ASSET_UNION,
     )
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
     @override
     def _build_data_connector(
         self,
-        data_asset: SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        data_asset: SPARK_PATH_ASSET_UNION,
         glob_directive: str = "**/*",
         **kwargs,
     ) -> None:
