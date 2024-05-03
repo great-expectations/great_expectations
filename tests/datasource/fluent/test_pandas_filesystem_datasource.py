@@ -17,7 +17,7 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
-from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset,
     JSONAsset,
 )

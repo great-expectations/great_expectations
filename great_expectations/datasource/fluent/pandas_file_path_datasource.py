@@ -10,7 +10,7 @@ from typing import (
 from great_expectations.datasource.fluent.data_asset.path.file_asset import (
     FileDataAsset,  # noqa: TCH001  # pydantic requires this type at runtime
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     _FILE_PATH_ASSET_MODELS,
 )
 from great_expectations.datasource.fluent.pandas_datasource import (

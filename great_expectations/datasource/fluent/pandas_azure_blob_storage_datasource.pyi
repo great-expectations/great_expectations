@@ -19,7 +19,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import AzureUrl as AzureUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset,
     ExcelAsset,
     FeatherAsset,

@@ -19,20 +19,20 @@ from great_expectations.datasource.fluent.data_asset.path.file_asset import (
     RegexMissingRequiredGroupsError,
     RegexUnknownGroupsError,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset as PandasCSVAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     ExcelAsset,
     FWFAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     JSONAsset as PandasJSONAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     ORCAsset as PandasORCAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     ParquetAsset as PandasParquetAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (

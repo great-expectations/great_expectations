@@ -12,7 +12,7 @@ import pytest
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
-from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import CSVAsset
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
