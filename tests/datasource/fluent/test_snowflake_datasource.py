@@ -120,7 +120,7 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": f"""expected string or bytes-like object{'' if python_version < (3, 11) else ', got "dict"'}""",
+                    "msg": f"""expected string or bytes-like object{"" if python_version < (3, 11) else ", got 'dict'"}""",
                     "type": "type_error",
                 },
                 {
@@ -147,7 +147,7 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": f"""expected string or bytes-like object{'' if python_version < (3, 11) else ', got "dict"'}""",
+                    "msg": f"""expected string or bytes-like object{"" if python_version < (3, 11) else ", got 'dict'"}""",
                     "type": "type_error",
                 },
                 {
