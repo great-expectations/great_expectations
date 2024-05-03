@@ -100,7 +100,9 @@ def test_conflicting_connection_string_and_args_raises_error(
     connection_string: ConfigStr | SnowflakeDsn | None | dict, connect_args: dict
 ):
     with pytest.raises(ValueError):
-        _ = SnowflakeDatasource(connection_string=connection_string, **connect_args)
+        _ = SnowflakeDatasource(
+            name="my_sf_ds", connection_string=connection_string, **connect_args
+        )
 
 
 @pytest.mark.unit
