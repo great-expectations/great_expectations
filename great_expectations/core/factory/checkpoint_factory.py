@@ -45,23 +45,22 @@ class CheckpointFactory(Factory[Checkpoint]):
 
     @public_api
     @override
-    def delete(self, checkpoint: Checkpoint) -> Checkpoint:
+    def delete(self, name: str) -> None:
         """Delete a Checkpoint from the collection.
 
         Parameters:
-            checkpoint: Checkpoint to delete
+            name: The name of the Checkpoint to delete
 
         Raises:
             DataContextError if Checkpoint doesn't exist
         """
-        key = self._store.get_key(name=checkpoint.name, id=None)
+        key = self._store.get_key(name=name, id=None)
         if not self._store.has_key(key=key):
             raise DataContextError(  # noqa: TRY003
-                f"Cannot delete Checkpoint with name {checkpoint.name} because it cannot be found."
+                f"Cannot delete Checkpoint with name {name} because it cannot be found."
             )
 
         self._store.remove_key(key=key)
-        return checkpoint
 
     @public_api
     @override
