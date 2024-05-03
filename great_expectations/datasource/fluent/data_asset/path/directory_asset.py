@@ -75,7 +75,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
         self,
         partitioner: Optional[RegexPartitioner] = None,
     ) -> tuple[str, ...]:
-        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
+        option_keys: tuple[str, ...] = (FILE_PATH_BATCH_SPEC_KEY,)
         # todo: need to get dataframe partitioner here
         if partitioner:
             option_keys += tuple(partitioner.param_names)

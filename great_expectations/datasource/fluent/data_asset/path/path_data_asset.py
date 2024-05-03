@@ -7,12 +7,10 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
     Generic,
     List,
     Mapping,
     Optional,
-    Pattern,
     Set,
 )
 
@@ -24,12 +22,8 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
 )
-from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_connector import (
     FilePathDataConnector,  # noqa: TCH001  # pydantic uses type at runtime
-)
-from great_expectations.datasource.fluent.data_connector.regex_parser import (
-    RegExParser,
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
@@ -69,20 +63,11 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
     }
 
     # General file-path DataAsset pertaining attributes.
-    batching_regex: Pattern = (  # must use typing.Pattern for pydantic < v1.10
-        MATCH_ALL_PATTERN
-    )
+
     connect_options: Mapping = pydantic.Field(
         default_factory=dict,
         description="Optional filesystem specific advanced parameters for connecting to data assets",  # noqa: E501
     )
-
-    _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(default="batch_request_param_")
-    _regex_parser: RegExParser = pydantic.PrivateAttr()
-
-    _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
-    _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
-    _all_group_names: List[str] = pydantic.PrivateAttr()
 
     # `_data_connector`` should be set inside `_build_data_connector()`
     _data_connector: FilePathDataConnector = pydantic.PrivateAttr()
@@ -98,22 +83,6 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
         """
 
         extra = pydantic.Extra.allow
-
-    def __init__(self, **data):
-        super().__init__(**data)
-
-        self._regex_parser = RegExParser(
-            regex_pattern=self.batching_regex,
-            unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
-        )
-
-        self._all_group_name_to_group_index_mapping = (
-            self._regex_parser.get_all_group_name_to_group_index_mapping()
-        )
-        self._all_group_index_to_group_name_mapping = (
-            self._regex_parser.get_all_group_index_to_group_name_mapping()
-        )
-        self._all_group_names = self._regex_parser.group_names()
 
     @override
     def get_batch_parameters_keys(

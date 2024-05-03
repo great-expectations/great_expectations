@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, Optional
+from typing import TYPE_CHECKING, Dict, Generic, List, Optional, Pattern
 
 from great_expectations._docs_decorators import public_api
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.partitioners import (
     PartitionerDaily,
@@ -13,6 +14,7 @@ from great_expectations.core.partitioners import (
     PartitionerYearly,
     RegexPartitioner,
 )
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
@@ -63,6 +65,32 @@ class AmbiguousPathError(ValueError):
 
 class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
     """Base class for PathDataAssets which batch by applying a regex to file names."""
+
+    batching_regex: Pattern = (  # must use typing.Pattern for pydantic < v1.10
+        MATCH_ALL_PATTERN
+    )
+    _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(default="batch_request_param_")
+    _regex_parser: RegExParser = pydantic.PrivateAttr()
+
+    _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
+    _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
+    _all_group_names: List[str] = pydantic.PrivateAttr()
+
+    def __init__(self, **data):
+        super().__init__(**data)
+
+        self._regex_parser = RegExParser(
+            regex_pattern=self.batching_regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
+        )
+
+        self._all_group_name_to_group_index_mapping = (
+            self._regex_parser.get_all_group_name_to_group_index_mapping()
+        )
+        self._all_group_index_to_group_name_mapping = (
+            self._regex_parser.get_all_group_index_to_group_name_mapping()
+        )
+        self._all_group_names = self._regex_parser.group_names()
 
     @public_api
     def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
