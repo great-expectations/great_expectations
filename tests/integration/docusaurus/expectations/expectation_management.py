@@ -49,4 +49,4 @@ expectation = next(
 suite.delete_expectation(expectation=expectation)
 
 # delete a suite
-context.suites.delete(suite=suite)
+context.suites.delete(name=suite_name)
