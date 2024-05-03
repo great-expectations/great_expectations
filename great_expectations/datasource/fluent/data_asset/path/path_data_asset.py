@@ -97,7 +97,6 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
         Args:
             batch_request: A batch request object to be validated.
         """
-        # need implementation for both dir & file
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
