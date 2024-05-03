@@ -239,11 +239,9 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     datasource is not configured, and docs are not built.
     """
     empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
-    FileDataContext.create(empty_directory)
     context = get_context(
-        context_root_dir=os.path.join(  # noqa: PTH118
-            empty_directory, FileDataContext.GX_DIR
-        )
+        mode="file",
+        project_root_dir=empty_directory,
     )
 
     obs = context.get_docs_sites_urls(only_if_exists=False)
@@ -256,7 +254,6 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     tmp_path_factory,
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
-    FileDataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
     context = get_context(context_root_dir=ge_dir)
 
@@ -290,7 +287,6 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     tmp_path_factory,
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
-    FileDataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
     context = get_context(context_root_dir=ge_dir)
 
@@ -340,7 +336,6 @@ def test_build_data_docs_skipping_index_does_not_build_index(
 ):
     # TODO What's the latest and greatest way to use configs rather than my hackery?
     empty_directory = str(tmp_path_factory.mktemp("empty"))
-    FileDataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
     context = get_context(context_root_dir=ge_dir)
     config = context.get_config()

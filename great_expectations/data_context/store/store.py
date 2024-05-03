@@ -278,7 +278,7 @@ class Store:
         keys_without_store_backend_id = [
             key
             for key in self._store_backend.list_keys()
-            if not key == StoreBackend.STORE_BACKEND_ID_KEY
+            if key != StoreBackend.STORE_BACKEND_ID_KEY
         ]
         return [self.tuple_to_key(key) for key in keys_without_store_backend_id]
 

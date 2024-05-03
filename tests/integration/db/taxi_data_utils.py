@@ -1,14 +1,10 @@
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, List
 
 import sqlalchemy as sa
 
 import great_expectations as gx
-from great_expectations.core import IDDict
-from great_expectations.core.batch import BatchRequest, LegacyBatchDefinition
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.datasource import BaseDatasource
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -18,6 +14,7 @@ from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases
 )
 from tests.test_utils import (
     LoadedTable,
+    add_datasource,
     clean_up_tables_with_prefix,
     load_and_concatenate_csvs,
     load_data_into_test_database,
@@ -100,114 +97,66 @@ def _execute_taxi_partitioning_test_cases(
 
     test_case: TaxiPartitioningTestCase
     for test_case in test_cases:
-        print("Testing partitioner method:", test_case.partitioner_method_name)
+        print("Testing add_batch_definition_* method", test_case.add_batch_definition_method_name)
 
         # 1. Setup
 
-        context = gx.get_context()
+        context = gx.get_context(mode="ephemeral")
 
         datasource_name: str = "test_datasource"
-        data_connector_name: str = "test_data_connector"
+        batch_definition_name: str = "test_batch_definition"
         data_asset_name: str = table_name  # Read from generated table name
 
         column_name: str = taxi_partitioning_test_cases.test_column_name
         column_names: List[str] = taxi_partitioning_test_cases.test_column_names
 
         # 2. Set partitioner in DataConnector config
-        data_connector_config: dict = {
-            "class_name": "ConfiguredAssetSqlDataConnector",
-            "assets": {
-                data_asset_name: {
-                    "partitioner_method": test_case.partitioner_method_name,
-                    "partitioner_kwargs": test_case.partitioner_kwargs,
-                }
-            },
-        }
-
-        # noinspection PyTypeChecker
-        context.add_datasource(
-            name=datasource_name,
-            class_name="Datasource",
-            execution_engine={
-                "class_name": "SqlAlchemyExecutionEngine",
-                "connection_string": connection_string,
-            },
-            data_connectors={data_connector_name: data_connector_config},
+        datasource = add_datasource(
+            context, name=datasource_name, connection_string=connection_string
         )
-
-        datasource: BaseDatasource = context.get_datasource(datasource_name=datasource_name)
-
-        data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
-            data_connector_name
-        ]
+        asset = datasource.add_table_asset(data_asset_name, table_name=table_name)
+        add_batch_definition_method = getattr(
+            asset, test_case.add_batch_definition_method_name or "MAKE THIS REQUIRED"
+        )
+        batch_definition: BatchDefinition = add_batch_definition_method(
+            name=batch_definition_name, **test_case.add_batch_definition_kwargs
+        )
 
         # 3. Check if resulting batches are as expected
-        # using data_connector.get_batch_definition_list_from_batch_request()
-        batch_request: BatchRequest = BatchRequest(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
+        batch_request = batch_definition.build_batch_request()
+        batch_list = asset.get_batch_list_from_batch_request(batch_request)
+        assert len(batch_list) == test_case.num_expected_batch_definitions, (
+            f"Found {len(batch_list)} batch definitions "
+            f"but expected {test_case.num_expected_batch_definitions}"
         )
-        batch_definition_list: List[LegacyBatchDefinition] = (
-            data_connector.get_batch_definition_list_from_batch_request(batch_request=batch_request)
-        )
-        print(len(batch_definition_list), "batch definitions found")
-        print(test_case.num_expected_batch_definitions, "expected batch definitions")
-        assert len(batch_definition_list) == test_case.num_expected_batch_definitions
 
-        expected_batch_definition_list: List[LegacyBatchDefinition]
+        expected_batch_metadata: List[dict]
+
         if test_case.table_domain_test_case:
-            expected_batch_definition_list = [
-                LegacyBatchDefinition(
-                    datasource_name=datasource_name,
-                    data_connector_name=data_connector_name,
-                    data_asset_name=data_asset_name,
-                    batch_identifiers=IDDict({}),
-                )
-            ]
+            expected_batch_metadata = [{}]
+        elif column_name or column_names:
+            # This condition is a smell. Consider refactoring.
+            expected_batch_metadata = [data for data in test_case.expected_column_values]
         else:
-            column_value: Any
-            if column_name:
-                expected_batch_definition_list = [
-                    LegacyBatchDefinition(
-                        datasource_name=datasource_name,
-                        data_connector_name=data_connector_name,
-                        data_asset_name=data_asset_name,
-                        batch_identifiers=IDDict({column_name: column_value}),
-                    )
-                    for column_value in test_case.expected_column_values
-                ]
-            elif column_names:
-                dictionary_element: dict
-                expected_batch_definition_list = [
-                    LegacyBatchDefinition(
-                        datasource_name=datasource_name,
-                        data_connector_name=data_connector_name,
-                        data_asset_name=data_asset_name,
-                        batch_identifiers=IDDict(dictionary_element),
-                    )
-                    for dictionary_element in test_case.expected_column_values
-                ]
-            else:
-                raise ValueError("Missing test_column_names or test_column_names attribute.")
+            raise ValueError("Missing test_column_names or test_column_names attribute.")
 
-        assert (
-            set(batch_definition_list) == set(expected_batch_definition_list)
-        ), f"BatchDefinition lists don't match\n\nbatch_definition_list:\n{batch_definition_list}\n\nexpected_batch_definition_list:\n{expected_batch_definition_list}"  # noqa: E501
-
-        # 4. Check that loaded data is as expected
-
-        # Use expected_batch_definition_list since it is sorted, and we already
-        # asserted that it contains the same items as batch_definition_list
-        batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
-            expected_batch_definition_list[0]
+        actual_batch_metadata = [batch.metadata for batch in batch_list]
+        assert actual_batch_metadata == expected_batch_metadata, (
+            f"Batch metadata lists don't match.\n\n"
+            f"batch_list:\n{batch_list}\n\n"
+            f"expected_batch metadata:\n{expected_batch_metadata}"
         )
 
-        batch_data: SqlAlchemyBatchData = context.datasources[
-            datasource_name
-        ].execution_engine.get_batch_data(batch_spec=batch_spec)
+        # 4. Check that loaded data is as expected, using correctness
+        # of the first batch as a proxy for correctness of the whole list
 
-        num_rows: int = batch_data.execution_engine.execute_query(
+        first_batch = batch_list[0]
+        execution_engine = datasource.get_execution_engine()
+        batch_data: SqlAlchemyBatchData = execution_engine.get_batch_data(
+            batch_spec=first_batch.batch_spec
+        )
+
+        num_rows: int = execution_engine.execute_query(
             sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition

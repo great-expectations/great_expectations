@@ -89,7 +89,7 @@ def test_expectation_configuration_equality(config1, config2, config3, config4):
     assert config1 is not config2  # different instances, but same content
     assert config1 == config2  # different instances, but same content
     assert not (config1 != config2)  # ne works properly
-    assert not (config1 == config3)  # different meta
+    assert config1 != config3  # different meta
     assert config1 != config3  # ne works properly
     assert config3 != config4  # different result format
 
@@ -136,7 +136,7 @@ def test_expectation_configuration_get_suite_parameter_dependencies():
         dependencies["profile"][0]["metric_kwargs_id"]["column=norm"]
     )
 
-    assert {
+    assert dependencies == {
         "profile": [
             {
                 "metric_kwargs_id": {
@@ -147,7 +147,7 @@ def test_expectation_configuration_get_suite_parameter_dependencies():
                 }
             }
         ]
-    } == dependencies
+    }
 
 
 @pytest.mark.unit

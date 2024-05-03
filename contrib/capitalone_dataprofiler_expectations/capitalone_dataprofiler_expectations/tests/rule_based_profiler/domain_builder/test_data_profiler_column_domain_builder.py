@@ -17,8 +17,8 @@ from great_expectations.core.domain import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import FileDataContext
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations.experimental.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.experimental.rule_based_profiler.parameter_container import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )

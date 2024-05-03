@@ -49,6 +49,7 @@ from great_expectations.execution_engine.sqlalchemy_dialect import (
     GXSqlDialect,
     quote_str,
 )
+from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -710,6 +711,132 @@ def _raw_query_check_column_exists(
             print(f"\n{column_name_param} does not exist!\n")
             return False
         return True
+
+
+@pytest.mark.parametrize(
+    "column_name",
+    [
+        # DDL: unquoted_lower_col ----------------------------------
+        param("unquoted_lower_col", id="str unquoted_lower_col"),
+        param('"unquoted_lower_col"', id='str "unquoted_lower_col"'),
+        param("UNQUOTED_LOWER_COL", id="str UNQUOTED_LOWER_COL"),
+        param('"UNQUOTED_LOWER_COL"', id='str "UNQUOTED_LOWER_COL"'),
+        # DDL: UNQUOTED_UPPER_COL ----------------------------------
+        param("unquoted_upper_col", id="str unquoted_upper_col"),
+        param('"unquoted_upper_col"', id='str "unquoted_upper_col"'),
+        param("UNQUOTED_UPPER_COL", id="str UNQUOTED_UPPER_COL"),
+        param('"UNQUOTED_UPPER_COL"', id='str "UNQUOTED_UPPER_COL"'),
+        # DDL: "quoted_lower_col"-----------------------------------
+        param("quoted_lower_col", id="str quoted_lower_col"),
+        param('"quoted_lower_col"', id='str "quoted_lower_col"'),
+        param("QUOTED_LOWER_COL", id="str QUOTED_LOWER_COL"),
+        param('"QUOTED_LOWER_COL"', id='str "QUOTED_LOWER_COL"'),
+        # DDL: "QUOTED_UPPER_COL" ----------------------------------
+        param("quoted_upper_col", id="str quoted_upper_col"),
+        param('"quoted_upper_col"', id='str "quoted_upper_col"'),
+        param("QUOTED_UPPER_COL", id="str QUOTED_UPPER_COL"),
+        param('"QUOTED_UPPER_COL"', id='str "QUOTED_UPPER_COL"'),
+    ],
+)
+class TestColumnIdentifiers:
+    @pytest.mark.parametrize(
+        "expectation_type",
+        [
+            "expect_column_to_exist",
+            "expect_column_values_to_not_be_null",
+        ],
+    )
+    def test_column_expectation(
+        self,
+        context: EphemeralDataContext,
+        all_sql_datasources: SQLDatasource,
+        table_factory: TableFactory,
+        column_name: str | quoted_name,
+        expectation_type: str,
+        request: pytest.FixtureRequest,
+    ):
+        param_id = request.node.callspec.id
+        datasource = all_sql_datasources
+        dialect = datasource.get_engine().dialect.name
+
+        if _is_quote_char_dialect_mismatch(dialect, column_name):
+            pytest.skip(f"quote char dialect mismatch: {column_name[0]}")
+
+        if _requires_fix(param_id):
+            # apply marker this way so that xpasses can be seen in the report
+            request.applymarker(pytest.mark.xfail)
+
+        schema: str | None = (
+            RAND_SCHEMA
+            if GXSqlDialect(dialect) in (GXSqlDialect.SNOWFLAKE, GXSqlDialect.DATABRICKS)
+            else None
+        )
+
+        print(f"\ncolumn_name:\n  {column_name!r}")
+        print(f"type:\n  {type(column_name)}\n")
+
+        table_factory(
+            gx_engine=datasource.get_execution_engine(),
+            table_names={TEST_TABLE_NAME},
+            schema=schema,
+            data=[
+                {
+                    "id": 1,
+                    "name": param_id,
+                    "quoted_upper_col": "my column is uppercase",
+                    "quoted_lower_col": "my column is lowercase",
+                    "unquoted_upper_col": "whatever",
+                    "unquoted_lower_col": "whatever",
+                },
+            ],
+        )
+
+        qualified_table_name: str = f"{schema}.{TEST_TABLE_NAME}" if schema else TEST_TABLE_NAME
+        # check that the column exists so that we know what if the expectation should succeed or fail  # noqa: E501
+        column_exists = _raw_query_check_column_exists(
+            column_name,
+            qualified_table_name,
+            datasource.get_execution_engine(),
+        )
+
+        asset = datasource.add_table_asset(
+            "my_asset", table_name=TEST_TABLE_NAME, schema_name=schema
+        )
+        print(f"asset:\n{asset!r}\n")
+
+        suite = context.add_expectation_suite(
+            expectation_suite_name=f"{datasource.name}-{asset.name}"
+        )
+        suite.add_expectation_configuration(
+            expectation_configuration=ExpectationConfiguration(
+                expectation_type=expectation_type,
+                kwargs={
+                    "column": column_name,
+                    "mostly": 1,
+                },
+            )
+        )
+        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+
+        batch_definition = asset.add_batch_definition_whole_table("my_batch_def")
+        validation_definition = ValidationDefinition(
+            name="my_validation_def", suite=suite, data=batch_definition
+        )
+
+        checkpoint = context.checkpoints.add(
+            checkpoint=Checkpoint(
+                name="my_checkpoint", validation_definitions=[validation_definition]
+            )
+        )
+        result = checkpoint.run()
+
+        exc_details = _get_exception_details(result, prettyprint=True)
+        assert not exc_details, exc_details[0]["raised_exception"]
+
+        if column_exists:
+            assert result.success is True, "column exists but validation failed"
+        else:
+            assert result.success is False, "column does not exist but validation succeeded"
 
 
 if __name__ == "__main__":

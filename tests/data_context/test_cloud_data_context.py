@@ -68,7 +68,6 @@ def _create_cloud_config_response(
         expectation_suite_store_name_key: "suite_parameter_store",
         "expectations_store_name": "default_expectations_store",
         "plugins_directory": "plugins/",
-        "profiler_store_name": "default_profiler_store",
         "progress_bars": {
             "globally": False,
             "metric_calculations": False,
@@ -99,20 +98,6 @@ def _create_cloud_config_response(
                         "organization_id": ORG_ID,
                     },
                     "ge_cloud_resource_type": "expectation_suite",
-                    "suppress_store_backend_id": True,
-                },
-            },
-            "default_profiler_store": {
-                "class_name": "ProfilerStore",
-                "store_backend": {
-                    "class_name": "GXCloudStoreBackend",
-                    "ge_cloud_base_url": CLOUD_BASE_URL,
-                    "ge_cloud_credentials": {
-                        "access_token": ACCESS_TOKEN,
-                        "organization_id": ORG_ID,
-                    },
-                    "ge_cloud_resource_name": "profilers",
-                    "ge_cloud_resource_type": "profiler",
                     "suppress_store_backend_id": True,
                 },
             },

@@ -212,13 +212,13 @@ class TestDynamicPandasAssets:
             )
 
         errors_dict = exc_info.value.errors()
-        assert {
+        assert errors_dict[  # the extra keyword error will always be the last error
+            -1  # we don't care about any other errors for this test
+        ] == {
             "loc": ("invalid_keyword_arg",),
             "msg": "extra fields not permitted",
             "type": "value_error.extra",
-        } == errors_dict[  # the extra keyword error will always be the last error
-            -1  # we don't care about any other errors for this test
-        ]
+        }
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
@@ -417,14 +417,12 @@ def test_default_pandas_datasource_get_and_set(
             assert asset["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_default_pandas_datasource_name_conflict(
     empty_data_context: AbstractDataContext,
 ):
-    # the datasource name is taken by legacy
-    empty_data_context.add_datasource(
-        name=DEFAULT_PANDAS_DATASOURCE_NAME, class_name="PandasDatasource"
-    )
+    # empty_data_context.data_sources.add_spark(name=DEFAULT_PANDAS_DATASOURCE_NAME)
+    empty_data_context.data_sources.add_spark(name=DEFAULT_PANDAS_DATASOURCE_NAME)
     with pytest.raises(DefaultPandasDatasourceError):
         _ = empty_data_context.data_sources.pandas_default
 
