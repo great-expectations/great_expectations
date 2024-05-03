@@ -626,6 +626,28 @@ module.exports = {
         },
         {
           type: 'category',
+          label: 'Manage alerts',
+          link: { type: 'doc', id: 'cloud/alerts/manage_alerts' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add a Slack alert',
+              href: '/docs/cloud/alerts/manage_alerts#add-a-slack-alert',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Slack alert',
+              href: '/docs/cloud/alerts/manage_alerts#edit-a-slack-alert',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Slack alert',
+              href: '/docs/cloud/alerts/manage_alerts#delete-a-slack-alert',
+            },
+          ]
+        },
+        {
+          type: 'category',
           label: 'Manage users and access tokens',
           link: { type: 'doc', id: 'cloud/users/manage_users' },
           items: [
