@@ -39,12 +39,6 @@
                 "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
             }
         },
-        "batching_regex": {
-            "title": "Batching Regex",
-            "default": ".*",
-            "type": "string",
-            "format": "regex"
-        },
         "connect_options": {
             "title": "Connect Options",
             "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -298,6 +292,12 @@
                 "RAISE_ERROR"
             ],
             "type": "string"
+        },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "default": ".*",
+            "type": "string",
+            "format": "regex"
         }
     },
     "required": [
