@@ -7,9 +7,22 @@ abs_integration_tests = []
 
 connecting_to_your_data: List[IntegrationTestFixture] = []
 
-partition_data = []
+partition_data = [
+    IntegrationTestFixture(
+        name="azure_pandas_by_path",
+        user_flow_script="tests/integration/test_definitions/abs/select_batch_by_path.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
+    IntegrationTestFixture(
+        name="partition_data_on_datetime_azure_pandas",
+        user_flow_script="tests/integration/test_definitions/abs/partitioned_on_datetime.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
+]
 
-sample_data = []
+sample_data: List[IntegrationTestFixture] = []
 
 fluent_datasources = [
     IntegrationTestFixture(
