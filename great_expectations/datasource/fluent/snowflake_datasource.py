@@ -130,23 +130,22 @@ class SnowflakeDatasource(SQLDatasource):
             values["connection_string"] = connection_details
         return values
 
-    @pydantic.root_validator
-    def _check_xor_input_args(cls, values: dict) -> dict:
+    @pydantic.validator("connection_string")
+    def _check_connection_string(
+        cls, connection_string: ConnectionDetails | ConfigStr | SnowflakeDsn
+    ) -> ConnectionDetails | ConfigStr | SnowflakeDsn:
         # keeping this validator isn't strictly necessary, but it provides a better error message
-        connection_string: str | ConnectionDetails | None = values.get(
-            "connection_string"
-        )
-        if connection_string:
-            # Method 1 - connection string
-            if isinstance(connection_string, (str, ConfigStr)):
-                return values
-            # Method 2 - individual args (account, user, and password are bare minimum)
-            elif isinstance(connection_string, ConnectionDetails) and bool(
-                connection_string.account
-                and connection_string.user
-                and connection_string.password
-            ):
-                return values
+
+        # Method 1 - connection string
+        if isinstance(connection_string, (str, ConfigStr)):
+            return connection_string
+        # Method 2 - individual args (account, user, and password are bare minimum)
+        elif isinstance(connection_string, ConnectionDetails) and bool(
+            connection_string.account
+            and connection_string.user
+            and connection_string.password
+        ):
+            return connection_string
         raise ValueError(
             "Must provide either a connection string or a combination of account, user, and password."
         )
