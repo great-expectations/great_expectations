@@ -21,10 +21,9 @@ from great_expectations.datasource.fluent.spark_datasource import SparkDatasourc
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
         _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
-
 
 logger = logging.getLogger(__name__)
 

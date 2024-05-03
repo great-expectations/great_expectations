@@ -15,15 +15,13 @@ from great_expectations.datasource.fluent import SparkAzureBlobStorageDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.spark_azure_blob_storage_datasource import (
     SparkAzureBlobStorageDatasourceError,
-)
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
 )
 
 logger = logging.getLogger(__file__)

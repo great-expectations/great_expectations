@@ -10,11 +10,9 @@ from great_expectations.datasource.fluent.config_str import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition,
-)
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
 )
 
 logger: Logger

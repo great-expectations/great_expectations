@@ -11,6 +11,7 @@ from great_expectations.datasource.fluent import SparkFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     DBFSDataConnector as DBFSDataConnector,
 )
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.interfaces import (
     BatchMetadata,
 )
@@ -19,9 +20,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
-)
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
 )
 
 logger: Logger

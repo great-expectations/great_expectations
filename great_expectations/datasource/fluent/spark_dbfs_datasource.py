@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
         _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
