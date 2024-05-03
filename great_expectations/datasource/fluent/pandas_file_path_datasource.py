@@ -15,7 +15,7 @@ from great_expectations.datasource.fluent.pandas_datasource import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.file_path_asset_base import _RegexDataAssetBase
+    from great_expectations.datasource.fluent.data_asset.path.regex_asset import RegexDataAsset
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
@@ -24,4 +24,4 @@ class _PandasFilePathDatasource(_PandasDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_FILE_PATH_ASSET_MODELS.values())
 
     # instance attributes
-    assets: List[_RegexDataAssetBase] = []
+    assets: List[RegexDataAsset] = []
