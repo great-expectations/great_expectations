@@ -214,6 +214,7 @@ def test_get_execution_engine_succeeds():
     datasource.get_execution_engine()
 
 
+@pytest.mark.snowflake
 @pytest.mark.parametrize(
     "connection_string",
     [
@@ -238,13 +239,11 @@ def test_get_execution_engine_succeeds():
             "empty_file_context",
             "great_expectations_oss",
             id="file context",
-            marks=pytest.mark.filesystem,
         ),
         param(
             "empty_cloud_context_fluent",
             "great_expectations_oss",
             id="cloud context",
-            marks=pytest.mark.cloud,
         ),
     ],
 )
