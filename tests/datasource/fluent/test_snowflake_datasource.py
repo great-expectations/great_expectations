@@ -118,7 +118,7 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "expected string or bytes-like object",
+                    "msg": "expected string or bytes-like object,- got 'dict'",
                     "type": "type_error",
                 },
                 {
@@ -145,7 +145,7 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "expected string or bytes-like object",
+                    "msg": "expected string or bytes-like object,- got 'dict'",
                     "type": "type_error",
                 },
                 {
