@@ -10,6 +10,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.partitioners import RegexPartitioner
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
-    from great_expectations.datasource.fluent import BatchParameters, BatchRequest
+    from great_expectations.datasource.fluent import BatchParameters
 
 
 class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
