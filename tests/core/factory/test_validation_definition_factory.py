@@ -159,7 +159,7 @@ def test_validation_definition_factory_delete_uses_store_remove_key(
     factory = ValidationDefinitionFactory(store=store)
 
     # Act
-    factory.delete(validation=validation_definition)
+    factory.delete(name="my_validation_def")
 
     # Assert
     store.remove_key.assert_called_once_with(
@@ -183,7 +183,7 @@ def test_validation_definition_factory_delete_raises_for_missing_validation(
         DataContextError,
         match=f"Cannot delete ValidationDefinition with name {name} because it cannot be found.",
     ):
-        factory.delete(validation=validation_definition)
+        factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_not_called()
@@ -300,7 +300,8 @@ def _test_validation_definition_factory_delete_success(
         validation_definition = context.validation_definitions.add(validation=validation_definition)
 
     # Act
-    context.validation_definitions.delete(validation_definition)
+    with mocker.patch.object(ValidationDefinition, "parse_raw", return_value=validation_definition):
+        context.validation_definitions.delete(name=name)
 
     # Assert
     with pytest.raises(

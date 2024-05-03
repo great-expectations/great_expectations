@@ -107,9 +107,9 @@ def checkpoint(
 
     validation_definitions: list[ValidationDefinition] = []
     checkpoint = Checkpoint(name=checkpoint_name, validation_definitions=validation_definitions)
-    checkpoint = context.checkpoints.add(checkpoint)
+    checkpoint = context.checkpoints.add(checkpoint=checkpoint)
     yield checkpoint
-    context.checkpoints.delete(checkpoint)
+    context.checkpoints.delete(name=checkpoint_name)
 
     with pytest.raises(gx_exceptions.DataContextError):
         context.checkpoints.get(name=checkpoint_name)
