@@ -169,7 +169,7 @@ def test_conflicting_connection_string_and_args_raises_error(
     connect_args: dict,
     expected_errors: list[dict],
 ):
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(pydantic.ValidationError) as exc_info:
         _ = SnowflakeDatasource(
             name="my_sf_ds", connection_string=connection_string, **connect_args
         )
