@@ -682,9 +682,9 @@ class ExpectationSuitePageRenderer(Renderer):
         (
             columns,
             ordered_columns,
-        ) = self._get_grouped_and_ordered_expectations_by_column()
-        expectation_suite_name = expectations.name
+        ) = self._get_grouped_and_ordered_expectations_by_column(expectations)
 
+        expectation_suite_name = expectations.name
         overview_content_blocks = [
             self._render_expectation_suite_header(),
             self._render_expectation_suite_info(expectations),
