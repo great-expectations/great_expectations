@@ -8,7 +8,6 @@ from typing import (
     Any,
     ClassVar,
     Dict,
-    Generic,
     List,
     Mapping,
     Optional,
@@ -37,7 +36,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
-    DatasourceT,
     TestConnectionError,
 )
 
@@ -57,7 +55,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
+class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
