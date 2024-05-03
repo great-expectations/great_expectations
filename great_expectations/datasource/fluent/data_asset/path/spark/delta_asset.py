@@ -7,10 +7,10 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.data_asset.path.directory_asset import (
     DirectoryDataAsset,
 )
+from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.regex_asset import RegexDataAsset
 
 
 class DeltaAssetBase(_FilePathDataAsset):
@@ -39,7 +39,7 @@ class DeltaAssetBase(_FilePathDataAsset):
         return {"timestamp_as_of", "version_as_of"}
 
 
-class DeltaAsset(RegexDataAsset, DeltaAssetBase):
+class DeltaAsset(FileDataAsset, DeltaAssetBase):
     type: Literal["delta"] = "delta"
 
 

@@ -7,7 +7,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.data_asset.path.directory_asset import (
     DirectoryDataAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.regex_asset import RegexDataAsset
+from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 from great_expectations.datasource.fluent.data_asset.path.spark.spark_generic import (
     _SparkGenericFilePathAssetMixin,
 )
@@ -37,7 +37,7 @@ class ORCAssetBase(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"merge_schema"})
 
 
-class ORCAsset(RegexDataAsset, ORCAssetBase):
+class ORCAsset(FileDataAsset, ORCAssetBase):
     type: Literal["orc"] = "orc"
 
 

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class DirectoryDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
-    """Base class for FilePathDataAssets which batch by combining the contents of a directory."""
+    """Base class for PathDataAssets which batch by combining the contents of a directory."""
 
     data_directory: pathlib.Path
 

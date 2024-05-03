@@ -60,8 +60,8 @@ class AmbiguousPathError(ValueError):
         self.path = path
 
 
-class RegexDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
-    """Base class for FilePathDataAssets which batch by applying a regex to file names."""
+class FileDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
+    """Base class for PathDataAssets which batch by applying a regex to file names."""
 
     @public_api
     def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:

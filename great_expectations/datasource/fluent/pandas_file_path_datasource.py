@@ -7,11 +7,11 @@ from typing import (
     Type,
 )
 
+from great_expectations.datasource.fluent.data_asset.path.file_asset import (
+    FileDataAsset,  # noqa: TCH001  # pydantic requires this type at runtime
+)
 from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     _FILE_PATH_ASSET_MODELS,
-)
-from great_expectations.datasource.fluent.data_asset.path.regex_asset import (
-    RegexDataAsset,  # noqa: TCH001  # pydantic requires this type at runtime
 )
 from great_expectations.datasource.fluent.pandas_datasource import (
     _PandasDatasource,
@@ -26,4 +26,4 @@ class _PandasFilePathDatasource(_PandasDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_FILE_PATH_ASSET_MODELS.values())
 
     # instance attributes
-    assets: List[RegexDataAsset] = []
+    assets: List[FileDataAsset] = []
