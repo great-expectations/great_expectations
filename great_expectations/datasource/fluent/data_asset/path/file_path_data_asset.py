@@ -322,3 +322,11 @@ class _FilePathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
         """
         # todo: refactor data connector instantiation so this isn't necessary
         raise NotImplementedError
+
+    def _get_reader_method(self) -> str:
+        # subtypes must define a reader method
+        raise NotImplementedError
+
+    def _get_reader_options_include(self) -> set[str]:
+        # subtypes control how reader options get serialized
+        raise NotImplementedError

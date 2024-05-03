@@ -193,3 +193,11 @@ class RegexDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[
         self,
     ) -> None:
         return None
+
+    @override
+    def _get_reader_method(self) -> str:
+        raise NotImplementedError
+
+    @override
+    def _get_reader_options_include(self) -> set[str]:
+        raise NotImplementedError

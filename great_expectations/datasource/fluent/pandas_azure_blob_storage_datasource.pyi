@@ -19,12 +19,6 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import AzureUrl as AzureUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.data_asset.data_connector import (
-    AzureBlobStorageDataConnector as AzureBlobStorageDataConnector,
-)
-from great_expectations.datasource.fluent.data_asset.data_connector import (
-    FilesystemDataConnector as FilesystemDataConnector,
-)
 from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
     CSVAsset,
     ExcelAsset,
@@ -40,6 +34,12 @@ from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
     SPSSAsset,
     StataAsset,
     XMLAsset,
+)
+from great_expectations.datasource.fluent.data_connector import (
+    AzureBlobStorageDataConnector as AzureBlobStorageDataConnector,
+)
+from great_expectations.datasource.fluent.data_connector import (
+    FilesystemDataConnector as FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
