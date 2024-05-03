@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Generic
+from typing import TYPE_CHECKING, Generic, Optional
 
 from great_expectations._docs_decorators import public_api
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.partitioners import (
     PartitionerDaily,
     PartitionerMonthly,
@@ -11,15 +12,18 @@ from great_expectations.core.partitioners import (
     PartitionerYearly,
     RegexPartitioner,
 )
+from great_expectations.datasource.fluent.data_asset.data_connector import FILE_PATH_BATCH_SPEC_KEY
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import RegExParser
-from great_expectations.datasource.fluent.data_asset.file_asset.file_path_data_asset import (
+from great_expectations.datasource.fluent.data_asset.path_asset.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.interfaces import DatasourceT
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.core.batch_definition import BatchDefinition
+    from great_expectations.datasource.fluent import BatchRequest
 
 
 class RegexMissingRequiredGroupsError(ValueError):
@@ -164,3 +168,29 @@ class RegexDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[
         if not actual_group_names.issubset(required_group_names):
             unknown_groups = actual_group_names - required_group_names
             raise RegexUnknownGroupsError(unknown_groups)
+
+    def _get_batch_definition_list(
+        self, batch_request: BatchRequest
+    ) -> list[LegacyBatchDefinition]:
+        """Generate a batch definition list from a given batch request, handling a partitioner config if present.
+
+        Args:
+            batch_request: Batch request used to generate batch definitions.
+
+        Returns:
+            List of batch definitions.
+        """  # noqa: E501
+        batch_definition_list = self._data_connector.get_batch_definition_list(
+            batch_request=batch_request
+        )
+        return batch_definition_list
+
+    @override
+    def get_batch_parameters_keys(
+        self,
+        partitioner: Optional[RegexPartitioner] = None,
+    ) -> tuple[str, ...]:
+        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
+        if partitioner:
+            option_keys += tuple(partitioner.param_names)
+        return option_keys

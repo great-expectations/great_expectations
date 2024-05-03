@@ -18,18 +18,11 @@ from typing import (
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.partitioners import (
-    RegexPartitioner,
-)
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
 )
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
-from great_expectations.datasource.fluent.data_asset.data_connector import (
-    FILE_PATH_BATCH_SPEC_KEY,
-    FilePathDataConnector,
-)
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
@@ -40,9 +33,12 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
+    from great_expectations.core.batch_definition import PartitionerT
     from great_expectations.core.id_dict import BatchSpec
+    from great_expectations.datasource.fluent.data_asset.data_connector import (
+        FilePathDataConnector,
+    )
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -119,19 +115,16 @@ class _FilePathDataAsset(DataAsset):
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[RegexPartitioner] = None,
+        partitioner: Optional[PartitionerT] = None,
     ) -> tuple[str, ...]:
-        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
-        if partitioner:
-            option_keys += tuple(partitioner.param_names)
-        return option_keys
+        raise NotImplementedError
 
     @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[RegexPartitioner] = None,
+        partitioner: Optional[PartitionerT] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -201,7 +194,7 @@ class _FilePathDataAsset(DataAsset):
         ):
             valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
-            expect_batch_request_form = BatchRequest[RegexPartitioner](
+            expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
@@ -263,21 +256,11 @@ class _FilePathDataAsset(DataAsset):
 
         return batch_list
 
+    @override
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[LegacyBatchDefinition]:
-        """Generate a batch definition list from a given batch request, handling a partitioner config if present.
-
-        Args:
-            batch_request: Batch request used to generate batch definitions.
-
-        Returns:
-            List of batch definitions.
-        """  # noqa: E501
-        batch_definition_list = self._data_connector.get_batch_definition_list(
-            batch_request=batch_request
-        )
-        return batch_definition_list
+        raise NotImplementedError
 
     def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
         """Build a set of options for use in a batch spec from a batch request.
@@ -320,23 +303,3 @@ class _FilePathDataAsset(DataAsset):
                 f"Could not connect to asset using {type(self._data_connector).__name__}: Got {type(e).__name__}"  # noqa: E501
             ) from e
         raise TestConnectionError(self._test_connection_error_message)
-
-    def get_whole_directory_path_override(
-        self,
-    ) -> PathStr | None:
-        """If present, override DataConnector behavior in order to
-        treat an entire directory as a single Asset.
-        """
-        return None
-
-    def _get_reader_method(self) -> str:
-        raise NotImplementedError(
-            """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
-work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""  # noqa: E501
-        )
-
-    def _get_reader_options_include(self) -> set[str]:
-        raise NotImplementedError(
-            """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
-to use as its "include" directive for File-Path style DataAsset processing."""  # noqa: E501
-        )

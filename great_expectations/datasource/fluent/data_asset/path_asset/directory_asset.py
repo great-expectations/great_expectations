@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import TYPE_CHECKING, Generic
+from typing import TYPE_CHECKING, Generic, Optional
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
@@ -9,13 +9,13 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.partitioners import Partitioner
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
-from great_expectations.datasource.fluent.data_asset.file_asset.file_path_data_asset import (
+from great_expectations.datasource.fluent.data_asset.data_connector import FILE_PATH_BATCH_SPEC_KEY
+from great_expectations.datasource.fluent.data_asset.path_asset.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.interfaces import DatasourceT
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
     from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.fluent import BatchRequest
 
@@ -57,23 +57,24 @@ class DirectoryDataAsset(_FilePathDataAsset[DatasourceT, Partitioner], Generic[D
             )
         return batch_definition_list
 
-    @override
-    def get_whole_directory_path_override(
-        self,
-    ) -> PathStr:
-        return self.data_directory
-
     @public_api
     def add_batch_definition_whole_directory(self, name: str) -> BatchDefinition:
         """Add a BatchDefinition which creates a single batch for the entire directory."""
         return self.add_batch_definition(name=name, partitioner=None)
 
     @override
-    def _get_reader_method(self) -> str:
-        raise NotImplementedError
-
-    @override
     def _get_reader_options_include(self) -> set[str]:
         return {
             "data_directory",
         }
+
+    @override
+    def get_batch_parameters_keys(
+        self,
+        partitioner: Optional[Partitioner] = None,
+    ) -> tuple[str, ...]:
+        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
+        # todo: need to get dataframe partitioner here
+        if partitioner:
+            option_keys += tuple(partitioner.param_names)
+        return option_keys
