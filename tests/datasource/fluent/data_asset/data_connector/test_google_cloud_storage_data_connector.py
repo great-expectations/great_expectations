@@ -10,12 +10,12 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import BatchRequest
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
+    from great_expectations.datasource.fluent.data_connector import (
         DataConnector,
     )
 

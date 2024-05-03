@@ -4,7 +4,6 @@ from typing import Literal, Optional
 
 from pydantic import Field
 
-from great_expectations.compatibility.pydantic import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.data_asset.path.directory_asset import (
     DirectoryDataAsset,
@@ -23,7 +22,8 @@ class DeltaAssetBase(_FilePathDataAsset):
     version_as_of: Optional[str] = Field(None, alias="versionAsOf")
 
     class Config:
-        extra = pydantic.Extra.forbid
+        extra = "forbid"
+
         allow_population_by_field_name = True
 
     @classmethod

@@ -15,10 +15,10 @@ from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import (
     PandasGoogleCloudStorageDatasource,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset
+from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,

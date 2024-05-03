@@ -13,10 +13,10 @@ from great_expectations.compatibility import azure
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset
+from great_expectations.datasource.fluent.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,

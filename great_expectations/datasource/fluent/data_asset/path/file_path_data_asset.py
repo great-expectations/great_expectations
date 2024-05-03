@@ -8,6 +8,7 @@ from typing import (
     Any,
     ClassVar,
     Dict,
+    Generic,
     List,
     Mapping,
     Optional,
@@ -18,27 +19,28 @@ from typing import (
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.batch_definition import PartitionerT
 from great_expectations.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
 )
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
-from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
+from great_expectations.datasource.fluent.data_connector import (
+    FilePathDataConnector,
+)
+from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
+    DatasourceT,
     TestConnectionError,
 )
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
-    from great_expectations.core.batch_definition import PartitionerT
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
-        FilePathDataConnector,
-    )
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -51,7 +53,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset):
+class _FilePathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",

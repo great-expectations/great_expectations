@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError

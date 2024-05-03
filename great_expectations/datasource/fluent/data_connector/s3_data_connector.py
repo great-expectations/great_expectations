@@ -11,7 +11,7 @@ from great_expectations.datasource.data_connector.util import (
     list_s3_keys,
     sanitize_prefix_for_gcs_and_s3,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilePathDataConnector,
 )
 

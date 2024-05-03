@@ -16,10 +16,10 @@ import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset, JSONAsset
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset, JSONAsset
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 from great_expectations.datasource.fluent.interfaces import TestConnectionError

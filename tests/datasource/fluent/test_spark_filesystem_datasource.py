@@ -19,8 +19,8 @@ from great_expectations.core.partitioners import (
     PartitionerMonthly,
     PartitionerYearly,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
-    FilesystemDataConnector,
+from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
+    _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
     CSVAsset,
@@ -46,7 +46,9 @@ from great_expectations.datasource.fluent.data_asset.path.spark.text_asset impor
     DirectoryTextAsset,
     TextAsset,
 )
-from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
+from great_expectations.datasource.fluent.data_connector import (
+    FilesystemDataConnector,
+)
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError,
 )

@@ -15,10 +15,10 @@ from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import (
     SparkGoogleCloudStorageDatasource,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
+from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
