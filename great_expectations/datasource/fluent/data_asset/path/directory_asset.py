@@ -16,6 +16,7 @@ from great_expectations.datasource.fluent.data_connector import FILE_PATH_BATCH_
 from great_expectations.datasource.fluent.interfaces import DatasourceT
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.core.batch_definition import BatchDefinition
     from great_expectations.datasource.fluent import BatchRequest
 
@@ -78,3 +79,9 @@ class DirectoryDataAsset(_FilePathDataAsset[DatasourceT, Partitioner], Generic[D
         if partitioner:
             option_keys += tuple(partitioner.param_names)
         return option_keys
+
+    @override
+    def get_whole_directory_path_override(
+        self,
+    ) -> PathStr:
+        return self.data_directory

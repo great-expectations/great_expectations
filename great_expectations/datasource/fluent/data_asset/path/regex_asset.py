@@ -194,3 +194,9 @@ class RegexDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[
         if partitioner:
             option_keys += tuple(partitioner.param_names)
         return option_keys
+
+    @override
+    def get_whole_directory_path_override(
+        self,
+    ) -> None:
+        return None

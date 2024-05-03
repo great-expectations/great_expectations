@@ -25,9 +25,6 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
 )
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
-from great_expectations.datasource.fluent.data_connector import (
-    FilePathDataConnector,
-)
 from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
 )
@@ -37,10 +34,14 @@ from great_expectations.datasource.fluent.interfaces import (
     DatasourceT,
     TestConnectionError,
 )
-
+from great_expectations.datasource.fluent.data_connector import (
+    FilePathDataConnector,
+)
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
     from great_expectations.core.id_dict import BatchSpec
+
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -305,3 +306,12 @@ class _FilePathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
                 f"Could not connect to asset using {type(self._data_connector).__name__}: Got {type(e).__name__}"  # noqa: E501
             ) from e
         raise TestConnectionError(self._test_connection_error_message)
+
+    def get_whole_directory_path_override(
+        self,
+    ) -> PathStr | None:
+        """If present, override DataConnector behavior in order to
+        treat an entire directory as a single Asset.
+        """
+        # todo: refactor data connector instantiation so this isn't necessary
+        raise NotImplementedError
