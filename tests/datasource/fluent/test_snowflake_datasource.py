@@ -214,7 +214,6 @@ def test_get_execution_engine_succeeds():
     datasource.get_execution_engine()
 
 
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "connection_string",
     [
