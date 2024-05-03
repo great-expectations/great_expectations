@@ -234,9 +234,12 @@ class SnowflakeDatasource(SQLDatasource):
                 connection_string: str | dict = model_dict.pop("connection_string")
 
                 if isinstance(connection_string, str):
+                    url = sa.engine.url.make_url(connection_string)
+                    url = url.update_query_dict(
+                        query_parameters={"application": snowflake_partner_application}
+                    )
                     self._engine = sa.create_engine(
-                        connection_string,
-                        connect_args={"application": snowflake_partner_application},
+                        url,
                         **kwargs,
                     )
                 else:
