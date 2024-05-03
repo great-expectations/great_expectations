@@ -76,33 +76,104 @@ def test_valid_config(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "connection_string, connect_args",
+    "connection_string, connect_args, expected_errors",
     [
         pytest.param(
             "snowflake://my_user:password@my_account?numpy=True",
             {"account": "my_account", "user": "my_user", "password": "123456"},
+            [
+                {
+                    "loc": ("__root__",),
+                    "msg": "Cannot provide both a connection string and a combination of account, user, and password.",
+                    "type": "value_error",
+                }
+            ],
             id="both connection_string and connect_args",
         ),
-        pytest.param(None, {}, id="neither connection_string nor connect_args"),
+        pytest.param(
+            None,
+            {},
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "none is not an allowed value",
+                    "type": "type_error.none.not_allowed",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="neither connection_string nor connect_args",
+        ),
         pytest.param(
             None,
             {"account": "my_account", "user": "my_user"},
+            [
+                {
+                    "loc": ("connection_string", "password"),
+                    "msg": "field required",
+                    "type": "value_error.missing",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "expected string or bytes-like object",
+                    "type": "type_error",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "str type expected",
+                    "type": "type_error.str",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
             id="incomplete connect_args",
         ),
         pytest.param(
-            {"connection_string": {"account": "my_account", "user": "my_user"}},
+            {"account": "my_account", "user": "my_user"},
             {},
+            [
+                {
+                    "loc": ("connection_string", "password"),
+                    "msg": "field required",
+                    "type": "value_error.missing",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "expected string or bytes-like object",
+                    "type": "type_error",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "str type expected",
+                    "type": "type_error.str",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
+                    "type": "value_error",
+                },
+            ],
             id="incomplete connection_string dict connect_args",
         ),
     ],
 )
 def test_conflicting_connection_string_and_args_raises_error(
-    connection_string: ConfigStr | SnowflakeDsn | None | dict, connect_args: dict
+    connection_string: ConfigStr | SnowflakeDsn | None | dict,
+    connect_args: dict,
+    expected_errors: list[dict],
 ):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc_info:
         _ = SnowflakeDatasource(
             name="my_sf_ds", connection_string=connection_string, **connect_args
         )
+    assert exc_info.value.errors() == expected_errors
 
 
 @pytest.mark.unit
