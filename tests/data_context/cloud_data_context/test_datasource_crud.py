@@ -10,7 +10,6 @@ import pytest
 import great_expectations as gx
 from great_expectations.data_context import CloudDataContext
 from great_expectations.data_context.types.base import GXCloudConfig
-from great_expectations.datasource import Datasource
 from great_expectations.datasource.fluent import PandasDatasource
 
 # module level markers
@@ -24,25 +23,6 @@ def test_cloud_context_add_datasource_with_individual_fds_args_raises_error(
 
     with pytest.raises(TypeError):
         context.add_datasource(name="my_pandas_fds", type="pandas", assets=[])
-
-
-def test_cloud_context_add_datasource_with_legacy_datasource_raises_error(
-    empty_base_data_context_in_cloud_mode: CloudDataContext,
-):
-    context = empty_base_data_context_in_cloud_mode
-    datasource = Datasource(
-        name="my_legacy_datasource",
-        execution_engine={"class_name": "PandasExecutionEngine"},
-        data_connectors={
-            "default_runtime_data_connector_name": {
-                "class_name": "RuntimeDataConnector",
-                "batch_identifiers": ["default_identifier_name"],
-            },
-        },
-    )
-
-    with pytest.raises(TypeError):
-        context.add_datasource(datasource=datasource)
 
 
 def test_cloud_context_add_datasource_with_fds(

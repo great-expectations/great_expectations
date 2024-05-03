@@ -8,7 +8,6 @@ from moto import mock_glue
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource import Datasource
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     SparkDFExecutionEngine,
 )
@@ -111,11 +110,6 @@ def glue_titanic_catalog():
             },
         )
         yield client
-
-
-@pytest.fixture
-def mysql_sqlalchemy_datasource(mysql_engine):
-    return Datasource("mysql_sqlalchemy_datasource", engine=mysql_engine)
 
 
 @pytest.fixture
