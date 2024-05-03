@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import (
-    TYPE_CHECKING,
     ClassVar,
     List,
     Sequence,
@@ -13,9 +12,9 @@ from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset impo
     SPARK_FILE_PATH_ASSET_TYPES,
     SPARK_FILE_PATH_ASSET_TYPES_UNION,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import DataAsset
+from great_expectations.datasource.fluent.interfaces import (
+    DataAsset,  # noqa: TCH001  # pydantic requires this type at runtime
+)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):

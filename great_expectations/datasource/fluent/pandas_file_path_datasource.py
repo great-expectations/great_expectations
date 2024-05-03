@@ -10,12 +10,14 @@ from typing import (
 from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
     _FILE_PATH_ASSET_MODELS,
 )
+from great_expectations.datasource.fluent.data_asset.path.regex_asset import (
+    RegexDataAsset,  # noqa: TCH001  # pydantic requires this type at runtime
+)
 from great_expectations.datasource.fluent.pandas_datasource import (
     _PandasDatasource,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.data_asset.path.regex_asset import RegexDataAsset
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
