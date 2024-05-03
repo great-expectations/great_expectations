@@ -4,12 +4,12 @@ from typing import Optional, Union
 
 from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 
 
-class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
+class _SparkGenericFilePathAssetMixin(PathDataAsset):
     # vvv Docs <> Source Code mismatch
     # ignoreCorruptFiles and ignoreMissingFiles appear in the docs https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
     # but not in any reader method signatures (e.g. https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)

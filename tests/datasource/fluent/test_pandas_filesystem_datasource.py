@@ -16,12 +16,12 @@ import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     CSVAsset,
     JSONAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
@@ -143,7 +143,7 @@ class TestDynamicPandasAssets:
         assert type_name in asset_class_names
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_add_asset_method_exists_and_is_functional(self, asset_class: Type[_FilePathDataAsset]):
+    def test_add_asset_method_exists_and_is_functional(self, asset_class: Type[PathDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
@@ -167,7 +167,7 @@ class TestDynamicPandasAssets:
         assert exc_info.value.model == asset_class
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_add_asset_method_signature(self, asset_class: Type[_FilePathDataAsset]):
+    def test_add_asset_method_signature(self, asset_class: Type[PathDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
@@ -197,7 +197,7 @@ class TestDynamicPandasAssets:
             print("✅")
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_minimal_validation(self, asset_class: Type[_FilePathDataAsset]):
+    def test_minimal_validation(self, asset_class: Type[PathDataAsset]):
         """
         These parametrized tests ensures that every `PandasFilesystemDatasource` asset model does some minimal
         validation, and doesn't accept arbitrary keyword arguments.
@@ -229,7 +229,7 @@ class TestDynamicPandasAssets:
     )
     def test_data_asset_defaults(
         self,
-        asset_model: Type[_FilePathDataAsset],
+        asset_model: Type[PathDataAsset],
         extra_kwargs: dict,
     ):
         """

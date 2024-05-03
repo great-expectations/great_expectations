@@ -9,8 +9,8 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.partitioners import RegexPartitioner
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_connector import FILE_PATH_BATCH_SPEC_KEY
 from great_expectations.datasource.fluent.interfaces import DatasourceT
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchRequest
 
 
-class DirectoryDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
+class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
     """Base class for PathDataAssets which batch by combining the contents of a directory."""
 
     data_directory: pathlib.Path

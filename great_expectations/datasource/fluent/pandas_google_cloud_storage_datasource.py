@@ -20,8 +20,8 @@ from great_expectations.datasource.fluent.pandas_datasource import PandasDatasou
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.google import Client
-    from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-        _FilePathDataAsset,
+    from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+        PathDataAsset,
     )
 
 logger = logging.getLogger(__name__)
@@ -125,7 +125,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _FilePathDataAsset,
+        data_asset: PathDataAsset,
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,

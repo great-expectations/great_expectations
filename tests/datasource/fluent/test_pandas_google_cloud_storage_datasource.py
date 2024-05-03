@@ -15,10 +15,10 @@ from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import (
     PandasGoogleCloudStorageDatasource,
 )
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import CSVAsset
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
+)
 from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
@@ -99,7 +99,7 @@ def csv_asset(
     mock_list_keys,
     object_keys: List[str],
     pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
-) -> _FilePathDataAsset:
+) -> PathDataAsset:
     mock_list_keys.return_value = object_keys
     asset = pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",

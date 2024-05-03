@@ -12,10 +12,10 @@ import pytest
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import CSVAsset
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
+)
 from great_expectations.datasource.fluent.data_connector import (
     DBFSDataConnector,
 )
@@ -85,7 +85,7 @@ def pandas_dbfs_datasource(
 
 
 @pytest.fixture
-def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> _FilePathDataAsset:
+def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> PathDataAsset:
     asset = pandas_dbfs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",

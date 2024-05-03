@@ -21,8 +21,8 @@ from great_expectations.datasource.fluent.pandas_datasource import PandasDatasou
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-        _FilePathDataAsset,
+    from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+        PathDataAsset,
     )
 
 
@@ -106,7 +106,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _FilePathDataAsset,
+        data_asset: PathDataAsset,
         s3_prefix: str = "",
         s3_delimiter: str = "/",  # TODO: delimiter conflicts with csv asset args
         s3_max_keys: int = 1000,

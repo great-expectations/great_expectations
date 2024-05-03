@@ -13,10 +13,10 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility import aws, pydantic
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import PandasS3Datasource
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import CSVAsset
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
+)
 from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
@@ -89,7 +89,7 @@ def pandas_s3_datasource(empty_data_context, s3_mock, s3_bucket: str) -> PandasS
 
 
 @pytest.fixture
-def csv_asset(pandas_s3_datasource: PandasS3Datasource) -> _FilePathDataAsset:
+def csv_asset(pandas_s3_datasource: PandasS3Datasource) -> PathDataAsset:
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",

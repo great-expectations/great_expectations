@@ -12,8 +12,8 @@ import great_expectations.execution_engine.sparkdf_execution_engine
 from great_expectations.compatibility import azure
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import SparkAzureBlobStorageDatasource
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.data_connector import (
@@ -94,7 +94,7 @@ def csv_asset(
     mock_list_keys,
     object_keys: List[str],
     spark_abs_datasource: SparkAzureBlobStorageDatasource,
-) -> _FilePathDataAsset:
+) -> PathDataAsset:
     mock_list_keys.return_value = object_keys
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",

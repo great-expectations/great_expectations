@@ -12,8 +12,8 @@ from great_expectations.core.partitioners import (
     PartitionerYearly,
     RegexPartitioner,
 )
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_connector import FILE_PATH_BATCH_SPEC_KEY
 from great_expectations.datasource.fluent.data_connector.regex_parser import RegExParser
@@ -60,7 +60,7 @@ class AmbiguousPathError(ValueError):
         self.path = path
 
 
-class FileDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
+class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
     """Base class for PathDataAssets which batch by applying a regex to file names."""
 
     @public_api

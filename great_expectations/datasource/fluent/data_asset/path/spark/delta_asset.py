@@ -8,12 +8,12 @@ from great_expectations.datasource.fluent.data_asset.path.directory_asset import
     DirectoryDataAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 
 
-class DeltaAssetBase(_FilePathDataAsset):
+class DeltaAssetBase(PathDataAsset):
     # The options below are available as of 2023-05-12
     # See https://docs.databricks.com/delta/tutorial.html for more info.
 

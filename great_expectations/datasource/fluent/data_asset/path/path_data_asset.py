@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
+class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
@@ -92,7 +92,7 @@ class _FilePathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
     class Config:
         """
         Need to allow extra fields for the base type because pydantic will first create
-        an instance of `_FilePathDataAsset` before we select and create the more specific
+        an instance of `PathDataAsset` before we select and create the more specific
         asset subtype.
         Each specific subtype should `forbid` extra fields.
         """

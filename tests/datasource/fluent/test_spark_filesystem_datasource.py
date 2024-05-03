@@ -19,8 +19,8 @@ from great_expectations.core.partitioners import (
     PartitionerMonthly,
     PartitionerYearly,
 )
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
     CSVAsset,
@@ -434,7 +434,7 @@ def test_all_spark_file_path_asset_types_tested():
         for (asset_type, required_fields) in _SPARK_ASSET_TYPES
     ],
 )
-def test__get_reader_options_include(asset_type: _FilePathDataAsset, required_fields: dict):
+def test__get_reader_options_include(asset_type: PathDataAsset, required_fields: dict):
     """Make sure options are in fields."""
     fields = set(asset_type.__fields__.keys())
     asset = asset_type.validate(required_fields)

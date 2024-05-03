@@ -19,9 +19,6 @@ from great_expectations.datasource.fluent.data_asset.path.file_asset import (
     RegexMissingRequiredGroupsError,
     RegexUnknownGroupsError,
 )
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     CSVAsset as PandasCSVAsset,
 )
@@ -37,6 +34,9 @@ from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets 
 )
 from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     ParquetAsset as PandasParquetAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
     CSVAsset as SparkCSVAsset,
@@ -167,7 +167,7 @@ def file_path_data_connector(mocker):
 
 
 @pytest.fixture
-def asset(request, datasource, file_path_data_connector) -> _FilePathDataAsset:
+def asset(request, datasource, file_path_data_connector) -> PathDataAsset:
     asset = request.param
     # since we're parametrizing these tests multiple ways, this object
     # will likely be reused, so we make sure the state we care about is reset:

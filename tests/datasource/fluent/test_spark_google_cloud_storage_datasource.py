@@ -15,8 +15,8 @@ from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import (
     SparkGoogleCloudStorageDatasource,
 )
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.data_connector import (
@@ -90,7 +90,7 @@ def csv_asset(
     mock_list_keys,
     object_keys: List[str],
     spark_gcs_datasource: SparkGoogleCloudStorageDatasource,
-) -> _FilePathDataAsset:
+) -> PathDataAsset:
     mock_list_keys.return_value = object_keys
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",

@@ -12,8 +12,8 @@ import pytest
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import SparkDBFSDatasource
-from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
-    _FilePathDataAsset,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.data_connector import (
@@ -70,7 +70,7 @@ def spark_dbfs_datasource(fs: FakeFilesystem, test_backends) -> SparkDBFSDatasou
 
 
 @pytest.fixture
-def csv_asset(spark_dbfs_datasource: SparkDBFSDatasource) -> _FilePathDataAsset:
+def csv_asset(spark_dbfs_datasource: SparkDBFSDatasource) -> PathDataAsset:
     asset = spark_dbfs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
