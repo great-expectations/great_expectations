@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from abc import ABC
 from typing import TYPE_CHECKING, Generic, Optional
 
 from great_expectations._docs_decorators import public_api
@@ -60,7 +61,7 @@ class AmbiguousPathError(ValueError):
         self.path = path
 
 
-class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
+class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
     """Base class for PathDataAssets which batch by applying a regex to file names."""
 
     @public_api
@@ -193,7 +194,3 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self,
     ) -> None:
         return None
-
-    @override
-    def _get_reader_method(self) -> str:
-        raise NotImplementedError

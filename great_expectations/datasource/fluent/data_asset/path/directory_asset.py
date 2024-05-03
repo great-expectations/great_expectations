@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+from abc import ABC
 from typing import TYPE_CHECKING, Generic, Optional
 
 from great_expectations._docs_decorators import public_api
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchRequest
 
 
-class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
+class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
     """Base class for PathDataAssets which batch by combining the contents of a directory."""
 
     data_directory: pathlib.Path
