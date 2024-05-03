@@ -14,6 +14,8 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
+        SPARK_DIRECTORY_ASSET_UNION,
+        SPARK_FILE_ASSET_UNION,
         SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
@@ -71,15 +73,12 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             raise TypeError(  # noqa: TRY003
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
-        data_asset._data_connector = self.data_connector_type.build_data_connector(
-            datasource_name=self.name,
-            data_asset_name=data_asset.name,
-            batching_regex=data_asset.batching_regex,
-            base_directory=self.base_directory,
-            glob_directive=glob_directive,
-            data_context_root_directory=self.data_context_root_directory,
-            whole_directory_path_override=data_asset.get_whole_directory_path_override(),
-        )
+        if isinstance(data_asset, SPARK_FILE_ASSET_UNION):
+            self._build_file_data_connector(data_asset=data_asset, glob_directive=glob_directive)
+        else:
+            self._build_directory_data_connector(
+                data_asset=data_asset, glob_directive=glob_directive
+            )
 
         # build a more specific `_test_connection_error_message`
         data_asset._test_connection_error_message = (
@@ -89,4 +88,35 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
                 glob_directive=glob_directive,
                 base_directory=self.base_directory,
             )
+        )
+
+    def _build_file_data_connector(
+        self,
+        data_asset: SPARK_FILE_ASSET_UNION,
+        glob_directive: str = "**/*",
+    ) -> None:
+        data_asset._data_connector = self.data_connector_type.build_data_connector(
+            datasource_name=self.name,
+            data_asset_name=data_asset.name,
+            batching_regex=data_asset.batching_regex,
+            base_directory=self.base_directory,
+            glob_directive=glob_directive,
+            data_context_root_directory=self.data_context_root_directory,
+            # todo: remove
+            whole_directory_path_override=data_asset.get_whole_directory_path_override(),
+        )
+
+    def _build_directory_data_connector(
+        self,
+        data_asset: SPARK_DIRECTORY_ASSET_UNION,
+        glob_directive: str = "**/*",
+    ) -> None:
+        data_asset._data_connector = self.data_connector_type.build_data_connector(
+            datasource_name=self.name,
+            data_asset_name=data_asset.name,
+            base_directory=self.base_directory,
+            glob_directive=glob_directive,
+            data_context_root_directory=self.data_context_root_directory,
+            # todo: remove
+            whole_directory_path_override=data_asset.get_whole_directory_path_override(),
         )
