@@ -9,7 +9,7 @@ from typing import (
 
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
-    SPARK_FILE_PATH_ASSET_TYPES,
+    SPARK_PATH_ASSET_TYPES,
     SPARK_PATH_ASSET_UNION,
 )
 from great_expectations.datasource.fluent.interfaces import (
@@ -19,7 +19,7 @@ from great_expectations.datasource.fluent.interfaces import (
 
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
-    asset_types: ClassVar[Sequence[Type[DataAsset]]] = SPARK_FILE_PATH_ASSET_TYPES
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = SPARK_PATH_ASSET_TYPES
 
     # instance attributes
     assets: List[SPARK_PATH_ASSET_UNION] = []
