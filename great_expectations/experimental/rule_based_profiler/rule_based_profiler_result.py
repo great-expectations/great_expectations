@@ -135,7 +135,4 @@ class RuleBasedProfilerResult(SerializableDictDot):
             match_type="domain",
             overwrite_existing=True,
         )
-        expectation_suite.add_citation(
-            **self.citation,
-        )
         return expectation_suite
