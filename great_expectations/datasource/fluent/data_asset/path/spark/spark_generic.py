@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Union
 
-from pydantic import Field
-
+from great_expectations.compatibility.pydantic import Field
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
     _FilePathDataAsset,
