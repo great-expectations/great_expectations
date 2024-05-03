@@ -1,5 +1,5 @@
-from great_expectations import get_context
 import great_expectations.expectations as gxe
+from great_expectations import get_context
 
 context = get_context(project_root_dir="./gx")
 
@@ -24,15 +24,14 @@ try:
     batch_definition = asset.get_batch_definition("monthly")
 except KeyError:
     import re
-    pattern = re.compile(r"trip data/yellow_tripdata_(?P<year>[0-9]{4})-(?P<month>[0-9]{2}).parquet")
-    batch_definition = asset.add_batch_definition_monthly(
-        "monthly",
-        regex=pattern
+
+    pattern = re.compile(
+        r"trip data/yellow_tripdata_(?P<year>[0-9]{4})-(?P<month>[0-9]{2}).parquet"
     )
+    batch_definition = asset.add_batch_definition_monthly("monthly", regex=pattern)
 
 
 # To verify that things worked...
 batch = batch_definition.get_batch(batch_parameters={"year": "2020", "month": "04"})
 
-import great_expectations.expectations as gxe
 print(batch.validate(gxe.ExpectColumnToExist(column="VendorID")))

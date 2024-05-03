@@ -1,9 +1,9 @@
 from great_expectations import get_context
 
 # TODO: will become from great_expectations import Checkpoint
-from great_expectations.checkpoint import Checkpoint
 # TODO will become from great_expectations.actions import SlackNotificationAction
-from great_expectations.checkpoint import SlackNotificationAction
+from great_expectations.checkpoint import Checkpoint, SlackNotificationAction
+
 # TODO will become freom great_expectations.exceptions import ResourceNotFoundError
 from great_expectations.exceptions import DataContextError
 
@@ -21,10 +21,9 @@ except DataContextError:
                 SlackNotificationAction(
                     # TODO: config variable substitution not working
                     slack_token="${SLACK_NOTIFICATION_TOKEN}",
-                    slack_channel="#alerts-timber-test"
+                    slack_channel="#alerts-timber-test",
                 ),
-            ]
-
+            ],
         )
     )
 
