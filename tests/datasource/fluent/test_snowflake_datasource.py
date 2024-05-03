@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from sys import version_info as python_version
+
 import pytest
 import sqlalchemy as sa
 from pytest import param
@@ -118,7 +120,7 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "expected string or bytes-like object, got 'dict'",
+                    "msg": f"""expected string or bytes-like object{'' if python_version < (3, 11) else ', got "dict"'}""",
                     "type": "type_error",
                 },
                 {
@@ -145,7 +147,7 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "expected string or bytes-like object, got 'dict'",
+                    "msg": f"""expected string or bytes-like object{'' if python_version < (3, 11) else ', got "dict"'}""",
                     "type": "type_error",
                 },
                 {
