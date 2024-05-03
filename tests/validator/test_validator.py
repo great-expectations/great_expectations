@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
-from typing import List, Set, Tuple
+from typing import TYPE_CHECKING, List, Set, Tuple
 from unittest import mock
 from unittest.mock import ANY, patch
 
@@ -38,8 +38,10 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 DATASOURCE_NAME = "my_datasource"
 DATA_ASSET_NAME = "IN_MEMORY_DATA_ASSET"
@@ -648,18 +650,14 @@ def test_graph_validate_with_runtime_config(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={"column": "b", "mostly": 1.0, "threshold": 2.0, "double_sided": True},
     )
-    try:
-        # noinspection PyTypeChecker
-        result = Validator(
-            execution_engine=PandasExecutionEngine(),
-            data_context=in_memory_runtime_context,
-            batches=[batch],
-        ).graph_validate(
-            configurations=[expectation_configuration],
-            runtime_configuration={"result_format": "COMPLETE"},
-        )
-    except AssertionError as e:
-        result = e
+    result = Validator(
+        execution_engine=PandasExecutionEngine(),
+        data_context=in_memory_runtime_context,
+        batches=[batch],
+    ).graph_validate(
+        configurations=[expectation_configuration],
+        runtime_configuration={"result_format": "COMPLETE"},
+    )
 
     assert result == [
         ExpectationValidationResult(
@@ -679,23 +677,19 @@ def test_graph_validate_with_runtime_config(
                 "unexpected_list": [332.0],
                 "unexpected_index_list": [1],
             },
-            expectation_config={
-                "expectation_type": "expect_column_value_z_scores_to_be_less_than",
-                "kwargs": {
-                    "column": "b",
-                    "mostly": 1,
-                    "threshold": 2,
-                    "double_sided": True,
-                },
-                "meta": {},
-            },
+            expectation_config=gxe.ExpectColumnValueZScoresToBeLessThan(
+                column="b",
+                mostly=1.0,
+                threshold=2.0,
+                double_sided=True,
+            ).configuration,
             exception_info=None,
         )
     ]
 
 
 @pytest.mark.big
-def test_graph_validate_with_exception(basic_datasource: PandasDatasource):
+def test_graph_validate_with_exception(basic_datasource: PandasDatasource, mocker: MockerFixture):
     # noinspection PyUnusedLocal
     def mock_error(*args, **kwargs):
         raise Exception("Mock Error")  # noqa: TRY002
@@ -717,8 +711,10 @@ def test_graph_validate_with_exception(basic_datasource: PandasDatasource):
 
     execution_engine = PandasExecutionEngine()
     validator = Validator(execution_engine=execution_engine, batches=[batch])
-    graph = ValidationGraph(execution_engine=execution_engine)
-    graph.build_metric_dependency_graph = mock_error
+
+    # TODO: Convert this to actually mock an exception being thrown
+    # graph = ValidationGraph(execution_engine=execution_engine)
+    # graph.build_metric_dependency_graph = mock_error  # type: ignore[method-assign]
 
     result = validator.graph_validate(configurations=[expectation_configuration])
 
@@ -739,9 +735,7 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
         expectation_type="expect_column_max_to_be_between",
         kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
     )
-    with pytest.raises(
-        tuple([gx_exceptions.MetricResolutionError, gx_exceptions.ProfilerExecutionError])
-    ) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         _ = Validator(
             execution_engine=PandasExecutionEngine(),
