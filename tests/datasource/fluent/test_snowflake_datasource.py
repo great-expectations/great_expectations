@@ -243,7 +243,7 @@ def test_get_execution_engine_succeeds():
         ),
         param(
             "empty_cloud_context_fluent",
-            "great_expectations_cloud",
+            "great_expectations_oss",
             id="cloud context",
             marks=pytest.mark.cloud,
         ),
