@@ -8,7 +8,7 @@ from great_expectations.compatibility.pyspark import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import SparkFilesystemDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     DBFSDataConnector as DBFSDataConnector,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset

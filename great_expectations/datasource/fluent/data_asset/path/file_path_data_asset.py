@@ -259,10 +259,17 @@ class _FilePathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
 
         return batch_list
 
-    @override
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[LegacyBatchDefinition]:
+        """Generate a batch definition list from a given batch request.
+
+        Args:
+            batch_request: Batch request used to generate batch definitions.
+
+        Returns:
+            List of batch definitions.
+        """
         raise NotImplementedError
 
     def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:

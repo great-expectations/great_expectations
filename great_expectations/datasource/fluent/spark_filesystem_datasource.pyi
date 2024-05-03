@@ -7,7 +7,7 @@ from great_expectations.compatibility.pyspark import (
     types as pyspark_types,
 )
 from great_expectations.datasource.fluent import BatchMetadata, _SparkFilePathDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (

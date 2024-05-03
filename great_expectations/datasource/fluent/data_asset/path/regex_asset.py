@@ -169,17 +169,10 @@ class RegexDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[
             unknown_groups = actual_group_names - required_group_names
             raise RegexUnknownGroupsError(unknown_groups)
 
+    @override
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[LegacyBatchDefinition]:
-        """Generate a batch definition list from a given batch request, handling a partitioner config if present.
-
-        Args:
-            batch_request: Batch request used to generate batch definitions.
-
-        Returns:
-            List of batch definitions.
-        """  # noqa: E501
         batch_definition_list = self._data_connector.get_batch_definition_list(
             batch_request=batch_request
         )
