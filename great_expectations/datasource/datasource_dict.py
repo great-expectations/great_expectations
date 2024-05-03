@@ -81,8 +81,7 @@ class DatasourceDict(UserDict):
                     name = config.name
                     datasources[name] = self._init_fluent_datasource(name=name, ds=config)
                 else:
-                    name = config["name"]
-                    datasources[name] = self._init_block_style_datasource(name=name, config=config)
+                    raise Exception("uh oh")  # noqa: TRY004, TRY002, TRY003
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
@@ -150,7 +149,7 @@ class DatasourceDict(UserDict):
 
         if isinstance(ds, FluentDatasource):
             return self._init_fluent_datasource(name=name, ds=ds)
-        return self._init_block_style_datasource(name=name, config=ds)
+        raise Exception("uh oh")  # noqa: TRY002, TRY003
 
     def _init_fluent_datasource(self, name: str, ds: FluentDatasource) -> FluentDatasource:
         ds._data_context = self._context
@@ -170,12 +169,6 @@ class DatasourceDict(UserDict):
                         # time when DataframeAsset.build_batch_request(dataframe=df) is called
                         self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
-
-    # To be removed once block-style is fully removed (deprecated as of v0.17.2)
-    def _init_block_style_datasource(self, name: str, config: DatasourceConfig) -> BaseDatasource:
-        return self._context._init_block_style_datasource(
-            datasource_name=name, datasource_config=config
-        )
 
 
 class CacheableDatasourceDict(DatasourceDict):
