@@ -16,9 +16,22 @@ deployment_patterns = [
     ),
 ]
 
-partition_data = []
+partition_data = [
+    IntegrationTestFixture(
+        name="partition_on_datetime_s3",
+        user_flow_script="tests/integration/test_definitions/s3/partition_on_datetime.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+    IntegrationTestFixture(
+        name="select_batch_by_path",
+        user_flow_script="tests/integration/test_definitions/s3/select_batch_by_path.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+]
 
-sample_data = []
+sample_data: List[IntegrationTestFixture] = []
 
 fluent_datasources = [
     IntegrationTestFixture(

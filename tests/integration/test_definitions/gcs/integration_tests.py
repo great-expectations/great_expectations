@@ -32,9 +32,22 @@ how_to_configure_metadata_store = [
     # ),
 ]
 
-partition_data = []
+partition_data = [
+    IntegrationTestFixture(
+        name="partition_data_on_datetime_gcs",
+        user_flow_script="tests/integration/test_definitions/gcs/partitioned_on_datetime.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
+    IntegrationTestFixture(
+        name="gcs_by_path",
+        user_flow_script="tests/integration/test_definitions/gcs/select_batch_by_path.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
+]
 
-sample_data = []
+sample_data: List[IntegrationTestFixture] = []
 
 deployment_patterns = [
     IntegrationTestFixture(
