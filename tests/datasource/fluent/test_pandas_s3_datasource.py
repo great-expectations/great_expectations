@@ -13,14 +13,14 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility import aws, pydantic
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import PandasS3Datasource
+from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
+    _FilePathDataAsset,
+)
 from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset
 from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:

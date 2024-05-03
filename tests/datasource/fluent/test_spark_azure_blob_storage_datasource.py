@@ -12,12 +12,12 @@ import great_expectations.execution_engine.sparkdf_execution_engine
 from great_expectations.compatibility import azure
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import SparkAzureBlobStorageDatasource
+from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
+    _FilePathDataAsset,
+)
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.data_connector import (
     AzureBlobStorageDataConnector,
-)
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.spark_azure_blob_storage_datasource import (

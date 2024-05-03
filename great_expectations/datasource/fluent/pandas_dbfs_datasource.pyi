@@ -12,9 +12,17 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
     CSVAsset,
     ExcelAsset,
+    FeatherAsset,
+    HDFAsset,
+    HTMLAsset,
     JSONAsset,
     ORCAsset,
-    ParquetAsset, FeatherAsset, HDFAsset, HTMLAsset, PickleAsset, SASAsset, SPSSAsset, StataAsset, XMLAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,

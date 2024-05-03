@@ -7,10 +7,10 @@ from great_expectations.datasource.fluent import BatchMetadata, _SparkFilePathDa
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
 )
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition,
 )

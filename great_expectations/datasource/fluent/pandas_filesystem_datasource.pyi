@@ -15,16 +15,24 @@ from typing import (
 from great_expectations._docs_decorators import public_api as public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import Sorter, _PandasFilePathDatasource
-from great_expectations.datasource.fluent.data_connector import (
-    FilesystemDataConnector as FilesystemDataConnector,
-)
 from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
     CSVAsset,
     ExcelAsset,
+    FeatherAsset,
     FWFAsset,
+    HDFAsset,
+    HTMLAsset,
     JSONAsset,
     ORCAsset,
-    ParquetAsset, FeatherAsset, HDFAsset, HTMLAsset, PickleAsset, SASAsset, SPSSAsset, StataAsset, XMLAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
+)
+from great_expectations.datasource.fluent.data_connector import (
+    FilesystemDataConnector as FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,

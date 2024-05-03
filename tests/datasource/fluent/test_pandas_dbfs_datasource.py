@@ -12,14 +12,14 @@ import pytest
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
+from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
+    _FilePathDataAsset,
+)
 from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset
 from great_expectations.datasource.fluent.data_connector import (
     DBFSDataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from tests.test_utils import create_files_in_directory
 

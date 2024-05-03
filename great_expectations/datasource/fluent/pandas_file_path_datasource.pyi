@@ -7,7 +7,6 @@ from great_expectations.datasource.fluent.pandas_datasource import _PandasDataso
 
 logger: Logger
 
-
 class _PandasFilePathDatasource(_PandasDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]]
     assets: List[RegexDataAsset]

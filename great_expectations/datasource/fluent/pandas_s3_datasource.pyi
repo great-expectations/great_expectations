@@ -20,19 +20,27 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import S3Url as S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+    CSVAsset,
+    ExcelAsset,
+    FeatherAsset,
+    FWFAsset,
+    HDFAsset,
+    HTMLAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
+)
 from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector as FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector as S3DataConnector,
-)
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
-    CSVAsset,
-    ExcelAsset,
-    FWFAsset,
-    JSONAsset,
-    ORCAsset,
-    ParquetAsset, FeatherAsset, HDFAsset, HTMLAsset, PickleAsset, SASAsset, SPSSAsset, StataAsset, XMLAsset,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,

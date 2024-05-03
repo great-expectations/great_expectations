@@ -18,19 +18,27 @@ from great_expectations.compatibility import google
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import GCSUrl as GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+    CSVAsset,
+    ExcelAsset,
+    FeatherAsset,
+    FWFAsset,
+    HDFAsset,
+    HTMLAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
+)
 from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector as FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector as GoogleCloudStorageDataConnector,
-)
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
-    CSVAsset,
-    ExcelAsset,
-    FWFAsset,
-    JSONAsset,
-    ORCAsset,
-    ParquetAsset, FeatherAsset, HDFAsset, HTMLAsset, PickleAsset, SASAsset, SPSSAsset, StataAsset, XMLAsset,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,

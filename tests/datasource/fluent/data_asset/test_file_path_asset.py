@@ -13,6 +13,9 @@ from great_expectations.core.partitioners import (
     PartitionerYearly,
 )
 from great_expectations.datasource.fluent import Datasource
+from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
+    _FilePathDataAsset,
+)
 from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
     CSVAsset as PandasCSVAsset,
 )
@@ -25,6 +28,12 @@ from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
 )
 from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
     ParquetAsset as PandasParquetAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.regex_asset import (
+    AmbiguousPathError,
+    PathNotFoundError,
+    RegexMissingRequiredGroupsError,
+    RegexUnknownGroupsError,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
     CSVAsset as SparkCSVAsset,
@@ -59,15 +68,6 @@ from great_expectations.datasource.fluent.data_asset.path.spark.text_asset impor
     TextAsset,
 )
 from great_expectations.datasource.fluent.data_connector import FilePathDataConnector
-from great_expectations.datasource.fluent.file_path_asset_base import (
-    AmbiguousPathError,
-    PathNotFoundError,
-    RegexMissingRequiredGroupsError,
-    RegexUnknownGroupsError,
-)
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )
