@@ -241,7 +241,9 @@ class SnowflakeDatasource(SQLDatasource):
                     )
                 else:
                     self._engine = self._build_engine_with_connect_args(
-                        application=snowflake_partner_application, **connection_string
+                        application=snowflake_partner_application,
+                        **connection_string,
+                        **kwargs,
                     )
 
             except Exception as e:
