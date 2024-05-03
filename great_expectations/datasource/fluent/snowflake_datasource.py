@@ -126,6 +126,12 @@ class SnowflakeDatasource(SQLDatasource):
         for field_name in tuple(values.keys()):
             if field_name in connection_detail_fields:
                 connection_details[field_name] = values.pop(field_name)
+
+        if values.get("connection_string") and connection_details:
+            raise ValueError(
+                "Cannot provide both a connection string or a combination of account, user, and password."
+            )
+
         if connection_details:
             values["connection_string"] = connection_details
         return values
