@@ -16,7 +16,7 @@ from great_expectations.datasource.fluent import PandasS3Datasource
 from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset
+from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import CSVAsset
 from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )

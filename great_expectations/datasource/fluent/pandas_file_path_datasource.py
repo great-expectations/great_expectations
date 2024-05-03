@@ -7,7 +7,7 @@ from typing import (
     Type,
 )
 
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     _FILE_PATH_ASSET_MODELS,
 )
 from great_expectations.datasource.fluent.data_asset.path.regex_asset import (

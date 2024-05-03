@@ -18,7 +18,7 @@ from great_expectations.compatibility import google
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import GCSUrl as GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     CSVAsset,
     ExcelAsset,
     FeatherAsset,

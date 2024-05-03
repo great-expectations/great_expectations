@@ -20,7 +20,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import S3Url as S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     CSVAsset,
     ExcelAsset,
     FeatherAsset,

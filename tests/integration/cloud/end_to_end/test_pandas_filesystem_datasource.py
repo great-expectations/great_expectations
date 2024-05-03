@@ -20,7 +20,7 @@ if TYPE_CHECKING:
         DataAsset,
         PandasFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+    from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
         CSVAsset,
         ParquetAsset,
     )

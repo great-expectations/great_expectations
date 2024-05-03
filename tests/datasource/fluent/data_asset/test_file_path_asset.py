@@ -16,17 +16,20 @@ from great_expectations.datasource.fluent import Datasource
 from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     CSVAsset as PandasCSVAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import ExcelAsset, FWFAsset
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
+    ExcelAsset,
+    FWFAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     JSONAsset as PandasJSONAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     ORCAsset as PandasORCAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.dynamic_assets import (
     ParquetAsset as PandasParquetAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.regex_asset import (
