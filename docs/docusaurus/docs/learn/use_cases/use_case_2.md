@@ -1,21 +1,154 @@
 ---
-sidebar_label: 'Use case 2'
-title: 'Use case 2'
-description: Use case 2.
+sidebar_label: 'Validate column values against a column in another table'
+title: 'Validate column values against a column in another table'
+description: Validate column values against a column in another table.
 ---
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ac massa sed ligula vulputate luctus in et augue. Cras convallis odio quis ex tincidunt ornare. Sed et malesuada lacus, non commodo magna. Integer condimentum tortor nunc, quis elementum ante ultricies at. Mauris hendrerit imperdiet pellentesque. Donec varius ornare scelerisque. Quisque nec lacinia tellus, sed tempus velit. Donec id eros felis. Nulla nec viverra est.
+When validating data schema, it is common use case to vet incoming values against a collection values in a reference table. For example:
+* Incoming orders must be checked for a valid currency.
+* An address must be checked for a valid country.
+* A categorical value must be checked against a list of values that define that category.
 
-## Petere
+Rather than specify valid values within a hardcoded list that must be updated by developers every time it changes, it's often much more maintainable to store values in a table that can be easily updated without requiring a software change. GX provides an Expectation, `expect_column_values_to_be_present_in_other_table` that enables you to do just that.
 
-Ut non metus in quam ultricies malesuada at lacinia felis. Nulla semper mauris ac sapien finibus, sit amet rutrum felis rhoncus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nam erat arcu, maximus non orci at, vulputate fermentum nulla. Nam quis congue eros. Etiam sagittis velit sed condimentum congue. Aliquam non dolor pellentesque nunc pharetra mollis eu id felis. Sed scelerisque a nibh quis accumsan. In hac habitasse platea dictumst. Sed egestas est nulla, tempor ultrices urna dignissim ut.
+## Sample data
 
-Sed sed aliquam metus, a consequat diam. Etiam semper sapien orci, eu dictum lorem accumsan id. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris rhoncus, nulla nec finibus ultrices, odio urna laoreet magna, non mattis sem metus et dui. Fusce sit amet dictum nunc. Nullam et viverra lorem, non tristique ipsum. Cras mollis vestibulum ligula et maximus. Phasellus at urna posuere, molestie tortor id, suscipit lacus. Aliquam non interdum tortor. Ut imperdiet, metus nec vestibulum accumsan, eros arcu placerat nulla, ac elementum erat augue sagittis arcu. Pellentesque commodo metus diam. Ut sollicitudin est nunc, et viverra nunc scelerisque in. Donec consectetur ligula sem, vestibulum laoreet ligula volutpat eu.
+In this example, we'll demonstrate how to validate that a column in a source table only contains values that are present in the column of another table. The two tables we'll use in this example are:
 
-## Petere
+* `customer`: a customer table containing the customer id, name, and country
 
-Proin ut sodales mi, pulvinar feugiat dui. Nulla viverra nisl consectetur dolor accumsan efficitur. Sed mollis velit sapien, quis pellentesque dolor auctor eget. Nunc sagittis neque neque, eget tincidunt lacus viverra at. Fusce nisi massa, luctus at lorem at, ultrices aliquam libero. Donec pretium a libero vel condimentum. Morbi at vehicula nibh. Nullam malesuada sodales metus, at lacinia dolor laoreet nec. Nullam sit amet odio eget tortor gravida dictum. Nam venenatis odio ac ex dignissim, eu pretium justo molestie. Curabitur vestibulum augue id tortor blandit maximus. Maecenas in tellus id mauris ornare convallis. Sed eu iaculis mi. In faucibus sem id neque tempus tincidunt. Phasellus malesuada, elit quis euismod condimentum, ante augue tempor nisi, a facilisis dolor lectus eget libero. Nulla cursus, magna in tincidunt rutrum, erat odio condimentum lorem, eu imperdiet mi magna et turpis.
+| `country_code` | `country_name` |
+| :-- | :-- |
+| US | United States |
+| GB | United Kingdom |
+| JP | Japan |
+| IS | Iceland |
+| MV | Maldives |
+| BZ | Belize |
 
-### Petere
+* `country`: a reference table containing country code and country name
 
-Fusce eget aliquam eros. Fusce imperdiet pretium quam eget rutrum. Curabitur est mauris, tristique in lacinia sed, tincidunt et massa. Maecenas vestibulum nec tortor nec tincidunt. Sed sed nisl nunc. Etiam sodales erat at maximus lobortis. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Integer vel quam consequat augue dapibus gravida convallis quis neque. Suspendisse tincidunt, augue nec ornare sodales, ipsum massa facilisis magna, in venenatis urna libero sed neque. Nullam aliquam malesuada massa, vitae pulvinar ante aliquet et. Cras molestie lacus ut dolor commodo, bibendum cursus lectus eleifend. Etiam nec nulla finibus, feugiat ipsum in, tempus orci.
+| `customer_id` | `customer_name` | `customer_country` |
+| :-- | :-- | :-- |
+| 1 | Alice | US |
+| 2 | Bob | GB |
+| 3 | Charlie | JP |
+| 4 | Dave | IS |
+| 5 | Eddie | MV |
+| 6 | Fred | BZ |
+| 7 | Greg | BZ |
+| 8 | Hilary | AR |
+
+## Run the Expectation
+
+First, install `great_expectations_experimental` to gain access to contrib Expectations.
+
+```
+pip install great-expectations-experimental
+```
+
+To use the `expect_column_values_to_be_present_in_other_table` Expectation, import it directly from `great_expectations_experimental` in addition the standard `great_expectations` import.
+```
+import great_expectations as gx
+
+from great_expectations_experimental.expectations.expect_column_values_to_be_present_in_other_table import ExpectColumnValuesToBePresentInOtherTable
+```
+
+Next, create the GX context, Data Source, Data Asset, Batch Request, and Validator. Note that we have used a Snowflake Data Source, here you can [adjust the Data Source type based on your data](/docs/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data).
+```
+context = gx.get_context()
+
+data_source = context.sources.add_snowflake(
+    name="<data-source-name>",
+    account="<snowflake-account-identifier>",
+    user="<snowflake-account-username>",
+    password="<snowflake-account-password>",
+    database="<snowflake-account-database>",
+    schema="<snowflake-account-schema>",
+    warehouse="<snowflake-account-warehouse>",
+    role="<snowflake-account-role>",
+)
+
+data_asset = data_source.add_table_asset(
+    name="customers",
+    table_name="customer"
+)
+
+context.add_or_update_expectation_suite(
+    expectation_suite_name="customer_expectations"
+)
+
+batch_request = data_asset.build_batch_request()
+
+validator = context.get_validator(
+    batch_request=batch_request,
+    expectation_suite_name="customer_expectations",
+)
+```
+
+To validate that `customer.customer_country` contains only values present in `country.country_code`, run `expect_column_values_to_be_present_in_other_table` using the Validator object.
+```
+validator.expect_column_values_to_be_present_in_other_table(
+    foreign_key_column="customer_country",
+    foreign_table="country",
+    foreign_table_key_column="country_code",
+)
+```
+
+## Result
+
+Running this Expectation against our sample data results in a failed Expectation; the country code of customer 8 (Hilary) is not contained in the `country.country_code` column.
+
+```
+{
+  "success": false,
+  "result": {
+    "observed_value": "1 missing value.",
+    "unexpected_list": [
+      "AR"
+    ],
+    "unexpected_index_column_names": [
+      "country"
+    ],
+    "unexpected_index_list": [
+      {
+        "country": "AR"
+      }
+    ],
+    "partial_unexpected_counts": [
+      {
+        "value": "AR",
+        "count": 1
+      }
+    ]
+  },
+  "meta": {},
+  "exception_info": {
+    "raised_exception": false,
+    "exception_traceback": null,
+    "exception_message": null
+  }
+}
+```
+
+If Hilary is removed from the customer table, then `expect_column_values_to_be_present_in_other_table` passes with the following output.
+```
+{
+  "success": true,
+  "result": {
+    "observed_value": "0 missing values.",
+    "unexpected_list": [],
+    "unexpected_index_column_names": [
+      "country"
+    ],
+    "unexpected_index_list": [],
+    "partial_unexpected_counts": []
+  },
+  "meta": {},
+  "exception_info": {
+    "raised_exception": false,
+    "exception_traceback": null,
+    "exception_message": null
+  }
+}
+```
