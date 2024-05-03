@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, Dict, Generic, List, Optional, Pattern
+from typing import TYPE_CHECKING, Generic, List, Optional, Pattern
 
+from great_expectations import exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -26,7 +27,8 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.core.batch_definition import BatchDefinition
-    from great_expectations.datasource.fluent import BatchRequest
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent import BatchParameters, BatchRequest
 
 
 class RegexMissingRequiredGroupsError(ValueError):
@@ -72,9 +74,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(default="batch_request_param_")
     _regex_parser: RegExParser = pydantic.PrivateAttr()
 
-    _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
-    _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
-    _all_group_names: List[str] = pydantic.PrivateAttr()
+    _group_names: List[str] = pydantic.PrivateAttr()
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -84,13 +84,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
             unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
         )
 
-        self._all_group_name_to_group_index_mapping = (
-            self._regex_parser.get_all_group_name_to_group_index_mapping()
-        )
-        self._all_group_index_to_group_name_mapping = (
-            self._regex_parser.get_all_group_index_to_group_name_mapping()
-        )
-        self._all_group_names = self._regex_parser.group_names()
+        self._group_names = self._regex_parser.group_names()
 
     @public_api
     def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
@@ -212,7 +206,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self,
         partitioner: Optional[RegexPartitioner] = None,
     ) -> tuple[str, ...]:
-        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
+        option_keys: tuple[str, ...] = tuple(self._group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
         if partitioner:
             option_keys += tuple(partitioner.param_names)
         return option_keys
@@ -222,3 +216,57 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self,
     ) -> None:
         return None
+
+    @override
+    def build_batch_request(
+        self,
+        options: Optional[BatchParameters] = None,
+        batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[RegexPartitioner] = None,
+    ) -> BatchRequest:
+        """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: A dict that can be used to filter the batch groups returned from the asset.
+                The dict structure depends on the asset type. The available keys for dict can be obtained by
+                calling get_batch_parameters_keys(...).
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
+            partitioner: A Partitioner used to narrow the data returned from the asset.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+
+        Note:
+            Option "batch_slice" is supported for all "DataAsset" extensions of this class identically.  This mechanism
+            applies to every "Datasource" type and any "ExecutionEngine" that is capable of loading data from files on
+            local and/or cloud/networked filesystems (currently, Pandas and Spark backends work with files).
+        """  # noqa: E501
+        if options:
+            for option, value in options.items():
+                if option in self._group_names and value and not isinstance(value, str):
+                    raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
+                        f"All batching_regex matching options must be strings. The value of '{option}' is "  # noqa: E501
+                        f"not a string: {value}"
+                    )
+
+        if options is not None and not self._batch_parameters_are_valid(
+            options=options,
+            partitioner=partitioner,
+        ):
+            allowed_keys = set(self.get_batch_parameters_keys(partitioner=partitioner))
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
+                "Batch parameters should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+            )
+
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options=options or {},
+            batch_slice=batch_slice,
+            partitioner=partitioner,
+        )

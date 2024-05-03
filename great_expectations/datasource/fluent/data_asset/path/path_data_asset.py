@@ -19,7 +19,6 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_definition import PartitionerT
 from great_expectations.datasource.fluent.batch_request import (
-    BatchParameters,
     BatchRequest,
 )
 from great_expectations.datasource.fluent.data_connector import (
@@ -38,7 +37,6 @@ if TYPE_CHECKING:
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
-        BatchSlice,
     )
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
@@ -90,64 +88,6 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
         partitioner: Optional[PartitionerT] = None,
     ) -> tuple[str, ...]:
         raise NotImplementedError
-
-    @override
-    def build_batch_request(
-        self,
-        options: Optional[BatchParameters] = None,
-        batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[PartitionerT] = None,
-    ) -> BatchRequest:
-        """A batch request that can be used to obtain batches for this DataAsset.
-
-        Args:
-            options: A dict that can be used to filter the batch groups returned from the asset.
-                The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling get_batch_parameters_keys(...).
-            batch_slice: A python slice that can be used to limit the sorted batches by index.
-                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
-            partitioner: A Partitioner used to narrow the data returned from the asset.
-
-        Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-
-        Note:
-            Option "batch_slice" is supported for all "DataAsset" extensions of this class identically.  This mechanism
-            applies to every "Datasource" type and any "ExecutionEngine" that is capable of loading data from files on
-            local and/or cloud/networked filesystems (currently, Pandas and Spark backends work with files).
-        """  # noqa: E501
-        if options:
-            for option, value in options.items():
-                if (
-                    option in self._all_group_name_to_group_index_mapping
-                    and value
-                    and not isinstance(value, str)
-                ):
-                    raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
-                        f"All batching_regex matching options must be strings. The value of '{option}' is "  # noqa: E501
-                        f"not a string: {value}"
-                    )
-
-        if options is not None and not self._batch_parameters_are_valid(
-            options=options,
-            partitioner=partitioner,
-        ):
-            allowed_keys = set(self.get_batch_parameters_keys(partitioner=partitioner))
-            actual_keys = set(options.keys())
-            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
-                "Batch parameters should only contain keys from the following set:\n"
-                f"{allowed_keys}\nbut your specified keys contain\n"
-                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
-            )
-
-        return BatchRequest(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
-            options=options or {},
-            batch_slice=batch_slice,
-            partitioner=partitioner,
-        )
 
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:

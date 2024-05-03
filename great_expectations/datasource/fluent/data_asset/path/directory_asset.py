@@ -4,6 +4,7 @@ import pathlib
 from abc import ABC
 from typing import TYPE_CHECKING, Generic, Optional
 
+from great_expectations import exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
@@ -19,7 +20,8 @@ from great_expectations.datasource.fluent.interfaces import DatasourceT
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch_definition import BatchDefinition
-    from great_expectations.datasource.fluent import BatchRequest
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent import BatchParameters, BatchRequest
 
 
 class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
@@ -31,14 +33,14 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[LegacyBatchDefinition]:
-        """Generate a batch definition list from a given batch request, handling a partitioner config if present.
+        """Generate a batch definition list from a given batch request.
 
         Args:
             batch_request: Batch request used to generate batch definitions.
 
         Returns:
-            List of batch definitions, in the case of a DirectoryDataAsset the list contains a single item.
-        """  # noqa: E501
+            List of a single batch definition.
+        """
         if batch_request.partitioner:
             # Currently non-sql asset partitioners do not introspect the datasource for available
             # batches and only return a single batch based on specified batch_identifiers.
@@ -86,3 +88,30 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
         self,
     ) -> PathStr:
         return self.data_directory
+
+    @override
+    def build_batch_request(
+        self,
+        options: Optional[BatchParameters] = None,
+        batch_slice: Optional[BatchSlice] = None,
+        partitioner: Optional[RegexPartitioner] = None,
+    ) -> BatchRequest:
+        if options is not None and not self._batch_parameters_are_valid(
+            options=options,
+            partitioner=partitioner,
+        ):
+            allowed_keys = set(self.get_batch_parameters_keys(partitioner=partitioner))
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
+                "Batch parameters should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+            )
+
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options=options or {},
+            batch_slice=batch_slice,
+            partitioner=partitioner,
+        )
