@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+from abc import ABC
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -46,7 +47,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT]):
+class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
