@@ -26,7 +26,7 @@
             "default": [],
             "type": "array",
             "items": {
-                "$ref": "#/definitions/_RegexDataAssetBase"
+                "$ref": "#/definitions/RegexDataAsset"
             }
         },
         "azure_options": {
@@ -206,8 +206,8 @@
                 "name"
             ]
         },
-        "_RegexDataAssetBase": {
-            "title": "_RegexDataAssetBase",
+        "RegexDataAsset": {
+            "title": "RegexDataAsset",
             "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
