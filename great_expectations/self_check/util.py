@@ -94,7 +94,6 @@ if TYPE_CHECKING:
         ExpectationExecutionEngineDiagnostics,
     )
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.datasource.fluent.interfaces import Datasource
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -914,35 +913,35 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if context is None:
         context = build_in_memory_runtime_context()
 
-    datasource_name = "my_test_datasource"
-    datasource: Datasource
-    if sa_engine_name == "postgres":
-        assert connection_string
-        datasource = context.data_sources.add_postgres(
-            name=datasource_name, connection_string=connection_string
-        )
-    elif sa_engine_name == "snowflake":
-        datasource = context.data_sources.add_snowflake(
-            name=datasource_name, connection_string=connection_string
-        )
-    elif sa_engine_name == "sqlite":
-        assert connection_string
-        datasource = context.data_sources.add_sqlite(
-            name=datasource_name, connection_string=connection_string
-        )
-    else:
-        assert connection_string
-        datasource = context.data_sources.add_sql(
-            name=datasource_name, connection_string=connection_string
-        )
-    print(datasource)
+    # datasource_name = "my_test_datasource"
+    # datasource: Datasource
+    # if sa_engine_name == "postgres":
+    #     assert connection_string
+    #     datasource = context.data_sources.add_postgres(
+    #         name=datasource_name, connection_string=connection_string
+    #     )
+    # elif sa_engine_name == "snowflake":
+    #     datasource = context.data_sources.add_snowflake(
+    #         name=datasource_name, connection_string=connection_string
+    #     )
+    # elif sa_engine_name == "sqlite":
+    #     assert connection_string
+    #     datasource = context.data_sources.add_sqlite(
+    #         name=datasource_name, connection_string=connection_string
+    #     )
+    # else:
+    #     assert connection_string
+    #     datasource = context.data_sources.add_sql(
+    #         name=datasource_name, connection_string=connection_string
+    #     )
+    # print(datasource)
     # try:
     #     datasource.add_table_asset("my_asset", table_name=table_name)
     # except TestConnectionError:
     #     ...
 
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine
+    # context.datasources["my_test_datasource"]._execution_engine = execution_engine
     my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
         name="my_sql_data_connector",
         datasource_name="my_test_datasource",
