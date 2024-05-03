@@ -118,7 +118,7 @@ core_tests = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="delete_an_expectation_suite.py",
+        name="delete_an_expectation_suite",
         user_flow_script="docs/docusaurus/docs/core/create_expectations/expectation_suites/_examples/delete_an_expectation_suite.py",
         backend_dependencies=[],
     ),
