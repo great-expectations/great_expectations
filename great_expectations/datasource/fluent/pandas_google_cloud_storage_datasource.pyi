@@ -24,6 +24,14 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector as GoogleCloudStorageDataConnector,
 )
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+    CSVAsset,
+    ExcelAsset,
+    FWFAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+)
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
     CSVEngine,
@@ -42,15 +50,9 @@ from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError as PandasDatasourceError,
 )
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset,
-    ExcelAsset,
     FeatherAsset,
-    FWFAsset,
     HDFAsset,
     HTMLAsset,
-    JSONAsset,
-    ORCAsset,
-    ParquetAsset,
     PickleAsset,
     SASAsset,
     SPSSAsset,

@@ -9,6 +9,13 @@ from great_expectations.datasource.fluent import PandasFilesystemDatasource, Sor
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     DBFSDataConnector as DBFSDataConnector,
 )
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+    CSVAsset,
+    ExcelAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+)
 from great_expectations.datasource.fluent.dynamic_pandas import (
     CompressionOptions,
     CSVEngine,
@@ -24,14 +31,9 @@ from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
 )
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset,
-    ExcelAsset,
     FeatherAsset,
     HDFAsset,
     HTMLAsset,
-    JSONAsset,
-    ORCAsset,
-    ParquetAsset,
     PickleAsset,
     SASAsset,
     SPSSAsset,

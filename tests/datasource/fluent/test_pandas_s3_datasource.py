@@ -16,14 +16,12 @@ from great_expectations.datasource.fluent import PandasS3Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import CSVAsset
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset,
-)
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient

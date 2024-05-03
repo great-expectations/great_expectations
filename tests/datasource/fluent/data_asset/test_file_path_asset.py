@@ -14,6 +14,19 @@ from great_expectations.core.partitioners import (
 )
 from great_expectations.datasource.fluent import Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import FilePathDataConnector
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+    CSVAsset as PandasCSVAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import ExcelAsset, FWFAsset
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+    JSONAsset as PandasJSONAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+    ORCAsset as PandasORCAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.pandas.pandas import (
+    ParquetAsset as PandasParquetAsset,
+)
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
     CSVAsset as SparkCSVAsset,
 )
@@ -54,22 +67,6 @@ from great_expectations.datasource.fluent.file_path_asset_base import (
 )
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset as PandasCSVAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    ExcelAsset,
-    FWFAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    JSONAsset as PandasJSONAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    ORCAsset as PandasORCAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    ParquetAsset as PandasParquetAsset,
 )
 from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
