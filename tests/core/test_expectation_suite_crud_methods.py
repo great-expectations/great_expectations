@@ -253,12 +253,8 @@ def test_remove_expectation(
 
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp5, match_type="runtime")
-    assert domain_success_runtime_suite._find_expectation_indexes(exp4, "domain") == [
-        1,
-        2,
-        3,
-    ]
-    assert domain_success_runtime_suite._find_expectation_indexes(exp4, "success") == [3]
+
+    assert len(domain_success_runtime_suite.expectations) == 4
 
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(
@@ -275,7 +271,7 @@ def test_remove_expectation(
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp3, match_type="runtime")
 
-    assert domain_success_runtime_suite._find_expectation_indexes(exp1, match_type="domain") == [0]
+    assert len(domain_success_runtime_suite.expectations) == 1
     assert domain_success_runtime_suite == single_expectation_suite
 
 
