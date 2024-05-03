@@ -359,7 +359,7 @@ class ExpectationSuite(SerializableDictDot):
         if expectation_configuration is None and id is None:
             raise TypeError("Must provide either expectation_configuration or id")  # noqa: TRY003
 
-        found_expectation_indexes = self.find_expectation_indexes(
+        found_expectation_indexes = self._find_expectation_indexes(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
             id=id,  # type: ignore[arg-type]
@@ -389,7 +389,7 @@ class ExpectationSuite(SerializableDictDot):
             ]
             return result
 
-    def find_expectation_indexes(
+    def _find_expectation_indexes(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
@@ -467,8 +467,8 @@ class ExpectationSuite(SerializableDictDot):
             One match if overwrite_existing = False
         """  # noqa: E501
 
-        found_expectation_indexes = self.find_expectation_indexes(
-            expectation_configuration, match_type
+        found_expectation_indexes = self._find_expectation_indexes(
+            expectation_configuration=expectation_configuration, match_type=match_type
         )
 
         if len(found_expectation_indexes) > 1:

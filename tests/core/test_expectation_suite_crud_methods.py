@@ -244,67 +244,6 @@ def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3) -> ExpectationSuite:
 
 
 @pytest.mark.filesystem
-def test_find_expectation_indexes_on_empty_suite(exp1, empty_suite):
-    assert empty_suite.find_expectation_indexes(exp1, "domain") == []
-
-
-@pytest.mark.filesystem
-def test_find_expectation_indexes(
-    exp1, exp4, domain_success_runtime_suite, single_expectation_suite
-):
-    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "domain") == [
-        1,
-        2,
-        3,
-        4,
-    ]
-    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "success") == [
-        3,
-        4,
-    ]
-
-    assert single_expectation_suite.find_expectation_indexes(exp4, "runtime") == []
-
-    with pytest.raises(InvalidExpectationConfigurationError):
-        domain_success_runtime_suite.remove_expectation("not an expectation", match_type="runtime")
-
-    with pytest.raises(ValueError):
-        domain_success_runtime_suite.remove_expectation(exp1, match_type="not a match_type")
-
-
-@pytest.mark.cloud
-def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, ge_cloud_id):
-    # All expectations in `ge_cloud_suite` have our desired id
-    res = ge_cloud_suite.find_expectation_indexes(id=ge_cloud_id)
-    assert res == [0, 1, 2]
-
-    # Wrong `id` will fail to match with any expectations
-    res = ge_cloud_suite.find_expectation_indexes(id="my_fake_id")
-    assert res == []
-
-
-@pytest.mark.cloud
-def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
-    with pytest.raises(TypeError) as err:
-        ge_cloud_suite.find_expectation_indexes(expectation_configuration=None, id=None)
-    assert str(err.value) == "Must provide either expectation_configuration or id"
-
-
-@pytest.mark.cloud
-def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suite):
-    with pytest.raises(InvalidExpectationConfigurationError) as err:
-        ge_cloud_suite.find_expectation_indexes(expectation_configuration={"foo": "bar"})
-    assert str(err.value) == "Ensure that expectation configuration is valid."
-
-
-@pytest.mark.cloud
-def test_find_expectations_without_necessary_args(ge_cloud_suite):
-    with pytest.raises(TypeError) as err:
-        ge_cloud_suite.find_expectations(expectation_configuration=None, id=None)
-    assert str(err.value) == "Must provide either expectation_configuration or id"
-
-
-@pytest.mark.filesystem
 def test_remove_expectation(
     exp1, exp2, exp3, exp4, exp5, single_expectation_suite, domain_success_runtime_suite
 ):
@@ -314,12 +253,12 @@ def test_remove_expectation(
 
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp5, match_type="runtime")
-    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "domain") == [
+    assert domain_success_runtime_suite._find_expectation_indexes(exp4, "domain") == [
         1,
         2,
         3,
     ]
-    assert domain_success_runtime_suite.find_expectation_indexes(exp4, "success") == [3]
+    assert domain_success_runtime_suite._find_expectation_indexes(exp4, "success") == [3]
 
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(
@@ -336,7 +275,7 @@ def test_remove_expectation(
     with pytest.raises(ValueError):
         domain_success_runtime_suite.remove_expectation(exp3, match_type="runtime")
 
-    assert domain_success_runtime_suite.find_expectation_indexes(exp1, match_type="domain") == [0]
+    assert domain_success_runtime_suite._find_expectation_indexes(exp1, match_type="domain") == [0]
     assert domain_success_runtime_suite == single_expectation_suite
 
 
