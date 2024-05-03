@@ -26,7 +26,7 @@
             "default": [],
             "type": "array",
             "items": {
-                "$ref": "#/definitions/RegexDataAsset"
+                "$ref": "#/definitions/FileDataAsset"
             }
         },
         "base_directory": {
@@ -202,9 +202,9 @@
                 "name"
             ]
         },
-        "RegexDataAsset": {
-            "title": "RegexDataAsset",
-            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+        "FileDataAsset": {
+            "title": "FileDataAsset",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
