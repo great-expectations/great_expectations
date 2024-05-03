@@ -337,7 +337,7 @@ def test_remove_expectation(
         domain_success_runtime_suite.remove_expectation(exp3, match_type="runtime")
 
     assert domain_success_runtime_suite.find_expectation_indexes(exp1, match_type="domain") == [0]
-    assert domain_success_runtime_suite.isEquivalentTo(single_expectation_suite)
+    assert domain_success_runtime_suite == single_expectation_suite
 
 
 @pytest.mark.filesystem
@@ -359,7 +359,7 @@ def test_add_expectation_configurations(
 ):
     expectation_configurations = [exp1, exp2, exp3, exp4, exp5]
     assert len(single_expectation_suite.expectations) == 1
-    assert not single_expectation_suite.isEquivalentTo(different_suite)
+    assert single_expectation_suite != different_suite
     result = single_expectation_suite.add_expectation_configurations(
         expectation_configurations=expectation_configurations,
         match_type="domain",
@@ -379,7 +379,14 @@ def test_add_expectation_configurations(
             overwrite_existing=False,
         )
 
-    assert single_expectation_suite.isEquivalentTo(different_suite)
+    assert len(single_expectation_suite.expectations) == len(different_suite.expectations)
+    assert all(
+        mine.isEquivalentTo(theirs)
+        for (mine, theirs) in zip(
+            single_expectation_suite.expectation_configurations,
+            different_suite.expectation_configurations,
+        )
+    )
 
 
 @pytest.mark.filesystem
@@ -392,11 +399,11 @@ def test_add_expectation(
     domain_success_runtime_suite,
 ):
     assert len(single_expectation_suite.expectations) == 1
-    assert not single_expectation_suite.isEquivalentTo(baseline_suite)
+    assert single_expectation_suite != baseline_suite
     single_expectation_suite.add_expectation_configuration(
         exp2, match_type="runtime", overwrite_existing=False
     )
-    assert single_expectation_suite.isEquivalentTo(baseline_suite)
+    assert single_expectation_suite == baseline_suite
     assert len(single_expectation_suite.expectations) == 2
 
     # Should raise if overwrite_existing=False and a matching expectation is found
@@ -405,11 +412,11 @@ def test_add_expectation(
             exp4, match_type="domain", overwrite_existing=False
         )
 
-    assert not single_expectation_suite.isEquivalentTo(different_suite)
+    assert single_expectation_suite != different_suite
     single_expectation_suite.add_expectation_configuration(
         exp4, match_type="domain", overwrite_existing=True
     )
-    assert single_expectation_suite.isEquivalentTo(different_suite)
+    assert single_expectation_suite == different_suite
     assert len(single_expectation_suite.expectations) == 2
 
     # Should raise if more than one matching expectation is found
@@ -460,19 +467,3 @@ def test_add_expectation_with_ge_cloud_id(
         44,
         55,
     ]
-
-
-@pytest.mark.filesystem
-def test_remove_all_expectations_of_type(
-    suite_with_table_and_column_expectations,
-):
-    expectation_type = "expect_column_values_to_be_in_set"
-    assert any(
-        expectation.expectation_type == expectation_type
-        for expectation in suite_with_table_and_column_expectations.expectations
-    )
-    suite_with_table_and_column_expectations.remove_all_expectations_of_type(expectation_type)
-    assert not any(
-        expectation.expectation_type == expectation_type
-        for expectation in suite_with_table_and_column_expectations.expectations
-    )
