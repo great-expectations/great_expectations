@@ -31,34 +31,34 @@
                         "$ref": "#/definitions/CSVAsset"
                     },
                     {
-                        "$ref": "#/definitions/ParquetAsset"
-                    },
-                    {
-                        "$ref": "#/definitions/ORCAsset"
-                    },
-                    {
-                        "$ref": "#/definitions/JSONAsset"
-                    },
-                    {
-                        "$ref": "#/definitions/TextAsset"
-                    },
-                    {
-                        "$ref": "#/definitions/DeltaAsset"
-                    },
-                    {
                         "$ref": "#/definitions/DirectoryCSVAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/ParquetAsset"
                     },
                     {
                         "$ref": "#/definitions/DirectoryParquetAsset"
                     },
                     {
+                        "$ref": "#/definitions/ORCAsset"
+                    },
+                    {
                         "$ref": "#/definitions/DirectoryORCAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/JSONAsset"
                     },
                     {
                         "$ref": "#/definitions/DirectoryJSONAsset"
                     },
                     {
+                        "$ref": "#/definitions/TextAsset"
+                    },
+                    {
                         "$ref": "#/definitions/DirectoryTextAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/DeltaAsset"
                     },
                     {
                         "$ref": "#/definitions/DirectoryDeltaAsset"
@@ -576,706 +576,6 @@
             ],
             "additionalProperties": false
         },
-        "ParquetAsset": {
-            "title": "ParquetAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "title": "Name",
-                    "type": "string"
-                },
-                "type": {
-                    "title": "Type",
-                    "default": "parquet",
-                    "enum": [
-                        "parquet"
-                    ],
-                    "type": "string"
-                },
-                "id": {
-                    "title": "Id",
-                    "description": "DataAsset id",
-                    "type": "string",
-                    "format": "uuid"
-                },
-                "order_by": {
-                    "title": "Order By",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Sorter"
-                    }
-                },
-                "batch_metadata": {
-                    "title": "Batch Metadata",
-                    "type": "object"
-                },
-                "batch_definitions": {
-                    "title": "Batch Definitions",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
-                    }
-                },
-                "connect_options": {
-                    "title": "Connect Options",
-                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
-                    "type": "object"
-                },
-                "pathGlobFilter": {
-                    "title": "Pathglobfilter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "recursiveFileLookup": {
-                    "title": "Recursivefilelookup",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedBefore": {
-                    "title": "Modifiedbefore",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedAfter": {
-                    "title": "Modifiedafter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "mergeSchema": {
-                    "title": "Mergeschema",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "datetimeRebaseMode": {
-                    "title": "Datetimerebasemode",
-                    "enum": [
-                        "EXCEPTION",
-                        "CORRECTED",
-                        "LEGACY"
-                    ],
-                    "type": "string"
-                },
-                "int96RebaseMode": {
-                    "title": "Int96Rebasemode",
-                    "enum": [
-                        "EXCEPTION",
-                        "CORRECTED",
-                        "LEGACY"
-                    ],
-                    "type": "string"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                }
-            },
-            "required": [
-                "name"
-            ],
-            "additionalProperties": false
-        },
-        "ORCAsset": {
-            "title": "ORCAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "title": "Name",
-                    "type": "string"
-                },
-                "type": {
-                    "title": "Type",
-                    "default": "orc",
-                    "enum": [
-                        "orc"
-                    ],
-                    "type": "string"
-                },
-                "id": {
-                    "title": "Id",
-                    "description": "DataAsset id",
-                    "type": "string",
-                    "format": "uuid"
-                },
-                "order_by": {
-                    "title": "Order By",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Sorter"
-                    }
-                },
-                "batch_metadata": {
-                    "title": "Batch Metadata",
-                    "type": "object"
-                },
-                "batch_definitions": {
-                    "title": "Batch Definitions",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
-                    }
-                },
-                "connect_options": {
-                    "title": "Connect Options",
-                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
-                    "type": "object"
-                },
-                "pathGlobFilter": {
-                    "title": "Pathglobfilter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "recursiveFileLookup": {
-                    "title": "Recursivefilelookup",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedBefore": {
-                    "title": "Modifiedbefore",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedAfter": {
-                    "title": "Modifiedafter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "mergeSchema": {
-                    "title": "Mergeschema",
-                    "default": false,
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                }
-            },
-            "required": [
-                "name"
-            ],
-            "additionalProperties": false
-        },
-        "JSONAsset": {
-            "title": "JSONAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "title": "Name",
-                    "type": "string"
-                },
-                "type": {
-                    "title": "Type",
-                    "default": "json",
-                    "enum": [
-                        "json"
-                    ],
-                    "type": "string"
-                },
-                "id": {
-                    "title": "Id",
-                    "description": "DataAsset id",
-                    "type": "string",
-                    "format": "uuid"
-                },
-                "order_by": {
-                    "title": "Order By",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Sorter"
-                    }
-                },
-                "batch_metadata": {
-                    "title": "Batch Metadata",
-                    "type": "object"
-                },
-                "batch_definitions": {
-                    "title": "Batch Definitions",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
-                    }
-                },
-                "connect_options": {
-                    "title": "Connect Options",
-                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
-                    "type": "object"
-                },
-                "pathGlobFilter": {
-                    "title": "Pathglobfilter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "recursiveFileLookup": {
-                    "title": "Recursivefilelookup",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedBefore": {
-                    "title": "Modifiedbefore",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedAfter": {
-                    "title": "Modifiedafter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "schema": {
-                    "title": "Schema",
-                    "anyOf": [
-                        {
-                            "type": "object"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "primitivesAsString": {
-                    "title": "Primitivesasstring",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "prefersDecimal": {
-                    "title": "Prefersdecimal",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "allowComments": {
-                    "title": "Allowcomments",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "allowUnquotedFieldNames": {
-                    "title": "Allowunquotedfieldnames",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "allowSingleQuotes": {
-                    "title": "Allowsinglequotes",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "allowNumericLeadingZero": {
-                    "title": "Allownumericleadingzero",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "allowBackslashEscapingAnyCharacter": {
-                    "title": "Allowbackslashescapinganycharacter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "mode": {
-                    "title": "Mode",
-                    "enum": [
-                        "PERMISSIVE",
-                        "DROPMALFORMED",
-                        "FAILFAST"
-                    ],
-                    "type": "string"
-                },
-                "columnNameOfCorruptRecord": {
-                    "title": "Columnnameofcorruptrecord",
-                    "type": "string"
-                },
-                "dateFormat": {
-                    "title": "Dateformat",
-                    "type": "string"
-                },
-                "timestampFormat": {
-                    "title": "Timestampformat",
-                    "type": "string"
-                },
-                "multiLine": {
-                    "title": "Multiline",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "allowUnquotedControlChars": {
-                    "title": "Allowunquotedcontrolchars",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "lineSep": {
-                    "title": "Linesep",
-                    "type": "string"
-                },
-                "samplingRatio": {
-                    "title": "Samplingratio",
-                    "anyOf": [
-                        {
-                            "type": "number"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "dropFieldIfAllNull": {
-                    "title": "Dropfieldifallnull",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "encoding": {
-                    "title": "Encoding",
-                    "type": "string"
-                },
-                "locale": {
-                    "title": "Locale",
-                    "type": "string"
-                },
-                "allowNonNumericNumbers": {
-                    "title": "Allownonnumericnumbers",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                }
-            },
-            "required": [
-                "name"
-            ],
-            "additionalProperties": false
-        },
-        "TextAsset": {
-            "title": "TextAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "title": "Name",
-                    "type": "string"
-                },
-                "type": {
-                    "title": "Type",
-                    "default": "text",
-                    "enum": [
-                        "text"
-                    ],
-                    "type": "string"
-                },
-                "id": {
-                    "title": "Id",
-                    "description": "DataAsset id",
-                    "type": "string",
-                    "format": "uuid"
-                },
-                "order_by": {
-                    "title": "Order By",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Sorter"
-                    }
-                },
-                "batch_metadata": {
-                    "title": "Batch Metadata",
-                    "type": "object"
-                },
-                "batch_definitions": {
-                    "title": "Batch Definitions",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
-                    }
-                },
-                "connect_options": {
-                    "title": "Connect Options",
-                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
-                    "type": "object"
-                },
-                "pathGlobFilter": {
-                    "title": "Pathglobfilter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "recursiveFileLookup": {
-                    "title": "Recursivefilelookup",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedBefore": {
-                    "title": "Modifiedbefore",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedAfter": {
-                    "title": "Modifiedafter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "wholetext": {
-                    "title": "Wholetext",
-                    "default": false,
-                    "type": "boolean"
-                },
-                "lineSep": {
-                    "title": "Linesep",
-                    "type": "string"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                }
-            },
-            "required": [
-                "name"
-            ],
-            "additionalProperties": false
-        },
-        "DeltaAsset": {
-            "title": "DeltaAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "title": "Name",
-                    "type": "string"
-                },
-                "type": {
-                    "title": "Type",
-                    "default": "delta",
-                    "enum": [
-                        "delta"
-                    ],
-                    "type": "string"
-                },
-                "id": {
-                    "title": "Id",
-                    "description": "DataAsset id",
-                    "type": "string",
-                    "format": "uuid"
-                },
-                "order_by": {
-                    "title": "Order By",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Sorter"
-                    }
-                },
-                "batch_metadata": {
-                    "title": "Batch Metadata",
-                    "type": "object"
-                },
-                "batch_definitions": {
-                    "title": "Batch Definitions",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
-                    }
-                },
-                "connect_options": {
-                    "title": "Connect Options",
-                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
-                    "type": "object"
-                },
-                "timestampAsOf": {
-                    "title": "Timestampasof",
-                    "type": "string"
-                },
-                "versionAsOf": {
-                    "title": "Versionasof",
-                    "type": "string"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                }
-            },
-            "required": [
-                "name"
-            ],
-            "additionalProperties": false
-        },
         "DirectoryCSVAsset": {
             "title": "DirectoryCSVAsset",
             "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
@@ -1575,11 +875,148 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
                 "name",
                 "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "ParquetAsset": {
+            "title": "ParquetAsset",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "parquet",
+                    "enum": [
+                        "parquet"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                    }
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mergeSchema": {
+                    "title": "Mergeschema",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "datetimeRebaseMode": {
+                    "title": "Datetimerebasemode",
+                    "enum": [
+                        "EXCEPTION",
+                        "CORRECTED",
+                        "LEGACY"
+                    ],
+                    "type": "string"
+                },
+                "int96RebaseMode": {
+                    "title": "Int96Rebasemode",
+                    "enum": [
+                        "EXCEPTION",
+                        "CORRECTED",
+                        "LEGACY"
+                    ],
+                    "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                }
+            },
+            "required": [
+                "name"
             ],
             "additionalProperties": false
         },
@@ -1706,11 +1143,131 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
                 "name",
                 "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "ORCAsset": {
+            "title": "ORCAsset",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "orc",
+                    "enum": [
+                        "orc"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                    }
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mergeSchema": {
+                    "title": "Mergeschema",
+                    "default": false,
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                }
+            },
+            "required": [
+                "name"
             ],
             "additionalProperties": false
         },
@@ -1820,11 +1377,295 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
                 "name",
                 "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "JSONAsset": {
+            "title": "JSONAsset",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "json",
+                    "enum": [
+                        "json"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                    }
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "schema": {
+                    "title": "Schema",
+                    "anyOf": [
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "primitivesAsString": {
+                    "title": "Primitivesasstring",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "prefersDecimal": {
+                    "title": "Prefersdecimal",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowComments": {
+                    "title": "Allowcomments",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowUnquotedFieldNames": {
+                    "title": "Allowunquotedfieldnames",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowSingleQuotes": {
+                    "title": "Allowsinglequotes",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowNumericLeadingZero": {
+                    "title": "Allownumericleadingzero",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowBackslashEscapingAnyCharacter": {
+                    "title": "Allowbackslashescapinganycharacter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mode": {
+                    "title": "Mode",
+                    "enum": [
+                        "PERMISSIVE",
+                        "DROPMALFORMED",
+                        "FAILFAST"
+                    ],
+                    "type": "string"
+                },
+                "columnNameOfCorruptRecord": {
+                    "title": "Columnnameofcorruptrecord",
+                    "type": "string"
+                },
+                "dateFormat": {
+                    "title": "Dateformat",
+                    "type": "string"
+                },
+                "timestampFormat": {
+                    "title": "Timestampformat",
+                    "type": "string"
+                },
+                "multiLine": {
+                    "title": "Multiline",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowUnquotedControlChars": {
+                    "title": "Allowunquotedcontrolchars",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "lineSep": {
+                    "title": "Linesep",
+                    "type": "string"
+                },
+                "samplingRatio": {
+                    "title": "Samplingratio",
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "dropFieldIfAllNull": {
+                    "title": "Dropfieldifallnull",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "encoding": {
+                    "title": "Encoding",
+                    "type": "string"
+                },
+                "locale": {
+                    "title": "Locale",
+                    "type": "string"
+                },
+                "allowNonNumericNumbers": {
+                    "title": "Allownonnumericnumbers",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                }
+            },
+            "required": [
+                "name"
             ],
             "additionalProperties": false
         },
@@ -2098,11 +1939,128 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
                 "name",
                 "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "TextAsset": {
+            "title": "TextAsset",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "text",
+                    "enum": [
+                        "text"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                    }
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "wholetext": {
+                    "title": "Wholetext",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "lineSep": {
+                    "title": "Linesep",
+                    "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                }
+            },
+            "required": [
+                "name"
             ],
             "additionalProperties": false
         },
@@ -2209,11 +2167,83 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
                 "name",
                 "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "DeltaAsset": {
+            "title": "DeltaAsset",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "delta",
+                    "enum": [
+                        "delta"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                    }
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "timestampAsOf": {
+                    "title": "Timestampasof",
+                    "type": "string"
+                },
+                "versionAsOf": {
+                    "title": "Versionasof",
+                    "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                }
+            },
+            "required": [
+                "name"
             ],
             "additionalProperties": false
         },
@@ -2275,6 +2305,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
