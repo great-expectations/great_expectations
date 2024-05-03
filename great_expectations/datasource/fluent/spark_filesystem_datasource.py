@@ -73,7 +73,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             raise TypeError(  # noqa: TRY003
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
-        if data_asset.get_whole_directory_path_override() is None:
+        if isinstance(data_asset, SPARK_FILE_ASSET_UNION):
             self._build_file_data_connector(data_asset=data_asset, glob_directive=glob_directive)
         else:
             self._build_directory_data_connector(

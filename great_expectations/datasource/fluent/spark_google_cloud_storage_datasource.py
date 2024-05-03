@@ -21,8 +21,6 @@ from great_expectations.datasource.fluent.spark_datasource import SparkDatasourc
 if TYPE_CHECKING:
     from great_expectations.compatibility.google import Client
     from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
-        SPARK_DIRECTORY_ASSET_UNION,
-        SPARK_FILE_ASSET_UNION,
         SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
@@ -143,23 +141,6 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             raise TypeError(  # noqa: TRY003
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
-
-        if data_asset.get_whole_directory_path_override() is None:
-            self._build_file_data_connector(
-                data_asset=data_asset,
-                gcs_prefix=gcs_prefix,
-                gcs_delimiter=gcs_delimiter,
-                gcs_max_results=gcs_max_results,
-                gcs_recursive_file_discovery=gcs_recursive_file_discovery,
-            )
-        else:
-            self._build_directory_data_connector(
-                data_asset=data_asset,
-                gcs_prefix=gcs_prefix,
-                gcs_delimiter=gcs_delimiter,
-                gcs_max_results=gcs_max_results,
-                gcs_recursive_file_discovery=gcs_recursive_file_discovery,
-            )
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
             data_asset_name=data_asset.name,
@@ -183,45 +164,4 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                 delimiter=gcs_delimiter,
                 recursive_file_discovery=gcs_recursive_file_discovery,
             )
-        )
-
-    def _build_file_data_connector(  # noqa: PLR0913
-        self,
-        data_asset: SPARK_FILE_ASSET_UNION,
-        gcs_prefix: str,
-        gcs_delimiter: str,
-        gcs_max_results: int,
-        gcs_recursive_file_discovery: bool,
-    ) -> None:
-        data_asset._data_connector = self.data_connector_type.build_data_connector(
-            datasource_name=self.name,
-            data_asset_name=data_asset.name,
-            gcs_client=self._get_gcs_client(),
-            batching_regex=data_asset.batching_regex,
-            bucket_or_name=self.bucket_or_name,
-            prefix=gcs_prefix,
-            delimiter=gcs_delimiter,
-            max_results=gcs_max_results,
-            recursive_file_discovery=gcs_recursive_file_discovery,
-            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
-        )
-
-    def _build_directory_data_connector(  # noqa: PLR0913
-        self,
-        data_asset: SPARK_DIRECTORY_ASSET_UNION,
-        gcs_prefix: str,
-        gcs_delimiter: str,
-        gcs_max_results: int,
-        gcs_recursive_file_discovery: bool,
-    ) -> None:
-        data_asset._data_connector = self.data_connector_type.build_data_connector(
-            datasource_name=self.name,
-            data_asset_name=data_asset.name,
-            gcs_client=self._get_gcs_client(),
-            bucket_or_name=self.bucket_or_name,
-            prefix=gcs_prefix,
-            delimiter=gcs_delimiter,
-            max_results=gcs_max_results,
-            recursive_file_discovery=gcs_recursive_file_discovery,
-            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
