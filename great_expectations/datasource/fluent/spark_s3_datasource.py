@@ -22,8 +22,6 @@ if TYPE_CHECKING:
     from botocore.client import BaseClient
 
     from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
-        SPARK_DIRECTORY_ASSET_UNION,
-        SPARK_FILE_ASSET_UNION,
         SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
@@ -124,23 +122,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
 
-        if isinstance(data_asset, SPARK_FILE_ASSET_UNION):
-            self._build_file_data_connector(
-                data_asset=data_asset,
-                s3_prefix=s3_prefix,
-                s3_delimiter=s3_delimiter,
-                s3_max_keys=s3_max_keys,
-                s3_recursive_file_discovery=s3_recursive_file_discovery,
-            )
-        else:
-            self._build_directory_data_connector(
-                data_asset=data_asset,
-                s3_prefix=s3_prefix,
-                s3_delimiter=s3_delimiter,
-                s3_max_keys=s3_max_keys,
-                s3_recursive_file_discovery=s3_recursive_file_discovery,
-            )
-
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
             data_asset_name=data_asset.name,
@@ -164,45 +145,4 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 delimiter=s3_delimiter,
                 recursive_file_discovery=s3_recursive_file_discovery,
             )
-        )
-
-    def _build_file_data_connector(  # noqa: PLR0913
-        self,
-        data_asset: SPARK_FILE_ASSET_UNION,
-        s3_prefix: str,
-        s3_delimiter: str,
-        s3_max_keys: int,
-        s3_recursive_file_discovery: bool,
-    ) -> None:
-        data_asset._data_connector = self.data_connector_type.build_data_connector(
-            datasource_name=self.name,
-            data_asset_name=data_asset.name,
-            s3_client=self._get_s3_client(),
-            batching_regex=data_asset.batching_regex,
-            bucket=self.bucket,
-            prefix=s3_prefix,
-            delimiter=s3_delimiter,
-            max_keys=s3_max_keys,
-            recursive_file_discovery=s3_recursive_file_discovery,
-            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
-        )
-
-    def _build_directory_data_connector(  # noqa: PLR0913
-        self,
-        data_asset: SPARK_DIRECTORY_ASSET_UNION,
-        s3_prefix: str,
-        s3_delimiter: str,
-        s3_max_keys: int,
-        s3_recursive_file_discovery: bool,
-    ) -> None:
-        data_asset._data_connector = self.data_connector_type.build_data_connector(
-            datasource_name=self.name,
-            data_asset_name=data_asset.name,
-            s3_client=self._get_s3_client(),
-            bucket=self.bucket,
-            prefix=s3_prefix,
-            delimiter=s3_delimiter,
-            max_keys=s3_max_keys,
-            recursive_file_discovery=s3_recursive_file_discovery,
-            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )

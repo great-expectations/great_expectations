@@ -49,22 +49,17 @@ SPARK_FILE_PATH_ASSET_TYPES: Sequence[Type[DataAsset]] = (
     DeltaAsset,
     DirectoryDeltaAsset,
 )
-SPARK_FILE_ASSET_UNION = Union[
+SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     CSVAsset,
-    ParquetAsset,
-    ORCAsset,
-    JSONAsset,
-    TextAsset,
-    DeltaAsset,
-]
-
-SPARK_DIRECTORY_ASSET_UNION = Union[
     DirectoryCSVAsset,
+    ParquetAsset,
     DirectoryParquetAsset,
+    ORCAsset,
     DirectoryORCAsset,
+    JSONAsset,
     DirectoryJSONAsset,
+    TextAsset,
     DirectoryTextAsset,
+    DeltaAsset,
     DirectoryDeltaAsset,
 ]
-
-SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[SPARK_FILE_ASSET_UNION, SPARK_DIRECTORY_ASSET_UNION]
