@@ -13,7 +13,7 @@ from great_expectations.datasource.fluent.data_connector import (
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.file_path_data_asset import (
+    from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
         _FilePathDataAsset,
     )
 

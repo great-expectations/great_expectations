@@ -21,7 +21,7 @@ from great_expectations.datasource.fluent.pandas_datasource import PandasDatasou
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.azure import BlobServiceClient
-    from great_expectations.datasource.fluent.file_path_data_asset import (
+    from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
         _FilePathDataAsset,
     )
 
