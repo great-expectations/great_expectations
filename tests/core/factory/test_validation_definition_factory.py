@@ -300,7 +300,8 @@ def _test_validation_definition_factory_delete_success(
         validation_definition = context.validation_definitions.add(validation=validation_definition)
 
     # Act
-    context.validation_definitions.delete(name=name)
+    with mocker.patch.object(ValidationDefinition, "parse_raw", return_value=validation_definition):
+        context.validation_definitions.delete(name=name)
 
     # Assert
     with pytest.raises(
