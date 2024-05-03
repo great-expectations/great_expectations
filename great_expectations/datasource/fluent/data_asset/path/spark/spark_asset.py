@@ -27,12 +27,12 @@ from great_expectations.datasource.fluent.data_asset.path.spark.text_asset impor
     TextAsset,
 )
 
-# New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
-# and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
+# New asset types should be added to the SPARK_FILE_PATH_ASSET_TYPES tuple,
+# and to SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
 
 
-_SPARK_FILE_PATH_ASSET_TYPES = (
+SPARK_FILE_PATH_ASSET_TYPES = (
     CSVAsset,
     DirectoryCSVAsset,
     ParquetAsset,
@@ -46,7 +46,7 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     DeltaAsset,
     DirectoryDeltaAsset,
 )
-_SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
+SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     CSVAsset,
     DirectoryCSVAsset,
     ParquetAsset,

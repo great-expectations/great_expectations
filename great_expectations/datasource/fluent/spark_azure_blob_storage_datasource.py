@@ -27,7 +27,7 @@ _MISSING: Final = object()
 if TYPE_CHECKING:
     from great_expectations.compatibility.azure import BlobServiceClient
     from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
-        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
 
@@ -136,7 +136,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        data_asset: SPARK_FILE_PATH_ASSET_TYPES_UNION,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",

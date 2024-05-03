@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from botocore.client import BaseClient
 
     from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
-        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
 logger = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        data_asset: SPARK_FILE_PATH_ASSET_TYPES_UNION,
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,
