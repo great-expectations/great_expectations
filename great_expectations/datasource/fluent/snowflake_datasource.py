@@ -129,7 +129,7 @@ class SnowflakeDatasource(SQLDatasource):
 
         if values.get("connection_string") and connection_details:
             raise ValueError(
-                "Cannot provide both a connection string or a combination of account, user, and password."
+                "Cannot provide both a connection string and a combination of account, user, and password."
             )
 
         if connection_details:
