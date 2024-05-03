@@ -7,7 +7,7 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.partitioners import Partitioner
+from great_expectations.core.partitioners import RegexPartitioner
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.data_asset.path.file_path_data_asset import (
     _FilePathDataAsset,
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchRequest
 
 
-class DirectoryDataAsset(_FilePathDataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
+class DirectoryDataAsset(_FilePathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
     """Base class for FilePathDataAssets which batch by combining the contents of a directory."""
 
     data_directory: pathlib.Path
@@ -72,7 +72,7 @@ class DirectoryDataAsset(_FilePathDataAsset[DatasourceT, Partitioner], Generic[D
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[RegexPartitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
         # todo: need to get dataframe partitioner here
