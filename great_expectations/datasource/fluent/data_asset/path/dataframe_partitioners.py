@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Literal
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
@@ -85,3 +85,8 @@ class DataframePartitionerDaily(_PartitionerDatetime):
     @override
     def partitioner_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
+
+
+DataframePartitioner = Union[
+    DataframePartitionerDaily, DataframePartitionerMonthly, DataframePartitionerYearly
+]
