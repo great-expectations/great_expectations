@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pathlib
 from abc import ABC
+from functools import singledispatchmethod
 from typing import TYPE_CHECKING, Generic, Optional, Pattern
 
 from great_expectations import exceptions as gx_exceptions
@@ -9,9 +10,21 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.partitioners import RegexPartitioner
+from great_expectations.core.partitioners import (
+    Partitioner,
+    PartitionerDaily,
+    PartitionerMonthly,
+    PartitionerYearly,
+    RegexPartitioner,
+)
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
+from great_expectations.datasource.fluent.data_asset.path.dataframe_partitioners import (
+    DataframePartitioner,
+    DataframePartitionerDaily,
+    DataframePartitionerMonthly,
+    DataframePartitionerYearly,
+)
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
@@ -47,6 +60,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
             List of a single batch definition.
         """
         if batch_request.partitioner:
+            partitioner = self._get_dataframe_partitioner(batch_request.partitioner)
             # Currently non-sql asset partitioners do not introspect the datasource for available
             # batches and only return a single batch based on specified batch_identifiers.
             batch_identifiers = batch_request.options
@@ -65,6 +79,21 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
                 batch_request=batch_request
             )
         return batch_definition_list
+
+    @singledispatchmethod
+    def _get_dataframe_partitioner(self, partitioner: Partitioner) -> DataframePartitioner: ...
+
+    @_get_dataframe_partitioner.register
+    def _(self, partitioner: PartitionerYearly) -> DataframePartitionerYearly:
+        return DataframePartitionerYearly(**partitioner.dict())
+
+    @_get_dataframe_partitioner.register
+    def _(self, partitioner: PartitionerMonthly) -> DataframePartitionerMonthly:
+        return DataframePartitionerMonthly(**partitioner.dict())
+
+    @_get_dataframe_partitioner.register
+    def _(self, partitioner: PartitionerDaily) -> DataframePartitionerDaily:
+        return DataframePartitionerDaily(**partitioner.dict())
 
     @public_api
     def add_batch_definition_whole_directory(self, name: str) -> BatchDefinition:
@@ -120,3 +149,29 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
             batch_slice=batch_slice,
             partitioner=partitioner,
         )
+
+    def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
+        """Build a set of options for use in a batch spec from a batch request.
+
+        Args:
+            batch_request: Batch request to use to generate options.
+
+        Returns:
+            Dictionary containing batch spec options.
+        """
+        get_reader_options_include: set[str] | None = self._get_reader_options_include()
+        if not get_reader_options_include:
+            # Set to None if empty set to include any additional `extra_kwargs` passed to `add_*_asset`  # noqa: E501
+            get_reader_options_include = None
+        batch_spec_options = {
+            "reader_method": self._get_reader_method(),
+            "reader_options": self.dict(
+                include=get_reader_options_include,
+                exclude=self._EXCLUDE_FROM_READER_OPTIONS,
+                exclude_unset=True,
+                by_alias=True,
+                config_provider=self._datasource._config_provider,
+            ),
+        }
+
+        return batch_spec_options
