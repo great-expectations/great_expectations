@@ -67,7 +67,7 @@ class AmbiguousPathError(ValueError):
 
 
 class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
-    """Base class for PathDataAssets which batch by applying a regex to file names."""
+    """Base class for PathDataAssets which batch by file."""
 
     batching_regex: Pattern = (  # must use typing.Pattern for pydantic < v1.10
         MATCH_ALL_PATTERN

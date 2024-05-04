@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
-    """Base class for PathDataAssets which batch by combining the contents of a directory."""
+    """Base class for PathDataAssets which batch by directory."""
 
     data_directory: pathlib.Path
     # todo: remove. this is included to allow for an incremental refactor.
