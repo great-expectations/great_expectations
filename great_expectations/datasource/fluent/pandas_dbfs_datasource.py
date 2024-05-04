@@ -7,14 +7,12 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     DBFSDataConnector,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
-    )
+    from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +30,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
 
     @override
     def _build_data_connector(
-        self, data_asset: _FilePathDataAsset, glob_directive: str = "**/*", **kwargs
+        self, data_asset: FileDataAsset, glob_directive: str = "**/*", **kwargs
     ) -> None:
         """Builds and attaches the `DBFSDataConnector` to the asset."""
         if kwargs:

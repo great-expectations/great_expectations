@@ -13,56 +13,66 @@ from great_expectations.core.partitioners import (
     PartitionerYearly,
 )
 from great_expectations.datasource.fluent import Datasource
-from great_expectations.datasource.fluent.data_asset.data_connector import FilePathDataConnector
-from great_expectations.datasource.fluent.file_path_asset_base import (
+from great_expectations.datasource.fluent.data_asset.path.file_asset import (
     AmbiguousPathError,
     PathNotFoundError,
     RegexMissingRequiredGroupsError,
     RegexUnknownGroupsError,
 )
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset as PandasCSVAsset,
 )
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     ExcelAsset,
     FWFAsset,
 )
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     JSONAsset as PandasJSONAsset,
 )
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     ORCAsset as PandasORCAsset,
 )
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     ParquetAsset as PandasParquetAsset,
 )
-from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
-    PandasFilesystemDatasource,
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
 )
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
     CSVAsset as SparkCSVAsset,
 )
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    DeltaAsset,
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
     DirectoryCSVAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.delta_asset import (
+    DeltaAsset,
     DirectoryDeltaAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.json_asset import (
     DirectoryJSONAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.json_asset import (
+    JSONAsset as SparkJSONAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.orc_asset import (
     DirectoryORCAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.orc_asset import (
+    ORCAsset as SparkORCAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.parquet_asset import (
     DirectoryParquetAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.parquet_asset import (
+    ParquetAsset as SparkParquetAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.text_asset import (
     DirectoryTextAsset,
     TextAsset,
 )
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    JSONAsset as SparkJSONAsset,
-)
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    ORCAsset as SparkORCAsset,
-)
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    ParquetAsset as SparkParquetAsset,
+from great_expectations.datasource.fluent.data_connector import FilePathDataConnector
+from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
+    PandasFilesystemDatasource,
 )
 
 
@@ -157,7 +167,7 @@ def file_path_data_connector(mocker):
 
 
 @pytest.fixture
-def asset(request, datasource, file_path_data_connector) -> _FilePathDataAsset:
+def asset(request, datasource, file_path_data_connector) -> PathDataAsset:
     asset = request.param
     # since we're parametrizing these tests multiple ways, this object
     # will likely be reused, so we make sure the state we care about is reset:

@@ -10,13 +10,13 @@ from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.partitioners import PartitionerYearly
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
+    from great_expectations.datasource.fluent.data_connector import (
         DataConnector,
     )
 

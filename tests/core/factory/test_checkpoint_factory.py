@@ -105,12 +105,9 @@ def test_checkpoint_factory_delete_uses_store_remove_key(mocker: MockerFixture):
     store.has_key.return_value = True
     key = store.get_key.return_value
     factory = CheckpointFactory(store=store)
-    checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
-    )
 
     # Act
-    factory.delete(checkpoint=checkpoint)
+    factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_called_once_with(
@@ -125,16 +122,13 @@ def test_checkpoint_factory_delete_raises_for_missing_checkpoint(mocker: MockerF
     store = mocker.MagicMock(spec=CheckpointStore)
     store.has_key.return_value = False
     factory = CheckpointFactory(store=store)
-    checkpoint = Checkpoint(
-        name=name, validation_definitions=[mocker.Mock(spec=ValidationDefinition)]
-    )
 
     # Act
     with pytest.raises(
         DataContextError,
         match=f"Cannot delete Checkpoint with name {name} because it cannot be found.",
     ):
-        factory.delete(checkpoint=checkpoint)
+        factory.delete(name=name)
 
     # Assert
     store.remove_key.assert_not_called()
@@ -202,7 +196,7 @@ def _test_checkpoint_factory_delete_success(context):
     batch_def = asset.add_batch_definition("my_batch_definition")
     suite = ExpectationSuite(name="my_suite")
 
-    checkpoint = context.checkpoints.add(
+    context.checkpoints.add(
         checkpoint=Checkpoint(
             name=name,
             validation_definitions=[
@@ -212,7 +206,7 @@ def _test_checkpoint_factory_delete_success(context):
     )
 
     # Act
-    context.checkpoints.delete(checkpoint)
+    context.checkpoints.delete(name)
 
     # Assert
     with pytest.raises(

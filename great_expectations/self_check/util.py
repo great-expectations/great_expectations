@@ -56,7 +56,6 @@ from great_expectations.core.batch import Batch, BatchRequest, LegacyBatchDefini
 from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.exceptions.exceptions import (
     ExecutionEngineError,
@@ -791,6 +790,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         dialect_types["trino"] = TRINO_TYPES
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+
     if sa_engine_name == "sqlite":
         connection_string = get_sqlite_connection_url(sqlite_db_path)
         engine = sa.create_engine(connection_string)
@@ -913,28 +913,6 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if context is None:
         context = build_in_memory_runtime_context()
 
-    assert context is not None, 'Instance of any child of "AbstractDataContext" class is required.'
-
-    context.datasources["my_test_datasource"] = Datasource(
-        name="my_test_datasource",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
-        execution_engine={
-            "class_name": "SqlAlchemyExecutionEngine",
-            "connection_string": connection_string,
-        },
-        data_connectors={
-            "my_sql_data_connector": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "assets": {
-                    "my_asset": {
-                        "table_name": "animal_names",
-                    },
-                },
-            },
-        },
-    )
-    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
-    context.datasources["my_test_datasource"]._execution_engine = execution_engine
     my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
         name="my_sql_data_connector",
         datasource_name="my_test_datasource",

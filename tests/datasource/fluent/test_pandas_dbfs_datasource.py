@@ -12,17 +12,15 @@ import pytest
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
+)
+from great_expectations.datasource.fluent.data_connector import (
     DBFSDataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset,
-)
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
@@ -87,7 +85,7 @@ def pandas_dbfs_datasource(
 
 
 @pytest.fixture
-def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> _FilePathDataAsset:
+def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> PathDataAsset:
     asset = pandas_dbfs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
