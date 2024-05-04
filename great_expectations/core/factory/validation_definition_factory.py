@@ -41,23 +41,24 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
 
     @public_api
     @override
-    def delete(self, validation: ValidationDefinition) -> ValidationDefinition:
+    def delete(self, name: str) -> None:
         """Delete a ValidationDefinition from the collection.
 
         Parameters:
-            validation: ValidationDefinition to delete
+            name: The name of the ValidationDefinition to delete
 
         Raises:
             DataContextError if ValidationDefinition doesn't exist
         """
-        key = self._store.get_key(name=validation.name, id=validation.id)
-        if not self._store.has_key(key=key):
+        try:
+            validation_definition = self.get(name=name)
+        except DataContextError as e:
             raise DataContextError(  # noqa: TRY003
-                f"Cannot delete ValidationDefinition with name {validation.name} because it cannot be found."  # noqa: E501
-            )
-        self._store.remove_key(key=key)
+                f"Cannot delete ValidationDefinition with name {name} because it cannot be found."
+            ) from e
 
-        return validation
+        key = self._store.get_key(name=validation_definition.name, id=validation_definition.id)
+        self._store.remove_key(key=key)
 
     @public_api
     @override

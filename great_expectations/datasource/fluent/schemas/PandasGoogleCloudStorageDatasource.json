@@ -26,7 +26,7 @@
             "default": [],
             "type": "array",
             "items": {
-                "$ref": "#/definitions/_RegexDataAssetBase"
+                "$ref": "#/definitions/FileDataAsset"
             }
         },
         "bucket_or_name": {
@@ -211,9 +211,9 @@
                 "name"
             ]
         },
-        "_RegexDataAssetBase": {
-            "title": "_RegexDataAssetBase",
-            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+        "FileDataAsset": {
+            "title": "FileDataAsset",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -248,16 +248,16 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
                     "type": "string",
                     "format": "regex"
-                },
-                "connect_options": {
-                    "title": "Connect Options",
-                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
-                    "type": "object"
                 }
             },
             "required": [

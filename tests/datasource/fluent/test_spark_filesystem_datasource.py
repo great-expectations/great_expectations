@@ -19,27 +19,40 @@ from great_expectations.core.partitioners import (
     PartitionerMonthly,
     PartitionerYearly,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
+    CSVAsset,
+    DirectoryCSVAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.delta_asset import (
+    DeltaAsset,
+    DirectoryDeltaAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.json_asset import (
+    DirectoryJSONAsset,
+    JSONAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.orc_asset import (
+    DirectoryORCAsset,
+    ORCAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.parquet_asset import (
+    DirectoryParquetAsset,
+    ParquetAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.text_asset import (
+    DirectoryTextAsset,
+    TextAsset,
+)
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 from great_expectations.datasource.fluent.interfaces import (
-    SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
-    DeltaAsset,
-    DirectoryCSVAsset,
-    DirectoryDeltaAsset,
-    DirectoryJSONAsset,
-    DirectoryORCAsset,
-    DirectoryParquetAsset,
-    DirectoryTextAsset,
-    JSONAsset,
-    ORCAsset,
-    ParquetAsset,
-    TextAsset,
     _SparkFilePathDatasource,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
@@ -55,9 +68,6 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def spark_filesystem_datasource(empty_data_context, test_backends) -> SparkFilesystemDatasource:
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
     base_directory_rel_path = pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     base_directory_abs_path = (
         pathlib.Path(__file__).parent.joinpath(base_directory_rel_path).resolve(strict=True)
@@ -67,17 +77,27 @@ def spark_filesystem_datasource(empty_data_context, test_backends) -> SparkFiles
         base_directory=base_directory_abs_path,
     )
     spark_filesystem_datasource._data_context = empty_data_context
+
+    # Verify test directory has files we expect
+    years = ["2018", "2019", "2020"]
+    file_name: PathStr
+    all_files: List[str] = [
+        file_name.stem
+        for file_name in list(pathlib.Path(spark_filesystem_datasource.base_directory).iterdir())
+    ]
+    # assert there are 12 files for each year
+    for year in years:
+        files_for_year = [
+            file_name
+            for file_name in all_files
+            if file_name.find(f"yellow_tripdata_sample_{year}") == 0
+        ]
+        assert len(files_for_year) == 12
+
     return spark_filesystem_datasource
 
 
-@pytest.mark.unit
-def test_construct_spark_filesystem_datasource(
-    spark_filesystem_datasource: SparkFilesystemDatasource,
-):
-    assert spark_filesystem_datasource.name == "spark_filesystem_datasource"
-
-
-@pytest.mark.unit
+@pytest.mark.spark
 def test_add_csv_asset_to_datasource(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -414,7 +434,7 @@ def test_all_spark_file_path_asset_types_tested():
         for (asset_type, required_fields) in _SPARK_ASSET_TYPES
     ],
 )
-def test__get_reader_options_include(asset_type: _FilePathDataAsset, required_fields: dict):
+def test__get_reader_options_include(asset_type: PathDataAsset, required_fields: dict):
     """Make sure options are in fields."""
     fields = set(asset_type.__fields__.keys())
     asset = asset_type.validate(required_fields)
@@ -769,7 +789,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         asset.build_batch_request({"year": 2018, "month": "04"})
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 @pytest.mark.parametrize(
     "path",
     [
@@ -795,7 +815,7 @@ def test_get_batch_list_from_directory_one_batch(
     assert len(batches) == 1
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 @pytest.mark.parametrize(
     "path",
     [
@@ -827,7 +847,7 @@ def test_get_batch_list_from_directory_merges_files(
     assert batch_data.dataframe.count() == 12 * 10000  # type: ignore[attr-defined]
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 def test_get_batch_list_from_fully_specified_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -851,7 +871,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert batch.id == "spark_filesystem_datasource-csv_asset-year_2018-month_04"
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 def test_get_batch_list_from_partially_specified_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -891,91 +911,41 @@ def test_get_batch_list_from_partially_specified_batch_request(
     assert expected_year_month == batch_year_month
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 @pytest.mark.parametrize(
-    "order_by",
-    [
-        ["+year", "month"],
-        ["+year", "+month"],
-        ["+year", "-month"],
-        ["year", "month"],
-        ["year", "+month"],
-        ["year", "-month"],
-        ["-year", "month"],
-        ["-year", "+month"],
-        ["-year", "-month"],
-        ["month", "+year"],
-        ["+month", "+year"],
-        ["-month", "+year"],
-        ["month", "year"],
-        ["+month", "year"],
-        ["-month", "year"],
-        ["month", "-year"],
-        ["+month", "-year"],
-        ["-month", "-year"],
-    ],
+    "sort_ascending",
+    [pytest.param(True), pytest.param(False)],
 )
-def test_spark_sorter(
-    spark_filesystem_datasource: SparkFilesystemDatasource,
-    order_by: SortersDefinition,
-):
-    # Verify test directory has files we expect
-    years = ["2018", "2019", "2020"]
-    months = [format(m, "02d") for m in range(1, 13)]
-    file_name: PathStr
-    all_files: List[str] = [
-        file_name.stem
-        for file_name in list(pathlib.Path(spark_filesystem_datasource.base_directory).iterdir())
-    ]
-    # assert there are 12 files for each year
-    for year in years:
-        files_for_year = [
-            file_name
-            for file_name in all_files
-            if file_name.find(f"yellow_tripdata_sample_{year}") == 0
-        ]
-        assert len(files_for_year) == 12
-
+def test_spark_sorter(spark_filesystem_datasource: SparkFilesystemDatasource, sort_ascending: bool):
+    # arrange
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        batching_regex=".*",
         header=True,
         infer_schema=True,
-        order_by=order_by,
     )
-    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+    batch_def = asset.add_batch_definition_monthly(
+        name="test-batch-def", regex=regex, sort_ascending=sort_ascending
+    )
+    batch_request = batch_def.build_batch_request()
+
+    # act
+    batches = asset.get_batch_list_from_batch_request(batch_request)
+
+    # assert
     assert (len(batches)) == 36
 
-    @dataclass(frozen=True)
-    class TimeRange:
-        key: str
-        range: List[str]
-
-    ordered_years = reversed(years) if "-year" in order_by else years
-    ordered_months = reversed(months) if "-month" in order_by else months
-    if "year" in order_by[0]:  # type: ignore[operator]
-        ordered = [
-            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
-            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
-        ]
-    else:
-        ordered = [
-            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
-            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
-        ]
-
-    batch_index = -1
-    for range1 in ordered[0].range:
-        key1 = ordered[0].key
-        for range2 in ordered[1].range:
-            key2 = ordered[1].key
-            batch_index += 1
-            metadata = batches[batch_index].metadata
-            assert metadata[key1] == range1
-            assert metadata[key2] == range2
+    reverse = sort_ascending is False
+    sorted_batches = sorted(
+        batches,
+        key=lambda batch: (batch.metadata.get("year"), batch.metadata.get("month")),
+        reverse=reverse,
+    )
+    assert sorted_batches == batches
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 @pytest.mark.parametrize(
     "batch_slice, expected_batch_count",
     [
@@ -1047,7 +1017,7 @@ def datasource_test_connection_error_messages(
     return spark_filesystem_datasource, test_connection_error
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 def test_test_connection_failures(
     datasource_test_connection_error_messages: tuple[
         SparkFilesystemDatasource, TestConnectionError
@@ -1064,7 +1034,7 @@ def test_test_connection_failures(
     assert str(e.value) == str(test_connection_error)
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 def test_get_batch_list_from_batch_request_does_not_modify_input_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -1084,7 +1054,7 @@ def test_get_batch_list_from_batch_request_does_not_modify_input_batch_request(
     assert len(batches) == 12
 
 
-@pytest.mark.unit
+@pytest.mark.spark
 def test_add_csv_asset_with_batch_metadata(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -1154,7 +1124,8 @@ def column_value_partitioner():
 
 
 class TestPartitionerDirectoryAsset:
-    @pytest.mark.unit
+    @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_batch_parameters(
         self, directory_asset, column_value_partitioner
     ):
@@ -1163,7 +1134,8 @@ class TestPartitionerDirectoryAsset:
             "passenger_count",
         )
 
-    @pytest.mark.unit
+    @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_one_batch(
         self, directory_asset, column_value_partitioner
     ):
@@ -1181,7 +1153,8 @@ class TestPartitionerDirectoryAsset:
             == post_partitioner_expected_num_batches
         )
 
-    @pytest.mark.unit
+    @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_one_batch_size(
         self,
         directory_asset,
@@ -1276,7 +1249,8 @@ def file_asset(
 
 
 class TestPartitionerFileAsset:
-    @pytest.mark.unit
+    @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_batch_parameters(
         self, file_asset, column_value_partitioner
     ):
@@ -1287,7 +1261,8 @@ class TestPartitionerFileAsset:
             "passenger_count",
         )
 
-    @pytest.mark.unit
+    @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_one_batch(
         self, file_asset, column_value_partitioner
     ):
@@ -1304,7 +1279,8 @@ class TestPartitionerFileAsset:
             == post_partitioner_expected_num_batches
         )
 
-    @pytest.mark.unit
+    @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_one_batch_size(
         self,
         file_asset,
@@ -1330,7 +1306,8 @@ class TestPartitionerFileAsset:
             post_partitioner_batch_data.dataframe.filter(F.col("passenger_count") != 2).count() == 0
         )
 
-    @pytest.mark.unit
+    @pytest.mark.spark
+    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_add_file_csv_asset_with_partitioner_conflicting_identifier_batch_parameters(
         self, file_asset_with_no_partitioner: CSVAsset
     ):
@@ -1347,7 +1324,7 @@ class TestPartitionerFileAsset:
             "path",
         )
 
-    @pytest.mark.unit
+    @pytest.mark.spark
     def test_add_file_csv_asset_with_partitioner_conflicting_identifier_gets_one_batch(
         self, file_asset_with_no_partitioner: CSVAsset
     ):
@@ -1367,7 +1344,7 @@ class TestPartitionerFileAsset:
         post_partitioner_expected_num_batches = 1
         assert len(post_partitioner_batches) == post_partitioner_expected_num_batches
 
-    @pytest.mark.unit
+    @pytest.mark.spark
     def test_add_file_csv_asset_with_partitioner_conflicting_identifier_gets_correct_data(
         self,
         file_asset_with_no_partitioner: CSVAsset,

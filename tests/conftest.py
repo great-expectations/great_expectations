@@ -59,10 +59,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import (
     file_relative_path,
-    instantiate_class_from_config,
 )
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
-from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -2228,38 +2227,6 @@ introspection:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
     return context
-
-
-@pytest.fixture
-def basic_datasource(tmp_path_factory):
-    basic_datasource: Datasource = instantiate_class_from_config(
-        config=yaml.load(
-            """
-class_name: Datasource
-
-data_connectors:
-    test_runtime_data_connector:
-        module_name: great_expectations.datasource.data_connector
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-            - pipeline_stage_name
-            - airflow_run_id
-            - custom_key_0
-
-execution_engine:
-    class_name: PandasExecutionEngine
-
-    """,
-        ),
-        runtime_environment={
-            "name": "my_datasource",
-        },
-        config_defaults={
-            "module_name": "great_expectations.datasource",
-        },
-    )
-
-    return basic_datasource
 
 
 @pytest.fixture

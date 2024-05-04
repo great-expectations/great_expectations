@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Mapping
-from unittest import mock
 
 import pytest
 
@@ -17,13 +16,11 @@ from great_expectations.data_context.store.checkpoint_store import CheckpointSto
 from great_expectations.data_context.store.datasource_store import DatasourceStore
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DatasourceConfig,
     InMemoryStoreBackendDefaults,
     ProgressBarsConfig,
     datasourceConfigSchema,
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
-from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -125,14 +122,9 @@ BLOCK_CONFIG_DATASOURCE_NAME = "my_pandas_datasource"
 
 @pytest.fixture
 def in_memory_data_context(
-    block_config_datasource_config: DatasourceConfig,
     fluent_datasource_config: dict,
 ) -> EphemeralDataContextSpy:
-    datasources = {
-        BLOCK_CONFIG_DATASOURCE_NAME: block_config_datasource_config,
-    }
     config = DataContextConfig(
-        datasources=datasources,
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
     context = EphemeralDataContextSpy(project_config=config)
@@ -224,246 +216,6 @@ def test_update_project_config(
     context.update_project_config(config)
 
     assert context.progress_bars["globally"] is True
-
-
-@pytest.mark.unit
-def test_add_datasource_with_existing_datasource(
-    in_memory_data_context: EphemeralDataContextSpy,
-    block_config_datasource_config: DatasourceConfig,
-):
-    context = in_memory_data_context
-
-    config_dict = block_config_datasource_config.to_dict()
-    for attr in ("class_name", "module_name"):
-        config_dict.pop(attr)
-    config_dict["name"] = "my_datasource"
-
-    datasource = Datasource(**config_dict)
-    persisted_datasource = context.add_datasource(datasource=datasource)
-
-    expected_config = datasource.config
-    actual_config = persisted_datasource.config
-
-    # Name gets injected into data connector as part of serialization hook
-    # Removing for purposes of test assertion
-    data_connectors = actual_config["data_connectors"]
-    data_connector_name = tuple(data_connectors.keys())[0]
-    data_connectors[data_connector_name].pop("name")
-
-    assert actual_config == expected_config
-    assert context.datasource_store.save_count == 1
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "datasource, datasource_name, error_message",
-    [
-        pytest.param(
-            mock.MagicMock(),  # noqa: TID251
-            "my_datasource",
-            "an existing 'datasource' or individual constructor arguments (but not both)",
-            id="both datasource and name",
-        ),
-        pytest.param(
-            None,
-            None,
-            "an existing 'datasource' or individual constructor arguments",
-            id="neither datasource nor name",
-        ),
-    ],
-)
-def test_add_datasource_conflicting_args_failure(
-    in_memory_data_context: EphemeralDataContextSpy,
-    datasource: mock.MagicMock | None,  # noqa: TID251
-    datasource_name: str | None,
-    error_message: str,
-):
-    context = in_memory_data_context
-
-    with pytest.raises(TypeError) as e:
-        context.add_datasource(datasource=datasource, name=datasource_name)
-
-    assert error_message in str(e.value)
-    assert context.datasource_store.save_count == 0
-
-
-@pytest.mark.unit
-def test_add_or_update_datasource_updates_with_individual_args_successfully(
-    in_memory_data_context: EphemeralDataContextSpy,
-    parametrized_datasource_configs: DatasourceConfig | dict,
-):
-    context = in_memory_data_context
-
-    num_datasource_before = len(context.datasources)
-    num_datasource_configs_before = len(context.config.datasources)
-
-    new_base_directory = "/new/path/to/trip_data"
-
-    if isinstance(parametrized_datasource_configs, DatasourceConfig):
-        config_dict = parametrized_datasource_configs.to_dict()
-        config_dict["name"] = BLOCK_CONFIG_DATASOURCE_NAME
-        config_dict["data_connectors"]["tripdata_monthly_configured"]["base_directory"] = (
-            new_base_directory
-        )
-        datasource = context.add_or_update_datasource(**config_dict)
-        datasource.config["data_connectors"]["tripdata_monthly_configured"]["base_directory"] = (
-            new_base_directory
-        )
-
-        assert context.datasource_store.save_count == 1
-    else:
-        config_dict = parametrized_datasource_configs
-        config_dict["base_directory"] = new_base_directory
-        with mock.patch(
-            "great_expectations.datasource.fluent.pandas_filesystem_datasource.PandasFilesystemDatasource.test_connection"
-        ):
-            datasource = context.add_or_update_datasource(**config_dict)
-        datasource.base_directory = new_base_directory
-
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
-        assert context.datasource_store.save_count == 0
-
-    num_datasource_after = len(context.datasources)
-    num_datasource_configs_after = len(context.config.datasources)
-
-    assert num_datasource_after == num_datasource_before
-    assert num_datasource_configs_after == num_datasource_configs_before
-
-
-@pytest.mark.unit
-def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
-    in_memory_data_context: EphemeralDataContextSpy,
-    parametrized_datasource_configs: DatasourceConfig | dict,
-):
-    context = in_memory_data_context
-
-    num_datasource_before = len(context.datasources)
-    num_datasource_configs_before = len(context.config.datasources)
-
-    if isinstance(parametrized_datasource_configs, DatasourceConfig):
-        config_dict = parametrized_datasource_configs.to_dict()
-        for attr in ("class_name", "module_name"):
-            config_dict.pop(attr)
-        config_dict["name"] = BLOCK_CONFIG_DATASOURCE_NAME
-        datasource = Datasource(**config_dict)
-        persisted_datasource = context.add_or_update_datasource(datasource=datasource)
-
-        assert context.datasource_store.save_count == 1
-
-        expected_config = datasource.config
-        actual_config = persisted_datasource.config
-
-        # Name gets injected into data connector as part of serialization hook
-        # Removing for purposes of test assertion
-        data_connectors = actual_config["data_connectors"]
-        data_connector_name = tuple(data_connectors.keys())[0]
-        data_connectors[data_connector_name].pop("name")
-
-        assert actual_config == expected_config
-
-    else:
-        ds_type = _SourceFactories.type_lookup[parametrized_datasource_configs["type"]]
-        datasource = ds_type(**parametrized_datasource_configs)
-        with mock.patch(
-            "great_expectations.datasource.fluent.pandas_filesystem_datasource.PandasFilesystemDatasource.test_connection"
-        ):
-            persisted_datasource = context.add_or_update_datasource(datasource=datasource)
-
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
-        assert context.datasource_store.save_count == 0
-
-        assert datasource == persisted_datasource
-
-    num_datasource_after = len(context.datasources)
-    num_datasource_configs_after = len(context.config.datasources)
-
-    assert num_datasource_after == num_datasource_before
-    assert num_datasource_configs_after == num_datasource_configs_before
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize("use_existing_datasource", [True, False])
-def test_add_or_update_datasource_adds_successfully(
-    in_memory_data_context: EphemeralDataContextSpy,
-    parametrized_datasource_configs: DatasourceConfig | dict,
-    use_existing_datasource: bool,
-):
-    context = in_memory_data_context
-
-    num_datasource_before = len(context.datasources)
-    num_datasource_configs_before = len(context.config.datasources)
-
-    datasource_name = "my_brand_new_datasource"
-
-    assert datasource_name not in context.datasources
-
-    if isinstance(parametrized_datasource_configs, DatasourceConfig):
-        config_dict = parametrized_datasource_configs.to_dict()
-        config_dict["name"] = datasource_name
-
-        for attr in ("class_name", "module_name"):
-            config_dict.pop(attr)
-
-        if use_existing_datasource:
-            datasource = Datasource(**config_dict)
-            _ = context.add_or_update_datasource(datasource=datasource)
-        else:
-            _ = context.add_or_update_datasource(**config_dict)
-
-        # fluent datasources are not loaded into DataContextConfig as of April 21, 2023
-        num_datasource_configs_after = len(context.config.datasources)
-        assert num_datasource_configs_after == num_datasource_configs_before + 1
-
-        assert context.datasource_store.save_count == 1
-    else:
-        parametrized_datasource_configs["name"] = datasource_name
-        if use_existing_datasource:
-            ds_type = _SourceFactories.type_lookup[parametrized_datasource_configs["type"]]
-            datasource = ds_type(**parametrized_datasource_configs)
-            _ = context.add_or_update_datasource(datasource=datasource)
-        else:
-            _ = context.add_or_update_datasource(**parametrized_datasource_configs)
-
-        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023  # noqa: E501
-        assert context.datasource_store.save_count == 0
-
-    num_datasource_after = len(context.datasources)
-
-    assert datasource_name in context.datasources
-    assert num_datasource_after == num_datasource_before + 1
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "datasource, datasource_name, error_message",
-    [
-        pytest.param(
-            mock.MagicMock(),  # noqa: TID251
-            "my_datasource",
-            "an existing 'datasource' or individual constructor arguments (but not both)",
-            id="both datasource and name",
-        ),
-        pytest.param(
-            None,
-            None,
-            "an existing 'datasource' or individual constructor arguments",
-            id="neither datasource nor name",
-        ),
-    ],
-)
-def test_add_or_update_datasource_conflicting_args_failure(
-    in_memory_data_context: EphemeralDataContextSpy,
-    datasource: mock.MagicMock | None,  # noqa: TID251
-    datasource_name: str | None,
-    error_message: str,
-):
-    context = in_memory_data_context
-
-    with pytest.raises(TypeError) as e:
-        context.add_or_update_datasource(datasource=datasource, name=datasource_name)
-
-    assert error_message in str(e.value)
-    assert context.expectations_store.save_count == 0
 
 
 @pytest.mark.unit

@@ -1,6 +1,6 @@
 {
     "title": "DeltaAsset",
-    "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+    "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
     "type": "object",
     "properties": {
         "name": {
@@ -39,12 +39,6 @@
                 "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
             }
         },
-        "batching_regex": {
-            "title": "Batching Regex",
-            "default": ".*",
-            "type": "string",
-            "format": "regex"
-        },
         "connect_options": {
             "title": "Connect Options",
             "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -57,6 +51,12 @@
         "versionAsOf": {
             "title": "Versionasof",
             "type": "string"
+        },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "default": ".*",
+            "type": "string",
+            "format": "regex"
         }
     },
     "required": [

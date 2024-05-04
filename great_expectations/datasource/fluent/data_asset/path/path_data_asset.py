@@ -2,37 +2,28 @@ from __future__ import annotations
 
 import copy
 import logging
+from abc import ABC
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
     Generic,
     List,
     Mapping,
     Optional,
-    Pattern,
     Set,
 )
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.partitioners import (
-    RegexPartitioner,
-)
+from great_expectations.core.batch_definition import PartitionerT
 from great_expectations.datasource.fluent.batch_request import (
-    BatchParameters,
     BatchRequest,
 )
-from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
-from great_expectations.datasource.fluent.data_asset.data_connector import (
-    FILE_PATH_BATCH_SPEC_KEY,
-    FilePathDataConnector,
-)
-from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
-    RegExParser,
+from great_expectations.datasource.fluent.data_connector import (
+    FilePathDataConnector,  # noqa: TCH001  # pydantic uses type at runtime
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
@@ -47,7 +38,6 @@ if TYPE_CHECKING:
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
-        BatchSlice,
     )
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
@@ -57,7 +47,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT]):
+class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_definitions",
         "type",
@@ -72,20 +62,11 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
     }
 
     # General file-path DataAsset pertaining attributes.
-    batching_regex: Pattern = (  # must use typing.Pattern for pydantic < v1.10
-        MATCH_ALL_PATTERN
-    )
+
     connect_options: Mapping = pydantic.Field(
         default_factory=dict,
         description="Optional filesystem specific advanced parameters for connecting to data assets",  # noqa: E501
     )
-
-    _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(default="batch_request_param_")
-    _regex_parser: RegExParser = pydantic.PrivateAttr()
-
-    _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
-    _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
-    _all_group_names: List[str] = pydantic.PrivateAttr()
 
     # `_data_connector`` should be set inside `_build_data_connector()`
     _data_connector: FilePathDataConnector = pydantic.PrivateAttr()
@@ -95,96 +76,19 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
     class Config:
         """
         Need to allow extra fields for the base type because pydantic will first create
-        an instance of `_FilePathDataAsset` before we select and create the more specific
+        an instance of `PathDataAsset` before we select and create the more specific
         asset subtype.
         Each specific subtype should `forbid` extra fields.
         """
 
         extra = pydantic.Extra.allow
 
-    def __init__(self, **data):
-        super().__init__(**data)
-
-        self._regex_parser = RegExParser(
-            regex_pattern=self.batching_regex,
-            unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
-        )
-
-        self._all_group_name_to_group_index_mapping = (
-            self._regex_parser.get_all_group_name_to_group_index_mapping()
-        )
-        self._all_group_index_to_group_name_mapping = (
-            self._regex_parser.get_all_group_index_to_group_name_mapping()
-        )
-        self._all_group_names = self._regex_parser.group_names()
-
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[RegexPartitioner] = None,
+        partitioner: Optional[PartitionerT] = None,
     ) -> tuple[str, ...]:
-        option_keys: tuple[str, ...] = tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
-        if partitioner:
-            option_keys += tuple(partitioner.param_names)
-        return option_keys
-
-    @override
-    def build_batch_request(
-        self,
-        options: Optional[BatchParameters] = None,
-        batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[RegexPartitioner] = None,
-    ) -> BatchRequest:
-        """A batch request that can be used to obtain batches for this DataAsset.
-
-        Args:
-            options: A dict that can be used to filter the batch groups returned from the asset.
-                The dict structure depends on the asset type. The available keys for dict can be obtained by
-                calling get_batch_parameters_keys(...).
-            batch_slice: A python slice that can be used to limit the sorted batches by index.
-                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
-            partitioner: A Partitioner used to narrow the data returned from the asset.
-
-        Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-
-        Note:
-            Option "batch_slice" is supported for all "DataAsset" extensions of this class identically.  This mechanism
-            applies to every "Datasource" type and any "ExecutionEngine" that is capable of loading data from files on
-            local and/or cloud/networked filesystems (currently, Pandas and Spark backends work with files).
-        """  # noqa: E501
-        if options:
-            for option, value in options.items():
-                if (
-                    option in self._all_group_name_to_group_index_mapping
-                    and value
-                    and not isinstance(value, str)
-                ):
-                    raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
-                        f"All batching_regex matching options must be strings. The value of '{option}' is "  # noqa: E501
-                        f"not a string: {value}"
-                    )
-
-        if options is not None and not self._batch_parameters_are_valid(
-            options=options,
-            partitioner=partitioner,
-        ):
-            allowed_keys = set(self.get_batch_parameters_keys(partitioner=partitioner))
-            actual_keys = set(options.keys())
-            raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
-                "Batch parameters should only contain keys from the following set:\n"
-                f"{allowed_keys}\nbut your specified keys contain\n"
-                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
-            )
-
-        return BatchRequest(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
-            options=options or {},
-            batch_slice=batch_slice,
-            partitioner=partitioner,
-        )
+        raise NotImplementedError
 
     @override
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -202,7 +106,7 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
         ):
             valid_options = self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             options = {option: None for option in valid_options}
-            expect_batch_request_form = BatchRequest[RegexPartitioner](
+            expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
@@ -267,18 +171,15 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[LegacyBatchDefinition]:
-        """Generate a batch definition list from a given batch request, handling a partitioner config if present.
+        """Generate a batch definition list from a given batch request.
 
         Args:
             batch_request: Batch request used to generate batch definitions.
 
         Returns:
             List of batch definitions.
-        """  # noqa: E501
-        batch_definition_list = self._data_connector.get_batch_definition_list(
-            batch_request=batch_request
-        )
-        return batch_definition_list
+        """
+        raise NotImplementedError
 
     def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
         """Build a set of options for use in a batch spec from a batch request.
@@ -328,16 +229,13 @@ class _FilePathDataAsset(DataAsset[DatasourceT, RegexPartitioner], Generic[Datas
         """If present, override DataConnector behavior in order to
         treat an entire directory as a single Asset.
         """
-        return None
+        # todo: refactor data connector instantiation so this isn't necessary
+        raise NotImplementedError
 
     def _get_reader_method(self) -> str:
-        raise NotImplementedError(
-            """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
-work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""  # noqa: E501
-        )
+        # subtypes must define a reader method
+        raise NotImplementedError
 
     def _get_reader_options_include(self) -> set[str]:
-        raise NotImplementedError(
-            """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
-to use as its "include" directive for File-Path style DataAsset processing."""  # noqa: E501
-        )
+        # subtypes control how reader options get serialized
+        raise NotImplementedError
