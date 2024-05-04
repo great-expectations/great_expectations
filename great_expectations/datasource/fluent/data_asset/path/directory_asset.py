@@ -60,7 +60,6 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
             List of a single batch definition.
         """
         if batch_request.partitioner:
-            partitioner = self._get_dataframe_partitioner(batch_request.partitioner)
             # Currently non-sql asset partitioners do not introspect the datasource for available
             # batches and only return a single batch based on specified batch_identifiers.
             batch_identifiers = batch_request.options
@@ -81,7 +80,9 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
         return batch_definition_list
 
     @singledispatchmethod
-    def _get_dataframe_partitioner(self, partitioner: Partitioner) -> DataframePartitioner: ...
+    def _get_dataframe_partitioner(
+        self, partitioner: Optional[Partitioner]
+    ) -> DataframePartitioner: ...
 
     @_get_dataframe_partitioner.register
     def _(self, partitioner: PartitionerYearly) -> DataframePartitionerYearly:
@@ -94,6 +95,10 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
     @_get_dataframe_partitioner.register
     def _(self, partitioner: PartitionerDaily) -> DataframePartitionerDaily:
         return DataframePartitionerDaily(**partitioner.dict())
+
+    @_get_dataframe_partitioner.register
+    def _(self, partitioner: None) -> None:
+        return None
 
     @public_api
     def add_batch_definition_whole_directory(self, name: str) -> BatchDefinition:
@@ -173,5 +178,9 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
                 config_provider=self._datasource._config_provider,
             ),
         }
+        partitioner = self._get_dataframe_partitioner(batch_request.partitioner)
+        if partitioner:
+            batch_spec_options["partitioner_method"] = partitioner.method_name
+            batch_spec_options["partitioner_kwargs"] = partitioner.partitioner_method_kwargs()
 
         return batch_spec_options
