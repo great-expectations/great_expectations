@@ -14,11 +14,11 @@ Add alerts to your GX Cloud workflows to receive Slack notifications when a Chec
 
 3. Complete the following fields:
 
-    **Alert name:** Enter a meaningful name for the alert.
+    - **Alert name:** Enter a meaningful name for the alert.
 
-    **Webhook:** Enter the Slack incoming webhook URL. For more information about Slack incoming webhooks, see [Sending messages using incoming webhooks](https://api.slack.com/messaging/webhooks).
+    - **Webhook:** Enter the Slack incoming webhook URL. For more information about Slack incoming webhooks, see [Sending messages using incoming webhooks](https://api.slack.com/messaging/webhooks).
 
-    **Alert type:** Select the type of alert to send to Slack. **Show all** sends a notification when the Checkpoint succeeds or fails, **Failures only** sends a notification when the Checkpoint fails, and **Success only** sends a notification when the Checkpoint succeeds. 
+    - **Alert type:** Select the type of alert to send to Slack. **Show all** sends a notification when the Checkpoint succeeds or fails, **Failures only** sends a notification when the Checkpoint fails, and **Success only** sends a notification when the Checkpoint succeeds. 
 
 4. Click **Save**.
 
@@ -34,11 +34,11 @@ Add alerts to your GX Cloud workflows to receive Slack notifications when a Chec
 
 3. Edit the following fields:
 
-    **Alert name:** Enter a meaningful name for the alert.
+    - **Alert name:** Enter a meaningful name for the alert.
 
-    **Webhook:** Enter the Slack incoming webhook URL. For more information about Slack incoming webhooks, see [Sending messages using incoming webhooks](https://api.slack.com/messaging/webhooks).
+    - **Webhook:** Enter the Slack incoming webhook URL. For more information about Slack incoming webhooks, see [Sending messages using incoming webhooks](https://api.slack.com/messaging/webhooks).
 
-    **Alert type:** Select the type of alert to send to Slack. **Show all** sends a notification when the Checkpoint succeeds or fails, **Failures only** sends a notification when the Checkpoint fails, and **Success only** sends a notification when the Checkpoint succeeds. 
+    - **Alert type:** Select the type of alert to send to Slack. **Show all** sends a notification when the Checkpoint succeeds or fails, **Failures only** sends a notification when the Checkpoint fails, and **Success only** sends a notification when the Checkpoint succeeds. 
 
 4. Click **Save**.
 
@@ -50,4 +50,4 @@ Add alerts to your GX Cloud workflows to receive Slack notifications when a Chec
 
 3. Click **Delete** for the alert you want to delete.
 
-4.  Click **Delete**.
+4. Click **Delete**.
