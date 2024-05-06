@@ -275,14 +275,7 @@ class SlackNotificationAction(DataDocsAction):
             success=success,
         )
 
-        return self._post_slack_payload(payload=payload, result=result)
-
-    def _post_slack_payload(self, payload: dict, result: dict) -> dict:
-        blocks = payload.get("blocks")
-        if blocks:
-            result = self._get_slack_result(payload=payload)
-
-        return result
+        return self._send_slack_notification(payload=payload)
 
     def _render_validation_result(
         self,
@@ -315,7 +308,7 @@ class SlackNotificationAction(DataDocsAction):
             validation_result_urls=validation_result_urls,
         )
 
-    def _get_slack_result(self, payload):
+    def _send_slack_notification(self, payload: dict) -> dict:
         # this will actually send the POST request to the Slack webapp server
         slack_notif_result = send_slack_notification(
             payload=payload,

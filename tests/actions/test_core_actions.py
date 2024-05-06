@@ -533,8 +533,7 @@ class TestV1ActionRun:
         with mock.patch.object(Session, "post") as mock_post:
             output = action.run(checkpoint_result=checkpoint_result)
 
-        assert mock_post.call_count == 1
-        mock_post.assert_called_with(
+        mock_post.assert_called_once_with(
             url="test",
             headers=None,
             json={
