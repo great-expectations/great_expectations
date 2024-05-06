@@ -64,6 +64,9 @@ except ImportError:
 if not LegacyRow:
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
 
+if not Row:
+    Row = SQLALCHEMY_NOT_IMPORTED
+
 SCHEMAS = {
     "api_np": {
         "NegativeInfinity": -np.inf,
@@ -374,7 +377,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
         return str(data)
 
-    if isinstance(data, Row):
+    if Row and isinstance(data, Row):
         return str(data)
 
     if isinstance(data, decimal.Decimal):
