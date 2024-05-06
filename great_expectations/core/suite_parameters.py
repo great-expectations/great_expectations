@@ -134,7 +134,6 @@ class SuiteParameterParser:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
             fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
             variable = Word(alphas, f"{alphanums}_$")
-            ident = variable
 
             plus, minus, mult, div = map(Literal, "+-*/")
             lpar, rpar = map(Suppress, "()")
@@ -157,20 +156,20 @@ class SuiteParameterParser:
             # add parse action that replaces the function identifier with a (name, number of args, has_fn_kwargs) tuple  # noqa: E501
             # 20211009 - JPC - Note that it's important that we consider kwarglist
             # first as part of disabling backtracking for the function's arguments
-            fn_call = (ident + lpar + rpar).setParseAction(
+            fn_call = (variable + lpar + rpar).setParseAction(
                 lambda t: t.insert(0, (t.pop(0), 0, False))
             ) | (
-                (ident + lpar - Group(expr_list) + rpar).setParseAction(
+                (variable + lpar - Group(expr_list) + rpar).setParseAction(
                     lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
                 )
-                ^ (ident + lpar - Group(kwarglist) + rpar).setParseAction(
+                ^ (variable + lpar - Group(kwarglist) + rpar).setParseAction(
                     lambda t: t.insert(0, (t.pop(0), len(t[0]), True))
                 )
             )
             atom = (
                 addop[...]
                 + (
-                    (fn_call | pi | e | fnumber | ident).setParseAction(self.push_first)
+                    (fn_call | pi | e | fnumber | variable).setParseAction(self.push_first)
                     | Group(lpar + expr + rpar)
                 )
             ).setParseAction(self.push_unary_minus)
