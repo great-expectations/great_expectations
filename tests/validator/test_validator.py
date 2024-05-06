@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
 import pandas as pd
@@ -12,7 +12,6 @@ import great_expectations.exceptions as gx_exceptions
 import great_expectations.expectations as gxe
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
-    BatchMarkers,
     BatchRequest,
 )
 from great_expectations.core.expectation_validation_result import (
@@ -194,130 +193,6 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     )
 
     return validator_multi_batch
-
-
-@pytest.mark.big
-def test_validator_with_bad_batchrequest(
-    yellow_trip_pandas_data_context,
-):
-    context = yellow_trip_pandas_data_context
-
-    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
-
-    multi_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="i_dont_exist",
-        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
-    )
-    with pytest.raises(gx_exceptions.InvalidBatchRequestError):
-        # noinspection PyUnusedLocal
-        _: Validator = context.get_validator(
-            batch_request=multi_batch_request, expectation_suite=suite
-        )
-
-
-@pytest.mark.big
-def test_validator_load_additional_batch_to_validator(
-    yellow_trip_pandas_data_context,
-):
-    context = yellow_trip_pandas_data_context
-
-    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
-
-    jan_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-        data_connector_query={"batch_filter_parameters": {"month": "01"}},
-    )
-
-    validator: Validator = context.get_validator(
-        batch_request=jan_batch_request, expectation_suite=suite
-    )
-
-    assert len(validator.batches) == 1
-    assert validator.active_batch_id == "0327cfb13205ec8512e1c28e438ab43b"
-
-    first_batch_markers: BatchMarkers = validator.active_batch_markers
-    assert first_batch_markers["pandas_data_fingerprint"] == "c4f929e6d4fab001fedc9e075bf4b612"
-
-    feb_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-        data_connector_query={"batch_filter_parameters": {"month": "02"}},
-    )
-
-    new_batch = context.get_batch_list(batch_request=feb_batch_request)
-    validator.load_batch_list(batch_list=new_batch)
-
-    updated_batch_markers: BatchMarkers = validator.active_batch_markers
-    assert updated_batch_markers["pandas_data_fingerprint"] == "88b447d903f05fb594b87b13de399e45"
-
-    assert len(validator.batches) == 2
-    assert validator.active_batch_id == "0808e185a52825d22356de2fe00a8f5f"
-    assert first_batch_markers != updated_batch_markers
-
-
-@pytest.mark.big
-def test_instantiate_validator_with_a_list_of_batch_requests(
-    yellow_trip_pandas_data_context,
-):
-    context = yellow_trip_pandas_data_context
-    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
-
-    jan_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-        data_connector_query={"batch_filter_parameters": {"month": "01"}},
-    )
-
-    feb_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-        data_connector_query={"batch_filter_parameters": {"month": "02"}},
-    )
-
-    validator_two_batch_requests_two_batches: Validator = context.get_validator(
-        batch_request_list=[jan_batch_request, feb_batch_request],
-        expectation_suite=suite,
-    )
-
-    # Instantiate a validator with a single BatchRequest yielding two batches for testing
-    jan_feb_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-        data_connector_query={"index": "0:2"},
-    )
-
-    validator_one_batch_request_two_batches: Validator = context.get_validator(
-        batch_request=jan_feb_batch_request, expectation_suite=suite
-    )
-
-    assert (
-        validator_one_batch_request_two_batches.batches.keys()
-        == validator_two_batch_requests_two_batches.batches.keys()
-    )
-    assert (
-        validator_one_batch_request_two_batches.active_batch_id
-        == validator_two_batch_requests_two_batches.active_batch_id
-    )
-
-    with pytest.raises(ValueError) as ve:
-        # noinspection PyUnusedLocal
-        _: Validator = context.get_validator(
-            batch_request=jan_feb_batch_request,
-            batch_request_list=[jan_batch_request, feb_batch_request],
-            expectation_suite=suite,
-        )
-
-    assert ve.value.args == (
-        "No more than one of batch, batch_list, batch_request, or batch_request_list can be specified",  # noqa: E501
-    )
 
 
 @pytest.mark.big
@@ -530,7 +405,7 @@ def test_validator_validate_substitutes_suite_parameters(
 @pytest.mark.unit
 @pytest.mark.parametrize("result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}])
 def test_rendered_content_bool_only_respected(result_format: str | dict):
-    context = get_context()
+    context = get_context(mode="ephemeral")
     csv_asset = context.data_sources.pandas_default.add_dataframe_asset(
         "df",
         dataframe=pd.DataFrame(
@@ -612,96 +487,6 @@ def test__get_attr___raises_attribute_error_with_invalid_attr(
         _ = validator.my_fake_attr
 
     assert "'Validator'  object has no attribute 'my_fake_attr'" in str(e.value)
-
-
-@pytest.mark.unit
-def test_list_available_expectation_types(
-    validator_with_mock_execution_engine: Validator,
-) -> None:
-    validator = validator_with_mock_execution_engine
-
-    available = validator.list_available_expectation_types()
-    assert all(e.startswith("expect_") for e in available)
-
-
-def _context_to_validator_and_expectation_sql(
-    context: FileDataContext,
-) -> Tuple[Validator, gxe.ExpectColumnValuesToBeInSet]:
-    """
-    Helper method used by sql tests in this suite. Takes in a Datacontext and returns a tuple of Validator and
-    Expectation after building a BatchRequest and creating ExpectationSuite.
-    Args:
-        context (FileDataContext): DataContext to use
-    """  # noqa: E501
-
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-        },
-    )
-    expectation: gxe.ExpectColumnValuesToBeInSet = gxe.ExpectColumnValuesToBeInSet(
-        **expectation_configuration.kwargs
-    )
-
-    batch_request = BatchRequest(
-        datasource_name="my_datasource",
-        data_connector_name="my_sql_data_connector",
-        data_asset_name="animals_names_asset",  # this is the name of the table you want to retrieve
-    )
-    context.add_expectation_suite(expectation_suite_name="test_suite")
-    validator = context.get_validator(
-        batch_request=batch_request, expectation_suite_name="test_suite"
-    )
-    return validator, expectation
-
-
-@pytest.mark.big
-def test_validator_result_format_config_from_validator(
-    data_context_with_connection_to_metrics_db,
-):
-    result_format_config: dict = {
-        "result_format": "COMPLETE",
-        "unexpected_index_column_names": ["pk_1"],
-    }
-    (validator, _) = _context_to_validator_and_expectation_sql(
-        context=data_context_with_connection_to_metrics_db,
-    )
-
-    with pytest.warns(UserWarning) as config_warning:
-        _: ExpectationValidationResult = validator.expect_column_values_to_be_in_set(
-            column="animals",
-            value_set=["cat", "fish", "dog"],
-            result_format=result_format_config,
-        )
-
-    assert "`result_format` configured at the Validator-level will not be persisted." in str(
-        config_warning.list[0].message
-    )
-
-
-@pytest.mark.big
-def test_validator_result_format_config_from_expectation(
-    data_context_with_connection_to_metrics_db,
-):
-    runtime_configuration: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
-    }
-    (validator, expectation) = _context_to_validator_and_expectation_sql(
-        context=data_context_with_connection_to_metrics_db,
-    )
-    with pytest.warns(UserWarning) as config_warning:
-        _: ExpectationValidationResult = expectation.validate_(
-            validator=validator, runtime_configuration=runtime_configuration
-        )
-
-    assert "`result_format` configured at the Validator-level will not be persisted." in str(
-        config_warning.list[0].message
-    )
 
 
 @pytest.mark.big
