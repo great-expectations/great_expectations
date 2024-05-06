@@ -531,7 +531,6 @@ def fluent_datasource_config() -> dict:
 
 @pytest.fixture(
     params=[
-        basic_block_config_datasource_config,
         basic_fluent_datasource_config,
     ]
 )

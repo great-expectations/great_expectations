@@ -19,10 +19,10 @@ from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
 )
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     DataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
+from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
 )
 

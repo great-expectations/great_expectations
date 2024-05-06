@@ -13,19 +13,17 @@ from great_expectations.compatibility import azure
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
+)
+from great_expectations.datasource.fluent.data_connector import (
     AzureBlobStorageDataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource import (
     PandasAzureBlobStorageDatasourceError,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset,
 )
 
 if TYPE_CHECKING:
@@ -111,7 +109,7 @@ def csv_asset(
     mock_list_keys,
     object_keys: List[str],
     pandas_abs_datasource: PandasAzureBlobStorageDatasource,
-) -> _FilePathDataAsset:
+) -> PathDataAsset:
     mock_list_keys.return_value = object_keys
     asset = pandas_abs_datasource.add_csv_asset(
         name="csv_asset",
