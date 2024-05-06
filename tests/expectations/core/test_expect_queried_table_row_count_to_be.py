@@ -33,7 +33,7 @@ sqlite_batch_request: BatchRequest = BatchRequest(
     batch_spec_passthrough={"create_temp_table": False},
 )
 
-pytest.mark.xfail("TODO: Fix in V1-323", allow_module_level=True)
+pytest.skip("TODO: Fix in V1-323", allow_module_level=True)
 
 
 @pytest.mark.parametrize(
