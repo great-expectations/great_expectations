@@ -12,13 +12,13 @@ module.exports = {
         },
         {
           type: 'doc',
-          id: 'core/introduction/community_resources',
-          label: 'Community Resources'
+          id: 'core/introduction/try_gx',
+          label: '🚧 Try GX'
         },
         {
           type: 'doc',
-          id: 'core/introduction/try_gx',
-          label: '🚧 Try GX'
+          id: 'core/introduction/community_resources',
+          label: 'Community Resources'
         },
       ],
     },
