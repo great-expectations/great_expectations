@@ -1,5 +1,5 @@
 ---
-title: 'Community Resources'
+title: 'Community resources'
 ---
 import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 

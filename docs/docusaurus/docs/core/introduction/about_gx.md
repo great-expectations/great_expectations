@@ -68,7 +68,7 @@ GX does not store data itself. Instead, it deals in metadata about data: Expecta
 
 GX is NOT an independent executable.
 
-{GxData.product_name} is a Python library.  To use GX, you will need an installation of <PythonVersion/>.  Ideally, you will also configure a Python virtual environment to use GX from.  Guidance on setting up your Python environment and installing the GX Python library is provided under [Set up a GX environment](/core/installation_and_setup/installation_and_setup.md) in the GX docs.
+{GxData.product_name} is a Python library.  To use GX, you will need an installation of <PythonVersion/>.  Ideally, you will also configure a Python virtual environment to in which you can install and run GX.  Guidance on setting up your Python environment and installing the GX Python library is provided under [Set up a GX environment](/core/installation_and_setup/installation_and_setup.md) in the GX docs.
 
 ## GX Cloud
 
