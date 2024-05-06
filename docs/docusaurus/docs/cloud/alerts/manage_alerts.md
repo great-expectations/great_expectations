@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Manage alerts'
 title: 'Manage alerts'
-description: Create and manage aalertss in GX Cloud.
+description: Create and manage alerts in GX Cloud.
 ---
 
 Add alerts to your GX Cloud workflows to receive Slack notifications when a Checkpoint is successful, it fails, or when it succeeds or fails.
@@ -46,8 +46,6 @@ Add alerts to your GX Cloud workflows to receive Slack notifications when a Chec
 
 1. In GX Cloud, click **Checkpoints** > **Alerts**.
 
-2. Click **Edit** for the alert you want to edit.
+2. Click **Delete** for the alert you want to delete.
 
-3. Click **Delete** for the alert you want to delete.
-
-4. Click **Delete**.
+3. Click **Delete**.
