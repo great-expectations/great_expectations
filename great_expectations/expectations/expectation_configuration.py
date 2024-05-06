@@ -27,7 +27,6 @@ from great_expectations.core.suite_parameters import (
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
-    nested_update,
 )
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
@@ -39,8 +38,6 @@ from great_expectations.render import RenderedAtomicContent, RenderedAtomicConte
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
-    from pyparsing import ParseResults
-
     from great_expectations.alias_types import JSONValues
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.expectations.expectation import Expectation
@@ -440,25 +437,6 @@ class ExpectationConfiguration(SerializableDictDot):
         dependencies: dict = {}
 
         return dependencies
-
-    @staticmethod
-    def _update_dependencies_with_expectation_suite_urn(
-        dependencies: dict, urn: ParseResults
-    ) -> None:
-        if not urn.get("metric_kwargs"):
-            nested_update(
-                dependencies,
-                {urn["expectation_suite_name"]: [urn["metric_name"]]},
-            )
-        else:
-            nested_update(
-                dependencies,
-                {
-                    urn["expectation_suite_name"]: [
-                        {"metric_kwargs_id": {urn["metric_kwargs"]: [urn["metric_name"]]}}
-                    ]
-                },
-            )
 
     def _get_expectation_impl(self) -> Type[Expectation]:
         return get_expectation_impl(self.expectation_type)

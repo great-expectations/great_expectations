@@ -282,57 +282,6 @@ def build_suite_parameters(
 EXPR = SuiteParameterParser()
 
 
-def find_suite_parameter_dependencies(parameter_expression):
-    """Parse a parameter expression to identify dependencies including GX URNs.
-
-    Args:
-        parameter_expression: the parameter to parse
-
-    Returns:
-        a dictionary including:
-          - "urns": set of strings that are valid GX URN objects
-          - "other": set of non-GX URN strings that are required to evaluate the parameter expression
-
-    """  # noqa: E501
-    expr = SuiteParameterParser()
-
-    dependencies = {"urns": set(), "other": set()}
-    # Calling get_parser clears the stack
-    parser = expr.get_parser()
-    try:
-        _ = parser.parseString(parameter_expression, parseAll=True)
-    except ParseException as err:
-        raise SuiteParameterError(  # noqa: TRY003
-            f"Unable to parse suite parameter: {err!s} at line {err.line}, column {err.column}"
-        )
-    except AttributeError as err:
-        raise SuiteParameterError(f"Unable to parse suite parameter: {err!s}")  # noqa: TRY003
-
-    for word in expr.exprStack:
-        if isinstance(word, (int, float)):
-            continue
-
-        if not isinstance(word, str):
-            # If we have a function that itself is a tuple (e.g. (trunc, 1))
-            continue
-
-        if word in expr.opn or word in expr.fn or word == "unary -":
-            # operations and functions
-            continue
-
-        # if this is parseable as a number, then we do not include it
-        try:
-            _ = float(word)
-            continue
-        except ValueError:
-            pass
-
-        # If we got this far, it's a legitimate "other" suite parameter
-        dependencies["other"].add(word)
-
-    return dependencies
-
-
 def parse_suite_parameter(  # noqa: C901
     parameter_expression: str,
     suite_parameters: Optional[Dict[str, Any]] = None,
@@ -349,9 +298,7 @@ def parse_suite_parameter(  # noqa: C901
     The parser will allow arithmetic operations +, -, /, *, as well as basic functions, including trunc() and round() to
     obtain integer values when needed for certain expectations (e.g. expect_column_value_length_to_be_between).
 
-    Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$',
-    EXCEPT if they begin with the string "urn:great_expectations" in which case they may also include additional
-    characters to support inclusion of GX URLs (see :ref:`suite_parameters` for more information).
+    Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$'.
     """  # noqa: E501
     if suite_parameters is None:
         suite_parameters = {}

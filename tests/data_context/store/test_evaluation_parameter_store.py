@@ -3,7 +3,6 @@ import os
 from unittest import mock
 
 import pytest
-from freezegun import freeze_time
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -126,13 +125,6 @@ def test_suite_parameter_store_methods(
 
     data_context_parameterized_expectation_suite.store_suite_parameters(source_patient_data_results)
 
-    bound_parameters = (
-        data_context_parameterized_expectation_suite.suite_parameter_store.get_bind_params(run_id)
-    )
-    assert bound_parameters == {
-        "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
-        ".observed_value": 1024
-    }
     source_diabetes_data_results = ExpectationSuiteValidationResult(
         meta={
             "expectation_suite_name": "source_diabetes_data.default",
@@ -165,15 +157,6 @@ def test_suite_parameter_store_methods(
     data_context_parameterized_expectation_suite.store_suite_parameters(
         source_diabetes_data_results
     )
-    bound_parameters = (
-        data_context_parameterized_expectation_suite.suite_parameter_store.get_bind_params(run_id)
-    )
-    assert bound_parameters == {
-        "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
-        ".observed_value": 1024,
-        "urn:great_expectations:validations:source_diabetes_data.default"
-        ":expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr": 2048,  # noqa: E501
-    }
 
 
 @pytest.mark.postgresql
@@ -208,58 +191,6 @@ def test_database_suite_parameter_store_store_backend_id(in_memory_param_store):
     assert test_utils.validate_uuid4(in_memory_param_store.store_backend_id)
 
 
-@freeze_time("09/26/2019 13:42:41")
-@pytest.mark.postgresql
-def test_database_suite_parameter_store_get_bind_params(param_store):
-    # Bind params must be expressed as a string-keyed dictionary.
-    # Verify that the param_store supports that
-    run_id = RunIdentifier(
-        run_name=datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
-    )
-    metric_identifier = ValidationMetricIdentifier(
-        run_id=run_id,
-        data_asset_name=None,
-        expectation_suite_identifier="asset.warning",
-        metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
-        metric_kwargs_id="column=mycol",
-    )
-
-    metric_value = 12.3456789
-    param_store.set(metric_identifier, metric_value)
-
-    metric_identifier = ValidationMetricIdentifier(
-        run_id=run_id,
-        data_asset_name=None,
-        expectation_suite_identifier="asset.warning",
-        metric_name="expect_table_row_count_to_be_between.result.observed_value",
-        metric_kwargs_id=None,
-    )
-
-    metric_value = 512
-    param_store.set(metric_identifier, metric_value)
-
-    metric_identifier = ValidationMetricIdentifier(
-        run_id=run_id,
-        data_asset_name=None,
-        expectation_suite_identifier="asset2.warning",
-        metric_name="expect_column_values_to_match_regex.result.unexpected_percent",
-        metric_kwargs_id="column=mycol",
-    )
-
-    metric_value = 12.3456789
-    param_store.set(metric_identifier, metric_value)
-
-    params = param_store.get_bind_params(run_id)
-    assert params == {
-        "urn:great_expectations:validations:asset.warning:"
-        "expect_column_values_to_match_regex.result.unexpected_percent:column=mycol": 12.3456789,
-        "urn:great_expectations:validations:asset.warning:"
-        "expect_table_row_count_to_be_between.result.observed_value": 512,
-        "urn:great_expectations:validations:asset2.warning:"
-        "expect_column_values_to_match_regex.result.unexpected_percent:column=mycol": 12.3456789,
-    }
-
-
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
 )
@@ -276,17 +207,11 @@ def test_suite_parameter_store_calls_proper_cloud_tuple_store_methods(
     and that the store backend adheres to the Liskov substitution principle.
     """
     suite_parameter_store = SuiteParameterStore()
-    run_id = RunIdentifier()
     s3_store = TupleS3StoreBackend(bucket="my_bucket")
     suite_parameter_store._store_backend = s3_store
 
     # Sanity check to ensure neither parent nor child method has been called
     assert not mock_s3_list_keys.called
-    assert not mock_parent_list_keys.called
-
-    # `get_bind_params` calls the child method due to proper polymorphism
-    suite_parameter_store.get_bind_params(run_id=run_id)
-    assert mock_s3_list_keys.called
     assert not mock_parent_list_keys.called
 
 
@@ -306,7 +231,6 @@ def test_suite_parameter_store_calls_proper_azure_tuple_store_methods(
     and that the store backend adheres to the Liskov substitution principle.
     """
     suite_parameter_store = SuiteParameterStore()
-    run_id = RunIdentifier()
     azure_store = TupleAzureBlobStoreBackend(
         container="my_container", connection_string="my_connection_string"
     )
@@ -314,11 +238,6 @@ def test_suite_parameter_store_calls_proper_azure_tuple_store_methods(
 
     # Sanity check to ensure neither parent nor child method has been called
     assert not mock_azure_list_keys.called
-    assert not mock_parent_list_keys.called
-
-    # `get_bind_params` calls the child method due to proper polymorphism
-    suite_parameter_store.get_bind_params(run_id=run_id)
-    assert mock_azure_list_keys.called
     assert not mock_parent_list_keys.called
 
 
@@ -338,15 +257,9 @@ def test_suite_parameter_store_calls_proper_gcs_tuple_store_methods(
     and that the store backend adheres to the Liskov substitution principle.
     """
     suite_parameter_store = SuiteParameterStore()
-    run_id = RunIdentifier()
     gcs_store = TupleGCSStoreBackend(bucket="my_bucket", project="my_project")
     suite_parameter_store._store_backend = gcs_store
 
     # Sanity check to ensure neither parent nor child method has been called
     assert not mock_gcs_list_keys.called
-    assert not mock_parent_list_keys.called
-
-    # `get_bind_params` calls the child method due to proper polymorphism
-    suite_parameter_store.get_bind_params(run_id=run_id)
-    assert mock_gcs_list_keys.called
     assert not mock_parent_list_keys.called
