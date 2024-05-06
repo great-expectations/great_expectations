@@ -4,7 +4,7 @@ from great_expectations import get_context
 from great_expectations.core import ExpectationSuite
 from great_expectations.exceptions import DataContextError
 
-context = get_context(project_root_dir="./gx")
+context = get_context(project_root_dir="./")
 
 try:
     suite = context.suites.get("project_name")

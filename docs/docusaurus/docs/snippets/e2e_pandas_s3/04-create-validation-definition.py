@@ -4,12 +4,12 @@ from great_expectations import get_context
 from great_expectations.core import ValidationDefinition
 from great_expectations.exceptions import DataContextError
 
-context = get_context(project_root_dir="./gx")
+context = get_context(project_root_dir="./")
 
 # TODO: will become
-# batch_definition = context.data_sources.get("nextflow").get_asset("my_project").get_batch_definition("monthly")
+# batch_definition = context.data_sources.get("project_name").get_asset("my_project").get_batch_definition("monthly")
 batch_definition = (
-    context.datasources["nextflow"]
+    context.datasources["project_name"]
     .get_asset("my_project")
     .get_batch_definition("monthly")
 )

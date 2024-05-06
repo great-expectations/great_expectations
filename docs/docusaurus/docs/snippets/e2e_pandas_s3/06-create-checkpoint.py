@@ -7,7 +7,7 @@ from great_expectations.checkpoint import Checkpoint, SlackNotificationAction
 # TODO will become freom great_expectations.exceptions import ResourceNotFoundError
 from great_expectations.exceptions import DataContextError
 
-context = get_context(project_root_dir="./gx")
+context = get_context(project_root_dir="./")
 
 try:
     checkpoint = context.checkpoints.get("project_integration_checkpoint")

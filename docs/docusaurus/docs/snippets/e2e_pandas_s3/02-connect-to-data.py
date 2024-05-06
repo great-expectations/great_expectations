@@ -1,16 +1,16 @@
 import great_expectations.expectations as gxe
 from great_expectations import get_context
 
-context = get_context(project_root_dir="./gx")
+context = get_context(project_root_dir="./")
 
 try:
-    data_source = context.datasources["nextflow"]
+    data_source = context.datasources["project_name"]
     # TODO: this will be updated to become
-    # data_source = context.data_sources.get("nextflow")
+    # data_source = context.data_sources.get("project_name")
 # TODO: instead of keyerror will be ResourceNotFoundError
 except KeyError:
     data_source = context.data_sources.add_pandas_s3(
-        name="nextflow",
+        name="project_name",
         bucket="nyc-tlc",
     )
 
