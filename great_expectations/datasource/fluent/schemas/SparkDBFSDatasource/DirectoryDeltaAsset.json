@@ -1,6 +1,6 @@
 {
     "title": "DirectoryDeltaAsset",
-    "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
+    "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
     "type": "object",
     "properties": {
         "name": {
@@ -39,12 +39,6 @@
                 "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
             }
         },
-        "batching_regex": {
-            "title": "Batching Regex",
-            "default": ".*",
-            "type": "string",
-            "format": "regex"
-        },
         "connect_options": {
             "title": "Connect Options",
             "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -62,6 +56,12 @@
             "title": "Data Directory",
             "type": "string",
             "format": "path"
+        },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "default": ".*",
+            "type": "string",
+            "format": "regex"
         }
     },
     "required": [

@@ -39,16 +39,16 @@
                 "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
             }
         },
+        "connect_options": {
+            "title": "Connect Options",
+            "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+            "type": "object"
+        },
         "batching_regex": {
             "title": "Batching Regex",
             "default": ".*",
             "type": "string",
             "format": "regex"
-        },
-        "connect_options": {
-            "title": "Connect Options",
-            "description": "Optional filesystem specific advanced parameters for connecting to data assets",
-            "type": "object"
         },
         "compression": {
             "title": "Compression",

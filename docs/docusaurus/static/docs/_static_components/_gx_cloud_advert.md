@@ -1,0 +1,1 @@
+[Check out GX Cloud](https://greatexpectations.io/cloud), our SaaS platform—it's now in public preview! [Sign up here](https://greatexpectations.io/cloud) and you could be validating your data in minutes. We also offer regular GX Cloud workshops: [click here to get more information and register](https://pages.greatexpectations.io/gx-cloud-workshops).

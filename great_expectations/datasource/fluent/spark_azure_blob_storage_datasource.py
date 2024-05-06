@@ -13,7 +13,7 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     AzureBlobStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
@@ -26,8 +26,8 @@ _MISSING: Final = object()
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.azure import BlobServiceClient
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+    from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
+        SPARK_PATH_ASSET_UNION,
     )
 
 
@@ -136,7 +136,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        data_asset: SPARK_PATH_ASSET_UNION,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
