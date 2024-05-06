@@ -4,10 +4,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import (
     SuiteParameterStore,
@@ -19,9 +15,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationMetricIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
 from tests import test_utils
 
 
@@ -84,78 +77,6 @@ def in_memory_param_store(request, test_backends):
             "module_name": "great_expectations.data_context.store",
         },
         runtime_environment={},
-    )
-
-
-@pytest.mark.filesystem
-def test_suite_parameter_store_methods(
-    data_context_parameterized_expectation_suite,
-):
-    run_id = RunIdentifier(run_name="20191125T000000.000000Z")
-    source_patient_data_results = ExpectationSuiteValidationResult(
-        meta={
-            "expectation_suite_name": "source_patient_data.default",
-            "run_id": run_id,
-        },
-        results=[
-            ExpectationValidationResult(
-                expectation_config=ExpectationConfiguration(
-                    expectation_type="expect_table_row_count_to_equal",
-                    kwargs={
-                        "value": 1024,
-                    },
-                ),
-                success=True,
-                exception_info={
-                    "exception_message": None,
-                    "exception_traceback": None,
-                    "raised_exception": False,
-                },
-                result={
-                    "observed_value": 1024,
-                    "element_count": 1024,
-                    "missing_percent": 0.0,
-                    "missing_count": 0,
-                },
-            )
-        ],
-        success=True,
-        suite_name="source_patient_data.default",
-    )
-
-    data_context_parameterized_expectation_suite.store_suite_parameters(source_patient_data_results)
-
-    source_diabetes_data_results = ExpectationSuiteValidationResult(
-        meta={
-            "expectation_suite_name": "source_diabetes_data.default",
-            "run_id": run_id,
-        },
-        results=[
-            ExpectationValidationResult(
-                expectation_config=ExpectationConfiguration(
-                    expectation_type="expect_column_unique_value_count_to_be_between",
-                    kwargs={"column": "patient_nbr", "min": 2048, "max": 2048},
-                ),
-                success=True,
-                exception_info={
-                    "exception_message": None,
-                    "exception_traceback": None,
-                    "raised_exception": False,
-                },
-                result={
-                    "observed_value": 2048,
-                    "element_count": 5000,
-                    "missing_percent": 0.0,
-                    "missing_count": 0,
-                },
-            )
-        ],
-        success=True,
-        suite_name="source_diabetes_data.default",
-    )
-
-    data_context_parameterized_expectation_suite.store_suite_parameters(
-        source_diabetes_data_results
     )
 
 

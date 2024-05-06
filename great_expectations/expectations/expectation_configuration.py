@@ -432,12 +432,6 @@ class ExpectationConfiguration(SerializableDictDot):
             myself["rendered_content"] = convert_to_json_serializable(myself["rendered_content"])
         return myself
 
-    def get_suite_parameter_dependencies(self) -> dict:
-        # TODO: remove me
-        dependencies: dict = {}
-
-        return dependencies
-
     def _get_expectation_impl(self) -> Type[Expectation]:
         return get_expectation_impl(self.expectation_type)
 
