@@ -251,7 +251,9 @@ class SlackNotificationAction(DataDocsAction):
         self, checkpoint_result: CheckpointResult, action_context: ActionContext | None = None
     ) -> dict:
         success = checkpoint_result.success or False
+        checkpoint_name = checkpoint_result.checkpoint_config.name
         result = {"slack_notification_result": "none required"}
+
         if not self._is_enabled(success=success):
             return result
 
@@ -268,7 +270,9 @@ class SlackNotificationAction(DataDocsAction):
             checkpoint_text_blocks.extend(validation_text_blocks)
 
         payload = self.renderer.concatenate_text_blocks(
-            checkpoint_result=checkpoint_result, text_blocks=checkpoint_text_blocks
+            text_blocks=checkpoint_text_blocks,
+            name=checkpoint_name,
+            success=success,
         )
 
         return self._post_slack_payload(payload=payload, result=result)
@@ -276,13 +280,7 @@ class SlackNotificationAction(DataDocsAction):
     def _post_slack_payload(self, payload: dict, result: dict) -> dict:
         blocks = payload.get("blocks")
         if blocks:
-            if len(blocks) >= 1:
-                if blocks[0].get("text"):
-                    result = self._send_notifications_in_batches(
-                        blocks=blocks, payload=payload, result=result
-                    )
-                else:
-                    result = self._get_slack_result(payload=payload)
+            result = self._get_slack_result(payload=payload)
 
         return result
 
@@ -316,17 +314,6 @@ class SlackNotificationAction(DataDocsAction):
             show_failed_expectations=self.show_failed_expectations,
             validation_result_urls=validation_result_urls,
         )
-
-    def _send_notifications_in_batches(self, blocks, payload, result):
-        text = blocks[0]["text"]["text"]
-        chunks, chunk_size = len(text), len(text) // 4
-        split_text = [
-            text[position : position + chunk_size] for position in range(0, chunks, chunk_size)
-        ]
-        for batch in split_text:
-            payload["text"] = batch
-            result = self._get_slack_result(payload)
-        return result
 
     def _get_slack_result(self, payload):
         # this will actually send the POST request to the Slack webapp server

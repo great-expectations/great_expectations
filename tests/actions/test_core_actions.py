@@ -533,39 +533,51 @@ class TestV1ActionRun:
         with mock.patch.object(Session, "post") as mock_post:
             output = action.run(checkpoint_result=checkpoint_result)
 
-        assert mock_post.call_count == 5  # Sent in batches
+        assert mock_post.call_count == 1
         mock_post.assert_called_with(
             url="test",
             headers=None,
             json={
                 "blocks": [
+                    {"text": {"text": mock.ANY, "type": "mrkdwn"}, "type": "header"},
+                    {"type": "divider"},
                     {
                         "text": {
-                            "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite name*: `suite_a`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
-                            "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *3* of *3* expectations were met",  # noqa: E501
+                            "text": "*Batch Validation Status*: Success :tada:\n"
+                            "*Expectation Suite Name*: `suite_a`\n"
+                            "*Data Asset Name*: `__no_data_asset_name__`\n"
+                            "*Run ID*: `__no_run_id__`\n"
+                            "*Batch ID*: `None`\n"
+                            "*Summary*: *3* of *3* expectations were met",
                             "type": "mrkdwn",
                         },
                         "type": "section",
                     },
+                    {"type": "divider"},
                     {
                         "text": {
-                            "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite name*: `suite_b`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
-                            "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *2* of *2* expectations were met",  # noqa: E501
+                            "text": "*Batch Validation Status*: Success :tada:\n"
+                            "*Expectation Suite Name*: `suite_b`\n"
+                            "*Data Asset Name*: `__no_data_asset_name__`\n"
+                            "*Run ID*: `__no_run_id__`\n"
+                            "*Batch ID*: `None`\n"
+                            "*Summary*: *2* of *2* expectations were met",
                             "type": "mrkdwn",
                         },
                         "type": "section",
                     },
+                    {"type": "divider"},
                     {
                         "elements": [
                             {
                                 "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/docs/terms/data_docs",
                                 "type": "mrkdwn",
-                            },
+                            }
                         ],
                         "type": "context",
                     },
                 ],
-                "text": "et",
+                "text": mock.ANY,
             },
         )
 
