@@ -197,8 +197,6 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 4. Select an Expectation type, enter the column name, and then complete the optional fields. To view descriptions of the available Expectation types, see [Available Expectations](./expectations/manage_expectations.md#available-expectations).
 
-    If you prefer to work in a code editor, click the **JSON Editor** tab and define your Expectation parameters in the code pane.
-
 5. Click **Save**. The Expectation is added to the default Expectation Suite.
 
 6. Optional. Repeat steps 3 to 5 to add additional Expectations.
