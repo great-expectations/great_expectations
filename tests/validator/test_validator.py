@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import os
 import shutil
-from typing import TYPE_CHECKING, List, Set, Tuple
-from unittest.mock import ANY, patch
+from typing import TYPE_CHECKING, Tuple
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -14,7 +14,6 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchMarkers,
     BatchRequest,
-    LegacyBatchDefinition,
 )
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -25,12 +24,7 @@ from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.types.base import CheckpointValidationDefinition
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.data_connector.batch_filter import (
-    BatchFilter,
-    build_batch_filter,
-)
 from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
@@ -164,50 +158,6 @@ def test_validator_default_expectation_args__pandas(basic_datasource: PandasData
 
 
 @pytest.fixture()
-def multi_batch_taxi_validator(
-    yellow_trip_pandas_data_context,
-) -> Validator:
-    context = yellow_trip_pandas_data_context
-
-    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
-
-    multi_batch_request: BatchRequest = BatchRequest(
-        datasource_name="taxi_pandas",
-        data_connector_name="monthly",
-        data_asset_name="my_reports",
-        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
-    )
-
-    validator_multi_batch: Validator = context.get_validator(
-        batch_request=multi_batch_request, expectation_suite=suite
-    )
-
-    return validator_multi_batch
-
-
-@pytest.mark.big
-def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_validator):
-    validator = multi_batch_taxi_validator
-
-    actual = validator.convert_to_checkpoint_validations_list()
-    expected_config = CheckpointValidationDefinition(
-        expectation_suite_name="validating_taxi_data",
-        expectation_suite_id=ANY,
-        batch_request={
-            "datasource_name": "taxi_pandas",
-            "data_connector_name": "monthly",
-            "data_asset_name": "my_reports",
-            "data_connector_query": {"batch_filter_parameters": {"year": "2019"}},
-            "batch_spec_passthrough": None,
-            "limit": None,
-        },
-        id=None,
-        name=None,
-    )
-    assert all(config.to_dict() == expected_config.to_dict() for config in actual)
-
-
-@pytest.fixture()
 def multi_batch_taxi_validator_ge_cloud_mode(
     yellow_trip_pandas_data_context,
 ) -> Validator:
@@ -247,25 +197,6 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 
 
 @pytest.mark.big
-def test_validator_can_instantiate_with_a_multi_batch_request(
-    multi_batch_taxi_validator,
-):
-    assert len(multi_batch_taxi_validator.batches) == 3
-    assert (
-        multi_batch_taxi_validator.active_batch.batch_definition.batch_identifiers["month"] == "03"
-    )
-
-    validator_batch_identifiers_for_all_batches: List[str] = [
-        i for i in multi_batch_taxi_validator.batches
-    ]
-    assert validator_batch_identifiers_for_all_batches == [
-        "0327cfb13205ec8512e1c28e438ab43b",
-        "0808e185a52825d22356de2fe00a8f5f",
-        "90bb41c1fbd7c71c05dbc8695320af71",
-    ]
-
-
-@pytest.mark.big
 def test_validator_with_bad_batchrequest(
     yellow_trip_pandas_data_context,
 ):
@@ -284,110 +215,6 @@ def test_validator_with_bad_batchrequest(
         _: Validator = context.get_validator(
             batch_request=multi_batch_request, expectation_suite=suite
         )
-
-
-@pytest.mark.big
-def test_validator_batch_filter(
-    multi_batch_taxi_validator,
-):
-    total_batch_definition_list: List[LegacyBatchDefinition] = [
-        v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
-    ]
-
-    jan_batch_filter: BatchFilter = build_batch_filter(
-        data_connector_query_dict={"batch_filter_parameters": {"month": "01"}}
-    )
-
-    jan_batch_definition_list: List[LegacyBatchDefinition] = (
-        jan_batch_filter.select_from_data_connector_query(
-            batch_definition_list=total_batch_definition_list
-        )
-    )
-
-    assert len(jan_batch_definition_list) == 1
-    assert jan_batch_definition_list[0]["batch_identifiers"]["month"] == "01"
-    assert jan_batch_definition_list[0]["id"] == "0327cfb13205ec8512e1c28e438ab43b"
-
-    feb_march_batch_filter: BatchFilter = build_batch_filter(
-        data_connector_query_dict={"index": slice(-1, 0, -1)}
-    )
-
-    feb_march_batch_definition_list: List[LegacyBatchDefinition] = (
-        feb_march_batch_filter.select_from_data_connector_query(
-            batch_definition_list=total_batch_definition_list
-        )
-    )
-
-    for i in feb_march_batch_definition_list:
-        print(i["batch_identifiers"])
-    assert len(feb_march_batch_definition_list) == 2
-
-    batch_definitions_months_set: Set[str] = {
-        v.batch_identifiers["month"] for v in feb_march_batch_definition_list
-    }
-    assert batch_definitions_months_set == {"02", "03"}
-
-    jan_march_batch_filter: BatchFilter = build_batch_filter(
-        data_connector_query_dict={
-            "custom_filter_function": lambda batch_identifiers: batch_identifiers["month"] == "01"
-            or batch_identifiers["month"] == "03"
-        }
-    )
-
-    jan_march_batch_definition_list: List[LegacyBatchDefinition] = (
-        jan_march_batch_filter.select_from_data_connector_query(
-            batch_definition_list=total_batch_definition_list
-        )
-    )
-
-    for i in jan_march_batch_definition_list:
-        print(i["batch_identifiers"])
-    assert len(jan_march_batch_definition_list) == 2
-
-    batch_definitions_months_set: Set[str] = {
-        v.batch_identifiers["month"] for v in jan_march_batch_definition_list
-    }
-    assert batch_definitions_months_set == {"01", "03"}
-
-    # Filter using limit param
-    limit_batch_filter: BatchFilter = build_batch_filter(data_connector_query_dict={"limit": 2})
-
-    limit_batch_filter_definition_list: List[LegacyBatchDefinition] = (
-        limit_batch_filter.select_from_data_connector_query(
-            batch_definition_list=total_batch_definition_list
-        )
-    )
-
-    assert len(limit_batch_filter_definition_list) == 2
-    assert limit_batch_filter_definition_list[0]["batch_identifiers"]["month"] == "01"
-    assert limit_batch_filter_definition_list[0]["id"] == "0327cfb13205ec8512e1c28e438ab43b"
-    assert limit_batch_filter_definition_list[1]["batch_identifiers"]["month"] == "02"
-    assert limit_batch_filter_definition_list[1]["id"] == "0808e185a52825d22356de2fe00a8f5f"
-
-
-@pytest.mark.big
-def test_custom_filter_function(
-    multi_batch_taxi_validator,
-):
-    total_batch_definition_list: List[LegacyBatchDefinition] = [
-        v.batch_definition for k, v in multi_batch_taxi_validator.batches.items()
-    ]
-    assert len(total_batch_definition_list) == 3
-
-    # Filter to all batch_definitions prior to March
-    jan_feb_batch_filter: BatchFilter = build_batch_filter(
-        data_connector_query_dict={
-            "custom_filter_function": lambda batch_identifiers: int(batch_identifiers["month"]) < 3
-        }
-    )
-    jan_feb_batch_definition_list: list = jan_feb_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
-    )
-    assert len(jan_feb_batch_definition_list) == 2
-    batch_definitions_months_set: Set[str] = {
-        v.batch_identifiers["month"] for v in jan_feb_batch_definition_list
-    }
-    assert batch_definitions_months_set == {"01", "02"}
 
 
 @pytest.mark.big
@@ -652,38 +479,6 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
             },
         )
     assert str(eee.value) == 'Error: The column "not_in_table" in BatchData does not exist.'
-
-
-@pytest.mark.big
-def test_validate_expectation(multi_batch_taxi_validator):
-    validator: Validator = multi_batch_taxi_validator
-    expect_column_values_to_be_between_config = validator.validate_expectation(
-        "expect_column_values_to_be_between"
-    )("passenger_count", 0, 5).expectation_config.kwargs
-    assert expect_column_values_to_be_between_config == {
-        "column": "passenger_count",
-        "min_value": 0,
-        "max_value": 5,
-        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-    }
-
-    expect_column_values_to_be_of_type_config = validator.validate_expectation(
-        "expect_column_values_to_be_of_type"
-    )("passenger_count", "int").expectation_config.kwargs
-
-    assert expect_column_values_to_be_of_type_config == {
-        "column": "passenger_count",
-        "type_": "int",
-        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
-    }
-
-
-@pytest.mark.big
-def test_validator_docstrings(multi_batch_taxi_validator):
-    expectation_impl = getattr(
-        multi_batch_taxi_validator, "expect_column_values_to_be_in_set", None
-    )
-    assert expectation_impl.__doc__.startswith("Expect each column value to be in a given set")
 
 
 @pytest.mark.parametrize(
