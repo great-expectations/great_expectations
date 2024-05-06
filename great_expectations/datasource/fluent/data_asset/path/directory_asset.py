@@ -10,13 +10,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.partitioners import (
-    Partitioner,
-    PartitionerDaily,
-    PartitionerMonthly,
-    PartitionerYearly,
-    RegexPartitioner,
-)
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.path.dataframe_partitioners import (
@@ -34,11 +27,19 @@ from great_expectations.datasource.fluent.interfaces import DatasourceT
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch_definition import BatchDefinition
+    from great_expectations.core.partitioners import (
+        Partitioner,
+        PartitionerDaily,
+        PartitionerMonthly,
+        PartitionerYearly,
+    )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import BatchParameters
 
 
-class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
+class DirectoryDataAsset(
+    PathDataAsset[DatasourceT, DataframePartitioner], Generic[DatasourceT], ABC
+):
     """Base class for PathDataAssets which batch by directory."""
 
     data_directory: pathlib.Path
@@ -82,7 +83,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
     @singledispatchmethod
     def _get_dataframe_partitioner(
         self, partitioner: Optional[Partitioner]
-    ) -> DataframePartitioner: ...
+    ) -> Optional[DataframePartitioner]: ...
 
     @_get_dataframe_partitioner.register
     def _(self, partitioner: PartitionerYearly) -> DataframePartitionerYearly:
@@ -114,10 +115,9 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[RegexPartitioner] = None,
+        partitioner: Optional[DataframePartitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = (FILE_PATH_BATCH_SPEC_KEY,)
-        # todo: need to get dataframe partitioner here
         if partitioner:
             option_keys += tuple(partitioner.param_names)
         return option_keys
@@ -133,7 +133,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[RegexPartitioner] = None,
+        partitioner: Optional[DataframePartitioner] = None,
     ) -> BatchRequest:
         if options is not None and not self._batch_parameters_are_valid(
             options=options,
@@ -181,6 +181,12 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[D
         partitioner = self._get_dataframe_partitioner(batch_request.partitioner)
         if partitioner:
             batch_spec_options["partitioner_method"] = partitioner.method_name
-            batch_spec_options["partitioner_kwargs"] = partitioner.partitioner_method_kwargs()
+            partitioner_kwargs = partitioner.partitioner_method_kwargs()
+            partitioner_kwargs["batch_identifiers"] = (
+                partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
+                    batch_request.options
+                )
+            )
+            batch_spec_options["partitioner_kwargs"] = partitioner_kwargs
 
         return batch_spec_options
