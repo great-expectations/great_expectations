@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+    from great_expectations.datasource.fluent.data_asset.path.spark.spark_asset import (
+        SPARK_PATH_ASSET_UNION,
     )
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
     @override
     def _build_data_connector(
         self,
-        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        data_asset: SPARK_PATH_ASSET_UNION,
         glob_directive: str = "**/*",
         **kwargs,
     ) -> None:

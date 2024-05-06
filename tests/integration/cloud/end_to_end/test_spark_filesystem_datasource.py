@@ -21,9 +21,7 @@ if TYPE_CHECKING:
         DataAsset,
         SparkFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-    )
+    from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
     from great_expectations.validator.validator import Validator
 
 

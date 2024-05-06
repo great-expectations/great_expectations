@@ -280,7 +280,7 @@
         },
         "CSVAsset": {
             "title": "CSVAsset",
-            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -319,12 +319,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -578,6 +572,12 @@
                         "RAISE_ERROR"
                     ],
                     "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -587,7 +587,7 @@
         },
         "DirectoryCSVAsset": {
             "title": "DirectoryCSVAsset",
-            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -626,12 +626,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -890,6 +884,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -900,7 +900,7 @@
         },
         "ParquetAsset": {
             "title": "ParquetAsset",
-            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -939,12 +939,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -1022,6 +1016,12 @@
                         "LEGACY"
                     ],
                     "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1031,7 +1031,7 @@
         },
         "DirectoryParquetAsset": {
             "title": "DirectoryParquetAsset",
-            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1070,12 +1070,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -1158,6 +1152,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1168,7 +1168,7 @@
         },
         "ORCAsset": {
             "title": "ORCAsset",
-            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1207,12 +1207,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -1273,6 +1267,12 @@
                             "type": "string"
                         }
                     ]
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1282,7 +1282,7 @@
         },
         "DirectoryORCAsset": {
             "title": "DirectoryORCAsset",
-            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1321,12 +1321,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -1392,6 +1386,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1402,7 +1402,7 @@
         },
         "JSONAsset": {
             "title": "JSONAsset",
-            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1441,12 +1441,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -1671,6 +1665,12 @@
                             "type": "string"
                         }
                     ]
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1680,7 +1680,7 @@
         },
         "DirectoryJSONAsset": {
             "title": "DirectoryJSONAsset",
-            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1719,12 +1719,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -1954,6 +1948,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1964,7 +1964,7 @@
         },
         "TextAsset": {
             "title": "TextAsset",
-            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2003,12 +2003,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -2066,6 +2060,12 @@
                 "lineSep": {
                     "title": "Linesep",
                     "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -2075,7 +2075,7 @@
         },
         "DirectoryTextAsset": {
             "title": "DirectoryTextAsset",
-            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2114,12 +2114,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -2182,6 +2176,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -2192,7 +2192,7 @@
         },
         "DeltaAsset": {
             "title": "DeltaAsset",
-            "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2231,12 +2231,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -2249,6 +2243,12 @@
                 "versionAsOf": {
                     "title": "Versionasof",
                     "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -2258,7 +2258,7 @@
         },
         "DirectoryDeltaAsset": {
             "title": "DirectoryDeltaAsset",
-            "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2297,12 +2297,6 @@
                         "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
                     }
                 },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
                 "connect_options": {
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
@@ -2320,6 +2314,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [

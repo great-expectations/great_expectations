@@ -1,6 +1,6 @@
 {
     "title": "DirectoryParquetAsset",
-    "description": "Base class for FilePathDataAssets which batch by combining the contents of a directory.",
+    "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
     "type": "object",
     "properties": {
         "name": {
@@ -38,12 +38,6 @@
             "items": {
                 "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
             }
-        },
-        "batching_regex": {
-            "title": "Batching Regex",
-            "default": ".*",
-            "type": "string",
-            "format": "regex"
         },
         "connect_options": {
             "title": "Connect Options",
@@ -127,6 +121,12 @@
             "title": "Data Directory",
             "type": "string",
             "format": "path"
+        },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "default": ".*",
+            "type": "string",
+            "format": "regex"
         }
     },
     "required": [

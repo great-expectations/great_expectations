@@ -10,7 +10,7 @@ import botocore
 import pytest
 
 from great_expectations.core.util import DBFSPath
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     DBFSDataConnector,
 )
 from tests.test_utils import create_files_in_directory
@@ -18,7 +18,7 @@ from tests.test_utils import create_files_in_directory
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
+    from great_expectations.datasource.fluent.data_connector import (
         DataConnector,
     )
 
