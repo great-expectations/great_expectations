@@ -20,13 +20,13 @@ class _PartitionerDatetime(FluentBaseModel):
         return [self.column_name]
 
     def batch_parameters_to_batch_spec_kwarg_identifiers(
-        self, options: BatchParameters
+        self, parameters: BatchParameters
     ) -> Dict[str, Any]:
-        """Validates all the datetime parameters for this partitioner exist in `options`."""
+        """Validates all the datetime parameters for this partitioner exist in `parameters`."""
         identifiers: Dict = {}
         for part in self.param_names:
-            if part in options:
-                identifiers[part] = options[part]
+            if part in parameters:
+                identifiers[part] = parameters[part]
         return {self.column_name: identifiers}
 
     def _get_concrete_values_from_batch(self, batch: Batch) -> tuple[int]:

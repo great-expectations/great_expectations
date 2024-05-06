@@ -10,13 +10,17 @@ from typing import TYPE_CHECKING, List, cast
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+import great_expectations.expectations as gxe
 from great_expectations.alias_types import PathStr
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.core.partitioners import (
-    PartitionerColumnValue,
+    Partitioner,
     PartitionerMonthly,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
     PartitionerYearly,
 )
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
@@ -1099,9 +1103,9 @@ def expected_num_records_directory_asset_no_partitioner_2020_passenger_count_2(
     )
     pre_partitioner_batch_data = pre_partitioner_batches[0].data
     expected_num_records = pre_partitioner_batch_data.dataframe.filter(  # type: ignore[attr-defined]
-        F.col("passenger_count") == 2
+        F.col("pickup_datetime").contains("2018-01-11")
     ).count()
-    assert expected_num_records == 37, "Check that the referenced data hasn't changed"
+    assert expected_num_records == 3, "Check that the referenced data hasn't changed"
     return expected_num_records
 
 
@@ -1119,64 +1123,126 @@ def directory_asset(
 
 
 @pytest.fixture
-def column_value_partitioner():
-    return PartitionerColumnValue(column_name="passenger_count")
+def daily_partitioner():
+    return PartitionerYearAndMonthAndDay(column_name="pickup_datetime")
+
+
+@pytest.fixture
+def daily_batch_parameters_and_expected_result():
+    batch_parameters = {"year": 2018, "month": 1, "day": 11}
+    expected_result = 3
+    return batch_parameters, expected_result
+
+
+@pytest.fixture
+def monthly_batch_parameters_and_expected_result():
+    batch_parameters = {"year": 2018, "month": 1}
+    expected_result = 10
+    return batch_parameters, expected_result
+
+
+@pytest.fixture
+def yearly_batch_parameters_and_expected_result():
+    batch_parameters = {"year": 2018}
+    expected_result = 120
+    return batch_parameters, expected_result
+
+
+@pytest.fixture
+def whole_directory_batch_parameters_and_expected_result():
+    batch_parameters = {}
+    expected_result = 360
+    return batch_parameters, expected_result
 
 
 class TestPartitionerDirectoryAsset:
     @pytest.mark.spark
-    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
-    def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_batch_parameters(
-        self, directory_asset, column_value_partitioner
+    def test_daily_batch_definition_workflow(
+        self, directory_asset, daily_batch_parameters_and_expected_result
     ):
-        assert directory_asset.get_batch_parameters_keys(partitioner=column_value_partitioner) == (
-            "path",
-            "passenger_count",
+        batch_parameters, expected_result = daily_batch_parameters_and_expected_result
+        batch_def = directory_asset.add_batch_definition_daily(
+            name="daily", column="pickup_datetime"
         )
+        batch = batch_def.get_batch(batch_parameters=batch_parameters)
+        assert batch.validate(gxe.ExpectTableRowCountToEqual(value=expected_result)).success
 
     @pytest.mark.spark
-    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
-    def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_one_batch(
-        self, directory_asset, column_value_partitioner
+    def test_monthly_batch_definition_workflow(
+        self, directory_asset, monthly_batch_parameters_and_expected_result
     ):
-        post_passenger_count_partitioner_batch_request = directory_asset.build_batch_request(
-            options={"passenger_count": 2}, partitioner=column_value_partitioner
+        batch_parameters, expected_result = monthly_batch_parameters_and_expected_result
+        batch_def = directory_asset.add_batch_definition_monthly(
+            name="monthly", column="pickup_datetime"
         )
-        post_passenger_count_partitioner_batch_list = (
-            directory_asset.get_batch_list_from_batch_request(
-                post_passenger_count_partitioner_batch_request
-            )
-        )
-        post_partitioner_expected_num_batches = 1
-        assert (
-            len(post_passenger_count_partitioner_batch_list)
-            == post_partitioner_expected_num_batches
-        )
+        batch = batch_def.get_batch(batch_parameters=batch_parameters)
+        assert batch.validate(gxe.ExpectTableRowCountToEqual(value=expected_result)).success
 
     @pytest.mark.spark
-    @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
-    def test_get_batch_list_from_batch_request_with_partitioner_directory_asset_one_batch_size(
-        self,
-        directory_asset,
-        column_value_partitioner,
-        expected_num_records_directory_asset_no_partitioner_2020_passenger_count_2: int,
+    def test_yearly_batch_definition_workflow(
+        self, directory_asset, yearly_batch_parameters_and_expected_result
     ):
-        post_partitioner_batch_request = directory_asset.build_batch_request(
-            options={"passenger_count": 2},
-            partitioner=column_value_partitioner,
+        batch_parameters, expected_result = yearly_batch_parameters_and_expected_result
+        batch_def = directory_asset.add_batch_definition_yearly(
+            name="yearly", column="pickup_datetime"
         )
-        post_partitioner_batch_list = directory_asset.get_batch_list_from_batch_request(
-            post_partitioner_batch_request
-        )
-        post_partitioner_batch_data = post_partitioner_batch_list[0].data
+        batch = batch_def.get_batch(batch_parameters=batch_parameters)
+        assert batch.validate(gxe.ExpectTableRowCountToEqual(value=expected_result)).success
 
-        assert (
-            post_partitioner_batch_data.dataframe.count()
-            == expected_num_records_directory_asset_no_partitioner_2020_passenger_count_2
+    @pytest.mark.spark
+    def test_whole_table_batch_definition_workflow(
+        self, directory_asset, whole_directory_batch_parameters_and_expected_result
+    ):
+        batch_parameters, expected_result = whole_directory_batch_parameters_and_expected_result
+        batch_def = directory_asset.add_batch_definition_whole_directory(name="whole directory")
+        batch = batch_def.get_batch(batch_parameters=batch_parameters)
+        assert batch.validate(gxe.ExpectTableRowCountToEqual(value=expected_result)).success
+
+    @pytest.mark.spark
+    @pytest.mark.parametrize(
+        "partitioner,expected_keys",
+        [
+            pytest.param(
+                PartitionerYearAndMonthAndDay(column_name="foo"),
+                ("path", "year", "month", "day"),
+                id="Daily Partitioner",
+            ),
+            pytest.param(
+                PartitionerYearAndMonth(column_name="foo"),
+                (
+                    "path",
+                    "year",
+                    "month",
+                ),
+                id="Monthly Partitioner",
+            ),
+            pytest.param(
+                PartitionerYear(column_name="foo"),
+                (
+                    "path",
+                    "year",
+                ),
+                id="Yearly Partitioner",
+            ),
+            pytest.param(None, ("path",), id="No Partitioner"),
+        ],
+    )
+    def test_get_batch_parameters_keys_with_partitioner(
+        self, directory_asset, partitioner: Partitioner, expected_keys
+    ):
+        assert directory_asset.get_batch_parameters_keys(partitioner=partitioner) == expected_keys
+
+    @pytest.mark.spark
+    def test_get_batch_list_from_batch_request_returns_single_batch(
+        self, directory_asset, daily_partitioner, daily_batch_parameters_and_expected_result
+    ):
+        batch_parameters, _ = daily_batch_parameters_and_expected_result
+        batch_request = directory_asset.build_batch_request(
+            options=batch_parameters, partitioner=daily_partitioner
         )
-        assert (
-            post_partitioner_batch_data.dataframe.filter(F.col("passenger_count") != 2).count() == 0
-        )
+        batch_list = directory_asset.get_batch_list_from_batch_request(batch_request)
+        expected_batch_count = 1
+        assert len(batch_list) == expected_batch_count
 
 
 @pytest.fixture
@@ -1252,9 +1318,9 @@ class TestPartitionerFileAsset:
     @pytest.mark.spark
     @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_batch_parameters(
-        self, file_asset, column_value_partitioner
+        self, file_asset, daily_partitioner
     ):
-        assert file_asset.get_batch_parameters_keys(partitioner=column_value_partitioner) == (
+        assert file_asset.get_batch_parameters_keys(partitioner=daily_partitioner) == (
             "year",
             "month",
             "path",
@@ -1264,11 +1330,11 @@ class TestPartitionerFileAsset:
     @pytest.mark.spark
     @pytest.mark.xfail(strict=True, reason="Will fix or refactor as part of V1-306")
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_one_batch(
-        self, file_asset, column_value_partitioner
+        self, file_asset, daily_partitioner
     ):
         post_passenger_count_partitioner_batch_request = file_asset.build_batch_request(
             options={"year": "2020", "month": "11", "passenger_count": 2},
-            partitioner=column_value_partitioner,
+            partitioner=daily_partitioner,
         )
         post_passenger_count_partitioner_batch_list = file_asset.get_batch_list_from_batch_request(
             post_passenger_count_partitioner_batch_request
@@ -1284,12 +1350,12 @@ class TestPartitionerFileAsset:
     def test_get_batch_list_from_batch_request_with_partitioner_file_asset_one_batch_size(
         self,
         file_asset,
-        column_value_partitioner,
+        daily_partitioner,
         expected_num_records_file_asset_no_partitioner_2020_10_passenger_count_2: int,
     ):
         post_partitioner_batch_request = file_asset.build_batch_request(
             options={"year": "2020", "month": "11", "passenger_count": 2},
-            partitioner=column_value_partitioner,
+            partitioner=daily_partitioner,
         )
         post_partitioner_batch_list = file_asset.get_batch_list_from_batch_request(
             post_partitioner_batch_request

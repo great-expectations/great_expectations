@@ -272,6 +272,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
             partitioner=partitioner,
         )
 
+    @override
     def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
         """Build a set of options for use in a batch spec from a batch request.
 

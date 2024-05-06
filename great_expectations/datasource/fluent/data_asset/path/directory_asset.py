@@ -10,6 +10,12 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
+from great_expectations.core.partitioners import (
+    Partitioner,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
+)
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.path.dataframe_partitioners import (
@@ -27,19 +33,11 @@ from great_expectations.datasource.fluent.interfaces import DatasourceT
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch_definition import BatchDefinition
-    from great_expectations.core.partitioners import (
-        Partitioner,
-        PartitionerDaily,
-        PartitionerMonthly,
-        PartitionerYearly,
-    )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import BatchParameters
 
 
-class DirectoryDataAsset(
-    PathDataAsset[DatasourceT, DataframePartitioner], Generic[DatasourceT], ABC
-):
+class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[DatasourceT], ABC):
     """Base class for PathDataAssets which batch by directory."""
 
     data_directory: pathlib.Path
@@ -47,6 +45,38 @@ class DirectoryDataAsset(
     batching_regex: Pattern = (  # must use typing.Pattern for pydantic < v1.10
         MATCH_ALL_PATTERN
     )
+
+    @public_api
+    def add_batch_definition_daily(
+        self, name: str, column: str, sort_ascending: bool = True
+    ) -> BatchDefinition:
+        # todo: test column
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonthAndDay(
+                column_name=column, sort_ascending=sort_ascending
+            ),
+        )
+
+    @public_api
+    def add_batch_definition_monthly(
+        self, name: str, column: str, sort_ascending: bool = True
+    ) -> BatchDefinition:
+        # todo: test column
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYearAndMonth(column_name=column, sort_ascending=sort_ascending),
+        )
+
+    @public_api
+    def add_batch_definition_yearly(
+        self, name: str, column: str, sort_ascending: bool = True
+    ) -> BatchDefinition:
+        # todo: test column
+        return self.add_batch_definition(
+            name=name,
+            partitioner=PartitionerYear(column_name=column, sort_ascending=sort_ascending),
+        )
 
     @override
     def _get_batch_definition_list(
@@ -81,21 +111,19 @@ class DirectoryDataAsset(
         return batch_definition_list
 
     @singledispatchmethod
-    def _get_dataframe_partitioner(
-        self, partitioner: Optional[Partitioner]
-    ) -> Optional[DataframePartitioner]: ...
+    def _get_dataframe_partitioner(self, partitioner) -> Optional[DataframePartitioner]: ...
 
     @_get_dataframe_partitioner.register
-    def _(self, partitioner: PartitionerYearly) -> DataframePartitionerYearly:
-        return DataframePartitionerYearly(**partitioner.dict())
+    def _(self, partitioner: PartitionerYear) -> DataframePartitionerYearly:
+        return DataframePartitionerYearly(**partitioner.dict(exclude={"param_names"}))
 
     @_get_dataframe_partitioner.register
-    def _(self, partitioner: PartitionerMonthly) -> DataframePartitionerMonthly:
-        return DataframePartitionerMonthly(**partitioner.dict())
+    def _(self, partitioner: PartitionerYearAndMonth) -> DataframePartitionerMonthly:
+        return DataframePartitionerMonthly(**partitioner.dict(exclude={"param_names"}))
 
     @_get_dataframe_partitioner.register
-    def _(self, partitioner: PartitionerDaily) -> DataframePartitionerDaily:
-        return DataframePartitionerDaily(**partitioner.dict())
+    def _(self, partitioner: PartitionerYearAndMonthAndDay) -> DataframePartitionerDaily:
+        return DataframePartitionerDaily(**partitioner.dict(exclude={"param_names"}))
 
     @_get_dataframe_partitioner.register
     def _(self, partitioner: None) -> None:
@@ -115,11 +143,12 @@ class DirectoryDataAsset(
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[DataframePartitioner] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = (FILE_PATH_BATCH_SPEC_KEY,)
-        if partitioner:
-            option_keys += tuple(partitioner.param_names)
+        dataframe_partitioner = self._get_dataframe_partitioner(partitioner)
+        if dataframe_partitioner:
+            option_keys += tuple(dataframe_partitioner.param_names)
         return option_keys
 
     @override
@@ -133,7 +162,7 @@ class DirectoryDataAsset(
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[DataframePartitioner] = None,
+        partitioner: Optional[Partitioner] = None,
     ) -> BatchRequest:
         if options is not None and not self._batch_parameters_are_valid(
             options=options,
@@ -155,6 +184,7 @@ class DirectoryDataAsset(
             partitioner=partitioner,
         )
 
+    @override
     def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
         """Build a set of options for use in a batch spec from a batch request.
 
@@ -178,15 +208,22 @@ class DirectoryDataAsset(
                 config_provider=self._datasource._config_provider,
             ),
         }
-        partitioner = self._get_dataframe_partitioner(batch_request.partitioner)
-        if partitioner:
-            batch_spec_options["partitioner_method"] = partitioner.method_name
-            partitioner_kwargs = partitioner.partitioner_method_kwargs()
-            partitioner_kwargs["batch_identifiers"] = (
-                partitioner.batch_request_options_to_batch_spec_kwarg_identifiers(
-                    batch_request.options
-                )
-            )
-            batch_spec_options["partitioner_kwargs"] = partitioner_kwargs
+
+        self._add_partitioner_batch_parameters(
+            batch_request=batch_request, parameters=batch_spec_options
+        )
 
         return batch_spec_options
+
+    def _add_partitioner_batch_parameters(self, batch_request, parameters) -> dict:
+        """If a partitioner is present, add its configuration to batch parameters."""
+        partitioner = self._get_dataframe_partitioner(batch_request.partitioner)
+        if partitioner:
+            parameters["partitioner_method"] = partitioner.method_name
+            partitioner_kwargs = partitioner.partitioner_method_kwargs()
+            batch_identifiers = partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(
+                parameters=batch_request.options
+            )
+            partitioner_kwargs["batch_identifiers"] = batch_identifiers
+            parameters["partitioner_kwargs"] = partitioner_kwargs
+        return parameters

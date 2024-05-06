@@ -194,6 +194,17 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
             ) from e
         raise TestConnectionError(self._test_connection_error_message)
 
+    def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
+        """Build a set of options for use in a batch spec from a batch request.
+
+        Args:
+            batch_request: Batch request to use to generate options.
+
+        Returns:
+            Dictionary containing batch spec options.
+        """
+        raise NotImplementedError
+
     def get_whole_directory_path_override(
         self,
     ) -> PathStr | None:
