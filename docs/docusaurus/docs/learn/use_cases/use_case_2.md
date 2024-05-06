@@ -54,7 +54,7 @@ import great_expectations as gx
 from great_expectations_experimental.expectations.expect_column_values_to_be_present_in_other_table import ExpectColumnValuesToBePresentInOtherTable
 ```
 
-Next, create the GX context, Data Source, Data Asset, Batch Request, and Validator. Note that we have used a Snowflake Data Source, here you can [adjust the Data Source type based on your data](/docs/oss/guides/connecting_to_your_data/fluent/database/connect_sql_source_data).
+Next, create the GX context, Data Source, Data Asset, Batch Request, and Validator. This example uses a Snowflake Data Source. To connect to a different Data Source, see [Connect to data](/core/manage_and_access_data/connect_to_data/connect_to_data.md).
 ```
 context = gx.get_context()
 
