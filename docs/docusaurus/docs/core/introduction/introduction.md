@@ -25,19 +25,19 @@ import OverviewCard from '@site/src/components/OverviewCard';
   />
 
   <LinkCard 
-      topIcon 
-      label="Community resources"
-      description="Learn how to connect with the GX community, where to ask questions about GX, and how to contribute to the GX open source code and documentation."
-      to="/core/introduction/community_resources" 
-      icon="/img/expectation_icon.svg"
-  />
-
-  <LinkCard 
     topIcon 
     label="Try GX"
     description="Set up a local GX deployment and give it a test run using sample data."
     to="/core/introduction/try_gx" 
     icon="/img/expectation_icon.svg" 
+  />
+
+  <LinkCard 
+      topIcon 
+      label="Community resources"
+      description="Learn how to connect with the GX community, where to ask questions about GX, and how to contribute to the GX open source code and documentation."
+      to="/core/introduction/community_resources" 
+      icon="/img/expectation_icon.svg"
   />
 
 </LinkCardGrid>
