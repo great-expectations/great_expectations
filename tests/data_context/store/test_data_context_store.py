@@ -27,6 +27,8 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
         actual = store.serialize(basic_data_context_config)
 
     expected = {
+        "analytics": True,
+        "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 2.0,
         "data_docs_sites": {},

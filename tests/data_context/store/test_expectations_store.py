@@ -12,7 +12,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
-from tests import test_utils
 
 
 @pytest.mark.filesystem
@@ -123,7 +122,7 @@ def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     # Check that store_backend_id exists can be read
     assert in_memory_expectations_store.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(in_memory_expectations_store.store_backend_id)
+    assert isinstance(in_memory_expectations_store.store_backend_id, UUID)
 
 
 @pytest.mark.filesystem

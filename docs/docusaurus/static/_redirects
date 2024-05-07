@@ -247,10 +247,6 @@ http://old.docs.greatexpectations.io/* http://648b46c2ec119e00089c4318--niobium-
 /docs/reference/api/expectations/util.py /docs/reference/api/expectations/util
 /docs/reference/api/render/util.py /docs/reference/api/render/util
 
-# Redirects for renamed reference docs
-
-/docs/reference/anonymous_usage_statistics /docs/reference/usage_statistics
-
 # Redirect from Getting Started Tutorial to Quickstart
 
 /docs/docusaurus/docs/tutorials/getting_started/ /docs/tutorials/quickstart

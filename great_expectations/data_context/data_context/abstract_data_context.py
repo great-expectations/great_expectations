@@ -2587,7 +2587,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             logger.info(f"Something went wrong when trying to read from the user's conf file: {e}")
             return None
 
-        oss_id = config.get("anonymous_usage_statistics", "oss_id", fallback=None)
+        oss_id = config.get("analytics", "oss_id", fallback=None)
         if not oss_id:
             return cls._set_oss_id(config)
 
@@ -2606,8 +2606,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         oss_id = uuid.uuid4()
 
-        # If the section already exists, don't overwite usage_statistics_url
-        section = "anonymous_usage_statistics"
+        # If the section already exists, don't overwrite
+        section = "analytics"
         if not config.has_section(section):
             config[section] = {}
         config[section]["oss_id"] = str(oss_id)
