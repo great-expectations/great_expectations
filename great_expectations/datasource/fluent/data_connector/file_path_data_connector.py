@@ -18,7 +18,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
 )
-from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
+from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_connector import (
     DataConnector,
 )
@@ -57,7 +57,6 @@ class FilePathDataConnector(DataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         file_path_template_map_fn: Optional[Callable] = None,
         whole_directory_path_override: PathStr | None = None,
@@ -144,7 +143,9 @@ class FilePathDataConnector(DataConnector):
     # Interface Method
     @override
     def get_data_reference_count(self) -> int:
-        data_references = self._get_data_references_cache(batching_regex=self._batching_regex)
+        # todo: in the world of BatchDefinition, this method must accept a BatchRequest.
+        #       In the meantime, we fall back to a regex that matches everything.
+        data_references = self._get_data_references_cache(batching_regex=MATCH_ALL_PATTERN)
         return len(data_references)
 
     # Interface Method
@@ -219,7 +220,7 @@ class FilePathDataConnector(DataConnector):
         if batch_request.partitioner:
             batching_regex = batch_request.partitioner.regex
         else:
-            batching_regex = self._batching_regex
+            batching_regex = MATCH_ALL_PATTERN
         for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
             if (
                 self._batch_definition_matches_batch_request(
@@ -251,9 +252,6 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """  # noqa: E501
-
-        if not regex:
-            regex = self._batching_regex
 
         def _matching_criterion(
             batch_definition_list: Union[List[LegacyBatchDefinition], None],
@@ -294,8 +292,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             dict -- dictionary of "BatchSpec" properties
         """  # noqa: E501
-        # todo: remove fallback self._batching_regex
-        batching_regex = batch_definition.batching_regex or self._batching_regex
+        batching_regex = batch_definition.batching_regex
         if not batching_regex:
             raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
         regex_parser = RegExParser(
