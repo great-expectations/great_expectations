@@ -30,7 +30,7 @@ def test_SlackRenderer_render():
         == [
             {
                 "text": {
-                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite name*: `my_suite`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
+                    "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite Name*: `my_suite`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
                     "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *3* of *3* expectations were met",  # noqa: E501
                     "type": "mrkdwn",
                 },
