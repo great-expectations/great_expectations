@@ -12,6 +12,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -397,7 +398,10 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.suites.add(ExpectationSuite(name="test_suite"))
+    try:
+        suite = in_memory_runtime_context.suites.add(ExpectationSuite(name="test_suite"))
+    except DataContextError:
+        suite = in_memory_runtime_context.suites.get(name="test_suite")
 
     expectation_arguments_column: dict = {
         "column": "Name",  # use correct column to avoid error
