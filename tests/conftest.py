@@ -998,7 +998,8 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
 ):
     context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
-    project_dir: str = context.root_directory
+    project_dir = context.root_directory
+    assert isinstance(project_dir, str)
     data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
 
     if (
