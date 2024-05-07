@@ -61,7 +61,6 @@ from great_expectations.data_context.util import (
     file_relative_path,
 )
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
-from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -962,28 +961,6 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
-    project_dir: str = context.root_directory
-    data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
-
-    datasource_config: str = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_additional_data_connector:
-                class_name: InferredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                default_regex:
-                    pattern: (.*)\\.csv
-                    group_names:
-                        - data_asset_name
-    """
-
-    _: BaseDatasource = context.add_datasource(
-        "my_additional_datasource", **yaml.load(datasource_config)
-    )
     project_manager.set_project(context)
     return context
 
