@@ -3,7 +3,7 @@ from __future__ import annotations
 import pathlib
 from abc import ABC
 from functools import singledispatchmethod
-from typing import TYPE_CHECKING, Generic, Optional, Pattern
+from typing import TYPE_CHECKING, Dict, Generic, Literal, Optional, Pattern, Union
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
@@ -201,24 +201,29 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
             ),
         }
 
-        self._add_partitioner_batch_parameters(
-            batch_request=batch_request, parameters=batch_spec_options
-        )
+        partitioner_parameters = self._get_partitioner_parameters(batch_request=batch_request)
+        if partitioner_parameters:
+            batch_spec_options.update(partitioner_parameters)
 
         return batch_spec_options
 
-    def _add_partitioner_batch_parameters(self, batch_request, parameters) -> dict:
+    def _get_partitioner_parameters(self, batch_request: BatchRequest) -> Optional[dict]:
         """If a partitioner is present, add its configuration to batch parameters."""
-        partitioner = self._get_dataframe_partitioner(batch_request.partitioner)
-        if partitioner:
-            parameters["partitioner_method"] = partitioner.method_name
-            partitioner_kwargs = partitioner.partitioner_method_kwargs()
-            batch_identifiers = partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(
-                parameters=batch_request.options
-            )
-            partitioner_kwargs["batch_identifiers"] = batch_identifiers
-            parameters["partitioner_kwargs"] = partitioner_kwargs
-        return parameters
+        partitioner: Optional[DataframePartitioner] = self._get_dataframe_partitioner(
+            batch_request.partitioner
+        )
+        if not partitioner:
+            return None
+        batch_identifiers = partitioner.batch_parameters_to_batch_spec_kwarg_identifiers(
+            parameters=batch_request.options
+        )
+        return {
+            "partitioner_method": partitioner.method_name,
+            "partitioner_kwargs": {
+                **partitioner.partitioner_method_kwargs(),
+                "batch_identifiers": batch_identifiers,
+            },
+        }
 
     @override
     def _get_sortable_partitioner(

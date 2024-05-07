@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
@@ -21,7 +21,7 @@ class _PartitionerDatetime(FluentBaseModel):
 
     def batch_parameters_to_batch_spec_kwarg_identifiers(
         self, parameters: BatchParameters
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, Dict[str, str]]:
         """Validates all the datetime parameters for this partitioner exist in `parameters`."""
         identifiers: Dict = {}
         for part in self.param_names:
@@ -36,7 +36,7 @@ class _PartitionerDatetime(FluentBaseModel):
     def param_names(self) -> list[str]:
         raise NotImplementedError
 
-    def partitioner_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, str]:
         raise NotImplementedError
 
 
@@ -51,7 +51,7 @@ class DataframePartitionerYearly(_PartitionerDatetime):
         return ["year"]
 
     @override
-    def partitioner_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, str]:
         return {"column_name": self.column_name}
 
 
@@ -66,7 +66,7 @@ class DataframePartitionerMonthly(_PartitionerDatetime):
         return ["year", "month"]
 
     @override
-    def partitioner_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, str]:
         return {"column_name": self.column_name}
 
 
@@ -83,7 +83,7 @@ class DataframePartitionerDaily(_PartitionerDatetime):
         return ["year", "month", "day"]
 
     @override
-    def partitioner_method_kwargs(self) -> Dict[str, Any]:
+    def partitioner_method_kwargs(self) -> Dict[str, str]:
         return {"column_name": self.column_name}
 
 
