@@ -8,21 +8,21 @@ from great_expectations.compatibility import pydantic
 
 
 @public_api
-class PartitionerYear(pydantic.BaseModel):
+class ColumnPartitionerYearly(pydantic.BaseModel):
     column_name: str
     sort_ascending: bool = True
     method_name: Literal["partition_on_year"] = "partition_on_year"
 
 
 @public_api
-class PartitionerYearAndMonth(pydantic.BaseModel):
+class ColumnPartitionerMonthly(pydantic.BaseModel):
     column_name: str
     sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
 
 @public_api
-class PartitionerYearAndMonthAndDay(pydantic.BaseModel):
+class ColumnPartitionerDaily(pydantic.BaseModel):
     column_name: str
     sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month_and_day"] = (
@@ -81,9 +81,9 @@ ColumnPartitioner = Union[
     PartitionerMultiColumnValue,
     PartitionerDividedInteger,
     PartitionerModInteger,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
+    ColumnPartitionerYearly,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerDaily,
     PartitionerDatetimePart,
     PartitionerConvertedDatetime,
 ]

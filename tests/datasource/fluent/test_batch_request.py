@@ -9,10 +9,10 @@ import pytest
 from great_expectations.core.batch_definition import PartitionerT
 from great_expectations.core.partitioners import (
     ColumnPartitioner,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
     PartitionerColumnValue,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
     RegexPartitionerDaily,
     RegexPartitionerMonthly,
     RegexPartitionerYearly,
@@ -131,21 +131,21 @@ def test_batch_request_config_serialization_round_trips(
 def _partitioner_test_cases():
     return [
         pytest.param(
-            PartitionerYearAndMonthAndDay(
+            ColumnPartitionerDaily(
                 column_name="foo",
                 sort_ascending=False,
             ),
             id="Sql Daily",
         ),
         pytest.param(
-            PartitionerYearAndMonth(
+            ColumnPartitionerMonthly(
                 column_name="foo",
                 sort_ascending=False,
             ),
             id="Sql Monthly",
         ),
         pytest.param(
-            PartitionerYear(
+            ColumnPartitionerYearly(
                 column_name="foo",
                 sort_ascending=False,
             ),

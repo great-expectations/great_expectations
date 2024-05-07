@@ -37,15 +37,15 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.partitioners import (
     ColumnPartitioner,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
     PartitionerColumnValue,
     PartitionerConvertedDatetime,
     PartitionerDatetimePart,
     PartitionerDividedInteger,
     PartitionerModInteger,
     PartitionerMultiColumnValue,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
@@ -440,9 +440,9 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
         Type[ColumnPartitioner], Optional[Type[SqlPartitioner]]
     ] = pydantic.PrivateAttr(
         default={
-            PartitionerYear: SqlPartitionerYear,
-            PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
-            PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
+            ColumnPartitionerYearly: SqlPartitionerYear,
+            ColumnPartitionerMonthly: SqlPartitionerYearAndMonth,
+            ColumnPartitionerDaily: SqlPartitionerYearAndMonthAndDay,
             PartitionerColumnValue: SqlPartitionerColumnValue,
             PartitionerDatetimePart: SqlPartitionerDatetimePart,
             PartitionerDividedInteger: SqlPartitionerDividedInteger,
@@ -646,7 +646,7 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYear(column_name=column, sort_ascending=sort_ascending),
+            partitioner=ColumnPartitionerYearly(column_name=column, sort_ascending=sort_ascending),
         )
 
     @public_api
@@ -655,7 +655,7 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonth(column_name=column, sort_ascending=sort_ascending),
+            partitioner=ColumnPartitionerMonthly(column_name=column, sort_ascending=sort_ascending),
         )
 
     @public_api
@@ -664,9 +664,7 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonthAndDay(
-                column_name=column, sort_ascending=sort_ascending
-            ),
+            partitioner=ColumnPartitionerDaily(column_name=column, sort_ascending=sort_ascending),
         )
 
     @override
