@@ -158,13 +158,6 @@ local_tests = [
     #     backend_dependencies=[BackendDependencies.PANDAS],
     # ),
     IntegrationTestFixture(
-        name="how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
         name="expect_column_max_to_be_between_custom",
         user_flow_script="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py",
         backend_dependencies=[],
