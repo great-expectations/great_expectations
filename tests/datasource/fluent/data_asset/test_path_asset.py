@@ -10,6 +10,9 @@ from great_expectations.core.partitioners import (
     PartitionerDaily,
     PartitionerMonthly,
     PartitionerPath,
+    PartitionerYear,
+    PartitionerYearAndMonth,
+    PartitionerYearAndMonthAndDay,
     PartitionerYearly,
 )
 from great_expectations.datasource.fluent import Datasource
@@ -537,6 +540,70 @@ def test_add_batch_definition_whole_directory_success(
 
     # act
     batch_definition = asset.add_batch_definition_whole_directory(name=name)
+
+    # assert
+    assert batch_definition == expected_batch_definition
+    datasource.add_batch_definition.assert_called_once_with(expected_batch_definition)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("asset", _directory_asset_parameters(), indirect=["asset"])
+def test_add_batch_definition_daily_success(datasource, asset):
+    # arrange
+    name = "batch_def_name"
+    column = "foo"
+    expected_batch_definition = BatchDefinition(
+        name=name,
+        partitioner=PartitionerYearAndMonthAndDay(column_name=column),
+    )
+    datasource.add_batch_definition.return_value = expected_batch_definition
+
+    # act
+    batch_definition = asset.add_batch_definition_daily(name=name, column=column)
+
+    # assert
+    assert batch_definition == expected_batch_definition
+    datasource.add_batch_definition.assert_called_once_with(expected_batch_definition)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("asset", _directory_asset_parameters(), indirect=["asset"])
+def test_add_batch_definition_monthly_success(
+    datasource,
+    asset,
+):
+    # arrange
+    name = "batch_def_name"
+    column = "foo"
+    expected_batch_definition = BatchDefinition(
+        name=name, partitioner=PartitionerYearAndMonth(column_name=column)
+    )
+    datasource.add_batch_definition.return_value = expected_batch_definition
+
+    # act
+    batch_definition = asset.add_batch_definition_monthly(name=name, column=column)
+
+    # assert
+    assert batch_definition == expected_batch_definition
+    datasource.add_batch_definition.assert_called_once_with(expected_batch_definition)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("asset", _directory_asset_parameters(), indirect=["asset"])
+def test_add_batch_definition_yearly_success(
+    datasource,
+    asset,
+):
+    # arrange
+    name = "batch_def_name"
+    column = "foo"
+    expected_batch_definition = BatchDefinition(
+        name=name, partitioner=PartitionerYear(column_name=column)
+    )
+    datasource.add_batch_definition.return_value = expected_batch_definition
+
+    # act
+    batch_definition = asset.add_batch_definition_yearly(name=name, column=column)
 
     # assert
     assert batch_definition == expected_batch_definition

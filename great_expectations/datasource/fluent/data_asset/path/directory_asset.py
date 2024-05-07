@@ -47,36 +47,33 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
     )
 
     @public_api
-    def add_batch_definition_daily(
-        self, name: str, column: str, sort_ascending: bool = True
-    ) -> BatchDefinition:
+    def add_batch_definition_daily(self, name: str, column: str) -> BatchDefinition:
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonthAndDay(
-                column_name=column, sort_ascending=sort_ascending
-            ),
+            partitioner=PartitionerYearAndMonthAndDay(column_name=column),
         )
 
     @public_api
-    def add_batch_definition_monthly(
-        self, name: str, column: str, sort_ascending: bool = True
-    ) -> BatchDefinition:
+    def add_batch_definition_monthly(self, name: str, column: str) -> BatchDefinition:
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonth(column_name=column, sort_ascending=sort_ascending),
+            partitioner=PartitionerYearAndMonth(column_name=column),
         )
 
     @public_api
-    def add_batch_definition_yearly(
-        self, name: str, column: str, sort_ascending: bool = True
-    ) -> BatchDefinition:
+    def add_batch_definition_yearly(self, name: str, column: str) -> BatchDefinition:
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYear(column_name=column, sort_ascending=sort_ascending),
+            partitioner=PartitionerYear(column_name=column),
         )
+
+    @public_api
+    def add_batch_definition_whole_directory(self, name: str) -> BatchDefinition:
+        """Add a BatchDefinition which creates a single batch for the entire directory."""
+        return self.add_batch_definition(name=name, partitioner=None)
 
     @override
     def _get_batch_definition_list(
@@ -128,11 +125,6 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
     @_get_dataframe_partitioner.register
     def _(self, partitioner: None) -> None:
         return None
-
-    @public_api
-    def add_batch_definition_whole_directory(self, name: str) -> BatchDefinition:
-        """Add a BatchDefinition which creates a single batch for the entire directory."""
-        return self.add_batch_definition(name=name, partitioner=None)
 
     @override
     def _get_reader_options_include(self) -> set[str]:
