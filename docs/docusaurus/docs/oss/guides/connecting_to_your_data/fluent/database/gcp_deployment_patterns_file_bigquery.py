@@ -7,6 +7,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.exceptions.exceptions import DataContextError
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -260,7 +261,10 @@ request = table_asset.build_batch_request()
 
 
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite">
-context.suites.add(ExpectationSuite(name="test_bigquery_suite"))
+try:
+    context.suites.add(ExpectationSuite(name="test_bigquery_suite"))
+except DataContextError:
+    ...
 
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_bigquery_suite"

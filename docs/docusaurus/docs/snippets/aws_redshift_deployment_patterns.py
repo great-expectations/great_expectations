@@ -8,6 +8,7 @@ from great_expectations.data_context.data_context.file_data_context import (
 )
 
 # This utility is not for general use. It is only to support testing.
+from great_expectations.exceptions.exceptions import DataContextError
 from tests.test_utils import get_redshift_connection_url
 
 temp_dir = tempfile.TemporaryDirectory()
@@ -248,7 +249,11 @@ query_asset = datasource.add_query_asset(
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py add_suite_and_get_validator">
 request = table_asset.build_batch_request()
 
-context.suites.add(ExpectationSuite(name="test_suite"))
+try:
+    context.suites.add(ExpectationSuite(name="test_suite"))
+except DataContextError:
+    ...
+
 
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_suite"

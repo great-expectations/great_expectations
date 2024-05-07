@@ -8,6 +8,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.exceptions.exceptions import DataContextError
 
 client = boto3.client("s3")
 temp_dir = tempfile.TemporaryDirectory()
@@ -246,7 +247,10 @@ assert "name: s3_datasource" in config
 assert "type: pandas_s3" in config
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_validator">
-context.suites.add(ExpectationSuite(name="test_suite"))
+try:
+    context.suites.add(ExpectationSuite(name="test_suite"))
+except DataContextError:
+    ...
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_suite"
 )
