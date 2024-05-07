@@ -16,12 +16,12 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.core.partitioners import (
+    ColumnPartitioner,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
     FileNamePartitionerMonthly,
     FileNamePartitionerYearly,
-    PartitionerColumnValue,
-    ColumnPartitionerDaily,
-    ColumnPartitionerYearly,
-    ColumnPartitionerMonthly, ColumnPartitioner
 )
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,

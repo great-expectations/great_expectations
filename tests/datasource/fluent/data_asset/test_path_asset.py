@@ -7,13 +7,13 @@ import pytest
 from great_expectations.alias_types import PathStr
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import (
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
     FileNamePartitionerDaily,
     FileNamePartitionerMonthly,
     FileNamePartitionerPath,
     FileNamePartitionerYearly,
-    ColumnPartitionerYearly,
-ColumnPartitionerMonthly,
-ColumnPartitionerDaily,
 )
 from great_expectations.datasource.fluent import Datasource
 from great_expectations.datasource.fluent.data_asset.path.file_asset import (
@@ -581,7 +581,7 @@ def test_add_batch_definition_monthly_success(
     name = "batch_def_name"
     column = "foo"
     expected_batch_definition = BatchDefinition(
-        name=name, partitioner=PartitionerYearAndMonth(column_name=column)
+        name=name, partitioner=ColumnPartitionerMonthly(column_name=column)
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
 
@@ -603,7 +603,7 @@ def test_add_batch_definition_yearly_success(
     name = "batch_def_name"
     column = "foo"
     expected_batch_definition = BatchDefinition(
-        name=name, partitioner=PartitionerYear(column_name=column)
+        name=name, partitioner=ColumnPartitionerYearly(column_name=column)
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
 

@@ -10,8 +10,12 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.partitioners import ColumnPartitioner, ColumnPartitionerYearly, \
-    ColumnPartitionerMonthly, ColumnPartitionerDaily
+from great_expectations.core.partitioners import (
+    ColumnPartitioner,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
+)
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.path.dataframe_partitioners import (
@@ -33,9 +37,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchParameters
 
 
-class DirectoryDataAsset(
-    PathDataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT], ABC
-):
+class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT], ABC):
     """Base class for PathDataAssets which batch by combining the contents of a directory."""
 
     data_directory: pathlib.Path
@@ -109,15 +111,15 @@ class DirectoryDataAsset(
     def _get_dataframe_partitioner(self, partitioner) -> Optional[DataframePartitioner]: ...
 
     @_get_dataframe_partitioner.register
-    def _(self, partitioner: PartitionerYear) -> DataframePartitionerYearly:
+    def _(self, partitioner: ColumnPartitionerYearly) -> DataframePartitionerYearly:
         return DataframePartitionerYearly(**partitioner.dict(exclude={"param_names"}))
 
     @_get_dataframe_partitioner.register
-    def _(self, partitioner: PartitionerYearAndMonth) -> DataframePartitionerMonthly:
+    def _(self, partitioner: ColumnPartitionerMonthly) -> DataframePartitionerMonthly:
         return DataframePartitionerMonthly(**partitioner.dict(exclude={"param_names"}))
 
     @_get_dataframe_partitioner.register
-    def _(self, partitioner: PartitionerYearAndMonthAndDay) -> DataframePartitionerDaily:
+    def _(self, partitioner: ColumnPartitionerDaily) -> DataframePartitionerDaily:
         return DataframePartitionerDaily(**partitioner.dict(exclude={"param_names"}))
 
     @_get_dataframe_partitioner.register

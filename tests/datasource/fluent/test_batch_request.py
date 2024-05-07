@@ -15,7 +15,6 @@ from great_expectations.core.partitioners import (
     FileNamePartitionerDaily,
     FileNamePartitionerMonthly,
     FileNamePartitionerYearly,
-    PartitionerColumnValue,
 )
 from great_expectations.datasource.fluent import BatchRequest
 
