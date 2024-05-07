@@ -86,6 +86,9 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
+data_context_id: 6e1c5254-2541-4cea-8d0d-d66b4d335619
+analytics: false
+
 fluent_datasources:
   save_ds_test:
     type: sqlite
