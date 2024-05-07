@@ -635,7 +635,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     monkeypatch.setenv("DB_HOST_FROM_ENV_VAR", "DB_HOST_FROM_ENV_VAR_VALUE")
 
     # "postgresql+psycopg2://<username>:<password>@<host>:<port>/<database>"
-    connection_string = "postgresql+psycopg2:/$DB_USER:$DB_PWD@$DB_HOST:65432/$DB_NAME"
+    connection_string = "postgresql://${DB_USER}:${DB_PWD}@${DB_HOST}:65432/${DB_NAME}"
     context.data_sources.add_postgres("test_datasource", connection_string=connection_string)
     # datasource_config = DatasourceConfig(
     #     class_name="Datasource",
