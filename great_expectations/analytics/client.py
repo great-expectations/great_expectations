@@ -57,12 +57,10 @@ def init(  # noqa: PLR0913
         conf["oss_id"] = oss_id
     update_config(config=Config(cloud_mode=cloud_mode, **conf))
 
-    # An omitted enabled_from_config should default to True
-    if enabled_from_config is None:
-        enabled_from_config = True
-
     # Analytics are enabled by default
     # A user can opt out through the config or by setting the environment variable
+    # If one is set to False, analytics will be disabled
+    enabled_from_config = True if enabled_from_config is None else enabled_from_config
     enabled = enabled_from_config and ENV_CONFIG.posthog_enabled
     posthog.disabled = not enabled
     if enabled:
