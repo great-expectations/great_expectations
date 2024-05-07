@@ -213,7 +213,7 @@
         },
         "FileDataAsset": {
             "title": "FileDataAsset",
-            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "description": "Base class for PathDataAssets which batch by file.",
             "type": "object",
             "properties": {
                 "name": {
