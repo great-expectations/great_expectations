@@ -236,8 +236,6 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     when instantiating the DataContext,
     and also that this data_context_id is used to configure the expectations_store.store_backend_id
     """
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)  # Undo the project-wide test default
-
     bucket = "leakybucket"
     expectations_store_prefix = "expectations_store_prefix"
     validation_results_store_prefix = "validation_results_store_prefix"
