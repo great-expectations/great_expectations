@@ -310,7 +310,46 @@ def build_in_memory_runtime_context(
         InMemoryStoreBackendDefaults,
     )
 
+    datasources = {}
+    if include_pandas:
+        datasources["pandas_datasource"] = {
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+    if include_spark:
+        datasources["spark_datasource"] = {
+            "execution_engine": {
+                "class_name": "SparkDFExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+
     data_context_config: DataContextConfig = DataContextConfig(
+        datasources=datasources,  # type: ignore[arg-type]
         expectations_store_name="expectations_store",
         validation_results_store_name="validation_results_store",
         suite_parameter_store_name="suite_parameter_store",
@@ -319,11 +358,6 @@ def build_in_memory_runtime_context(
     )
 
     context = context_factory(project_config=data_context_config, mode="ephemeral")
-
-    if include_pandas:
-        context.data_sources.add_pandas("pandas_datasource")
-    if include_spark:
-        context.data_sources.add_spark("spark_datasource")
 
     return context
 
