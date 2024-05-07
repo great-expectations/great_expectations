@@ -13,8 +13,10 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
-from great_expectations.datasource.fluent.constants import SNOWFLAKE_PARTNER_APPLICATION_CLOUD, \
-    SNOWFLAKE_PARTNER_APPLICATION_OSS
+from great_expectations.datasource.fluent.constants import (
+    SNOWFLAKE_PARTNER_APPLICATION_CLOUD,
+    SNOWFLAKE_PARTNER_APPLICATION_OSS,
+)
 from great_expectations.datasource.fluent.sql_datasource import (
     FluentBaseModel,
     SQLDatasource,
@@ -239,7 +241,9 @@ class SnowflakeDatasource(SQLDatasource):
                 if isinstance(connection_string, str):
                     url = sa.engine.url.make_url(connection_string)
                     url = url.update_query_dict(
-                        query_parameters={"application": self._get_snowflake_partner_application()}
+                        query_parameters={
+                            "application": self._get_snowflake_partner_application()
+                        }
                     )
                     self._engine = sa.create_engine(
                         url,
