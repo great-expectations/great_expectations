@@ -12,10 +12,10 @@ from great_expectations.core.partitioners import (
     ColumnPartitionerDaily,
     ColumnPartitionerMonthly,
     ColumnPartitionerYearly,
+    FileNamePartitionerDaily,
+    FileNamePartitionerMonthly,
+    FileNamePartitionerYearly,
     PartitionerColumnValue,
-    RegexPartitionerDaily,
-    RegexPartitionerMonthly,
-    RegexPartitionerYearly,
 )
 from great_expectations.datasource.fluent import BatchRequest
 
@@ -152,21 +152,21 @@ def _partitioner_test_cases():
             id="Sql Yearly",
         ),
         pytest.param(
-            RegexPartitionerDaily(
+            FileNamePartitionerDaily(
                 regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}).csv"),
                 sort_ascending=False,
             ),
             id="Regex Daily",
         ),
         pytest.param(
-            RegexPartitionerMonthly(
+            FileNamePartitionerMonthly(
                 regex=re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
                 sort_ascending=False,
             ),
             id="Regex Monthly",
         ),
         pytest.param(
-            RegexPartitionerYearly(
+            FileNamePartitionerYearly(
                 regex=re.compile(r"data_(?P<year>\d{4}).csv"),
                 sort_ascending=False,
             ),
