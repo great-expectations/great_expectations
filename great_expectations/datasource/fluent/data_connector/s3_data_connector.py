@@ -40,7 +40,6 @@ class S3DataConnector(FilePathDataConnector):
         data_asset_name: The name of the DataAsset using this DataConnector instance
         s3_client: Reference to instantiated AWS S3 client handle
         bucket (str): bucket for S3
-        batching_regex: A regex pattern for partitioning data references
         prefix (str): S3 prefix
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)

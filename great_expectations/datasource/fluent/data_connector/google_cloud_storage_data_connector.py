@@ -36,7 +36,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
         gcs_client: Reference to instantiated Google Cloud Storage client handle
         bucket_or_name (str): bucket name for Google Cloud Storage
         prefix (str): GCS prefix

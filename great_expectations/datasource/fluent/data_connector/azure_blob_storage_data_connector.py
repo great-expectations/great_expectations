@@ -36,7 +36,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
         azure_client: Reference to instantiated Microsoft Azure Blob Storage client handle
         account_name (str): account name for Microsoft Azure Blob Storage
         container (str): container name for Microsoft Azure Blob Storage

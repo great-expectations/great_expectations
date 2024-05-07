@@ -48,7 +48,6 @@ class FilePathDataConnector(DataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
     """
 
     FILE_PATH_BATCH_SPEC_KEY = "path"
