@@ -101,9 +101,12 @@ def test_checkpoint_factory_add_raises_for_duplicate_key(mocker: MockerFixture):
 def test_checkpoint_factory_delete_uses_store_remove_key(mocker: MockerFixture):
     # Arrange
     name = "test-checkpoint"
-    store = mocker.MagicMock(spec=CheckpointStore)
+    store = mocker.Mock(spec=CheckpointStore)
     store.has_key.return_value = True
     key = store.get_key.return_value
+    checkpoint = mocker.Mock(spec=Checkpoint, id=None)
+    checkpoint.name = name
+    store.get.return_value = checkpoint
     factory = CheckpointFactory(store=store)
 
     # Act
@@ -260,5 +263,5 @@ def test_checkpoint_factory_all(context_fixture_name: str, request: pytest.Fixtu
 
 
 class TestCheckpointFactoryAnalytics:
-    # TODO: Write tests once analytics are in place
+    # TODO: Write this now Chetan!
     pass
