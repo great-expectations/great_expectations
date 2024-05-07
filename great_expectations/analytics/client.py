@@ -43,7 +43,7 @@ def init(  # noqa: PLR0913
     organization_id: Optional[UUID] = None,
     oss_id: Optional[UUID] = None,
     cloud_mode: bool = False,
-    enabled_from_config: bool = True,
+    enabled_from_config: bool | None = None,
 ):
     """Initializes the analytics platform client."""
     conf = {}
@@ -56,6 +56,10 @@ def init(  # noqa: PLR0913
     if oss_id:
         conf["oss_id"] = oss_id
     update_config(config=Config(cloud_mode=cloud_mode, **conf))
+
+    # An omitted enabled_from_config should default to True
+    if enabled_from_config is None:
+        enabled_from_config = True
 
     # Analytics are enabled by default
     # A user can opt out through the config or by setting the environment variable

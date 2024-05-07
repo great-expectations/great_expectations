@@ -143,18 +143,13 @@ class CloudDataContext(SerializableDataContext):
     @override
     def _init_analytics(self) -> None:
         organization_id = self.ge_cloud_config.organization_id
-
-        enabled_from_config = self.config.analytics
-        if enabled_from_config is None:
-            enabled_from_config = True
-
         init_analytics(
             user_id=self._get_cloud_user_id(),
             data_context_id=self._data_context_id,
             organization_id=uuid.UUID(organization_id) if organization_id else None,
             oss_id=self._get_oss_id(),
             cloud_mode=True,
-            enabled_from_config=enabled_from_config,
+            enabled_from_config=self.config.analytics,
         )
 
     def _get_cloud_user_id(self) -> uuid.UUID | None:
