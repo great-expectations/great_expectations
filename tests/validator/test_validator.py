@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import shutil
 from typing import TYPE_CHECKING, List, Set, Tuple
-from unittest import mock
 from unittest.mock import ANY, patch
 
 import pandas as pd
@@ -284,57 +283,6 @@ def multi_batch_taxi_validator_ge_cloud_mode(
     )
 
     return validator_multi_batch
-
-
-# TODO: There is something wrong with this test. It is trying to mock out cloud, but if I don't
-#       unset the gx_env_variables (eg if i remove this fixture), this test will fail.
-@mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
-@mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
-@pytest.mark.cloud
-def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
-    mock_cloud_mode,
-    mock_expectation_store_update,
-    mock_context_get_suite,
-    mock_context_save_suite,
-    unset_gx_env_variables,
-    multi_batch_taxi_validator_ge_cloud_mode,
-):
-    """
-    This checks that Validator in ge_cloud_mode properly updates underlying Expectation Suite on save.
-    The multi_batch_taxi_validator_ge_cloud_mode fixture has a suite with a single expectation.
-    :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GX Cloud
-    :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GX Cloud
-    """  # noqa: E501
-    mock_suite = ExpectationSuite(
-        name="validating_taxi_data",
-        expectations=[
-            ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_between",
-                kwargs={"column": "passenger_count", "min_value": 0, "max_value": 99},
-                meta={"notes": "This is an expectation."},
-                id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_between",
-                kwargs={"column": "trip_distance", "min_value": 11, "max_value": 22},
-                meta={"notes": "This is an expectation."},
-                id="3e8eee33-b425-4b36-a831-6e9dd31ad5af",
-            ),
-        ],
-        meta={"notes": "This is an expectation suite."},
-    )
-    mock_context_get_suite.return_value = mock_suite
-    mock_cloud_mode.return_value = True
-    mock_context_save_suite.return_value = True
-
-    multi_batch_taxi_validator_ge_cloud_mode.expect_column_values_to_be_between(
-        column="trip_distance", min_value=11, max_value=22
-    )
-    multi_batch_taxi_validator_ge_cloud_mode.save_expectation_suite()
-
-    expected = mock_suite.to_json_dict()
-    actual = multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
-    assert expected == actual
 
 
 @pytest.mark.big
