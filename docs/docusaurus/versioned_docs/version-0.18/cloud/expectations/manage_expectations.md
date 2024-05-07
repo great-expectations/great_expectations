@@ -46,13 +46,11 @@ The following table lists the available GX Cloud Expectations.
 
 5. Select an Expectation type. See [Available Expectation types](#available-expectation-types).
 
-    If you prefer to work in a code editor, or you want to configure an Expectation from the [Expectations Gallery](https://greatexpectations.io/expectations/) that isn't listed, click the **JSON Editor** tab and define your Expectation parameters in the code pane.
-
-6. Complete the fields in the **Create Expectation** pane.
+6. Complete the mandatory and optional fields.
 
 7. Click **Save**.
 
-8. Optional. Repeat steps 1 to 4 to add additional Expectations.
+8. Optional. Click **Save & Add More** and then repeat steps 1 to 4 to add additional Expectations.
 
 9. Optional. Run a Validation. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
@@ -67,8 +65,6 @@ The following table lists the available GX Cloud Expectations.
 4. Click **Edit Expectations** for the Expectation that you want to edit.
 
 5. Edit the Expectation configuration.
-
-    If you prefer to work in a code editor, or you configured an Expectation from the [Expectations Gallery](https://greatexpectations.io/expectations/), click the **JSON Editor** tab and edit the Expectation parameters in the code pane.
 
 6. Click **Save**.
 
