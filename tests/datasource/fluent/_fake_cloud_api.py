@@ -706,7 +706,8 @@ def delete_checkpoint_by_id_cb(
     LOGGER.debug(f"{request.method} {url}")
 
     parsed_url = urllib.parse.urlparse(url)
-    checkpoint_id = parsed_url.path.split("/")[-1]
+    path = str(parsed_url.path)
+    checkpoint_id = path.split("/")[-1]
     checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
 
     deleted_cp = checkpoints.pop(checkpoint_id, None)
