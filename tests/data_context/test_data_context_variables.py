@@ -387,6 +387,8 @@ def test_data_context_variables_save_config(
     cloud_data_context_variables.save_config()
 
     expected_config_dict = {
+        "analytics": True,
+        "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 3.0,
         "data_docs_sites": {},

@@ -271,7 +271,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._init_factories()
 
         self._attach_fluent_config_datasources_and_build_data_connectors(self.fluent_config)
-        self._init_analytics(enabled=self.config.analytics)
+        self._init_analytics()
         submit_event(event=DataContextInitializedEvent())
 
     def _init_factories(self) -> None:
@@ -293,13 +293,17 @@ class AbstractDataContext(ConfigPeer, ABC):
             store=self.validation_definition_store
         )
 
-    def _init_analytics(self, enabled: bool) -> None:
+    def _init_analytics(self) -> None:
+        enabled_from_config = self.config.analytics
+        if enabled_from_config is None:
+            enabled_from_config = True
+
         init_analytics(
-            enabled=enabled,
             user_id=None,
-            data_context_id=uuid.UUID(self._data_context_id),
+            data_context_id=self._data_context_id,
             organization_id=None,
             oss_id=self._get_oss_id(),
+            enabled_from_config=enabled_from_config,
         )
 
     def _init_config_provider(self) -> _ConfigurationProvider:
@@ -2476,72 +2480,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             return config_var_provider.get_values()
         return {}
 
-    @staticmethod
-    def _is_usage_stats_enabled() -> bool:
-        """
-        Checks the following locations to see if usage_statistics is disabled in any of the following locations:
-            - GE_USAGE_STATS, which is an environment_variable
-            - GLOBAL_CONFIG_PATHS
-        If GE_USAGE_STATS exists AND its value is one of the FALSEY_STRINGS, usage_statistics is disabled (return False)
-        Also checks GLOBAL_CONFIG_PATHS to see if config file contains override for anonymous_usage_statistics
-        Returns True otherwise
-
-        Returns:
-            bool that tells you whether usage_statistics is on or off
-        """  # noqa: E501
-        usage_statistics_enabled: bool = True
-        if os.environ.get("GE_USAGE_STATS", False):  # noqa: TID251
-            ge_usage_stats = os.environ.get("GE_USAGE_STATS")  # noqa: TID251
-            if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
-                usage_statistics_enabled = False
-            else:
-                logger.warning(
-                    f"GE_USAGE_STATS environment variable must be one of: {AbstractDataContext.FALSEY_STRINGS}"  # noqa: E501
-                )
-        for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
-            config = configparser.ConfigParser()
-            states = config.BOOLEAN_STATES
-            for falsey_string in AbstractDataContext.FALSEY_STRINGS:
-                states[falsey_string] = False  # type: ignore[index]
-
-            states["TRUE"] = True  # type: ignore[index]
-            states["True"] = True  # type: ignore[index]
-            config.BOOLEAN_STATES = states  # type: ignore[misc] # Cannot assign to class variable via instance
-            config.read(config_path)
-            try:
-                if not config.getboolean("anonymous_usage_statistics", "enabled"):
-                    usage_statistics_enabled = False
-
-            except (ValueError, configparser.Error):
-                pass
-        return usage_statistics_enabled
-
-    def _get_data_context_id_override(self) -> Optional[str]:
-        """
-        Return data_context_id from environment variable.
-
-        Returns:
-            Optional string that represents data_context_id
-        """
-        return self._get_global_config_value(
-            environment_variable="GE_DATA_CONTEXT_ID",
-            conf_file_section="anonymous_usage_statistics",
-            conf_file_option="data_context_id",
-        )
-
-    def _get_usage_stats_url_override(self) -> Optional[str]:
-        """
-        Return GE_USAGE_STATISTICS_URL from environment variable if it exists
-
-        Returns:
-            Optional string that represents GE_USAGE_STATISTICS_URL
-        """
-        return self._get_global_config_value(
-            environment_variable="GE_USAGE_STATISTICS_URL",
-            conf_file_section="anonymous_usage_statistics",
-            conf_file_option="usage_statistics_url",
-        )
-
     def _build_store_from_config(
         self, store_name: str, store_config: dict | StoreConfigTypedDict
     ) -> Store:
@@ -2552,9 +2490,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         # to the store_config under the key manually_initialize_store_backend_id
         if (store_name == self.expectations_store_name) and store_config.get("store_backend"):
             store_config["store_backend"].update(
-                {
-                    "manually_initialize_store_backend_id": self.variables.data_context_id  # type: ignore[union-attr]
-                }
+                {"manually_initialize_store_backend_id": self.variables.data_context_id}
             )
 
         # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
@@ -2598,8 +2534,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         }
 
     @property
-    def data_context_id(self) -> str:
-        return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
+    def data_context_id(self) -> uuid.UUID | None:
+        return self.variables.data_context_id
 
     def _init_primary_stores(self, store_configs: Dict[str, StoreConfigTypedDict]) -> None:
         """Initialize all Stores for this DataContext.
@@ -2926,7 +2862,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return datasource
 
-    def _construct_data_context_id(self) -> str:
+    def _construct_data_context_id(self) -> uuid.UUID | None:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self.stores[self.expectations_store_name]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
@@ -2936,7 +2872,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # Otherwise choose the id stored in the project_config
         else:
-            return self.variables.data_context_id  # type: ignore[union-attr]
+            return self.variables.data_context_id
 
     def get_validation_result(  # noqa: C901, PLR0913
         self,

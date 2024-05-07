@@ -1,7 +1,6 @@
 import copy
 import os
 from typing import Any, Dict, Final, Optional
-from unittest import mock
 
 import pytest
 
@@ -69,10 +68,7 @@ def construct_data_context_config():
             "stores": stores,
             "data_docs_sites": data_docs_sites,
             "config_variables_file_path": None,
-            "anonymous_usage_statistics": {
-                "data_context_id": data_context_id,
-                "enabled": True,
-            },
+            "data_context_id": data_context_id,
         }
 
     return _construct_data_context_config
@@ -126,7 +122,7 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
     )
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
     )
 
@@ -224,7 +220,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_S3_store",
         validation_results_store_name="validation_results_S3_store",
@@ -347,7 +343,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_S3_store_name",
         validation_results_store_name="custom_validation_results_S3_store_name",
@@ -402,7 +398,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     )
 
     # Create desired config
-    data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
+    data_context_id = data_context_config.data_context_id
     desired_config = construct_data_context_config(
         data_context_id=data_context_id, datasources=default_pandas_datasource_config
     )
@@ -468,7 +464,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     )
 
     # Create desired config
-    data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
+    data_context_id = data_context_config.data_context_id
     desired_config = construct_data_context_config(
         data_context_id=data_context_id, datasources=default_pandas_datasource_config
     )
@@ -525,7 +521,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
     )
 
     # Create desired config
-    data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
+    data_context_id = data_context_config.data_context_id
     desired_stores_config = {
         "suite_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_GCS_store": {
@@ -714,7 +710,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         }
     }
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_GCS_store_name",
         validation_results_store_name="custom_validation_results_GCS_store_name",
@@ -855,7 +851,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_database_store",
         validation_results_store_name="validation_results_database_store",
@@ -1024,7 +1020,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_database_store_name",
         validation_results_store_name="custom_validation_results_database_store_name",
@@ -1146,7 +1142,6 @@ def test_override_general_defaults(
                 },
             },
         },
-        anonymous_usage_statistics={"enabled": True},
     )
 
     desired_stores = {
@@ -1221,7 +1216,7 @@ def test_override_general_defaults(
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources={
             **default_pandas_datasource_config,
         },
@@ -1322,7 +1317,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources={},
         expectations_store_name="expectations_S3_store",
         validation_results_store_name="validation_results_S3_store",
@@ -1359,10 +1354,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
     )
 
     desired_config = {
-        "anonymous_usage_statistics": {
-            "data_context_id": data_context_config.anonymous_usage_statistics.data_context_id,
-            "enabled": True,
-        },
+        "data_context_id": data_context_config.data_context_id,
         "checkpoint_store_name": "checkpoint_store",
         "config_version": 3.0,
         "suite_parameter_store_name": "suite_parameter_store",
@@ -1409,13 +1401,8 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
 def test_data_context_config_defaults():
     config = DataContextConfig()
     assert config.to_json_dict() == {
-        "anonymous_usage_statistics": {
-            "data_context_id": mock.ANY,
-            "enabled": True,
-            "explicit_id": False,
-            "explicit_url": False,
-            "usage_statistics_url": "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics",
-        },
+        "analytics": None,
+        "data_context_id": None,
         "checkpoint_store_name": None,
         "config_variables_file_path": None,
         "config_version": 3,

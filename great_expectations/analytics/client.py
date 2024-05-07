@@ -38,12 +38,12 @@ def submit(event: Event) -> None:
 
 
 def init(  # noqa: PLR0913
-    enabled: bool = True,
     user_id: Optional[UUID] = None,
     data_context_id: Optional[UUID] = None,
     organization_id: Optional[UUID] = None,
     oss_id: Optional[UUID] = None,
     cloud_mode: bool = False,
+    enabled_from_config: bool = True,
 ):
     """Initializes the analytics platform client."""
     conf = {}
@@ -57,7 +57,8 @@ def init(  # noqa: PLR0913
         conf["oss_id"] = oss_id
     update_config(config=Config(cloud_mode=cloud_mode, **conf))
 
-    enabled = enabled and ENV_CONFIG.posthog_enabled
+    enabled: bool = (True,)
+    enabled = enabled_from_config and ENV_CONFIG.posthog_enabled
     posthog.disabled = not enabled
     if enabled:
         posthog.debug = ENV_CONFIG.posthog_debug

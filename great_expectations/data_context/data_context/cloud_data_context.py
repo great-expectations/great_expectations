@@ -141,15 +141,20 @@ class CloudDataContext(SerializableDataContext):
         checker.check_if_using_latest_gx()
 
     @override
-    def _init_analytics(self, enabled: bool) -> None:
+    def _init_analytics(self) -> None:
         organization_id = self.ge_cloud_config.organization_id
+
+        enabled_from_config = self.config.analytics
+        if enabled_from_config is None:
+            enabled_from_config = True
+
         init_analytics(
-            enabled=enabled,
             user_id=self._get_cloud_user_id(),
             data_context_id=uuid.UUID(self._data_context_id),
             organization_id=uuid.UUID(organization_id) if organization_id else None,
             oss_id=self._get_oss_id(),
             cloud_mode=True,
+            enabled_from_config=enabled_from_config,
         )
 
     def _get_cloud_user_id(self) -> uuid.UUID | None:
