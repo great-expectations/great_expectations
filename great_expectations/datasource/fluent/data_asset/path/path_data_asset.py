@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -223,6 +223,7 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
         # subtypes control how reader options get serialized
         raise NotImplementedError
 
+    @abstractmethod
     def _get_sortable_partitioner(
         self, partitioner: Optional[PartitionerT]
     ) -> Optional[PartitionerSortingProtocol]:
