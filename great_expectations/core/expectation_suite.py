@@ -30,13 +30,9 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.suite_parameters import (
-    _deduplicate_suite_parameter_dependencies,
-)
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
-    nested_update,
 )
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
@@ -319,15 +315,6 @@ class ExpectationSuite(SerializableDictDot):
             pass  # Allow suite parameters to be missing if empty
         myself["meta"] = convert_to_json_serializable(myself["meta"])
         return myself
-
-    def get_suite_parameter_dependencies(self) -> dict:
-        dependencies: dict = {}
-        for expectation in self.expectations:
-            t = expectation.configuration.get_suite_parameter_dependencies()
-            nested_update(dependencies, t)
-
-        dependencies = _deduplicate_suite_parameter_dependencies(dependencies)
-        return dependencies
 
     @public_api
     def remove_expectation(

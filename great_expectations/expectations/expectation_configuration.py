@@ -22,29 +22,22 @@ from typing_extensions import TypedDict
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.suite_parameters import (
-    _deduplicate_suite_parameter_dependencies,
     build_suite_parameters,
-    find_suite_parameter_dependencies,
 )
-from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
-    nested_update,
 )
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
-    ParserError,
 )
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
-    from pyparsing import ParseResults
-
     from great_expectations.alias_types import JSONValues
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.expectations.expectation import Expectation
@@ -438,51 +431,6 @@ class ExpectationConfiguration(SerializableDictDot):
         if "rendered_content" in myself:
             myself["rendered_content"] = convert_to_json_serializable(myself["rendered_content"])
         return myself
-
-    def get_suite_parameter_dependencies(self) -> dict:
-        parsed_dependencies: dict = {}
-        for value in self.kwargs.values():
-            if isinstance(value, dict) and "$PARAMETER" in value:
-                param_string_dependencies = find_suite_parameter_dependencies(value["$PARAMETER"])
-                nested_update(parsed_dependencies, param_string_dependencies)
-
-        dependencies: dict = {}
-        urns = parsed_dependencies.get("urns", [])
-        for string_urn in urns:
-            try:
-                urn = ge_urn.parseString(string_urn)
-            except ParserError:
-                logger.warning("Unable to parse great_expectations urn['$PARAMETER']")
-                continue
-
-            # Query stores do not have "expectation_suite_name"
-            if urn["urn_type"] == "stores" and "expectation_suite_name" not in urn:
-                pass
-            else:
-                self._update_dependencies_with_expectation_suite_urn(dependencies, urn)
-
-        dependencies = _deduplicate_suite_parameter_dependencies(dependencies)
-
-        return dependencies
-
-    @staticmethod
-    def _update_dependencies_with_expectation_suite_urn(
-        dependencies: dict, urn: ParseResults
-    ) -> None:
-        if not urn.get("metric_kwargs"):
-            nested_update(
-                dependencies,
-                {urn["expectation_suite_name"]: [urn["metric_name"]]},
-            )
-        else:
-            nested_update(
-                dependencies,
-                {
-                    urn["expectation_suite_name"]: [
-                        {"metric_kwargs_id": {urn["metric_kwargs"]: [urn["metric_name"]]}}
-                    ]
-                },
-            )
 
     def _get_expectation_impl(self) -> Type[Expectation]:
         return get_expectation_impl(self.expectation_type)
