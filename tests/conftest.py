@@ -893,61 +893,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
-    datasource_config: str = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_basic_data_connector:
-                class_name: InferredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                default_regex:
-                    pattern: (.*)\\.csv
-                    group_names:
-                        - data_asset_name
-
-            my_special_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users:
-                        base_directory: {data_path}
-                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
-                        group_names:
-                            - name
-                            - timestamp
-                            - size
-
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users: {{}}
-
-            my_runtime_data_connector:
-                module_name: great_expectations.datasource.data_connector
-                class_name: RuntimeDataConnector
-                batch_identifiers:
-                    - pipeline_stage_name
-                    - airflow_run_id
-    """
-
-    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
-
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1073,28 +1018,6 @@ def deterministic_asset_data_connector_context(
     )
     context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
-
-    datasource_config = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users: {{}}
-        """
-
-    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
 
     context._save_project_config()
     project_manager.set_project(context)
