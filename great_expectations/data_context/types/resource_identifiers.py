@@ -284,17 +284,6 @@ class ValidationMetricIdentifier(MetricIdentifier):
             + [self.metric_name, self.metric_kwargs_id or "__"]
         )
 
-    def to_suite_parameter_urn(self):
-        if self._metric_kwargs_id is None:
-            return "urn:great_expectations:validations:" + ":".join(
-                list(self.expectation_suite_identifier.to_fixed_length_tuple()) + [self.metric_name]
-            )
-        else:
-            return "urn:great_expectations:validations:" + ":".join(
-                list(self.expectation_suite_identifier.to_fixed_length_tuple())
-                + [self.metric_name, self._metric_kwargs_id]
-            )
-
     @classmethod
     def from_tuple(cls, tuple_):
         if len(tuple_) < 6:  # noqa: PLR2004
