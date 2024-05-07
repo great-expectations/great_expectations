@@ -13,6 +13,8 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
+from great_expectations.datasource.fluent.constants import SNOWFLAKE_PARTNER_APPLICATION_CLOUD, \
+    SNOWFLAKE_PARTNER_APPLICATION_OSS
 from great_expectations.datasource.fluent.sql_datasource import (
     FluentBaseModel,
     SQLDatasource,
@@ -208,19 +210,19 @@ class SnowflakeDatasource(SQLDatasource):
         self._execution_engine = gx_exec_engine
         return gx_exec_engine
 
-    @override
-    def get_engine(self) -> sqlalchemy.Engine:
+    def _get_snowflake_partner_application(self) -> str:
         # This import is here to avoid a circular import
         from great_expectations.data_context import CloudDataContext
 
         # This is used to set the application query parameter, which provides attribution to GX
         # for the Snowflake Partner program.
         if isinstance(self._data_context, CloudDataContext):
-            # TODO: Change this value to ""great_expectations_cloud" once configured in Snowflake partner account
-            snowflake_partner_application = "great_expectations_oss"
-        else:
-            snowflake_partner_application = "great_expectations_oss"
+            # TODO: Change this value to "great_expectations_cloud" once configured in Snowflake partner account
+            return SNOWFLAKE_PARTNER_APPLICATION_CLOUD
+        return SNOWFLAKE_PARTNER_APPLICATION_OSS
 
+    @override
+    def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 model_dict = self.dict(
@@ -237,7 +239,7 @@ class SnowflakeDatasource(SQLDatasource):
                 if isinstance(connection_string, str):
                     url = sa.engine.url.make_url(connection_string)
                     url = url.update_query_dict(
-                        query_parameters={"application": snowflake_partner_application}
+                        query_parameters={"application": self._get_snowflake_partner_application()}
                     )
                     self._engine = sa.create_engine(
                         url,
@@ -245,7 +247,7 @@ class SnowflakeDatasource(SQLDatasource):
                     )
                 else:
                     self._engine = self._build_engine_with_connect_args(
-                        application=snowflake_partner_application,
+                        application=self._get_snowflake_partner_application(),
                         **connection_string,
                         **kwargs,
                     )
