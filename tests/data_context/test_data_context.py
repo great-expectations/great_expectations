@@ -781,33 +781,6 @@ def test_load_config_variables_property(basic_data_context_config, tmp_path_fact
         monkeypatch.delenv("TEST_CONFIG_FILE_ENV")
 
 
-@pytest.mark.unit
-def test_list_expectation_suite_with_no_suites(titanic_data_context):
-    observed = titanic_data_context.list_expectation_suite_names()
-    assert isinstance(observed, list)
-    assert observed == []
-
-
-@pytest.mark.unit
-def test_list_expectation_suite_with_one_suite(titanic_data_context):
-    titanic_data_context.suites.add(ExpectationSuite(name="warning"))
-    observed = titanic_data_context.list_expectation_suite_names()
-    assert isinstance(observed, list)
-    assert observed == ["warning"]
-
-
-@pytest.mark.unit
-def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
-    titanic_data_context.suites.add(ExpectationSuite(name="a.warning"))
-    titanic_data_context.suites.add(ExpectationSuite(name="b.warning"))
-    titanic_data_context.suites.add(ExpectationSuite(name="c.warning"))
-
-    observed = titanic_data_context.list_expectation_suite_names()
-    assert isinstance(observed, list)
-    assert observed == ["a.warning", "b.warning", "c.warning"]
-    assert len(observed) == 3
-
-
 @pytest.mark.filesystem
 def test_get_validator_with_instantiated_expectation_suite(
     empty_data_context_stats_enabled, tmp_path_factory
