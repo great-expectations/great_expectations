@@ -67,11 +67,6 @@ class FilePathDataConnector(DataConnector):
         )
 
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
-        self._batching_regex: re.Pattern = self._preprocess_batching_regex(regex=batching_regex)
-        self._regex_parser: RegExParser = RegExParser(
-            regex_pattern=self._batching_regex,
-            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
-        )
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
@@ -252,6 +247,8 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """  # noqa: E501
+        if not regex:
+            regex = MATCH_ALL_PATTERN
 
         def _matching_criterion(
             batch_definition_list: Union[List[LegacyBatchDefinition], None],

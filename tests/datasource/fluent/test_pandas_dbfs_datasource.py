@@ -3,24 +3,18 @@ from __future__ import annotations
 import logging
 import os
 import pathlib
-import re
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import boto3
 import botocore
 import pytest
 
-from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
-from great_expectations.datasource.fluent.data_connector import (
-    DBFSDataConnector,
-)
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
@@ -93,14 +87,6 @@ def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> PathDataAsset:
     return asset
 
 
-@pytest.fixture
-def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    data_connector: DBFSDataConnector = cast(DBFSDataConnector, csv_asset._data_connector)
-    test_connection_error_message = f"""No file at base_directory path "{data_connector._base_directory.resolve()}" matched regular expressions pattern "{data_connector._batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""  # noqa: E501
-    return regex, test_connection_error_message
-
-
 @pytest.mark.filesystem
 def test_construct_pandas_dbfs_datasource(pandas_dbfs_datasource: PandasDBFSDatasource):
     assert pandas_dbfs_datasource.name == "pandas_dbfs_datasource"
@@ -165,34 +151,3 @@ def test_get_batch_list_from_fully_specified_batch_request(
     request = asset.build_batch_request({"name": "alex"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 2
-
-
-@pytest.mark.filesystem
-def test_test_connection_failures(
-    pandas_dbfs_datasource: PandasDBFSDatasource,
-    bad_regex_config: tuple[re.Pattern, str],
-):
-    regex, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(  # type: ignore[call-arg]
-        name="csv_asset",
-        batching_regex=regex,
-    )
-    csv_asset._datasource = pandas_dbfs_datasource
-    pandas_dbfs_datasource.assets = [
-        csv_asset,
-    ]
-    csv_asset._data_connector = DBFSDataConnector(
-        datasource_name=pandas_dbfs_datasource.name,
-        data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
-        base_directory=pandas_dbfs_datasource.base_directory,
-        data_context_root_directory=pandas_dbfs_datasource.data_context_root_directory,
-        glob_directive="*.csv",
-        file_path_template_map_fn=DBFSPath.convert_to_file_semantics_version,
-    )
-    csv_asset._test_connection_error_message = test_connection_error_message
-
-    with pytest.raises(TestConnectionError) as e:
-        pandas_dbfs_datasource.test_connection()
-
-    assert str(e.value) == str(test_connection_error_message)

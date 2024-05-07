@@ -59,7 +59,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             file_path_template_map_fn=file_path_template_map_fn,
             whole_directory_path_override=whole_directory_path_override,
         )
