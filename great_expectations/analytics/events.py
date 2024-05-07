@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import ClassVar, List
 
 from great_expectations.analytics.actions import (
+    CHECKPOINT_CREATED,
+    CHECKPOINT_DELETED,
     DATA_CONTEXT_INITIALIZED,
     EXPECTATION_SUITE_CREATED,
     EXPECTATION_SUITE_DELETED,
@@ -135,4 +137,37 @@ class ExpectationSuiteDeletedEvent(_ExpectationSuiteEvent):
         super().__init__(
             action=EXPECTATION_SUITE_DELETED,
             expectation_suite_id=expectation_suite_id,
+        )
+
+
+@dataclass
+class _CheckpointEvent(Event):
+    checkpoint_id: str | None = None
+
+    @override
+    def _properties(self) -> dict:
+        return {
+            "checkpoint_id": self.checkpoint_id,
+        }
+
+
+@dataclass
+class CheckpointCreatedEvent(_CheckpointEvent):
+    _allowed_actions: ClassVar[List[Action]] = [CHECKPOINT_CREATED]
+
+    def __init__(self, checkpoint_id: str | None = None):
+        super().__init__(
+            action=CHECKPOINT_CREATED,
+            checkpoint_id=checkpoint_id,
+        )
+
+
+@dataclass
+class CheckpointDeletedEvent(_CheckpointEvent):
+    _allowed_actions: ClassVar[List[Action]] = [CHECKPOINT_DELETED]
+
+    def __init__(self, checkpoint_id: str | None = None):
+        super().__init__(
+            action=CHECKPOINT_DELETED,
+            checkpoint_id=checkpoint_id,
         )
