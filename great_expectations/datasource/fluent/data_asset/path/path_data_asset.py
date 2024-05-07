@@ -28,6 +28,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     DatasourceT,
+    PartitionerSortingProtocol,
     TestConnectionError,
 )
 
@@ -160,8 +161,8 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
             )
             batch_list.append(batch)
 
-        if batch_request.partitioner:
-            self.sort_batches(batch_list, batch_request.partitioner)
+        if sortable_partitioner := self._get_sortable_partitioner(batch_request.partitioner):
+            self.sort_batches(batch_list, sortable_partitioner)
 
         return batch_list
 
@@ -220,4 +221,10 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
 
     def _get_reader_options_include(self) -> set[str]:
         # subtypes control how reader options get serialized
+        raise NotImplementedError
+
+    def _get_sortable_partitioner(
+        self, partitioner: Optional[PartitionerT]
+    ) -> Optional[PartitionerSortingProtocol]:
+        # allow subclasses to determine sorting configuration.
         raise NotImplementedError

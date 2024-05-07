@@ -28,7 +28,7 @@ from great_expectations.datasource.fluent.data_asset.path.path_data_asset import
     PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_connector import FILE_PATH_BATCH_SPEC_KEY
-from great_expectations.datasource.fluent.interfaces import DatasourceT
+from great_expectations.datasource.fluent.interfaces import DatasourceT, PartitionerSortingProtocol
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -219,3 +219,10 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
             partitioner_kwargs["batch_identifiers"] = batch_identifiers
             parameters["partitioner_kwargs"] = partitioner_kwargs
         return parameters
+
+    @override
+    def _get_sortable_partitioner(
+        self, partitioner: Optional[Partitioner]
+    ) -> Optional[PartitionerSortingProtocol]:
+        # DirectoryAssets can only ever return a single batch, so they do not require sorting.
+        return None

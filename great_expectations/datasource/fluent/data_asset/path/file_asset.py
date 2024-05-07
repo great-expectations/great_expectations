@@ -22,7 +22,7 @@ from great_expectations.datasource.fluent.data_asset.path.path_data_asset import
 )
 from great_expectations.datasource.fluent.data_connector import FILE_PATH_BATCH_SPEC_KEY
 from great_expectations.datasource.fluent.data_connector.regex_parser import RegExParser
-from great_expectations.datasource.fluent.interfaces import DatasourceT
+from great_expectations.datasource.fluent.interfaces import DatasourceT, PartitionerSortingProtocol
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -298,3 +298,10 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         }
 
         return batch_spec_options
+
+    @override
+    def _get_sortable_partitioner(
+        self, partitioner: Optional[RegexPartitioner]
+    ) -> Optional[PartitionerSortingProtocol]:
+        # RegexPartitioner already implements PartitionerSortingProtocol
+        return partitioner
