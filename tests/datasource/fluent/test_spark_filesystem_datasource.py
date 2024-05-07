@@ -16,8 +16,8 @@ from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.core.partitioners import (
     PartitionerColumnValue,
-    PartitionerMonthly,
-    PartitionerYearly,
+    RegexPartitionerMonthly,
+    RegexPartitionerYearly,
 )
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
@@ -1315,7 +1315,7 @@ class TestPartitionerFileAsset:
             r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
         )
         asset_with_conflicting_partitioner = file_asset_with_no_partitioner
-        partitioner = PartitionerYearly(regex=regex)
+        partitioner = RegexPartitionerYearly(regex=regex)
         assert asset_with_conflicting_partitioner.get_batch_parameters_keys(
             partitioner=partitioner
         ) == (
@@ -1333,7 +1333,7 @@ class TestPartitionerFileAsset:
         )
 
         asset = file_asset_with_no_partitioner
-        partitioner = PartitionerMonthly(regex=regex)
+        partitioner = RegexPartitionerMonthly(regex=regex)
 
         post_partitioner_batch_request = asset.build_batch_request(
             options={"year": "2020", "month": "11"}, partitioner=partitioner
@@ -1354,7 +1354,7 @@ class TestPartitionerFileAsset:
             r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
         )
         asset = file_asset_with_no_partitioner
-        partitioner = PartitionerMonthly(regex=regex)
+        partitioner = RegexPartitionerMonthly(regex=regex)
 
         post_partitioner_batch_request = asset.build_batch_request(
             options={"year": "2020", "month": "11"}, partitioner=partitioner

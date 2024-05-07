@@ -89,28 +89,30 @@ ColumnPartitioner = Union[
 ]
 
 
-class PartitionerYearly(pydantic.BaseModel):
+class RegexPartitionerYearly(pydantic.BaseModel):
     regex: re.Pattern
     param_names = ["year"]
     sort_ascending: bool = True
 
 
-class PartitionerMonthly(pydantic.BaseModel):
+class RegexPartitionerMonthly(pydantic.BaseModel):
     regex: re.Pattern
     param_names = ["year", "month"]
     sort_ascending: bool = True
 
 
-class PartitionerDaily(pydantic.BaseModel):
+class RegexPartitionerDaily(pydantic.BaseModel):
     regex: re.Pattern
     param_names = ["year", "month", "day"]
     sort_ascending: bool = True
 
 
-class PartitionerPath(pydantic.BaseModel):
+class RegexPartitionerPath(pydantic.BaseModel):
     regex: re.Pattern
     param_names: Final[List[str]] = []
     sort_ascending: bool = True
 
 
-RegexPartitioner = Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily, PartitionerPath]
+RegexPartitioner = Union[
+    RegexPartitionerYearly, RegexPartitionerMonthly, RegexPartitionerDaily, RegexPartitionerPath
+]

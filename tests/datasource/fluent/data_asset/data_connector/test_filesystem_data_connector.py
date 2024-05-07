@@ -7,7 +7,7 @@ import pytest
 from great_expectations.compatibility import pydantic
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.partitioners import PartitionerYearly
+from great_expectations.core.partitioners import RegexPartitionerYearly
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_connector import (
@@ -705,7 +705,7 @@ def test_filesystem_data_connector_uses_batching_regex_from_batch_request(
             datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={},
-            partitioner=PartitionerYearly(regex=re.compile(batching_regex)),
+            partitioner=RegexPartitionerYearly(regex=re.compile(batching_regex)),
         )
     )
 

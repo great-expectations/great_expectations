@@ -7,7 +7,7 @@ from unittest.mock import Mock  # noqa: TID251
 import pytest
 
 from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.partitioners import PartitionerYearly
+from great_expectations.core.partitioners import RegexPartitionerYearly
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 from great_expectations.datasource.fluent.batch_request import BatchParameters
 from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
@@ -49,7 +49,7 @@ def test_build_batch_request(
     mock_data_asset: DataAsset,
 ):
     batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv")
-    partitioner = PartitionerYearly(regex=batching_regex)
+    partitioner = RegexPartitionerYearly(regex=batching_regex)
     batch_definition = BatchDefinition(
         name="test_batch_definition",
         partitioner=partitioner,

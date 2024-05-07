@@ -9,11 +9,11 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.partitioners import (
-    PartitionerDaily,
-    PartitionerMonthly,
-    PartitionerPath,
-    PartitionerYearly,
     RegexPartitioner,
+    RegexPartitionerDaily,
+    RegexPartitionerMonthly,
+    RegexPartitionerPath,
+    RegexPartitionerYearly,
 )
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
@@ -108,7 +108,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
             raise AmbiguousPathError(path=path)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerPath(regex=regex),
+            partitioner=RegexPartitionerPath(regex=regex),
         )
 
     @public_api
@@ -130,7 +130,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAME)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearly(regex=regex, sort_ascending=sort_ascending),
+            partitioner=RegexPartitionerYearly(regex=regex, sort_ascending=sort_ascending),
         )
 
     @public_api
@@ -152,7 +152,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
+            partitioner=RegexPartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
         )
 
     @public_api
@@ -175,7 +175,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerDaily(regex=regex, sort_ascending=sort_ascending),
+            partitioner=RegexPartitionerDaily(regex=regex, sort_ascending=sort_ascending),
         )
 
     @classmethod
