@@ -14,7 +14,6 @@ from great_expectations.core import (
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.suite_parameters import (
     _deduplicate_suite_parameter_dependencies,
-    find_suite_parameter_dependencies,
     get_suite_parameter_key,
     is_suite_parameter,
     parse_suite_parameter,
@@ -54,8 +53,8 @@ def test_parse_suite_parameter():
     assert parse_suite_parameter("a", {"a": 1}) == 1
     assert (
         parse_suite_parameter(
-            "urn:great_expectations:validations:blarg",
-            {"urn:great_expectations:validations:blarg": 1},
+            "my_value",
+            {"my_value": 1},
         )
         == 1
     )
@@ -66,61 +65,10 @@ def test_parse_suite_parameter():
     # So is simple variable substitution:
     assert parse_suite_parameter("a + 1", {"a": 2}) == 3
 
-    # URN syntax works
-    assert (
-        parse_suite_parameter(
-            "urn:great_expectations:validations:source_patient_data.default"
-            ":expect_table_row_count_to_equal.result.observed_value * 0.9",
-            {
-                "urn:great_expectations:validations:source_patient_data.default"
-                ":expect_table_row_count_to_equal.result.observed_value": 10
-            },
-        )
-        == 9
-    )
-
     # bare decimal is accepted
-    assert (
-        parse_suite_parameter(
-            "urn:great_expectations:validations:source_patient_data.default"
-            ":expect_table_row_count_to_equal.result.observed_value * .9",
-            {
-                "urn:great_expectations:validations:source_patient_data.default"
-                ":expect_table_row_count_to_equal.result.observed_value": 10
-            },
-        )
-        == 9
-    )
+    assert parse_suite_parameter("my_value * .9", {"my_value": 10}) == 9
 
-    # We have basic operations (trunc)
-    assert (
-        parse_suite_parameter(
-            "urn:great_expectations:validations:source_patient_data.default"
-            ":expect_table_row_count_to_equal.result.observed_value * 0.9",
-            {
-                "urn:great_expectations:validations:source_patient_data.default"
-                ":expect_table_row_count_to_equal.result.observed_value": 11
-            },
-        )
-        != 9
-    )
-
-    assert (
-        parse_suite_parameter(
-            "trunc(urn:great_expectations:validations:source_patient_data.default"
-            ":expect_table_row_count_to_equal.result.observed_value * 0.9)",
-            {
-                "urn:great_expectations:validations:source_patient_data.default"
-                ":expect_table_row_count_to_equal.result.observed_value": 11
-            },
-        )
-        == 9
-    )
-
-    # Non GX URN syntax fails
-    with pytest.raises(SuiteParameterError) as err:
-        parse_suite_parameter("urn:ieee:not_ge * 10", {"urn:ieee:not_ge": 1})
-    assert "Parse Failure" in str(err.value)
+    assert parse_suite_parameter("trunc(my_value * 0.9)", {"my_value": 11}) == 9
 
     # Valid variables but invalid expression is no good
     with pytest.raises(SuiteParameterError) as err:
@@ -145,60 +93,6 @@ def test_parse_suite_parameter():
     assert "Error while evaluating suite parameter expression: Unknown string format: bar" in str(
         e.value
     )
-
-
-@pytest.mark.filesystem
-def test_query_store_results_in_suite_parameters(data_context_with_query_store):
-    TITANIC_ROW_COUNT = 1313  # taken from the titanic db conftest
-    DISTINCT_TITANIC_ROW_COUNT = 4
-
-    # parse_suite_parameters correctly resolves a stores URN
-    res1 = parse_suite_parameter(
-        parameter_expression="urn:great_expectations:stores:my_query_store:col_count",
-        suite_parameters=None,
-        data_context=data_context_with_query_store,
-    )
-    assert res1 == TITANIC_ROW_COUNT
-
-    # and can handle an operator
-    res2 = parse_suite_parameter(
-        parameter_expression="urn:great_expectations:stores:my_query_store:col_count * 2",
-        suite_parameters=None,
-        data_context=data_context_with_query_store,
-    )
-    assert res2 == TITANIC_ROW_COUNT * 2
-
-    # can even handle multiple operators
-    res3 = parse_suite_parameter(
-        parameter_expression="urn:great_expectations:stores:my_query_store:col_count * 0 + 100",
-        suite_parameters=None,
-        data_context=data_context_with_query_store,
-    )
-    assert res3 == 100
-
-    # allows stores URNs with functions
-    res4 = parse_suite_parameter(
-        parameter_expression="cos(urn:great_expectations:stores:my_query_store:col_count)",
-        suite_parameters=None,
-        data_context=data_context_with_query_store,
-    )
-    assert math.isclose(math.cos(TITANIC_ROW_COUNT), res4)
-
-    # multiple stores URNs can be used
-    res5 = parse_suite_parameter(
-        parameter_expression="urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count",  # noqa: E501
-        suite_parameters=None,
-        data_context=data_context_with_query_store,
-    )
-    assert res5 == TITANIC_ROW_COUNT - DISTINCT_TITANIC_ROW_COUNT
-
-    # complex expressions can combine operators, urns, and functions
-    res6 = parse_suite_parameter(
-        parameter_expression="abs(-urn:great_expectations:stores:my_query_store:col_count - urn:great_expectations:stores:my_query_store:dist_col_count)",  # noqa: E501
-        suite_parameters=None,
-        data_context=data_context_with_query_store,
-    )
-    assert res6 == TITANIC_ROW_COUNT + DISTINCT_TITANIC_ROW_COUNT
 
 
 @pytest.mark.unit
@@ -243,40 +137,6 @@ def test_temporal_suite_parameters_complex():
         < dateutil.parser.parse(parse_suite_parameter("now() - timedelta(weeks=2*3, seconds=2)"))
         < now - timedelta(weeks=2 * 3, seconds=1)
     )
-
-
-@pytest.mark.unit
-def test_find_suite_parameter_dependencies():
-    parameter_expression = "(-3 * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm) + urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value:column=norm"  # noqa: E501
-    dependencies = find_suite_parameter_dependencies(parameter_expression)
-    assert dependencies == {
-        "urns": {
-            "urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm",
-            "urn:great_expectations:validations:profile:expect_column_mean_to_be_between.result.observed_value:column=norm",
-        },
-        "other": set(),
-    }
-
-    parameter_expression = "upstream_value * urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm"  # noqa: E501
-    dependencies = find_suite_parameter_dependencies(parameter_expression)
-    assert dependencies == {
-        "urns": {
-            "urn:great_expectations:validations:profile:expect_column_stdev_to_be_between.result.observed_value:column=norm",
-        },
-        "other": {"upstream_value"},
-    }
-
-    parameter_expression = "upstream_value"
-    dependencies = find_suite_parameter_dependencies(parameter_expression)
-    assert dependencies == {"urns": set(), "other": {"upstream_value"}}
-
-    parameter_expression = "3 * upstream_value"
-    dependencies = find_suite_parameter_dependencies(parameter_expression)
-    assert dependencies == {"urns": set(), "other": {"upstream_value"}}
-
-    parameter_expression = "3"
-    dependencies = find_suite_parameter_dependencies(parameter_expression)
-    assert dependencies == {"urns": set(), "other": set()}
 
 
 @pytest.mark.unit
