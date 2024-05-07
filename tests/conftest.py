@@ -991,7 +991,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 @pytest.fixture
 def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(  # noqa: E501
     sa,
-    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled: AbstractDataContext,  # noqa: E501
     tmp_path_factory,
     test_backends,
     monkeypatch,
@@ -1019,23 +1019,9 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
             db_file_path,
         )
 
-        datasource_config: str = f"""
-        class_name: Datasource
-        execution_engine:
-          class_name: SqlAlchemyExecutionEngine
-          connection_string: sqlite:///{db_file_path}
-        data_connectors:
-          default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-              - default_identifier_name
-          default_inferred_data_connector_name:
-            class_name: InferredAssetSqlDataConnector
-            name: whole_table
-        """
-
-        _: BaseDatasource = context.add_datasource(
-            "my_sqlite_db_datasource", **yaml.load(datasource_config)
+        context.data_sources.add_sqlite(
+            name="my_sqlite_db_datasource",
+            connection_string=f"sqlite:///{db_file_path}",
         )
 
     return context
