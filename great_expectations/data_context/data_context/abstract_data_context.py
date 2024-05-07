@@ -41,6 +41,7 @@ from great_expectations.analytics.client import submit as submit_event
 from great_expectations.analytics.events import DataContextInitializedEvent
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -112,7 +113,6 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.core import ExpectationSuite
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -1404,8 +1404,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 expectation_suite_name,
             )
         if create_expectation_suite_with_name is not None:
-            expectation_suite = self.suites.get(
-                name=create_expectation_suite_with_name,
+            expectation_suite = self.suites.add(
+                ExpectationSuite(name=create_expectation_suite_with_name)
             )
 
         return expectation_suite
