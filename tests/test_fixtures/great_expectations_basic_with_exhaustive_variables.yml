@@ -56,7 +56,5 @@ stores:
   validation_results_store:
     class_name: ${z}
 
-anonymous_usage_statistics:
-  data_context_id: d1aad86c-a205-49e6-95f7-b7c0a3635a43
-  enabled: False
-  usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
+data_context_id: d1aad86c-a205-49e6-95f7-b7c0a3635a43
+analytics: False

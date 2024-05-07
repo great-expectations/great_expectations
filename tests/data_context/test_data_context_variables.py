@@ -27,16 +27,12 @@ from great_expectations.data_context.data_context_variables import (
     FileDataContextVariables,
 )
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     GXCloudConfig,
     ProgressBarsConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-)
-from tests.data_context.conftest import (
-    USAGE_STATISTICS_QA_URL,
 )
 
 if TYPE_CHECKING:
@@ -71,11 +67,8 @@ def data_context_config_dict() -> dict:
             },
         },
         "data_docs_sites": {},
-        "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
-            enabled=True,
-            data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url=USAGE_STATISTICS_QA_URL,
-        ),
+        "analytics": True,
+        "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         "progress_bars": None,
     }
     return config
@@ -192,13 +185,6 @@ def data_docs_sites() -> dict:
 
 
 @pytest.fixture
-def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
-    return AnonymizedUsageStatisticsConfig(
-        enabled=False,
-    )
-
-
-@pytest.fixture
 def progress_bars() -> ProgressBarsConfig:
     return ProgressBarsConfig(
         globally=True,
@@ -241,10 +227,6 @@ def progress_bars() -> ProgressBarsConfig:
         pytest.param(
             DataContextVariableSchema.DATA_DOCS_SITES,
             id="data_docs_sites getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            id="anonymous_usage_statistics getter",
         ),
         pytest.param(
             DataContextVariableSchema.PROGRESS_BARS,
@@ -339,11 +321,6 @@ def test_data_context_variables_get_with_substitutions(
             data_docs_sites,
             DataContextVariableSchema.DATA_DOCS_SITES,
             id="data_docs_sites setter",
-        ),
-        pytest.param(
-            anonymous_usage_statistics,
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            id="anonymous_usage_statistics setter",
         ),
         pytest.param(
             progress_bars,

@@ -56,10 +56,10 @@ class ConfigurationBundle:
         Returns: Boolean of whether the usage statistics are enabled.
 
         """
-        if self._data_context_variables.anonymous_usage_statistics:
-            return self._data_context_variables.anonymous_usage_statistics.enabled
-        else:
-            return False
+        enabled = self._data_context_variables.analytics
+        if enabled is None:
+            enabled = True
+        return enabled
 
     @property
     def data_context_variables(self) -> DataContextVariables:

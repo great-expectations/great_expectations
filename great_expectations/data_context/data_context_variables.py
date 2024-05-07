@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import enum
 import logging
+import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
@@ -23,7 +24,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store import DataContextStore
     from great_expectations.data_context.types.base import (
-        AnonymizedUsageStatisticsConfig,
         DataContextConfig,
         ProgressBarsConfig,
     )
@@ -46,7 +46,8 @@ class DataContextVariableSchema(str, enum.Enum):
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
-    ANONYMOUS_USAGE_STATISTICS = "anonymous_usage_statistics"
+    ANALYTICS = "analytics"
+    DATA_CONTEXT_ID = "data_context_id"
     PROGRESS_BARS = "progress_bars"
 
     @classmethod
@@ -201,18 +202,29 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.DATA_DOCS_SITES, data_docs_sites)
 
     @property
-    def anonymous_usage_statistics(
+    def analytics(
         self,
-    ) -> Optional[AnonymizedUsageStatisticsConfig]:
-        return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
+    ) -> Optional[bool]:
+        return self._get(DataContextVariableSchema.ANALYTICS)
 
-    @anonymous_usage_statistics.setter
-    def anonymous_usage_statistics(
-        self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
-    ) -> None:
+    @analytics.setter
+    def analytics(self, analytics: bool) -> None:
         self._set(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            anonymous_usage_statistics,
+            DataContextVariableSchema.ANALYTICS,
+            analytics,
+        )
+
+    @property
+    def data_context_id(
+        self,
+    ) -> Optional[uuid.UUID]:
+        return self._get(DataContextVariableSchema.DATA_CONTEXT_ID)
+
+    @data_context_id.setter
+    def data_context_id(self, data_context_id: uuid.UUID) -> None:
+        self._set(
+            DataContextVariableSchema.DATA_CONTEXT_ID,
+            data_context_id,
         )
 
     @property

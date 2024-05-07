@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import configparser
-import copy
 import json
 import os
 import pathlib
@@ -30,9 +29,6 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-)
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
@@ -1102,56 +1098,6 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
     context.save_config_variable(config_variable_name=config_var_name, value=config_var_value)
 
     assert context.plugins_directory and context.plugins_directory.endswith(config_var_value)
-
-
-@pytest.mark.big
-def test_check_for_usage_stats_sync_finds_diff(
-    empty_data_context_stats_enabled,
-    data_context_config_with_datasources: DataContextConfig,
-) -> None:
-    """
-    What does this test do and why?
-
-    During DataContext instantiation, if the project config used to create the object
-    and the actual config assigned to self.config differ in terms of their usage statistics
-    values, we want to be able to identify that and persist values accordingly.
-    """
-    context = empty_data_context_stats_enabled
-    project_config = data_context_config_with_datasources
-
-    res = context._check_for_usage_stats_sync(project_config=project_config)
-    assert res is True
-
-
-@pytest.mark.big
-def test_check_for_usage_stats_sync_does_not_find_diff(
-    empty_data_context_stats_enabled,
-) -> None:
-    """
-    What does this test do and why?
-
-    During DataContext instantiation, if the project config used to create the object
-    and the actual config assigned to self.config differ in terms of their usage statistics
-    values, we want to be able to identify that and persist values accordingly.
-    """
-    context = empty_data_context_stats_enabled
-    project_config = copy.deepcopy(context.config)  # Using same exact config
-
-    res = context._check_for_usage_stats_sync(project_config=project_config)
-    assert res is False
-
-
-@pytest.mark.big
-def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
-    empty_data_context,
-    data_context_config_with_datasources: DataContextConfig,
-) -> None:
-    context = empty_data_context
-    project_config = data_context_config_with_datasources
-    project_config.anonymous_usage_statistics.enabled = False
-
-    res = context._check_for_usage_stats_sync(project_config=project_config)
-    assert res is False
 
 
 class ExpectSkyToBeColor(BatchExpectation):
