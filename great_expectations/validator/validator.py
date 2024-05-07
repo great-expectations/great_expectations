@@ -1186,12 +1186,7 @@ class Validator:
             # 3. from data context
             # So, we load them in reverse order
 
-            if data_context is not None:
-                runtime_suite_parameters = data_context.suite_parameter_store.get_bind_params(
-                    run_id
-                )
-            else:
-                runtime_suite_parameters = {}
+            runtime_suite_parameters: dict = {}
 
             if expectation_suite.suite_parameters:
                 runtime_suite_parameters.update(expectation_suite.suite_parameters)
