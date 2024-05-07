@@ -48,11 +48,9 @@ The following table lists the available GX Cloud Expectations.
 
 6. Complete the mandatory and optional fields.
 
-7. Click **Save**.
+7. Click **Save** or click **Save & Add More** and then repeat steps 5 and 6 to add additional Expectations.
 
-8. Optional. Click **Save & Add More** and then repeat steps 1 to 4 to add additional Expectations.
-
-9. Optional. Run a Validation. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
+8. Optional. Run a Validation. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
 ## Edit an Expectation
 

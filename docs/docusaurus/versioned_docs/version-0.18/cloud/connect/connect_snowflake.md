@@ -37,9 +37,9 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
    - Paste the code you copied in step 2 into the SQL worksheet.
 
-      Replace `secure_password` with your value and `database_name` and `schema_name` with the names of the database and schema you want to access in GX Cloud.
+      Replace `your_password` with your value and `your_database_name` and `your_schema` with the names of the database and schema you want to access in GX Cloud.
 
-      `grant select on future tables in schema "database_name.schema_name" to role gx_role;` is optional and gives the user with the `gx_role` role access to all future tables in the defined schema.
+      `grant select on future tables in schema "your_database.your_schema" to role gx_role;` is optional and gives the user with the `gx_role` role access to all future tables in the defined schema.
 
       The settings in the code example optimize cost and performance. Adjust them to suit your business requirements.
 
