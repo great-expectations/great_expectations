@@ -3,7 +3,7 @@ from __future__ import annotations
 import pathlib
 from abc import ABC
 from functools import singledispatchmethod
-from typing import TYPE_CHECKING, Dict, Generic, Literal, Optional, Pattern, Union
+from typing import TYPE_CHECKING, Generic, Optional, Pattern
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
