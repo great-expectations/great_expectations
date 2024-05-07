@@ -12,15 +12,15 @@ import great_expectations as gx
 import great_expectations.expectations as gxe
 from great_expectations.compatibility import pydantic
 from great_expectations.core.partitioners import (
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
     PartitionerColumnValue,
     PartitionerConvertedDatetime,
     PartitionerDatetimePart,
     PartitionerDividedInteger,
     PartitionerModInteger,
     PartitionerMultiColumnValue,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
 )
 from great_expectations.data_context import (
     AbstractDataContext,
@@ -116,7 +116,7 @@ class TestQueryAssets:
         validator = context.get_validator(
             batch_request=asset.build_batch_request(
                 options={"year": 2019},
-                partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
+                partitioner=ColumnPartitionerMonthly(column_name="pickup_datetime"),
             )
         )
         result = validator.expect_column_distinct_values_to_equal_set(
@@ -219,7 +219,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata_sample_2020_all_months_combined.db",
             "yellow_tripdata_sample_2020",
-            PartitionerYear,
+            ColumnPartitionerYearly,
             {"column_name": "pickup_datetime"},
             1,
             {"year": 2020},
@@ -230,7 +230,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata_sample_2020_all_months_combined.db",
             "yellow_tripdata_sample_2020",
-            PartitionerYearAndMonth,
+            ColumnPartitionerMonthly,
             {"column_name": "pickup_datetime"},
             12,
             {"year": 2020, "month": 6},
@@ -241,7 +241,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            PartitionerYearAndMonthAndDay,
+            ColumnPartitionerDaily,
             {"column_name": "pickup_datetime"},
             28,
             {"year": 2019, "month": 2, "day": 10},
@@ -435,7 +435,7 @@ def test_success_with_partitioners_from_batch_definitions(
     )
     batch_definition = asset.add_batch_definition(
         name="whatevs",
-        partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
+        partitioner=ColumnPartitionerMonthly(column_name="pickup_datetime"),
     )
     validator = Validator(
         batch_definition=batch_definition,
@@ -470,7 +470,7 @@ def test_asset_specified_metadata(empty_data_context, add_asset_method, add_asse
         batch_metadata=asset_specified_metadata,
         **add_asset_kwarg,
     )
-    partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+    partitioner = ColumnPartitionerMonthly(column_name="pickup_datetime")
     # Test getting all batches
     batches = asset.get_batch_list_from_batch_request(
         asset.build_batch_request(partitioner=partitioner)

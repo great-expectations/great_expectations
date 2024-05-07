@@ -9,11 +9,11 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.partitioners import (
-    PartitionerDaily,
-    PartitionerMonthly,
-    PartitionerPath,
-    PartitionerYearly,
-    RegexPartitioner,
+    FileNamePartitioner,
+    FileNamePartitionerDaily,
+    FileNamePartitionerMonthly,
+    FileNamePartitionerPath,
+    FileNamePartitionerYearly,
 )
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
@@ -66,8 +66,8 @@ class AmbiguousPathError(ValueError):
         self.path = path
 
 
-class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
-    """Base class for PathDataAssets which batch by file."""
+class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[DatasourceT], ABC):
+    """Base class for PathDataAssets which batch by applying a regex to file names."""
 
     batching_regex: Pattern = (  # must use typing.Pattern for pydantic < v1.10
         MATCH_ALL_PATTERN
@@ -108,7 +108,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
             raise AmbiguousPathError(path=path)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerPath(regex=regex),
+            partitioner=FileNamePartitionerPath(regex=regex),
         )
 
     @public_api
@@ -130,7 +130,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAME)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearly(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerYearly(regex=regex, sort_ascending=sort_ascending),
         )
 
     @public_api
@@ -152,7 +152,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
         )
 
     @public_api
@@ -175,7 +175,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerDaily(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerDaily(regex=regex, sort_ascending=sort_ascending),
         )
 
     @classmethod
@@ -205,7 +205,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[RegexPartitioner] = None,
+        partitioner: Optional[FileNamePartitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = tuple(self._group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
         if partitioner:
@@ -223,7 +223,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[RegexPartitioner] = None,
+        partitioner: Optional[FileNamePartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -301,7 +301,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
 
     @override
     def _get_sortable_partitioner(
-        self, partitioner: Optional[RegexPartitioner]
+        self, partitioner: Optional[FileNamePartitioner]
     ) -> Optional[PartitionerSortingProtocol]:
         # RegexPartitioner already implements PartitionerSortingProtocol
         return partitioner
