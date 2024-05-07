@@ -14,8 +14,6 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
-    DatasourceConfig,
-    DatasourceConfigSchema,
 )
 from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
@@ -636,30 +634,33 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     # Add env var for substitution
     monkeypatch.setenv("DB_HOST_FROM_ENV_VAR", "DB_HOST_FROM_ENV_VAR_VALUE")
 
-    datasource_config = DatasourceConfig(
-        class_name="Datasource",
-        execution_engine={
-            "class_name": "SqlAlchemyExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-            "credentials": {
-                "drivername": "postgresql",
-                "host": "$DB_HOST",
-                "port": "65432",
-                "database": "${DB_NAME}",
-                "username": "${DB_USER}",
-                "password": "${DB_PWD}",
-            },
-        },
-    )
+    # "postgresql+psycopg2://<username>:<password>@<host>:<port>/<database>"
+    connection_string = "postgresql+psycopg2:/$DB_USER:$DB_PWD@$DB_HOST:65432/$DB_NAME"
+    context.data_sources.add_postgres("test_datasource", connection_string=connection_string)
+    # datasource_config = DatasourceConfig(
+    #     class_name="Datasource",
+    #     execution_engine={
+    #         "class_name": "SqlAlchemyExecutionEngine",
+    #         "module_name": "great_expectations.execution_engine",
+    #         "credentials": {
+    #             "drivername": "postgresql",
+    #             "host": "$DB_HOST",
+    #             "port": "65432",
+    #             "database": "${DB_NAME}",
+    #             "username": "${DB_USER}",
+    #             "password": "${DB_PWD}",
+    #         },
+    #     },
+    # )
 
-    datasource_config_schema = DatasourceConfigSchema()
+    # datasource_config_schema = DatasourceConfigSchema()
 
-    # use context.add_datasource to test this by adding a datasource with values to substitute.
-    context.add_datasource(
-        initialize=False,
-        name="test_datasource",
-        **datasource_config_schema.dump(datasource_config),
-    )
+    # # use context.add_datasource to test this by adding a datasource with values to substitute.
+    # context.add_datasource(
+    #     initialize=False,
+    #     name="test_datasource",
+    #     **datasource_config_schema.dump(datasource_config),
+    # )
 
     assert context.list_datasources()[0]["execution_engine"]["credentials"] == {
         "drivername": "postgresql",
