@@ -294,10 +294,7 @@ def load_class(class_name: str, module_name: str) -> type:
     return klass_
 
 
-def build_in_memory_runtime_context(
-    include_pandas: bool = True,
-    include_spark: bool = True,
-) -> AbstractDataContext:
+def build_in_memory_runtime_context() -> AbstractDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
 
