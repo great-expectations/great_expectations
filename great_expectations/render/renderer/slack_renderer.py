@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
@@ -87,7 +86,7 @@ class SlackRenderer(Renderer):
             summary_text += f"*Batch Validation Status*: {status}"
 
         summary_text += f"""
-*Expectation Suite name*: `{expectation_suite_name}`
+*Expectation Suite Name*: `{expectation_suite_name}`
 *Data Asset Name*: `{data_asset_name}`
 *Run ID*: `{run_id}`
 *Batch ID*: `{batch_id}`
@@ -142,17 +141,28 @@ class SlackRenderer(Renderer):
 
         return None
 
-    def _build_divider_block(self) -> dict:
+    def concatenate_text_blocks(self, text_blocks: list[dict], name: str, success: bool) -> dict:
+        all_blocks = [self._build_header(name=name, success=success), self._build_divider()]
+        for block in text_blocks:
+            all_blocks.append(block)
+            all_blocks.append(self._build_divider())
+        all_blocks.append(self._build_footer())
+
+        return {"blocks": all_blocks, "text": name}
+
+    def _build_header(self, name: str, success: bool) -> dict:
+        status = "Success :tada:" if success else "Failed :x:"
+        return {
+            "type": "header",
+            "text": {"type": "mrkdwn", "text": f"*Checkpoint Status* ({name}): {status}"},
+        }
+
+    def _build_divider(self) -> dict:
         return {"type": "divider"}
 
-    def concatenate_text_blocks(
-        self, checkpoint_result: CheckpointResult, text_blocks: list[dict]
-    ) -> dict:
-        checkpoint_name = checkpoint_result.checkpoint_config.name
-        status = checkpoint_result.success or False
-
+    def _build_footer(self) -> dict:
         documentation_url = "https://docs.greatexpectations.io/docs/terms/data_docs"
-        footer_section = {
+        return {
             "type": "context",
             "elements": [
                 {
@@ -161,9 +171,6 @@ class SlackRenderer(Renderer):
                 }
             ],
         }
-
-        all_blocks = text_blocks + [footer_section]
-        return {"blocks": all_blocks, "text": f"{checkpoint_name}: {status}"}
 
     def _get_report_element(self, docs_link):
         report_element = None
