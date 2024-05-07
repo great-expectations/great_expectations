@@ -63,9 +63,6 @@ from great_expectations.exceptions.exceptions import DataContextError
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.data_context.types.resource_identifiers import (
-        ExpectationSuiteIdentifier,
-    )
     from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
@@ -622,23 +619,6 @@ class CloudDataContext(SerializableDataContext):
             },
         )
         return site_builder
-
-    @override
-    def _determine_key_for_suite_update(
-        self, name: str, id: str | None
-    ) -> Union[ExpectationSuiteIdentifier, GXCloudIdentifier]:
-        """
-        Note that this explicitly overriding the `AbstractDataContext` helper method called
-        in `self.update_expectation_suite()`.
-
-        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
-        instead of the usual `ExpectationSuiteIdentifier` for `Store` interaction.
-        """
-        return GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            id=id,
-            resource_name=name,
-        )
 
     @classmethod
     def _load_cloud_backed_project_config(

@@ -70,7 +70,7 @@ def expectation_suite(
     yield expectation_suite
     expectation_suite = context.suites.get(name=expectation_suite_name)
     assert len(expectation_suite.expectations) > 0
-    context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.suites.delete(expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
         _ = context.suites.get(name=expectation_suite_name)
 
