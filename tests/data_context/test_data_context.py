@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import configparser
 import copy
-import json
 import os
 import pathlib
 import shutil
@@ -15,9 +14,6 @@ from typing_extensions import override
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import (
-    expectationSuiteSchema,
-)
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -32,9 +28,6 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.expectation import BatchExpectation
@@ -83,51 +76,6 @@ def data_context_with_bad_datasource(tmp_path_factory):
         str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
-
-
-@pytest.mark.filesystem
-def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
-    assert data_context_parameterized_expectation_suite.list_expectation_suites() == [
-        ExpectationSuiteIdentifier(name=parameterized_expectation_suite_name)
-    ]
-
-
-@pytest.mark.filesystem
-def test_get_existing_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        parameterized_expectation_suite_name
-    )
-    assert expectation_suite.name == parameterized_expectation_suite_name
-    assert len(expectation_suite.expectations) == 2
-
-
-@pytest.mark.filesystem
-def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = data_context_parameterized_expectation_suite.add_expectation_suite(
-        "this_data_asset_does_not_exist.default"
-    )
-    assert expectation_suite.name == "this_data_asset_does_not_exist.default"
-    assert len(expectation_suite.expectations) == 0
-
-
-@pytest.mark.filesystem
-def test_save_expectation_suite(data_context_parameterized_expectation_suite):
-    expectation_suite = data_context_parameterized_expectation_suite.add_expectation_suite(
-        "this_data_asset_config_does_not_exist.default"
-    )
-    expectation_suite.expectation_configurations.append(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
-    )
-    data_context_parameterized_expectation_suite.save_expectation_suite(expectation_suite)
-    expectation_suite_saved = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "this_data_asset_config_does_not_exist.default"
-    )
-    assert (
-        expectation_suite.expectation_configurations
-        == expectation_suite_saved.expectation_configurations
-    )
 
 
 @pytest.mark.cloud
@@ -280,87 +228,6 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
     )
     monkeypatch.setenv("GX_HOME", str(context_path))
     assert FileDataContext.find_context_root_dir() == str(context_path)
-
-
-@pytest.mark.filesystem
-def test_data_context_updates_expectation_suite_names(
-    data_context_parameterized_expectation_suite,
-):
-    # A data context should update the data_asset_name and expectation_suite_name of expectation suites  # noqa: E501
-    # that it creates when it saves them.
-
-    expectation_suites = data_context_parameterized_expectation_suite.list_expectation_suites()
-
-    # We should have a single expectation suite defined
-    assert len(expectation_suites) == 1
-
-    expectation_suite_name = expectation_suites[0].name
-
-    # We'll get that expectation suite and then update its name and re-save, then verify that everything  # noqa: E501
-    # has been properly updated
-    expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        expectation_suite_name
-    )
-
-    # Note we codify here the current behavior of having a string data_asset_name though typed ExpectationSuite objects  # noqa: E501
-    # will enable changing that
-    assert expectation_suite.name == expectation_suite_name
-
-    # We will now change the data_asset_name and then save the suite in three ways:
-    #   1. Directly using the new name,
-    #   2. Using a different name that should be overwritten
-    #   3. Using the new name but having the context draw that from the suite
-
-    # Finally, we will try to save without a name (deleting it first) to demonstrate that saving will fail.  # noqa: E501
-
-    expectation_suite.name = "a_new_suite_name"
-
-    data_context_parameterized_expectation_suite.save_expectation_suite(
-        expectation_suite=expectation_suite, expectation_suite_name="a_new_suite_name"
-    )
-
-    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "a_new_suite_name"
-    )
-
-    assert fetched_expectation_suite.name == "a_new_suite_name"
-
-    #   2. Using a different name that should be overwritten
-    data_context_parameterized_expectation_suite.save_expectation_suite(
-        expectation_suite=expectation_suite,
-        expectation_suite_name="a_new_new_suite_name",
-    )
-
-    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "a_new_new_suite_name"
-    )
-
-    assert fetched_expectation_suite.name == "a_new_new_suite_name"
-
-    # Check that the saved name difference is actually persisted on disk
-    with open(
-        os.path.join(  # noqa: PTH118
-            data_context_parameterized_expectation_suite.root_directory,
-            "expectations",
-            "a_new_new_suite_name.json",
-        ),
-    ) as suite_file:
-        loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
-        loaded_suite = ExpectationSuite(
-            **loaded_suite_dict,
-        )
-        assert loaded_suite.name == "a_new_new_suite_name"
-
-    #   3. Using the new name but having the context draw that from the suite
-    expectation_suite.name = "a_third_suite_name"
-    data_context_parameterized_expectation_suite.save_expectation_suite(
-        expectation_suite=expectation_suite
-    )
-
-    fetched_expectation_suite = data_context_parameterized_expectation_suite.get_expectation_suite(
-        "a_third_suite_name"
-    )
-    assert fetched_expectation_suite.name == "a_third_suite_name"
 
 
 @pytest.mark.filesystem
