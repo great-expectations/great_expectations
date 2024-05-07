@@ -5,7 +5,7 @@ import logging
 import pathlib
 import re
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, List, cast
+from typing import TYPE_CHECKING, Dict, List, Tuple, cast
 
 import pytest
 
@@ -1128,29 +1128,29 @@ def daily_partitioner():
 
 
 @pytest.fixture
-def daily_batch_parameters_and_expected_result():
+def daily_batch_parameters_and_expected_result() -> Tuple[Dict[str, int], int]:
     batch_parameters = {"year": 2018, "month": 1, "day": 11}
     expected_result = 3
     return batch_parameters, expected_result
 
 
 @pytest.fixture
-def monthly_batch_parameters_and_expected_result():
+def monthly_batch_parameters_and_expected_result() -> Tuple[Dict[str, int], int]:
     batch_parameters = {"year": 2018, "month": 1}
     expected_result = 10
     return batch_parameters, expected_result
 
 
 @pytest.fixture
-def yearly_batch_parameters_and_expected_result():
+def yearly_batch_parameters_and_expected_result() -> Tuple[Dict[str, int], int]:
     batch_parameters = {"year": 2018}
     expected_result = 120
     return batch_parameters, expected_result
 
 
 @pytest.fixture
-def whole_directory_batch_parameters_and_expected_result():
-    batch_parameters = {}
+def whole_directory_batch_parameters_and_expected_result() -> Tuple[Dict[str, int], int]:
+    batch_parameters: Dict[str, int] = {}
     expected_result = 360
     return batch_parameters, expected_result
 
@@ -1158,9 +1158,11 @@ def whole_directory_batch_parameters_and_expected_result():
 class TestPartitionerDirectoryAsset:
     @pytest.mark.spark
     def test_daily_batch_definition_workflow(
-        self, directory_asset, daily_batch_parameters_and_expected_result
+        self,
+        directory_asset: DirectoryCSVAsset,
     ):
-        batch_parameters, expected_result = daily_batch_parameters_and_expected_result
+        batch_parameters = {"year": 2018, "month": 1, "day": 11}
+        expected_result = 3
         batch_def = directory_asset.add_batch_definition_daily(
             name="daily", column="pickup_datetime"
         )
@@ -1169,9 +1171,11 @@ class TestPartitionerDirectoryAsset:
 
     @pytest.mark.spark
     def test_monthly_batch_definition_workflow(
-        self, directory_asset, monthly_batch_parameters_and_expected_result
+        self,
+        directory_asset: DirectoryCSVAsset,
     ):
-        batch_parameters, expected_result = monthly_batch_parameters_and_expected_result
+        batch_parameters = {"year": 2018, "month": 1}
+        expected_result = 10
         batch_def = directory_asset.add_batch_definition_monthly(
             name="monthly", column="pickup_datetime"
         )
@@ -1180,9 +1184,12 @@ class TestPartitionerDirectoryAsset:
 
     @pytest.mark.spark
     def test_yearly_batch_definition_workflow(
-        self, directory_asset, yearly_batch_parameters_and_expected_result
+        self,
+        directory_asset: DirectoryCSVAsset,
+        yearly_batch_parameters_and_expected_result: Tuple[Dict[str, int], int],
     ):
-        batch_parameters, expected_result = yearly_batch_parameters_and_expected_result
+        batch_parameters = {"year": 2018}
+        expected_result = 120
         batch_def = directory_asset.add_batch_definition_yearly(
             name="yearly", column="pickup_datetime"
         )
@@ -1191,9 +1198,12 @@ class TestPartitionerDirectoryAsset:
 
     @pytest.mark.spark
     def test_whole_table_batch_definition_workflow(
-        self, directory_asset, whole_directory_batch_parameters_and_expected_result
+        self,
+        directory_asset: DirectoryCSVAsset,
+        whole_directory_batch_parameters_and_expected_result: Tuple[Dict[str, int], int],
     ):
-        batch_parameters, expected_result = whole_directory_batch_parameters_and_expected_result
+        batch_parameters: Dict[str, int] = {}
+        expected_result = 360
         batch_def = directory_asset.add_batch_definition_whole_directory(name="whole directory")
         batch = batch_def.get_batch(batch_parameters=batch_parameters)
         assert batch.validate(gxe.ExpectTableRowCountToEqual(value=expected_result)).success
@@ -1228,15 +1238,20 @@ class TestPartitionerDirectoryAsset:
         ],
     )
     def test_get_batch_parameters_keys_with_partitioner(
-        self, directory_asset, partitioner: Partitioner, expected_keys
+        self,
+        directory_asset: DirectoryCSVAsset,
+        partitioner: Partitioner,
+        expected_keys: Tuple[str, ...],
     ):
         assert directory_asset.get_batch_parameters_keys(partitioner=partitioner) == expected_keys
 
     @pytest.mark.spark
     def test_get_batch_list_from_batch_request_returns_single_batch(
-        self, directory_asset, daily_partitioner, daily_batch_parameters_and_expected_result
+        self,
+        directory_asset: DirectoryCSVAsset,
+        daily_partitioner: PartitionerYearAndMonthAndDay,
     ):
-        batch_parameters, _ = daily_batch_parameters_and_expected_result
+        batch_parameters = {"year": 2018, "month": 1, "day": 11}
         batch_request = directory_asset.build_batch_request(
             options=batch_parameters, partitioner=daily_partitioner
         )
