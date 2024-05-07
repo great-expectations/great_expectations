@@ -85,7 +85,11 @@ def test_ephemeral_context_init(monkeypatch):
         _ = gx.get_context(mode="ephemeral")
 
     mock_init.assert_called_once_with(
-        data_context_id=mock.ANY, organization_id=None, oss_id=mock.ANY, user_id=None
+        data_context_id=mock.ANY,
+        organization_id=None,
+        oss_id=mock.ANY,
+        user_id=None,
+        enabled_from_config=True,
     )
     mock_submit.assert_called_once_with(
         mock.ANY,
@@ -115,6 +119,7 @@ def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
         organization_id=UUID(cloud_details.org_id),
         oss_id=mock.ANY,
         cloud_mode=True,
+        enabled_from_config=True,
     )
     mock_submit.assert_called_once_with(
         mock.ANY,

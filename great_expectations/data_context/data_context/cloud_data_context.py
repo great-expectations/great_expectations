@@ -150,7 +150,7 @@ class CloudDataContext(SerializableDataContext):
 
         init_analytics(
             user_id=self._get_cloud_user_id(),
-            data_context_id=uuid.UUID(self._data_context_id),
+            data_context_id=self._data_context_id,
             organization_id=uuid.UUID(organization_id) if organization_id else None,
             oss_id=self._get_oss_id(),
             cloud_mode=True,
@@ -573,14 +573,17 @@ class CloudDataContext(SerializableDataContext):
         return variables
 
     @override
-    def _construct_data_context_id(self) -> str:
+    def _construct_data_context_id(self) -> uuid.UUID | None:
         """
         Choose the id of the currently-configured expectations store, if available and a persistent store.
         If not, it should choose the id stored in DataContextConfig.
         Returns:
             UUID to use as the data_context_id
         """  # noqa: E501
-        return self.ge_cloud_config.organization_id  # type: ignore[return-value]
+        org_id = self.ge_cloud_config.organization_id
+        if org_id:
+            return uuid.UUID(org_id)
+        return None
 
     @override
     def get_config_with_variables_substituted(
