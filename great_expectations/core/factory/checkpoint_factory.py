@@ -49,7 +49,7 @@ class CheckpointFactory(Factory[Checkpoint]):
 
         submit_event(
             event=CheckpointCreatedEvent(
-                checkpoint_id=checkpoint.id,
+                checkpoint_id=obj.id,
             )
         )
 
