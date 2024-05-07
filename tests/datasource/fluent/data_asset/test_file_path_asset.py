@@ -1,6 +1,6 @@
 import pathlib
 import re
-from typing import Final, List
+from typing import Final, List, Union
 
 import pytest
 
@@ -97,20 +97,30 @@ def validated_pandas_filesystem_datasource(
 
 
 @pytest.mark.filesystem
+@pytest.mark.parametrize(
+    "batching_regex",
+    [
+        pytest.param(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv", id="String"),
+        pytest.param(
+            re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"),
+            id="re.Pattern",
+        ),
+    ],
+)
 def test_get_batch_list_from_batch_request__sort_ascending(
     validated_pandas_filesystem_datasource: PandasFilesystemDatasource,
+    batching_regex: Union[str, re.Pattern],
 ):
     """Verify that get_batch_list_from_batch_request respects a partitioner's ascending sort order.
 
     NOTE: we just happen to be using pandas as the concrete class.
     """
-    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=batching_regex,
     )
-    batch_definition = asset.add_batch_definition(
-        "foo", partitioner=PartitionerMonthly(sort_ascending=True, regex=re.compile(batching_regex))
+    batch_definition = asset.add_batch_definition_monthly(
+        name="foo", sort_ascending=True, regex=batching_regex
     )
     batch_request = batch_definition.build_batch_request()
 
@@ -126,21 +136,30 @@ def test_get_batch_list_from_batch_request__sort_ascending(
 
 
 @pytest.mark.filesystem
+@pytest.mark.parametrize(
+    "batching_regex",
+    [
+        pytest.param(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv", id="String"),
+        pytest.param(
+            re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"),
+            id="re.Pattern",
+        ),
+    ],
+)
 def test_get_batch_list_from_batch_request__sort_descending(
     validated_pandas_filesystem_datasource: PandasFilesystemDatasource,
+    batching_regex: Union[str, re.Pattern],
 ):
     """Verify that get_batch_list_from_batch_request respects a partitioner's descending sort order.
 
     NOTE: we just happen to be using pandas as the concrete class.
     """
-    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=batching_regex,
     )
-    batch_definition = asset.add_batch_definition(
-        "foo",
-        partitioner=PartitionerMonthly(regex=re.compile(batching_regex), sort_ascending=False),
+    batch_definition = asset.add_batch_definition_monthly(
+        name="foo", regex=batching_regex, sort_ascending=False
     )
     batch_request = batch_definition.build_batch_request()
 
@@ -303,12 +322,18 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_path_fails_
 @pytest.mark.unit
 @pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
+@pytest.mark.parametrize(
+    "batching_regex",
+    [
+        pytest.param(r"data_(?P<year>\d{4}).csv", id="String"),
+        pytest.param(re.compile(r"data_(?P<year>\d{4}).csv"), id="re.Pattern"),
+    ],
+)
 def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_success(
-    datasource, asset, sort
+    datasource, asset, sort, batching_regex
 ):
     # arrange
     name = "batch_def_name"
-    batching_regex = re.compile(r"data_(?P<year>\d{4}).csv")
     expected_batch_definition = BatchDefinition(
         name=name,
         partitioner=PartitionerYearly(regex=batching_regex, sort_ascending=sort),
@@ -328,12 +353,18 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_succ
 @pytest.mark.unit
 @pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
+@pytest.mark.parametrize(
+    "batching_regex",
+    [
+        pytest.param(r"data_2024.csv", id="String"),
+        pytest.param(re.compile(r"data_2024.csv"), id="re.Pattern"),
+    ],
+)
 def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fails_if_required_group_is_missing(  # noqa: E501
-    datasource, asset, sort
+    datasource, asset, sort, batching_regex
 ):
     # arrange
     name = "batch_def_name"
-    batching_regex = re.compile(r"data_2024.csv")
 
     # act
     with pytest.raises(RegexMissingRequiredGroupsError) as error:
@@ -348,12 +379,18 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fail
 @pytest.mark.unit
 @pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
+@pytest.mark.parametrize(
+    "batching_regex",
+    [
+        pytest.param(r"data_(?P<year>\d{4})-(?P<foo>\d{4}).csv", id="String"),
+        pytest.param(re.compile(r"data_(?P<year>\d{4})-(?P<foo>\d{4}).csv"), id="re.Pattern"),
+    ],
+)
 def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fails_if_unknown_groups_are_found(  # noqa: E501
-    datasource, asset, sort
+    datasource, asset, sort, batching_regex
 ):
     # arrange
     name = "batch_def_name"
-    batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<foo>\d{4}).csv")
 
     # act
     with pytest.raises(RegexUnknownGroupsError) as error:
@@ -368,12 +405,18 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_fail
 @pytest.mark.unit
 @pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
+@pytest.mark.parametrize(
+    "batching_regex",
+    [
+        pytest.param(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv", id="String"),
+        pytest.param(re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv"), id="re.Pattern"),
+    ],
+)
 def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_success(
-    datasource, asset, sort
+    datasource, asset, sort, batching_regex
 ):
     # arrange
     name = "batch_def_name"
-    batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     expected_batch_definition = BatchDefinition(
         name=name,
         partitioner=PartitionerMonthly(regex=batching_regex, sort_ascending=sort),
@@ -393,8 +436,15 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_suc
 @pytest.mark.unit
 @pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
+@pytest.mark.parametrize(
+    "batching_regex",
+    [
+        pytest.param(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv", id="String"),
+        pytest.param(re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2}).csv"), id="re.Pattern"),
+    ],
+)
 def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_fails_if_required_group_is_missing(  # noqa: E501
-    datasource, asset, sort
+    datasource, asset, sort, batching_regex
 ):
     # arrange
     name = "batch_def_name"
@@ -458,12 +508,18 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_succe
 @pytest.mark.unit
 @pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
+@pytest.mark.parametrize(
+    "batching_regex",
+    [
+        pytest.param(r"data_2024.csv", id="String"),
+        pytest.param(re.compile(r"data_2024.csv"), id="re.Pattern"),
+    ],
+)
 def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails_if_required_group_is_missing(  # noqa: E501
-    datasource, asset, sort
+    datasource, asset, sort, batching_regex
 ):
     # arrange
     name = "batch_def_name"
-    batching_regex = re.compile(r"data_2024-01-01.csv")
 
     # act
     with pytest.raises(RegexMissingRequiredGroupsError) as error:
@@ -478,8 +534,20 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails
 @pytest.mark.unit
 @pytest.mark.parametrize("asset", _path_asset_parameters(), indirect=["asset"])
 @pytest.mark.parametrize("sort", [True, False])
+@pytest.mark.parametrize(
+    "batching_regex",
+    [
+        pytest.param(
+            r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})-(?P<foo>\d{4}).csv", id="String"
+        ),
+        pytest.param(
+            re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})-(?P<foo>\d{4}).csv"),
+            id="re.Pattern",
+        ),
+    ],
+)
 def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_fails_if_unknown_groups_are_found(  # noqa: E501
-    datasource, asset, sort
+    datasource, asset, sort, batching_regex
 ):
     # arrange
     name = "batch_def_name"
