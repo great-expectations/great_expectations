@@ -76,7 +76,7 @@ class PartitionerConvertedDatetime(pydantic.BaseModel):
     date_format_string: str
 
 
-Partitioner = Union[
+ColumnPartitioner = Union[
     PartitionerColumnValue,
     PartitionerMultiColumnValue,
     PartitionerDividedInteger,

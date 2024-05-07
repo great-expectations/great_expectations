@@ -8,7 +8,7 @@ import pytest
 
 from great_expectations.core.batch_definition import PartitionerT
 from great_expectations.core.partitioners import (
-    Partitioner,
+    ColumnPartitioner,
     PartitionerColumnValue,
     PartitionerDaily,
     PartitionerMonthly,
@@ -81,7 +81,7 @@ def test_batch_request_config_serialization_round_trips(
         "partitioner": PartitionerColumnValue(column_name="my_column"),
     }
     batch_request_config.update(optional_batch_request_config)
-    batch_request = BatchRequest[Partitioner](**batch_request_config)
+    batch_request = BatchRequest[ColumnPartitioner](**batch_request_config)
     assert batch_request.datasource_name == datasource_name
     assert batch_request.data_asset_name == data_asset_name
     # options is optional and an empty dict by default

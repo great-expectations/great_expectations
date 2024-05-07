@@ -18,7 +18,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.partitioners import (
-    Partitioner,
+    ColumnPartitioner,
     PartitionerColumnValue,
     PartitionerDatetimePart,
     PartitionerDividedInteger,
@@ -96,7 +96,7 @@ def assert_table_asset(
     table_name: str,
     source: PostgresDatasource,
     batch_parameters: tuple[str, ...],
-    partitioner: Optional[Partitioner] = None,
+    partitioner: Optional[ColumnPartitioner] = None,
 ):
     assert asset.name == name
     assert asset.table_name == table_name
@@ -508,7 +508,7 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
         partitioner = PartitionerClass(**add_partitioner_kwargs)
 
         src, ast, op = batch_request_args
-        batch_request = BatchRequest[Partitioner](
+        batch_request = BatchRequest[ColumnPartitioner](
             datasource_name=src or source.name,
             data_asset_name=ast or asset.name,
             options=op or {},
