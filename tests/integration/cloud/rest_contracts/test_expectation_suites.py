@@ -110,7 +110,6 @@ def test_get_expectation_suite(
         "organizations",
         EXISTING_ORGANIZATION_ID,
         "expectation-suites",
-        GET_EXPECTATION_SUITE_ID,
     )
     status = 200
     response_body = GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY
@@ -149,7 +148,6 @@ def test_get_non_existent_expectation_suite(
         "organizations",
         EXISTING_ORGANIZATION_ID,
         "expectation-suites",
-        NON_EXISTENT_EXPECTATION_SUITE_ID,
     )
 
     status = 404
