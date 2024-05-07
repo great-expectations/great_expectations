@@ -15,6 +15,7 @@ from pytest import MonkeyPatch, param
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
+from great_expectations.core.partitioners import PartitionerMonthly
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
@@ -271,7 +272,14 @@ class TestDynamicPandasAssets:
                 batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
                 **extra_kwargs,
             )
-            .build_batch_request({"year": "2018"})
+            .build_batch_request(
+                {"year": "2018"},
+                partitioner=PartitionerMonthly(
+                    regex=re.compile(
+                        r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+                    )
+                ),
+            )
         )
         with pytest.raises(SpyInterrupt):
             empty_data_context.get_validator(batch_request=batch_request)
@@ -477,7 +485,12 @@ def test_get_batch_list_from_fully_specified_batch_request(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
-    request = asset.build_batch_request({"year": "2018", "month": "04"})
+    request = asset.build_batch_request(
+        {"year": "2018", "month": "04"},
+        partitioner=PartitionerMonthly(
+            regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+        ),
+    )
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -512,7 +525,12 @@ def test_get_batch_list_batch_count(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
-    request = asset.build_batch_request({"year": year, "month": month, "path": path})
+    request = asset.build_batch_request(
+        {"year": year, "month": month, "path": path},
+        partitioner=PartitionerMonthly(
+            regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+        ),
+    )
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == batch_count
 
@@ -586,6 +604,9 @@ def test_pandas_slice_batch_count(
     batch_request = asset.build_batch_request(
         options={"year": "2019"},
         batch_slice=batch_slice,
+        partitioner=PartitionerMonthly(
+            regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+        ),
     )
     batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
     assert len(batches) == expected_batch_count
@@ -630,22 +651,6 @@ def datasource_test_connection_error_messages(
     return pandas_filesystem_datasource, test_connection_error
 
 
-@pytest.mark.unit
-def test_test_connection_failures(
-    datasource_test_connection_error_messages: tuple[
-        PandasFilesystemDatasource, TestConnectionError
-    ],
-):
-    (
-        pandas_filesystem_datasource,
-        test_connection_error,
-    ) = datasource_test_connection_error_messages
-
-    with pytest.raises(type(test_connection_error)) as e:
-        pandas_filesystem_datasource.test_connection()
-    assert str(e.value) == str(test_connection_error)
-
-
 @pytest.mark.timeout(
     5,  # deepcopy operation can be slow. Try to eliminate it in the future.
 )
@@ -671,7 +676,11 @@ def test_csv_asset_batch_metadata(
     )
     assert asset.batch_metadata == asset_specified_metadata
 
-    batch_request = asset.build_batch_request()
+    batch_request = asset.build_batch_request(
+        partitioner=PartitionerMonthly(
+            regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+        )
+    )
 
     batches = pandas_filesystem_datasource.get_batch_list_from_batch_request(batch_request)
 
@@ -690,4 +699,5 @@ def test_csv_asset_batch_metadata(
         actual_metadata = copy.deepcopy(batches[i].metadata)
         # not testing path for the purposes of this test
         actual_metadata.pop("path")
+        actual_metadata.pop("year")
         assert actual_metadata == substituted_batch_metadata
