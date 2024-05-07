@@ -4,6 +4,7 @@ import pytest
 
 import great_expectations
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.validator.validator import Validator
 
@@ -121,7 +122,7 @@ def test_get_validator_successful_specification_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
-    context.add_expectation_suite("my_expectations")
+    context.suites.add(ExpectationSuite(name="my_expectations"))
     # Successful specification using a RuntimeBatchRequest
     my_validator: Validator = context.get_validator(
         batch_request=RuntimeBatchRequest(
@@ -142,7 +143,7 @@ def test_get_validator_wrong_runtime_parameters_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
-    context.add_expectation_suite("my_expectations")
+    context.suites.add(ExpectationSuite(name="my_expectations"))
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(great_expectations.exceptions.exceptions.InvalidBatchRequestError):
         # runtime_parameters are not configured in the DataConnector
@@ -163,7 +164,7 @@ def test_get_validator_successful_specification_sqlalchemy_engine_named_asset(
 ):
     context = data_context_with_datasource_sqlalchemy_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    context.add_expectation_suite("my_expectations")
+    context.suites.add(ExpectationSuite(name="my_expectations"))
     # Successful specification using a RuntimeBatchRequest
     my_validator: Validator = context.get_validator(
         batch_request=RuntimeBatchRequest(

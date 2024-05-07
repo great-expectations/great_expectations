@@ -65,14 +65,11 @@ def expectation_suite(
     context: CloudDataContext,
 ) -> Iterator[ExpectationSuite]:
     expectation_suite_name = f"es_{uuid.uuid4().hex}"
-    expectation_suite = context.add_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-    )
+    expectation_suite = context.suites.add(ExpectationSuite(name=expectation_suite_name))
     assert len(expectation_suite.expectations) == 0
     yield expectation_suite
-    expectation_suite = context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
+    expectation_suite = context.suites.get(name=expectation_suite_name)
     assert len(expectation_suite.expectations) > 0
-    _ = context.suites.get(name=expectation_suite_name)
     context.delete_expectation_suite(expectation_suite_name=expectation_suite_name)
     with pytest.raises(gx_exceptions.DataContextError):
         _ = context.suites.get(name=expectation_suite_name)

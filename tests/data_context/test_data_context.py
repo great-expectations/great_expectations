@@ -86,23 +86,6 @@ def data_context_with_bad_datasource(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-def test_create_duplicate_expectation_suite(titanic_data_context):
-    # create new expectation suite
-    assert titanic_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test_create_expectation_suite"
-    )
-    # attempt to create expectation suite with name that already exists on data asset
-    with pytest.raises(gx_exceptions.DataContextError):
-        titanic_data_context.add_expectation_suite(
-            expectation_suite_name="titanic.test_create_expectation_suite"
-        )
-    # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True  # noqa: E501
-    assert titanic_data_context.add_or_update_expectation_suite(
-        expectation_suite_name="titanic.test_create_expectation_suite",
-    )
-
-
-@pytest.mark.filesystem
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
     assert data_context_parameterized_expectation_suite.list_expectation_suites() == [
         ExpectationSuiteIdentifier(name=parameterized_expectation_suite_name)
@@ -153,8 +136,8 @@ def test_save_expectation_suite_include_rendered_content(
 ):
     context = empty_cloud_data_context
 
-    expectation_suite: ExpectationSuite = context.add_expectation_suite(
-        "this_data_asset_config_does_not_exist.default"
+    expectation_suite: ExpectationSuite = context.suites.add(
+        ExpectationSuite(name="this_data_asset_config_does_not_exist.default")
     )
     expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
@@ -163,10 +146,8 @@ def test_save_expectation_suite_include_rendered_content(
     )
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
-    context.save_expectation_suite(
-        expectation_suite,
-    )
-    expectation_suite_saved: ExpectationSuite = context.get_expectation_suite(
+    expectation_suite.save()
+    expectation_suite_saved: ExpectationSuite = context.suites.get(
         "this_data_asset_config_does_not_exist.default"
     )
     for expectation in expectation_suite_saved.expectation_configurations:
@@ -184,8 +165,8 @@ def test_get_expectation_suite_include_rendered_content(
 ):
     context = empty_cloud_data_context
 
-    expectation_suite: ExpectationSuite = context.add_expectation_suite(
-        "this_data_asset_config_does_not_exist.default"
+    expectation_suite: ExpectationSuite = context.suites.add(
+        ExpectationSuite(name="this_data_asset_config_does_not_exist.default")
     )
     expectation_suite.expectation_configurations.append(
         ExpectationConfiguration(
@@ -194,14 +175,12 @@ def test_get_expectation_suite_include_rendered_content(
     )
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
-    context.save_expectation_suite(
-        expectation_suite,
-    )
-    (context.get_expectation_suite("this_data_asset_config_does_not_exist.default"))
+    expectation_suite.save()
+    context.suites.get("this_data_asset_config_does_not_exist.default")
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
 
-    expectation_suite_retrieved: ExpectationSuite = context.get_expectation_suite(
+    expectation_suite_retrieved: ExpectationSuite = context.suites.get(
         "this_data_asset_config_does_not_exist.default",
     )
 
@@ -212,34 +191,6 @@ def test_get_expectation_suite_include_rendered_content(
                 rendered_content_block,
                 RenderedAtomicContent,
             )
-
-
-@pytest.mark.filesystem
-def test_data_context_expectation_suite_delete(empty_data_context):
-    assert empty_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test_create_expectation_suite"
-    )
-    expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert len(expectation_suites) == 1
-    empty_data_context.delete_expectation_suite(expectation_suite_name=expectation_suites[0])
-    expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert len(expectation_suites) == 0
-
-
-@pytest.mark.filesystem
-def test_data_context_expectation_nested_suite_delete(empty_data_context):
-    assert empty_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test.create_expectation_suite"
-    )
-    expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert empty_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test.a.create_expectation_suite"
-    )
-    expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert len(expectation_suites) == 2
-    empty_data_context.delete_expectation_suite(expectation_suite_name=expectation_suites[0])
-    expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert len(expectation_suites) == 1
 
 
 @pytest.mark.unit
@@ -507,8 +458,8 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context = empty_context
     ge_dir = context.root_directory
     context.data_sources.add_pandas("arthur")
-    context.add_expectation_suite("dent")
-    assert len(context.list_expectation_suites()) == 1
+    context.suites.add(ExpectationSuite(name="dent"))
+    assert len(context.suites.all()) == 1
 
     assert FileDataContext.is_project_initialized(ge_dir) is True
 
@@ -520,7 +471,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context = empty_context
     ge_dir = context.root_directory
     context.data_sources.add_pandas("arthur")
-    assert len(context.list_expectation_suites()) == 0
+    assert len(context.suites.all()) == 0
 
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
@@ -839,7 +790,7 @@ def test_list_expectation_suite_with_no_suites(titanic_data_context):
 
 @pytest.mark.unit
 def test_list_expectation_suite_with_one_suite(titanic_data_context):
-    titanic_data_context.add_expectation_suite("warning")
+    titanic_data_context.suites.add(ExpectationSuite(name="warning"))
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
     assert observed == ["warning"]
@@ -847,9 +798,9 @@ def test_list_expectation_suite_with_one_suite(titanic_data_context):
 
 @pytest.mark.unit
 def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
-    titanic_data_context.add_expectation_suite("a.warning")
-    titanic_data_context.add_expectation_suite("b.warning")
-    titanic_data_context.add_expectation_suite("c.warning")
+    titanic_data_context.suites.add(ExpectationSuite(name="a.warning"))
+    titanic_data_context.suites.add(ExpectationSuite(name="b.warning"))
+    titanic_data_context.suites.add(ExpectationSuite(name="c.warning"))
 
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
@@ -1050,8 +1001,8 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
 def test_add_expectation_to_expectation_suite(empty_data_context_stats_enabled):
     context = empty_data_context_stats_enabled
 
-    expectation_suite: ExpectationSuite = context.add_expectation_suite(
-        expectation_suite_name="my_new_expectation_suite"
+    expectation_suite: ExpectationSuite = context.suites.add(
+        ExpectationSuite(name="my_new_expectation_suite")
     )
     expectation_suite.add_expectation_configuration(
         ExpectationConfiguration(
@@ -1198,7 +1149,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.add_expectation_suite(expectation_suite=expectation_suite)
+    context.suites.add(expectation_suite)
 
     # Without include_rendered_content set, all legacy rendered_content was None.
     expectation_suite = context.suites.get(name=expectation_suite_name)

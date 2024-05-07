@@ -77,7 +77,9 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite("test_suite")
+    suite: ExpectationSuite = in_memory_runtime_context.suites.add(
+        ExpectationSuite(name="test_suite")
+    )
 
     expectation_configuration: ExpectationConfiguration
 
@@ -173,7 +175,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite("test_suite")
+    suite: ExpectationSuite = in_memory_runtime_context.suites.add(
+        ExpectationSuite(name="test_suite")
+    )
 
     expectation_configuration: ExpectationConfiguration
 
@@ -275,7 +279,9 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite("test_suite")
+    suite: ExpectationSuite = in_memory_runtime_context.suites.add(
+        ExpectationSuite(name="test_suite")
+    )
 
     expectation_configuration: ExpectationConfiguration
 
@@ -391,7 +397,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.add_expectation_suite("test_suite")
+    suite = in_memory_runtime_context.suites.add(ExpectationSuite(name="test_suite"))
 
     expectation_arguments_column: dict = {
         "column": "Name",  # use correct column to avoid error
@@ -455,7 +461,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
+    suite = in_memory_runtime_context.suites.add(ExpectationSuite(name="test_suite"))
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -494,7 +500,7 @@ def test_result_format_configured_no_set_default_override(  # noqa: PLR0915
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
+    suite = in_memory_runtime_context.suites.add(ExpectationSuite(name="test_suite"))
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -593,7 +599,7 @@ def test_result_format_configured_with_set_default_override(
 
     suite: ExpectationSuite
 
-    suite = in_memory_runtime_context.add_expectation_suite("test_suite")
+    suite = in_memory_runtime_context.suites.add(ExpectationSuite(name="test_suite"))
 
     expectation_configuration: ExpectationConfiguration
 
@@ -677,7 +683,7 @@ def test_result_format_configured_with_set_default_override(
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
+    suite = in_memory_runtime_context.suites.add(ExpectationSuite(name="test_suite"))
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column

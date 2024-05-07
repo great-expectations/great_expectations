@@ -1396,16 +1396,16 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "expectation_suite, or create_expectation_suite_with_name can be specified"
             )
         if expectation_suite_id is not None:
-            expectation_suite = self.get_expectation_suite(
-                id=expectation_suite_id,
+            expectation_suite = next(
+                suite for suite in self.suites.all() if suite.id == expectation_suite_id
             )
         if expectation_suite_name is not None:
-            expectation_suite = self.get_expectation_suite(
+            expectation_suite = self.suites.get(
                 expectation_suite_name,
             )
         if create_expectation_suite_with_name is not None:
-            expectation_suite = self.add_expectation_suite(
-                expectation_suite_name=create_expectation_suite_with_name,
+            expectation_suite = self.suites.get(
+                name=create_expectation_suite_with_name,
             )
 
         return expectation_suite

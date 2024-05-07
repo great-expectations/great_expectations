@@ -2,6 +2,7 @@ import os
 import pathlib
 import tempfile
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -259,7 +260,7 @@ request = table_asset.build_batch_request()
 
 
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite">
-context.add_or_update_expectation_suite(expectation_suite_name="test_bigquery_suite")
+context.suites.add(ExpectationSuite(name="test_bigquery_suite"))
 
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_bigquery_suite"

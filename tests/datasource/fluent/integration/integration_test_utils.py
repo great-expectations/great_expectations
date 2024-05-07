@@ -7,6 +7,7 @@ import pytest
 
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
@@ -36,7 +37,7 @@ def run_checkpoint_and_data_doc(
 
     # Define an expectation suite
     suite_name = "my_suite"
-    context.add_expectation_suite(expectation_suite_name=suite_name)
+    context.suites.add(ExpectationSuite(name=suite_name))
     # noinspection PyTypeChecker
     validator = context.get_validator(
         batch_request=batch_request,

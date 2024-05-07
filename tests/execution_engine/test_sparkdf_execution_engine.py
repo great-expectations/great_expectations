@@ -11,6 +11,7 @@ from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.data_context import get_context
@@ -1185,7 +1186,7 @@ def test_explicit_string_identifiers_should_work_with_validator(spark_session):
         runtime_parameters={"batch_data": df},  # Your dataframe goes here
     )
 
-    context.add_or_update_expectation_suite(expectation_suite_name="test_ge_unique_record")
+    context.suites.add(ExpectationSuite(name="test_ge_unique_record"))
 
     validator = context.get_validator(
         batch_request=batch_request,

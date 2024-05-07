@@ -504,7 +504,7 @@ class SerializableDataContext(AbstractDataContext):
         context = cls._attempt_context_instantiation(ge_dir)
         if not context:
             return False
-        return bool(context.list_expectation_suites())
+        return bool(context.suites.all())
 
     @classmethod
     def _attempt_context_instantiation(cls, ge_dir: PathStr) -> Optional[SerializableDataContext]:

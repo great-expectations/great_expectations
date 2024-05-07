@@ -8,6 +8,7 @@ import pytest
 import great_expectations
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
@@ -167,7 +168,7 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine(
     context = data_context_with_datasource_spark_engine
     test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
 
-    context.add_expectation_suite("my_expectations")
+    context.suites.add(ExpectationSuite(name="my_expectations"))
     # Successful specification using a RuntimeBatchRequest
     my_validator = context.get_validator(
         batch_request=RuntimeBatchRequest(
@@ -188,7 +189,7 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine_named_
     context = data_context_with_datasource_spark_engine
     test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    context.add_expectation_suite("my_expectations")
+    context.suites.add(ExpectationSuite(name="my_expectations"))
     # Successful specification using a RuntimeBatchRequest
     my_validator = context.get_validator(
         batch_request=RuntimeBatchRequest(
@@ -500,7 +501,7 @@ def test_file_path_get_validator_successful_specification_sparkdf_engine_named_a
 ):
     context = data_context_with_datasource_spark_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    context.add_expectation_suite("my_expectations")
+    context.suites.add(ExpectationSuite(name="my_expectations"))
     # Successful specification using a RuntimeBatchRequest
     my_validator = context.get_validator(
         batch_request=RuntimeBatchRequest(

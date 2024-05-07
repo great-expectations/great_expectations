@@ -130,7 +130,7 @@ def test_get_expectation_suite(
     )
 
     with pact_test:
-        cloud_data_context.get_expectation_suite(id=GET_EXPECTATION_SUITE_ID)
+        cloud_data_context.suites.get("no_checkpoint_suite")
 
 
 @pytest.mark.cloud
@@ -169,7 +169,7 @@ def test_get_non_existent_expectation_suite(
 
     with pact_test:
         with pytest.raises(DataContextError):
-            cloud_data_context.get_expectation_suite(id=NON_EXISTENT_EXPECTATION_SUITE_ID)
+            cloud_data_context.suites.get(name="no_checkpoint_suite")
 
 
 @pytest.mark.cloud
@@ -207,7 +207,7 @@ def test_get_expectation_suites(
     )
 
     with pact_test:
-        cloud_data_context.list_expectation_suites()
+        cloud_data_context.suites.all()
 
 
 @pytest.mark.cloud

@@ -19,7 +19,7 @@ spark_session: pyspark.SparkSession = SparkDFExecutionEngine.get_or_create_spark
 
 # create and load Expectation Suite
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py create_expectation_suite">
-context.add_expectation_suite(expectation_suite_name="insert_your_expectation_suite_name_here")
+context.suites.add(ExpectationSuite(name="insert_your_expectation_suite_name_here"))
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_expectation_suite">
 suite: ExpectationSuite = context.suites.get(name="insert_your_expectation_suite_name_here")

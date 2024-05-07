@@ -1,6 +1,7 @@
 import pathlib
 import tempfile
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -247,7 +248,7 @@ query_asset = datasource.add_query_asset(
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py add_suite_and_get_validator">
 request = table_asset.build_batch_request()
 
-context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
+context.suites.add(ExpectationSuite(name="test_suite"))
 
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_suite"

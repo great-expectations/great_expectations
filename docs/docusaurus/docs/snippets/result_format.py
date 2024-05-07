@@ -1,6 +1,7 @@
 import pandas as pd
 
 import great_expectations as gx
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 # Snippet: example data frame for result_format
 # <snippet name="docs/docusaurus/docs/snippets/result_format pandas_df_for_result_format">
@@ -19,7 +20,7 @@ context = gx.get_context()
 datasource = context.data_sources.add_pandas(name="my_pandas_datasource")
 data_asset = datasource.add_dataframe_asset(name="my_df")
 my_batch_request = data_asset.build_batch_request(dataframe=dataframe)
-context.add_or_update_expectation_suite("my_expectation_suite")
+context.suites.add(ExpectationSuite(name="my_expectation_suite"))
 my_validator = context.get_validator(
     batch_request=my_batch_request,
     expectation_suite_name="my_expectation_suite",

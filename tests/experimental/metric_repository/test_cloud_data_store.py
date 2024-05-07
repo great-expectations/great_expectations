@@ -5,6 +5,7 @@ from uuid import UUID
 import numpy
 import pytest
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
 from great_expectations.exceptions.exceptions import ExpectationSuiteError
 from great_expectations.experimental.metric_repository.cloud_data_store import (
@@ -24,7 +25,7 @@ class TestCloudDataStore:
         self, empty_cloud_context_fluent: CloudDataContext
     ):  # used as a fixture
         context = empty_cloud_context_fluent
-        created_expectation_suite = context.add_expectation_suite("test_suite")
+        created_expectation_suite = context.suites.add(ExpectationSuite(name="test_suite"))
         retrieved_expectation_suite = context.suites.get("test_suite")
         assert created_expectation_suite == retrieved_expectation_suite
 
@@ -32,11 +33,11 @@ class TestCloudDataStore:
         self, empty_cloud_context_fluent: CloudDataContext
     ):  # used as a fixture
         context = empty_cloud_context_fluent
-        created_expectation_suite = context.add_expectation_suite("test_suite")
+        created_expectation_suite = context.suites.add(ExpectationSuite(name="test_suite"))
         retrieved_expectation_suite = context.suites.get("test_suite")
         assert created_expectation_suite == retrieved_expectation_suite
         with pytest.raises(ExpectationSuiteError):
-            context.add_expectation_suite("test_suite")
+            context.suites.add(ExpectationSuite(name="test_suite"))
 
 
 @pytest.mark.cloud  # NOTE: needs orjson dependency

@@ -209,7 +209,7 @@ def multi_batch_taxi_validator(
 ) -> Validator:
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.suites.add(ExpectationSuite(name="validating_taxi_data"))
 
     multi_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -288,12 +288,6 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 
 # TODO: There is something wrong with this test. It is trying to mock out cloud, but if I don't
 #       unset the gx_env_variables (eg if i remove this fixture), this test will fail.
-@mock.patch(
-    "great_expectations.data_context.data_context.AbstractDataContext.save_expectation_suite"
-)
-@mock.patch(
-    "great_expectations.data_context.data_context.AbstractDataContext.get_expectation_suite"
-)
 @mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
@@ -368,7 +362,7 @@ def test_validator_with_bad_batchrequest(
 ):
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.suites.add(ExpectationSuite(name="validating_taxi_data"))
 
     multi_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -493,7 +487,7 @@ def test_validator_load_additional_batch_to_validator(
 ):
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.suites.add(ExpectationSuite(name="validating_taxi_data"))
 
     jan_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -535,7 +529,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     yellow_trip_pandas_data_context,
 ):
     context = yellow_trip_pandas_data_context
-    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.suites.add(ExpectationSuite(name="validating_taxi_data"))
 
     jan_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -842,9 +836,7 @@ def test_rendered_content_bool_only_respected(result_format: str | dict):
     )
     batch_request = csv_asset.build_batch_request()
     expectation_suite_name = "test_result_format_suite"
-    context.add_or_update_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-    )
+    context.suites.add(ExpectationSuite(name=expectation_suite_name))
 
     validator = context.get_validator(
         batch_request=batch_request,
@@ -952,7 +944,7 @@ def _context_to_validator_and_expectation_sql(
         data_connector_name="my_sql_data_connector",
         data_asset_name="animals_names_asset",  # this is the name of the table you want to retrieve
     )
-    context.add_expectation_suite(expectation_suite_name="test_suite")
+    context.suites.add(ExpectationSuite(name="test_suite"))
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )

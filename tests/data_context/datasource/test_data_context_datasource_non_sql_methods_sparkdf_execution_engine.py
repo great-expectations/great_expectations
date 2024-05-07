@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import ExecutionEngineError, InvalidBatchRequestError
@@ -105,7 +106,7 @@ def test_get_validator(context_with_single_titanic_csv_spark):
         },
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
-    context.add_expectation_suite(expectation_suite_name="temp_suite")
+    context.suites.add(ExpectationSuite(name="temp_suite"))
     my_validator: Validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="temp_suite"
     )
@@ -123,7 +124,7 @@ def test_get_validator_bad_batch_request(context_with_single_titanic_csv_spark):
         "data_asset_name": "I_DONT_EXIST",
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
-    context.add_expectation_suite(expectation_suite_name="temp_suite")
+    context.suites.add(ExpectationSuite(name="temp_suite"))
     with pytest.raises(InvalidBatchRequestError):
         context.get_validator(batch_request=batch_request, expectation_suite_name="temp_suite")
 
