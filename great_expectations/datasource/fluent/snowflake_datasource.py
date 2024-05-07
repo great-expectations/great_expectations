@@ -213,11 +213,14 @@ class SnowflakeDatasource(SQLDatasource):
         return gx_exec_engine
 
     def _get_snowflake_partner_application(self) -> str:
+        """
+        This is used to set the application query parameter in the Snowflake connection URL, which provides attribution
+        to GX for the Snowflake Partner program.
+        """
+
         # This import is here to avoid a circular import
         from great_expectations.data_context import CloudDataContext
 
-        # This is used to set the application query parameter, which provides attribution to GX
-        # for the Snowflake Partner program.
         if isinstance(self._data_context, CloudDataContext):
             # TODO: Change this value to "great_expectations_cloud" once configured in Snowflake partner account
             return SNOWFLAKE_PARTNER_APPLICATION_CLOUD
