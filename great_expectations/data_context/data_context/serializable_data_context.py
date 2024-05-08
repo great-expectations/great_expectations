@@ -302,7 +302,7 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def get_ge_config_version(cls, context_root_dir: Optional[PathStr] = None) -> Optional[float]:
-        yml_path = cls._find_context_yml_file(search_start_dir=context_root_dir)
+        yml_path = cls._find_context_yml_file(directory_to_search=context_root_dir)
         if yml_path is None:
             return None
 
@@ -336,7 +336,7 @@ class SerializableDataContext(AbstractDataContext):
                                                                   The maximum valid version is {CURRENT_GX_CONFIG_VERSION}."""  # noqa: E501
                 )
 
-        yml_path = cls._find_context_yml_file(search_start_dir=context_root_dir)
+        yml_path = cls._find_context_yml_file(directory_to_search=context_root_dir)
         if yml_path is None:
             return False
 
@@ -350,41 +350,33 @@ class SerializableDataContext(AbstractDataContext):
         return True
 
     @classmethod
-    def _find_context_yml_file(cls, search_start_dir: Optional[PathStr] = None) -> str | None:
+    def _find_context_yml_file(cls, directory_to_search: Optional[PathStr] = None) -> str | None:
         """Search for the yml file starting here and moving upward."""
-        if search_start_dir is None:
-            search_start_dir = pathlib.Path.cwd()
+        if directory_to_search is None:
+            directory_to_search = pathlib.Path.cwd()
         else:
-            search_start_dir = pathlib.Path(search_start_dir)
+            directory_to_search = pathlib.Path(directory_to_search)
 
         # Ensure backwards compatibility if user is using "great_expectations/" over "gx/"
         # Starting v0.17.13, "gx/" will be the default
         return cls._search_gx_dir_for_context_yml(
-            search_start_dir=search_start_dir, gx_dir=cls.GX_DIR
+            directory_to_search=directory_to_search, gx_dir_name=cls.GX_DIR
         ) or cls._search_gx_dir_for_context_yml(
-            search_start_dir=search_start_dir, gx_dir=cls._LEGACY_GX_DIR
+            directory_to_search=directory_to_search, gx_dir_name=cls._LEGACY_GX_DIR
         )
 
     @classmethod
     def _search_gx_dir_for_context_yml(
-        cls, search_start_dir: pathlib.Path, gx_dir: str
+        cls, directory_to_search: pathlib.Path, gx_dir_name: str
     ) -> Optional[str]:
         yml_path: str | None = None
 
-        for i in range(4):
-            logger.debug(f"Searching for config file {search_start_dir} ({i} layer deep)")
-
-            potential_ge_dir = search_start_dir / gx_dir
-
-            if potential_ge_dir.is_dir():
-                potential_yml = potential_ge_dir / cls.GX_YML
-                if potential_yml.is_file():
-                    yml_path = str(potential_yml)
-                    logger.debug(f"Found config file at {yml_path}")
-                    break
-
-            # move up one directory
-            search_start_dir = search_start_dir.parent
+        potential_gx_dir = directory_to_search / gx_dir_name
+        if potential_gx_dir.is_dir():
+            potential_yml = potential_gx_dir / cls.GX_YML
+            if potential_yml.is_file():
+                yml_path = str(potential_yml)
+                logger.debug(f"Found config file at {yml_path}")
 
         return yml_path
 
