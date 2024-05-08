@@ -1032,13 +1032,13 @@ def get_or_create_expectation_suite(  # noqa: C901
         expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"  # noqa: E501
 
     if create_expectation_suite:
-        if persist:
+        if persist and data_context:
             try:
                 # noinspection PyUnusedLocal
                 expectation_suite = data_context.suites.get(name=expectation_suite_name)
             except gx_exceptions.DataContextError:
-                expectation_suite = data_context.add_expectation_suite(
-                    expectation_suite_name=expectation_suite_name
+                expectation_suite = data_context.suites.add(
+                    ExpectationSuite(name=expectation_suite_name)
                 )
                 logger.info(f'Created ExpectationSuite "{expectation_suite.name}".')
         else:

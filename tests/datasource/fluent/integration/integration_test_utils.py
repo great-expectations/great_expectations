@@ -7,6 +7,7 @@ import pytest
 
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
@@ -15,6 +16,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
     HeadData,
 )
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -36,7 +38,11 @@ def run_checkpoint_and_data_doc(
 
     # Define an expectation suite
     suite_name = "my_suite"
-    context.add_expectation_suite(expectation_suite_name=suite_name)
+    try:
+        context.suites.add(ExpectationSuite(name=suite_name))
+    except DataContextError:
+        ...
+    context.suites.get(name=suite_name)
     # noinspection PyTypeChecker
     validator = context.get_validator(
         batch_request=batch_request,
@@ -45,7 +51,6 @@ def run_checkpoint_and_data_doc(
     validator.expect_table_row_count_to_be_between(0, 10000)
     validator.expect_column_max_to_be_between(column="passenger_count", min_value=1, max_value=7)
     validator.expect_column_median_to_be_between(column="passenger_count", min_value=1, max_value=4)
-    validator.save_expectation_suite(discard_failed_expectations=False)
 
     suite = validator.expectation_suite
     batch_def = asset.add_batch_definition(name="my_batch_definition")
