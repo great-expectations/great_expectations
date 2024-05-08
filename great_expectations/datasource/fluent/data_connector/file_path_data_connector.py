@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from typing import DefaultDict
 
     from great_expectations.alias_types import PathStr
-    from great_expectations.core.partitioners import RegexPartitioner
+    from great_expectations.core.partitioners import FileNamePartitioner
     from great_expectations.datasource.fluent import BatchRequest
 
 logger = logging.getLogger(__name__)
@@ -194,7 +194,7 @@ class FilePathDataConnector(DataConnector):
         return len(self.get_unmatched_data_references())
 
     def _get_unfiltered_batch_definition_list(
-        self, batch_request: BatchRequest[RegexPartitioner]
+        self, batch_request: BatchRequest[FileNamePartitioner]
     ) -> list[LegacyBatchDefinition]:
         """Get all batch definitions for all files from a data connector
          using the supplied batch request.

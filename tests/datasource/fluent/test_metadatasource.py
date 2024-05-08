@@ -11,7 +11,7 @@ import pytest
 
 from great_expectations.compatibility.pydantic import DirectoryPath, validate_arguments
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.partitioners import Partitioner
+from great_expectations.core.partitioners import ColumnPartitioner
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context import get_context as get_gx_context
@@ -124,7 +124,7 @@ class DummyDataAsset(DataAsset):
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 

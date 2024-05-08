@@ -7,13 +7,13 @@ import pytest
 from great_expectations.alias_types import PathStr
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import (
-    PartitionerDaily,
-    PartitionerMonthly,
-    PartitionerPath,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
-    PartitionerYearly,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
+    FileNamePartitionerDaily,
+    FileNamePartitionerMonthly,
+    FileNamePartitionerPath,
+    FileNamePartitionerYearly,
 )
 from great_expectations.datasource.fluent import Datasource
 from great_expectations.datasource.fluent.data_asset.path.file_asset import (
@@ -240,7 +240,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_path_succes
     name = "batch_def_name"
     expected_regex = re.compile(str(path))
     expected_batch_definition = BatchDefinition(
-        name=name, partitioner=PartitionerPath(regex=expected_regex)
+        name=name, partitioner=FileNamePartitionerPath(regex=expected_regex)
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
     file_path_data_connector.get_matched_data_references.return_value = [PATH_NAME]
@@ -339,7 +339,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_yearly_succ
     name = "batch_def_name"
     expected_batch_definition = BatchDefinition(
         name=name,
-        partitioner=PartitionerYearly(regex=batching_regex, sort_ascending=sort),
+        partitioner=FileNamePartitionerYearly(regex=batching_regex, sort_ascending=sort),
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
 
@@ -422,7 +422,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_monthly_suc
     name = "batch_def_name"
     expected_batch_definition = BatchDefinition(
         name=name,
-        partitioner=PartitionerMonthly(regex=batching_regex, sort_ascending=sort),
+        partitioner=FileNamePartitionerMonthly(regex=batching_regex, sort_ascending=sort),
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
 
@@ -494,7 +494,7 @@ def test_add_batch_definition_fluent_file_path__add_batch_definition_daily_succe
     batching_regex = re.compile(r"data_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}).csv")
     expected_batch_definition = BatchDefinition(
         name=name,
-        partitioner=PartitionerDaily(regex=batching_regex, sort_ascending=sort),
+        partitioner=FileNamePartitionerDaily(regex=batching_regex, sort_ascending=sort),
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
 
@@ -622,7 +622,7 @@ def test_add_batch_definition_daily_success(datasource, asset):
     column = "foo"
     expected_batch_definition = BatchDefinition(
         name=name,
-        partitioner=PartitionerYearAndMonthAndDay(column_name=column),
+        partitioner=ColumnPartitionerDaily(column_name=column),
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
 
@@ -644,7 +644,7 @@ def test_add_batch_definition_monthly_success(
     name = "batch_def_name"
     column = "foo"
     expected_batch_definition = BatchDefinition(
-        name=name, partitioner=PartitionerYearAndMonth(column_name=column)
+        name=name, partitioner=ColumnPartitionerMonthly(column_name=column)
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
 
@@ -666,7 +666,7 @@ def test_add_batch_definition_yearly_success(
     name = "batch_def_name"
     column = "foo"
     expected_batch_definition = BatchDefinition(
-        name=name, partitioner=PartitionerYear(column_name=column)
+        name=name, partitioner=ColumnPartitionerYearly(column_name=column)
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
 

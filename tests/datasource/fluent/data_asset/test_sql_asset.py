@@ -2,9 +2,9 @@ import pytest
 
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.partitioners import (
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
 )
 from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.datasource.fluent.sql_datasource import TableAsset, _SQLAsset
@@ -46,7 +46,7 @@ def test_get_batch_list_from_batch_request__sort_ascending(postgres_asset):
     years = [2021, 2022]
     batches = postgres_asset.get_batch_list_from_batch_request(
         postgres_asset.build_batch_request(
-            partitioner=PartitionerYear(column_name="year", sort_ascending=True)
+            partitioner=ColumnPartitionerYearly(column_name="year", sort_ascending=True)
         )
     )
 
@@ -60,7 +60,7 @@ def test_get_batch_list_from_batch_request__sort_descending(postgres_asset):
     years = [2021, 2022]
     batches = postgres_asset.get_batch_list_from_batch_request(
         postgres_asset.build_batch_request(
-            partitioner=PartitionerYear(column_name="year", sort_ascending=False)
+            partitioner=ColumnPartitionerYearly(column_name="year", sort_ascending=False)
         )
     )
 
@@ -106,7 +106,7 @@ def test_add_batch_definition_fluent_sql__add_batch_definition_yearly(
     column = "test_column"
     expected_batch_definition = BatchDefinition(
         name=name,
-        partitioner=PartitionerYear(column_name=column, sort_ascending=sort_ascending),
+        partitioner=ColumnPartitionerYearly(column_name=column, sort_ascending=sort_ascending),
         batching_regex=None,
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
@@ -131,7 +131,7 @@ def test_add_batch_definition_fluent_sql__add_batch_definition_monthly(
     column = "test_column"
     expected_batch_definition = BatchDefinition(
         name=name,
-        partitioner=PartitionerYearAndMonth(column_name=column, sort_ascending=sort_ascending),
+        partitioner=ColumnPartitionerMonthly(column_name=column, sort_ascending=sort_ascending),
         batching_regex=None,
     )
     datasource.add_batch_definition.return_value = expected_batch_definition
@@ -156,9 +156,7 @@ def test_add_batch_definition_fluent_sql__add_batch_definition_daily(
     column = "test_column"
     expected_batch_definition = BatchDefinition(
         name=name,
-        partitioner=PartitionerYearAndMonthAndDay(
-            column_name=column, sort_ascending=sort_ascending
-        ),
+        partitioner=ColumnPartitionerDaily(column_name=column, sort_ascending=sort_ascending),
         batching_regex=None,
     )
     datasource.add_batch_definition.return_value = expected_batch_definition

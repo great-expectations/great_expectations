@@ -11,10 +11,10 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.partitioners import (
-    Partitioner,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
+    ColumnPartitioner,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
 )
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
@@ -37,8 +37,8 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchParameters
 
 
-class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[DatasourceT], ABC):
-    """Base class for PathDataAssets which batch by directory."""
+class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT], ABC):
+    """Base class for PathDataAssets which batch by combining the contents of a directory."""
 
     data_directory: pathlib.Path
     # todo: remove. this is included to allow for an incremental refactor.
@@ -51,7 +51,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonthAndDay(column_name=column),
+            partitioner=ColumnPartitionerDaily(column_name=column),
         )
 
     @public_api
@@ -59,7 +59,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonth(column_name=column),
+            partitioner=ColumnPartitionerMonthly(column_name=column),
         )
 
     @public_api
@@ -67,7 +67,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
         # todo: test column
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYear(column_name=column),
+            partitioner=ColumnPartitionerYearly(column_name=column),
         )
 
     @public_api
@@ -111,15 +111,15 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
     def _get_dataframe_partitioner(self, partitioner) -> Optional[DataframePartitioner]: ...
 
     @_get_dataframe_partitioner.register
-    def _(self, partitioner: PartitionerYear) -> DataframePartitionerYearly:
+    def _(self, partitioner: ColumnPartitionerYearly) -> DataframePartitionerYearly:
         return DataframePartitionerYearly(**partitioner.dict(exclude={"param_names"}))
 
     @_get_dataframe_partitioner.register
-    def _(self, partitioner: PartitionerYearAndMonth) -> DataframePartitionerMonthly:
+    def _(self, partitioner: ColumnPartitionerMonthly) -> DataframePartitionerMonthly:
         return DataframePartitionerMonthly(**partitioner.dict(exclude={"param_names"}))
 
     @_get_dataframe_partitioner.register
-    def _(self, partitioner: PartitionerYearAndMonthAndDay) -> DataframePartitionerDaily:
+    def _(self, partitioner: ColumnPartitionerDaily) -> DataframePartitionerDaily:
         return DataframePartitionerDaily(**partitioner.dict(exclude={"param_names"}))
 
     @_get_dataframe_partitioner.register
@@ -135,7 +135,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: tuple[str, ...] = (FILE_PATH_BATCH_SPEC_KEY,)
         dataframe_partitioner = self._get_dataframe_partitioner(partitioner)
@@ -154,7 +154,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         if options is not None and not self._batch_parameters_are_valid(
             options=options,
@@ -227,7 +227,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, Partitioner], Generic[Dataso
 
     @override
     def _get_sortable_partitioner(
-        self, partitioner: Optional[Partitioner]
+        self, partitioner: Optional[ColumnPartitioner]
     ) -> Optional[PartitionerSortingProtocol]:
         # DirectoryAssets can only ever return a single batch, so they do not require sorting.
         return None
