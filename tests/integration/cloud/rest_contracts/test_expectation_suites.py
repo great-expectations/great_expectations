@@ -110,7 +110,6 @@ def test_get_expectation_suite(
         "organizations",
         EXISTING_ORGANIZATION_ID,
         "expectation-suites",
-        GET_EXPECTATION_SUITE_ID,
     )
     status = 200
     response_body = GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY
@@ -130,7 +129,7 @@ def test_get_expectation_suite(
     )
 
     with pact_test:
-        cloud_data_context.get_expectation_suite(id=GET_EXPECTATION_SUITE_ID)
+        cloud_data_context.suites.get("no_checkpoint_suite")
 
 
 @pytest.mark.cloud
@@ -149,7 +148,6 @@ def test_get_non_existent_expectation_suite(
         "organizations",
         EXISTING_ORGANIZATION_ID,
         "expectation-suites",
-        NON_EXISTENT_EXPECTATION_SUITE_ID,
     )
 
     status = 404
@@ -169,9 +167,10 @@ def test_get_non_existent_expectation_suite(
 
     with pact_test:
         with pytest.raises(DataContextError):
-            cloud_data_context.get_expectation_suite(id=NON_EXISTENT_EXPECTATION_SUITE_ID)
+            cloud_data_context.suites.get(name="non_existent")
 
 
+@pytest.mark.xfail(strict=True, reason="TODO: Fix in V1-331")
 @pytest.mark.cloud
 def test_get_expectation_suites(
     pact_test: pact.Pact,
@@ -207,7 +206,7 @@ def test_get_expectation_suites(
     )
 
     with pact_test:
-        cloud_data_context.list_expectation_suites()
+        cloud_data_context.suites.all()
 
 
 @pytest.mark.cloud

@@ -936,7 +936,7 @@ def test_add_expectation_fails_validation(empty_suite_with_meta: ExpectationSuit
 class TestExpectationSuiteAnalytics:
     @pytest.fixture
     def empty_suite(self, in_memory_runtime_context) -> ExpectationSuite:
-        return in_memory_runtime_context.add_expectation_suite("my_suite")
+        return in_memory_runtime_context.suites.add(ExpectationSuite(name="my_suite"))
 
     @pytest.fixture
     def expect_column_values_to_be_between(self) -> Expectation:
