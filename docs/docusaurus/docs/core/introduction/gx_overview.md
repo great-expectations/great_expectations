@@ -2,22 +2,78 @@
 title: Great Expectations overview
 ---
 
-The information provided here is intended for new users of Great Expectations (GX) and those looking for an understanding of its components and its primary workflows. This overview of GX doesn’t require an in-depth understanding of the code that governs GX processes and interactions. This is an ideal place to start before moving to more advanced topics, or if you want a better understanding of GX functionality.
+This overview is for new users of Great Expectations (GX) and those looking for an understanding of its components and its primary workflows. It does not require an in-depth understanding of GX code, and is an ideal place to start before moving to more advanced topics, or if you want a better understanding of GX functionality.
 
 ## What is GX
 
-GX is a Python library that provides a framework for describing the acceptable state of data and then validating that the data meets those criteria.
+GX is a framework for describing data using expressive tests and then validating that the data meets those criteria.
 
 ## GX core components
 
-When working with GX you use the following five core components to access, store, and manage underlying objects and processes:
+GX is built around the following five core components:
 
-- **[Data Context:](#data-context)** Manages the settings and metadata for a GX project, and provides an entry point to the GX Python API.
-- **[Data Sources:](#datasources)** Connects to your Data Source, and organizes retrieved data for future use.
-- **[Expectations:](#expectations)** Identifies the standards to which your data should conform.
-- **[Validation Definitions:](#validation-definitions)** Links a set of Expectations to a specific set of data.
+- **[Data Sources:](#datasources)** Connect to your data, and organize data for testing.
+- **[Expectations:](#expectations)** Identify the standards to which your data should conform.
+- **[Validation Definitions:](#validation-definitions)** Link a set of Expectations to a specific set of data.
 - **[Checkpoints:](#checkpoints)** Facilitate the integration of GX into data pipelines by allowing you to run automated actions based on the results of validations.
+- **[Data Context:](#data-context)** Manages the settings and metadata for a GX project, and provides an entry point to the GX Python API.
 
+
+## Data Sources
+
+Data Sources connect GX to data such as CSV files in a folder, a PostgreSQL database hosted on AWS, or any combination of data formats and environments. Regardless of the format of your Data Asset or where it resides, Data Sources provide GX with a unified API for working with it.
+
+### Data Assets
+
+Data Assets are collections of records within a Data Source, like tables in a database or files in a cloud storage bucket.  A Data Source tells GX how to connect to your data and Data Assets tell GX how to organize that data.
+
+Data Assets should be defined in a way that makes sense for your data and your use case. For instance, you could define a Data Asset based on a SQL view that joins multiple tables or selects a subset of a table, such as all of the records with a given status in a specific field. 
+
+## Batches
+
+All validation in GX is performed on Batches of data. You can validate the entire data asset as a single batch, or you can partition the data asset into multiple batches and validate each one separately. 
+
+### Batch Definitions
+
+A Batch Definition tells GX how to organize the records in a Data Asset into Batches for retrieval. For example, if a table is updated with new records each day, you could define each day's worth of data as a different Batch. Batch Definitions allow you to retrieve a specific Batch based on parameters provided at runtime.
+
+Multiple Batch Definitions can be added to a Data Asset.  That feature allows you to apply different Expectations to different subsets of the same data.  For instance, you could define one Batch Definition that returns all the records within a Data Asset.  You might then configure a second Batch Definition to only return the most recent day's records.  And you could also create a Batch Definition that returns all the records for a given year and month which you only specify at runtime in a script.
+
+## Expectations
+
+An Expectation is a verifiable assertion about data.  Similar to assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behaviors. Unlike traditional unit tests which describe the expected behavior of code given a specific input, Expectations apply to the input data itself. For example, you can define an Expectation that a column contains no null values. When GX runs that Expectation on your data it generates a report which indicates if a null value was found.
+
+Expectations can be built directly from the domain knowledge of subject matter experts, interactively while introspecting a set of data, or through automated tools provided by GX.
+
+For a list of available Expectations, see [the Expectation Gallery](https://greatexpectations.io/expectations/).
+
+### Expectation Suites
+
+Expectation Suites are collections of Expectations describing your data.  When GX validates data, an Expectation Suite helps streamline the process by running all the contained Expectations against that data.
+
+You can define multiple Expectation Suites for the same data to cover different use cases, and you can apply the same Expectation Suite to different Data Assets.
+
+## Validation Definitions
+
+Validation Definitions tell GX what Expectations to apply to specific data for validation.  It connects a Data Asset's Batch Definition to a specific Expectation Suite.
+
+Because an Expectation Suite is decoupled from a specific source of data, you can apply the same Expectation Suite against different data by reusing it in different Validation Definitions.
+
+The same holds true for Batch Definitions: because they are decoupled from a specific Expectation Suite, you can run multiple Expectation Suites against the same Batch of data by reusing the Batch Definition in different Validation Definitions.  As an example, you could have one Validation Definition that links a permissive Expectation Suite to a Batch Definition.  Then you could have a second Validation Definition that links a more strict Expectation Suite to that same Batch Batch Definition to verify different quality parameters.
+
+In Python, Validation Definition objects also provide the API for running their defined validation and returning Validation Results.
+
+### Validation Results
+
+The Validation Results returned by GX tell you how your data corresponds to what you expected of it. You can view this information in the Data Docs that are configured in your Data Context. Evaluating your Validation Results helps you identify issues with your data. If the Validation Results show that your data meets your Expectations, you can confidently use it.
+
+## Checkpoints
+
+A Checkpoint is the primary means for validating data in a production deployment of GX. Checkpoints allow you to run a list of Validation Definitions with shared parameters and then pass the Validation Results to a list of automated Actions.
+
+### Actions
+
+One of the most powerful features of Checkpoints is that you can configure them to run Actions. The Validation Results generated when a Checkpoint runs determine what Actions are performed. Typical use cases include sending email, Slack messages, or custom notifications. Another common use case is updating Data Docs sites. Actions can be used to do anything you are capable of programming in Python. Actions are a versatile tool for integrating Checkpoints in your pipeline's workflow.
 
 ## Data Context
 
@@ -43,61 +99,3 @@ Stores contain the metadata GX uses.  This includes configurations for GX object
 Data Docs are human-readable documentation generated by GX.  Data Docs describe the standards that you expect your data to conform to, and the results of validating your data against those standards.  The Data Context manages the storage and retrieval of this information.
 
 You can configure where your Data Docs are hosted.  Unlike Stores, you can define configurations for multiple Data Docs sites.  You can also specify what information each Data Doc site provides, allowing you to format and provide different Data Docs for different use cases.
-
-## Data Sources
-
-Data Sources connect GX to data such as CSV files in a folder, a PostgreSQL database hosted on AWS, or any combination of data formats and environments. Regardless of the format of your Data Asset or where it resides, Data Sources provide GX with a unified API for working with it.
-
-### Data Assets
-
-Data Assets are collections of records within a Data Source.  A Data Source tells GX how to connect to your data and Data Assets tell GX how to organize that data.
-
-Although the records in your Data Assets can correspond directly to the contents of tables or files in your Data Source they do not necessarily need to. For instance, you could combine multiple tables worth of records in a SQL Data Source into a single Query Data Asset that joins the tables in question.  Query Assets can also be used to select a subset of a table, such as all of the records with a given status in a specific field.
-
-With a File Data Source, you could use a File Data Asset and regular expressions to define a Data Asset as the contents of all the `.csv` files in a specific subfolder. Alternatively, a Directory Data Asset could be used to combine all the records from those `.csv` files into a single Data Asset.
-
-## Batches
-
-Data Assets can be further partitioned into Batches.  Batches are unique subsets of records within a Data Asset.  For example, say you have a Data Asset in a SQL Data Source that consists of all records from last year in a given table.  You could then partition those records into Batches of data that correspond to the records for individual months of that year.
-
-### Batch Definitions
-
-A Batch Definition tells GX how to organize the records in a Data Asset into Batches for retrieval.  Batch Definitions can be configured to retrieve a specific Batch every time they are referenced or to retrieve a specific Batch from a list based on parameters provided at runtime.
-
-Multiple Batch Definitions can be added to a Data Asset.  This allows you to define different subsets of the same data for different purposes.  For instance, you could define one Batch Definition that returns all the records within a Data Asset.  You might then configure a second Batch Definition to only return the most recent day's records.  And you could also create a Batch Definition that returns all the records for a given year and month which you only specify at runtime in a script.
-
-## Expectations
-
-An Expectation is a verifiable assertion about data.  Similar to assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behaviors. Unlike traditional unit tests which describe the expected behavior of code given a specific input, Expectations apply to the input data itself. For example, you can define an Expectation that a column contains no null values. When GX runs that Expectation on your data it generates a report which indicates if a null value was found.
-
-Expectations can be built directly from the domain knowledge of subject matter experts, interactively while introspecting a set of data, or through automated tools provided by GX.
-
-For a list of available Expectations, see [the Expectation Gallery](https://greatexpectations.io/expectations/).
-
-### Expectation Suites
-
-Expectation Suites are collections of Expectations describing your data.  When GX validates data, an Expectation Suite helps streamline the process by running all the contained Expectations against that data.
-
-You can define multiple Expectation Suites for the same data to cover different use cases.  
-
-## Validation Definitions
-
-Validation Definitions tell GX what data to associate with an Expectation Suite for validation.  
-
-Because an Expectation Suite is decoupled from a specific source of data, you can apply the same Expectation Suite against multiple, disparate Batches by reusing them in different Validation Definitions.  For instance, you can reuse an Expectation Suite that was created around an older set of data to validate the quality of a new set of data.  You could also apply the same standard suite of Expectations to multiple Batches by including it in multiple Validation Definitions.
-
-The same holds true for Batches: Because they are decoupled from a specific Expectation Suite, you can run multiple Expectation Suites against the same Batch of data by reusing the Batch in different Validation Definitions.  As an example, you could have one Validation Definition that links a permissive Expectation Suite to a Batch of raw data.  Then you could have a second Validation Definition that links a more strict Expectation Suite to that same Batch of data to verify its quality post-processing.
-
-In Python, Validation Definition objects also provide the API for running their defined validation and returning Validation Results.
-
-### Validation Results
-
-The Validation Results returned by GX tell you how your data corresponds to what you expected of it. You can view this information in the Data Docs that are configured in your Data Context. Evaluating your Validation Results helps you identify issues with your data. If the Validation Results show that your data meets your Expectations, you can confidently use it.
-
-## Checkpoints
-
-A Checkpoint is the primary means for validating data in a production deployment of GX. Checkpoints allow you to run a list of Validation Definitions with shared parameters and then pass the Validation Results to a list of automated Actions.
-
-### Actions
-
-One of the most powerful features of Checkpoints is that you can configure them to run Actions. The Validation Results generated when a Checkpoint runs determine what Actions are performed. Typical use cases include sending email, Slack messages, or custom notifications. Another common use case is updating Data Docs sites. Actions can be used to do anything you are capable of programming in Python. Actions are a versatile tool for integrating Checkpoints in your pipeline's workflow.
