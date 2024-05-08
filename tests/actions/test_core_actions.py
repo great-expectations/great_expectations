@@ -565,7 +565,7 @@ class TestV1ActionRun:
             headers=None,
             json={
                 "blocks": [
-                    {"text": {"text": mock.ANY, "type": "mrkdwn"}, "type": "header"},
+                    {"text": {"text": mock.ANY, "type": "plain_text"}, "type": "header"},
                     {"type": "divider"},
                     {
                         "text": {
