@@ -289,7 +289,3 @@ validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=-3, max_value=1000
 )
 # </snippet>
-
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py save_expectation_suite">
-validator.save_expectation_suite(discard_failed_expectations=False)
-# </snippet>

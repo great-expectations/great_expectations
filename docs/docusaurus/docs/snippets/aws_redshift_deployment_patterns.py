@@ -252,6 +252,7 @@ request = table_asset.build_batch_request()
 try:
     context.suites.add(ExpectationSuite(name="test_suite"))
 except DataContextError:
+    # If the suite already exists, we will get an error. We can ignore it.
     ...
 
 
@@ -267,8 +268,4 @@ validator.expect_column_values_to_not_be_null(column="passenger_count")
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
-# </snippet>
-
-# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py save_expectations">
-validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
