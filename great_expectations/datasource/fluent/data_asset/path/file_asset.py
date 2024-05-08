@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, List, Optional, Pattern
+from typing import TYPE_CHECKING, Generic, List, Optional, Pattern, Union
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
@@ -113,7 +113,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
 
     @public_api
     def add_batch_definition_yearly(
-        self, name: str, regex: re.Pattern, sort_ascending: bool = True
+        self, name: str, regex: Union[re.Pattern, str], sort_ascending: bool = True
     ) -> BatchDefinition:
         """Add a BatchDefinition which defines yearly batches by file name.
 
@@ -121,11 +121,13 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
             name: BatchDefinition name
             regex: Regular Expression used to define batches by file name.
                 Must contain a single group `year`
+            sort_ascending: determine order in which batches are returned
 
         Raises:
             RegexMissingRequiredGroupsError: regex is missing the group `year`
             RegexUnknownGroupsError: regex has groups other than `year`
         """
+        regex = re.compile(regex)
         REQUIRED_GROUP_NAME = {"year"}
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAME)
         return self.add_batch_definition(
@@ -135,7 +137,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
 
     @public_api
     def add_batch_definition_monthly(
-        self, name: str, regex: re.Pattern, sort_ascending: bool = True
+        self, name: str, regex: Union[re.Pattern, str], sort_ascending: bool = True
     ) -> BatchDefinition:
         """Add a BatchDefinition which defines monthly batches by file name.
 
@@ -143,11 +145,13 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
             name: BatchDefinition name
             regex: Regular Expression used to define batches by file name.
                 Must contain the groups `year` and `month`.
+            sort_ascending: determine order in which batches are returned
 
         Raises:
             RegexMissingRequiredGroupsError: regex is missing the groups `year` and/or `month`.
             RegexUnknownGroupsError: regex has groups other than `year` and/or `month`.
         """
+        regex = re.compile(regex)
         REQUIRED_GROUP_NAMES = {"year", "month"}
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
@@ -157,7 +161,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
 
     @public_api
     def add_batch_definition_daily(
-        self, name: str, regex: re.Pattern, sort_ascending: bool = True
+        self, name: str, regex: Union[re.Pattern, str], sort_ascending: bool = True
     ) -> BatchDefinition:
         """Add a BatchDefinition which defines daily batches by file name.
 
@@ -165,12 +169,14 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
             name: BatchDefinition name
             regex: Regular Expression used to define batches by file name.
                 Must contain the groups `year`, `month`, and `day`.
+            sort_ascending: determine order in which batches are returned
 
         Raises:
             RegexMissingRequiredGroupsError: regex is missing the
                 groups `year`, `month`, and/or `day`.
             RegexUnknownGroupsError: regex has groups other than `year`, `month`, and/or `day`.
         """
+        regex = re.compile(regex)
         REQUIRED_GROUP_NAMES = {"year", "month", "day"}
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
