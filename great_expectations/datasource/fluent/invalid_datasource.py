@@ -25,7 +25,7 @@ from great_expectations.datasource.fluent import (
 from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTypes
 
 if TYPE_CHECKING:
-    from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.partitioners import ColumnPartitioner
     from great_expectations.datasource.fluent.batch_request import BatchRequest
     from great_expectations.datasource.fluent.interfaces import (
         Batch,
@@ -102,7 +102,7 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def get_batch_parameters_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
+    def get_batch_parameters_keys(self, partitioner: ColumnPartitioner | None = None) -> NoReturn:
         self._raise_type_error()
 
 

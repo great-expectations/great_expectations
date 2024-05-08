@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import copy
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
-    Any,
     ClassVar,
     Generic,
     List,
@@ -29,16 +28,13 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     DatasourceT,
+    PartitionerSortingProtocol,
     TestConnectionError,
 )
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-    from great_expectations.core.batch import BatchMarkers, LegacyBatchDefinition
-    from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchMetadata,
-    )
+    from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -121,6 +117,15 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
 
     @override
     def get_batch_list_from_batch_request(self, batch_request: BatchRequest) -> List[Batch]:
+        """A list of batches that match the BatchRequest.
+
+        Args:
+            batch_request: A batch request for this asset. Usually obtained by calling
+                build_batch_request on the asset.
+
+        Returns:
+            A list of batches that match the options specified in the batch request.
+        """
         self._validate_batch_request(batch_request)
 
         execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
@@ -131,19 +136,12 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
 
         batch_list: List[Batch] = []
 
-        batch_spec: BatchSpec
-        batch_data: Any
-        batch_markers: BatchMarkers
-        batch_metadata: BatchMetadata
-        batch: Batch
         for batch_definition in batch_definition_list:
             batch_spec = self._data_connector.build_batch_spec(batch_definition=batch_definition)
             batch_spec_options = self._batch_spec_options_from_batch_request(batch_request)
             batch_spec.update(batch_spec_options)
 
-            batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-                batch_spec=batch_spec
-            )
+            data, markers = execution_engine.get_batch_data_and_markers(batch_spec=batch_spec)
 
             fully_specified_batch_request = copy.deepcopy(batch_request)
             fully_specified_batch_request.options.update(batch_definition.batch_identifiers)
@@ -155,16 +153,16 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
                 datasource=self.datasource,
                 data_asset=self,
                 batch_request=fully_specified_batch_request,
-                data=batch_data,
+                data=data,
                 metadata=batch_metadata,
-                batch_markers=batch_markers,
+                batch_markers=markers,
                 batch_spec=batch_spec,
                 batch_definition=batch_definition,
             )
             batch_list.append(batch)
 
-        if batch_request.partitioner:
-            self.sort_batches(batch_list, batch_request.partitioner)
+        if sortable_partitioner := self._get_sortable_partitioner(batch_request.partitioner):
+            self.sort_batches(batch_list, sortable_partitioner)
 
         return batch_list
 
@@ -180,32 +178,6 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
             List of batch definitions.
         """
         raise NotImplementedError
-
-    def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
-        """Build a set of options for use in a batch spec from a batch request.
-
-        Args:
-            batch_request: Batch request to use to generate options.
-
-        Returns:
-            Dictionary containing batch spec options.
-        """
-        get_reader_options_include: set[str] | None = self._get_reader_options_include()
-        if not get_reader_options_include:
-            # Set to None if empty set to include any additional `extra_kwargs` passed to `add_*_asset`  # noqa: E501
-            get_reader_options_include = None
-        batch_spec_options = {
-            "reader_method": self._get_reader_method(),
-            "reader_options": self.dict(
-                include=get_reader_options_include,
-                exclude=self._EXCLUDE_FROM_READER_OPTIONS,
-                exclude_unset=True,
-                by_alias=True,
-                config_provider=self._datasource._config_provider,
-            ),
-        }
-
-        return batch_spec_options
 
     @override
     def test_connection(self) -> None:
@@ -223,6 +195,17 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
             ) from e
         raise TestConnectionError(self._test_connection_error_message)
 
+    def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
+        """Build a set of options for use in a batch spec from a batch request.
+
+        Args:
+            batch_request: Batch request to use to generate options.
+
+        Returns:
+            Dictionary containing batch spec options.
+        """
+        raise NotImplementedError
+
     def get_whole_directory_path_override(
         self,
     ) -> PathStr | None:
@@ -238,4 +221,11 @@ class PathDataAsset(DataAsset, Generic[DatasourceT, PartitionerT], ABC):
 
     def _get_reader_options_include(self) -> set[str]:
         # subtypes control how reader options get serialized
+        raise NotImplementedError
+
+    @abstractmethod
+    def _get_sortable_partitioner(
+        self, partitioner: Optional[PartitionerT]
+    ) -> Optional[PartitionerSortingProtocol]:
+        # allow subclasses to determine sorting configuration.
         raise NotImplementedError
