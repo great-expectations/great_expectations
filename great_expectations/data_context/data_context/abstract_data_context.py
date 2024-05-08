@@ -28,7 +28,6 @@ from typing import (
 )
 
 from marshmallow import ValidationError
-from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
@@ -98,8 +97,8 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource as FluentDatasource,
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
-from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.util import load_class, verify_dynamic_loading_support
+from great_expectations.datasource.new_datasource import BaseDatasource
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.validator import Validator
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
@@ -800,45 +799,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 datasource=datasource,
             )
         else:
-            datasource = self._add_block_config_datasource(
-                name=name,
-                initialize=initialize,
-                datasource=datasource,
-                **kwargs,
-            )
+            raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
         return datasource
-
-    def _add_block_config_datasource(
-        self,
-        name: str | None = None,
-        initialize: bool = True,
-        datasource: BaseDatasource | None = None,
-        **kwargs,
-    ) -> BaseDatasource | None:
-        logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
-
-        if datasource:
-            config = datasource.config
-        else:
-            module_name: str = kwargs.get("module_name", "great_expectations.datasource")
-            verify_dynamic_loading_support(module_name=module_name)
-            class_name = kwargs.get("class_name", "Datasource")
-            datasource_class = load_class(class_name=class_name, module_name=module_name)
-
-            # For any class that should be loaded, it may control its configuration construction
-            # by implementing a classmethod called build_configuration
-            if hasattr(datasource_class, "build_configuration"):
-                config = datasource_class.build_configuration(**kwargs)
-            else:
-                config = kwargs
-
-        datasource_config: DatasourceConfig = datasourceConfigSchema.load(CommentedMap(**config))
-        datasource_config.name = name or datasource_config.name
-
-        return self._instantiate_datasource_from_config_and_update_project_config(
-            config=datasource_config,
-            initialize=initialize,
-        )
 
     @public_api
     def update_datasource(
@@ -856,34 +818,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         if isinstance(datasource, FluentDatasource):
             self._update_fluent_datasource(datasource=datasource)
         else:
-            datasource = self._update_block_config_datasource(datasource=datasource)
+            raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
         return datasource
-
-    def _update_block_config_datasource(
-        self,
-        datasource: BaseDatasource,
-    ) -> BaseDatasource:
-        name = datasource.name
-        config = datasource.config
-        # `instantiate_class_from_config` requires `class_name`
-        config["class_name"] = datasource.__class__.__name__
-
-        datasource_config_dict: dict = datasourceConfigSchema.dump(config)
-        datasource_config = DatasourceConfig(**datasource_config_dict)
-
-        self._datasource_store.update_by_name(
-            datasource_name=name, datasource_config=datasource_config
-        )
-
-        updated_datasource = self._instantiate_datasource_from_config_and_update_project_config(
-            config=datasource_config,
-            initialize=True,
-        )
-
-        # Invariant based on `initalize=True` above
-        assert updated_datasource is not None
-
-        return updated_datasource
 
     @overload
     def add_or_update_datasource(
@@ -947,14 +883,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 self._add_fluent_datasource(datasource=datasource)
             return_datasource = self.datasources[datasource.name]
         else:
-            block_config_datasource = self._add_block_config_datasource(
-                name=name,
-                datasource=datasource,
-                initialize=True,
-                **kwargs,
-            )
-            assert block_config_datasource is not None
-            return_datasource = block_config_datasource
+            raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
 
         return return_datasource
 
@@ -2667,108 +2596,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 datasource = self._add_fluent_datasource(**fds)
                 datasource._rebuild_asset_data_connectors()
 
-        datasources: Dict[str, DatasourceConfig] = cast(
-            Dict[str, DatasourceConfig], config.datasources
-        )
-
-        for datasource_name, datasource_config in datasources.items():
-            try:
-                ds = self._init_block_style_datasource(
-                    datasource_name=datasource_name, datasource_config=datasource_config
-                )
-                self.datasources.data[datasource_name] = ds
-            except gx_exceptions.DatasourceInitializationError as e:
-                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
-                # this error will happen if our configuration contains datasources that GX can no longer connect to.  # noqa: E501
-                # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be  # noqa: E501
-                # caught at the context.get_batch_list() step. So we just pass here.
-                pass
-
-    def _init_block_style_datasource(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> BaseDatasource:
-        config = copy.deepcopy(datasource_config)
-
-        raw_config_dict = dict(datasourceConfigSchema.dump(config))
-        substituted_config_dict: dict = self.config_provider.substitute_config(raw_config_dict)
-
-        raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
-        substituted_datasource_config = datasourceConfigSchema.load(substituted_config_dict)
-        substituted_datasource_config.name = datasource_name
-
-        return self._instantiate_datasource_from_config(
-            raw_config=raw_datasource_config,
-            substituted_config=substituted_datasource_config,
-        )
-
-    def _instantiate_datasource_from_config(
-        self,
-        raw_config: DatasourceConfig,
-        substituted_config: DatasourceConfig,
-    ) -> Datasource:
-        """Instantiate a new datasource.
-        Args:
-            config: Datasource config.
-
-        Returns:
-            Datasource instantiated from config.
-
-        Raises:
-            DatasourceInitializationError
-        """
-        try:
-            datasource: Datasource = self._build_datasource_from_config(
-                raw_config=raw_config, substituted_config=substituted_config
-            )
-        except Exception as e:
-            name = getattr(substituted_config, "name", None) or ""
-            raise gx_exceptions.DatasourceInitializationError(datasource_name=name, message=str(e))
-        return datasource
-
-    def _build_datasource_from_config(
-        self, raw_config: DatasourceConfig, substituted_config: DatasourceConfig
-    ) -> Datasource:
-        """Instantiate a Datasource from a config.
-
-        Args:
-            config: DatasourceConfig object defining the datsource to instantiate.
-
-        Returns:
-            Datasource instantiated from config.
-
-        Raises:
-            ClassInstantiationError
-        """
-        # We convert from the type back to a dictionary for purposes of instantiation
-        serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        substituted_config_dict: dict = serializer.serialize(substituted_config)
-
-        # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.  # noqa: E501
-        if substituted_config_dict["class_name"] in [
-            "BaseDatasource",
-            "Datasource",
-        ]:
-            substituted_config_dict.update({"data_context_root_directory": self.root_directory})
-        module_name: str = "great_expectations.datasource"
-        datasource: Datasource = instantiate_class_from_config(
-            config=substituted_config_dict,
-            runtime_environment={"data_context": self},
-            config_defaults={"module_name": module_name},
-        )
-        if not datasource:
-            raise gx_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=substituted_config_dict["class_name"],
-            )
-
-        # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.  # noqa: E501
-        # This is to be removed once substitution logic is migrated from the context to the individual object level.  # noqa: E501
-        raw_config_dict: dict = serializer.serialize(raw_config)
-        datasource._raw_config = raw_config_dict
-
-        return datasource
-
     def _perform_substitutions_on_datasource_config(
         self, config: DatasourceConfig
     ) -> DatasourceConfig:
@@ -2790,89 +2617,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         substituted_config: DatasourceConfig = datasourceConfigSchema.load(substituted_config_dict)
 
         return substituted_config
-
-    def _instantiate_datasource_from_config_and_update_project_config(
-        self,
-        config: DatasourceConfig,
-        initialize: bool,
-    ) -> Optional[Datasource]:
-        """Perform substitutions and optionally initialize the Datasource and/or store the config.
-
-        Args:
-            config: Datasource Config to initialize and/or store.
-            initialize: Whether to initialize the datasource, alternatively you can store without initializing.
-
-        Returns:
-            Datasource object if initialized.
-
-        Raises:
-            DatasourceInitializationError
-        """  # noqa: E501
-        # If attempting to override an existing value, ensure that the id persists
-        name = config.name
-        if not config.id and name and name in self.datasources:
-            existing_datasource = self.datasources[name]
-            if isinstance(existing_datasource, BaseDatasource):
-                config.id = existing_datasource.id
-
-        # Note that the call to `DatasourceStore.set` may alter the config object's state
-        # As such, we invoke it at the top of our function so any changes are reflected downstream
-        config = self._datasource_store.set(key=None, value=config)
-
-        datasource: Optional[Datasource] = None
-        if initialize:
-            try:
-                substituted_config = self._perform_substitutions_on_datasource_config(config)
-
-                datasource = self._instantiate_datasource_from_config(
-                    raw_config=config, substituted_config=substituted_config
-                )
-                name = datasource.name
-                self.datasources[name] = datasource
-            except gx_exceptions.DatasourceInitializationError as e:
-                self._datasource_store.delete(config)
-                raise e  # noqa: TRY201
-
-        self.config.datasources[name] = config  # type: ignore[index,assignment]
-
-        return datasource
-
-    # TODO: this should just be _instantiate_datasource_from_config after BDS is removed
-    def _instantiate_datasource_from_config_with_substitution(
-        self, config: DatasourceConfig
-    ) -> Datasource:
-        """Perform substitutions and initialize the Datasource without storing configuration.
-
-        Args:
-            config: Datasource Config to initialize and/or store.
-
-        Returns:
-            Datasource object.
-
-        Raises:
-            DatasourceInitializationError
-        """
-        # TODO: Pulling IDs of existing entities is likely not what we want when testing configuration, but keeping  # noqa: E501
-        # existing behavior for now
-        name = config.name
-        if not config.id and name and name in self.datasources:
-            existing_datasource = self.datasources[name]
-            if isinstance(existing_datasource, BaseDatasource):
-                config.id = existing_datasource.id
-
-        substituted_config = self._perform_substitutions_on_datasource_config(config)
-
-        datasource = self._instantiate_datasource_from_config(
-            raw_config=config, substituted_config=substituted_config
-        )
-        name = datasource.name
-
-        # TODO: also unlikely desired as "testing" whether we can instantiate an object should not update  # noqa: E501
-        # caches or config, but keeping existing behavior for now
-        self.datasources[name] = datasource
-        self.config.datasources[name] = config  # type: ignore[assignment]
-
-        return datasource
 
     def _construct_data_context_id(self) -> uuid.UUID | None:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
