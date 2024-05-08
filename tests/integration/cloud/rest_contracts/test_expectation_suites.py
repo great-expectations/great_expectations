@@ -167,7 +167,7 @@ def test_get_non_existent_expectation_suite(
 
     with pact_test:
         with pytest.raises(DataContextError):
-            cloud_data_context.suites.get(name="no_checkpoint_suite")
+            cloud_data_context.suites.get(name="non_existent")
 
 
 @pytest.mark.cloud
