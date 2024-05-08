@@ -304,14 +304,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     def _determine_analytics_enabled(self) -> bool:
-        # If the config file is missing the analytics_enabled key, we default to True
+        """
+        In order to determine whether analytics should be enabled, we check two sources:
+          - The `analytics_enabled` key in the GX config file
+            - If missing, we assume True.
+          - The `GX_ANALYTICS_ENABLED` environment variable
+
+        If both are True, analytics will be enabled. If either is False, analytics will be disabled.
+        """
         config_file_enabled = self.config.analytics_enabled
         if config_file_enabled is None:
             config_file_enabled = True
-
         env_var_enabled = ENV_CONFIG.posthog_enabled
-
-        # A user must opt out through either the config file or env var to disable analytics
         return config_file_enabled and env_var_enabled
 
     def _init_config_provider(self) -> _ConfigurationProvider:
