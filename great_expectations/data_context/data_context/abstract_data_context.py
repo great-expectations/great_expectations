@@ -100,6 +100,7 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import BaseDatasource
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.validator.validator import Validator
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
@@ -784,7 +785,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 datasource=datasource,
             )
         else:
-            raise Exception("uh oh")  # noqa: TRY003, TRY002, TRY004
+            raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
         return datasource
 
     @public_api
@@ -803,7 +804,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if isinstance(datasource, FluentDatasource):
             self._update_fluent_datasource(datasource=datasource)
         else:
-            raise Exception("uh oh")  # noqa: TRY003, TRY002, TRY004
+            raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
         return datasource
 
     @overload
@@ -868,7 +869,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 self._add_fluent_datasource(datasource=datasource)
             return_datasource = self.datasources[datasource.name]
         else:
-            raise Exception("uh oh")  # noqa: TRY003, TRY002
+            raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
 
         return return_datasource
 

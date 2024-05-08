@@ -12,6 +12,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent.constants import _IN_MEMORY_DATA_ASSET_TYPE
+from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -81,7 +82,7 @@ class DatasourceDict(UserDict):
                     name = config.name
                     datasources[name] = self._init_fluent_datasource(name=name, ds=config)
                 else:
-                    raise Exception("uh oh")  # noqa: TRY004, TRY002, TRY003
+                    raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
@@ -149,7 +150,7 @@ class DatasourceDict(UserDict):
 
         if isinstance(ds, FluentDatasource):
             return self._init_fluent_datasource(name=name, ds=ds)
-        raise Exception("uh oh")  # noqa: TRY002, TRY003
+        raise DataContextError(f"Datasource {name} is not a FluentDatasource")  # noqa: TRY003
 
     def _init_fluent_datasource(self, name: str, ds: FluentDatasource) -> FluentDatasource:
         ds._data_context = self._context
