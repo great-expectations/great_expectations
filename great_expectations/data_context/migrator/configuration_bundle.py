@@ -57,7 +57,7 @@ class ConfigurationBundle:
         Returns: Boolean of whether the usage statistics are enabled.
 
         """
-        enabled = self._data_context_variables.analytics
+        enabled = self._data_context_variables.analytics_enabled
         if enabled is None:
             enabled = True
         return enabled
