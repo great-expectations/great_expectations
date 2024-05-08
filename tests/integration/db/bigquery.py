@@ -5,6 +5,7 @@ from google.cloud import bigquery
 
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.validator.validator import Validator
 
@@ -70,7 +71,7 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
-context.add_expectation_suite(expectation_suite_name="test_suite")
+context.suites.add(ExpectationSuite(name="test_suite"))
 validator: Validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -102,7 +103,7 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     },  # this is the name of the table you would like to use a 'temp_table'
 )
 
-context.add_expectation_suite(expectation_suite_name="test_suite_2")
+context.suites.add(ExpectationSuite(name="test_suite_2"))
 validator: Validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite_2"
 )

@@ -412,9 +412,7 @@ def test_rendered_content_bool_only_respected(result_format: str | dict):
     )
     batch_request = csv_asset.build_batch_request()
     expectation_suite_name = "test_result_format_suite"
-    context.add_or_update_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-    )
+    context.suites.add(ExpectationSuite(name=expectation_suite_name))
 
     validator = context.get_validator(
         batch_request=batch_request,

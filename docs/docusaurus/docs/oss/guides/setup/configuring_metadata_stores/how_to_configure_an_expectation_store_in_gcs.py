@@ -3,6 +3,7 @@ import pathlib
 import subprocess
 
 import great_expectations as gx
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -107,7 +108,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 expectation_suite_name = "my_expectation_suite"
-context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.suites.add(ExpectationSuite(name=expectation_suite_name))
 
 
 """

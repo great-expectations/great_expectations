@@ -94,9 +94,7 @@ class ConfigurationBundle:
         return datasource_configs
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
-        return [
-            self._context.suites.get(name) for name in self._context.list_expectation_suite_names()
-        ]
+        return list(self._context.suites.all())
 
     def _get_all_validation_results(
         self,
