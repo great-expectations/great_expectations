@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 from great_expectations.compatibility import pydantic
@@ -59,7 +58,6 @@ class S3DataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         s3_client: BaseClient,
         bucket: str,
         prefix: str = "",
@@ -91,7 +89,6 @@ class S3DataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         s3_client: BaseClient,
         bucket: str,
         prefix: str = "",
@@ -120,7 +117,6 @@ class S3DataConnector(FilePathDataConnector):
         return S3DataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             s3_client=s3_client,
             bucket=bucket,
             prefix=prefix,
@@ -134,7 +130,6 @@ class S3DataConnector(FilePathDataConnector):
     def build_test_connection_error_message(  # noqa: PLR0913
         cls,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         bucket: str,
         prefix: str = "",
         delimiter: str = "/",
@@ -144,7 +139,6 @@ class S3DataConnector(FilePathDataConnector):
 
         Args:
             data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             bucket: bucket for S3
             prefix: S3 prefix
             delimiter: S3 delimiter
@@ -153,11 +147,10 @@ class S3DataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """  # noqa: E501
-        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
+        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" found using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex.pattern,
                 "bucket": bucket,
                 "prefix": prefix,
                 "delimiter": delimiter,

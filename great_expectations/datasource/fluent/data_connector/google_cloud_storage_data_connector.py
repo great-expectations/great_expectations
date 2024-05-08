@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 from great_expectations.compatibility import pydantic
@@ -57,7 +56,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
@@ -89,7 +87,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
@@ -103,7 +100,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "GoogleCloudStorageDataConnector" instance
             data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             gcs_client: Reference to instantiated Google Cloud Storage client handle
             bucket_or_name: bucket name for Google Cloud Storage
             prefix: GCS prefix
@@ -118,7 +114,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         return GoogleCloudStorageDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             gcs_client=gcs_client,
             bucket_or_name=bucket_or_name,
             prefix=prefix,
@@ -132,7 +127,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
     def build_test_connection_error_message(  # noqa: PLR0913
         cls,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
@@ -151,11 +145,10 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """  # noqa: E501
-        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
+        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" found using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex.pattern,
                 "bucket_or_name": bucket_or_name,
                 "prefix": prefix,
                 "delimiter": delimiter,

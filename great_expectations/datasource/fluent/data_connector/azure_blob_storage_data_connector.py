@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 from great_expectations.compatibility import pydantic
@@ -57,7 +56,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
@@ -89,7 +87,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
@@ -103,7 +100,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "AzureBlobStorageDataConnector" instance
             data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             azure_client: Reference to instantiated Microsoft Azure Blob Storage client handle
             account_name: account name for Microsoft Azure Blob Storage
             container: container name for Microsoft Azure Blob Storage
@@ -118,7 +114,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         return AzureBlobStorageDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             azure_client=azure_client,
             account_name=account_name,
             container=container,
@@ -132,7 +127,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
     def build_test_connection_error_message(  # noqa: PLR0913
         cls,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         account_name: str,
         container: str,
         name_starts_with: str = "",
@@ -153,11 +147,10 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """  # noqa: E501
-        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
+        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" and recursive file discovery set to "{recursive_file_discovery}" found using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex.pattern,
                 "account_name": account_name,
                 "container": container,
                 "name_starts_with": name_starts_with,

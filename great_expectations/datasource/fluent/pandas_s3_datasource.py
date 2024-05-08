@@ -121,7 +121,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             s3_client=self._get_s3_client(),
-            batching_regex=data_asset.batching_regex,
             bucket=self.bucket,
             prefix=s3_prefix,
             delimiter=s3_delimiter,
@@ -134,7 +133,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         data_asset._test_connection_error_message = (
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
                 bucket=self.bucket,
                 prefix=s3_prefix,
                 delimiter=s3_delimiter,
