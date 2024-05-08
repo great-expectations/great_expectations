@@ -86,10 +86,9 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
-anonymous_usage_statistics:
-  enabled: false
-  usage_statistics_url: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-  data_context_id: 63036d6a-9b71-4831-a9b9-2792e6c6f9e2
+analytics_enabled: false
+data_context_id: 63036d6a-9b71-4831-a9b9-2792e6c6f9e2
+
 fluent_datasources:
   visits_datasource:
     type: spark_filesystem

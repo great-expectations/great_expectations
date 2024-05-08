@@ -57,9 +57,6 @@ def yellow_trip_pandas_data_context(
     months through a BatchRequest where the "year" in batch_filter_parameters is set to "2019", or
     to individual months if the "month" in batch_filter_parameters is set to "01", "02", or "03"
     """
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
