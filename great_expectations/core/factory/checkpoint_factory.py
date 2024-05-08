@@ -45,15 +45,15 @@ class CheckpointFactory(Factory[Checkpoint]):
         self._store.add(key=key, value=checkpoint)
 
         # TODO: Add id adding logic to CheckpointStore to prevent round trip
-        obj = self._get(key=key)
+        persisted_checkpoint = self._get(key=key)
 
         submit_event(
             event=CheckpointCreatedEvent(
-                checkpoint_id=obj.id,
+                checkpoint_id=persisted_checkpoint.id,
             )
         )
 
-        return obj
+        return persisted_checkpoint
 
     @public_api
     @override
