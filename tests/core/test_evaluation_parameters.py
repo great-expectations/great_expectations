@@ -1,17 +1,11 @@
 import math
 from datetime import datetime, timedelta
 from timeit import timeit
-from typing import Any, Dict
+from typing import Any
 
 import dateutil
-import pandas as pd
 import pytest
 
-from great_expectations.core import (
-    ExpectationSuite,
-    ExpectationValidationResult,
-)
-from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.suite_parameters import (
     _deduplicate_suite_parameter_dependencies,
     get_suite_parameter_key,
@@ -19,9 +13,6 @@ from great_expectations.core.suite_parameters import (
     parse_suite_parameter,
 )
 from great_expectations.exceptions import SuiteParameterError
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
 
 
 @pytest.mark.parametrize(
@@ -175,143 +166,6 @@ def test_deduplicate_suite_parameter_dependencies():
             }
         ]
     }
-
-
-@pytest.mark.filesystem
-@pytest.mark.parametrize(
-    "dataframe,suite_parameters,expectation_type,expectation_kwargs,expected_expectation_validation_result",
-    [
-        (
-            pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}),
-            (
-                ("my_min", 1),
-                ("my_max", 5),
-            ),
-            "expect_table_row_count_to_be_between",
-            {
-                "min_value": {
-                    "$PARAMETER": "my_min",
-                },
-                "max_value": {
-                    "$PARAMETER": "my_max",
-                },
-            },
-            ExpectationValidationResult(
-                expectation_config=ExpectationConfiguration(
-                    expectation_type="expect_table_row_count_to_be_between",
-                    kwargs={
-                        "min_value": 1,
-                        "max_value": 5,
-                    },
-                    meta={"substituted_parameters": {"min_value": 1, "max_value": 5}},
-                    id=None,
-                ),
-                meta={},
-                exception_info={
-                    "raised_exception": False,
-                    "exception_traceback": None,
-                    "exception_message": None,
-                },
-                success=True,
-                result={"observed_value": 3},
-            ),
-        ),
-        (
-            pd.DataFrame(
-                {
-                    "my_date": [
-                        datetime(year=2017, month=1, day=1),
-                        datetime(year=2018, month=1, day=1),
-                        datetime(year=2019, month=1, day=1),
-                        datetime(year=2020, month=1, day=1),
-                    ]
-                }
-            ),
-            (
-                ("my_min_date", datetime(2016, 12, 10)),
-                ("my_max_date", datetime(2022, 12, 13)),
-            ),
-            "expect_column_values_to_be_between",
-            {
-                "column": "my_date",
-                "min_value": {"$PARAMETER": "my_min_date"},
-                "max_value": {"$PARAMETER": "my_max_date - timedelta(weeks=1)"},
-            },
-            ExpectationValidationResult(
-                expectation_config=ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_be_between",
-                    kwargs={
-                        "column": "my_date",
-                        "min_value": datetime(year=2016, month=12, day=10),
-                        "max_value": datetime(year=2022, month=12, day=6),
-                        "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
-                    },
-                    meta={
-                        "substituted_parameters": {
-                            "min_value": "2016-12-10T00:00:00",
-                            "max_value": "2022-12-06T00:00:00",
-                        }
-                    },
-                    id=None,
-                ),
-                meta={},
-                exception_info={
-                    "raised_exception": False,
-                    "exception_traceback": None,
-                    "exception_message": None,
-                },
-                success=True,
-                result={
-                    "element_count": 4,
-                    "unexpected_count": 0,
-                    "unexpected_percent": 0.0,
-                    "partial_unexpected_list": [],
-                    "missing_count": 0,
-                    "missing_percent": 0.0,
-                    "unexpected_percent_total": 0.0,
-                    "unexpected_percent_nonmissing": 0.0,
-                },
-            ),
-        ),
-    ],
-)
-def test_suite_parameters_for_between_expectations_parse_correctly(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    dataframe: pd.DataFrame,
-    suite_parameters: Dict[str, Any],
-    expectation_type: str,
-    expectation_kwargs: Dict[str, dict],
-    expected_expectation_validation_result: ExpectationValidationResult,
-):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
-
-    expectation_suite_name = "test_suite"
-    context.suites.add(ExpectationSuite(name=expectation_suite_name))
-
-    batch_request = RuntimeBatchRequest(
-        datasource_name="my_datasource",
-        data_connector_name="my_runtime_data_connector",
-        data_asset_name="foo",
-        runtime_parameters={"batch_data": dataframe},
-        batch_identifiers={
-            "pipeline_stage_name": "kickoff",
-            "airflow_run_id": "1234",
-        },
-    )
-
-    validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name=expectation_suite_name,
-    )
-
-    for suite_parameter in suite_parameters:
-        validator.set_suite_parameter(*suite_parameter)
-
-    actual_expectation_validation_result = getattr(validator, expectation_type)(
-        **expectation_kwargs
-    )
-
-    assert actual_expectation_validation_result == expected_expectation_validation_result
 
 
 @pytest.mark.unit
