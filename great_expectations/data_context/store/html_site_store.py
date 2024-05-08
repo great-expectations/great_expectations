@@ -9,9 +9,6 @@ from mimetypes import guess_type
 from zipfile import ZipFile, is_zipfile
 
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudStoreBackend,
-)
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
@@ -133,10 +130,7 @@ class HtmlSiteStore:
         # If several types are being written to overlapping directories, we could get collisions.
         module_name = "great_expectations.data_context.store"
         filepath_suffix = ".html"
-        is_gx_cloud_store = store_backend["class_name"] in {
-            GeCloudStoreBackend.__name__,
-            GXCloudStoreBackend.__name__,
-        }
+        is_gx_cloud_store = store_backend["class_name"] == GXCloudStoreBackend.__name__
         expectation_config_defaults = {
             "module_name": module_name,
             "filepath_prefix": "expectations",
