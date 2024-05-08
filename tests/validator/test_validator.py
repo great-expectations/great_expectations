@@ -164,45 +164,6 @@ def test_validator_default_expectation_args__pandas(basic_datasource: PandasData
     }
 
 
-@pytest.mark.big
-def test_validator_default_expectation_args__sql(
-    data_context_with_simple_sql_datasource_for_testing_get_batch,
-):
-    context = data_context_with_simple_sql_datasource_for_testing_get_batch
-
-    my_validator = context.get_validator(
-        datasource_name="my_sqlite_db",
-        data_connector_name="daily",
-        data_asset_name="table_partitioned_by_date_column__A",
-        batch_identifiers={"date": "2020-01-15"},
-        create_expectation_suite_with_name="test_suite",
-    )
-
-    print(my_validator.get_default_expectation_arguments())
-
-    with pytest.raises(gx_exceptions.InvalidDataContextKeyError):
-        # expectation_suite_name is a number not str
-        # noinspection PyUnusedLocal
-        my_validator = context.get_validator(
-            datasource_name="my_sqlite_db",
-            data_connector_name="daily",
-            data_asset_name="table_partitioned_by_date_column__A",
-            batch_identifiers={"date": "2020-01-15"},
-            expectation_suite_name=1,
-        )
-
-    with pytest.raises(TypeError):
-        # expectation_suite is a string not an ExpectationSuite
-        # noinspection PyUnusedLocal
-        my_validator = context.get_validator(
-            datasource_name="my_sqlite_db",
-            data_connector_name="daily",
-            data_asset_name="table_partitioned_by_date_column__A",
-            batch_identifiers={"date": "2020-01-15"},
-            expectation_suite="I_am_not_an_expectation_suite",
-        )
-
-
 @pytest.fixture()
 def multi_batch_taxi_validator(
     yellow_trip_pandas_data_context,

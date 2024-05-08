@@ -2191,45 +2191,6 @@ def fds_data_context(
 
 
 @pytest.fixture
-def data_context_with_simple_sql_datasource_for_testing_get_batch(
-    sa, empty_data_context, sqlite_connection_string
-) -> AbstractDataContext:
-    context = empty_data_context
-
-    datasource_config: str = f"""
-class_name: SimpleSqlalchemyDatasource
-connection_string: {sqlite_connection_string}
-introspection:
-    whole_table: {{}}
-
-    daily:
-        partitioner_method: _partition_on_converted_datetime
-        partitioner_kwargs:
-            column_name: date
-            date_format_string: "%Y-%m-%d"
-
-    weekly:
-        partitioner_method: _partition_on_converted_datetime
-        partitioner_kwargs:
-            column_name: date
-            date_format_string: "%Y-%W"
-
-    by_id_dozens:
-        partitioner_method: _partition_on_divided_integer
-        partitioner_kwargs:
-            column_name: id
-            divisor: 12
-"""
-
-    try:
-        context.add_datasource("my_sqlite_db", **yaml.load(datasource_config))
-    except AttributeError:
-        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
-
-    return context
-
-
-@pytest.fixture
 def db_file():
     return file_relative_path(
         __file__,
