@@ -125,7 +125,7 @@ class DefaultJinjaView:
             url += f"?d={datetime_iso_string}"
         if data_context_id:
             url = f"{url}&dataContextId=" if add_datetime else f"{url}?dataContextId="
-            url += data_context_id
+            url += str(data_context_id)
         return url
 
     @contextfilter  # type: ignore[misc] # untyped 3rd party decorator

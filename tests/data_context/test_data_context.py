@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import configparser
-import copy
 import os
 import pathlib
 import shutil
@@ -24,9 +23,6 @@ from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.expectation_configuration import (
@@ -704,56 +700,6 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
     assert context.plugins_directory and context.plugins_directory.endswith(config_var_value)
 
 
-@pytest.mark.big
-def test_check_for_usage_stats_sync_finds_diff(
-    empty_data_context_stats_enabled,
-    data_context_config_with_datasources: DataContextConfig,
-) -> None:
-    """
-    What does this test do and why?
-
-    During DataContext instantiation, if the project config used to create the object
-    and the actual config assigned to self.config differ in terms of their usage statistics
-    values, we want to be able to identify that and persist values accordingly.
-    """
-    context = empty_data_context_stats_enabled
-    project_config = data_context_config_with_datasources
-
-    res = context._check_for_usage_stats_sync(project_config=project_config)
-    assert res is True
-
-
-@pytest.mark.big
-def test_check_for_usage_stats_sync_does_not_find_diff(
-    empty_data_context_stats_enabled,
-) -> None:
-    """
-    What does this test do and why?
-
-    During DataContext instantiation, if the project config used to create the object
-    and the actual config assigned to self.config differ in terms of their usage statistics
-    values, we want to be able to identify that and persist values accordingly.
-    """
-    context = empty_data_context_stats_enabled
-    project_config = copy.deepcopy(context.config)  # Using same exact config
-
-    res = context._check_for_usage_stats_sync(project_config=project_config)
-    assert res is False
-
-
-@pytest.mark.big
-def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
-    empty_data_context,
-    data_context_config_with_datasources: DataContextConfig,
-) -> None:
-    context = empty_data_context
-    project_config = data_context_config_with_datasources
-    project_config.anonymous_usage_statistics.enabled = False
-
-    res = context._check_for_usage_stats_sync(project_config=project_config)
-    assert res is False
-
-
 class ExpectSkyToBeColor(BatchExpectation):
     metric_dependencies = ("table.color",)
     success_keys = ("color",)
@@ -980,9 +926,9 @@ def test_set_oss_id_with_empty_config(in_memory_runtime_context: EphemeralDataCo
 
     oss_id = context._set_oss_id(config)
 
-    assert config.sections() == ["anonymous_usage_statistics"]
-    assert list(config["anonymous_usage_statistics"]) == ["oss_id"]
-    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])
+    assert config.sections() == ["analytics"]
+    assert list(config["analytics"]) == ["oss_id"]
+    assert oss_id == uuid.UUID(config["analytics"]["oss_id"])
 
 
 @pytest.mark.unit
@@ -992,21 +938,13 @@ def test_set_oss_id_with_existing_config(
     context = in_memory_runtime_context
 
     # Set up existing config
-    # [anonymous_usage_statistics]
-    # usage_statistics_url=https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
     config = configparser.ConfigParser()
-    config["anonymous_usage_statistics"] = {}
-    usage_statistics_url = (
-        "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-    )
-    config["anonymous_usage_statistics"]["usage_statistics_url"] = usage_statistics_url
+    config["analytics"] = {}
 
     oss_id = context._set_oss_id(config)
 
-    assert config.sections() == ["anonymous_usage_statistics"]
-    assert list(config["anonymous_usage_statistics"]) == [
-        "usage_statistics_url",
+    assert config.sections() == ["analytics"]
+    assert list(config["analytics"]) == [
         "oss_id",
     ]
-    assert usage_statistics_url == config["anonymous_usage_statistics"]["usage_statistics_url"]
-    assert oss_id == uuid.UUID(config["anonymous_usage_statistics"]["oss_id"])
+    assert oss_id == uuid.UUID(config["analytics"]["oss_id"])

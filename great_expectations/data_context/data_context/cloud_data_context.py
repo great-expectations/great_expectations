@@ -135,8 +135,9 @@ class CloudDataContext(SerializableDataContext):
     def _init_analytics(self) -> None:
         organization_id = self.ge_cloud_config.organization_id
         init_analytics(
+            enable=self._determine_analytics_enabled(),
             user_id=self._get_cloud_user_id(),
-            data_context_id=uuid.UUID(self._data_context_id),
+            data_context_id=self._data_context_id,
             organization_id=uuid.UUID(organization_id) if organization_id else None,
             oss_id=self._get_oss_id(),
             cloud_mode=True,
@@ -160,11 +161,7 @@ class CloudDataContext(SerializableDataContext):
                 cloud_config=self.ge_cloud_config,
             )
 
-        project_data_context_config = CloudDataContext.get_or_create_data_context_config(
-            project_config
-        )
-
-        return self._apply_global_config_overrides(config=project_data_context_config)
+        return CloudDataContext.get_or_create_data_context_config(project_config)
 
     @override
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
@@ -253,7 +250,13 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def _prepare_v1_config(cls, config: dict) -> dict:
         # Various context variables are no longer top-level keys in V1
-        for var in ("notebooks", "concurrency", "include_rendered_content", "profiler_store_name"):
+        for var in (
+            "notebooks",
+            "concurrency",
+            "include_rendered_content",
+            "profiler_store_name",
+            "anonymous_usage_statistics",
+        ):
             val = config.pop(var, None)
             if val:
                 logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
@@ -544,14 +547,17 @@ class CloudDataContext(SerializableDataContext):
         return variables
 
     @override
-    def _construct_data_context_id(self) -> str:
+    def _construct_data_context_id(self) -> uuid.UUID | None:
         """
         Choose the id of the currently-configured expectations store, if available and a persistent store.
         If not, it should choose the id stored in DataContextConfig.
         Returns:
             UUID to use as the data_context_id
         """  # noqa: E501
-        return self.ge_cloud_config.organization_id  # type: ignore[return-value]
+        org_id = self.ge_cloud_config.organization_id
+        if org_id:
+            return uuid.UUID(org_id)
+        return None
 
     @override
     def get_config_with_variables_substituted(

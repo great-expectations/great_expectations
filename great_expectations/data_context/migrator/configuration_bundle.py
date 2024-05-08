@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from typing import TYPE_CHECKING, Dict, List, cast
 
 from marshmallow import Schema, fields, post_dump
@@ -45,7 +46,7 @@ class ConfigurationBundle:
         self._validation_results = self._get_all_validation_results()
 
     @property
-    def data_context_id(self) -> str:
+    def data_context_id(self) -> uuid.UUID | None:
         return self._context_id
 
     def is_usage_stats_enabled(self) -> bool:
@@ -56,10 +57,10 @@ class ConfigurationBundle:
         Returns: Boolean of whether the usage statistics are enabled.
 
         """
-        if self._data_context_variables.anonymous_usage_statistics:
-            return self._data_context_variables.anonymous_usage_statistics.enabled
-        else:
-            return False
+        enabled = self._data_context_variables.analytics_enabled
+        if enabled is None:
+            enabled = True
+        return enabled
 
     @property
     def data_context_variables(self) -> DataContextVariables:

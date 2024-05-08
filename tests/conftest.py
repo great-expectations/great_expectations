@@ -429,8 +429,7 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(autouse=True)
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
-    monkeypatch.setenv("GE_USAGE_STATS", "False")  # v0.18 and before
-    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", False)  # v1.0 and after
+    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", False)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -802,9 +801,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
     context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
@@ -969,9 +965,6 @@ def deterministic_asset_data_connector_context(
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -1029,9 +1022,6 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
     context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
@@ -1264,8 +1254,6 @@ def empty_context_with_checkpoint(empty_data_context):
 
 @pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = gx.get_context(mode="file", project_root_dir=project_path)
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
@@ -1370,8 +1358,6 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -1403,8 +1389,6 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -1436,8 +1420,6 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103

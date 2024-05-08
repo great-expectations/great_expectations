@@ -93,5 +93,4 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
-anonymous_usage_statistics:
-  enabled: true
+analytics_enabled: true
