@@ -597,7 +597,6 @@ def test_escape_all_config_variables_skip_substitution_vars(
 
 
 @pytest.mark.filesystem
-# @mock.patch.object(sa, "create_engine")
 def test_create_data_context_and_config_vars_in_code(
     tmp_path_factory, monkeypatch, mocker: MockerFixture
 ):

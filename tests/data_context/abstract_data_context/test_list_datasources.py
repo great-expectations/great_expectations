@@ -33,7 +33,6 @@ def test_list_datasources_base_data_context_one_datasource(empty_data_context) -
 
     # one datasource
 
-    # context.add_datasource(**datasource_config_with_names.to_dict())
     datasource = context.data_sources.add_pandas("my_data_source")
 
     observed = context.list_datasources()
