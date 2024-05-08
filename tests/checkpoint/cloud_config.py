@@ -95,10 +95,8 @@ def make_send_slack_notifications(counter: CallCounter):
 
 def _cloud_config(data_dir):
     return {
-        "anonymous_usage_statistics": {
-            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-            "enabled": True,
-        },
+        "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
+        "analytics_enabled": True,
         "checkpoint_store_name": "default_checkpoint_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 3.0,
@@ -144,7 +142,6 @@ def _cloud_config(data_dir):
         "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "default_expectations_store",
         "plugins_directory": "plugins/",
-        "profiler_store_name": "default_profiler_store",
         "progress_bars": {
             "globally": False,
             "metric_calculations": False,
@@ -175,20 +172,6 @@ def _cloud_config(data_dir):
                         "organization_id": os.environ["GX_CLOUD_ORGANIZATION_ID"],
                     },
                     "ge_cloud_resource_type": "expectation_suite",
-                    "suppress_store_backend_id": True,
-                },
-            },
-            "default_profiler_store": {
-                "class_name": "ProfilerStore",
-                "store_backend": {
-                    "class_name": "GXCloudStoreBackend",
-                    "ge_cloud_base_url": os.environ["GX_CLOUD_BASE_URL"],
-                    "ge_cloud_credentials": {
-                        "access_token": os.environ["GX_CLOUD_ACCESS_TOKEN"],
-                        "organization_id": os.environ["GX_CLOUD_ORGANIZATION_ID"],
-                    },
-                    "ge_cloud_resource_name": "profilers",
-                    "ge_cloud_resource_type": "profiler",
                     "suppress_store_backend_id": True,
                 },
             },

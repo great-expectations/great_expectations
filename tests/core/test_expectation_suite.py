@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import datetime
-import itertools
 from copy import copy, deepcopy
-from typing import Any, Dict, List, Union
+from typing import Dict, Union
 from unittest import mock
 from unittest.mock import MagicMock, Mock  # noqa: TID251
 from uuid import UUID, uuid4
@@ -22,18 +20,14 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
-    expectationSuiteSchema,
 )
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.util import filter_properties_dict
 
 
 @pytest.fixture
@@ -97,7 +91,6 @@ class TestInit:
         assert suite.name == fake_expectation_suite_name
         assert suite.expectations == []
         assert suite.suite_parameters == {}
-        assert suite.execution_engine_type is None
         assert suite.meta == default_meta
         assert suite.id is None
 
@@ -111,7 +104,6 @@ class TestInit:
             pass
 
         test_suite_parameters = {"$PARAMETER": "test_suite_parameters"}
-        dummy_execution_engine_type = type(DummyExecutionEngine())
         default_meta = {"great_expectations_version": ge_version}
         test_meta_base = {"test_key": "test_value"}
         test_meta = {**default_meta, **test_meta_base}
@@ -121,7 +113,6 @@ class TestInit:
             name=fake_expectation_suite_name,
             expectations=[expect_column_values_to_be_in_set_col_a_with_meta],
             suite_parameters=test_suite_parameters,
-            execution_engine_type=dummy_execution_engine_type,  # type: ignore[arg-type]
             meta=test_meta,
             id=test_id,
         )
@@ -130,7 +121,6 @@ class TestInit:
             expect_column_values_to_be_in_set_col_a_with_meta
         ]
         assert suite.suite_parameters == test_suite_parameters
-        assert suite.execution_engine_type == dummy_execution_engine_type
         assert suite.meta == test_meta
         assert suite.id == test_id
 
@@ -682,227 +672,6 @@ class TestSuiteParameterOptions:
         )
 
 
-@pytest.mark.unit
-class TestAddCitation:
-    @pytest.mark.unit
-    def test_empty_suite_with_meta_fixture(self, empty_suite_with_meta: ExpectationSuite):
-        assert "citations" not in empty_suite_with_meta.meta
-
-    @pytest.mark.unit
-    def test_add_citation_comment(self, empty_suite_with_meta: ExpectationSuite):
-        empty_suite_with_meta.add_citation("hello!")
-        assert empty_suite_with_meta.meta["citations"][0].get("comment") == "hello!"
-
-    @pytest.mark.unit
-    def test_add_citation_comment_required(self, empty_suite_with_meta: ExpectationSuite):
-        with pytest.raises(TypeError) as e:
-            empty_suite_with_meta.add_citation()  # type: ignore[call-arg]
-        assert "add_citation() missing 1 required positional argument: 'comment'" in str(e.value)
-
-    @pytest.mark.unit
-    def test_add_citation_not_specified_params_filtered(
-        self, empty_suite_with_meta: ExpectationSuite
-    ):
-        empty_suite_with_meta.add_citation(
-            "fake_comment",
-            batch_spec={"fake": "batch_spec"},
-            batch_markers={"fake": "batch_markers"},
-        )
-        assert "citations" in empty_suite_with_meta.meta
-
-        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
-        # Note: citation_date is always added if not provided
-        assert citation_keys == {
-            "comment",
-            "citation_date",
-            "batch_spec",
-            "batch_markers",
-        }
-        # batch_definition (along with other keys that are not provided) should be filtered out
-        assert "batch_definition" not in citation_keys
-
-    @pytest.mark.unit
-    @pytest.mark.v2_api
-    def test_add_citation_accepts_v2_api_params(self, empty_suite_with_meta: ExpectationSuite):
-        """This test ensures backward compatibility with the v2 api and can be removed when deprecated."""  # noqa: E501
-        empty_suite_with_meta.add_citation(
-            "fake_comment",
-            batch_kwargs={"fake": "batch_kwargs"},
-            batch_parameters={"fake": "batch_parameters"},
-        )
-
-        assert empty_suite_with_meta.meta["citations"][0]["batch_kwargs"] == {
-            "fake": "batch_kwargs"
-        }
-        assert empty_suite_with_meta.meta["citations"][0]["batch_parameters"] == {
-            "fake": "batch_parameters"
-        }
-        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
-        assert citation_keys == {
-            "comment",
-            "citation_date",
-            "batch_kwargs",
-            "batch_parameters",
-        }
-
-    @pytest.mark.unit
-    def test_add_citation_all_params(self, empty_suite_with_meta: ExpectationSuite):
-        """Note, this does not include v2 api params e.g. batch_kwargs"""
-        empty_suite_with_meta.add_citation(
-            "fake_comment",
-            batch_request={"fake": "batch_request"},
-            batch_definition={"fake": "batch_definition"},
-            batch_spec={"fake": "batch_spec"},
-            batch_markers={"fake": "batch_markers"},
-            profiler_config={"fake": "profiler_config"},
-            citation_date="2022-09-08",
-        )
-        assert "citations" in empty_suite_with_meta.meta
-
-        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
-        assert citation_keys == {
-            "comment",
-            "citation_date",
-            "batch_request",
-            "batch_definition",
-            "batch_spec",
-            "batch_markers",
-            "profiler_config",
-        }
-
-    @pytest.mark.parametrize(
-        "citation_date",
-        [
-            pytest.param("2022-09-08", id="str override"),
-            pytest.param(datetime.datetime(2022, 9, 8), id="datetime override"),
-        ],
-    )
-    @pytest.mark.unit
-    def test_add_citation_citation_date_override(
-        self,
-        citation_date: Union[str, datetime.datetime],
-        empty_suite_with_meta: ExpectationSuite,
-    ):
-        empty_suite_with_meta.add_citation("fake_comment", citation_date=citation_date)
-        assert (
-            empty_suite_with_meta.meta["citations"][0]["citation_date"]
-            == "2022-09-08T00:00:00.000000Z"
-        )
-
-    @pytest.mark.unit
-    def test_add_citation_with_existing_citations(self, empty_suite_with_meta: ExpectationSuite):
-        empty_suite_with_meta.add_citation("fake_comment1")
-        assert "citations" in empty_suite_with_meta.meta
-        assert len(empty_suite_with_meta.meta["citations"]) == 1
-        empty_suite_with_meta.add_citation("fake_comment2")
-        assert len(empty_suite_with_meta.meta["citations"]) == 2
-
-    @pytest.mark.unit
-    def test_add_citation_with_profiler_config(self, empty_suite_with_meta: ExpectationSuite):
-        empty_suite_with_meta.add_citation(
-            "fake_comment",
-            profiler_config={"fake": "profiler_config"},
-        )
-
-        assert empty_suite_with_meta.meta["citations"][0]["profiler_config"] == {
-            "fake": "profiler_config"
-        }
-        citation_keys = set(empty_suite_with_meta.meta["citations"][0].keys())
-        assert citation_keys == {"comment", "citation_date", "profiler_config"}
-
-
-class TestIsEquivalentTo:
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_and_dict_true(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """Suite should be equivalent to its dict representation."""
-        suite_with_single_expectation_dict: dict = expectationSuiteSchema.dump(
-            suite_with_single_expectation
-        )
-
-        assert suite_with_single_expectation.isEquivalentTo(suite_with_single_expectation_dict)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_and_dict_false(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        modified_suite = deepcopy(suite_with_single_expectation)
-        modified_suite.expectations[0].value_set[0] = -1
-
-        modified_suite_dict: dict = expectationSuiteSchema.dump(modified_suite)
-
-        assert not suite_with_single_expectation.isEquivalentTo(modified_suite_dict)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_invalid_expectation_config_dict_returns_notimplemented(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        return_value = suite_with_single_expectation.isEquivalentTo(
-            {"not_valid": "expectation_suite_config_dict"}
-        )
-        assert return_value == NotImplemented
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_unsupported_class_returns_notimplemented(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """If we are not comparing to an ExpectationSuite or dict then we should return NotImplemented."""  # noqa: E501
-
-        class UnsupportedClass:
-            pass
-
-        return_value = suite_with_single_expectation.isEquivalentTo(UnsupportedClass())
-        assert return_value == NotImplemented
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_true_with_changes_to_non_considered_attributes(  # noqa: E501
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""  # noqa: E501
-        different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
-        different_but_equivalent_suite.name = "different_name"
-        different_but_equivalent_suite.meta = {"notes": "Different meta."}
-        different_but_equivalent_suite.id = "different_id"
-
-        assert suite_with_single_expectation.isEquivalentTo(different_but_equivalent_suite)
-        assert different_but_equivalent_suite.isEquivalentTo(suite_with_single_expectation)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_false(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """Only expectation equivalence is considered for suite equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""  # noqa: E501
-        different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
-        # Set different column in expectation kwargs
-        expectation = different_and_not_equivalent_suite.expectations[0]
-        expectation.column = "b"
-        expectation.value_set = [1, 2, 3]
-
-        assert not suite_with_single_expectation.isEquivalentTo(different_and_not_equivalent_suite)
-        assert not different_and_not_equivalent_suite.isEquivalentTo(suite_with_single_expectation)
-
-    @pytest.mark.unit
-    def test_is_equivalent_to_expectation_suite_classes_false_multiple_equivalent_expectations(
-        self, suite_with_single_expectation: ExpectationSuite
-    ):
-        """Only expectation equivalence is considered for suite equivalence, and the same number of expectations in the suite is required for equivalence. Marked as integration since this uses the ExpectationConfiguration.isEquivalentTo() under the hood."""  # noqa: E501
-        different_and_not_equivalent_suite = deepcopy(suite_with_single_expectation)
-        # Add a copy of the existing expectation, using list .append() to bypass add_expectation logic to handle overwrite  # noqa: E501
-        different_and_not_equivalent_suite.expectations.append(
-            different_and_not_equivalent_suite._build_expectation(
-                expectation_configuration=different_and_not_equivalent_suite.expectation_configurations[
-                    0
-                ]
-            )
-        )
-        assert len(suite_with_single_expectation.expectations) == 1
-        assert len(different_and_not_equivalent_suite.expectations) == 2
-
-        assert not suite_with_single_expectation.isEquivalentTo(different_and_not_equivalent_suite)
-        assert not different_and_not_equivalent_suite.isEquivalentTo(suite_with_single_expectation)
-
-
 class TestEqDunder:
     @pytest.mark.unit
     def test_equality_to_unsupported_class_is_false(
@@ -942,15 +711,6 @@ class TestEqDunder:
             ),
             pytest.param("expectations", []),
             pytest.param("suite_parameters", {"different": "suite_parameters"}),
-            pytest.param(
-                "execution_engine_type",
-                type(ExecutionEngine),
-                marks=pytest.mark.xfail(
-                    strict=True,
-                    raises=AssertionError,
-                    reason="Currently execution_engine_type is not considered in ExpectationSuite equality",  # noqa: E501
-                ),
-            ),
             pytest.param("meta", {"notes": "Different meta."}),
             pytest.param(
                 "id",
@@ -974,8 +734,8 @@ class TestEqDunder:
 
         setattr(different_but_equivalent_suite, attribute, new_value)
 
-        assert not suite_with_single_expectation == different_but_equivalent_suite
-        assert not different_but_equivalent_suite == suite_with_single_expectation
+        assert suite_with_single_expectation != different_but_equivalent_suite
+        assert different_but_equivalent_suite != suite_with_single_expectation
         assert suite_with_single_expectation != different_but_equivalent_suite
         assert different_but_equivalent_suite != suite_with_single_expectation
 
@@ -1097,50 +857,6 @@ def baseline_suite(expect_column_values_to_be_in_set_col_a_with_meta, exp2) -> E
     )
 
 
-@pytest.fixture
-def profiler_config():
-    # Profiler configuration is pulled from the Bobster use case in tests/rule_based_profiler/
-    yaml_config = """
-    # This profiler is meant to be used on the NYC taxi data:
-    # tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_20(18|19|20)-*.csv
-    variables:
-      # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
-      jan_2018_thru_nov_2020_monthly_tripdata_batch_request:
-        datasource_name: taxi_pandas
-        data_connector_name: monthly
-        data_asset_name: my_reports
-        data_connector_query:
-          index: ":-1"
-      confidence_level: 9.5e-1
-      mostly: 1.0
-
-    rules:
-      row_count_range_rule:
-        domain_builder:
-          class_name: TableDomainBuilder
-        parameter_builders:
-          - parameter_name: row_count_range
-            class_name: NumericMetricRangeMultiBatchParameterBuilder
-            metric_name: table.row_count
-            confidence_level: $variables.confidence_level
-            truncate_values:
-              lower_bound: 0
-            round_decimals: 0
-        expectation_configuration_builders:
-         - expectation_type: expect_table_row_count_to_be_between
-           class_name: DefaultExpectationConfigurationBuilder
-           module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-           min_value: $parameter.row_count_range.value.min_value
-           max_value: $parameter.row_count_range.value.max_value
-           mostly: $variables.mostly
-           meta:
-             profiler_details: $parameter.row_count_range.details
-    """
-
-    yaml = YAMLHandler()
-    return yaml.load(yaml_config)
-
-
 @pytest.mark.unit
 def test_expectation_suite_copy(baseline_suite):
     suite_copy = copy(baseline_suite)
@@ -1179,216 +895,6 @@ def test_suite_does_not_overwrite_existing_version_metadata():
 @pytest.mark.unit
 def test_suite_with_metadata_includes_ge_version_metadata(baseline_suite):
     assert "great_expectations_version" in baseline_suite.meta
-
-
-@pytest.mark.unit
-def test_get_citations_with_no_citations(baseline_suite):
-    assert "citations" not in baseline_suite.meta
-    assert baseline_suite.get_citations() == []
-
-
-@pytest.mark.unit
-def test_get_citations_not_sorted(baseline_suite):
-    assert "citations" not in baseline_suite.meta
-
-    baseline_suite.add_citation("first", citation_date="2000-01-01")
-    baseline_suite.add_citation("third", citation_date="2000-01-03")
-    baseline_suite.add_citation("second", citation_date="2000-01-02")
-    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(sort=False)
-    for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, clean_falsy=True, inplace=True)
-        properties_dict.pop("interactive", None)
-
-    assert properties_dict_list == [
-        {"citation_date": "2000-01-01T00:00:00.000000Z", "comment": "first"},
-        {"citation_date": "2000-01-03T00:00:00.000000Z", "comment": "third"},
-        {"citation_date": "2000-01-02T00:00:00.000000Z", "comment": "second"},
-    ]
-
-
-@pytest.mark.unit
-def test_get_citations_sorted(baseline_suite):
-    assert "citations" not in baseline_suite.meta
-
-    dt: datetime.datetime
-
-    baseline_suite.add_citation("first", citation_date="2000-01-01")
-    baseline_suite.add_citation("third", citation_date="2000-01-03")
-    baseline_suite.add_citation("second", citation_date="2000-01-02")
-    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(sort=True)
-    for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, clean_falsy=True, inplace=True)
-        properties_dict.pop("interactive", None)
-
-    assert properties_dict_list == [
-        {
-            "citation_date": "2000-01-01T00:00:00.000000Z",
-            "comment": "first",
-        },
-        {
-            "citation_date": "2000-01-02T00:00:00.000000Z",
-            "comment": "second",
-        },
-        {
-            "citation_date": "2000-01-03T00:00:00.000000Z",
-            "comment": "third",
-        },
-    ]
-
-
-@pytest.mark.unit
-def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_suite):
-    assert "citations" not in baseline_suite.meta
-
-    baseline_suite.add_citation("first", batch_kwargs={"path": "first"}, citation_date="2000-01-01")
-    baseline_suite.add_citation(
-        "second", batch_kwargs={"path": "second"}, citation_date="2001-01-01"
-    )
-    baseline_suite.add_citation("third", citation_date="2002-01-01")
-
-    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(
-        sort=True, require_batch_kwargs=True
-    )
-    for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, clean_falsy=True, inplace=True)
-        properties_dict.pop("interactive", None)
-
-    assert properties_dict_list == [
-        {
-            "citation_date": "2000-01-01T00:00:00.000000Z",
-            "batch_kwargs": {"path": "first"},
-            "comment": "first",
-        },
-        {
-            "citation_date": "2001-01-01T00:00:00.000000Z",
-            "batch_kwargs": {"path": "second"},
-            "comment": "second",
-        },
-    ]
-
-
-@pytest.mark.unit
-def test_get_citations_with_multiple_citations_containing_profiler_config(
-    baseline_suite, profiler_config
-):
-    assert "citations" not in baseline_suite.meta
-
-    baseline_suite.add_citation(
-        "first",
-        citation_date="2000-01-01",
-        profiler_config=profiler_config,
-    )
-    baseline_suite.add_citation(
-        "second",
-        citation_date="2001-01-01",
-        profiler_config=profiler_config,
-    )
-    baseline_suite.add_citation("third", citation_date="2002-01-01")
-
-    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(
-        sort=True, require_profiler_config=True
-    )
-    for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, clean_falsy=True, inplace=True)
-        properties_dict.pop("interactive", None)
-
-    assert properties_dict_list == [
-        {
-            "citation_date": "2000-01-01T00:00:00.000000Z",
-            "profiler_config": profiler_config,
-            "comment": "first",
-        },
-        {
-            "citation_date": "2001-01-01T00:00:00.000000Z",
-            "profiler_config": profiler_config,
-            "comment": "second",
-        },
-    ]
-
-
-@pytest.mark.unit
-def test_get_table_expectations_returns_empty_list_on_empty_suite(empty_suite):
-    assert empty_suite.get_table_expectations() == []
-
-
-@pytest.mark.unit
-def test_get_table_expectations_returns_empty_list_on_suite_without_any(baseline_suite):
-    assert baseline_suite.get_table_expectations() == []
-
-
-@pytest.mark.unit
-def test_get_table_expectations(
-    suite_with_table_and_column_expectations, table_exp1, table_exp2, table_exp3
-):
-    obs = suite_with_table_and_column_expectations.get_table_expectations()
-    assert obs == [table_exp1, table_exp2, table_exp3]
-
-
-@pytest.mark.unit
-def test_get_column_expectations_returns_empty_list_on_empty_suite(empty_suite):
-    assert empty_suite.get_column_expectations() == []
-
-
-@pytest.mark.unit
-def test_get_column_expectations(
-    suite_with_table_and_column_expectations,
-    expect_column_values_to_be_in_set_col_a_with_meta,
-    exp2,
-    exp3,
-    exp4,
-):
-    obs = suite_with_table_and_column_expectations.get_column_expectations()
-    assert obs == [expect_column_values_to_be_in_set_col_a_with_meta, exp2, exp3, exp4]
-
-
-@pytest.mark.unit
-def test_get_expectations_by_expectation_type(
-    suite_with_table_and_column_expectations,
-    expect_column_values_to_be_in_set_col_a_with_meta,
-    exp2,
-    exp3,
-    exp4,
-    column_pair_expectation,
-    table_exp1,
-    table_exp2,
-    table_exp3,
-):
-    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_expectation_type()  # noqa: E501
-    assert obs == [
-        table_exp1,
-        table_exp2,
-        table_exp3,
-        expect_column_values_to_be_in_set_col_a_with_meta,
-        exp2,
-        exp3,
-        exp4,
-        column_pair_expectation,
-    ]
-
-
-@pytest.mark.unit
-def test_get_expectations_by_domain_type(
-    suite_with_table_and_column_expectations,
-    expect_column_values_to_be_in_set_col_a_with_meta,
-    exp2,
-    exp3,
-    exp4,
-    column_pair_expectation,
-    table_exp1,
-    table_exp2,
-    table_exp3,
-):
-    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_domain_type()  # noqa: E501
-    assert list(itertools.chain.from_iterable(obs.values())) == [
-        table_exp1,
-        table_exp2,
-        table_exp3,
-        expect_column_values_to_be_in_set_col_a_with_meta,
-        exp2,
-        exp3,
-        exp4,
-        column_pair_expectation,
-    ]
 
 
 class DataContextSendUsageMessageSpy:

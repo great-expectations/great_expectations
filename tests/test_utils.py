@@ -22,10 +22,10 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.store import (
     CheckpointStore,
     ConfigurationStore,
-    ProfilerStore,
     Store,
     StoreBackend,
 )
@@ -34,6 +34,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -212,38 +213,6 @@ def build_checkpoint_store_using_filesystem(
         store_backend=store_backend_obj,
         overwrite_existing=overwrite_existing,
     )
-
-
-def build_profiler_store_using_store_backend(
-    store_name: str,
-    store_backend: Union[StoreBackend, dict],
-    overwrite_existing: bool = False,
-) -> ProfilerStore:
-    return cast(
-        ProfilerStore,
-        build_configuration_store(
-            class_name="ProfilerStore",
-            module_name="great_expectations.data_context.store",
-            store_name=store_name,
-            store_backend=store_backend,
-            overwrite_existing=overwrite_existing,
-        ),
-    )
-
-
-def build_profiler_store_using_filesystem(
-    store_name: str,
-    base_directory: str,
-    overwrite_existing: bool = False,
-) -> ProfilerStore:
-    store_config: dict = {"base_directory": base_directory}
-    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(**store_config)
-    store = build_profiler_store_using_store_backend(
-        store_name=store_name,
-        store_backend=store_backend_obj,
-        overwrite_existing=overwrite_existing,
-    )
-    return store
 
 
 def save_config_to_filesystem(
@@ -963,6 +932,26 @@ def get_connection_string_and_dialect(
         connection_string: str = db_config["connection_string"]
 
     return dialect, connection_string
+
+
+def add_datasource(
+    context: AbstractDataContext, *, name: str, connection_string: str
+) -> SQLDatasource:
+    """Add a datasource to the context based on the dialect from config file.
+
+    Needed because context.data_sources.add_sql is prohibitted when
+    more specific methods are available.
+    """
+    with open("./connection_string.yml") as f:
+        db_config: dict = yaml_handler.load(f)
+
+    dialect: str = db_config["dialect"]
+    if dialect == "snowflake":
+        return context.data_sources.add_snowflake(name=name, connection_string=connection_string)
+    elif dialect == "postgres":
+        return context.data_sources.add_postgres(name=name, connection_string=connection_string)
+    else:
+        return context.data_sources.add_sql(name=name, connection_string=connection_string)
 
 
 def find_strings_in_nested_obj(  # noqa: C901 - 14

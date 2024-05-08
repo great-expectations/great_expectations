@@ -3,7 +3,9 @@ import shutil
 from collections import OrderedDict
 
 import pytest
+from pytest_mock import MockerFixture
 
+import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
@@ -13,10 +15,8 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
-    DatasourceConfig,
-    DatasourceConfigSchema,
 )
-from great_expectations.data_context.util import PasswordMasker, file_relative_path
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
 from tests.data_context.conftest import create_data_context_files
 
@@ -88,7 +88,6 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
         config_commented_map_from_yaml = yaml.load(data)
     expected_config = DataContextConfig.from_commented_map(config_commented_map_from_yaml)
     expected_config_commented_map = dataContextConfigSchema.dump(expected_config)
-    expected_config_commented_map.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
     context = get_context(context_root_dir=context_path)
@@ -96,7 +95,6 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     context_config_commented_map = dataContextConfigSchema.dump(
         get_context(context_root_dir=context_path)._project_config
     )
-    context_config_commented_map.pop("anonymous_usage_statistics")
 
     assert context_config_commented_map == expected_config_commented_map
 
@@ -597,7 +595,9 @@ def test_escape_all_config_variables_skip_substitution_vars(
 
 
 @pytest.mark.filesystem
-def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypatch):
+def test_create_data_context_and_config_vars_in_code(
+    tmp_path_factory, monkeypatch, mocker: MockerFixture
+):
     """
     What does this test and why?
     Creating a DataContext via .create(), then using .save_config_variable() to save a variable that will eventually be substituted (e.g. ${SOME_VAR}) should result in the proper escaping of $.
@@ -605,7 +605,8 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     """  # noqa: E501
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context = FileDataContext.create(
+    context = gx.get_context(
+        mode="file",
         project_root_dir=project_path,
     )
 
@@ -632,57 +633,18 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     assert not all(item in config_vars_file_contents.items() for item in CONFIG_VARS.items())
 
     # Add env var for substitution
-    monkeypatch.setenv("DB_HOST_FROM_ENV_VAR", "DB_HOST_FROM_ENV_VAR_VALUE")
+    DB_HOST_FROM_ENV_VAR_VALUE = "localhost"
+    monkeypatch.setenv("DB_HOST_FROM_ENV_VAR", DB_HOST_FROM_ENV_VAR_VALUE)
 
-    datasource_config = DatasourceConfig(
-        class_name="Datasource",
-        execution_engine={
-            "class_name": "SqlAlchemyExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-            "credentials": {
-                "drivername": "postgresql",
-                "host": "$DB_HOST",
-                "port": "65432",
-                "database": "${DB_NAME}",
-                "username": "${DB_USER}",
-                "password": "${DB_PWD}",
-            },
-        },
+    connection_string = "postgresql://${DB_USER}:${DB_PWD}@${DB_HOST}:65432/${DB_NAME}"
+    mock_create_engine = mocker.Mock()
+    mock_create_engine = mocker.patch("sqlalchemy.create_engine")
+
+    context.data_sources.add_postgres("test_datasource", connection_string=connection_string)
+
+    assert mock_create_engine.called_once_with(
+        "postgresql://DB_USER:pas$word@localhost:65432/DB_NAME"
     )
-
-    datasource_config_schema = DatasourceConfigSchema()
-
-    # use context.add_datasource to test this by adding a datasource with values to substitute.
-    context.add_datasource(
-        initialize=False,
-        name="test_datasource",
-        **datasource_config_schema.dump(datasource_config),
-    )
-
-    assert context.list_datasources()[0]["execution_engine"]["credentials"] == {
-        "drivername": "postgresql",
-        "host": "DB_HOST_FROM_ENV_VAR_VALUE",
-        "port": "65432",
-        "database": "DB_NAME",
-        "username": "DB_USER",
-        # Note masking of "password" field
-        "password": PasswordMasker.MASKED_PASSWORD_STRING,
-    }
-
-    # Check context substitutes escaped variables appropriately
-    data_context_config_schema = DataContextConfigSchema()
-    context_with_variables_substituted_dict = data_context_config_schema.dump(
-        context.get_config_with_variables_substituted()
-    )
-
-    test_datasource_credentials = context_with_variables_substituted_dict["datasources"][
-        "test_datasource"
-    ]["execution_engine"]["credentials"]
-
-    assert test_datasource_credentials["host"] == "DB_HOST_FROM_ENV_VAR_VALUE"
-    assert test_datasource_credentials["username"] == "DB_USER"
-    assert test_datasource_credentials["password"] == "pas$word"
-    assert test_datasource_credentials["database"] == "DB_NAME"
 
     # Ensure skip_if_substitution_variable=False works as documented
     context.save_config_variable("escaped", "$SOME_VAR", skip_if_substitution_variable=False)

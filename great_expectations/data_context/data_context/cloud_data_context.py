@@ -72,7 +72,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         ExpectationSuiteIdentifier,
     )
-    from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
@@ -145,8 +144,9 @@ class CloudDataContext(SerializableDataContext):
     def _init_analytics(self) -> None:
         organization_id = self.ge_cloud_config.organization_id
         init_analytics(
+            enable=self._determine_analytics_enabled(),
             user_id=self._get_cloud_user_id(),
-            data_context_id=uuid.UUID(self._data_context_id),
+            data_context_id=self._data_context_id,
             organization_id=uuid.UUID(organization_id) if organization_id else None,
             oss_id=self._get_oss_id(),
             cloud_mode=True,
@@ -170,11 +170,7 @@ class CloudDataContext(SerializableDataContext):
                 cloud_config=self.ge_cloud_config,
             )
 
-        project_data_context_config = CloudDataContext.get_or_create_data_context_config(
-            project_config
-        )
-
-        return self._apply_global_config_overrides(config=project_data_context_config)
+        return CloudDataContext.get_or_create_data_context_config(project_config)
 
     @override
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
@@ -263,9 +259,16 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def _prepare_v1_config(cls, config: dict) -> dict:
         # Various context variables are no longer top-level keys in V1
-        config.pop("notebooks", None)
-        config.pop("concurrency", None)
-        config.pop("include_rendered_content", None)
+        for var in (
+            "notebooks",
+            "concurrency",
+            "include_rendered_content",
+            "profiler_store_name",
+            "anonymous_usage_statistics",
+        ):
+            val = config.pop(var, None)
+            if val:
+                logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
 
         # FluentDatasources are nested under the "datasources" key and need to be separated
         # to prevent downstream issues
@@ -273,7 +276,6 @@ class CloudDataContext(SerializableDataContext):
 
         # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
         # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
-
         cls._change_key_from_v0_to_v1(
             config,
             "evaluation_parameter_store_name",
@@ -282,19 +284,36 @@ class CloudDataContext(SerializableDataContext):
         cls._change_key_from_v0_to_v1(
             config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
         )
+
+        config = cls._prepare_stores_config(config=config)
+
+        return config
+
+    @classmethod
+    def _prepare_stores_config(cls, config) -> dict:
         stores = config.get("stores")
-        if stores:
-            for store in stores.values():
-                if store:
-                    cls._change_value_from_v0_to_v1(
-                        store,
-                        "class_name",
-                        "EvaluationParameterStore",
-                        SuiteParameterStore.__name__,
-                    )
-                    cls._change_value_from_v0_to_v1(
-                        store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
-                    )
+        if not stores:
+            return config
+
+        to_delete: list[str] = []
+        for name, store in stores.items():
+            # Certain stores have been renamed in V1
+            cls._change_value_from_v0_to_v1(
+                store,
+                "class_name",
+                "EvaluationParameterStore",
+                SuiteParameterStore.__name__,
+            )
+            cls._change_value_from_v0_to_v1(
+                store, "class_name", "ValidationsStore", ValidationResultsStore.__name__
+            )
+
+            # Profiler stores are no longer supported in V1
+            if store.get("class_name") == "ProfilerStore":
+                to_delete.append(name)
+
+        for name in to_delete:
+            config["stores"].pop(name)
 
         return config
 
@@ -549,14 +568,17 @@ class CloudDataContext(SerializableDataContext):
         return variables
 
     @override
-    def _construct_data_context_id(self) -> str:
+    def _construct_data_context_id(self) -> uuid.UUID | None:
         """
         Choose the id of the currently-configured expectations store, if available and a persistent store.
         If not, it should choose the id stored in DataContextConfig.
         Returns:
             UUID to use as the data_context_id
         """  # noqa: E501
-        return self.ge_cloud_config.organization_id  # type: ignore[return-value]
+        org_id = self.ge_cloud_config.organization_id
+        if org_id:
+            return uuid.UUID(org_id)
+        return None
 
     @override
     def get_config_with_variables_substituted(
@@ -761,7 +783,6 @@ class CloudDataContext(SerializableDataContext):
         if not overwrite_existing:
             self._validate_suite_unique_constaints_before_save(key)
 
-        self._suite_parameter_dependencies_compiled = False
         if self._include_rendered_content:
             expectation_suite.render()
 
@@ -892,9 +913,9 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
+        datasource: BaseDatasource | FluentDatasource | None = None,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | None:
         if datasource and not isinstance(datasource, FluentDatasource):
             raise TypeError(  # noqa: TRY003
                 "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."  # noqa: E501

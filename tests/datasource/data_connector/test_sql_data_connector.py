@@ -13,7 +13,6 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,
     InferredAssetSqlDataConnector,
@@ -38,26 +37,11 @@ def get_data_context_for_datasource_and_execution_engine(
     connection_url: str,
     sql_alchemy_execution_engine: SqlAlchemyExecutionEngine,
 ) -> AbstractDataContext:
-    context.datasources["my_test_datasource"] = Datasource(
-        name="my_test_datasource",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.  # noqa: E501
-        execution_engine={
-            "class_name": "SqlAlchemyExecutionEngine",
-            "url": connection_url,
-        },
-        data_connectors={
-            "my_sql_data_connector": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "assets": {
-                    "my_asset": {
-                        "table_name": "table_partitioned_by_date_column__A",
-                    },
-                },
-            },
-        },
+    datasource = context.data_sources.add_sqlite(
+        "my_test_datasource", connection_string=connection_url
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.  # noqa: E501
-    context.datasources["my_test_datasource"]._execution_engine = sql_alchemy_execution_engine  # type: ignore[union-attr]
+    datasource._execution_engine = sql_alchemy_execution_engine  # type: ignore[union-attr]
     return context
 
 

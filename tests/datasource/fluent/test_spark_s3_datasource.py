@@ -10,14 +10,14 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import SparkS3Datasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
+from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
-from great_expectations.datasource.fluent.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.spark_file_path_datasource import CSVAsset
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
@@ -70,7 +70,7 @@ def spark_s3_datasource(s3_mock, s3_bucket: str) -> SparkS3Datasource:
 
 
 @pytest.fixture
-def csv_asset(spark_s3_datasource: SparkS3Datasource) -> _FilePathDataAsset:
+def csv_asset(spark_s3_datasource: SparkS3Datasource) -> PathDataAsset:
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",

@@ -49,13 +49,6 @@ stores:
       suppress_store_backend_id: true
       base_directory: checkpoints/
 
-  profiler_store:
-    class_name: ProfilerStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      suppress_store_backend_id: true
-      base_directory: profilers/
-
   validation_definition_store:
     class_name: ValidationDefinitionStore
     store_backend:
@@ -117,7 +110,7 @@ def test_project_optional_config_comment_matches_default(
     Make sure that the templates built on data_context.types.base.DataContextConfigDefaults match the desired default.
     """  # noqa: E501
 
-    assert templates.PROJECT_OPTIONAL_CONFIG_COMMENT == project_optional_config_comment
+    assert project_optional_config_comment == templates.PROJECT_OPTIONAL_CONFIG_COMMENT
 
 
 @pytest.mark.unit
@@ -127,4 +120,4 @@ def test_project_help_comment_matches_default(project_help_comment):
     Make sure that the templates built on data_context.types.base.DataContextConfigDefaults match the desired default.
     """  # noqa: E501
 
-    assert templates.PROJECT_HELP_COMMENT == project_help_comment
+    assert project_help_comment == templates.PROJECT_HELP_COMMENT

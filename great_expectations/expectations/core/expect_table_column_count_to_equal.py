@@ -151,7 +151,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        _ = False if runtime_configuration.get("include_column_name") is False else True
+        _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["value"])
         template_str = "Must have exactly $value columns."

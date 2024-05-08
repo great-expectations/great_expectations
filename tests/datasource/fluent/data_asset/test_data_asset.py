@@ -3,7 +3,7 @@ from typing import List
 import pytest
 
 from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.partitioners import PartitionerYear
+from great_expectations.core.partitioners import ColumnPartitionerYearly
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -93,7 +93,7 @@ def test_add_batch_definition__success(empty_data_asset: DataAsset):
 @pytest.mark.unit
 def test_add_batch_definition_with_partitioner__success(empty_data_asset: DataAsset):
     name = "my batch config"
-    partitioner = PartitionerYear(column_name="test-column")
+    partitioner = ColumnPartitionerYearly(column_name="test-column")
     batch_definition = empty_data_asset.add_batch_definition(name, partitioner=partitioner)
 
     assert batch_definition.partitioner == partitioner
@@ -104,7 +104,7 @@ def test_add_batch_definition__persists(
     file_context: AbstractDataContext, empty_data_asset: DataAsset
 ):
     name = "my batch config"
-    partitioner = PartitionerYear(column_name="test-column")
+    partitioner = ColumnPartitionerYearly(column_name="test-column")
     batch_definition = empty_data_asset.add_batch_definition(name, partitioner=partitioner)
 
     loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)
@@ -119,7 +119,7 @@ def test_add_batch_definition_with_partitioner__persists(
     file_context: AbstractDataContext, empty_data_asset: DataAsset
 ):
     name = "my batch config"
-    partitioner = PartitionerYear(column_name="test-column")
+    partitioner = ColumnPartitionerYearly(column_name="test-column")
     empty_data_asset.add_batch_definition(name, partitioner=partitioner)
 
     loaded_datasource = file_context.get_datasource(DATASOURCE_NAME)

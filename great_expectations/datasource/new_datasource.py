@@ -5,7 +5,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchMarkers,
@@ -23,7 +22,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class BaseDatasource:
     """A Datasource is the glue between an `ExecutionEngine` and a `DataConnector`. This class should be considered
     abstract and not directly instantiated; please use `Datasource` instead.
@@ -232,7 +230,6 @@ class BaseDatasource:
         self.data_connectors[name] = new_data_connector
         return new_data_connector
 
-    @public_api
     def get_available_data_asset_names(
         self, data_connector_names: Optional[Union[list, str]] = None
     ) -> Dict[str, List[str]]:
@@ -373,84 +370,3 @@ NOT_FLUENT_ERROR_MSG: str = (
     "Not a 'Fluent' Datasource. Please refer to `0.15` docs for info on non 'Fluent' Datasources: https://docs.greatexpectations.io/docs/0.15.50/"
     "\n or recreate your datasource with our new 'Fluent' API: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview/"
 )
-
-
-@public_api
-class Datasource(BaseDatasource):
-    """A Datasource is the glue between an `ExecutionEngine` and a `DataConnector`.
-
-    Args:
-        name: the name for the datasource
-        execution_engine: the type of compute engine to produce
-        data_connectors: DataConnectors to add to the datasource
-        data_context_root_directory: Installation directory path (if installed on a filesystem).
-        id: Identifier specific to this datasource.
-    """
-
-    recognized_batch_parameters: set = {"limit"}
-
-    def __init__(  # noqa: PLR0913
-        self,
-        name: str,
-        execution_engine: Optional[dict] = None,
-        data_connectors: Optional[dict] = None,
-        data_context_root_directory: Optional[str] = None,
-        id: Optional[str] = None,
-    ) -> None:
-        """
-        Build a new Datasource with data connectors.
-
-        Args:
-            name: the name for the datasource
-            execution_engine (ClassConfig): the type of compute engine to produce
-            data_connectors: DataConnectors to add to the datasource
-            data_context_root_directory: Installation directory path (if installed on a filesystem).
-            id: Identifier specific to this datasource.
-        """
-        self._name = name
-
-        super().__init__(
-            name=name,
-            execution_engine=execution_engine,
-            data_context_root_directory=data_context_root_directory,
-            id=id,
-        )
-
-        if data_connectors is None:
-            data_connectors = {}
-        self._data_connectors = data_connectors
-        self._datasource_config.update({"data_connectors": copy.deepcopy(data_connectors)})
-        self._init_data_connectors(data_connector_configs=data_connectors)
-
-    def _init_data_connectors(
-        self,
-        data_connector_configs: Dict[str, Dict[str, Any]],
-    ) -> None:
-        for name, config in data_connector_configs.items():
-            self._build_data_connector_from_config(
-                name=name,
-                config=config,
-            )
-
-    def __getattr__(self, attr: str):
-        fluent_datasource_attrs: set[str] = set()
-        from great_expectations.datasource.fluent import PandasDatasource
-
-        # PandasDatasource has all the `read_*` methods + the normal Datasource methods
-        fluent_datasource_attrs.update({a for a in dir(PandasDatasource) if not a.startswith("_")})
-        if attr.startswith("add_"):
-            from great_expectations.datasource.fluent.sources import (  # isort: skip
-                _iter_all_registered_types,
-            )
-
-            fluent_datasource_attrs.update(
-                {
-                    f"add_{type_name}_asset"
-                    for type_name, _ in _iter_all_registered_types(include_datasource=False)
-                }
-            )
-        if attr in fluent_datasource_attrs:
-            raise NotImplementedError(f"`{attr}` - {NOT_FLUENT_ERROR_MSG}")
-
-        # normal Attribute error if attr does not exist
-        super().__getattribute__(attr)

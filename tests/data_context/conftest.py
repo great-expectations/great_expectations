@@ -122,22 +122,6 @@ def create_common_data_context_files(context_path, asset_config_path):
         os.path.join(context_path, "plugins"),  # noqa: PTH118
         exist_ok=True,
     )
-    copy_relative_path(
-        "../test_fixtures/custom_pandas_dataset.py",
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    copy_relative_path(
-        "../test_fixtures/custom_sparkdf_dataset.py",
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
-    )
 
 
 def copy_relative_path(relative_src, dest):
@@ -178,11 +162,8 @@ def basic_data_context_config():
                 },
             },
             "data_docs_sites": {},
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
+            "analytics_enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         }
     )
 
@@ -332,11 +313,8 @@ def data_context_config_with_datasources(conn_string_password):
                 },
             },
             "data_docs_sites": {},
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
+            "analytics_enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         }
     )
 
@@ -403,11 +381,8 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                 },
             },
             "data_docs_sites": {},
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
+            "analytics_enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         }
     )
 
@@ -547,7 +522,6 @@ def fluent_datasource_config() -> dict:
 
 @pytest.fixture(
     params=[
-        basic_block_config_datasource_config,
         basic_fluent_datasource_config,
     ]
 )

@@ -67,13 +67,6 @@ stores:
       suppress_store_backend_id: true
       base_directory: checkpoints/
 
-  profiler_store:
-    class_name: ProfilerStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      suppress_store_backend_id: true
-      base_directory: profilers/
-
 expectations_store_name: expectations_store
 validation_results_store_name: validation_results_store
 suite_parameter_store_name: suite_parameter_store
@@ -93,7 +86,5 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
-anonymous_usage_statistics:
-  usage_statistics_url: https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-  enabled: false
-  data_context_id: f98647c3-0120-42ff-ae47-e48b8a6500cf
+analytics_enabled: false
+data_context_id: f98647c3-0120-42ff-ae47-e48b8a6500cf

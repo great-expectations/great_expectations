@@ -18,15 +18,15 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility.pydantic import ValidationError
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.partitioners import (
-    Partitioner,
+    ColumnPartitioner,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
     PartitionerColumnValue,
     PartitionerDatetimePart,
     PartitionerDividedInteger,
     PartitionerModInteger,
     PartitionerMultiColumnValue,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
@@ -96,7 +96,7 @@ def assert_table_asset(
     table_name: str,
     source: PostgresDatasource,
     batch_parameters: tuple[str, ...],
-    partitioner: Optional[Partitioner] = None,
+    partitioner: Optional[ColumnPartitioner] = None,
 ):
     assert asset.name == name
     assert asset.table_name == table_name
@@ -125,7 +125,7 @@ def test_add_table_asset_with_partitioner(mocker, create_source: CreateSourceFix
         has_table.return_value = True
 
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         assert len(source.assets) == 1
         assert asset == source.assets[0]
         assert_table_asset(
@@ -218,7 +218,7 @@ def test_construct_table_asset_directly_with_partitioner(create_source):
             name="my_asset",
             table_name="my_table",
         )
-        partitioner = PartitionerYearAndMonth(column_name="col")
+        partitioner = ColumnPartitionerMonthly(column_name="col")
         assert_table_asset(
             asset,
             "my_asset",
@@ -310,7 +310,7 @@ def test_datasource_gets_batch_list_partitioner_with_unspecified_batch_parameter
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         empty_batch_request = asset.build_batch_request(partitioner=partitioner)
         assert empty_batch_request.options == {}
         batches = source.get_batch_list_from_batch_request(empty_batch_request)
@@ -339,7 +339,7 @@ def test_datasource_gets_batch_list_partitioner_with_batch_parameters_set_to_non
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         assert asset.get_batch_parameters_keys(partitioner=partitioner) == (
             "year",
             "month",
@@ -377,7 +377,7 @@ def test_datasource_gets_batch_list_partitioner_with_partially_specified_batch_p
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(options={"year": year}, partitioner=partitioner)
         )
@@ -432,13 +432,13 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_parameters(
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(
                 options={"month": month, "year": year}, partitioner=partitioner
             )
         )
-        assert 1 == len(batches)
+        assert len(batches) == 1
         assert batches[0].metadata == {"month": month, "year": year}
 
 
@@ -458,22 +458,22 @@ def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
     ],
     [
         # These bad parameters do not occur in the batch request params
-        (PartitionerYear, {"column_name": "my_col"}, ("bad", None, None)),
-        (PartitionerYear, {"column_name": "my_col"}, (None, "bad", None)),
-        (PartitionerYear, {"column_name": "my_col"}, ("bad", "bad", None)),
+        (ColumnPartitionerYearly, {"column_name": "my_col"}, ("bad", None, None)),
+        (ColumnPartitionerYearly, {"column_name": "my_col"}, (None, "bad", None)),
+        (ColumnPartitionerYearly, {"column_name": "my_col"}, ("bad", "bad", None)),
         # These bad parameters are request option parameters which depend on the partitioner.
         (
-            PartitionerYear,
+            ColumnPartitionerYearly,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
         (
-            PartitionerYearAndMonth,
+            ColumnPartitionerMonthly,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
         (
-            PartitionerYearAndMonthAndDay,
+            ColumnPartitionerDaily,
             {"column_name": "my_col"},
             (None, None, {"bad": None}),
         ),
@@ -508,7 +508,7 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
         partitioner = PartitionerClass(**add_partitioner_kwargs)
 
         src, ast, op = batch_request_args
-        batch_request = BatchRequest[Partitioner](
+        batch_request = BatchRequest[ColumnPartitioner](
             datasource_name=src or source.name,
             data_asset_name=ast or asset.name,
             options=op or {},
@@ -544,7 +544,7 @@ def test_get_batch_list_from_batch_request_with_good_batch_request(
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         batch_request = BatchRequest(
             datasource_name=source.name,
             data_asset_name=asset.name,
@@ -575,7 +575,7 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         src, ast, op = batch_request_args
         batch_request = BatchRequest(
             datasource_name=src or source.name,
@@ -596,7 +596,7 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         with pytest.raises(ge_exceptions.InvalidBatchRequestError):
             asset.build_batch_request(options={"invalid_key": None}, partitioner=partitioner)
 
@@ -637,7 +637,7 @@ def test_postgres_slice_batch_count(
         ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         batch_request = asset.build_batch_request(
             options={"year": 2021}, batch_slice=batch_slice, partitioner=partitioner
         )
@@ -922,7 +922,7 @@ def test_adding_partitioner_persists_results(
     ).add_query_asset(
         name="my_asset", query="select * from table", order_by=["year"]
     ).add_batch_definition(
-        name="my_batch_definition", partitioner=PartitionerYear(column_name="my_col")
+        name="my_batch_definition", partitioner=ColumnPartitionerYearly(column_name="my_col")
     )
 
     final_yaml: dict = YAMLHandler().load(  # type: ignore[assignment]
@@ -956,7 +956,7 @@ def test_partitioner_year(
         asset = source.add_query_asset(
             name="my_asset", query="select * from table", order_by=["year"]
         )
-        partitioner = PartitionerYear(column_name="my_col")
+        partitioner = ColumnPartitionerYearly(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
         )
@@ -996,7 +996,7 @@ def test_partitioner_year_and_month(
         asset = source.add_query_asset(
             name="my_asset", query="select * from table", order_by=["year", "month"]
         )
-        partitioner = PartitionerYearAndMonth(column_name="my_col")
+        partitioner = ColumnPartitionerMonthly(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
         )
@@ -1046,7 +1046,7 @@ def test_partitioner_year_and_month_and_day(
             query="select * from table",
             order_by=["year", "month", "day"],
         )
-        partitioner = PartitionerYearAndMonthAndDay(column_name="my_col")
+        partitioner = ColumnPartitionerDaily(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
         )
@@ -1081,7 +1081,7 @@ def test_partitioner_year_and_month_and_day(
     ],
     [
         pytest.param(
-            PartitionerYear,
+            ColumnPartitionerYearly,
             {"column_name": "pickup_datetime"},
             [{"year": 2020}],
             1,
@@ -1091,7 +1091,7 @@ def test_partitioner_year_and_month_and_day(
             id="year",
         ),
         pytest.param(
-            PartitionerYearAndMonth,
+            ColumnPartitionerMonthly,
             {"column_name": "pickup_datetime"},
             [{"year": 2020, "month": 1}, {"year": 2020, "month": 2}],
             2,
@@ -1101,7 +1101,7 @@ def test_partitioner_year_and_month_and_day(
             id="year_and_month",
         ),
         pytest.param(
-            PartitionerYearAndMonthAndDay,
+            ColumnPartitionerDaily,
             {"column_name": "pickup_datetime"},
             [
                 {"year": 2020, "month": 2, "day": 10},
@@ -1221,7 +1221,7 @@ def test_sorting_none_in_metadata(
         # We use a query asset because then we don't have to mock out db connection tests
         # in this unit test.
         asset = source.add_query_asset(name="my_asset", query="select * from table")
-        partitioner = PartitionerYear(column_name="my_col", sort_ascending=False)
+        partitioner = ColumnPartitionerYearly(column_name="my_col", sort_ascending=False)
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
         )
@@ -1271,7 +1271,7 @@ def test_add_postgres_query_asset_with_batch_metadata(
             order_by=["year"],
         )
         assert asset.batch_metadata == asset_specified_metadata
-        partitioner = PartitionerYear(column_name="col")
+        partitioner = ColumnPartitionerYearly(column_name="col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
         )
@@ -1316,7 +1316,7 @@ def test_add_postgres_table_asset_with_batch_metadata(
             order_by=["year"],
         )
         assert asset.batch_metadata == asset_specified_metadata
-        partitioner = PartitionerYear(column_name="my_col")
+        partitioner = ColumnPartitionerYearly(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request(partitioner=partitioner)
         )

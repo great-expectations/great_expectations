@@ -16,16 +16,19 @@ import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
-    FilesystemDataConnector,
-)
-from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset,
     JSONAsset,
 )
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+    PathDataAsset,
+)
+from great_expectations.datasource.fluent.data_connector import (
+    FilesystemDataConnector,
+)
+from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.sources import _get_field_details
 
 if TYPE_CHECKING:
@@ -141,7 +144,7 @@ class TestDynamicPandasAssets:
         assert type_name in asset_class_names
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_add_asset_method_exists_and_is_functional(self, asset_class: Type[_FilePathDataAsset]):
+    def test_add_asset_method_exists_and_is_functional(self, asset_class: Type[PathDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
@@ -165,7 +168,7 @@ class TestDynamicPandasAssets:
         assert exc_info.value.model == asset_class
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_add_asset_method_signature(self, asset_class: Type[_FilePathDataAsset]):
+    def test_add_asset_method_signature(self, asset_class: Type[PathDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
@@ -195,7 +198,7 @@ class TestDynamicPandasAssets:
             print("✅")
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_minimal_validation(self, asset_class: Type[_FilePathDataAsset]):
+    def test_minimal_validation(self, asset_class: Type[FileDataAsset]):
         """
         These parametrized tests ensures that every `PandasFilesystemDatasource` asset model does some minimal
         validation, and doesn't accept arbitrary keyword arguments.
@@ -210,13 +213,13 @@ class TestDynamicPandasAssets:
             )
 
         errors_dict = exc_info.value.errors()
-        assert {
+        assert errors_dict[  # the extra keyword error will always be the last error
+            -1  # we don't care about any other errors for this test
+        ] == {
             "loc": ("invalid_keyword_arg",),
             "msg": "extra fields not permitted",
             "type": "value_error.extra",
-        } == errors_dict[  # the extra keyword error will always be the last error
-            -1  # we don't care about any other errors for this test
-        ]
+        }
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
@@ -227,7 +230,7 @@ class TestDynamicPandasAssets:
     )
     def test_data_asset_defaults(
         self,
-        asset_model: Type[_FilePathDataAsset],
+        asset_model: Type[PathDataAsset],
         extra_kwargs: dict,
     ):
         """
@@ -341,13 +344,13 @@ def test_invalid_connect_options(
 
     error_dicts = exc_info.value.errors()
     print(pf(error_dicts))
-    assert [
+    assert error_dicts == [
         {
             "loc": ("glob_foobar",),
             "msg": "extra fields not permitted",
             "type": "value_error.extra",
         }
-    ] == error_dicts
+    ]
 
 
 @pytest.mark.unit
@@ -375,13 +378,13 @@ def test_invalid_connect_options_value(
     if isinstance(exc_info.value, pydantic.ValidationError):
         error_dicts = exc_info.value.errors()
         print(pf(error_dicts))
-        assert [
+        assert error_dicts == [
             {
                 "loc": ("glob_directive",),
                 "msg": "str type expected",
                 "type": "type_error.str",
             }
-        ] == error_dicts
+        ]
 
 
 @pytest.mark.unit

@@ -51,7 +51,7 @@ class Checkpoint(BaseModel):
     name: str
     validation_definitions: List[ValidationDefinition]
     actions: List[CheckpointAction] = Field(default_factory=list)
-    result_format: ResultFormat = ResultFormat.SUMMARY
+    result_format: Union[ResultFormat, dict] = ResultFormat.SUMMARY
     id: Union[str, None] = None
 
     class Config:
@@ -166,7 +166,7 @@ class Checkpoint(BaseModel):
         self,
         batch_parameters: Dict[str, Any] | None,
         expectation_parameters: Dict[str, Any] | None,
-        result_format: ResultFormat,
+        result_format: ResultFormat | dict,
         run_id: RunIdentifier,
     ) -> Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult]:
         run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult] = {}

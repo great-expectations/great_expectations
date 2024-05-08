@@ -1,11 +1,9 @@
 import copy
 import os
-from typing import Dict, Final, Optional
-from unittest import mock
+from typing import Any, Dict, Final, Optional
 
 import pytest
 
-from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
@@ -50,7 +48,6 @@ def construct_data_context_config():
         validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
         suite_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,  # noqa: E501
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
-        profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
@@ -67,15 +64,11 @@ def construct_data_context_config():
             "validation_results_store_name": validation_results_store_name,
             "suite_parameter_store_name": suite_parameter_store_name,
             "checkpoint_store_name": checkpoint_store_name,
-            "profiler_store_name": profiler_store_name,
             "plugins_directory": plugins_directory,
             "stores": stores,
             "data_docs_sites": data_docs_sites,
             "config_variables_file_path": None,
-            "anonymous_usage_statistics": {
-                "data_context_id": data_context_id,
-                "enabled": True,
-            },
+            "data_context_id": data_context_id,
         }
 
     return _construct_data_context_config
@@ -126,11 +119,10 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
         },
         store_backend_defaults=store_backend_defaults,
         checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
-        profiler_store_name=store_backend_defaults.profiler_store_name,
     )
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
     )
 
@@ -211,14 +203,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
                 "prefix": "checkpoints",
             },
         },
-        "profiler_S3_store": {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "bucket": "my_default_bucket",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "profilers",
-            },
-        },
     }
     desired_data_docs_sites_config = {
         "s3_site": {
@@ -236,13 +220,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_S3_store",
         validation_results_store_name="validation_results_S3_store",
         suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         checkpoint_store_name="checkpoint_S3_store",
-        profiler_store_name="profiler_S3_store",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -279,17 +262,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         validation_results_store_bucket_name="custom_validation_results_store_bucket_name",
         data_docs_bucket_name="custom_data_docs_store_bucket_name",
         checkpoint_store_bucket_name="custom_checkpoint_store_bucket_name",
-        profiler_store_bucket_name="custom_profiler_store_bucket_name",
         expectations_store_prefix="custom_expectations_store_prefix",
         validation_results_store_prefix="custom_validation_results_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
         checkpoint_store_prefix="custom_checkpoint_store_prefix",
-        profiler_store_prefix="custom_profiler_store_prefix",
         expectations_store_name="custom_expectations_S3_store_name",
         validation_results_store_name="custom_validation_results_S3_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_S3_store_name",
-        profiler_store_name="custom_profiler_S3_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -346,14 +326,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_checkpoint_store_prefix",
             },
         },
-        "custom_profiler_S3_store_name": {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "bucket": "custom_profiler_store_bucket_name",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "custom_profiler_store_prefix",
-            },
-        },
     }
     desired_data_docs_sites_config = {
         "s3_site": {
@@ -371,13 +343,12 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_S3_store_name",
         validation_results_store_name="custom_validation_results_S3_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_S3_store_name",
-        profiler_store_name="custom_profiler_S3_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -427,7 +398,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     )
 
     # Create desired config
-    data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
+    data_context_id = data_context_config.data_context_id
     desired_config = construct_data_context_config(
         data_context_id=data_context_id, datasources=default_pandas_datasource_config
     )
@@ -439,9 +410,6 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         "root_directory"
     ] = test_root_directory
     desired_config["stores"][desired_config["checkpoint_store_name"]]["store_backend"][
-        "root_directory"
-    ] = test_root_directory
-    desired_config["stores"][desired_config["profiler_store_name"]]["store_backend"][
         "root_directory"
     ] = test_root_directory
     desired_config["data_docs_sites"]["local_site"]["store_backend"]["root_directory"] = (
@@ -493,11 +461,10 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         },
         store_backend_defaults=store_backend_defaults,
         checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
-        profiler_store_name=store_backend_defaults.profiler_store_name,
     )
 
     # Create desired config
-    data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
+    data_context_id = data_context_config.data_context_id
     desired_config = construct_data_context_config(
         data_context_id=data_context_id, datasources=default_pandas_datasource_config
     )
@@ -554,7 +521,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
     )
 
     # Create desired config
-    data_context_id = data_context_config.anonymous_usage_statistics.data_context_id
+    data_context_id = data_context_config.data_context_id
     desired_stores_config = {
         "suite_parameter_store": {"class_name": "SuiteParameterStore"},
         "expectations_GCS_store": {
@@ -593,15 +560,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
                 "prefix": "checkpoints",
             },
         },
-        "profiler_GCS_store": {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "bucket": "my_default_bucket",
-                "project": "my_default_project",
-                "class_name": "TupleGCSStoreBackend",
-                "prefix": "profilers",
-            },
-        },
     }
     desired_data_docs_sites_config = {
         "gcs_site": {
@@ -625,7 +583,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         expectations_store_name="expectations_GCS_store",
         validation_results_store_name="validation_results_GCS_store",
         checkpoint_store_name="checkpoint_GCS_store",
-        profiler_store_name="profiler_GCS_store",
         suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
@@ -664,22 +621,18 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         validation_results_store_bucket_name="custom_validation_results_store_bucket_name",
         data_docs_bucket_name="custom_data_docs_store_bucket_name",
         checkpoint_store_bucket_name="custom_checkpoint_store_bucket_name",
-        profiler_store_bucket_name="custom_profiler_store_bucket_name",
         expectations_store_project_name="custom_expectations_store_project_name",
         validation_results_store_project_name="custom_validation_results_store_project_name",
         data_docs_project_name="custom_data_docs_store_project_name",
         checkpoint_store_project_name="custom_checkpoint_store_project_name",
-        profiler_store_project_name="custom_profiler_store_project_name",
         expectations_store_prefix="custom_expectations_store_prefix",
         validation_results_store_prefix="custom_validation_results_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
         checkpoint_store_prefix="custom_checkpoint_store_prefix",
-        profiler_store_prefix="custom_profiler_store_prefix",
         expectations_store_name="custom_expectations_GCS_store_name",
         validation_results_store_name="custom_validation_results_GCS_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_GCS_store_name",
-        profiler_store_name="custom_profiler_GCS_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -740,15 +693,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_checkpoint_store_prefix",
             },
         },
-        "custom_profiler_GCS_store_name": {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "bucket": "custom_profiler_store_bucket_name",
-                "project": "custom_profiler_store_project_name",
-                "class_name": "TupleGCSStoreBackend",
-                "prefix": "custom_profiler_store_prefix",
-            },
-        },
     }
     desired_data_docs_sites_config = {
         "gcs_site": {
@@ -766,13 +710,12 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         }
     }
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_GCS_store_name",
         validation_results_store_name="custom_validation_results_GCS_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_GCS_store_name",
-        profiler_store_name="custom_profiler_GCS_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -892,20 +835,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                 },
             },
         },
-        "profiler_database_store": {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "class_name": "DatabaseStoreBackend",
-                "credentials": {
-                    "drivername": "postgresql",
-                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-                    "port": "65432",
-                    "username": "ge_tutorials",
-                    "password": "ge_tutorials",
-                    "database": "ge_tutorials",
-                },
-            },
-        },
     }
     desired_data_docs_sites_config = {
         "local_site": {
@@ -922,12 +851,11 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_database_store",
         validation_results_store_name="validation_results_database_store",
         checkpoint_store_name="checkpoint_database_store",
-        profiler_store_name="profiler_database_store",
         suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
@@ -992,19 +920,10 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             "password": "custom_checkpoint_store_password",
             "database": "custom_checkpoint_store_database",
         },
-        profiler_store_credentials={
-            "drivername": "custom_profiler_store_drivername",
-            "host": "custom_profiler_store_host",
-            "port": "custom_profiler_store_port",
-            "username": "custom_profiler_store_username",
-            "password": "custom_profiler_store_password",
-            "database": "custom_profiler_store_database",
-        },
         expectations_store_name="custom_expectations_database_store_name",
         validation_results_store_name="custom_validation_results_database_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_database_store_name",
-        profiler_store_name="custom_profiler_database_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -1085,20 +1004,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
                 },
             },
         },
-        "custom_profiler_database_store_name": {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "class_name": "DatabaseStoreBackend",
-                "credentials": {
-                    "database": "custom_profiler_store_database",
-                    "drivername": "custom_profiler_store_drivername",
-                    "host": "custom_profiler_store_host",
-                    "password": "custom_profiler_store_password",
-                    "port": "custom_profiler_store_port",
-                    "username": "custom_profiler_store_username",
-                },
-            },
-        },
     }
     desired_data_docs_sites_config = {
         "local_site": {
@@ -1115,13 +1020,12 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_database_store_name",
         validation_results_store_name="custom_validation_results_database_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_database_store_name",
-        profiler_store_name="custom_profiler_database_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -1210,20 +1114,11 @@ def test_override_general_defaults(
                     "prefix": "REPLACE_ME",
                 },
             },
-            "profiler_S3_store": {
-                "class_name": "ProfilerStore",
-                "store_backend": {
-                    "class_name": "TupleS3StoreBackend",
-                    "bucket": "REPLACE_ME",
-                    "prefix": "REPLACE_ME",
-                },
-            },
         },
         expectations_store_name="custom_expectations_store_name",
         validation_results_store_name="custom_validation_results_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="checkpoint_S3_store",
-        profiler_store_name="profiler_S3_store",
         data_docs_sites={
             "s3_site": {
                 "class_name": "SiteBuilder",
@@ -1247,7 +1142,6 @@ def test_override_general_defaults(
                 },
             },
         },
-        anonymous_usage_statistics={"enabled": True},
     )
 
     desired_stores = {
@@ -1295,14 +1189,6 @@ def test_override_general_defaults(
                 "prefix": "REPLACE_ME",
             },
         },
-        "profiler_S3_store": {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "bucket": "REPLACE_ME",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "REPLACE_ME",
-            },
-        },
     }
 
     desired_data_docs_sites_config = {
@@ -1330,7 +1216,7 @@ def test_override_general_defaults(
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
+        data_context_id=data_context_config.data_context_id,
         datasources={
             **default_pandas_datasource_config,
         },
@@ -1339,7 +1225,6 @@ def test_override_general_defaults(
         validation_results_store_name="custom_validation_results_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
         checkpoint_store_name="checkpoint_S3_store",
-        profiler_store_name="profiler_S3_store",
         stores=desired_stores,
         data_docs_sites=desired_data_docs_sites_config,
         plugins_directory="custom_plugins_directory",
@@ -1365,7 +1250,7 @@ def test_override_general_defaults(
 @pytest.mark.big
 @pytest.mark.slow  # 1.81s
 def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_variable_sub(
-    monkeypatch, construct_data_context_config, default_pandas_datasource_config
+    monkeypatch, construct_data_context_config
 ):
     """
     What does this test and why?
@@ -1377,17 +1262,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     store_backend_defaults = S3StoreBackendDefaults(default_bucket_name="my_default_bucket")
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "${SUBSTITUTED_BASE_DIRECTORY}",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
     )
 
@@ -1426,14 +1300,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
                 "prefix": "checkpoints",
             },
         },
-        "profiler_S3_store": {
-            "class_name": "ProfilerStore",
-            "store_backend": {
-                "bucket": "my_default_bucket",
-                "class_name": "TupleS3StoreBackend",
-                "prefix": "profilers",
-            },
-        },
     }
     desired_data_docs_sites_config = {
         "s3_site": {
@@ -1451,24 +1317,20 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
     }
 
     desired_config = construct_data_context_config(
-        data_context_id=data_context_config.anonymous_usage_statistics.data_context_id,
-        datasources=default_pandas_datasource_config,
+        data_context_id=data_context_config.data_context_id,
+        datasources={},
         expectations_store_name="expectations_S3_store",
         validation_results_store_name="validation_results_S3_store",
         checkpoint_store_name="checkpoint_S3_store",
-        profiler_store_name="profiler_S3_store",
         suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
 
-    desired_config["datasources"]["my_pandas_datasource"]["batch_kwargs_generators"][
-        "subdir_reader"
-    ]["base_directory"] = "${SUBSTITUTED_BASE_DIRECTORY}"
-
     data_context_config_schema = DataContextConfigSchema()
+    dumped_schema: Any = data_context_config_schema.dump(data_context_config)
     assert filter_properties_dict(
-        properties=data_context_config_schema.dump(data_context_config),
+        properties=dumped_schema,
         clean_falsy=True,
     ) == filter_properties_dict(
         properties=desired_config,
@@ -1479,14 +1341,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
             project_config=data_context_config
         ),
         DataContextConfig,
-    )
-
-    data_context = get_context(project_config=data_context_config)
-    assert (
-        data_context.datasources["my_pandas_datasource"]
-        .get_batch_kwargs_generator("subdir_reader")
-        ._base_directory
-        == "../data/"
     )
 
 
@@ -1500,22 +1354,14 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
     )
 
     desired_config = {
-        "anonymous_usage_statistics": {
-            "data_context_id": data_context_config.anonymous_usage_statistics.data_context_id,
-            "enabled": True,
-        },
+        "data_context_id": data_context_config.data_context_id,
         "checkpoint_store_name": "checkpoint_store",
-        "profiler_store_name": "profiler_store",
         "config_version": 3.0,
         "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "expectations_store",
         "stores": {
             "checkpoint_store": {
                 "class_name": "CheckpointStore",
-                "store_backend": {"class_name": "InMemoryStoreBackend"},
-            },
-            "profiler_store": {
-                "class_name": "ProfilerStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
             "suite_parameter_store": {"class_name": "SuiteParameterStore"},
@@ -1555,13 +1401,8 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
 def test_data_context_config_defaults():
     config = DataContextConfig()
     assert config.to_json_dict() == {
-        "anonymous_usage_statistics": {
-            "data_context_id": mock.ANY,
-            "enabled": True,
-            "explicit_id": False,
-            "explicit_url": False,
-            "usage_statistics_url": "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics",
-        },
+        "analytics_enabled": None,
+        "data_context_id": None,
         "checkpoint_store_name": None,
         "config_variables_file_path": None,
         "config_version": 3,
@@ -1571,7 +1412,6 @@ def test_data_context_config_defaults():
         "expectations_store_name": None,
         "fluent_datasources": {},
         "plugins_directory": None,
-        "profiler_store_name": None,
         "progress_bars": None,
         "stores": DataContextConfigDefaults.DEFAULT_STORES.value,
         "validation_results_store_name": None,

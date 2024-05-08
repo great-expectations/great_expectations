@@ -58,7 +58,7 @@ from great_expectations.exceptions.exceptions import (
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     DataConnector,
 )
 
@@ -1042,7 +1042,7 @@ class Batch:
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
 
     @property
-    def result_format(self) -> str | ResultFormat:
+    def result_format(self) -> str | dict | ResultFormat:
         # We always `return a ResultFormat`. However to prevent having to do #ignore[assignment] we return  # noqa: E501
         # `str | ResultFormat`. When the getter/setter have different types mypy gets confused on lines like:  # noqa: E501
         # batch.result_format = "SUMMARY"

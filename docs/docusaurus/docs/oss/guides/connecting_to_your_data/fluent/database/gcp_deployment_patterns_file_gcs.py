@@ -15,7 +15,7 @@ yaml = YAMLHandler()
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py get_context">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context(mode="file", project_root_dir=full_path_to_project_directory)
 # </snippet>
 
 
@@ -40,7 +40,6 @@ pop_stores = [
     "checkpoint_store",
     "suite_parameter_store",
     "validation_results_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -126,7 +125,6 @@ pop_stores = [
     "suite_parameter_store",
     "expectations_store",
     "expectations_GCS_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:

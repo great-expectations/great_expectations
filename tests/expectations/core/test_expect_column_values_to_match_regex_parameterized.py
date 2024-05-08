@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.expectations as gxe
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 
 
 class ExpectColumnValuesAsStringToBePositiveInteger(gxe.ExpectColumnValuesToMatchRegex):
@@ -11,45 +11,30 @@ class ExpectColumnValuesAsStringToBePositiveInteger(gxe.ExpectColumnValuesToMatc
 
 @pytest.mark.big
 def test_expect_column_values_as_string_to_be_positive_integers_pass(
-    data_context_with_datasource_pandas_engine,
+    empty_data_context: AbstractDataContext,
 ):
-    context = data_context_with_datasource_pandas_engine
-
     df = pd.DataFrame({"a": ["1", "2", "3", "4", "5"]})
-
-    batch_request = RuntimeBatchRequest(
-        datasource_name="my_datasource",
-        data_connector_name="default_runtime_data_connector_name",
-        data_asset_name="my_data_asset",
-        runtime_parameters={"batch_data": df},
-        batch_identifiers={"default_identifier_name": "my_identifier"},
+    data_asset = empty_data_context.data_sources.pandas_default.add_dataframe_asset(
+        "my_dataframe", dataframe=df
     )
-    validator = context.get_validator(
-        batch_request=batch_request,
-        create_expectation_suite_with_name="test",
-    )
+    batch = data_asset.add_batch_definition_whole_dataframe("my_batch_definition").get_batch()
 
-    assert validator.expect_column_values_as_string_to_be_positive_integer(column="a").success
+    result = batch.validate(ExpectColumnValuesAsStringToBePositiveInteger(column="a"))
+
+    assert result.success
 
 
 @pytest.mark.big
 def test_expect_column_values_as_string_to_be_positive_integers_fail(
-    data_context_with_datasource_pandas_engine,
+    empty_data_context: AbstractDataContext,
 ):
-    context = data_context_with_datasource_pandas_engine
-
     df = pd.DataFrame({"a": ["1", "2", "3", "4", "a"]})
 
-    batch_request = RuntimeBatchRequest(
-        datasource_name="my_datasource",
-        data_connector_name="default_runtime_data_connector_name",
-        data_asset_name="my_data_asset",
-        runtime_parameters={"batch_data": df},
-        batch_identifiers={"default_identifier_name": "my_identifier"},
+    data_asset = empty_data_context.data_sources.pandas_default.add_dataframe_asset(
+        "my_dataframe", dataframe=df
     )
-    validator = context.get_validator(
-        batch_request=batch_request,
-        create_expectation_suite_with_name="test",
-    )
+    batch = data_asset.add_batch_definition_whole_dataframe("my_batch_definition").get_batch()
 
-    assert not validator.expect_column_values_as_string_to_be_positive_integer(column="a").success
+    result = batch.validate(ExpectColumnValuesAsStringToBePositiveInteger(column="a"))
+
+    assert not result.success

@@ -1,14 +1,31 @@
 module.exports = {
   gx_core: [
     {
-      type: 'doc',
-      id: 'core/introduction/about_gx',
-      label: 'About GX'
-    },
-    {
-      type: 'doc',
-      id: 'core/introduction/try_gx',
-      label: '🚧 Try GX'
+      type: 'category',
+      label: 'Introduction to Great Expectations',
+      link: {type: 'doc', id: 'core/introduction/introduction'},
+      items: [
+        {
+          type: 'doc',
+          id: 'core/introduction/about_gx',
+          label: 'About GX'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/gx_overview',
+          label: 'GX Overview'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/try_gx',
+          label: '🚧 Try GX'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/community_resources',
+          label: 'Community Resources'
+        },
+      ],
     },
     {
       type: 'category',
@@ -321,14 +338,6 @@ module.exports = {
             },
           ]
         },
-        // {
-        //   type: 'category',
-        //   label: 'Data Assistants',
-        //   link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
-        //   items: [
-        //     'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
-        //   ]
-        // },
       ]
     },
     {

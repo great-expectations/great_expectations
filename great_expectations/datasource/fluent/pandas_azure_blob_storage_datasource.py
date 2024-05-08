@@ -13,7 +13,7 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     AzureBlobStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
@@ -21,9 +21,7 @@ from great_expectations.datasource.fluent.pandas_datasource import PandasDatasou
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.azure import BlobServiceClient
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
-    )
+    from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +129,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _FilePathDataAsset,
+        data_asset: FileDataAsset,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",

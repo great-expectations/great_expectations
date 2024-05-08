@@ -14,7 +14,7 @@ import pytest
 import requests
 
 from great_expectations import get_context
-from great_expectations.core.partitioners import PartitionerYear
+from great_expectations.core.partitioners import ColumnPartitionerYearly
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent import (
@@ -111,7 +111,7 @@ def test_partitioners_are_persisted_on_creation(
     )
     my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
     my_asset.test_connection()
-    partitioner = PartitionerYear(column_name="date")
+    partitioner = ColumnPartitionerYearly(column_name="date")
     my_asset.add_batch_definition(name="cloud partitioner test", partitioner=partitioner)
 
     datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
