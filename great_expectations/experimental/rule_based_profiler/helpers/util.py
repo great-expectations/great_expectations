@@ -1037,7 +1037,9 @@ def get_or_create_expectation_suite(  # noqa: C901
                 # noinspection PyUnusedLocal
                 expectation_suite = data_context.suites.get(name=expectation_suite_name)
             except gx_exceptions.DataContextError:
-                expectation_suite = data_context.suites.get(expectation_suite_name)
+                expectation_suite = data_context.suites.add(
+                    ExpectationSuite(name=expectation_suite_name)
+                )
                 logger.info(f'Created ExpectationSuite "{expectation_suite.name}".')
         else:
             expectation_suite = ExpectationSuite(
