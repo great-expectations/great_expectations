@@ -63,7 +63,6 @@ from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.datasource_dict import DatasourceDict
-from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
 
 if TYPE_CHECKING:
@@ -72,7 +71,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         ExpectationSuiteIdentifier,
     )
-    from great_expectations.datasource.new_datasource import BaseDatasource
+    from great_expectations.datasource.fluent import Datasource as FluentDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
@@ -913,13 +912,9 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: BaseDatasource | FluentDatasource | None = None,
+        datasource: FluentDatasource | None = None,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | None:
-        if datasource and not isinstance(datasource, FluentDatasource):
-            raise TypeError(  # noqa: TRY003
-                "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."  # noqa: E501
-            )
+    ) -> FluentDatasource | None:
         return super()._add_datasource(
             name=name,
             initialize=initialize,

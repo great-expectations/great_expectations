@@ -84,7 +84,6 @@ def _datasource_asserts(
     expected_data_connector_types: Dict[str, Type],
     expected_data_assets_with_types: Dict[str, List[Tuple[str, str]]],
 ):
-    # Some of this is checks on BaseDatasource
     assert ds.name == "simple_sqlalchemy_datasource"
     assert ds.id is None
     assert ds.config == {}
