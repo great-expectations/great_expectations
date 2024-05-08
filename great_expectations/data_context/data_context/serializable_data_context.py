@@ -6,7 +6,7 @@ import os
 import pathlib
 import shutil
 import warnings
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from ruamel.yaml import YAML
 
@@ -20,8 +20,6 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    CURRENT_GX_CONFIG_VERSION,
-    MINIMUM_SUPPORTED_CONFIG_VERSION,
     DataContextConfigDefaults,
 )
 from great_expectations.data_context.util import file_relative_path
@@ -299,55 +297,6 @@ class SerializableDataContext(AbstractDataContext):
 
         logger.debug(f"Using project config: {yml_path}")
         return result
-
-    @classmethod
-    def get_ge_config_version(cls, context_root_dir: Optional[PathStr] = None) -> Optional[float]:
-        yml_path = cls._find_context_yml_file(directory_to_search=context_root_dir)
-        if yml_path is None:
-            return None
-
-        with open(yml_path) as f:
-            config_commented_map_from_yaml = yaml.load(f)
-
-        config_version = config_commented_map_from_yaml.get("config_version")
-        return float(config_version) if config_version else None
-
-    @classmethod
-    def set_ge_config_version(
-        cls,
-        config_version: Union[int, float],  # noqa: PYI041
-        context_root_dir: Optional[str] = None,
-        validate_config_version: bool = True,
-    ) -> bool:
-        if not isinstance(config_version, (int, float)):
-            raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
-                "The argument `config_version` must be a number.",
-            )
-
-        if validate_config_version:
-            if config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-                raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
-                    f"""Invalid config version ({config_version})\n
-                                                                  The version number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}"""  # noqa: E501
-                )
-            elif config_version > CURRENT_GX_CONFIG_VERSION:
-                raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
-                    f"""Invalid config version ({config_version}).\n
-                                                                  The maximum valid version is {CURRENT_GX_CONFIG_VERSION}."""  # noqa: E501
-                )
-
-        yml_path = cls._find_context_yml_file(directory_to_search=context_root_dir)
-        if yml_path is None:
-            return False
-
-        with open(yml_path) as f:
-            config_commented_map_from_yaml = yaml.load(f)
-            config_commented_map_from_yaml["config_version"] = float(config_version)
-
-        with open(yml_path, "w") as f:
-            yaml.dump(config_commented_map_from_yaml, f)
-
-        return True
 
     @classmethod
     def _find_context_yml_file(cls, directory_to_search: Optional[PathStr] = None) -> str | None:
