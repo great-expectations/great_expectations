@@ -66,4 +66,4 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
-analytics: True
+analytics_enabled: True

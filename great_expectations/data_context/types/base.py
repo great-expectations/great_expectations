@@ -1324,7 +1324,7 @@ class DataContextConfigSchema(Schema):
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
-    analytics = fields.Boolean(allow_none=True)
+    analytics_enabled = fields.Boolean(allow_none=True)
     data_context_id = fields.UUID(allow_none=True)
     progress_bars = fields.Nested(ProgressBarsConfigSchema, required=False, allow_none=True)
 
@@ -2010,7 +2010,7 @@ class DataContextConfig(BaseYamlConfig):
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
-        analytics (Optional[bool]): whether or not to send usage statistics to the Great Expectations team.
+        analytics_enabled (Optional[bool]): whether or not to send usage statistics to the Great Expectations team.
         data_context_id (Optional[UUID]): unique identifier for the DataContext.
         store_backend_defaults (Optional[BaseStoreBackendDefaults]):  define base defaults for platform specific StoreBackendDefaults.
             For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults
@@ -2038,7 +2038,7 @@ class DataContextConfig(BaseYamlConfig):
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
-        analytics: Optional[bool] = None,
+        analytics_enabled: Optional[bool] = None,
         data_context_id: Optional[uuid.UUID] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
@@ -2077,7 +2077,7 @@ class DataContextConfig(BaseYamlConfig):
         self.stores = self._init_stores(stores)
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
-        self.analytics = analytics
+        self.analytics_enabled = analytics_enabled
         self.data_context_id = data_context_id
         self.progress_bars = progress_bars
 

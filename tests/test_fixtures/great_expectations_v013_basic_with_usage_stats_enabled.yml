@@ -57,4 +57,4 @@ stores:
       base_directory: checkpoints/
 
 data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
-analytics: true
+analytics_enabled: true

@@ -57,4 +57,4 @@ stores:
     class_name: ${z}
 
 data_context_id: d1aad86c-a205-49e6-95f7-b7c0a3635a43
-analytics: False
+analytics_enabled: False

@@ -49,4 +49,4 @@ stores:
     class_name: ValidationResultsStore
 
 data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
-analytics: false
+analytics_enabled: false

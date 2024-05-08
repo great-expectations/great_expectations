@@ -46,7 +46,7 @@ class DataContextVariableSchema(str, enum.Enum):
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
-    ANALYTICS = "analytics"
+    ANALYTICS_ENABLED = "analytics_enabled"
     DATA_CONTEXT_ID = "data_context_id"
     PROGRESS_BARS = "progress_bars"
 
@@ -202,16 +202,16 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.DATA_DOCS_SITES, data_docs_sites)
 
     @property
-    def analytics(
+    def analytics_enabled(
         self,
     ) -> Optional[bool]:
-        return self._get(DataContextVariableSchema.ANALYTICS)
+        return self._get(DataContextVariableSchema.ANALYTICS_ENABLED)
 
-    @analytics.setter
-    def analytics(self, analytics: bool) -> None:
+    @analytics_enabled.setter
+    def analytics_enabled(self, analytics_enabled: bool) -> None:
         self._set(
-            DataContextVariableSchema.ANALYTICS,
-            analytics,
+            DataContextVariableSchema.ANALYTICS_ENABLED,
+            analytics_enabled,
         )
 
     @property

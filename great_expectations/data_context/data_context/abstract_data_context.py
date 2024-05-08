@@ -304,10 +304,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     def _determine_analytics_enabled(self) -> bool:
-        config_file_enabled = self.config.analytics
+        # If the config file is missing the analytics_enabled key, we default to True
+        config_file_enabled = self.config.analytics_enabled
         if config_file_enabled is None:
             config_file_enabled = True
+
         env_var_enabled = ENV_CONFIG.posthog_enabled
+
+        # A user must opt out through either the config file or env var to disable analytics
         return config_file_enabled and env_var_enabled
 
     def _init_config_provider(self) -> _ConfigurationProvider:

@@ -147,11 +147,11 @@ data_docs_sites:
 )
 
 USAGE_STATISTICS_ENABLED = """
-analytics: True
+analytics_enabled: True
 """
 
 USAGE_STATISTICS_DISABLED = """
-analytics: False
+analytics_enabled: False
 """
 
 PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED = (

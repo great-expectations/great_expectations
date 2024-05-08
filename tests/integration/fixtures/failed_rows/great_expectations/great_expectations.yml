@@ -86,5 +86,5 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
-analytics: false
+analytics_enabled: false
 data_context_id: f98647c3-0120-42ff-ae47-e48b8a6500cf

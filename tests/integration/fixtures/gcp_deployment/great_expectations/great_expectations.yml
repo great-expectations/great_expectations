@@ -108,4 +108,4 @@ data_docs_sites:
 # </snippet>
 
 data_context_id: b9b23461-53c3-4490-a09e-fbe12984c25a
-analytics: true
+analytics_enabled: true

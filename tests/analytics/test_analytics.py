@@ -114,12 +114,12 @@ def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
         )
 
     mock_init.assert_called_once_with(
+        enable=True,
         user_id=UUID(FAKE_USER_ID),  # Should be consistent with the fake Cloud API
         data_context_id=UUID(cloud_details.org_id),
         organization_id=UUID(cloud_details.org_id),
         oss_id=mock.ANY,
         cloud_mode=True,
-        enabled_from_config=None,
     )
     mock_submit.assert_called_once_with(
         mock.ANY,

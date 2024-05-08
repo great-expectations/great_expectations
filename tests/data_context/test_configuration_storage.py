@@ -151,7 +151,7 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
 
-analytics: false
+analytics_enabled: false
 data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
 
 
