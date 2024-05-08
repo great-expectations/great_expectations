@@ -152,10 +152,7 @@ class SlackRenderer(Renderer):
 
     def _build_header(self, name: str, success: bool) -> dict:
         status = "Success :tada:" if success else "Failed :x:"
-        return {
-            "type": "header",
-            "text": {"type": "mrkdwn", "text": f"*Checkpoint Status* ({name}): {status}"},
-        }
+        return {"type": "header", "text": {"type": "plain_text", "text": f"{name} - {status}"}}
 
     def _build_divider(self) -> dict:
         return {"type": "divider"}
