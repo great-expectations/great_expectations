@@ -38,12 +38,12 @@ def submit(event: Event) -> None:
 
 
 def init(  # noqa: PLR0913
+    enable: bool,
     user_id: Optional[UUID] = None,
     data_context_id: Optional[UUID] = None,
     organization_id: Optional[UUID] = None,
     oss_id: Optional[UUID] = None,
     cloud_mode: bool = False,
-    enabled_from_config: bool | None = None,
 ):
     """Initializes the analytics platform client."""
     conf = {}
@@ -57,13 +57,8 @@ def init(  # noqa: PLR0913
         conf["oss_id"] = oss_id
     update_config(config=Config(cloud_mode=cloud_mode, **conf))
 
-    # Analytics are enabled by default
-    # A user can opt out through the config or by setting the environment variable
-    # If one is set to False, analytics will be disabled
-    enabled_from_config = True if enabled_from_config is None else enabled_from_config
-    enabled = enabled_from_config and ENV_CONFIG.posthog_enabled
-    posthog.disabled = not enabled
-    if enabled:
+    posthog.disabled = not enable
+    if enable:
         posthog.debug = ENV_CONFIG.posthog_debug
         posthog.project_api_key = ENV_CONFIG.posthog_project_api_key
         posthog.host = ENV_CONFIG.posthog_host

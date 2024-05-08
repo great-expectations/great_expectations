@@ -85,11 +85,11 @@ def test_ephemeral_context_init(monkeypatch):
         _ = gx.get_context(mode="ephemeral")
 
     mock_init.assert_called_once_with(
+        enable=True,
         data_context_id=mock.ANY,
         organization_id=None,
         oss_id=mock.ANY,
         user_id=None,
-        enabled_from_config=True,
     )
     mock_submit.assert_called_once_with(
         mock.ANY,

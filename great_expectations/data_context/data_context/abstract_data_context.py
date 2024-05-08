@@ -39,6 +39,7 @@ from great_expectations._docs_decorators import (
 )
 from great_expectations.analytics.client import init as init_analytics
 from great_expectations.analytics.client import submit as submit_event
+from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.analytics.events import DataContextInitializedEvent
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
@@ -294,17 +295,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     def _init_analytics(self) -> None:
-        enabled_from_config = self.config.analytics
-        if enabled_from_config is None:
-            enabled_from_config = True
-
         init_analytics(
+            enable=self._determine_analytics_enabled(),
             user_id=None,
             data_context_id=self._data_context_id,
             organization_id=None,
             oss_id=self._get_oss_id(),
-            enabled_from_config=enabled_from_config,
         )
+
+    def _determine_analytics_enabled(self) -> bool:
+        config_file_enabled = self.config.analytics
+        if config_file_enabled is None:
+            config_file_enabled = True
+        env_var_enabled = ENV_CONFIG.posthog_enabled
+        return config_file_enabled and env_var_enabled
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
