@@ -50,7 +50,6 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
 )
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DatasourceConfig,
     GXCloudConfig,
     InMemoryStoreBackendDefaults,
 )
@@ -2773,34 +2772,6 @@ def spark_df_from_pandas_df():
         return spark_df
 
     return _construct_spark_df_from_pandas
-
-
-@pytest.fixture
-def datasource_config_with_names() -> DatasourceConfig:
-    return DatasourceConfig(
-        name="my_datasource",
-        class_name="Datasource",
-        execution_engine={
-            "class_name": "PandasExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        data_connectors={
-            "tripdata_monthly_configured": {
-                "name": "tripdata_monthly_configured",
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector",
-                "base_directory": "/path/to/trip_data",
-                "assets": {
-                    "yellow": {
-                        "class_name": "Asset",
-                        "module_name": "great_expectations.datasource.data_connector.asset",
-                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
-                        "group_names": ["year", "month"],
-                    }
-                },
-            }
-        },
-    )
 
 
 @pytest.fixture

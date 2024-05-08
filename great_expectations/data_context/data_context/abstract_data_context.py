@@ -23,7 +23,6 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
-    cast,
     overload,
 )
 
@@ -62,20 +61,14 @@ from great_expectations.core.factory import (
     SuiteFactory,
     ValidationDefinitionFactory,
 )
-from great_expectations.core.serializer import (
-    AbstractConfigSerializer,
-    DictConfigSerializer,
-)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
-    DatasourceConfig,
     ProgressBarsConfig,
     dataContextConfigSchema,
-    datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -88,9 +81,6 @@ from great_expectations.data_context.util import (
     parse_substitution_variable,
 )
 from great_expectations.datasource.datasource_dict import CacheableDatasourceDict
-from great_expectations.datasource.datasource_serializer import (
-    NamedDatasourceSerializer,
-)
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
 from great_expectations.datasource.fluent.interfaces import (
@@ -966,24 +956,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource._data_context = self
         return datasource
 
-    def _serialize_substitute_and_sanitize_datasource_config(
-        self, serializer: AbstractConfigSerializer, datasource_config: DatasourceConfig
-    ) -> dict:
-        """Serialize, then make substitutions and sanitize config (mask passwords), return as dict.
-
-        Args:
-            serializer: Serializer to use when converting config to dict for substitutions.
-            datasource_config: Datasource config to process.
-
-        Returns:
-            Dict of config with substitutions and sanitizations applied.
-        """
-        datasource_dict: dict = serializer.serialize(datasource_config)
-
-        substituted_config = cast(dict, self.config_provider.substitute_config(datasource_dict))
-        masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
-        return masked_config
-
     @public_api
     def add_store(self, store_name: str, store_config: StoreConfigTypedDict) -> Store:
         """Add a new Store to the DataContext.
@@ -1112,30 +1084,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A list of dictionaries representing datasource configurations.
         """
-        datasources: List[dict] = []
-
-        datasource_name: str
-        datasource_config: Union[dict, DatasourceConfig]
-        serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
-
-        for datasource_name, datasource_config in self.config.datasources.items():
-            if isinstance(datasource_config, dict):
-                datasource_config = DatasourceConfig(  # noqa: PLW2901
-                    **datasource_config
-                )
-            datasource_config.name = datasource_name
-
-            masked_config: dict = self._serialize_substitute_and_sanitize_datasource_config(
-                serializer, datasource_config
-            )
-            datasources.append(masked_config)
-
-        for (
-            datasource_name,
-            fluent_datasource_config,
-        ) in self.fluent_datasources.items():
-            datasources.append(fluent_datasource_config.dict())
-        return datasources
+        return [ds.dict() for ds in self.datasources.values()]
 
     @public_api
     def delete_datasource(self, datasource_name: Optional[str]) -> None:
@@ -2586,28 +2535,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             for fds in config.fluent_datasources.values():
                 datasource = self._add_fluent_datasource(**fds)
                 datasource._rebuild_asset_data_connectors()
-
-    def _perform_substitutions_on_datasource_config(
-        self, config: DatasourceConfig
-    ) -> DatasourceConfig:
-        """Substitute variables in a datasource config e.g. from env vars, config_vars.yml
-
-        Config must be persisted with ${VARIABLES} syntax but hydrated at time of use.
-
-        Args:
-            config: Datasource Config
-
-        Returns:
-            Datasource Config with substitutions performed.
-        """
-        substitution_serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-        raw_config: dict = substitution_serializer.serialize(config)
-
-        substituted_config_dict: dict = self.config_provider.substitute_config(raw_config)
-
-        substituted_config: DatasourceConfig = datasourceConfigSchema.load(substituted_config_dict)
-
-        return substituted_config
 
     def _construct_data_context_id(self) -> uuid.UUID | None:
         # Choose the id of the currently-configured expectations store, if it is a persistent store

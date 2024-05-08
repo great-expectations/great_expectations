@@ -21,7 +21,6 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
-    DatasourceConfig,
     DatasourceConfigSchema,
 )
 
@@ -67,7 +66,7 @@ class ConfigurationBundle:
         return self._data_context_variables
 
     @property
-    def datasources(self) -> List[DatasourceConfig | FluentDatasource]:
+    def datasources(self) -> List[FluentDatasource]:
         return self._datasources
 
     @property
@@ -78,12 +77,12 @@ class ConfigurationBundle:
     def validation_results(self) -> Dict[str, ExpectationSuiteValidationResult]:
         return self._validation_results
 
-    def _get_all_datasources(self) -> List[DatasourceConfig | FluentDatasource]:
+    def _get_all_datasources(self) -> List[FluentDatasource]:
         datasource_names: List[str] = list(self._context.datasources.keys())
 
         # Note: we are accessing the protected _datasource_store to not add a public property
         # to all Data Contexts.
-        datasource_configs: List[DatasourceConfig | FluentDatasource] = []
+        datasource_configs: List[FluentDatasource] = []
         for datasource_name in datasource_names:
             datasource_config = self._context._datasource_store.retrieve_by_name(
                 datasource_name=datasource_name

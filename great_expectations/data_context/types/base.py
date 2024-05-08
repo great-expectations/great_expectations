@@ -2023,12 +2023,6 @@ class DataContextConfig(BaseYamlConfig):
     def __init__(  # noqa: C901, PLR0913
         self,
         config_version: Optional[float] = None,
-        datasources: Optional[
-            Union[
-                Dict[str, DatasourceConfig],
-                Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
-            ]
-        ] = None,
         fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validation_results_store_name: Optional[str] = None,
@@ -2065,9 +2059,6 @@ class DataContextConfig(BaseYamlConfig):
                 checkpoint_store_name = store_backend_defaults.checkpoint_store_name
 
         self._config_version = config_version
-        if datasources is None:
-            datasources = {}
-        self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
         self.validation_results_store_name = validation_results_store_name

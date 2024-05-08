@@ -13,7 +13,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
     DataContextConfigSchema,
-    DatasourceConfig,
     FilesystemStoreBackendDefaults,
     GCSStoreBackendDefaults,
     InMemoryStoreBackendDefaults,
@@ -106,17 +105,6 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
 
     store_backend_defaults = BaseStoreBackendDefaults()
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
         checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
@@ -154,17 +142,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
 
     store_backend_defaults = S3StoreBackendDefaults(default_bucket_name="my_default_bucket")
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
     )
 
@@ -272,22 +249,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         checkpoint_store_name="custom_checkpoint_S3_store_name",
     )
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                module_name="great_expectations.datasource",
-                data_asset_type={
-                    "module_name": "great_expectations.dataset",
-                    "class_name": "PandasDataset",
-                },
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
     )
 
@@ -383,17 +344,6 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
     store_backend_defaults = FilesystemStoreBackendDefaults(root_directory=test_root_directory)
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
     )
 
@@ -448,17 +398,6 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
     store_backend_defaults = FilesystemStoreBackendDefaults()
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
         checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
@@ -501,22 +440,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         default_project_name="my_default_project",
     )
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                module_name="great_expectations.datasource",
-                data_asset_type={
-                    "module_name": "great_expectations.dataset",
-                    "class_name": "PandasDataset",
-                },
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
     )
 
@@ -635,22 +558,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         checkpoint_store_name="custom_checkpoint_GCS_store_name",
     )
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                module_name="great_expectations.datasource",
-                data_asset_type={
-                    "module_name": "great_expectations.dataset",
-                    "class_name": "PandasDataset",
-                },
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
     )
 
@@ -757,22 +664,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         },
     )
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                module_name="great_expectations.datasource",
-                data_asset_type={
-                    "module_name": "great_expectations.dataset",
-                    "class_name": "PandasDataset",
-                },
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
     )
 
@@ -926,22 +817,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         checkpoint_store_name="custom_checkpoint_database_store_name",
     )
     data_context_config = DataContextConfig(
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                module_name="great_expectations.datasource",
-                data_asset_type={
-                    "module_name": "great_expectations.dataset",
-                    "class_name": "PandasDataset",
-                },
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            )
-        },
         store_backend_defaults=store_backend_defaults,
     )
 
@@ -1054,24 +929,12 @@ def test_override_general_defaults(
     """
     What does this test and why?
     A DataContextConfig should be able to be created by passing items into the constructor that override any defaults.
-    It should also be able to handle multiple datasources, even if they are configured with a dictionary or a DatasourceConfig.
     """  # noqa: E501
 
     data_context_config = DataContextConfig(
         config_version=999,
         plugins_directory="custom_plugins_directory",
         config_variables_file_path="custom_config_variables_file_path",
-        datasources={
-            "my_pandas_datasource": DatasourceConfig(
-                class_name="PandasDatasource",
-                batch_kwargs_generators={
-                    "subdir_reader": {
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "base_directory": "../data/",
-                    }
-                },
-            ),
-        },
         stores={
             "expectations_S3_store": {
                 "class_name": "ExpectationsStore",

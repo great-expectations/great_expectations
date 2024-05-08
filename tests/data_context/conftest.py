@@ -27,6 +27,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.datasource.fluent.interfaces import Datasource
 
 yaml = YAMLHandler()
 
@@ -515,20 +516,19 @@ def basic_fluent_datasource_config() -> dict:
     }
 
 
+def basic_fluent_datasource() -> Datasource:
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_pandas_filesystem(
+        name="pandas_filesystem",
+        base_directory="/path/to/trip_data",  # type: ignore
+    )
+    datasource.add_csv_asset(name="my_csv")
+    return datasource
+
+
 @pytest.fixture
 def fluent_datasource_config() -> dict:
     return basic_fluent_datasource_config()
-
-
-@pytest.fixture(
-    params=[
-        basic_fluent_datasource_config,
-    ]
-)
-def parametrized_datasource_configs(
-    request,
-) -> DatasourceConfig | dict:
-    return request.param()
 
 
 @pytest.fixture
