@@ -5,15 +5,7 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 spark_integration_tests = []
 
-connecting_to_your_data = [
-    IntegrationTestFixture(
-        name="how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-]
+connecting_to_your_data: List[IntegrationTestFixture] = []
 
 databricks_deployment_patterns: List[IntegrationTestFixture] = [
     # unable to mock dbfs in CI

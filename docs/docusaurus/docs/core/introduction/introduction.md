@@ -26,6 +26,14 @@ import OverviewCard from '@site/src/components/OverviewCard';
 
   <LinkCard 
     topIcon 
+    label="GX overview"
+    description="Learn about the major components of GX and how they interact."
+    to="/core/introduction/gx_overview" 
+    icon="/img/expectation_icon.svg" 
+  />
+
+  <LinkCard 
+    topIcon 
     label="Try GX"
     description="Set up a local GX deployment and give it a test run using sample data."
     to="/core/introduction/try_gx" 

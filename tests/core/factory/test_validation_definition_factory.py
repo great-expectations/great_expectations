@@ -1,10 +1,15 @@
 import json
 import pathlib
+from unittest import mock
 
 import pytest
 from pytest_mock import MockerFixture
 
 import great_expectations.expectations as gxe
+from great_expectations.analytics.events import (
+    ValidationDefinitionCreatedEvent,
+    ValidationDefinitionDeletedEvent,
+)
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.factory.validation_definition_factory import (
@@ -396,5 +401,71 @@ def test_validation_definition_factory_round_trip(
 
 
 class TestValidationDefinitionFactoryAnalytics:
-    # TODO: Write tests once analytics are in place
-    pass
+    @pytest.mark.filesystem
+    def test_validation_definition_factory_add_emits_event_filesystem(self, empty_data_context):
+        self._test_validation_definition_factory_add_emits_event(empty_data_context)
+
+    @pytest.mark.cloud
+    def test_validation_definition_factory_add_emits_event_cloud(self, empty_cloud_context_fluent):
+        self._test_validation_definition_factory_add_emits_event(empty_cloud_context_fluent)
+
+    def _test_validation_definition_factory_add_emits_event(self, context):
+        # Arrange
+        ds = context.data_sources.add_pandas("my_datasource")
+        asset = ds.add_csv_asset("my_asset", "data.csv")
+        batch_def = asset.add_batch_definition("my_batch_definition")
+        suite = ExpectationSuite(name="my_suite")
+
+        validation_definition = ValidationDefinition(
+            name="validation_def", data=batch_def, suite=suite
+        )
+
+        # Act
+        with mock.patch(
+            "great_expectations.core.factory.validation_definition_factory.submit_event",
+            autospec=True,
+        ) as mock_submit:
+            _ = context.validation_definitions.add(validation=validation_definition)
+
+        # Assert
+        mock_submit.assert_called_once_with(
+            event=ValidationDefinitionCreatedEvent(
+                validation_definition_id=validation_definition.id
+            )
+        )
+
+    @pytest.mark.filesystem
+    def test_validation_definition_factory_delete_emits_event_filesystem(self, empty_data_context):
+        self._test_validation_definition_factory_delete_emits_event(empty_data_context)
+
+    @pytest.mark.cloud
+    def test_validation_definition_factory_delete_emits_event_cloud(
+        self, empty_cloud_context_fluent
+    ):
+        self._test_validation_definition_factory_delete_emits_event(empty_cloud_context_fluent)
+
+    def _test_validation_definition_factory_delete_emits_event(self, context):
+        # Arrange
+        ds = context.data_sources.add_pandas("my_datasource")
+        asset = ds.add_csv_asset("my_asset", "data.csv")
+        batch_def = asset.add_batch_definition("my_batch_definition")
+        suite = ExpectationSuite(name="my_suite")
+
+        name = "validation_def"
+        validation_definition = context.validation_definitions.add(
+            validation=ValidationDefinition(name=name, data=batch_def, suite=suite)
+        )
+
+        # Act
+        with mock.patch(
+            "great_expectations.core.factory.validation_definition_factory.submit_event",
+            autospec=True,
+        ) as mock_submit:
+            context.validation_definitions.delete(name=name)
+
+        # Assert
+        mock_submit.assert_called_once_with(
+            event=ValidationDefinitionDeletedEvent(
+                validation_definition_id=validation_definition.id
+            )
+        )

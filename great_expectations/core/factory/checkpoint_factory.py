@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable
 
 from great_expectations._docs_decorators import public_api
+from great_expectations.analytics.client import submit as submit_event
+from great_expectations.analytics.events import (
+    CheckpointCreatedEvent,
+    CheckpointDeletedEvent,
+)
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
@@ -16,7 +21,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 
-# TODO: Add analytics as needed
 class CheckpointFactory(Factory[Checkpoint]):
     def __init__(self, store: CheckpointStore):
         self._store = store
@@ -41,7 +45,15 @@ class CheckpointFactory(Factory[Checkpoint]):
         self._store.add(key=key, value=checkpoint)
 
         # TODO: Add id adding logic to CheckpointStore to prevent round trip
-        return self._get(key=key)
+        persisted_checkpoint = self._get(key=key)
+
+        submit_event(
+            event=CheckpointCreatedEvent(
+                checkpoint_id=persisted_checkpoint.id,
+            )
+        )
+
+        return persisted_checkpoint
 
     @public_api
     @override
@@ -54,13 +66,21 @@ class CheckpointFactory(Factory[Checkpoint]):
         Raises:
             DataContextError if Checkpoint doesn't exist
         """
-        key = self._store.get_key(name=name, id=None)
-        if not self._store.has_key(key=key):
+        try:
+            checkpoint = self.get(name=name)
+        except DataContextError as e:
             raise DataContextError(  # noqa: TRY003
                 f"Cannot delete Checkpoint with name {name} because it cannot be found."
-            )
+            ) from e
 
+        key = self._store.get_key(name=checkpoint.name, id=checkpoint.id)
         self._store.remove_key(key=key)
+
+        submit_event(
+            event=CheckpointDeletedEvent(
+                checkpoint_id=checkpoint.id,
+            )
+        )
 
     @public_api
     @override

@@ -12,7 +12,7 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.core.partitioners import PartitionerYearAndMonth
+from great_expectations.core.partitioners import ColumnPartitionerMonthly
 from great_expectations.data_context import AbstractDataContext, EphemeralDataContext
 from great_expectations.datasource.fluent import (
     BatchRequest,
@@ -129,7 +129,7 @@ def sql_data(
     )
     batch_request = asset.build_batch_request(
         options={"year": 2019, "month": 1},
-        partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
+        partitioner=ColumnPartitionerMonthly(column_name="pickup_datetime"),
     )
     return context, datasource, asset, batch_request
 
@@ -199,7 +199,7 @@ def multibatch_sql_data(
     )
     batch_request = asset.build_batch_request(
         options={"year": 2020},
-        partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
+        partitioner=ColumnPartitionerMonthly(column_name="pickup_datetime"),
     )
     return context, datasource, asset, batch_request
 

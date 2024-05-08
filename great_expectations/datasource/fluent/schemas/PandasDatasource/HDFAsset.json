@@ -255,8 +255,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYear": {
-            "title": "PartitionerYear",
+        "ColumnPartitionerYearly": {
+            "title": "ColumnPartitionerYearly",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -282,8 +282,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYearAndMonth": {
-            "title": "PartitionerYearAndMonth",
+        "ColumnPartitionerMonthly": {
+            "title": "ColumnPartitionerMonthly",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -309,8 +309,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYearAndMonthAndDay": {
-            "title": "PartitionerYearAndMonthAndDay",
+        "ColumnPartitionerDaily": {
+            "title": "ColumnPartitionerDaily",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -403,8 +403,8 @@
                 "date_format_string"
             ]
         },
-        "PartitionerYearly": {
-            "title": "PartitionerYearly",
+        "FileNamePartitionerYearly": {
+            "title": "FileNamePartitionerYearly",
             "type": "object",
             "properties": {
                 "regex": {
@@ -430,8 +430,8 @@
                 "regex"
             ]
         },
-        "PartitionerMonthly": {
-            "title": "PartitionerMonthly",
+        "FileNamePartitionerMonthly": {
+            "title": "FileNamePartitionerMonthly",
             "type": "object",
             "properties": {
                 "regex": {
@@ -458,8 +458,8 @@
                 "regex"
             ]
         },
-        "PartitionerDaily": {
-            "title": "PartitionerDaily",
+        "FileNamePartitionerDaily": {
+            "title": "FileNamePartitionerDaily",
             "type": "object",
             "properties": {
                 "regex": {
@@ -487,8 +487,8 @@
                 "regex"
             ]
         },
-        "PartitionerPath": {
-            "title": "PartitionerPath",
+        "FileNamePartitionerPath": {
+            "title": "FileNamePartitionerPath",
             "type": "object",
             "properties": {
                 "regex": {
@@ -535,13 +535,13 @@
                             "$ref": "#/definitions/PartitionerModInteger"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYear"
+                            "$ref": "#/definitions/ColumnPartitionerYearly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYearAndMonth"
+                            "$ref": "#/definitions/ColumnPartitionerMonthly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
+                            "$ref": "#/definitions/ColumnPartitionerDaily"
                         },
                         {
                             "$ref": "#/definitions/PartitionerDatetimePart"
@@ -550,16 +550,16 @@
                             "$ref": "#/definitions/PartitionerConvertedDatetime"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYearly"
+                            "$ref": "#/definitions/FileNamePartitionerYearly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerMonthly"
+                            "$ref": "#/definitions/FileNamePartitionerMonthly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerDaily"
+                            "$ref": "#/definitions/FileNamePartitionerDaily"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerPath"
+                            "$ref": "#/definitions/FileNamePartitionerPath"
                         }
                     ]
                 }
