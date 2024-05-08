@@ -515,9 +515,9 @@ def test_update_datasource_with_datasource_object(
     # Add an asset and update datasource
     (data_dir / "1.csv").touch()
     if use_positional_arg:
-        datasource.add_csv_asset("csv_asset", batching_regex=r"(?P<file_name>.*).csv")
+        datasource.add_csv_asset("csv_asset")
     else:
-        datasource.add_csv_asset(name="csv_asset", batching_regex=r"(?P<file_name>.*).csv")
+        datasource.add_csv_asset(name="csv_asset")
 
     context.data_sources.update_pandas_filesystem(datasource=datasource)
     assert_fluent_datasource_content(
@@ -529,7 +529,6 @@ def test_update_datasource_with_datasource_object(
                 "type": "pandas_filesystem",
                 "assets": {
                     "csv_asset": {
-                        "batching_regex": "(?P<file_name>.*).csv",
                         "type": "csv",
                     },
                 },

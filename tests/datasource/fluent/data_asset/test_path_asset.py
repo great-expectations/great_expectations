@@ -110,7 +110,6 @@ def test_get_batch_list_from_batch_request__sort_ascending(
     batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=batching_regex,
     )
     batch_definition = asset.add_batch_definition(
         "foo", partitioner=PartitionerMonthly(sort_ascending=True, regex=re.compile(batching_regex))
@@ -139,7 +138,6 @@ def test_get_batch_list_from_batch_request__sort_descending(
     batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=batching_regex,
     )
     batch_definition = asset.add_batch_definition(
         "foo",
