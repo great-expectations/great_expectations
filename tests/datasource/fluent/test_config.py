@@ -22,7 +22,7 @@ import pytest
 import great_expectations as gx
 from great_expectations.compatibility import pydantic
 from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.partitioners import PartitionerYearAndMonth
+from great_expectations.core.partitioners import ColumnPartitionerMonthly
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import (
@@ -749,7 +749,7 @@ def test_partitioners_deserialization(inject_engine_lookup_double, from_all_conf
         asset_name="with_partitioner"
     )
     partitioner = table_asset.batch_definitions[0].partitioner
-    assert isinstance(partitioner, PartitionerYearAndMonth)
+    assert isinstance(partitioner, ColumnPartitionerMonthly)
     assert partitioner.method_name == "partition_on_year_and_month"
 
 

@@ -9,7 +9,6 @@ import shutil
 import uuid
 from typing import Dict, List, Union
 
-import pandas as pd
 import pytest
 from typing_extensions import override
 
@@ -18,7 +17,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import (
     expectationSuiteSchema,
 )
-from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
@@ -51,7 +49,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     gen_directory_tree_str,
 )
-from tests.test_utils import create_files_in_directory, safe_remove
+from tests.test_utils import safe_remove
 
 yaml = YAMLHandler()
 
@@ -855,195 +853,6 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
     assert isinstance(observed, list)
     assert observed == ["a.warning", "b.warning", "c.warning"]
     assert len(observed) == 3
-
-
-@pytest.mark.filesystem
-def test_get_validator_with_instantiated_expectation_suite(
-    empty_data_context_stats_enabled, tmp_path_factory
-):
-    context = empty_data_context_stats_enabled
-
-    base_directory = str(
-        tmp_path_factory.mktemp("test_get_validator_with_instantiated_expectation_suite")
-    )
-
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "some_file.csv",
-        ],
-    )
-
-    yaml_config = f"""
-class_name: Datasource
-
-execution_engine:
-    class_name: PandasExecutionEngine
-
-data_connectors:
-    my_filesystem_data_connector:
-        class_name: ConfiguredAssetFilesystemDataConnector
-        base_directory: {base_directory}
-        default_regex:
-            pattern: (.+)\\.csv
-            group_names:
-                - alphanumeric
-        assets:
-            A:
-"""
-
-    config = yaml.load(yaml_config)
-    context.add_datasource(
-        "my_directory_datasource",
-        **config,
-    )
-
-    my_validator = context.get_validator(
-        datasource_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="A",
-        batch_identifiers={
-            "alphanumeric": "some_file",
-        },
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
-    )
-    assert my_validator.expectation_suite_name == "my_expectation_suite"
-
-
-@pytest.mark.filesystem
-def test_get_validator_with_attach_expectation_suite(empty_data_context, tmp_path_factory):
-    context = empty_data_context
-
-    base_directory = str(
-        tmp_path_factory.mktemp("test_get_validator_with_attach_expectation_suite")
-    )
-
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "some_file.csv",
-        ],
-    )
-
-    yaml_config = f"""
-class_name: Datasource
-
-execution_engine:
-    class_name: PandasExecutionEngine
-
-data_connectors:
-    my_filesystem_data_connector:
-        class_name: ConfiguredAssetFilesystemDataConnector
-        base_directory: {base_directory}
-        default_regex:
-            pattern: (.+)\\.csv
-            group_names:
-                - alphanumeric
-        assets:
-            A:
-"""
-
-    config = yaml.load(yaml_config)
-    context.add_datasource(
-        "my_directory_datasource",
-        **config,
-    )
-
-    my_validator = context.get_validator(
-        datasource_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="A",
-        batch_identifiers={
-            "alphanumeric": "some_file",
-        },
-        create_expectation_suite_with_name="A_expectation_suite",
-    )
-    assert my_validator.expectation_suite_name == "A_expectation_suite"
-
-
-@pytest.mark.big
-@pytest.mark.slow  # 8.13s
-def test_get_validator_without_expectation_suite(in_memory_runtime_context):
-    context = in_memory_runtime_context
-
-    batch = context.get_batch_list(
-        batch_request=RuntimeBatchRequest(
-            datasource_name="pandas_datasource",
-            data_connector_name="runtime_data_connector",
-            data_asset_name="my_data_asset",
-            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
-            batch_identifiers={
-                "id_key_0": "id_0_value_a",
-                "id_key_1": "id_1_value_a",
-            },
-        )
-    )[0]
-
-    my_validator = context.get_validator(batch=batch)
-    assert isinstance(my_validator.get_expectation_suite(), ExpectationSuite)
-    assert my_validator.expectation_suite_name == "default"
-
-
-@pytest.mark.big
-@pytest.mark.slow  # 1.35s
-def test_get_validator_with_batch(in_memory_runtime_context):
-    context = in_memory_runtime_context
-
-    my_batch = context.get_batch_list(
-        batch_request=RuntimeBatchRequest(
-            datasource_name="pandas_datasource",
-            data_connector_name="runtime_data_connector",
-            data_asset_name="my_data_asset",
-            runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
-            batch_identifiers={
-                "id_key_0": "id_0_value_a",
-                "id_key_1": "id_1_value_a",
-            },
-        )
-    )[0]
-
-    context.get_validator(
-        batch=my_batch,
-        create_expectation_suite_with_name="A_expectation_suite",
-    )
-
-
-@pytest.mark.big
-def test_get_validator_with_batch_list(in_memory_runtime_context):
-    context = in_memory_runtime_context
-
-    my_batch_list = [
-        context.get_batch_list(
-            batch_request=RuntimeBatchRequest(
-                datasource_name="pandas_datasource",
-                data_connector_name="runtime_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={"batch_data": pd.DataFrame({"x": range(10)})},
-                batch_identifiers={
-                    "id_key_0": "id_0_value_a",
-                    "id_key_1": "id_1_value_a",
-                },
-            )
-        )[0],
-        context.get_batch_list(
-            batch_request=RuntimeBatchRequest(
-                datasource_name="pandas_datasource",
-                data_connector_name="runtime_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={"batch_data": pd.DataFrame({"y": range(10)})},
-                batch_identifiers={
-                    "id_key_0": "id_0_value_b",
-                    "id_key_1": "id_1_value_b",
-                },
-            )
-        )[0],
-    ]
-
-    my_validator = context.get_validator(
-        batch_list=my_batch_list,
-        create_expectation_suite_with_name="A_expectation_suite",
-    )
-    assert len(my_validator.batches) == 2
 
 
 @pytest.mark.filesystem

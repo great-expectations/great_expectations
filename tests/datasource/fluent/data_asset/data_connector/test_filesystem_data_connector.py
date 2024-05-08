@@ -7,7 +7,7 @@ import pytest
 from great_expectations.compatibility import pydantic
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.partitioners import PartitionerPath, PartitionerYearly
+from great_expectations.core.partitioners import FileNamePartitionerPath, FileNamePartitionerYearly
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_connector import (
@@ -105,7 +105,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_filesystem_data_asset",
                 options={},
-                partitioner=PartitionerPath(regex=batching_regex),
+                partitioner=FileNamePartitionerPath(regex=batching_regex),
             )
         )
     )
@@ -262,7 +262,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={"name": "alex", "timestamp": "20200819", "price": "1300"},
-            partitioner=PartitionerPath(regex=batching_regex),
+            partitioner=FileNamePartitionerPath(regex=batching_regex),
         )
     )
     assert expected[2:3] == unsorted_batch_definition_list
@@ -369,7 +369,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_filesystem_data_asset",
                 options={},
-                partitioner=PartitionerPath(regex=batching_regex),
+                partitioner=FileNamePartitionerPath(regex=batching_regex),
             )
         )
     )
@@ -422,7 +422,7 @@ def test_alpha(tmp_path_factory):
         datasource_name="BASE",
         data_asset_name="A",
         options={},
-        partitioner=PartitionerPath(regex=batching_regex),
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
     )
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
@@ -433,7 +433,7 @@ def test_alpha(tmp_path_factory):
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         options={"part_1": "B"},
-        partitioner=PartitionerPath(regex=batching_regex),
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
     )
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
@@ -553,7 +553,7 @@ def test_foxtrot(tmp_path_factory):
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         options={},
-        partitioner=PartitionerPath(regex=batching_regex),
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
     )
     my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
@@ -622,7 +622,7 @@ def test_relative_base_directory_path(tmp_path_factory):
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         options={},
-        partitioner=PartitionerPath(regex=batching_regex),
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
     )
     my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
@@ -670,7 +670,7 @@ def test_filesystem_data_connector_uses_batching_regex_from_batch_request(
             datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={},
-            partitioner=PartitionerYearly(regex=re.compile(batching_regex)),
+            partitioner=FileNamePartitionerYearly(regex=re.compile(batching_regex)),
         )
     )
 

@@ -61,7 +61,6 @@ from great_expectations.data_context.util import (
     file_relative_path,
 )
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
-from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -894,61 +893,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
-    datasource_config: str = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_basic_data_connector:
-                class_name: InferredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                default_regex:
-                    pattern: (.*)\\.csv
-                    group_names:
-                        - data_asset_name
-
-            my_special_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users:
-                        base_directory: {data_path}
-                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
-                        group_names:
-                            - name
-                            - timestamp
-                            - size
-
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users: {{}}
-
-            my_runtime_data_connector:
-                module_name: great_expectations.datasource.data_connector
-                class_name: RuntimeDataConnector
-                batch_identifiers:
-                    - pipeline_stage_name
-                    - airflow_run_id
-    """
-
-    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
-
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -962,28 +906,6 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
-    project_dir: str = context.root_directory
-    data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
-
-    datasource_config: str = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_additional_data_connector:
-                class_name: InferredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                default_regex:
-                    pattern: (.*)\\.csv
-                    group_names:
-                        - data_asset_name
-    """
-
-    _: BaseDatasource = context.add_datasource(
-        "my_additional_datasource", **yaml.load(datasource_config)
-    )
     project_manager.set_project(context)
     return context
 
@@ -991,14 +913,15 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 @pytest.fixture
 def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(  # noqa: E501
     sa,
-    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled: AbstractDataContext,  # noqa: E501
     tmp_path_factory,
     test_backends,
     monkeypatch,
 ):
     context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
-    project_dir: str = context.root_directory
+    project_dir = context.root_directory
+    assert isinstance(project_dir, str)
     data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
 
     if (
@@ -1019,23 +942,9 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
             db_file_path,
         )
 
-        datasource_config: str = f"""
-        class_name: Datasource
-        execution_engine:
-          class_name: SqlAlchemyExecutionEngine
-          connection_string: sqlite:///{db_file_path}
-        data_connectors:
-          default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-              - default_identifier_name
-          default_inferred_data_connector_name:
-            class_name: InferredAssetSqlDataConnector
-            name: whole_table
-        """
-
-        _: BaseDatasource = context.add_datasource(
-            "my_sqlite_db_datasource", **yaml.load(datasource_config)
+        context.data_sources.add_sqlite(
+            name="my_sqlite_db_datasource",
+            connection_string=f"sqlite:///{db_file_path}",
         )
 
     return context
@@ -1109,28 +1018,6 @@ def deterministic_asset_data_connector_context(
     )
     context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
-
-    datasource_config = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users: {{}}
-        """
-
-    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
 
     context._save_project_config()
     project_manager.set_project(context)

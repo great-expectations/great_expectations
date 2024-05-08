@@ -1,3 +1,3 @@
 from .data_connector.data_connector import DataConnector
-from .new_datasource import BaseDatasource, Datasource
+from .new_datasource import BaseDatasource
 from .simple_sqlalchemy_datasource import SimpleSqlalchemyDatasource

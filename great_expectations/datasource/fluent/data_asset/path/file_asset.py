@@ -2,18 +2,18 @@ from __future__ import annotations
 
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, Optional
+from typing import TYPE_CHECKING, Generic, Optional, Union
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.partitioners import (
-    PartitionerDaily,
-    PartitionerMonthly,
-    PartitionerPath,
-    PartitionerYearly,
-    RegexPartitioner,
+    FileNamePartitioner,
+    FileNamePartitionerDaily,
+    FileNamePartitionerMonthly,
+    FileNamePartitionerPath,
+    FileNamePartitionerYearly,
 )
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
@@ -65,8 +65,8 @@ class AmbiguousPathError(ValueError):
         self.path = path
 
 
-class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[DatasourceT], ABC):
-    """Base class for PathDataAssets which batch by file."""
+class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[DatasourceT], ABC):
+    """Base class for PathDataAssets which batch by applying a regex to file names."""
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(default="batch_request_param_")
 
@@ -91,12 +91,12 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
             raise AmbiguousPathError(path=path)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerPath(regex=regex),
+            partitioner=FileNamePartitionerPath(regex=regex),
         )
 
     @public_api
     def add_batch_definition_yearly(
-        self, name: str, regex: re.Pattern, sort_ascending: bool = True
+        self, name: str, regex: Union[re.Pattern, str], sort_ascending: bool = True
     ) -> BatchDefinition:
         """Add a BatchDefinition which defines yearly batches by file name.
 
@@ -104,21 +104,23 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
             name: BatchDefinition name
             regex: Regular Expression used to define batches by file name.
                 Must contain a single group `year`
+            sort_ascending: determine order in which batches are returned
 
         Raises:
             RegexMissingRequiredGroupsError: regex is missing the group `year`
             RegexUnknownGroupsError: regex has groups other than `year`
         """
+        regex = re.compile(regex)
         REQUIRED_GROUP_NAME = {"year"}
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAME)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearly(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerYearly(regex=regex, sort_ascending=sort_ascending),
         )
 
     @public_api
     def add_batch_definition_monthly(
-        self, name: str, regex: re.Pattern, sort_ascending: bool = True
+        self, name: str, regex: Union[re.Pattern, str], sort_ascending: bool = True
     ) -> BatchDefinition:
         """Add a BatchDefinition which defines monthly batches by file name.
 
@@ -126,21 +128,23 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
             name: BatchDefinition name
             regex: Regular Expression used to define batches by file name.
                 Must contain the groups `year` and `month`.
+            sort_ascending: determine order in which batches are returned
 
         Raises:
             RegexMissingRequiredGroupsError: regex is missing the groups `year` and/or `month`.
             RegexUnknownGroupsError: regex has groups other than `year` and/or `month`.
         """
+        regex = re.compile(regex)
         REQUIRED_GROUP_NAMES = {"year", "month"}
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerMonthly(regex=regex, sort_ascending=sort_ascending),
         )
 
     @public_api
     def add_batch_definition_daily(
-        self, name: str, regex: re.Pattern, sort_ascending: bool = True
+        self, name: str, regex: Union[re.Pattern, str], sort_ascending: bool = True
     ) -> BatchDefinition:
         """Add a BatchDefinition which defines daily batches by file name.
 
@@ -148,17 +152,19 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
             name: BatchDefinition name
             regex: Regular Expression used to define batches by file name.
                 Must contain the groups `year`, `month`, and `day`.
+            sort_ascending: determine order in which batches are returned
 
         Raises:
             RegexMissingRequiredGroupsError: regex is missing the
                 groups `year`, `month`, and/or `day`.
             RegexUnknownGroupsError: regex has groups other than `year`, `month`, and/or `day`.
         """
+        regex = re.compile(regex)
         REQUIRED_GROUP_NAMES = {"year", "month", "day"}
         self._assert_group_names_in_regex(regex=regex, required_group_names=REQUIRED_GROUP_NAMES)
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerDaily(regex=regex, sort_ascending=sort_ascending),
+            partitioner=FileNamePartitionerDaily(regex=regex, sort_ascending=sort_ascending),
         )
 
     @classmethod
@@ -185,7 +191,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         )
         return batch_definition_list
 
-    def _get_group_names(self, partitioner: Optional[RegexPartitioner]) -> list[str]:
+    def _get_group_names(self, partitioner: Optional[FileNamePartitioner]) -> list[str]:
         if not partitioner:
             return []
         regex_parser = RegExParser(
@@ -197,7 +203,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[RegexPartitioner] = None,
+        partitioner: Optional[FileNamePartitioner] = None,
     ) -> tuple[str, ...]:
         group_names = self._get_group_names(partitioner=partitioner)
         option_keys: tuple[str, ...] = tuple(group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
@@ -216,7 +222,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[RegexPartitioner] = None,
+        partitioner: Optional[FileNamePartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -298,7 +304,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, RegexPartitioner], Generic[Dataso
 
     @override
     def _get_sortable_partitioner(
-        self, partitioner: Optional[RegexPartitioner]
+        self, partitioner: Optional[FileNamePartitioner]
     ) -> Optional[PartitionerSortingProtocol]:
-        # RegexPartitioner already implements PartitionerSortingProtocol
+        # FileNamePartitioner already implements PartitionerSortingProtocol
         return partitioner
