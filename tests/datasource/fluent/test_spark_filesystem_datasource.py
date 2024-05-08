@@ -16,12 +16,12 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.core.partitioners import (
-    Partitioner,
-    PartitionerMonthly,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
-    PartitionerYearly,
+    ColumnPartitioner,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
+    FileNamePartitionerMonthly,
+    FileNamePartitionerYearly,
 )
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
@@ -1124,7 +1124,7 @@ def directory_asset(
 
 @pytest.fixture
 def daily_partitioner():
-    return PartitionerYearAndMonthAndDay(column_name="pickup_datetime")
+    return ColumnPartitionerDaily(column_name="pickup_datetime")
 
 
 @pytest.fixture
@@ -1213,12 +1213,12 @@ class TestPartitionerDirectoryAsset:
         "partitioner,expected_keys",
         [
             pytest.param(
-                PartitionerYearAndMonthAndDay(column_name="foo"),
+                ColumnPartitionerDaily(column_name="foo"),
                 ("path", "year", "month", "day"),
                 id="Daily Partitioner",
             ),
             pytest.param(
-                PartitionerYearAndMonth(column_name="foo"),
+                ColumnPartitionerMonthly(column_name="foo"),
                 (
                     "path",
                     "year",
@@ -1227,7 +1227,7 @@ class TestPartitionerDirectoryAsset:
                 id="Monthly Partitioner",
             ),
             pytest.param(
-                PartitionerYear(column_name="foo"),
+                ColumnPartitionerYearly(column_name="foo"),
                 (
                     "path",
                     "year",
@@ -1240,7 +1240,7 @@ class TestPartitionerDirectoryAsset:
     def test_get_batch_parameters_keys_with_partitioner(
         self,
         directory_asset: DirectoryCSVAsset,
-        partitioner: Partitioner,
+        partitioner: ColumnPartitioner,
         expected_keys: Tuple[str, ...],
     ):
         assert directory_asset.get_batch_parameters_keys(partitioner=partitioner) == expected_keys
@@ -1249,7 +1249,7 @@ class TestPartitionerDirectoryAsset:
     def test_get_batch_list_from_batch_request_returns_single_batch(
         self,
         directory_asset: DirectoryCSVAsset,
-        daily_partitioner: PartitionerYearAndMonthAndDay,
+        daily_partitioner: ColumnPartitionerDaily,
     ):
         batch_parameters = {"year": 2018, "month": 1, "day": 11}
         batch_request = directory_asset.build_batch_request(
@@ -1396,7 +1396,7 @@ class TestPartitionerFileAsset:
             r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
         )
         asset_with_conflicting_partitioner = file_asset_with_no_partitioner
-        partitioner = PartitionerYearly(regex=regex)
+        partitioner = FileNamePartitionerYearly(regex=regex)
         assert asset_with_conflicting_partitioner.get_batch_parameters_keys(
             partitioner=partitioner
         ) == (
@@ -1414,7 +1414,7 @@ class TestPartitionerFileAsset:
         )
 
         asset = file_asset_with_no_partitioner
-        partitioner = PartitionerMonthly(regex=regex)
+        partitioner = FileNamePartitionerMonthly(regex=regex)
 
         post_partitioner_batch_request = asset.build_batch_request(
             options={"year": "2020", "month": "11"}, partitioner=partitioner
@@ -1435,7 +1435,7 @@ class TestPartitionerFileAsset:
             r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
         )
         asset = file_asset_with_no_partitioner
-        partitioner = PartitionerMonthly(regex=regex)
+        partitioner = FileNamePartitionerMonthly(regex=regex)
 
         post_partitioner_batch_request = asset.build_batch_request(
             options={"year": "2020", "month": "11"}, partitioner=partitioner

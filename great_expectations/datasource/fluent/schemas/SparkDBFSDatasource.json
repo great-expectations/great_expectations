@@ -131,8 +131,8 @@
                 "key"
             ]
         },
-        "PartitionerYearly": {
-            "title": "PartitionerYearly",
+        "FileNamePartitionerYearly": {
+            "title": "FileNamePartitionerYearly",
             "type": "object",
             "properties": {
                 "regex": {
@@ -158,8 +158,8 @@
                 "regex"
             ]
         },
-        "PartitionerMonthly": {
-            "title": "PartitionerMonthly",
+        "FileNamePartitionerMonthly": {
+            "title": "FileNamePartitionerMonthly",
             "type": "object",
             "properties": {
                 "regex": {
@@ -186,8 +186,8 @@
                 "regex"
             ]
         },
-        "PartitionerDaily": {
-            "title": "PartitionerDaily",
+        "FileNamePartitionerDaily": {
+            "title": "FileNamePartitionerDaily",
             "type": "object",
             "properties": {
                 "regex": {
@@ -215,8 +215,8 @@
                 "regex"
             ]
         },
-        "PartitionerPath": {
-            "title": "PartitionerPath",
+        "FileNamePartitionerPath": {
+            "title": "FileNamePartitionerPath",
             "type": "object",
             "properties": {
                 "regex": {
@@ -234,8 +234,8 @@
                 "regex"
             ]
         },
-        "BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__": {
-            "title": "BatchDefinition[Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily, PartitionerPath]]",
+        "BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__": {
+            "title": "BatchDefinition[Union[FileNamePartitionerYearly, FileNamePartitionerMonthly, FileNamePartitionerDaily, FileNamePartitionerPath]]",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
@@ -251,16 +251,16 @@
                     "title": "Partitioner",
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/PartitionerYearly"
+                            "$ref": "#/definitions/FileNamePartitionerYearly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerMonthly"
+                            "$ref": "#/definitions/FileNamePartitionerMonthly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerDaily"
+                            "$ref": "#/definitions/FileNamePartitionerDaily"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerPath"
+                            "$ref": "#/definitions/FileNamePartitionerPath"
                         }
                     ]
                 }
@@ -271,7 +271,7 @@
         },
         "CSVAsset": {
             "title": "CSVAsset",
-            "description": "Base class for PathDataAssets which batch by file.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -307,7 +307,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
                 },
                 "connect_options": {
@@ -697,8 +697,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYear": {
-            "title": "PartitionerYear",
+        "ColumnPartitionerYearly": {
+            "title": "ColumnPartitionerYearly",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -724,8 +724,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYearAndMonth": {
-            "title": "PartitionerYearAndMonth",
+        "ColumnPartitionerMonthly": {
+            "title": "ColumnPartitionerMonthly",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -751,8 +751,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYearAndMonthAndDay": {
-            "title": "PartitionerYearAndMonthAndDay",
+        "ColumnPartitionerDaily": {
+            "title": "ColumnPartitionerDaily",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -845,8 +845,8 @@
                 "date_format_string"
             ]
         },
-        "BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__": {
-            "title": "BatchDefinition[Union[PartitionerColumnValue, PartitionerMultiColumnValue, PartitionerDividedInteger, PartitionerModInteger, PartitionerYear, PartitionerYearAndMonth, PartitionerYearAndMonthAndDay, PartitionerDatetimePart, PartitionerConvertedDatetime]]",
+        "BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__": {
+            "title": "BatchDefinition[Union[PartitionerColumnValue, PartitionerMultiColumnValue, PartitionerDividedInteger, PartitionerModInteger, ColumnPartitionerYearly, ColumnPartitionerMonthly, ColumnPartitionerDaily, PartitionerDatetimePart, PartitionerConvertedDatetime]]",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
@@ -874,13 +874,13 @@
                             "$ref": "#/definitions/PartitionerModInteger"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYear"
+                            "$ref": "#/definitions/ColumnPartitionerYearly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYearAndMonth"
+                            "$ref": "#/definitions/ColumnPartitionerMonthly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
+                            "$ref": "#/definitions/ColumnPartitionerDaily"
                         },
                         {
                             "$ref": "#/definitions/PartitionerDatetimePart"
@@ -897,7 +897,7 @@
         },
         "DirectoryCSVAsset": {
             "title": "DirectoryCSVAsset",
-            "description": "Base class for PathDataAssets which batch by directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -933,7 +933,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
                 },
                 "connect_options": {
@@ -1210,7 +1210,7 @@
         },
         "ParquetAsset": {
             "title": "ParquetAsset",
-            "description": "Base class for PathDataAssets which batch by file.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1246,7 +1246,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
                 },
                 "connect_options": {
@@ -1341,7 +1341,7 @@
         },
         "DirectoryParquetAsset": {
             "title": "DirectoryParquetAsset",
-            "description": "Base class for PathDataAssets which batch by directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1377,7 +1377,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
                 },
                 "connect_options": {
@@ -1478,7 +1478,7 @@
         },
         "ORCAsset": {
             "title": "ORCAsset",
-            "description": "Base class for PathDataAssets which batch by file.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1514,7 +1514,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
                 },
                 "connect_options": {
@@ -1592,7 +1592,7 @@
         },
         "DirectoryORCAsset": {
             "title": "DirectoryORCAsset",
-            "description": "Base class for PathDataAssets which batch by directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1628,7 +1628,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
                 },
                 "connect_options": {
@@ -1712,7 +1712,7 @@
         },
         "JSONAsset": {
             "title": "JSONAsset",
-            "description": "Base class for PathDataAssets which batch by file.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1748,7 +1748,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
                 },
                 "connect_options": {
@@ -1990,7 +1990,7 @@
         },
         "DirectoryJSONAsset": {
             "title": "DirectoryJSONAsset",
-            "description": "Base class for PathDataAssets which batch by directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2026,7 +2026,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
                 },
                 "connect_options": {
@@ -2274,7 +2274,7 @@
         },
         "TextAsset": {
             "title": "TextAsset",
-            "description": "Base class for PathDataAssets which batch by file.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2310,7 +2310,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
                 },
                 "connect_options": {
@@ -2385,7 +2385,7 @@
         },
         "DirectoryTextAsset": {
             "title": "DirectoryTextAsset",
-            "description": "Base class for PathDataAssets which batch by directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2421,7 +2421,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
                 },
                 "connect_options": {
@@ -2502,7 +2502,7 @@
         },
         "DeltaAsset": {
             "title": "DeltaAsset",
-            "description": "Base class for PathDataAssets which batch by file.",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2538,7 +2538,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
                 },
                 "connect_options": {
@@ -2568,7 +2568,7 @@
         },
         "DirectoryDeltaAsset": {
             "title": "DirectoryDeltaAsset",
-            "description": "Base class for PathDataAssets which batch by directory.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2604,7 +2604,7 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
                 },
                 "connect_options": {
