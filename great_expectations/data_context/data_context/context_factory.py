@@ -17,6 +17,7 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
+from great_expectations.exceptions.exceptions import DataContextRequiredError
 
 logger = logging.getLogger(__name__)
 
@@ -82,16 +83,13 @@ class ProjectManager:
         )
         return self.__project
 
-    def set_project(self, project: AbstractDataContext) -> None:
+    def set_project(self, project: AbstractDataContext | None) -> None:
         self.__project = project
 
     @property
     def _project(self) -> AbstractDataContext:
         if not self.__project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."  # noqa: E501
-            )
+            raise DataContextRequiredError()
         return self.__project
 
     def get_expectations_store(self) -> ExpectationsStore:
