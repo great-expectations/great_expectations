@@ -11,6 +11,7 @@ from pytest import param
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility import aws, pydantic
+from great_expectations.core.partitioners import FileNamePartitionerPath
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import PandasS3Datasource
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
@@ -92,7 +93,6 @@ def pandas_s3_datasource(empty_data_context, s3_mock, s3_bucket: str) -> PandasS
 def csv_asset(pandas_s3_datasource: PandasS3Datasource) -> PathDataAsset:
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
     return asset
 
@@ -114,13 +114,8 @@ def test_construct_pandas_s3_datasource(pandas_s3_datasource: PandasS3Datasource
 def test_add_csv_asset_to_datasource(pandas_s3_datasource: PandasS3Datasource, aws_credentials):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
 @pytest.mark.unit
@@ -128,13 +123,8 @@ def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
 @pytest.mark.aws_deps
@@ -142,7 +132,6 @@ def test_invalid_connect_options(pandas_s3_datasource: PandasS3Datasource, aws_c
     with pytest.raises(pydantic.ValidationError) as exc_info:
         pandas_s3_datasource.add_csv_asset(  # type: ignore[call-arg]
             name="csv_asset",
-            batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
             extra_field="invalid",
         )
 
@@ -193,7 +182,6 @@ def test_invalid_connect_options_value(
     with pytest.raises(pydantic.ValidationError) as exc_info:
         pandas_s3_datasource.add_csv_asset(
             name="csv_asset",
-            batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
             **connect_option_kwargs,
         )
 
@@ -224,7 +212,6 @@ def test_asset_connect_options_in_repr(
 
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         **connect_options,
     )
 
@@ -247,9 +234,11 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"(.+)_(.+)_(\d{4})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -264,9 +253,11 @@ def test_csv_asset_with_batching_regex_named_parameters(
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "name",
         "timestamp",
@@ -281,9 +272,11 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "name",
         "batch_request_param_2",
@@ -298,7 +291,6 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
@@ -311,10 +303,13 @@ def test_get_batch_list_from_fully_specified_batch_request(
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
 
-    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
+    request = asset.build_batch_request(
+        options={"name": "alex", "timestamp": "20200819", "price": "1300"},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
+    )
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -334,10 +329,6 @@ def test_get_batch_list_from_fully_specified_batch_request(
     }
     assert batch.id == "pandas_s3_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
 
-    request = asset.build_batch_request({"name": "alex"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 2
-
 
 @pytest.mark.aws_deps
 def test_test_connection_failures(
@@ -346,10 +337,9 @@ def test_test_connection_failures(
     bad_regex_config: tuple[re.Pattern, str],
     aws_credentials,
 ):
-    regex, test_connection_error_message = bad_regex_config
+    _, test_connection_error_message = bad_regex_config
     csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
-        batching_regex=regex,
     )
     csv_asset._datasource = pandas_s3_datasource
     pandas_s3_datasource.assets = [
@@ -358,7 +348,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = S3DataConnector(
         datasource_name=pandas_s3_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         s3_client=s3_mock,
         bucket=pandas_s3_datasource.bucket,
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
@@ -385,12 +374,16 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     """
     no_recursion_asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset_not_recursive",
-        batching_regex=r".*",
         s3_recursive_file_discovery=False,
+    )
+    batching_regex = re.compile(
+        r".*",
     )
     found_files_without_recursion = len(
         no_recursion_asset.get_batch_list_from_batch_request(
-            no_recursion_asset.build_batch_request()
+            no_recursion_asset.build_batch_request(
+                partitioner=FileNamePartitionerPath(regex=batching_regex)
+            )
         )
     )
     recursion_asset = pandas_s3_datasource.add_csv_asset(
@@ -399,9 +392,11 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
         s3_recursive_file_discovery=True,
     )
     found_files_with_recursion = len(
-        recursion_asset.get_batch_list_from_batch_request(recursion_asset.build_batch_request())
+        recursion_asset.get_batch_list_from_batch_request(
+            recursion_asset.build_batch_request(
+                partitioner=FileNamePartitionerPath(regex=batching_regex)
+            )
+        )
     )
     # Only 1 additional file was added to the subfolder
     assert found_files_without_recursion + 1 == found_files_with_recursion
-    recursion_match = recursion_asset.batching_regex.match(".*/.*.csv")
-    assert recursion_match is not None
