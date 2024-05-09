@@ -3,16 +3,15 @@ from __future__ import annotations
 import logging
 import os
 import pathlib
+import re
 from typing import TYPE_CHECKING
 
 import boto3
 import botocore
 import pytest
 
+from great_expectations.core.partitioners import FileNamePartitionerPath
 from great_expectations.datasource.fluent import SparkDBFSDatasource
-from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
-    PathDataAsset,
-)
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
 from tests.test_utils import create_files_in_directory
 
@@ -63,15 +62,6 @@ def spark_dbfs_datasource(fs: FakeFilesystem, test_backends) -> SparkDBFSDatasou
     )
 
 
-@pytest.fixture
-def csv_asset(spark_dbfs_datasource: SparkDBFSDatasource) -> PathDataAsset:
-    asset = spark_dbfs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-    )
-    return asset
-
-
 @pytest.mark.spark
 def test_construct_spark_dbfs_datasource(spark_dbfs_datasource: SparkDBFSDatasource):
     assert spark_dbfs_datasource.name == "spark_dbfs_datasource"
@@ -82,29 +72,18 @@ def test_add_csv_asset_to_datasource(spark_dbfs_datasource: SparkDBFSDatasource)
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_dbfs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         batch_metadata=asset_specified_metadata,
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
     assert asset.batch_metadata == asset_specified_metadata
 
 
 @pytest.mark.unit
 def test_construct_csv_asset_directly():
-    # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
 @pytest.mark.spark
@@ -117,11 +96,14 @@ def test_get_batch_list_from_fully_specified_batch_request(
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_dbfs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         batch_metadata=asset_specified_metadata,
     )
 
-    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
+    request = asset.build_batch_request(
+        options={"name": "alex", "timestamp": "20200819", "price": "1300"},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
+    )
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -142,6 +124,8 @@ def test_get_batch_list_from_fully_specified_batch_request(
     }
     assert batch.id == "spark_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
 
-    request = asset.build_batch_request({"name": "alex"})
+    request = asset.build_batch_request(
+        options={"name": "alex"}, partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 2

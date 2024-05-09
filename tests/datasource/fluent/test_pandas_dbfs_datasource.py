@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import pathlib
+import re
 from typing import TYPE_CHECKING
 
 import boto3
@@ -12,9 +13,6 @@ import pytest
 from great_expectations.core.partitioners import FileNamePartitionerPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
-from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
-    PathDataAsset,
-)
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from tests.test_utils import create_files_in_directory
 
@@ -79,15 +77,6 @@ def pandas_dbfs_datasource(
     return pandas_dbfs_datasource
 
 
-@pytest.fixture
-def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> PathDataAsset:
-    asset = pandas_dbfs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-    )
-    return asset
-
-
 @pytest.mark.filesystem
 def test_construct_pandas_dbfs_datasource(pandas_dbfs_datasource: PandasDBFSDatasource):
     assert pandas_dbfs_datasource.name == "pandas_dbfs_datasource"
@@ -118,7 +107,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         name="csv_asset",
     )
 
-    batching_regex = r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
     request = asset.build_batch_request(
         options={"name": "alex", "timestamp": "20200819", "price": "1300"},
         partitioner=FileNamePartitionerPath(regex=batching_regex),
