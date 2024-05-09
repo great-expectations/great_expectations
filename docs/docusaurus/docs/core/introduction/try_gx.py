@@ -16,7 +16,7 @@ import great_expectations.expectations as gxe
 
 # <snippet name="docs/docusaurus/docs/core/introduction/try_gx.py set up">
 context = gx.get_context()
-batch = context.sources.pandas_default.read_csv(
+batch = context.data_sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>
