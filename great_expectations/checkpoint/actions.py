@@ -113,6 +113,7 @@ class ValidationAction(BaseModel):
         json_encoders = {Renderer: lambda r: r.serialize()}
 
     type: str
+    name: str
     notify_on: Literal["all", "failure", "success"] = "all"
 
     @property
