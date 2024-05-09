@@ -111,8 +111,6 @@ def test_add_csv_asset_to_datasource(
         infer_schema=True,
     )
     assert asset.name == "csv_asset"
-    m1 = asset.batching_regex.match("this_can_be_named_anything.csv")
-    assert m1 is not None
 
 
 if pyspark_types:
@@ -707,29 +705,18 @@ def test_add_csv_asset_with_batching_regex_to_datasource(
 ):
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("yellow_tripdata_sample_11D1-22.csv") is None
-    m1 = asset.batching_regex.match("yellow_tripdata_sample_1111-22.csv")
-    assert m1 is not None
 
 
 @pytest.mark.unit
 def test_construct_csv_asset_directly():
-    # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",  # Ignoring IDE warning (type declarations are consistent).  # noqa: E501
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("yellow_tripdata_sample_11D1-22.csv") is None
-    m1 = asset.batching_regex.match("yellow_tripdata_sample_1111-22.csv")
-    assert m1 is not None
 
 
 @pytest.mark.unit

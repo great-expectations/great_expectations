@@ -229,7 +229,6 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
         _ = pandas_abs_datasource._get_azure_client()
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -244,17 +243,11 @@ def test_add_csv_asset_to_datasource(
     mock_list_keys.return_value = object_keys
     asset = pandas_abs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         abs_container="my_container",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -264,13 +257,8 @@ def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_
     mock_list_keys.return_value = object_keys
     asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",  # type: ignore[arg-type]
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
 # noinspection PyUnusedLocal
@@ -481,7 +469,6 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     mock_list_keys.return_value = object_keys
     pandas_abs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r".*",
         abs_container="my_container",
         abs_recursive_file_discovery=True,
     )

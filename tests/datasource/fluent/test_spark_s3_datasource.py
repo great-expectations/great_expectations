@@ -98,31 +98,20 @@ def test_add_csv_asset_to_datasource(spark_s3_datasource: SparkS3Datasource):
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         header=True,
         infer_schema=True,
         batch_metadata=asset_specified_metadata,
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
     assert asset.batch_metadata == asset_specified_metadata
 
 
 @pytest.mark.big
 def test_construct_csv_asset_directly():
-    # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
 @pytest.mark.big
@@ -286,11 +275,9 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset_recursive",
-        batching_regex=r".*",
         header=True,
         infer_schema=True,
         batch_metadata=asset_specified_metadata,
         s3_recursive_file_discovery=True,
     )
-    recursion_match = asset.batching_regex.match(".*/.*.csv")
-    assert recursion_match is not None
+    assert asset.batch_metadata == asset_specified_metadata

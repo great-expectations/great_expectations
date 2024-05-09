@@ -193,16 +193,10 @@ def test_add_csv_asset_to_datasource(
     mock_list_keys.return_value = object_keys
     asset = pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -212,13 +206,8 @@ def test_construct_csv_asset_directly(mock_gcs_client, mock_list_keys, object_ke
     mock_list_keys.return_value = object_keys
     asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",  # type: ignore[arg-type]
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
 # noinspection PyUnusedLocal
@@ -423,7 +412,6 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     mock_list_keys.return_value = object_keys
     pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r".*",
         gcs_recursive_file_discovery=True,
     )
     assert "recursive" in mock_list_keys.call_args.kwargs

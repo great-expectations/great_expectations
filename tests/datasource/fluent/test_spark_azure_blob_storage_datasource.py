@@ -206,19 +206,13 @@ def test_add_csv_asset_to_datasource(
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         abs_container="my_container",
         batch_metadata=asset_specified_metadata,
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
     assert asset.batch_metadata == asset_specified_metadata
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -228,13 +222,8 @@ def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_
     mock_list_keys.return_value = object_keys
     asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",  # type: ignore[arg-type]
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
 # noinspection PyUnusedLocal
@@ -449,7 +438,6 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     spark_abs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r".*",
         abs_container="my_container",
         batch_metadata=asset_specified_metadata,
         abs_recursive_file_discovery=True,
