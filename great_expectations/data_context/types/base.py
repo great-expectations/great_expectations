@@ -1249,92 +1249,6 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
         return DatasourceConfig(**data)
 
 
-class AnonymizedUsageStatisticsConfig(DictDot):
-    def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None) -> None:
-        self._enabled = enabled
-
-        if data_context_id is None:
-            data_context_id = str(uuid.uuid4())
-            self._explicit_id = False
-        else:
-            self._explicit_id = True
-
-        self._data_context_id = data_context_id
-
-        if usage_statistics_url is None:
-            usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
-            self._explicit_url = False
-        else:
-            self._explicit_url = True
-
-        self._usage_statistics_url = usage_statistics_url
-
-    @property
-    def enabled(self) -> bool:
-        return self._enabled
-
-    @enabled.setter
-    def enabled(self, enabled) -> None:
-        if not isinstance(enabled, bool):
-            raise ValueError("usage statistics enabled property must be boolean")  # noqa: TRY003, TRY004
-
-        self._enabled = enabled
-
-    @property
-    def data_context_id(self) -> str:
-        return self._data_context_id
-
-    @data_context_id.setter
-    def data_context_id(self, data_context_id) -> None:
-        try:
-            uuid.UUID(data_context_id)
-        except ValueError:
-            raise gx_exceptions.InvalidConfigError("data_context_id must be a valid uuid")  # noqa: TRY003
-
-        self._data_context_id = data_context_id
-        self._explicit_id = True
-
-    @property
-    def explicit_id(self) -> bool:
-        return self._explicit_id
-
-    @property
-    def explicit_url(self) -> bool:
-        return self._explicit_url
-
-    @property
-    def usage_statistics_url(self) -> str:
-        return self._usage_statistics_url
-
-    @usage_statistics_url.setter
-    def usage_statistics_url(self, usage_statistics_url) -> None:
-        self._usage_statistics_url = usage_statistics_url
-        self._explicit_url = True
-
-
-class AnonymizedUsageStatisticsConfigSchema(Schema):
-    data_context_id = fields.UUID()
-    enabled = fields.Boolean(default=True)
-    usage_statistics_url = fields.URL(allow_none=True)
-    _explicit_url = fields.Boolean(required=False)
-
-    # noinspection PyUnusedLocal
-    @post_load()
-    def make_usage_statistics_config(self, data, **kwargs):
-        if "data_context_id" in data:
-            data["data_context_id"] = str(data["data_context_id"])
-        return AnonymizedUsageStatisticsConfig(**data)
-
-    # noinspection PyUnusedLocal
-    @post_dump()
-    def filter_implicit(self, data, **kwargs):
-        if not data.get("_explicit_url") and "usage_statistics_url" in data:
-            del data["usage_statistics_url"]
-        if "_explicit_url" in data:
-            del data["_explicit_url"]
-        return data
-
-
 class ProgressBarsConfig(DictDot):
     def __init__(
         self,
@@ -1409,7 +1323,8 @@ class DataContextConfigSchema(Schema):
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    analytics_enabled = fields.Boolean(allow_none=True)
+    data_context_id = fields.UUID(allow_none=True)
     progress_bars = fields.Nested(ProgressBarsConfigSchema, required=False, allow_none=True)
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
@@ -2094,8 +2009,8 @@ class DataContextConfig(BaseYamlConfig):
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
-        anonymous_usage_statistics (Optional[AnonymizedUsageStatisticsConfig]): configuration for enabling or disabling
-            anonymous usage statistics for GX.
+        analytics_enabled (Optional[bool]): whether or not to send usage statistics to the Great Expectations team.
+        data_context_id (Optional[UUID]): unique identifier for the DataContext.
         store_backend_defaults (Optional[BaseStoreBackendDefaults]):  define base defaults for platform specific StoreBackendDefaults.
             For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults
             and you may be able to specify fewer parameters.
@@ -2122,7 +2037,8 @@ class DataContextConfig(BaseYamlConfig):
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
-        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
+        analytics_enabled: Optional[bool] = None,
+        data_context_id: Optional[uuid.UUID] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
@@ -2160,13 +2076,8 @@ class DataContextConfig(BaseYamlConfig):
         self.stores = self._init_stores(stores)
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
-        if anonymous_usage_statistics is None:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
-        elif isinstance(anonymous_usage_statistics, dict):
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-                **anonymous_usage_statistics
-            )
-        self.anonymous_usage_statistics = anonymous_usage_statistics
+        self.analytics_enabled = analytics_enabled
+        self.data_context_id = data_context_id
         self.progress_bars = progress_bars
 
         super().__init__(commented_map=commented_map)
@@ -2330,6 +2241,4 @@ dataConnectorConfigSchema = DataConnectorConfigSchema()
 executionEngineConfigSchema = ExecutionEngineConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
-# noinspection SpellCheckingInspection
-anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

@@ -11,6 +11,7 @@ import pytest
 
 import great_expectations.expectations as gxe
 from great_expectations import get_context
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.partitioners import ColumnPartitionerMonthly
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
@@ -250,7 +251,7 @@ def test_quickstart_workflow(
     batch = context.data_sources.pandas_default.read_csv(filepath)
 
     # Create Expectations
-    suite = context.add_expectation_suite("my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
     suite.add_expectation(
         gxe.ExpectColumnValuesToBeBetween(column="passenger_count", min_value=1, max_value=6)

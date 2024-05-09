@@ -137,16 +137,7 @@ class SiteBuilder:
         self.cloud_mode = cloud_mode
         self.ge_cloud_mode = cloud_mode
 
-        usage_statistics_config = data_context.anonymous_usage_statistics
-        data_context_id = None
-        if (
-            usage_statistics_config
-            and usage_statistics_config.enabled
-            and usage_statistics_config.data_context_id
-        ):
-            data_context_id = usage_statistics_config.data_context_id
-
-        self.data_context_id = data_context_id
+        self.data_context_id = data_context.variables.data_context_id
 
         # set custom_styles_directory if present
         custom_styles_directory = None

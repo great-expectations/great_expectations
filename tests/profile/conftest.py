@@ -14,8 +14,6 @@ from great_expectations.data_context.util import file_relative_path
 
 @pytest.fixture
 def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103

@@ -35,6 +35,7 @@ from great_expectations.compatibility.sqlalchemy import (
 from great_expectations.compatibility.sqlalchemy import (
     __version__ as sqlalchemy_version,
 )
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context import EphemeralDataContext
 from great_expectations.datasource.fluent import (
@@ -520,11 +521,8 @@ class TestTableIdentifiers:
         asset = datasource.add_table_asset(asset_name, table_name=table_name, schema_name=schema)
         batch_definition = asset.add_batch_definition_whole_table("whole table!")
 
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{datasource.name}-{asset.name}"
-        )
+        suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name", mostly=1))
-        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
 
         checkpoint = context.checkpoints.add(
             Checkpoint(
@@ -804,9 +802,7 @@ class TestColumnIdentifiers:
         )
         print(f"asset:\n{asset!r}\n")
 
-        suite = context.add_expectation_suite(
-            expectation_suite_name=f"{datasource.name}-{asset.name}"
-        )
+        suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
                 expectation_type=expectation_type,
@@ -816,7 +812,7 @@ class TestColumnIdentifiers:
                 },
             )
         )
-        suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+        suite.save()
 
         batch_definition = asset.add_batch_definition_whole_table("my_batch_def")
         validation_definition = ValidationDefinition(

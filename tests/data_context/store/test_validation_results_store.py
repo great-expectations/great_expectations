@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 import boto3
 import pytest
@@ -98,7 +99,7 @@ def test_ValidationResultsStore_with_TupleS3StoreBackend(aws_credentials):
     # Check that store_backend_id exists can be read
     assert my_store.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(my_store.store_backend_id)
+    assert isinstance(my_store.store_backend_id, uuid.UUID)
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -161,7 +162,7 @@ def test_ValidationResultsStore_with_InMemoryStoreBackend():
     # Check that store_backend_id exists can be read
     assert my_store.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(my_store.store_backend_id)
+    assert isinstance(my_store.store_backend_id, uuid.UUID)
 
 
 @pytest.mark.big
@@ -248,7 +249,7 @@ def test_ValidationResultsStore_with_TupleFileSystemStoreBackend(tmp_path_factor
     # Check that store_backend_id exists can be read
     assert my_store.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(my_store.store_backend_id)
+    assert isinstance(my_store.store_backend_id, uuid.UUID)
 
     # Check that another store with the same configuration shares the same store_backend_id
     my_store_duplicate = ValidationResultsStore(

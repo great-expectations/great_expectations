@@ -57,7 +57,7 @@ class StoreBackend(metaclass=ABCMeta):
     def store_name(self):
         return self._store_name
 
-    def _construct_store_backend_id(self, suppress_warning: bool = False) -> Optional[str]:
+    def _construct_store_backend_id(self, suppress_warning: bool = False) -> Optional[uuid.UUID]:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
         If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
@@ -84,7 +84,7 @@ class StoreBackend(metaclass=ABCMeta):
                 parsed_store_backend_id = store_backend_id_file_parser.parseString(
                     ge_store_backend_id_file_contents
                 )
-                return parsed_store_backend_id[1]
+                return uuid.UUID(parsed_store_backend_id[1])
             except InvalidKeyError:
                 store_id = (
                     self._manually_initialize_store_backend_id
@@ -95,13 +95,13 @@ class StoreBackend(metaclass=ABCMeta):
                     key=self.STORE_BACKEND_ID_KEY,
                     value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}\n",
                 )
-                return store_id
+                return uuid.UUID(store_id)
         except Exception as e:
             if not suppress_warning:
                 logger.warning(
                     f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}. Exception was: \n {e}"  # noqa: E501
                 )
-            return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
+            return uuid.UUID(self.STORE_BACKEND_INVALID_CONFIGURATION_ID)
 
     # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going through initialization order in DataContext  # noqa: E501
     @property
