@@ -723,7 +723,7 @@ def mysql_engine(test_backend):
 @pytest.fixture(scope="function")
 def empty_data_context(
     tmp_path,
-) -> FileDataContext:
+) -> Generator[FileDataContext, None, None]:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
     project_path = str(project_path)
@@ -733,7 +733,8 @@ def empty_data_context(
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
     project_manager.set_project(context)
-    return context
+    yield context
+    project_manager.set_project(None)
 
 
 @pytest.fixture(scope="function")

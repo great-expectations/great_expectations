@@ -82,7 +82,7 @@ class ProjectManager:
         )
         return self.__project
 
-    def set_project(self, project: AbstractDataContext) -> None:
+    def set_project(self, project: AbstractDataContext | None) -> None:
         self.__project = project
 
     @property
