@@ -1,2 +1,1 @@
 from .data_connector.data_connector import DataConnector
-from .simple_sqlalchemy_datasource import SimpleSqlalchemyDatasource

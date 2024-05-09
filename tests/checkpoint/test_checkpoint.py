@@ -74,6 +74,7 @@ def test_checkpoint_save_success(mocker: MockerFixture):
 @pytest.fixture
 def slack_action():
     return SlackNotificationAction(
+        name="my_slack_action",
         slack_webhook="slack_webhook",
     )
 
@@ -81,6 +82,7 @@ def slack_action():
 @pytest.fixture
 def teams_action():
     return MicrosoftTeamsNotificationAction(
+        name="my_teams_action",
         teams_webhook="teams_webhook",
     )
 
@@ -148,6 +150,7 @@ class TestCheckpointSerialization:
                 "actions",
                 [
                     {
+                        "name": "my_slack_action",
                         "notify_on": "all",
                         "notify_with": None,
                         "renderer": {
@@ -161,6 +164,7 @@ class TestCheckpointSerialization:
                         "type": "slack",
                     },
                     {
+                        "name": "my_teams_action",
                         "notify_on": "all",
                         "renderer": {
                             "class_name": "MicrosoftTeamsRenderer",
@@ -265,6 +269,7 @@ class TestCheckpointSerialization:
             ],
             "actions": [
                 {
+                    "name": "my_slack_action",
                     "notify_on": "all",
                     "notify_with": None,
                     "renderer": {
@@ -278,6 +283,7 @@ class TestCheckpointSerialization:
                     "type": "slack",
                 },
                 {
+                    "name": "my_teams_action",
                     "notify_on": "all",
                     "renderer": {
                         "class_name": "MicrosoftTeamsRenderer",
@@ -387,9 +393,9 @@ class TestCheckpointSerialization:
         # Act
         serialized_checkpoint = {
             "actions": [
-                {"site_names": [], "type": "update_data_docs"},
-                {"slack_webhook": "test", "type": "slack"},
-                {"teams_webhook": "test", "type": "microsoft"},
+                {"name": "my_docs_action", "site_names": [], "type": "update_data_docs"},
+                {"name": "my_slack_action", "slack_webhook": "test", "type": "slack"},
+                {"name": "my_teams_action", "teams_webhook": "test", "type": "microsoft"},
             ],
             "id": "e7d1f462-821b-429c-8086-cca80eeea5e9",
             "name": "my_checkpoint",
@@ -523,9 +529,11 @@ class TestCheckpointResult:
         Pydantics and mocks.
         Ideally, this would be tested through the public `run()` method.
         """
-        pd_action = PagerdutyAlertAction(api_key="api_key", routing_key="routing_key")
-        og_action = OpsgenieAlertAction(api_key="api_key")
-        data_docs_action = UpdateDataDocsAction()
+        pd_action = PagerdutyAlertAction(
+            name="my_pagerduty_action", api_key="api_key", routing_key="routing_key"
+        )
+        og_action = OpsgenieAlertAction(name="my_opsgenie_action", api_key="api_key")
+        data_docs_action = UpdateDataDocsAction(name="my_docs_action")
         actions: List[CheckpointAction] = [pd_action, og_action, data_docs_action]
 
         validation_definitions = [validation_definition]

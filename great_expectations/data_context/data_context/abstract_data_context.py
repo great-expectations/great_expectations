@@ -7,7 +7,6 @@ import os
 import pathlib
 import sys
 import uuid
-import warnings
 import webbrowser
 from abc import ABC, abstractmethod
 from collections import OrderedDict
@@ -30,7 +29,6 @@ from marshmallow import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations._docs_decorators import (
-    deprecated_method_or_class,
     new_argument,
     new_method_or_class,
     public_api,
@@ -122,9 +120,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validation_results_store import (
         ValidationResultsStore,
     )
-    from great_expectations.data_context.types.resource_identifiers import (
-        GXCloudIdentifier,
-    )
     from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.datasource.fluent.interfaces import (
         BatchParameters,
@@ -133,9 +128,6 @@ if TYPE_CHECKING:
         BatchRequest as FluentBatchRequest,
     )
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.expectations.expectation_configuration import (
-        ExpectationConfiguration,
-    )
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
@@ -367,66 +359,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         self.config.update(project_config)
         return self.config
-
-    @public_api
-    @deprecated_method_or_class(
-        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
-    )
-    def save_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
-        overwrite_existing: bool = True,
-        **kwargs: Optional[dict],
-    ) -> None:
-        """Save the provided ExpectationSuite into the DataContext using the configured ExpectationStore.
-
-        Args:
-            expectation_suite: The ExpectationSuite to save.
-            expectation_suite_name: The name of this ExpectationSuite. If no name is provided, the name will be read
-                from the suite.
-            overwrite_existing: Whether to overwrite the suite if it already exists.
-            kwargs: Additional parameters, unused
-
-        Returns:
-            None
-
-        Raises:
-            DataContextError: If a suite with the same name exists and `overwrite_existing` is set to `False`.
-        """  # noqa: E501
-        # deprecated-v0.15.48
-        warnings.warn(
-            "save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. "
-            "Please use update_expectation_suite or add_or_update_expectation_suite instead.",
-            DeprecationWarning,
-        )
-        return self._save_expectation_suite(
-            expectation_suite=expectation_suite,
-            expectation_suite_name=expectation_suite_name,
-            overwrite_existing=overwrite_existing,
-            **kwargs,
-        )
-
-    def _save_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
-        overwrite_existing: bool = True,
-        **kwargs: Optional[dict],
-    ) -> None:
-        if expectation_suite_name is None:
-            key = ExpectationSuiteIdentifier(name=expectation_suite.name)
-        else:
-            expectation_suite.name = expectation_suite_name
-            key = ExpectationSuiteIdentifier(name=expectation_suite_name)
-        if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
-                f"expectation_suite with name {expectation_suite_name} already exists. If you would like to overwrite this "  # noqa: E501
-                "expectation_suite, set overwrite_existing=True."
-            )
-        if self._include_rendered_content:
-            expectation_suite.render()
-        return self.expectations_store.set(key, expectation_suite, **kwargs)
 
     # Properties
     @property
@@ -1115,30 +1047,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._save_project_config()
 
     @public_api
-    def list_expectation_suite_names(self) -> List[str]:
-        """Lists the available expectation suite names.
-
-        Returns:
-            A list of suite names (sorted in alphabetic order).
-        """
-        sorted_expectation_suite_names = [
-            suite.name  # type: ignore[union-attr]
-            for suite in self.list_expectation_suites()  # type: ignore[union-attr]
-        ]
-        sorted_expectation_suite_names.sort()
-        return sorted_expectation_suite_names
-
-    def list_expectation_suites(
-        self,
-    ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:
-        """Return a list of available expectation suite keys."""
-        try:
-            keys = self.expectations_store.list_keys()
-        except KeyError as e:
-            raise gx_exceptions.InvalidConfigError(f"Unable to find configured store: {e!s}")  # noqa: TRY003
-        return keys  # type: ignore[return-value]
-
-    @public_api
     def get_validator(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -1379,16 +1287,16 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "expectation_suite, or create_expectation_suite_with_name can be specified"
             )
         if expectation_suite_id is not None:
-            expectation_suite = self.get_expectation_suite(
-                id=expectation_suite_id,
+            expectation_suite = next(
+                suite for suite in self.suites.all() if suite.id == expectation_suite_id
             )
         if expectation_suite_name is not None:
-            expectation_suite = self.get_expectation_suite(
+            expectation_suite = self.suites.get(
                 expectation_suite_name,
             )
         if create_expectation_suite_with_name is not None:
-            expectation_suite = self.add_expectation_suite(
-                expectation_suite_name=create_expectation_suite_with_name,
+            expectation_suite = self.suites.add(
+                ExpectationSuite(name=create_expectation_suite_with_name)
             )
 
         return expectation_suite
@@ -1589,338 +1497,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         return datasource.get_batch_list_from_batch_request(batch_request=result)
-
-    @overload
-    def add_expectation_suite(
-        self,
-        expectation_suite_name: str,
-        id: str | None = ...,
-        expectations: list[dict | ExpectationConfiguration] | None = ...,
-        suite_parameters: dict | None = ...,
-        meta: dict | None = ...,
-        expectation_suite: None = ...,
-    ) -> ExpectationSuite:
-        """
-        An `expectation_suite_name` is provided.
-        `expectation_suite` should not be provided.
-        """
-        ...
-
-    @overload
-    def add_expectation_suite(
-        self,
-        expectation_suite_name: None = ...,
-        id: str | None = ...,
-        expectations: list[dict | ExpectationConfiguration] | None = ...,
-        suite_parameters: dict | None = ...,
-        meta: dict | None = ...,
-        expectation_suite: ExpectationSuite = ...,
-    ) -> ExpectationSuite:
-        """
-        An `expectation_suite` is provided.
-        `expectation_suite_name` should not be provided.
-        """
-        ...
-
-    @public_api
-    @new_method_or_class(version="0.15.48")
-    def add_expectation_suite(  # noqa: PLR0913
-        self,
-        expectation_suite_name: str | None = None,
-        id: str | None = None,
-        expectations: list[dict | ExpectationConfiguration] | None = None,
-        suite_parameters: dict | None = None,
-        meta: dict | None = None,
-        expectation_suite: ExpectationSuite | None = None,
-    ) -> ExpectationSuite:
-        """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
-
-        Note that this method can be called by itself or run within the get_validator workflow.
-
-        When run with create_expectation_suite()::
-
-            expectation_suite_name = "genres_movies.fkey"
-            context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-            batch = context.get_batch_list(
-                expectation_suite_name=expectation_suite_name
-            )[0]
-
-
-        When run as part of get_validator()::
-
-            validator = context.get_validator(
-                datasource_name="my_datasource",
-                data_connector_name="whole_table",
-                data_asset_name="my_table",
-                create_expectation_suite_with_name="my_expectation_suite",
-            )
-            validator.expect_column_values_to_be_in_set("c1", [4,5,6])
-
-
-        Args:
-            expectation_suite_name: The name of the suite to create.
-            id: Identifier to associate with this suite.
-            expectations: Expectation Configurations to associate with this suite.
-            suite_parameters: Suite parameters to be substituted when evaluating Expectations.
-            meta: Metadata related to the suite.
-
-        Returns:
-            A new ExpectationSuite built with provided input args.
-
-        Raises:
-            DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
-            ValueError: The arguments provided are invalid.
-        """  # noqa: E501
-        return self._add_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            id=id,
-            expectations=expectations,
-            suite_parameters=suite_parameters,
-            meta=meta,
-            expectation_suite=expectation_suite,
-            overwrite_existing=False,  # `add` does not resolve collisions
-        )
-
-    def _add_expectation_suite(  # noqa: PLR0913
-        self,
-        expectation_suite_name: str | None = None,
-        id: str | None = None,
-        expectations: Sequence[dict | ExpectationConfiguration] | None = None,
-        suite_parameters: dict | None = None,
-        meta: dict | None = None,
-        overwrite_existing: bool = False,
-        expectation_suite: ExpectationSuite | None = None,
-        **kwargs,
-    ) -> ExpectationSuite:
-        if not isinstance(overwrite_existing, bool):
-            raise ValueError("overwrite_existing must be of type bool.")  # noqa: TRY003, TRY004
-
-        self._validate_expectation_suite_xor_expectation_suite_name(
-            expectation_suite, expectation_suite_name
-        )
-
-        if not expectation_suite:
-            # type narrowing
-            assert isinstance(
-                expectation_suite_name, str
-            ), "expectation_suite_name must be specified."
-
-            expectation_suite = ExpectationSuite(
-                name=expectation_suite_name,
-                id=id,
-                expectations=expectations,
-                suite_parameters=suite_parameters,
-                meta=meta,
-            )
-
-        return self._persist_suite_with_store(
-            expectation_suite=expectation_suite,
-            overwrite_existing=overwrite_existing,
-            **kwargs,
-        )
-
-    def _persist_suite_with_store(
-        self,
-        expectation_suite: ExpectationSuite,
-        overwrite_existing: bool,
-        **kwargs,
-    ) -> ExpectationSuite:
-        key = ExpectationSuiteIdentifier(name=expectation_suite.name)
-
-        persistence_fn: Callable
-        if overwrite_existing:
-            persistence_fn = self.expectations_store.add_or_update
-        else:
-            persistence_fn = self.expectations_store.add
-
-        persistence_fn(key=key, value=expectation_suite, **kwargs)
-        return expectation_suite
-
-    @public_api
-    @new_method_or_class(version="0.15.48")
-    def update_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-    ) -> ExpectationSuite:
-        """Update an ExpectationSuite that already exists.
-
-        Args:
-            expectation_suite: The suite to use to update.
-
-        Raises:
-            DataContextError: A suite with the given name does not already exist.
-        """
-        return self._update_expectation_suite(expectation_suite=expectation_suite)
-
-    def _update_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-    ) -> ExpectationSuite:
-        """
-        Like `update_expectation_suite` but without the usage statistics logging.
-        """
-        name = expectation_suite.name
-        id = expectation_suite.id
-        key = self._determine_key_for_suite_update(name=name, id=id)
-        self.expectations_store.update(key=key, value=expectation_suite)
-        return expectation_suite
-
-    def _determine_key_for_suite_update(
-        self, name: str, id: str | None
-    ) -> Union[ExpectationSuiteIdentifier, GXCloudIdentifier]:
-        return ExpectationSuiteIdentifier(name)
-
-    @overload
-    def add_or_update_expectation_suite(
-        self,
-        expectation_suite_name: str,
-        id: str | None = ...,
-        expectations: list[dict | ExpectationConfiguration] | None = ...,
-        suite_parameters: dict | None = ...,
-        meta: dict | None = ...,
-        expectation_suite: None = ...,
-    ) -> ExpectationSuite:
-        """
-        Two possible patterns:
-            - An expectation_suite_name and optional constructor args
-            - An expectation_suite
-        """
-        ...
-
-    @overload
-    def add_or_update_expectation_suite(
-        self,
-        expectation_suite_name: None = ...,
-        id: str | None = ...,
-        expectations: list[dict | ExpectationConfiguration] | None = ...,
-        suite_parameters: dict | None = ...,
-        meta: dict | None = ...,
-        expectation_suite: ExpectationSuite = ...,
-    ) -> ExpectationSuite:
-        """
-        Two possible patterns:
-            - An expectation_suite_name and optional constructor args
-            - An expectation_suite
-        """
-        ...
-
-    @public_api
-    @new_method_or_class(version="0.15.48")
-    def add_or_update_expectation_suite(  # noqa: PLR0913
-        self,
-        expectation_suite_name: str | None = None,
-        id: str | None = None,
-        expectations: list[dict | ExpectationConfiguration] | None = None,
-        suite_parameters: dict | None = None,
-        meta: dict | None = None,
-        expectation_suite: ExpectationSuite | None = None,
-    ) -> ExpectationSuite:
-        """Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.
-
-        Args:
-            expectation_suite_name: The name of the suite to create or replace.
-            id: Identifier to associate with this suite (ignored if updating existing suite).
-            expectations: Expectation Configurations to associate with this suite.
-            suite_parameters: Suite parameters to be substituted when evaluating Expectations.
-            meta: Metadata related to the suite.
-            expectation_suite: The `ExpectationSuite` object you wish to persist.
-
-        Returns:
-            The persisted `ExpectationSuite`.
-        """  # noqa: E501
-        self._validate_expectation_suite_xor_expectation_suite_name(
-            expectation_suite, expectation_suite_name
-        )
-
-        if not expectation_suite:
-            # type narrowing
-            assert isinstance(
-                expectation_suite_name, str
-            ), "expectation_suite_name must be specified."
-
-            expectation_suite = ExpectationSuite(
-                name=expectation_suite_name,
-                id=id,
-                expectations=expectations,
-                suite_parameters=suite_parameters,
-                meta=meta,
-            )
-
-        try:
-            existing = self.get_expectation_suite(expectation_suite_name=expectation_suite.name)
-        except gx_exceptions.DataContextError:
-            # not found
-            return self._add_expectation_suite(expectation_suite=expectation_suite)
-
-        # The suite object must have an ID in order to request a PUT to GX Cloud.
-        expectation_suite.id = existing.id
-        return self._update_expectation_suite(expectation_suite=expectation_suite)
-
-    @public_api
-    def delete_expectation_suite(
-        self,
-        expectation_suite_name: str | None = None,
-        id: str | None = None,
-    ) -> None:
-        """Delete specified expectation suite from data_context expectation store.
-
-        Args:
-            expectation_suite_name: The name of the expectation suite to delete
-            id: The identifier of the expectation suite to delete
-
-        Returns:
-            True for Success and False for Failure.
-        """
-        key = ExpectationSuiteIdentifier(expectation_suite_name)  # type: ignore[arg-type]
-        if not self.expectations_store.has_key(key):
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
-                f"expectation_suite with name {expectation_suite_name} does not exist."
-            )
-        self.expectations_store.remove_key(key)
-
-    @public_api
-    def get_expectation_suite(
-        self,
-        expectation_suite_name: str | None = None,
-        id: str | None = None,
-    ) -> ExpectationSuite:
-        """Get an Expectation Suite by name.
-
-        Args:
-            expectation_suite_name (str): The name of the Expectation Suite
-            id (str): The GX Cloud ID for the Expectation Suite (unused)
-
-        Returns:
-            An existing ExpectationSuite
-
-        Raises:
-            DataContextError: There is no expectation suite with the name provided
-        """
-        if id is not None:
-            # deprecated-v0.15.45
-            warnings.warn(
-                "id is deprecated as of v0.15.45 and will be removed in v0.16. Please use"
-                "expectation_suite_name instead",
-                DeprecationWarning,
-            )
-
-        if expectation_suite_name:
-            key = ExpectationSuiteIdentifier(name=expectation_suite_name)
-        else:
-            raise ValueError("expectation_suite_name must be provided")  # noqa: TRY003
-
-        if self.expectations_store.has_key(key):
-            expectations_schema_dict: dict = self.expectations_store.get(key)
-            # create the ExpectationSuite from constructor
-            expectation_suite = ExpectationSuite(**expectations_schema_dict)
-            if self._include_rendered_content:
-                expectation_suite.render()
-            return expectation_suite
-
-        else:
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
-                f"expectation_suite {expectation_suite_name} not found"
-            )
 
     BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
     FluentDataAssetNames: TypeAlias = List[str]
@@ -2926,21 +2502,3 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.fluent_config.update_datasources(datasources=fluent_datasources)
 
         return self.fluent_config.get_datasources_as_dict()
-
-    @staticmethod
-    def _validate_expectation_suite_xor_expectation_suite_name(
-        expectation_suite: Optional[ExpectationSuite] = None,
-        expectation_suite_name: Optional[str] = None,
-    ) -> None:
-        """
-        Validate that only one of expectation_suite or expectation_suite_name is specified.
-
-        Raises:
-            ValueError: Invalid arguments.
-        """
-        if expectation_suite_name is not None and expectation_suite is not None:
-            raise TypeError(  # noqa: TRY003
-                "Only one of expectation_suite_name or expectation_suite may be specified."
-            )
-        if expectation_suite_name is None and expectation_suite is None:
-            raise TypeError("One of expectation_suite_name or expectation_suite must be specified.")  # noqa: TRY003
