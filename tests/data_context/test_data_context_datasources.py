@@ -46,7 +46,7 @@ def pandas_enabled_datasource_config() -> dict:
     return config
 
 
-@pytest.mark.cloud
+@pytest.mark.unit
 def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
     tmp_path: pathlib.Path,
     data_context_config_with_datasources: DataContextConfig,
@@ -54,9 +54,6 @@ def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
 ) -> None:
     project_path = tmp_path / "my_data_context"
     project_path.mkdir()
-
-    # Clear datasources to improve test performance in DataContext._init_datasources
-    data_context_config_with_datasources.datasources = {}
 
     context = get_context(
         project_config=data_context_config_with_datasources,
@@ -78,9 +75,6 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
     project_path = tmp_path / "my_data_context"
     project_path.mkdir()
 
-    # Clear datasources to improve test performance in DataContext._init_datasources
-    data_context_config_with_datasources.datasources = {}
-
     context = get_context(
         project_config=data_context_config_with_datasources,
         context_root_dir=str(project_path),
@@ -93,17 +87,6 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
 @pytest.mark.unit
 def test_list_datasources() -> None:
     project_config = DataContextConfig(store_backend_defaults=InMemoryStoreBackendDefaults())
-    project_config.datasources = {  # type: ignore[assignment]
-        "my_datasource_name": {
-            "class_name": "Datasource",
-            "data_connectors": {},
-            "execution_engine": {
-                "class_name": "PandasExecutionEngine",
-                "module_name": "great_expectations.execution_engine",
-            },
-            "module_name": "great_expectations.datasource",
-        }
-    }
     context = gx.get_context(project_config=project_config)
 
     datasource_name = "my_experimental_datasource_awaiting_migration"

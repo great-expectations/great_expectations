@@ -201,97 +201,11 @@ def data_context_config_with_datasources(conn_string_password):
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {
-                "Datasource 1: Redshift": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"redshift+psycopg2://no_user:{conn_string_password}@111.11.1.1:1111/foo",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
+            "fluent_datasources": {
                 "Datasource 2: Postgres": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_sqlalchemy": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"postgresql://no_user:{conn_string_password}@some_url:1111/postgres?sslmode=prefer",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 3: MySQL": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_sqlalchemy": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"mysql+pymysql://no_user:{conn_string_password}@some_url:1111/foo",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 4: Pandas": {
-                    # no creds to be masked here, shouldnt be affected
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_runtime_data_connector": {
-                            "batch_identifiers": ["col"],
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "RuntimeDataConnector",
-                        }
-                    },
-                    "execution_engine": {"class_name": "PandasExecutionEngine"},
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 5: Snowflake": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_snowflake": {
-                            "assets": {
-                                "taxi_data": {
-                                    "table_name": "taxi_data",
-                                    "type": "table",
-                                }
-                            },
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"snowflake://no_user:{conn_string_password}@some_url/foo/PUBLIC?role=PUBLIC&warehouse=bar",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 6: Spark": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_runtime_data_connector": {
-                            "batch_identifiers": ["batch", "identifiers", "here"],
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "RuntimeDataConnector",
-                        }
-                    },
-                    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-                    "module_name": "great_expectations.datasource",
-                },
+                    "type": "pandas_filesystem",
+                    "base_directory": "/path/to/trip_data",
+                }
             },
             "stores": {
                 "expectations_store": {
