@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, cast
 
 from great_expectations._docs_decorators import public_api
+from great_expectations.analytics.client import submit as submit_event
+from great_expectations.analytics.events import (
+    ValidationDefinitionCreatedEvent,
+    ValidationDefinitionDeletedEvent,
+)
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.factory.factory import Factory
 from great_expectations.core.validation_definition import ValidationDefinition
@@ -14,7 +19,6 @@ if TYPE_CHECKING:
     )
 
 
-# TODO: Add analytics as needed
 class ValidationDefinitionFactory(Factory[ValidationDefinition]):
     def __init__(self, store: ValidationDefinitionStore) -> None:
         self._store = store
@@ -36,6 +40,12 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
                 f"Cannot add ValidationDefinition with name {validation.name} because it already exists."  # noqa: E501
             )
         self._store.add(key=key, value=validation)
+
+        submit_event(
+            event=ValidationDefinitionCreatedEvent(
+                validation_definition_id=validation.id,
+            )
+        )
 
         return validation
 
@@ -59,6 +69,12 @@ class ValidationDefinitionFactory(Factory[ValidationDefinition]):
 
         key = self._store.get_key(name=validation_definition.name, id=validation_definition.id)
         self._store.remove_key(key=key)
+
+        submit_event(
+            event=ValidationDefinitionDeletedEvent(
+                validation_definition_id=validation_definition.id,
+            )
+        )
 
     @public_api
     @override

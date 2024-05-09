@@ -1,6 +1,7 @@
 # ruff: noqa: I001, E401, B018
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py import_expectation_configuration">
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -28,7 +29,7 @@ context.data_sources.pandas_default.read_csv(
 # </snippet>
 
 
-my_suite = context.add_expectation_suite("my_suite")
+my_suite = context.suites.add(ExpectationSuite(name="my_suite"))
 my_suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
 my_suite.add_expectation(
     gxe.ExpectColumnValuesToBeBetween(

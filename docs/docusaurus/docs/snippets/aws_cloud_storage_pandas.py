@@ -3,10 +3,12 @@ import tempfile
 
 import boto3
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.exceptions.exceptions import DataContextError
 
 client = boto3.client("s3")
 temp_dir = tempfile.TemporaryDirectory()
@@ -245,7 +247,10 @@ assert "name: s3_datasource" in config
 assert "type: pandas_s3" in config
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_validator">
-context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
+try:
+    context.suites.add(ExpectationSuite(name="test_suite"))
+except DataContextError:
+    ...
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_suite"
 )
@@ -259,10 +264,6 @@ validator.expect_column_values_to_not_be_null(column="passenger_count")
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
-# </snippet>
-
-# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py save_expectations">
-validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
 # build datadocs

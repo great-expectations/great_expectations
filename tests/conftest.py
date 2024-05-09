@@ -61,7 +61,6 @@ from great_expectations.data_context.util import (
     file_relative_path,
 )
 from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
-from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -430,8 +429,7 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(autouse=True)
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
-    monkeypatch.setenv("GE_USAGE_STATS", "False")  # v0.18 and before
-    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", False)  # v1.0 and after
+    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", False)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -803,9 +801,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
     context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
@@ -894,61 +889,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
-    datasource_config: str = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_basic_data_connector:
-                class_name: InferredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                default_regex:
-                    pattern: (.*)\\.csv
-                    group_names:
-                        - data_asset_name
-
-            my_special_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users:
-                        base_directory: {data_path}
-                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
-                        group_names:
-                            - name
-                            - timestamp
-                            - size
-
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users: {{}}
-
-            my_runtime_data_connector:
-                module_name: great_expectations.datasource.data_connector
-                class_name: RuntimeDataConnector
-                batch_identifiers:
-                    - pipeline_stage_name
-                    - airflow_run_id
-    """
-
-    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
-
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -962,28 +902,6 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
-    project_dir: str = context.root_directory
-    data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
-
-    datasource_config: str = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_additional_data_connector:
-                class_name: InferredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                default_regex:
-                    pattern: (.*)\\.csv
-                    group_names:
-                        - data_asset_name
-    """
-
-    _: BaseDatasource = context.add_datasource(
-        "my_additional_datasource", **yaml.load(datasource_config)
-    )
     project_manager.set_project(context)
     return context
 
@@ -991,14 +909,15 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 @pytest.fixture
 def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(  # noqa: E501
     sa,
-    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled: AbstractDataContext,  # noqa: E501
     tmp_path_factory,
     test_backends,
     monkeypatch,
 ):
     context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled  # noqa: E501
 
-    project_dir: str = context.root_directory
+    project_dir = context.root_directory
+    assert isinstance(project_dir, str)
     data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
 
     if (
@@ -1019,23 +938,9 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
             db_file_path,
         )
 
-        datasource_config: str = f"""
-        class_name: Datasource
-        execution_engine:
-          class_name: SqlAlchemyExecutionEngine
-          connection_string: sqlite:///{db_file_path}
-        data_connectors:
-          default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-              - default_identifier_name
-          default_inferred_data_connector_name:
-            class_name: InferredAssetSqlDataConnector
-            name: whole_table
-        """
-
-        _: BaseDatasource = context.add_datasource(
-            "my_sqlite_db_datasource", **yaml.load(datasource_config)
+        context.data_sources.add_sqlite(
+            name="my_sqlite_db_datasource",
+            connection_string=f"sqlite:///{db_file_path}",
         )
 
     return context
@@ -1060,9 +965,6 @@ def deterministic_asset_data_connector_context(
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -1110,28 +1012,6 @@ def deterministic_asset_data_connector_context(
     context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
-    datasource_config = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users: {{}}
-        """
-
-    context.add_datasource(name="my_datasource", **yaml.load(datasource_config))
-
     context._save_project_config()
     project_manager.set_project(context)
     return context
@@ -1142,9 +1022,6 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     tmp_path_factory,
     monkeypatch,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
     context_path: str = os.path.join(  # noqa: PTH118
         project_path, FileDataContext.GX_DIR
@@ -1377,8 +1254,6 @@ def empty_context_with_checkpoint(empty_data_context):
 
 @pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = gx.get_context(mode="file", project_root_dir=project_path)
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
@@ -1483,8 +1358,6 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -1516,8 +1389,6 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -1549,8 +1420,6 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
@@ -2187,45 +2056,6 @@ def fds_data_context(
         name="trip_asset_partition_by_event_type",
         query="SELECT * FROM table_partitioned_by_date_column__A",
     )
-    return context
-
-
-@pytest.fixture
-def data_context_with_simple_sql_datasource_for_testing_get_batch(
-    sa, empty_data_context, sqlite_connection_string
-) -> AbstractDataContext:
-    context = empty_data_context
-
-    datasource_config: str = f"""
-class_name: SimpleSqlalchemyDatasource
-connection_string: {sqlite_connection_string}
-introspection:
-    whole_table: {{}}
-
-    daily:
-        partitioner_method: _partition_on_converted_datetime
-        partitioner_kwargs:
-            column_name: date
-            date_format_string: "%Y-%m-%d"
-
-    weekly:
-        partitioner_method: _partition_on_converted_datetime
-        partitioner_kwargs:
-            column_name: date
-            date_format_string: "%Y-%W"
-
-    by_id_dozens:
-        partitioner_method: _partition_on_divided_integer
-        partitioner_kwargs:
-            column_name: id
-            divisor: 12
-"""
-
-    try:
-        context.add_datasource("my_sqlite_db", **yaml.load(datasource_config))
-    except AttributeError:
-        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
-
     return context
 
 

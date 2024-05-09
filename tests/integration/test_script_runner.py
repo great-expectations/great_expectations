@@ -158,13 +158,6 @@ local_tests = [
     #     backend_dependencies=[BackendDependencies.PANDAS],
     # ),
     IntegrationTestFixture(
-        name="how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
         name="expect_column_max_to_be_between_custom",
         user_flow_script="docs/docusaurus/docs/snippets/expect_column_max_to_be_between_custom.py",
         backend_dependencies=[],
@@ -399,36 +392,7 @@ docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 docs_test_matrix += failed_rows_tests
 
-pandas_integration_tests = [
-    IntegrationTestFixture(
-        name="pandas_one_multi_batch_request_one_validator",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/one_multi_batch_request_one_validator.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="pandas_two_batch_requests_two_validators",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/two_batch_requests_two_validators.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="pandas_multiple_batch_requests_one_validator_multiple_steps",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
-        name="pandas_multiple_batch_requests_one_validator_one_step",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-        user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-]
+pandas_integration_tests: List[IntegrationTestFixture] = []
 
 # populate integration_test_matrix with sub-lists
 integration_test_matrix: List[IntegrationTestFixture] = []

@@ -2,7 +2,7 @@ import pathlib
 import tempfile
 
 import great_expectations as gx
-from great_expectations.core.partitioners import PartitionerYearAndMonth
+from great_expectations.core.partitioners import ColumnPartitionerMonthly
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -39,7 +39,7 @@ my_table_asset = my_datasource.get_asset(asset_name="my_table_asset")
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/organize_batches_in_sqlite_datasource.py add_splitter_year_and_month">
-partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+partitioner = ColumnPartitionerMonthly(column_name="pickup_datetime")
 # </snippet>
 
 my_batch_request = my_table_asset.build_batch_request(partitioner=partitioner)

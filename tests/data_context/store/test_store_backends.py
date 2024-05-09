@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import uuid
 from typing import Optional
 from unittest import mock
 
@@ -95,7 +96,7 @@ def check_store_backend_store_backend_id_functionality(
     if store_backend_id:
         assert store_backend.store_backend_id == store_backend_id
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(store_backend.store_backend_id)
+    assert isinstance(store_backend.store_backend_id, uuid.UUID)
     # Check in file stores that the actual file exists
     assert store_backend.has_key(key=(".ge_store_backend_id",))
 
@@ -237,7 +238,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
         project=project,
         base_public_path=base_public_path,
     )
-    store_error_uuid = "00000000-0000-0000-0000-00000000e003"
+    store_error_uuid = uuid.UUID("00000000-0000-0000-0000-00000000e003")
     assert gcs_store_backend_with_base_public_path.store_backend_id == store_error_uuid
 
 
@@ -1338,10 +1339,11 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         resource_type=DataContextVariableSchema.ALL_VARIABLES,
     )
     assert sorted(inline_store_backend.list_keys()) == [
-        ("anonymous_usage_statistics",),
+        ("analytics_enabled",),
         ("checkpoint_store_name",),
         ("config_variables_file_path",),
         ("config_version",),
+        ("data_context_id",),
         ("data_docs_sites",),
         ("datasources",),
         ("expectations_store_name",),

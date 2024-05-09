@@ -51,7 +51,7 @@ module.exports = {
         'GX Cloud is a fully-managed SaaS solution that simplifies deployment, scaling, and collaboration and lets you focus on data validation.',
       buttons: {
         primary: {
-          label: 'Sign up for GX Cloud',
+          label: 'Try GX Cloud',
           href: 'https://greatexpectations.io/cloud',
         },
         secondary: {
@@ -181,7 +181,7 @@ module.exports = {
         },
         {
           to: 'https://greatexpectations.io/cloud',
-          label: 'Sign up for GX Cloud',
+          label: 'Try GX Cloud',
           position: 'left',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access',
