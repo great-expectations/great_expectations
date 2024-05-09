@@ -89,7 +89,7 @@ export default function WasThisHelpful(){
 
                     <form onSubmit={sendReview} className={styles.modalContent}>
 
-                        <div>If you’re not reporting documentation issues such as typos, missing content, or inaccuracies, post your
+                        <div>If you’re not reporting documentation issues such as typos, missing content, or code inaccuracies, post your
                         comments or feedback on <a href="https://discourse.greatexpectations.io/">Discourse</a>.
                         Thank you for helping us improve our documentation.</div>
 
