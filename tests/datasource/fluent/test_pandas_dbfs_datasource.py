@@ -9,6 +9,7 @@ import boto3
 import botocore
 import pytest
 
+from great_expectations.core.partitioners import FileNamePartitionerPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
@@ -96,13 +97,8 @@ def test_construct_pandas_dbfs_datasource(pandas_dbfs_datasource: PandasDBFSData
 def test_add_csv_asset_to_datasource(pandas_dbfs_datasource: PandasDBFSDatasource):
     asset = pandas_dbfs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
 @pytest.mark.filesystem
@@ -110,13 +106,8 @@ def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
-    assert m1 is not None
 
 
 @pytest.mark.filesystem
@@ -125,10 +116,13 @@ def test_get_batch_list_from_fully_specified_batch_request(
 ):
     asset = pandas_dbfs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
 
-    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
+    batching_regex = r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
+    request = asset.build_batch_request(
+        options={"name": "alex", "timestamp": "20200819", "price": "1300"},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
+    )
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -147,7 +141,3 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "price": "1300",
     }
     assert batch.id == "pandas_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-
-    request = asset.build_batch_request({"name": "alex"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 2
