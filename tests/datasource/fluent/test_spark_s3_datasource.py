@@ -235,10 +235,9 @@ def test_test_connection_failures(
     spark_s3_datasource: SparkS3Datasource,
     bad_regex_config: tuple[re.Pattern, str],
 ):
-    regex, test_connection_error_message = bad_regex_config
+    _, test_connection_error_message = bad_regex_config
     csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
-        batching_regex=regex,
     )
     csv_asset._datasource = spark_s3_datasource
     spark_s3_datasource.assets = [
@@ -247,7 +246,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = S3DataConnector(
         datasource_name=spark_s3_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         s3_client=s3_mock,
         bucket=spark_s3_datasource.bucket,
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,

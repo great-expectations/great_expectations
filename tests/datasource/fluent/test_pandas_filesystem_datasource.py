@@ -208,7 +208,7 @@ class TestDynamicPandasAssets:
         with pytest.raises(pydantic.ValidationError) as exc_info:
             asset_class(
                 name="test",
-                base_directory=pathlib.Path(__file__),
+                # base_directory=pathlib.Path(__file__),
                 invalid_keyword_arg="bad",
             )
 
@@ -610,7 +610,7 @@ def datasource_test_connection_error_messages(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
     request,
 ) -> tuple[PandasFilesystemDatasource, TestConnectionError]:
-    batching_regex, test_connection_error = request.param(csv_path=csv_path)
+    _, test_connection_error = request.param(csv_path=csv_path)
     csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
     )
@@ -621,7 +621,6 @@ def datasource_test_connection_error_messages(
     csv_asset._data_connector = FilesystemDataConnector(
         datasource_name=pandas_filesystem_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=batching_regex,
         base_directory=pandas_filesystem_datasource.base_directory,
         data_context_root_directory=pandas_filesystem_datasource.data_context_root_directory,
     )
