@@ -21,6 +21,7 @@ from great_expectations.core.partitioners import (
     ColumnPartitionerMonthly,
     ColumnPartitionerYearly,
     FileNamePartitionerMonthly,
+    FileNamePartitionerPath,
     FileNamePartitionerYearly,
 )
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
@@ -725,11 +726,13 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 ):
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -743,11 +746,13 @@ def test_csv_asset_with_batching_regex_named_parameters(
 ):
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == ("year", "month", "path")
 
 
@@ -757,11 +762,13 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 ):
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == ("batch_request_param_1", "month", "path")
 
 
@@ -771,7 +778,6 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 ):
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
