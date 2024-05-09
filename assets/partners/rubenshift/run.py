@@ -2,6 +2,7 @@ import os
 
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 
 def test_ge():
@@ -45,7 +46,7 @@ def test_ge():
         batch_spec_passthrough={"create_temp_table": False},
     )
 
-    context.create_expectation_suite(expectation_suite_name="test_suite", overwrite_existing=True)
+    context.suites.add(ExpectationSuite(name="test_suite"))
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )

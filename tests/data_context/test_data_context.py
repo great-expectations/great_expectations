@@ -743,7 +743,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.update_expectation_suite(expectation_suite=expectation_suite)
+    context.suites.add(expectation_suite)
     expectation_suite = context.suites.get(name=expectation_suite_name)
 
     expected_rendered_content: List[RenderedAtomicContent] = [
