@@ -15,7 +15,6 @@ from great_expectations.data_context.store.inline_store_backend import (
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     GXCloudConfig,
-    InMemoryStoreBackendDefaults,
 )
 
 
@@ -86,11 +85,10 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
 
 @pytest.mark.unit
 def test_list_datasources() -> None:
-    project_config = DataContextConfig(store_backend_defaults=InMemoryStoreBackendDefaults())
-    context = gx.get_context(project_config=project_config)
+    context = gx.get_context(mode="ephemeral")
 
-    datasource_name = "my_experimental_datasource_awaiting_migration"
-    context.data_sources.add_pandas(datasource_name)
+    context.data_sources.add_pandas("a")
+    context.data_sources.add_pandas("b")
 
     assert len(context.list_datasources()) == 2
 
