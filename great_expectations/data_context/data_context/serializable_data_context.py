@@ -46,7 +46,6 @@ class SerializableDataContext(AbstractDataContext):
         GX_UNCOMMITTED_DIR,
     ]
     GX_DIR: ClassVar[str] = "gx"
-    _LEGACY_GX_DIR: ClassVar[str] = "great_expectations"
     GX_YML: ClassVar[str] = "great_expectations.yml"
     GX_EDIT_NOTEBOOK_DIR: ClassVar[str] = GX_UNCOMMITTED_DIR
 
@@ -306,21 +305,9 @@ class SerializableDataContext(AbstractDataContext):
         else:
             directory_to_search = pathlib.Path(directory_to_search)
 
-        # Ensure backwards compatibility if user is using "great_expectations/" over "gx/"
-        # Starting v0.17.13, "gx/" will be the default
-        return cls._search_gx_dir_for_context_yml(
-            directory_to_search=directory_to_search, gx_dir_name=cls.GX_DIR
-        ) or cls._search_gx_dir_for_context_yml(
-            directory_to_search=directory_to_search, gx_dir_name=cls._LEGACY_GX_DIR
-        )
-
-    @classmethod
-    def _search_gx_dir_for_context_yml(
-        cls, directory_to_search: pathlib.Path, gx_dir_name: str
-    ) -> Optional[str]:
         yml_path: str | None = None
 
-        potential_gx_dir = directory_to_search / gx_dir_name
+        potential_gx_dir = directory_to_search / cls.GX_DIR
         if potential_gx_dir.is_dir():
             potential_yml = potential_gx_dir / cls.GX_YML
             if potential_yml.is_file():

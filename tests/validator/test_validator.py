@@ -75,7 +75,7 @@ def yellow_trip_pandas_data_context(
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
-                FileDataContext._LEGACY_GX_DIR,
+                "great_expectations",
                 FileDataContext.GX_YML,
             ),
         ),
