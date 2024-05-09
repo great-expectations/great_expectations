@@ -27,6 +27,10 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
+from great_expectations.expectations.snowflake_util import (
+    map_sfsqlalchemy_type_to_sf_type,
+    normalize_snowflake_data_type_name,
+)
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -362,6 +366,22 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                         type_module, expected_type
                     )
                     types.append(potential_type)
+                elif type_module.__name__ == "snowflake.sqlalchemy.snowdialect":
+                    normalized_sfsqlalchemy_type_name = (
+                        normalize_snowflake_data_type_name(actual_column_type)
+                    )
+                    normalized_expected_type_name = normalize_snowflake_data_type_name(
+                        expected_type
+                    )
+                    normalized_native_type_name = map_sfsqlalchemy_type_to_sf_type(
+                        normalized_sfsqlalchemy_type_name
+                    )
+                    return {
+                        "success": normalized_native_type_name
+                        == normalized_expected_type_name,
+                        "result": {"observed_value": normalized_native_type_name},
+                    }
+
                 else:
                     potential_type = getattr(type_module, expected_type)
                     types.append(potential_type)
