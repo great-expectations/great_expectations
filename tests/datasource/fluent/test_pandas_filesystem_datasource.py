@@ -15,7 +15,7 @@ from pytest import MonkeyPatch, param
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
-from great_expectations.core.partitioners import FileNamePartitionerMonthly
+from great_expectations.core.partitioners import FileNamePartitionerMonthly, FileNamePartitionerPath
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
@@ -239,7 +239,6 @@ class TestDynamicPandasAssets:
         """
         kwargs: dict[str, Any] = {
             "name": "test",
-            "batching_regex": re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
         }
         kwargs.update(extra_kwargs)
         print(f"extra_kwargs\n{pf(extra_kwargs)}")
@@ -314,10 +313,6 @@ def test_add_csv_asset_with_batching_regex_to_datasource(
         name="csv_asset",
     )
     assert asset.name == "csv_asset"
-    assert asset.batching_regex.match("random string") is None
-    assert asset.batching_regex.match("yellow_tripdata_sample_11D1-22.csv") is None
-    m1 = asset.batching_regex.match("yellow_tripdata_sample_1111-22.csv")
-    assert m1 is not None
 
 
 @pytest.mark.unit
@@ -409,7 +404,10 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -424,7 +422,10 @@ def test_csv_asset_with_batching_regex_named_parameters(
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == ("year", "month", "path")
 
 
@@ -435,7 +436,10 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == ("batch_request_param_1", "month", "path")
 
 
