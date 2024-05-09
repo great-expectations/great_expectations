@@ -71,7 +71,7 @@ export default function WasThisHelpful(){
     return <>
             <hr className={styles.feedbackDivider}/>
             <section className={styles.feedbackCard}>
-                <h3 className={styles.feedbackCardTitle}>Was this helpful?</h3>
+                <h3 className={styles.feedbackCardTitle}>Was this topic helpful?</h3>
                 <div className={styles.feedbackCardActions}>
                     <button disabled={feedbackSent} className={styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.yes')}>Yes</button>
                     <button disabled={feedbackSent} className={styles.feedbackButton} onClick={handleNegativeFeedbackReaction}>No</button>
@@ -89,9 +89,9 @@ export default function WasThisHelpful(){
 
                     <form onSubmit={sendReview} className={styles.modalContent}>
 
-                        Your opinion matters. Share your feedback here to help us improve
-                        the quality of our documentation and ensure a better user experience.
-                        Thank you for taking the time to share your experience.
+                        <div>If you’re not reporting documentation issues such as typos, missing content, or code inaccuracies, post your
+                        comments or feedback on <a href="https://discourse.greatexpectations.io/">Discourse</a>.
+                        Thank you for helping us improve our documentation.</div>
 
                         <div className={styles.textInputs}>
                             <div className={styles.modalTextContainer}>
@@ -125,9 +125,8 @@ export default function WasThisHelpful(){
                                 className={styles.modalTextInput + ' ' + styles.modalTextareaInput}
                                 onChange={handleChange}
                                 required
-                                placeholder="Provide as much detail as possible about the issue you
-                                experienced or where improvement is needed. Detailed feedback helps
-                                us better identify the problem and determine a solution."
+                                placeholder="Provide as much detail as possible about the documentation
+                                 issue you experienced. Detailed feedback helps us get the documentation updated quickly."
                             />
                         </div>
                         <input type="submit" disabled={!formData.description} className={styles.submitButton} value="Submit"/>
