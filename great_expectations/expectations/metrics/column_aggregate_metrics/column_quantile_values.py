@@ -324,7 +324,7 @@ def _get_column_quantiles_sqlite(
 ) -> list:
     """
     The present implementation is somewhat inefficient, because it requires as many calls to
-    "execution_engine.execute_query()" as the number of partitions in the "quantiles" parameter (albeit, typically,
+    "execution_engine.execute_query()" as the number of distributions in the "quantiles" parameter (albeit, typically,
     only a few).  However, this is the only mechanism available for SQLite at the present time (11/17/2021), because
     the analytical processing is not a very strongly represented capability of the SQLite database management system.
     """  # noqa: E501

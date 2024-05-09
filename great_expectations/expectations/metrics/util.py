@@ -1100,34 +1100,34 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
         return params["loc"], params["scale"]
 
 
-def is_valid_continuous_partition_object(partition_object):
-    """Tests whether a given object is a valid continuous partition object. See :ref:`partition_object`.
+def is_valid_continuous_distribution_object(distribution_object):
+    """Tests whether a given object is a valid continuous distribution object. See :ref:`distribution_object`.
 
-    :param partition_object: The partition_object to evaluate
+    :param distribution_object: The distribution_object to evaluate
     :return: Boolean
     """  # noqa: E501
     if (
-        (partition_object is None)
-        or ("weights" not in partition_object)
-        or ("bins" not in partition_object)
+        (distribution_object is None)
+        or ("weights" not in distribution_object)
+        or ("bins" not in distribution_object)
     ):
         return False
 
-    if "tail_weights" in partition_object:
-        if len(partition_object["tail_weights"]) != 2:  # noqa: PLR2004
+    if "tail_weights" in distribution_object:
+        if len(distribution_object["tail_weights"]) != 2:  # noqa: PLR2004
             return False
-        comb_weights = partition_object["tail_weights"] + partition_object["weights"]
+        comb_weights = distribution_object["tail_weights"] + distribution_object["weights"]
     else:
-        comb_weights = partition_object["weights"]
+        comb_weights = distribution_object["weights"]
 
-    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects  # noqa: E501
-    # if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
+    ## TODO: Consider adding this check to migrate to the tail_weights structure of distribution objects  # noqa: E501
+    # if (distribution_object['bins'][0] == -np.inf) or (distribution_object['bins'][-1] == np.inf):
     #     return False
 
     # Expect one more bin edge than weight; all bin edges should be monotonically increasing; weights should sum to one  # noqa: E501
     return (
-        (len(partition_object["bins"]) == (len(partition_object["weights"]) + 1))
-        and np.all(np.diff(partition_object["bins"]) > 0)
+        (len(distribution_object["bins"]) == (len(distribution_object["weights"]) + 1))
+        and np.all(np.diff(distribution_object["bins"]) > 0)
         and np.allclose(np.sum(comb_weights), 1.0)
     )
 

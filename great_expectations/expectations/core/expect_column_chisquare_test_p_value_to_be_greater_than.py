@@ -26,7 +26,7 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(BatchExpectation):
     success_keys = ()
     args_keys = (
         "column",
-        "partition_object",
+        "distribution_object",
         "p",
         "tail_weight_holdout",
     )
