@@ -434,7 +434,7 @@ def basic_fluent_datasource() -> Datasource:
     context = gx.get_context(mode="ephemeral")
     datasource = context.data_sources.add_pandas_filesystem(
         name="pandas_filesystem",
-        base_directory="/path/to/trip_data",  # type: ignore
+        base_directory="/path/to/trip_data",  # type: ignore [arg-type]
     )
     datasource.add_csv_asset(name="my_csv")
     return datasource
