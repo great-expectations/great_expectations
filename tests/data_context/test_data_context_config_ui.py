@@ -41,7 +41,6 @@ def construct_data_context_config():
 
     def _construct_data_context_config(
         data_context_id: str,
-        datasources: Dict,
         config_version: float = _DEFAULT_CONFIG_VERSION,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,  # noqa: E501
         validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
@@ -58,7 +57,6 @@ def construct_data_context_config():
 
         return {
             "config_version": config_version,
-            "datasources": datasources,
             "expectations_store_name": expectations_store_name,
             "validation_results_store_name": validation_results_store_name,
             "suite_parameter_store_name": suite_parameter_store_name,
@@ -1270,7 +1268,6 @@ def test_data_context_config_defaults():
         "config_variables_file_path": None,
         "config_version": 3,
         "data_docs_sites": None,
-        "datasources": {},
         "suite_parameter_store_name": None,
         "expectations_store_name": None,
         "fluent_datasources": {},

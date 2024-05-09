@@ -141,7 +141,6 @@ def basic_data_context_config():
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {},
             "stores": {
                 "expectations_store": {
                     "class_name": "ExpectationsStore",
@@ -252,7 +251,6 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
             "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {},
             "stores": {
                 "default_checkpoint_store": {
                     "class_name": "CheckpointStore",
