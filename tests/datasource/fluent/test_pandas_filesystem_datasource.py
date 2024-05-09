@@ -15,7 +15,7 @@ from pytest import MonkeyPatch, param
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
-from great_expectations.core.partitioners import PartitionerMonthly
+from great_expectations.core.partitioners import FileNamePartitionerMonthly
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
@@ -272,7 +272,7 @@ class TestDynamicPandasAssets:
             )
             .build_batch_request(
                 {"year": "2018"},
-                partitioner=PartitionerMonthly(
+                partitioner=FileNamePartitionerMonthly(
                     regex=re.compile(
                         r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
                     )
@@ -460,7 +460,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     )
     request = asset.build_batch_request(
         {"year": "2018", "month": "04"},
-        partitioner=PartitionerMonthly(
+        partitioner=FileNamePartitionerMonthly(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
@@ -499,7 +499,7 @@ def test_get_batch_list_batch_count(
     )
     request = asset.build_batch_request(
         {"year": year, "month": month, "path": path},
-        partitioner=PartitionerMonthly(
+        partitioner=FileNamePartitionerMonthly(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
@@ -528,7 +528,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     )
     request = asset.build_batch_request(
         {"year": "2018"},
-        partitioner=PartitionerMonthly(
+        partitioner=FileNamePartitionerMonthly(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
@@ -579,7 +579,7 @@ def test_pandas_slice_batch_count(
     batch_request = asset.build_batch_request(
         options={"year": "2019"},
         batch_slice=batch_slice,
-        partitioner=PartitionerMonthly(
+        partitioner=FileNamePartitionerMonthly(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         ),
     )
@@ -650,7 +650,7 @@ def test_csv_asset_batch_metadata(
     assert asset.batch_metadata == asset_specified_metadata
 
     batch_request = asset.build_batch_request(
-        partitioner=PartitionerMonthly(
+        partitioner=FileNamePartitionerMonthly(
             regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
         )
     )
