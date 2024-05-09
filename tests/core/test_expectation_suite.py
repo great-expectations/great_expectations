@@ -83,7 +83,19 @@ class TestInit:
     """Tests related to ExpectationSuite.__init__()"""
 
     @pytest.mark.unit
-    def test_expectation_suite_init_defaults(self, fake_expectation_suite_name: str):
+    def test_instantiate_with_no_context_raises(self):
+        set_context(None)
+        with pytest.raises(gx_exceptions.DataContextRequiredError):
+            ExpectationSuite(
+                name="i've made a huge mistake",
+            )
+
+    @pytest.mark.unit
+    def test_expectation_suite_init_defaults(
+        self,
+        empty_data_context: AbstractDataContext,
+        fake_expectation_suite_name: str,
+    ):
         suite = ExpectationSuite(name=fake_expectation_suite_name)
 
         default_meta = {"great_expectations_version": ge_version}
@@ -97,6 +109,7 @@ class TestInit:
     @pytest.mark.unit
     def test_expectation_suite_init_overrides(
         self,
+        empty_data_context: AbstractDataContext,
         fake_expectation_suite_name: str,
         expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
     ):
@@ -127,6 +140,7 @@ class TestInit:
     @pytest.mark.unit
     def test_expectation_suite_init_overrides_expectations_dict_and_obj(
         self,
+        empty_data_context: AbstractDataContext,
         fake_expectation_suite_name: str,
         expect_column_values_to_be_in_set_col_a_with_meta_dict: dict,
         expect_column_values_to_be_in_set_col_a_with_meta: ExpectationConfiguration,
@@ -361,6 +375,16 @@ class TestCRUDMethods:
 
         # expect that the data context is kept in sync
         context.expectations_store.update.assert_called_once_with(key=store_key, value=suite)
+
+    @pytest.mark.unit
+    def test_save_before_add_raises(self):
+        gx.get_context(mode="ephemeral")
+        suite = ExpectationSuite(
+            name=self.expectation_suite_name,
+        )
+
+        with pytest.raises(gx_exceptions.ExpectationSuiteNotAddedToStoreError):
+            suite.save()
 
     @pytest.mark.filesystem
     def test_filesystem_context_update_suite_adds_ids(self, empty_data_context, expectation):
