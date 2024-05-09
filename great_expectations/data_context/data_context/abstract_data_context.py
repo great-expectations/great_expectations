@@ -130,6 +130,9 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
+BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
+FluentDataAssetNames: TypeAlias = List[str]
+
 logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
 
@@ -1034,15 +1037,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")  # noqa: TRY003
 
-        datasource = self.get_datasource(datasource_name=datasource_name)
-
-        if isinstance(datasource, FluentDatasource):
-            # Note: this results in some unnecessary dict lookups
-            self._delete_fluent_datasource(datasource_name)
-        else:
-            self.datasources.pop(datasource_name, None)
-
-        self.config.datasources.pop(datasource_name, None)
+        self._delete_fluent_datasource(datasource_name)
 
         self._save_project_config()
 
@@ -1498,9 +1493,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return datasource.get_batch_list_from_batch_request(batch_request=result)
 
-    BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
-    FluentDataAssetNames: TypeAlias = List[str]
-
     def _validate_datasource_names(self, datasource_names: list[str] | str | None) -> list[str]:
         if datasource_names is None:
             datasource_names = [datasource["name"] for datasource in self.list_datasources()]
@@ -1513,7 +1505,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasource_names
 
     @public_api
-    def get_available_data_asset_names(  # noqa: PLR0912, C901 - 18
+    def get_available_data_asset_names(
         self,
         datasource_names: str | list[str] | None = None,
         batch_kwargs_generator_names: str | list[str] | None = None,
@@ -1531,8 +1523,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ValueError: `datasource_names` is not None, a string, or list of strings.
         """  # noqa: E501
-        data_asset_names = {}
-        fluent_data_asset_names = {}
+        fluent_data_asset_names: dict[str, BlockConfigDataAssetNames | FluentDataAssetNames] = {}
         datasource_names = self._validate_datasource_names(datasource_names)
 
         # TODO: V1-222 batch_kwargs_generator_names is legacy and should be removed for V1
@@ -1540,33 +1531,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         if batch_kwargs_generator_names is not None:
             if isinstance(batch_kwargs_generator_names, str):
                 batch_kwargs_generator_names = [batch_kwargs_generator_names]
-            if len(batch_kwargs_generator_names) == len(
-                datasource_names
-            ):  # Iterate over both together
-                for idx, datasource_name in enumerate(datasource_names):
+            if len(batch_kwargs_generator_names) == len(datasource_names):
+                for datasource_name in datasource_names:
                     datasource = self.get_datasource(datasource_name)
-                    if isinstance(datasource, FluentDatasource):
-                        fluent_data_asset_names[datasource_name] = sorted(
-                            datasource.get_asset_names()
-                        )
-                    else:
-                        data_asset_names[datasource_name] = (
-                            datasource.get_available_data_asset_names(
-                                batch_kwargs_generator_names[idx]
-                            )
-                        )
+                    fluent_data_asset_names[datasource_name] = sorted(datasource.get_asset_names())
 
             elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
-                if isinstance(datasource, FluentDatasource):
-                    fluent_data_asset_names[datasource_names[0]] = sorted(
-                        datasource.get_asset_names()
-                    )
-
-                else:
-                    data_asset_names[datasource_names[0]] = (
-                        datasource.get_available_data_asset_names(batch_kwargs_generator_names)
-                    )
+                fluent_data_asset_names[datasource_names[0]] = sorted(datasource.get_asset_names())
 
             else:
                 raise ValueError(  # noqa: TRY003
@@ -1577,25 +1549,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             for datasource_name in datasource_names:
                 try:
                     datasource = self.get_datasource(datasource_name)
-                    if isinstance(datasource, FluentDatasource):
-                        fluent_data_asset_names[datasource_name] = sorted(
-                            datasource.get_asset_names()
-                        )
-
-                    else:
-                        data_asset_names[datasource_name] = (
-                            datasource.get_available_data_asset_names()
-                        )
+                    fluent_data_asset_names[datasource_name] = sorted(datasource.get_asset_names())
 
                 except ValueError:
                     # handle the edge case of a non-existent datasource
-                    data_asset_names[datasource_name] = {}
+                    fluent_data_asset_names[datasource_name] = {}
 
-        fluent_and_config_data_asset_names: Dict[Any, Any] = {
-            **data_asset_names,
-            **fluent_data_asset_names,
-        }
-        return fluent_and_config_data_asset_names
+        return fluent_data_asset_names
 
     def build_batch_kwargs(
         self,
