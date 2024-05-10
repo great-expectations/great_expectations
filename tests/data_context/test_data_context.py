@@ -73,35 +73,6 @@ def data_context_with_bad_datasource(tmp_path_factory):
 
 
 @pytest.mark.cloud
-def test_save_expectation_suite_include_rendered_content(
-    empty_cloud_data_context: CloudDataContext,
-):
-    context = empty_cloud_data_context
-
-    expectation_suite: ExpectationSuite = context.suites.add(
-        ExpectationSuite(name="this_data_asset_config_does_not_exist.default")
-    )
-    expectation_suite.expectation_configurations.append(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
-    )
-    for expectation in expectation_suite.expectation_configurations:
-        assert expectation.rendered_content is None
-    expectation_suite.save()
-    expectation_suite_saved: ExpectationSuite = context.suites.get(
-        "this_data_asset_config_does_not_exist.default"
-    )
-    for expectation in expectation_suite_saved.expectation_configurations:
-        assert expectation.rendered_content
-        for rendered_content_block in expectation.rendered_content:
-            assert isinstance(
-                rendered_content_block,
-                RenderedAtomicContent,
-            )
-
-
-@pytest.mark.cloud
 def test_get_expectation_suite_include_rendered_content(
     empty_cloud_data_context: CloudDataContext,
 ):
@@ -772,7 +743,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.update_expectation_suite(expectation_suite=expectation_suite)
+    context.suites.add(expectation_suite)
     expectation_suite = context.suites.get(name=expectation_suite_name)
 
     expected_rendered_content: List[RenderedAtomicContent] = [
