@@ -13,6 +13,7 @@ iterative process for trying and refining expectations.
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_pandas_quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 # </snippet>
 
@@ -44,7 +45,7 @@ assert result.success is False
 expectation.mostly = 0.95
 result = batch.validate(expectation)
 
-suite = context.add_expectation_suite("quickstart")
+suite = context.suites.add(ExpectationSuite(name="quickstart"))
 suite.add_expectation(expectation)
 suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="trip_distance"))
 # </snippet>

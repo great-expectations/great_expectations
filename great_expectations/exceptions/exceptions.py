@@ -48,6 +48,15 @@ class ExpectationSuiteError(DataContextError):
     pass
 
 
+class ExpectationSuiteNotAddedToStoreError(DataContextError):
+    def __init__(self) -> None:
+        super().__init__(
+            "ExpectationSuite must be added to the DataContext store before it can be saved. "
+            "Please call my_data_context.suites.add(my_expectation_suite), "
+            "then try your action again."
+        )
+
+
 class CheckpointError(DataContextError):
     pass
 
@@ -146,6 +155,14 @@ class UnsupportedConfigVersionError(DataContextError):
 class MissingDataContextError(DataContextError):
     def __init__(self) -> None:
         super().__init__("Missing DataContext")
+
+
+class DataContextRequiredError(DataContextError):
+    def __init__(self) -> None:
+        super().__init__(
+            "This action requires an active data context. "
+            "Please call `great_expectations.get_context()` first, then try your action again."
+        )
 
 
 class SuiteParameterError(GreatExpectationsError):

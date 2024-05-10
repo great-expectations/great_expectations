@@ -1,10 +1,10 @@
 import os
+import uuid
 
 import pytest
 
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.util import instantiate_class_from_config
-from tests import test_utils
 
 
 @pytest.fixture(
@@ -87,7 +87,7 @@ def test_metric_store_store_backend_id(in_memory_param_store):
     # Check that store_backend_id exists can be read
     assert in_memory_param_store.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(in_memory_param_store.store_backend_id)
+    assert isinstance(in_memory_param_store.store_backend_id, uuid.UUID)
 
 
 @pytest.mark.unit
