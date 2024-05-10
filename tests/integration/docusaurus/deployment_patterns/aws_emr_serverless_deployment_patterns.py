@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     context_gx = get_context(project_config=config)
     expectation_suite_name = suite_name
-    suite = context_gx.get_expectation_suite(suite_name)
+    suite = context_gx.suites.get(suite_name)
 
     batch_request = RuntimeBatchRequest(
         datasource_name="spark_s3",

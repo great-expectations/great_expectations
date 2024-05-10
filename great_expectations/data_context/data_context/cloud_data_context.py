@@ -3,16 +3,12 @@ from __future__ import annotations
 import logging
 import os
 import uuid
-import warnings
 from typing import (
     TYPE_CHECKING,
-    Callable,
     Dict,
-    List,
     Mapping,
     Optional,
     Union,
-    overload,
 )
 
 from requests import HTTPError, Response
@@ -23,7 +19,6 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.analytics.client import init as init_analytics
 from great_expectations.analytics.config import ENV_CONFIG
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
     _ConfigurationProvider,
@@ -59,19 +54,15 @@ from great_expectations.data_context.types.base import (
     assetConfigSchema,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.datasource_dict import DatasourceDict
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
-from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
+from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.data_context.types.resource_identifiers import (
-        ExpectationSuiteIdentifier,
-    )
     from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
@@ -144,8 +135,9 @@ class CloudDataContext(SerializableDataContext):
     def _init_analytics(self) -> None:
         organization_id = self.ge_cloud_config.organization_id
         init_analytics(
+            enable=self._determine_analytics_enabled(),
             user_id=self._get_cloud_user_id(),
-            data_context_id=uuid.UUID(self._data_context_id),
+            data_context_id=self._data_context_id,
             organization_id=uuid.UUID(organization_id) if organization_id else None,
             oss_id=self._get_oss_id(),
             cloud_mode=True,
@@ -169,11 +161,7 @@ class CloudDataContext(SerializableDataContext):
                 cloud_config=self.ge_cloud_config,
             )
 
-        project_data_context_config = CloudDataContext.get_or_create_data_context_config(
-            project_config
-        )
-
-        return self._apply_global_config_overrides(config=project_data_context_config)
+        return CloudDataContext.get_or_create_data_context_config(project_config)
 
     @override
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
@@ -262,7 +250,13 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def _prepare_v1_config(cls, config: dict) -> dict:
         # Various context variables are no longer top-level keys in V1
-        for var in ("notebooks", "concurrency", "include_rendered_content", "profiler_store_name"):
+        for var in (
+            "notebooks",
+            "concurrency",
+            "include_rendered_content",
+            "profiler_store_name",
+            "anonymous_usage_statistics",
+        ):
             val = config.pop(var, None)
             if val:
                 logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
@@ -527,18 +521,6 @@ class CloudDataContext(SerializableDataContext):
 
         return self._data_asset_store.remove_key(key)
 
-    @override
-    def list_expectation_suite_names(self) -> List[str]:
-        """
-        Lists the available expectation suite names. If in ge_cloud_mode, a list of
-        GX Cloud ids is returned instead.
-        """
-        return [
-            suite_key.resource_name  # type: ignore[union-attr]
-            for suite_key in self.list_expectation_suites()  # type: ignore[union-attr]
-            if suite_key.resource_name  # type: ignore[union-attr]
-        ]
-
     @property
     def ge_cloud_config(self) -> GXCloudConfig:
         return self._cloud_config
@@ -565,14 +547,17 @@ class CloudDataContext(SerializableDataContext):
         return variables
 
     @override
-    def _construct_data_context_id(self) -> str:
+    def _construct_data_context_id(self) -> uuid.UUID | None:
         """
         Choose the id of the currently-configured expectations store, if available and a persistent store.
         If not, it should choose the id stored in DataContextConfig.
         Returns:
             UUID to use as the data_context_id
         """  # noqa: E501
-        return self.ge_cloud_config.organization_id  # type: ignore[return-value]
+        org_id = self.ge_cloud_config.organization_id
+        if org_id:
+            return uuid.UUID(org_id)
+        return None
 
     @override
     def get_config_with_variables_substituted(
@@ -615,193 +600,6 @@ class CloudDataContext(SerializableDataContext):
 
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
-    def create_expectation_suite(  # noqa: C901 - too complex
-        self,
-        expectation_suite_name: str,
-        overwrite_existing: bool = False,
-        **kwargs,
-    ) -> ExpectationSuite:
-        """Build a new expectation suite and save it into the data_context expectation store.
-
-        Args:
-            expectation_suite_name: The name of the expectation_suite to create
-            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
-                already exists.
-
-        Returns:
-            A new (empty) expectation suite.
-        """  # noqa: E501
-        # deprecated-v0.15.48
-        warnings.warn(
-            "create_expectation_suite is deprecated as of v0.15.49 and will be removed in v0.18. "
-            "Please use add_expectation_suite or add_or_update_expectation_suite instead.",
-            DeprecationWarning,
-        )
-        if not isinstance(overwrite_existing, bool):
-            raise ValueError("overwrite_existing must be of type bool.")  # noqa: TRY003, TRY004
-
-        expectation_suite = ExpectationSuite(name=expectation_suite_name)
-
-        existing_suite_names = self.list_expectation_suite_names()
-        cloud_id: Optional[str] = None
-        if expectation_suite_name in existing_suite_names and not overwrite_existing:
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
-                f"expectation_suite '{expectation_suite_name}' already exists. If you would like to overwrite this "  # noqa: E501
-                "expectation_suite, set overwrite_existing=True."
-            )
-        elif expectation_suite_name in existing_suite_names and overwrite_existing:
-            identifiers: Optional[Union[List[str], List[GXCloudIdentifier]]] = (
-                self.list_expectation_suites()
-            )
-            if identifiers:
-                for cloud_identifier in identifiers:
-                    if isinstance(cloud_identifier, GXCloudIdentifier):
-                        cloud_identifier_tuple = cloud_identifier.to_tuple()
-                        name: str = cloud_identifier_tuple[2]
-                        if name == expectation_suite_name:
-                            cloud_id = cloud_identifier_tuple[1]
-                            expectation_suite.id = cloud_id
-
-        key = GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            id=cloud_id,
-            resource_name=expectation_suite_name,
-        )
-
-        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(
-            key, expectation_suite, **kwargs
-        )
-        if isinstance(response, GXCloudResourceRef):
-            expectation_suite.id = response.id
-
-        return expectation_suite
-
-    @overload  # type: ignore[override] # overloads don't match
-    def delete_expectation_suite(
-        self,
-        expectation_suite_name: str = ...,
-        id: None = ...,
-    ) -> bool: ...
-
-    @overload
-    def delete_expectation_suite(
-        self,
-        expectation_suite_name: None = ...,
-        id: str = ...,
-    ) -> bool: ...
-
-    @overload
-    def delete_expectation_suite(
-        self,
-        expectation_suite_name: None = ...,
-        id: None = ...,
-    ) -> bool: ...
-
-    @public_api
-    @override
-    def delete_expectation_suite(
-        self,
-        expectation_suite_name: str | None = None,
-        id: str | None = None,
-    ) -> bool:
-        """Delete specified expectation suite from data_context expectation store.
-
-        Args:
-            expectation_suite_name: The name of the expectation_suite to create
-
-        Returns:
-            True for Success and False for Failure.
-        """
-        key = GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            id=id,
-            resource_name=expectation_suite_name,
-        )
-
-        return self.expectations_store.remove_key(key)
-
-    @override
-    def get_expectation_suite(
-        self,
-        expectation_suite_name: Optional[str] = None,
-        id: Optional[str] = None,
-    ) -> ExpectationSuite:
-        """Get an Expectation Suite by name or GX Cloud ID
-        Args:
-            expectation_suite_name (str): The name of the Expectation Suite
-            id (str): The GX Cloud ID for the Expectation Suite.
-
-        Returns:
-            An existing ExpectationSuite
-
-        Raises:
-            DataContextError: There is no expectation suite with the name provided
-        """
-        if id is None and expectation_suite_name is None:
-            raise ValueError("id and expectation_suite_name cannot both be None")  # noqa: TRY003
-
-        key = GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            id=id,
-            resource_name=expectation_suite_name,
-        )
-
-        try:
-            expectations_schema_dict: dict = self.expectations_store.get(key)
-        except StoreBackendError:
-            raise DataContextError(  # noqa: TRY003
-                f"Unable to load Expectation Suite {key.resource_name or key.id}"
-            )
-
-        # create the ExpectationSuite from constructor
-        expectation_suite = ExpectationSuite(**expectations_schema_dict)
-        if self._include_rendered_content:
-            expectation_suite.render()
-        return expectation_suite
-
-    @override
-    def _save_expectation_suite(
-        self,
-        expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
-        overwrite_existing: bool = True,
-        **kwargs: Optional[dict],
-    ) -> None:
-        id = expectation_suite.id
-        key = GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            id=id,
-            resource_name=expectation_suite.name,
-        )
-
-        if not overwrite_existing:
-            self._validate_suite_unique_constaints_before_save(key)
-
-        self._suite_parameter_dependencies_compiled = False
-        if self._include_rendered_content:
-            expectation_suite.render()
-
-        response = self.expectations_store.set(key, expectation_suite, **kwargs)
-        if isinstance(response, GXCloudResourceRef):
-            expectation_suite.id = response.id
-
-    def _validate_suite_unique_constaints_before_save(self, key: GXCloudIdentifier) -> None:
-        id = key.id
-        if id:
-            if self.expectations_store.has_key(key):
-                raise gx_exceptions.DataContextError(  # noqa: TRY003
-                    f"expectation_suite with GX Cloud ID {id} already exists. "
-                    f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."  # noqa: E501
-                )
-
-        suite_name = key.resource_name
-        existing_suite_names = self.list_expectation_suite_names()
-        if suite_name in existing_suite_names:
-            raise gx_exceptions.DataContextError(  # noqa: TRY003
-                f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "  # noqa: E501
-                "expectation_suite, set overwrite_existing=True."
-            )
-
     @override
     def _init_site_builder_for_data_docs_site_creation(
         self, site_name: str, site_config: dict
@@ -828,23 +626,6 @@ class CloudDataContext(SerializableDataContext):
         )
         return site_builder
 
-    @override
-    def _determine_key_for_suite_update(
-        self, name: str, id: str | None
-    ) -> Union[ExpectationSuiteIdentifier, GXCloudIdentifier]:
-        """
-        Note that this explicitly overriding the `AbstractDataContext` helper method called
-        in `self.update_expectation_suite()`.
-
-        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
-        instead of the usual `ExpectationSuiteIdentifier` for `Store` interaction.
-        """
-        return GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            id=id,
-            resource_name=name,
-        )
-
     @classmethod
     def _load_cloud_backed_project_config(
         cls,
@@ -853,37 +634,6 @@ class CloudDataContext(SerializableDataContext):
         assert cloud_config is not None
         config = cls.retrieve_data_context_config_from_cloud(cloud_config=cloud_config)
         return config
-
-    @override
-    def _persist_suite_with_store(
-        self,
-        expectation_suite: ExpectationSuite,
-        overwrite_existing: bool,
-        **kwargs,
-    ) -> ExpectationSuite:
-        cloud_id: str | None
-        if expectation_suite.id:
-            cloud_id = expectation_suite.id
-        else:
-            cloud_id = None
-
-        key = GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            resource_name=expectation_suite.name,
-            id=cloud_id,
-        )
-
-        persistence_fn: Callable
-        if overwrite_existing:
-            persistence_fn = self.expectations_store.add_or_update
-        else:
-            persistence_fn = self.expectations_store.add
-
-        response = persistence_fn(key=key, value=expectation_suite, **kwargs)
-        if isinstance(response, GXCloudResourceRef):
-            expectation_suite.id = response.id
-
-        return expectation_suite
 
     @override
     def _save_project_config(self) -> None:

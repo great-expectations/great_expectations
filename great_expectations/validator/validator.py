@@ -1066,7 +1066,7 @@ class Validator:
         Raises:
             ValueError: Must configure a Data Context when instantiating the Validator or pass in `filepath`.
         """  # noqa: E501
-        expectation_suite = self.get_expectation_suite(
+        expectation_suite: ExpectationSuite = self.get_expectation_suite(
             discard_failed_expectations,
             discard_result_format_kwargs,
             discard_include_config_kwargs,
@@ -1074,9 +1074,9 @@ class Validator:
             suppress_warnings,
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
+            self._data_context.suites.add(expectation_suite)
             if self.cloud_mode:
-                updated_suite = self._data_context.get_expectation_suite(id=expectation_suite.id)
+                updated_suite = self._data_context.suites.get(expectation_suite.name)
                 self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:
             with open(filepath, "w") as outfile:
@@ -1186,12 +1186,7 @@ class Validator:
             # 3. from data context
             # So, we load them in reverse order
 
-            if data_context is not None:
-                runtime_suite_parameters = data_context.suite_parameter_store.get_bind_params(
-                    run_id
-                )
-            else:
-                runtime_suite_parameters = {}
+            runtime_suite_parameters: dict = {}
 
             if expectation_suite.suite_parameters:
                 runtime_suite_parameters.update(expectation_suite.suite_parameters)

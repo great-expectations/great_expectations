@@ -55,8 +55,8 @@ expectation_suite_name = None
 assert expectation_suite_name, "Please set expectation_suite_name."
 
 # Get or add Expectation Suite
-expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite(
-    expectation_suite_name=expectation_suite_name
+expectation_suite: ExpectationSuite = context.suites.add(
+    ExpectationSuite(name=expectation_suite_name)
 )
 expectation_suite_ge_cloud_id: str = expectation_suite.ge_cloud_id
 
@@ -80,7 +80,7 @@ expectation_configuration = gx.core.ExpectationConfiguration(
 expectation_suite.add_expectation_configuration(expectation_configuration=expectation_configuration)
 
 # Save the Expectation Suite
-context.update_expectation_suite(expectation_suite=expectation_suite)
+expectation_suite.save()
 
 print(f"\n{20*'='}\nExpectation Suite\n{20*'='}\n")
 pprint.pprint(expectation_suite)

@@ -109,7 +109,7 @@ class FileDataContext(SerializableDataContext):
             project_config = FileDataContext._load_file_backed_project_config(
                 context_root_directory=self._context_root_directory,
             )
-        return self._apply_global_config_overrides(config=project_config)
+        return project_config
 
     @override
     def _init_datasource_store(self) -> DatasourceStore:

@@ -93,7 +93,9 @@ def test_api_action_create_payload(mock_context):
         "data_asset_name": "my_schema.my_table",
         "validation_results": [],
     }
-    api_notification_action = APINotificationAction(url="http://www.example.com")
+    api_notification_action = APINotificationAction(
+        name="my_api_notification", url="http://www.example.com"
+    )
     payload = api_notification_action.create_payload(
         "my_schema.my_table", "my_suite", mock_validation_results
     )
@@ -112,21 +114,29 @@ class TestActionSerialization:
     EXAMPLE_URL = "http://www.example.com"
 
     ACTION_INIT_PARAMS = {
-        SlackNotificationAction: {"slack_webhook": EXAMPLE_SLACK_WEBHOOK},
-        MicrosoftTeamsNotificationAction: {"teams_webhook": EXAMPLE_TEAMS_WEBHOOK},
-        OpsgenieAlertAction: {"api_key": EXAMPLE_API_KEY},
+        SlackNotificationAction: {
+            "name": "my_slack_action",
+            "slack_webhook": EXAMPLE_SLACK_WEBHOOK,
+        },
+        MicrosoftTeamsNotificationAction: {
+            "name": "my_teams_action",
+            "teams_webhook": EXAMPLE_TEAMS_WEBHOOK,
+        },
+        OpsgenieAlertAction: {"name": "my_opsgenie_action", "api_key": EXAMPLE_API_KEY},
         EmailAction: {
+            "name": "my_email_action",
             "smtp_address": EXAMPLE_SMTP_ADDRESS,
             "smtp_port": EXAMPLE_SMTP_PORT,
             "receiver_emails": EXAMPLE_EMAILS,
         },
-        UpdateDataDocsAction: {"site_names": EXAMPLE_SITE_NAMES},
-        SNSNotificationAction: {"sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN},
-        APINotificationAction: {"url": EXAMPLE_URL},
+        UpdateDataDocsAction: {"name": "my_data_docs_action", "site_names": EXAMPLE_SITE_NAMES},
+        SNSNotificationAction: {"name": "my_sns_action", "sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN},
+        APINotificationAction: {"name": "my_api_action", "url": EXAMPLE_URL},
     }
 
     SERIALIZED_ACTIONS = {
         SlackNotificationAction: {
+            "name": "my_slack_action",
             "notify_on": "all",
             "notify_with": None,
             "renderer": {
@@ -140,6 +150,7 @@ class TestActionSerialization:
             "type": "slack",
         },
         MicrosoftTeamsNotificationAction: {
+            "name": "my_teams_action",
             "notify_on": "all",
             "renderer": {
                 "class_name": "MicrosoftTeamsRenderer",
@@ -149,6 +160,7 @@ class TestActionSerialization:
             "type": "microsoft",
         },
         OpsgenieAlertAction: {
+            "name": "my_opsgenie_action",
             "api_key": EXAMPLE_API_KEY,
             "notify_on": "failure",
             "priority": "P3",
@@ -161,6 +173,7 @@ class TestActionSerialization:
             "type": "opsgenie",
         },
         EmailAction: {
+            "name": "my_email_action",
             "notify_on": "all",
             "notify_with": None,
             "receiver_emails": EXAMPLE_EMAILS,
@@ -178,17 +191,24 @@ class TestActionSerialization:
             "use_tls": None,
         },
         UpdateDataDocsAction: {
+            "name": "my_data_docs_action",
             "notify_on": "all",
             "site_names": EXAMPLE_SITE_NAMES,
             "type": "update_data_docs",
         },
         SNSNotificationAction: {
+            "name": "my_sns_action",
             "notify_on": "all",
             "sns_message_subject": None,
             "sns_topic_arn": EXAMPLE_SNS_TOPIC_ARN,
             "type": "sns",
         },
-        APINotificationAction: {"type": "api", "notify_on": "all", "url": EXAMPLE_URL},
+        APINotificationAction: {
+            "name": "my_api_action",
+            "type": "api",
+            "notify_on": "all",
+            "url": EXAMPLE_URL,
+        },
     }
 
     @pytest.mark.parametrize(
@@ -278,7 +298,7 @@ class TestV1ActionRun:
     @pytest.mark.unit
     def test_APINotificationAction_run(self, checkpoint_result: CheckpointResult):
         url = "http://www.example.com"
-        action = APINotificationAction(url=url)
+        action = APINotificationAction(name="my_action", url=url)
 
         with mock.patch.object(requests, "post") as mock_post:
             action.run(checkpoint_result=checkpoint_result)
@@ -321,6 +341,7 @@ class TestV1ActionRun:
         self, checkpoint_result: CheckpointResult, emails: str, expected_email_list: list[str]
     ):
         action = EmailAction(
+            name="my_action",
             smtp_address="test",
             smtp_port="587",
             receiver_emails=emails,
@@ -355,7 +376,7 @@ class TestV1ActionRun:
 
     @pytest.mark.unit
     def test_MicrosoftTeamsNotificationAction_run(self, checkpoint_result: CheckpointResult):
-        action = MicrosoftTeamsNotificationAction(teams_webhook="test")
+        action = MicrosoftTeamsNotificationAction(name="my_action", teams_webhook="test")
 
         with mock.patch.object(Session, "post") as mock_post:
             action.run(checkpoint_result=checkpoint_result)
@@ -447,7 +468,9 @@ class TestV1ActionRun:
     def test_OpsgenieAlertAction_run(
         self, checkpoint_result: CheckpointResult, success: bool, message: str
     ):
-        action = OpsgenieAlertAction(api_key="test", routing_key="test", notify_on="all")
+        action = OpsgenieAlertAction(
+            name="my_action", api_key="test", routing_key="test", notify_on="all"
+        )
         checkpoint_result.success = success
 
         with mock.patch.object(Session, "post") as mock_post:
@@ -465,7 +488,9 @@ class TestV1ActionRun:
 
         with mock_not_imported_module(actions, "pypd", mocker):
             mock_pypd_event = actions.pypd.EventV2.create
-            action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="all")
+            action = PagerdutyAlertAction(
+                name="my_action", api_key="test", routing_key="test", notify_on="all"
+            )
             checkpoint_name = checkpoint_result.checkpoint_config.name
 
             checkpoint_result.success = True
@@ -517,7 +542,9 @@ class TestV1ActionRun:
     def test_PagerdutyAlertAction_run_does_not_emit_events(
         self, mock_pypd_event, checkpoint_result: CheckpointResult
     ):
-        action = PagerdutyAlertAction(api_key="test", routing_key="test", notify_on="failure")
+        action = PagerdutyAlertAction(
+            name="my_action", api_key="test", routing_key="test", notify_on="failure"
+        )
 
         checkpoint_result.success = True
         assert action.run(checkpoint_result=checkpoint_result) == {
@@ -528,44 +555,55 @@ class TestV1ActionRun:
 
     @pytest.mark.unit
     def test_SlackNotificationAction_run(self, checkpoint_result: CheckpointResult):
-        action = SlackNotificationAction(slack_webhook="test", notify_on="all")
+        action = SlackNotificationAction(name="my_action", slack_webhook="test", notify_on="all")
 
         with mock.patch.object(Session, "post") as mock_post:
             output = action.run(checkpoint_result=checkpoint_result)
 
-        assert mock_post.call_count == 5  # Sent in batches
-        mock_post.assert_called_with(
+        mock_post.assert_called_once_with(
             url="test",
             headers=None,
             json={
                 "blocks": [
+                    {"text": {"text": mock.ANY, "type": "plain_text"}, "type": "header"},
+                    {"type": "divider"},
                     {
                         "text": {
-                            "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite name*: `suite_a`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
-                            "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *3* of *3* expectations were met",  # noqa: E501
+                            "text": "*Batch Validation Status*: Success :tada:\n"
+                            "*Expectation Suite Name*: `suite_a`\n"
+                            "*Data Asset Name*: `__no_data_asset_name__`\n"
+                            "*Run ID*: `__no_run_id__`\n"
+                            "*Batch ID*: `None`\n"
+                            "*Summary*: *3* of *3* expectations were met",
                             "type": "mrkdwn",
                         },
                         "type": "section",
                     },
+                    {"type": "divider"},
                     {
                         "text": {
-                            "text": "*Batch Validation Status*: Success :tada:\n*Expectation Suite name*: `suite_b`\n*Data Asset Name*: `__no_data_asset_name__`"  # noqa: E501
-                            "\n*Run ID*: `__no_run_id__`\n*Batch ID*: `None`\n*Summary*: *2* of *2* expectations were met",  # noqa: E501
+                            "text": "*Batch Validation Status*: Success :tada:\n"
+                            "*Expectation Suite Name*: `suite_b`\n"
+                            "*Data Asset Name*: `__no_data_asset_name__`\n"
+                            "*Run ID*: `__no_run_id__`\n"
+                            "*Batch ID*: `None`\n"
+                            "*Summary*: *2* of *2* expectations were met",
                             "type": "mrkdwn",
                         },
                         "type": "section",
                     },
+                    {"type": "divider"},
                     {
                         "elements": [
                             {
                                 "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/docs/terms/data_docs",
                                 "type": "mrkdwn",
-                            },
+                            }
                         ],
                         "type": "context",
                     },
                 ],
-                "text": "et",
+                "text": mock.ANY,
             },
         )
 
@@ -577,6 +615,7 @@ class TestV1ActionRun:
         created_subj = sns.create_topic(Name=subj_topic)
         arn = created_subj.get("TopicArn")
         action = SNSNotificationAction(
+            name="my_action",
             sns_topic_arn=arn,
             sns_message_subject="Subject",
         )
@@ -609,7 +648,7 @@ class TestV1ActionRun:
         ]
 
         # Act
-        action = UpdateDataDocsAction(site_names=site_names)
+        action = UpdateDataDocsAction(name="my_action", site_names=site_names)
         res = action.run(checkpoint_result=checkpoint_result)
 
         # Assert
@@ -677,7 +716,7 @@ class TestV1ActionRun:
         ]
 
         # Act
-        action = UpdateDataDocsAction(site_names=site_names)
+        action = UpdateDataDocsAction(name="my_docs_action", site_names=site_names)
         res = action.run(checkpoint_result=checkpoint_result)
 
         # Assert

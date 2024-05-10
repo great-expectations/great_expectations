@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, ClassVar, Type
+from typing import ClassVar, Type
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.store.database_store_backend import (
@@ -16,9 +16,6 @@ from great_expectations.util import (
     load_class,
     verify_dynamic_loading_support,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.core.run_identifier import RunIdentifier
 
 
 class MetricStore(Store):
@@ -89,13 +86,6 @@ class SuiteParameterStore(MetricStore):
             "class_name": self.__class__.__name__,
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
-
-    def get_bind_params(self, run_id: RunIdentifier) -> dict:
-        params = {}
-        for k in self._store_backend.list_keys(run_id.to_tuple()):
-            key = self.tuple_to_key(k)
-            params[key.to_suite_parameter_urn()] = self.get(key)  # type: ignore[attr-defined]
-        return params
 
     @property
     @override
