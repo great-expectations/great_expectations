@@ -37,7 +37,6 @@ logger = logging.getLogger(__file__)
 class DataContextVariableSchema(str, enum.Enum):
     ALL_VARIABLES = "data_context_variables"  # If retrieving/setting the entire config at once
     CONFIG_VERSION = "config_version"
-    DATASOURCES = "datasources"
     FLUENT_DATASOURCES = "fluent_datasources"
     EXPECTATIONS_STORE_NAME = "expectations_store_name"
     VALIDATIONS_STORE_NAME = "validation_results_store_name"
