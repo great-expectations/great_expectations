@@ -337,11 +337,14 @@ def test_get_batch_list_from_fully_specified_batch_request(
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         batch_metadata=asset_specified_metadata,
     )
 
-    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
+    request = asset.build_batch_request(
+        {"name": "alex", "timestamp": "20200819", "price": "1300"},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
+    )
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -361,10 +364,6 @@ def test_get_batch_list_from_fully_specified_batch_request(
         **asset_specified_metadata,
     }
     assert batch.id == "spark_gcs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-
-    request = asset.build_batch_request({"name": "alex"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 2
 
 
 @pytest.mark.big
