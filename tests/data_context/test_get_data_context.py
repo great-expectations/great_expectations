@@ -53,7 +53,6 @@ def test_base_context(clear_env_vars):
         suite_parameter_store_name="suite_parameter_store",
         expectations_store_name="expectations_store",
         checkpoint_store_name="checkpoint_store",
-        datasources={},
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
@@ -115,7 +114,6 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
         suite_parameter_store_name="suite_parameter_store",
         expectations_store_name="expectations_store",
         checkpoint_store_name="checkpoint_store",
-        datasources={},
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
