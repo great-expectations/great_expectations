@@ -1345,7 +1345,6 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         ("config_version",),
         ("data_context_id",),
         ("data_docs_sites",),
-        ("datasources",),
         ("expectations_store_name",),
         ("fluent_datasources",),
         ("plugins_directory",),

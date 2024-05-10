@@ -14,6 +14,7 @@ def test_incomplete_uncommitted(tmp_path):
     uncommitted directory present. We should fail gracefully when config
     variables are missing.
     """
+    breakpoint()
     local_dir = tmp_path / "root"
     fixture_path = file_relative_path(
         __file__,
