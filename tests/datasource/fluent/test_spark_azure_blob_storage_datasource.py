@@ -388,10 +388,9 @@ def test_test_connection_failures(
     spark_abs_datasource: SparkAzureBlobStorageDatasource,
     bad_regex_config: tuple[re.Pattern, str],
 ):
-    regex, test_connection_error_message = bad_regex_config
+    _, test_connection_error_message = bad_regex_config
     csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
-        batching_regex=regex,
     )
     csv_asset._datasource = spark_abs_datasource
     spark_abs_datasource.assets = [
@@ -400,7 +399,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = AzureBlobStorageDataConnector(
         datasource_name=spark_abs_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         azure_client=spark_abs_datasource._azure_client,  # type: ignore[arg-type] # _azure_client could be None
         account_name=csv_asset.datasource._account_name,
         container="my_container",

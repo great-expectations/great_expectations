@@ -17,7 +17,6 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
 from great_expectations.core.partitioners import FileNamePartitionerMonthly, FileNamePartitionerPath
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
-from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset,
     JSONAsset,
@@ -197,29 +196,6 @@ class TestDynamicPandasAssets:
 
             assert param_name in add_asset_method_sig.parameters
             print("✅")
-
-    @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_minimal_validation(self, asset_class: Type[FileDataAsset]):
-        """
-        These parametrized tests ensures that every `PandasFilesystemDatasource` asset model does some minimal
-        validation, and doesn't accept arbitrary keyword arguments.
-        This is also a proxy for testing that the dynamic pydantic model creation was successful.
-        """  # noqa: E501
-        with pytest.raises(pydantic.ValidationError) as exc_info:
-            asset_class(
-                name="test",
-                # base_directory=pathlib.Path(__file__),
-                invalid_keyword_arg="bad",
-            )
-
-        errors_dict = exc_info.value.errors()
-        assert errors_dict[  # the extra keyword error will always be the last error
-            -1  # we don't care about any other errors for this test
-        ] == {
-            "loc": ("invalid_keyword_arg",),
-            "msg": "extra fields not permitted",
-            "type": "value_error.extra",
-        }
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],

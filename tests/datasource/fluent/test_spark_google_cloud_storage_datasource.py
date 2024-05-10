@@ -11,6 +11,7 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.sparkdf_execution_engine
 from great_expectations.compatibility import google
+from great_expectations.core.partitioners import FileNamePartitionerPath
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import (
     SparkGoogleCloudStorageDatasource,
@@ -94,7 +95,6 @@ def csv_asset(
     mock_list_keys.return_value = object_keys
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
     return asset
 
@@ -221,9 +221,11 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     mock_list_keys.return_value = object_keys
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"(.+)_(.+)_(\d{4})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -247,9 +249,11 @@ def test_csv_asset_with_batching_regex_named_parameters(
     mock_list_keys.return_value = object_keys
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "name",
         "timestamp",
@@ -273,9 +277,11 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     mock_list_keys.return_value = object_keys
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "name",
         "batch_request_param_2",
@@ -299,11 +305,14 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     mock_list_keys.return_value = object_keys
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
     )
+    batching_regex = re.compile(r"(.+)_(.+)_(?P<price>\d{4})\.csv")
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
-        asset.build_batch_request({"name": "alex", "timestamp": "1234567890", "price": 1300})
+        asset.build_batch_request(
+            {"name": "alex", "timestamp": "1234567890", "price": 1300},
+            partitioner=FileNamePartitionerPath(regex=batching_regex),
+        )
 
 
 @pytest.mark.big

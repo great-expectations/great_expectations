@@ -994,10 +994,9 @@ def datasource_test_connection_error_messages(
     spark_filesystem_datasource: SparkFilesystemDatasource,
     request,
 ) -> tuple[SparkFilesystemDatasource, TestConnectionError]:
-    batching_regex, test_connection_error = request.param(csv_path=csv_path)
+    _, test_connection_error = request.param(csv_path=csv_path)
     csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
         name="csv_asset",
-        batching_regex=batching_regex,
     )
     csv_asset._datasource = spark_filesystem_datasource
     spark_filesystem_datasource.assets = [
@@ -1006,7 +1005,6 @@ def datasource_test_connection_error_messages(
     csv_asset._data_connector = FilesystemDataConnector(
         datasource_name=spark_filesystem_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=batching_regex,
         base_directory=spark_filesystem_datasource.base_directory,
         data_context_root_directory=spark_filesystem_datasource.data_context_root_directory,
     )

@@ -420,10 +420,9 @@ def test_test_connection_failures(
     pandas_abs_datasource: PandasAzureBlobStorageDatasource,
     bad_regex_config: tuple[re.Pattern, str],
 ):
-    regex, test_connection_error_message = bad_regex_config
+    _, test_connection_error_message = bad_regex_config
     csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
-        batching_regex=regex,
     )
     csv_asset._datasource = pandas_abs_datasource
     pandas_abs_datasource.assets = [
@@ -432,7 +431,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = AzureBlobStorageDataConnector(
         datasource_name=pandas_abs_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         azure_client=pandas_abs_datasource._azure_client,
         account_name=csv_asset.datasource._account_name,
         container="my_container",

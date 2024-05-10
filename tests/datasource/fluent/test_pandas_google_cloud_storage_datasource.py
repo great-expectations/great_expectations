@@ -364,10 +364,9 @@ def test_test_connection_failures(
     pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
     bad_regex_config: tuple[re.Pattern, str],
 ):
-    regex, test_connection_error_message = bad_regex_config
+    _, test_connection_error_message = bad_regex_config
     csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
-        batching_regex=regex,
     )
     csv_asset._datasource = pandas_gcs_datasource
     pandas_gcs_datasource.assets = [
@@ -376,7 +375,6 @@ def test_test_connection_failures(
     csv_asset._data_connector = GoogleCloudStorageDataConnector(
         datasource_name=pandas_gcs_datasource.name,
         data_asset_name=csv_asset.name,
-        batching_regex=re.compile(regex),
         gcs_client=pandas_gcs_datasource._gcs_client,
         bucket_or_name=pandas_gcs_datasource.bucket_or_name,
         file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
