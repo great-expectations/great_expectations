@@ -186,7 +186,7 @@ class DatasourceStore(Store):
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."  # noqa: E501
             )
 
-        datasource_config: FluentDatasource = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
+        datasource_config: FluentDatasource = copy.deepcopy(self.get(datasource_key))  # type: ignore[arg-type]
         datasource_config.name = datasource_name
         return datasource_config
 
