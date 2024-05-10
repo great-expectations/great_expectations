@@ -121,7 +121,7 @@ class FileDataContext(SerializableDataContext):
         # to the convention set by other internal Stores
         store_backend: dict = {
             "class_name": "InlineStoreBackend",
-            "resource_type": DataContextVariableSchema.FLUENT_DATASOURCES,
+            "resource_type": DataContextVariableSchema.DATASOURCES,
         }
         runtime_environment: dict = {
             "root_directory": self.root_directory,
