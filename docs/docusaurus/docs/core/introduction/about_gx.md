@@ -10,7 +10,7 @@ Great Expectations (GX) is the leading tool for validating and documenting your 
 
 Software developers have long known that automated testing is essential for managing complex codebases. GX brings the same discipline, confidence, and acceleration to data science and data engineering teams.
 
-## Why use Great Expectations?
+## Why use GX?
 
 With GX, you can assert what you expect from the data you load and transform, and catch data issues quickly – Expectations are basically unit tests for your data. Not only that, but GX also creates data documentation and data quality reports from those Expectations. Data science and data engineering teams use GX to:
 
@@ -20,7 +20,7 @@ With GX, you can assert what you expect from the data you load and transform, an
 - Streamline knowledge capture from subject-matter experts and make implicit knowledge explicit.
 - Develop rich, shared documentation of their data.
 
-To learn more about how data teams are using GX, see [Case studies from Great Expectations](https://greatexpectations.io/case-studies/).
+To learn more about how data teams are using GX, see [GX case studies](https://greatexpectations.io/case-studies/).
 
 ## Key Features
 
@@ -56,7 +56,7 @@ GX currently supports native execution of Expectations against various Data Sour
 
 GX is highly configurable. It allows you to store all relevant metadata, such as the Expectations and Validation Results in file systems, database backends, as well as cloud storage such as S3 and Google Cloud Storage, by configuring metadata Stores.
 
-## What does Great Expectations NOT do?
+## What does GX NOT do?
 
 GX is NOT a pipeline execution framework.
 
