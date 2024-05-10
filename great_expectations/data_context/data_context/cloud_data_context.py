@@ -249,8 +249,15 @@ class CloudDataContext(SerializableDataContext):
 
     @classmethod
     def _prepare_v1_config(cls, config: dict) -> dict:
+        # FluentDatasources are nested under the "datasources" key and need to be separated
+        # to prevent downstream issues
+        # This should be done before datasources are popped from the config below until
+        # fluent_datasourcse are renamed datasourcess ()
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
+
         # Various context variables are no longer top-level keys in V1
         for var in (
+            "datasources",
             "notebooks",
             "concurrency",
             "include_rendered_content",
@@ -260,10 +267,6 @@ class CloudDataContext(SerializableDataContext):
             val = config.pop(var, None)
             if val:
                 logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
-
-        # FluentDatasources are nested under the "datasources" key and need to be separated
-        # to prevent downstream issues
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
 
         # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
         # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
