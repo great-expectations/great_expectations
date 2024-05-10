@@ -89,6 +89,7 @@ class DatasourceStore(Store):
         """
         return value._json_dict()
 
+    @override
     def deserialize(self, value: dict | FluentDatasource) -> FluentDatasource:
         """
         See parent 'Store.deserialize()' for more information
@@ -193,6 +194,7 @@ class DatasourceStore(Store):
             raise ValueError("Datasource is not a FluentDatasource")  # noqa: TRY003, TRY004
         return datasource
 
+    @override
     def set(
         self,
         key: Union[DataContextKey, None],
