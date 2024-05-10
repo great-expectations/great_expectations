@@ -51,7 +51,7 @@ def test_batch_validate_expectation_suite(
     context, batch = pandas_setup
 
     # Make Expectation Suite
-    suite = context.add_expectation_suite("my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     suite.add_expectation(
         gxe.ExpectColumnValuesToNotBeNull(
             column="vendor_id",
@@ -91,7 +91,7 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
     context, batch = pandas_setup
 
     # Make Expectation Suite
-    suite = context.add_expectation_suite("my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="vendor_id"))
     # Validate
     result = batch.validate(suite)
@@ -141,7 +141,7 @@ def test_batch_validate_change_expectation_suite_result_format(
     # "SUMMARY"" is the default result format
     assert batch.result_format == "SUMMARY"
     # Make Expectation Suite
-    suite = context.add_expectation_suite("my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     suite.add_expectation(
         gxe.ExpectColumnValuesToNotBeNull(
             column="vendor_id",
