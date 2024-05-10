@@ -383,36 +383,6 @@ def mock_response_factory() -> Callable[[JSONData, int, Optional[RequestError]],
     return _make_mock_response
 
 
-def basic_block_config_datasource_config() -> DatasourceConfig:
-    return DatasourceConfig(
-        class_name="Datasource",
-        execution_engine={
-            "class_name": "PandasExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        data_connectors={
-            "tripdata_monthly_configured": {
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector",
-                "base_directory": "/path/to/trip_data",
-                "assets": {
-                    "yellow": {
-                        "class_name": "Asset",
-                        "module_name": "great_expectations.datasource.data_connector.asset",
-                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
-                        "group_names": ["year", "month"],
-                    }
-                },
-            }
-        },
-    )
-
-
-@pytest.fixture
-def block_config_datasource_config() -> DatasourceConfig:
-    return basic_block_config_datasource_config()
-
-
 def basic_fluent_datasource_config() -> dict:
     return {
         "type": "pandas_filesystem",

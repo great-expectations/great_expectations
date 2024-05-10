@@ -6,7 +6,6 @@ plugins_directory: "foo"
 expectations_store_name: expectations_store
 validation_results_store_name: "foo"
 suite_parameter_store_name: "baz"
-datasources: "1"
 stores:
   validation_results_store:
     class_name: ValidationResultsStore
