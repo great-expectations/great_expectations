@@ -46,6 +46,7 @@ def construct_data_context_config():
         validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
         suite_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,  # noqa: E501
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
+        fluent_datasources: Optional[Dict] = None,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
@@ -58,6 +59,7 @@ def construct_data_context_config():
         return {
             "config_version": config_version,
             "expectations_store_name": expectations_store_name,
+            "fluent_datasources": fluent_datasources,
             "validation_results_store_name": validation_results_store_name,
             "suite_parameter_store_name": suite_parameter_store_name,
             "checkpoint_store_name": checkpoint_store_name,
@@ -71,29 +73,9 @@ def construct_data_context_config():
     return _construct_data_context_config
 
 
-@pytest.fixture()
-def default_pandas_datasource_config():
-    return {
-        "my_pandas_datasource": {
-            "batch_kwargs_generators": {
-                "subdir_reader": {
-                    "base_directory": "../data/",
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                }
-            },
-            "class_name": "PandasDatasource",
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-            "module_name": "great_expectations.datasource",
-        }
-    }
-
-
 @pytest.mark.unit
 def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
-    construct_data_context_config, default_pandas_datasource_config
+    construct_data_context_config,
 ):
     """
     What does this test and why?
@@ -109,7 +91,6 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        datasources=default_pandas_datasource_config,
     )
 
     data_context_config_schema = DataContextConfigSchema()
@@ -129,9 +110,7 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
 
 
 @pytest.mark.unit
-def test_DataContextConfig_with_S3StoreBackendDefaults(
-    construct_data_context_config, default_pandas_datasource_config
-):
+def test_DataContextConfig_with_S3StoreBackendDefaults(construct_data_context_config):
     """
     What does this test and why?
     Make sure that using S3StoreBackendDefaults as the store_backend_defaults applies appropriate
@@ -196,7 +175,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_S3_store",
         validation_results_store_name="validation_results_S3_store",
         suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
@@ -223,7 +201,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
 
 @pytest.mark.unit
 def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
-    construct_data_context_config, default_pandas_datasource_config
+    construct_data_context_config,
 ):
     """
     What does this test and why?
@@ -303,7 +281,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_S3_store_name",
         validation_results_store_name="custom_validation_results_S3_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
@@ -330,7 +307,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
 
 @pytest.mark.unit
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults(
-    construct_data_context_config, default_pandas_datasource_config
+    construct_data_context_config,
 ):
     """
     What does this test and why?
@@ -347,9 +324,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
     # Create desired config
     data_context_id = data_context_config.data_context_id
-    desired_config = construct_data_context_config(
-        data_context_id=data_context_id, datasources=default_pandas_datasource_config
-    )
+    desired_config = construct_data_context_config(data_context_id=data_context_id)
     # Add root_directory to stores and data_docs
     desired_config["stores"][desired_config["expectations_store_name"]]["store_backend"][
         "root_directory"
@@ -386,7 +361,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
 @pytest.mark.unit
 def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaults_no_root_directory(  # noqa: E501
-    construct_data_context_config, default_pandas_datasource_config
+    construct_data_context_config,
 ):
     """
     What does this test and why?
@@ -402,9 +377,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
     # Create desired config
     data_context_id = data_context_config.data_context_id
-    desired_config = construct_data_context_config(
-        data_context_id=data_context_id, datasources=default_pandas_datasource_config
-    )
+    desired_config = construct_data_context_config(data_context_id=data_context_id)
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(
@@ -423,9 +396,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
 
 @pytest.mark.unit
-def test_DataContextConfig_with_GCSStoreBackendDefaults(
-    construct_data_context_config, default_pandas_datasource_config
-):
+def test_DataContextConfig_with_GCSStoreBackendDefaults(construct_data_context_config):
     """
     What does this test and why?
     Make sure that using GCSStoreBackendDefaults as the store_backend_defaults applies appropriate
@@ -500,7 +471,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_id,
-        datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_GCS_store",
         validation_results_store_name="validation_results_GCS_store",
         checkpoint_store_name="checkpoint_GCS_store",
@@ -527,7 +497,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
 
 @pytest.mark.unit
 def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
-    construct_data_context_config, default_pandas_datasource_config
+    construct_data_context_config,
 ):
     """
     What does this test and why?
@@ -616,7 +586,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
     }
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_GCS_store_name",
         validation_results_store_name="custom_validation_results_GCS_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
@@ -642,9 +611,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
 
 
 @pytest.mark.unit
-def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
-    construct_data_context_config, default_pandas_datasource_config
-):
+def test_DataContextConfig_with_DatabaseStoreBackendDefaults(construct_data_context_config):
     """
     What does this test and why?
     Make sure that using DatabaseStoreBackendDefaults as the store_backend_defaults applies appropriate
@@ -741,7 +708,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_database_store",
         validation_results_store_name="validation_results_database_store",
         checkpoint_store_name="checkpoint_database_store",
@@ -768,7 +734,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
 
 @pytest.mark.unit
 def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameters(
-    construct_data_context_config, default_pandas_datasource_config
+    construct_data_context_config,
 ):
     """
     What does this test and why?
@@ -894,7 +860,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        datasources=default_pandas_datasource_config,
         expectations_store_name="custom_expectations_database_store_name",
         validation_results_store_name="custom_validation_results_database_store_name",
         suite_parameter_store_name="custom_suite_parameter_store_name",
@@ -922,7 +887,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
 @pytest.mark.unit
 def test_override_general_defaults(
     construct_data_context_config,
-    default_pandas_datasource_config,
 ):
     """
     What does this test and why?
@@ -1078,9 +1042,6 @@ def test_override_general_defaults(
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        datasources={
-            **default_pandas_datasource_config,
-        },
         config_version=999.0,
         expectations_store_name="custom_expectations_store_name",
         validation_results_store_name="custom_validation_results_store_name",
@@ -1179,7 +1140,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        datasources={},
         expectations_store_name="expectations_S3_store",
         validation_results_store_name="validation_results_S3_store",
         checkpoint_store_name="checkpoint_S3_store",
