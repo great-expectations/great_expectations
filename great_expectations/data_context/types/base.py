@@ -1303,12 +1303,6 @@ class DataContextConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
     )
-    datasources = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DatasourceConfigSchema),
-        required=False,
-        allow_none=True,
-    )
     fluent_datasources = fields.Dict(
         keys=fields.Str(),
         required=False,
@@ -1998,8 +1992,6 @@ class DataContextConfig(BaseYamlConfig):
 
     Args:
         config_version (Optional[float]): config version of this DataContext.
-        datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
-            DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
         fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
         expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
         validation_results_store_name (Optional[str]): name of ValidationResultsStore to be used by DataContext.
