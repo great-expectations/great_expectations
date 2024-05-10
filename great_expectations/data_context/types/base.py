@@ -1232,7 +1232,6 @@ class DatasourceConfigSchema(AbstractConfigSchema):
             data["class_name"]  # noqa: E713 # membership check
             in [
                 "SqlAlchemyDatasource",
-                "SimpleSqlalchemyDatasource",
             ]
         ):
             raise gx_exceptions.InvalidConfigError(  # noqa: TRY003

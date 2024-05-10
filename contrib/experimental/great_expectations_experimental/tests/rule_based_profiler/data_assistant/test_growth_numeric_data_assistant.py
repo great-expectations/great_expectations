@@ -343,7 +343,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.suites.add(suite)
 
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
@@ -453,7 +453,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.suites.add(suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_data",
@@ -558,7 +558,7 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.suites.add(expectation_suite=suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_multi_batch_sql_datasource",
