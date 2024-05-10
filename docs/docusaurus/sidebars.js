@@ -13,7 +13,7 @@ module.exports = {
         {
           type: 'doc',
           id: 'core/introduction/gx_overview',
-          label: 'GX Overview'
+          label: 'GX overview'
         },
         {
           type: 'doc',
@@ -23,7 +23,7 @@ module.exports = {
         {
           type: 'doc',
           id: 'core/introduction/community_resources',
-          label: 'Community Resources'
+          label: 'Community resources'
         },
       ],
     },
