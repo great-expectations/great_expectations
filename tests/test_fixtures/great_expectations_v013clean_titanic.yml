@@ -1,41 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
 config_version: 3
-datasources:
-  # For example, this one.
-  mydatasource:
-    class_name: Datasource
-
-    execution_engine:
-      class_name: PandasExecutionEngine
-
-    data_connectors:
-      my_basic_data_connector:
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: ../data
-        default_regex:
-          pattern: (.*).csv
-          group_names:
-            - data_asset_name
-
-      my_other_data_connector:
-        class_name: ConfiguredAssetFilesystemDataConnector
-        base_directory: ../data
-        glob_directive: "*.csv"
-
-        default_regex:
-          pattern: (.+).csv
-          group_names:
-            - name
-        assets:
-          users:
-
-      my_runtime_data_connector:
-        module_name: great_expectations.datasource.data_connector # optional
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - pipeline_stage_name
-          - airflow_run_id
 
 plugins_directory: plugins/
 

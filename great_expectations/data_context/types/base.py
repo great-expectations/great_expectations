@@ -1303,12 +1303,6 @@ class DataContextConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
     )
-    datasources = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DatasourceConfigSchema),
-        required=False,
-        allow_none=True,
-    )
     fluent_datasources = fields.Dict(
         keys=fields.Str(),
         required=False,
@@ -1998,8 +1992,6 @@ class DataContextConfig(BaseYamlConfig):
 
     Args:
         config_version (Optional[float]): config version of this DataContext.
-        datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
-            DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
         fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
         expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
         validation_results_store_name (Optional[str]): name of ValidationResultsStore to be used by DataContext.
@@ -2022,12 +2014,6 @@ class DataContextConfig(BaseYamlConfig):
     def __init__(  # noqa: C901, PLR0913
         self,
         config_version: Optional[float] = None,
-        datasources: Optional[
-            Union[
-                Dict[str, DatasourceConfig],
-                Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
-            ]
-        ] = None,
         fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validation_results_store_name: Optional[str] = None,
@@ -2064,9 +2050,6 @@ class DataContextConfig(BaseYamlConfig):
                 checkpoint_store_name = store_backend_defaults.checkpoint_store_name
 
         self._config_version = config_version
-        if datasources is None:
-            datasources = {}
-        self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
         self.validation_results_store_name = validation_results_store_name

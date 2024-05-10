@@ -4,7 +4,9 @@ import pathlib
 import subprocess
 
 import great_expectations as gx
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -22,41 +24,29 @@ if not gcp_project:
         "Environment Variable GE_TEST_GCP_PROJECT is required to run GCS integration tests"
     )
 
-
-datasource_config = r"""
-name: my_datasource
-class_name: Datasource
-module_name: great_expectations.datasource
-execution_engine:
-  module_name: great_expectations.execution_engine
-  class_name: PandasExecutionEngine
-data_connectors:
-  default_inferred_data_connector_name:
-    class_name: InferredAssetFilesystemDataConnector
-    base_directory: ../data/
-    default_regex:
-      group_names:
-        - data_asset_name
-      pattern: (.*)\.csv
-"""
-datasource = context.add_datasource(**yaml.load(datasource_config))
+datasource = context.data_sources.add_pandas_filesystem(
+    name="my_datasource",
+    base_directory="../data/",  # type: ignore
+)
+asset = datasource.add_csv_asset("yellow_tripdata_samples")
 
 expectation_suite_name = "my_expectation_suite"
-context.suites.add(ExpectationSuite(name=expectation_suite_name))
+suite = context.suites.add(ExpectationSuite(name=expectation_suite_name))
 
 checkpoint_name = "my_checkpoint"
-checkpoint = context.add_or_update_checkpoint(
-    name=checkpoint_name,
-    validations=[
-        {
-            "batch_request": {
-                "datasource_name": "my_datasource",
-                "data_connector_name": "default_inferred_data_connector_name",
-                "data_asset_name": "yellow_tripdata_sample_2019-01",
-            },
-            "expectation_suite_name": expectation_suite_name,
-        }
-    ],
+checkpoint = context.checkpoints.add(
+    Checkpoint(
+        name=checkpoint_name,
+        validation_definitions=[
+            ValidationDefinition(
+                name="my_validation_definition",
+                expectation_suite=suite,
+                data=asset.add_batch_definition_path(
+                    name="2019-01", path="yellow_tripdata_sample_2019-01.csv"
+                ),
+            )
+        ],
+    )
 )
 
 # run the checkpoint twice to create two validations

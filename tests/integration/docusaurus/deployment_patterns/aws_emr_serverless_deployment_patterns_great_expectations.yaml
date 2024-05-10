@@ -1,25 +1,4 @@
 config_version: 3.0
-datasources:
-  spark_s3:
-    module_name: great_expectations.datasource
-    class_name: Datasource
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: SparkDFExecutionEngine
-    data_connectors:
-      default_inferred_data_connector_name:
-        class_name: InferredAssetS3DataConnector
-        bucket: bucket_name
-        prefix: data_folder/
-        default_regex:
-          pattern: (.*)
-          group_names:
-            - data_asset_name
-      default_runtime_data_connector_name:
-        batch_identifiers:
-          - runtime_batch_identifier_name
-        module_name: great_expectations.datasource.data_connector
-        class_name: RuntimeDataConnector
 config_variables_file_path: great_expectations/uncommitted/config_variables.yml
 
 plugins_directory: great_expectations/plugins/

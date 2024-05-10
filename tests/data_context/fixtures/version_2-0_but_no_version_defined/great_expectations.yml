@@ -11,11 +11,6 @@
 # NORMALLY THIS config_version line is not commented out:
 #config_version: 2.0
 
-# Datasources tell Great Expectations where your data lives and how to get it.
-# You can use the CLI command `great_expectations datasource new` to help you
-# add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
-datasources: {}
-
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
