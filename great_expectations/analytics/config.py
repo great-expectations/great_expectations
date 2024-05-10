@@ -13,7 +13,7 @@ DUMMY_UUID = UUID("00000000-0000-0000-0000-000000000000")
 
 
 class _EnvConfig(BaseSettings):
-    gx_analytics_enabled: bool = True
+    gx_analytics_enabled: bool = False
 
     gx_posthog_debug: bool = False
     gx_posthog_host: HttpUrl = "https://posthog.greatexpectations.io"  # type: ignore[assignment] # default will be coerced

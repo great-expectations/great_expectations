@@ -57,6 +57,7 @@ def init(  # noqa: PLR0913
         conf["oss_id"] = oss_id
     update_config(config=Config(cloud_mode=cloud_mode, **conf))
 
+    assert not enable, "We should not be invoking Posthog in CI!"
     posthog.disabled = not enable
     if enable:
         posthog.debug = ENV_CONFIG.posthog_debug
