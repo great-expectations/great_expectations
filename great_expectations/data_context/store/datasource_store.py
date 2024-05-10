@@ -165,7 +165,7 @@ class DatasourceStore(Store):
         datasource_config_dict["id"] = datasource_id
         return datasource_config_dict
 
-    def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig | FluentDatasource:
+    def retrieve_by_name(self, datasource_name: str) -> FluentDatasource:
         """Retrieves a DatasourceConfig persisted in the store by it's given name.
 
         Args:
@@ -186,7 +186,7 @@ class DatasourceStore(Store):
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."  # noqa: E501
             )
 
-        datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
+        datasource_config: FluentDatasource = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
         datasource_config.name = datasource_name
         return datasource_config
 
