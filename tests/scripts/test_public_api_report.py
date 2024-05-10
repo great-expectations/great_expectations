@@ -241,7 +241,6 @@ class TestDocExampleParser:
             "example_public_staticmethod",
             "example_staticmethod",
             "Something",
-            "SqlAlchemyExecutionEngine",
         }
 
 
@@ -308,7 +307,7 @@ def test_parse_docs_contents_for_class_names(
 ):
     assert parse_docs_contents_for_class_names(
         file_contents={sample_markdown_doc_with_yaml_file_contents}
-    ) == {"Something", "SqlAlchemyExecutionEngine"}
+    ) == {"Something"}
 
 
 def test_get_shortest_dotted_path(monkeypatch):
