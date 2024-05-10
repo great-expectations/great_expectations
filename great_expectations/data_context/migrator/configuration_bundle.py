@@ -19,10 +19,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,  # noqa: TCH001
 )
-from great_expectations.data_context.types.base import (
-    DataContextConfigSchema,
-    DatasourceConfigSchema,
-)
+from great_expectations.data_context.types.base import DataContextConfigSchema
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -113,10 +110,6 @@ class ConfigurationBundleSchema(Schema):
 
     data_context_id = fields.String(allow_none=False, required=True)
     data_context_variables = fields.Nested(DataContextConfigSchema, allow_none=False)
-    datasources = fields.List(
-        fields.Nested(DatasourceConfigSchema, allow_none=True, required=True),
-        required=True,
-    )
     expectation_suites = fields.List(
         fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True),
         required=True,

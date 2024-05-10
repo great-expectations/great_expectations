@@ -52,7 +52,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     GXCloudConfig,
     assetConfigSchema,
-    datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -491,7 +490,6 @@ class CloudDataContext(SerializableDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
         return datasource_store
 

@@ -399,10 +399,6 @@ class DatasourceError(DataContextError):
         super().__init__(self.message)
 
 
-class DatasourceConfigurationError(DatasourceError):
-    pass
-
-
 class DatasourceInitializationError(DatasourceError):
     pass
 
