@@ -1408,7 +1408,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
 def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
     inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.DATASOURCES,
+        resource_type=DataContextVariableSchema.FLUENT_DATASOURCES,
     )
 
     datasource_config_a = empty_data_context.data_sources.add_pandas(name="a")
