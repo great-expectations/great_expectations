@@ -189,7 +189,6 @@ def test_cloud_context_with_in_memory_config_overrides(
             suite_parameter_store_name="new_suite_parameter_store",
             expectations_store_name="new_expectations_store",
             checkpoint_store_name="new_checkpoint_store",
-            datasources={},
             stores={
                 "new_expectations_store": {"class_name": "ExpectationsStore"},
                 "new_checkpoint_store": {"class_name": "CheckpointStore"},

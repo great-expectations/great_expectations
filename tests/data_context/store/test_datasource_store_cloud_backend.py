@@ -5,9 +5,6 @@ import pytest
 
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import DatasourceStore
-from great_expectations.data_context.types.base import (
-    DatasourceConfig,
-)
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import StoreBackendError
 from tests.data_context.conftest import MockResponse
@@ -17,7 +14,6 @@ from tests.data_context.conftest import MockResponse
 def test_datasource_store_get_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    block_config_datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
     """What does this test and why?
@@ -25,7 +21,7 @@ def test_datasource_store_get_by_id(
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource.
     """  # noqa: E501
 
-    id: str = "example_id_normally_uuid"
+    id = "8706d5fb-0432-47ab-943c-daa824210e99"
 
     key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
 
@@ -34,7 +30,12 @@ def test_datasource_store_get_by_id(
             {
                 "data": {
                     "id": id,
-                    "attributes": {"datasource_config": block_config_datasource_config},
+                    "attributes": {
+                        "datasource_config": {
+                            "name": "my_datasource",
+                            "type": "pandas",
+                        }
+                    },
                 }
             },
             200,
@@ -54,7 +55,6 @@ def test_datasource_store_get_by_id(
 def test_datasource_store_get_by_name(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    block_config_datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
     """What does this test and why?
@@ -62,7 +62,7 @@ def test_datasource_store_get_by_name(
     The datasource store when used with a cloud backend should emit the correct request when getting a datasource with a name.
     """  # noqa: E501
 
-    id: str = "example_id_normally_uuid"
+    id = "8706d5fb-0432-47ab-943c-daa824210e99"
     datasource_name: str = "example_datasource_config_name"
 
     def mocked_response(*args, **kwargs):
@@ -70,7 +70,12 @@ def test_datasource_store_get_by_name(
             {
                 "data": {
                     "id": id,
-                    "attributes": {"datasource_config": block_config_datasource_config},
+                    "attributes": {
+                        "datasource_config": {
+                            "name": "my_datasource",
+                            "type": "pandas",
+                        }
+                    },
                 }
             },
             200,
