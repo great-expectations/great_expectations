@@ -58,17 +58,6 @@ def build_in_code_data_context_project_config(
         config_version=2,
         plugins_directory=None,
         config_variables_file_path=None,
-        datasources={
-            "my_datasource_name": {
-                "class_name": "Datasource",
-                "data_connectors": {},
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "module_name": "great_expectations.datasource",
-            }
-        },
         stores=stores,
         checkpoint_store_name="checkpoint_store",
         expectations_store_name="expectations_S3_store",

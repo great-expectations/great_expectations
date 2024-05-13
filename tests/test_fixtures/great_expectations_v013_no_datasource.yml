@@ -1,7 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
 config_version: 3
-datasources:
 
 plugins_directory: plugins/
 

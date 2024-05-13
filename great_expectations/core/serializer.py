@@ -10,9 +10,9 @@ A base implementation (DictConfigSerializer) is provided if no modification need
 
 Typical usage example:
 
-datasource_config = DatasourceConfig(...)
-serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-serialized_value = serializer.serialize(datasource_config)
+config = ModelConfig(...)
+serializer = DictConfigSerializer(schema=modelConfigSchema)
+serialized_value = serializer.serialize(config)
 """  # noqa: E501
 
 import abc

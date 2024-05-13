@@ -63,7 +63,7 @@ from great_expectations.exceptions.exceptions import DataContextError
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.datasource.new_datasource import BaseDatasource
+    from great_expectations.datasource.fluent import Datasource as FluentDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
@@ -249,8 +249,15 @@ class CloudDataContext(SerializableDataContext):
 
     @classmethod
     def _prepare_v1_config(cls, config: dict) -> dict:
+        # FluentDatasources are nested under the "datasources" key and need to be separated
+        # to prevent downstream issues
+        # This should be done before datasources are popped from the config below until
+        # fluent_datasourcse are renamed datasourcess ()
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
+
         # Various context variables are no longer top-level keys in V1
         for var in (
+            "datasources",
             "notebooks",
             "concurrency",
             "include_rendered_content",
@@ -260,10 +267,6 @@ class CloudDataContext(SerializableDataContext):
             val = config.pop(var, None)
             if val:
                 logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
-
-        # FluentDatasources are nested under the "datasources" key and need to be separated
-        # to prevent downstream issues
-        config["fluent_datasources"] = _extract_fluent_datasources(config)
 
         # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
         # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
@@ -513,7 +516,7 @@ class CloudDataContext(SerializableDataContext):
         return data_asset_store
 
     def _delete_asset(self, id: str) -> bool:
-        """Delete a DataAsset. Cloud will also update the corresponding DatasourceConfig."""
+        """Delete a DataAsset. Cloud will also update the corresponding Datasource."""
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.DATA_ASSET,
             id=id,
@@ -658,13 +661,9 @@ class CloudDataContext(SerializableDataContext):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: BaseDatasource | FluentDatasource | None = None,
+        datasource: FluentDatasource | None = None,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | None:
-        if datasource and not isinstance(datasource, FluentDatasource):
-            raise TypeError(  # noqa: TRY003
-                "Adding block-style or legacy datasources in a Cloud-backed environment is no longer supported; please use fluent-style datasources moving forward."  # noqa: E501
-            )
+    ) -> FluentDatasource | None:
         return super()._add_datasource(
             name=name,
             initialize=initialize,
