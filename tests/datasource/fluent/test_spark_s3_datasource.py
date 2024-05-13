@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.partitioners import FileNamePartitionerPath
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import SparkS3Datasource
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
@@ -120,11 +121,13 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 ):
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"(.+)_(.+)_(\d{4})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "batch_request_param_1",
         "batch_request_param_2",
@@ -139,11 +142,13 @@ def test_csv_asset_with_batching_regex_named_parameters(
 ):
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "name",
         "timestamp",
@@ -158,11 +163,13 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 ):
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
         header=True,
         infer_schema=True,
     )
-    options = asset.get_batch_parameters_keys()
+    batching_regex = re.compile(r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv")
+    options = asset.get_batch_parameters_keys(
+        partitioner=FileNamePartitionerPath(regex=batching_regex)
+    )
     assert options == (
         "name",
         "batch_request_param_2",
@@ -177,7 +184,6 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 ):
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
         header=True,
         infer_schema=True,
     )
