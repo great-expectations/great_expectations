@@ -807,7 +807,8 @@ def test_get_batch_list_from_directory_one_batch(
         header=True,
         infer_schema=True,
     )
-    request = asset.build_batch_request()
+    batch_def = asset.add_batch_definition_whole_directory(name="test batch def")
+    request = batch_def.build_batch_request()
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
 
@@ -836,7 +837,8 @@ def test_get_batch_list_from_directory_merges_files(
         header=True,
         infer_schema=True,
     )
-    request = asset.build_batch_request()
+    batch_def = asset.add_batch_definition_whole_directory("test batch def")
+    request = batch_def.build_batch_request()
     batches = asset.get_batch_list_from_batch_request(request)
     batch_data = batches[0].data
     # The directory contains 12 files with 10,000 records each so the batch data
