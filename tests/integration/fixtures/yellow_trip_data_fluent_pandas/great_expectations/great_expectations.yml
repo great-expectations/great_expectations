@@ -1,5 +1,4 @@
 config_version: 3.0
-datasources: {}
 config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: plugins/
 stores:
@@ -21,12 +20,6 @@ stores:
       class_name: TupleFilesystemStoreBackend
       suppress_store_backend_id: true
       base_directory: checkpoints/
-  profiler_store:
-    class_name: ProfilerStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      suppress_store_backend_id: true
-      base_directory: profilers/
 expectations_store_name: expectations_store
 validation_results_store_name: validation_results_store
 suite_parameter_store_name: suite_parameter_store

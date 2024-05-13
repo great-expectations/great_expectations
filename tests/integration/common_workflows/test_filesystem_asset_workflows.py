@@ -18,10 +18,10 @@ from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.validation_definition import ValidationDefinition
 from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset as PandasCSVAsset,
 )
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
     CSVAsset as SparkCSVAsset,
 )
 

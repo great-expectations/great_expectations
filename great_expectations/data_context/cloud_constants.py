@@ -28,7 +28,6 @@ class GXCloudRESTResource(str, Enum):
     EXPECTATION = "expectation"
     EXPECTATION_SUITE = "expectation_suite"
     EXPECTATION_VALIDATION_RESULT = "expectation_validation_result"
-    PROFILER = "profiler"
     RENDERED_DATA_DOC = "rendered_data_doc"
     VALIDATION_RESULT = "validation_result"
     VALIDATION_DEFINITION = "validation_definition"

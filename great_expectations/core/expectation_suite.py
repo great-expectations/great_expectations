@@ -1,27 +1,21 @@
 from __future__ import annotations
 
-import datetime
 import json
 import logging
-import pprint
 import uuid
 from copy import deepcopy
 from typing import (
     TYPE_CHECKING,
-    Any,
-    Callable,
     Dict,
     List,
     Optional,
     Sequence,
-    Tuple,
     TypeVar,
     Union,
 )
 
-from marshmallow import Schema, ValidationError, fields, post_dump, post_load, pre_dump
+from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 
-import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import (
@@ -35,23 +29,16 @@ from great_expectations.analytics.events import (
     ExpectationSuiteExpectationUpdatedEvent,
 )
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.suite_parameters import (
-    _deduplicate_suite_parameter_dependencies,
-)
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
-    nested_update,
-    parse_string_to_datetime,
 )
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
 )
 from great_expectations.types import SerializableDictDot
-from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
@@ -273,84 +260,6 @@ class ExpectationSuite(SerializableDictDot):
             "Please use ExpectationSuite.expectations instead."
         )
 
-    def add_citation(  # noqa: PLR0913
-        self,
-        comment: str,
-        batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
-        batch_definition: Optional[dict] = None,
-        batch_spec: Optional[dict] = None,
-        batch_kwargs: Optional[dict] = None,
-        batch_markers: Optional[dict] = None,
-        batch_parameters: Optional[dict] = None,
-        profiler_config: Optional[dict] = None,
-        citation_date: Optional[Union[str, datetime.datetime]] = None,
-    ) -> None:
-        if "citations" not in self.meta:
-            self.meta["citations"] = []
-
-        citation_date_obj: datetime.datetime
-        _citation_date_types = (type(None), str, datetime.datetime)
-
-        if citation_date is None:
-            citation_date_obj = datetime.datetime.now(datetime.timezone.utc)
-        elif isinstance(citation_date, str):
-            citation_date_obj = parse_string_to_datetime(datetime_string=citation_date)
-        elif isinstance(citation_date, datetime.datetime):
-            citation_date_obj = citation_date
-        else:
-            raise gx_exceptions.GreatExpectationsTypeError(  # noqa: TRY003
-                f"citation_date should be of type - {' '.join(str(t) for t in _citation_date_types)}"  # noqa: E501
-            )
-
-        citation: Dict[str, Any] = {
-            "citation_date": citation_date_obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-            "batch_request": batch_request,
-            "batch_definition": batch_definition,
-            "batch_spec": batch_spec,
-            "batch_kwargs": batch_kwargs,
-            "batch_markers": batch_markers,
-            "batch_parameters": batch_parameters,
-            "profiler_config": profiler_config,
-            "comment": comment,
-        }
-        gx.util.filter_properties_dict(properties=citation, clean_falsy=True, inplace=True)
-        self.meta["citations"].append(citation)
-
-    # noinspection PyPep8Naming
-    def isEquivalentTo(self, other):
-        """
-        ExpectationSuite equivalence relies only on expectations and suite parameters. It does not include:
-        - data_asset_name
-        - name
-        - meta
-        """  # noqa: E501
-        if not isinstance(other, self.__class__):
-            if isinstance(other, dict):
-                try:
-                    # noinspection PyNoneFunctionAssignment,PyTypeChecker
-                    other_dict: dict = expectationSuiteSchema.load(other)
-                    other = ExpectationSuite(**other_dict)
-                except ValidationError:
-                    logger.debug(
-                        "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "  # noqa: E501
-                        "dict other could not be instantiated as an ExpectationConfiguration"
-                    )
-                    return NotImplemented
-            else:
-                # Delegate comparison to the other instance
-                return NotImplemented
-
-        exp_count_is_equal = len(self.expectations) == len(other.expectations)
-
-        exp_configs_are_equal = all(
-            mine.isEquivalentTo(theirs)
-            for (mine, theirs) in zip(
-                self.expectation_configurations, other.expectation_configurations
-            )
-        )
-
-        return exp_count_is_equal and exp_configs_are_equal
-
     def __eq__(self, other):
         """ExpectationSuite equality ignores instance identity, relying only on properties."""
         if not isinstance(other, self.__class__):
@@ -407,46 +316,6 @@ class ExpectationSuite(SerializableDictDot):
         myself["meta"] = convert_to_json_serializable(myself["meta"])
         return myself
 
-    def get_suite_parameter_dependencies(self) -> dict:
-        dependencies: dict = {}
-        for expectation in self.expectations:
-            t = expectation.configuration.get_suite_parameter_dependencies()
-            nested_update(dependencies, t)
-
-        dependencies = _deduplicate_suite_parameter_dependencies(dependencies)
-        return dependencies
-
-    def get_citations(
-        self,
-        sort: bool = True,
-        require_batch_kwargs: bool = False,
-        require_batch_request: bool = False,
-        require_profiler_config: bool = False,
-    ) -> List[Dict[str, Any]]:
-        citations: List[Dict[str, Any]] = self.meta.get("citations", [])
-        if require_batch_kwargs:
-            citations = self._filter_citations(citations=citations, filter_key="batch_kwargs")
-        if require_batch_request:
-            citations = self._filter_citations(citations=citations, filter_key="batch_request")
-        if require_profiler_config:
-            citations = self._filter_citations(citations=citations, filter_key="profiler_config")
-        if not sort:
-            return citations
-        return self._sort_citations(citations=citations)
-
-    @staticmethod
-    def _filter_citations(citations: List[Dict[str, Any]], filter_key) -> List[Dict[str, Any]]:
-        citations_with_bk: List[Dict[str, Any]] = []
-        for citation in citations:
-            if filter_key in citation and citation.get(filter_key):
-                citations_with_bk.append(citation)
-
-        return citations_with_bk
-
-    @staticmethod
-    def _sort_citations(citations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        return sorted(citations, key=lambda x: x["citation_date"])
-
     @public_api
     def remove_expectation(
         self,
@@ -477,7 +346,7 @@ class ExpectationSuite(SerializableDictDot):
         if expectation_configuration is None and id is None:
             raise TypeError("Must provide either expectation_configuration or id")  # noqa: TRY003
 
-        found_expectation_indexes = self.find_expectation_indexes(
+        found_expectation_indexes = self._find_expectation_indexes(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
             id=id,  # type: ignore[arg-type]
@@ -507,26 +376,7 @@ class ExpectationSuite(SerializableDictDot):
             ]
             return result
 
-    def remove_all_expectations_of_type(
-        self, expectation_types: Union[List[str], str]
-    ) -> List[ExpectationConfiguration]:
-        if isinstance(expectation_types, str):
-            expectation_types = [expectation_types]
-
-        removed_expectations = [
-            expectation.configuration
-            for expectation in self.expectations
-            if expectation.expectation_type in expectation_types
-        ]
-        self.expectations = [
-            expectation
-            for expectation in self.expectations
-            if expectation.expectation_type not in expectation_types
-        ]
-
-        return removed_expectations
-
-    def find_expectation_indexes(
+    def _find_expectation_indexes(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
@@ -580,42 +430,6 @@ class ExpectationSuite(SerializableDictDot):
 
         return match_indexes
 
-    @public_api
-    def find_expectations(
-        self,
-        expectation_configuration: Optional[ExpectationConfiguration] = None,
-        match_type: str = "domain",
-        id: Optional[str] = None,
-    ) -> List[ExpectationConfiguration]:
-        """
-        Find Expectations matching the given ExpectationConfiguration on the given match_type.
-        If a id is provided, match_type is ignored and only Expectations with matching
-        id are returned.
-
-        Args:
-            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against to
-                find the index of any matching Expectation Configurations on the suite.
-            match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
-                on the data evaluated by that expectation, 'success' to match based on all configuration parameters
-                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
-                 based on all configuration parameters
-            id: Great Expectations Cloud id
-
-        Returns: A list of matching ExpectationConfigurations
-        """  # noqa: E501
-
-        if expectation_configuration is None and id is None:
-            raise TypeError("Must provide either expectation_configuration or id")  # noqa: TRY003
-
-        found_expectation_indexes: List[int] = self.find_expectation_indexes(
-            expectation_configuration, match_type, id
-        )
-
-        if len(found_expectation_indexes) > 0:
-            return [self.expectations[idx].configuration for idx in found_expectation_indexes]
-
-        return []
-
     def _add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -640,8 +454,8 @@ class ExpectationSuite(SerializableDictDot):
             One match if overwrite_existing = False
         """  # noqa: E501
 
-        found_expectation_indexes = self.find_expectation_indexes(
-            expectation_configuration, match_type
+        found_expectation_indexes = self._find_expectation_indexes(
+            expectation_configuration=expectation_configuration, match_type=match_type
         )
 
         if len(found_expectation_indexes) > 1:
@@ -756,286 +570,6 @@ class ExpectationSuite(SerializableDictDot):
             raise gx_exceptions.InvalidExpectationConfigurationError(  # noqa: TRY003
                 f"Could not add expectation; provided configuration is not valid: {e.message}"
             ) from e
-
-    @public_api
-    def show_expectations_by_domain_type(self) -> None:
-        """Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
-
-        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
-        """  # noqa: E501
-        expectation_configurations_by_domain: Dict[str, List[ExpectationConfiguration]] = (
-            self.get_grouped_and_ordered_expectations_by_domain_type()
-        )
-
-        domain_type: str
-        expectation_configurations: List[ExpectationConfiguration]
-        for (
-            domain_type,
-            expectation_configurations,
-        ) in expectation_configurations_by_domain.items():
-            pprint.pprint(object=MetricDomainTypes(domain_type).value.capitalize())
-            self.show_expectations_by_expectation_type(
-                expectation_configurations=expectation_configurations
-            )
-
-    def show_expectations_by_expectation_type(
-        self,
-        expectation_configurations: Optional[List[ExpectationConfiguration]] = None,
-    ) -> None:
-        """Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
-
-        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
-        """  # noqa: E501
-        if expectation_configurations is None:
-            expectation_configurations = (
-                self.get_grouped_and_ordered_expectations_by_expectation_type()
-            )
-
-        expectation_configuration: ExpectationConfiguration
-        domain_type: MetricDomainTypes
-        kwargs: dict
-        pprint_objects: List[dict] = []
-        for expectation_configuration in expectation_configurations:
-            domain_type = expectation_configuration.get_domain_type()
-            kwargs = expectation_configuration.kwargs
-            pprint_objects.append(
-                {
-                    expectation_configuration.expectation_type: {
-                        "domain": domain_type.value,
-                        **kwargs,
-                    }
-                }
-            )
-        pprint.pprint(
-            object=pprint_objects,
-            indent=2,
-        )
-
-    def get_grouped_and_ordered_expectations_by_domain_type(
-        self,
-    ) -> Dict[str, List[ExpectationConfiguration]]:
-        """
-        Returns "ExpectationConfiguration" list in predetermined order by passing appropriate methods for retrieving
-        "ExpectationConfiguration" lists by corresponding "domain_type" (with "table" first; then "column", and so on).
-        """  # noqa: E501
-        expectation_configurations_by_domain: Dict[str, List[ExpectationConfiguration]] = (
-            self._get_expectations_by_domain_using_accessor_method(
-                domain_type=MetricDomainTypes.TABLE.value,
-                accessor_method=self.get_table_expectations,
-            )
-        )
-        expectation_configurations_by_domain.update(
-            self._get_expectations_by_domain_using_accessor_method(
-                domain_type=MetricDomainTypes.COLUMN.value,
-                accessor_method=self.get_column_expectations,
-            )
-        )
-        expectation_configurations_by_domain.update(
-            self._get_expectations_by_domain_using_accessor_method(
-                domain_type=MetricDomainTypes.COLUMN_PAIR.value,
-                accessor_method=self.get_column_pair_expectations,
-            )
-        )
-        expectation_configurations_by_domain.update(
-            self._get_expectations_by_domain_using_accessor_method(
-                domain_type=MetricDomainTypes.MULTICOLUMN.value,
-                accessor_method=self.get_multicolumn_expectations,
-            )
-        )
-        return expectation_configurations_by_domain
-
-    def get_grouped_and_ordered_expectations_by_expectation_type(
-        self,
-    ) -> List[ExpectationConfiguration]:
-        """
-        Returns "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
-        """  # noqa: E501
-        table_expectation_configurations: List[ExpectationConfiguration] = sorted(
-            self.get_table_expectations(),
-            key=lambda element: element["expectation_type"],
-        )
-        column_expectation_configurations: List[ExpectationConfiguration] = sorted(
-            self.get_column_expectations(),
-            key=lambda element: element["expectation_type"],
-        )
-        column_pair_expectation_configurations: List[ExpectationConfiguration] = sorted(
-            self.get_column_pair_expectations(),
-            key=lambda element: element["expectation_type"],
-        )
-        multicolumn_expectation_configurations: List[ExpectationConfiguration] = sorted(
-            self.get_multicolumn_expectations(),
-            key=lambda element: element["expectation_type"],
-        )
-        return (
-            table_expectation_configurations
-            + column_expectation_configurations
-            + column_pair_expectation_configurations
-            + multicolumn_expectation_configurations
-        )
-
-    def get_table_expectations(self) -> List[ExpectationConfiguration]:
-        """Return a list of table expectations."""
-        expectation_configurations: List[ExpectationConfiguration] = [
-            exp.configuration for exp in self.expectations
-        ]
-        expectation_configurations = list(
-            filter(
-                lambda element: element.get_domain_type() == MetricDomainTypes.TABLE,
-                expectation_configurations,
-            )
-        )
-
-        expectation_configuration: ExpectationConfiguration
-        for expectation_configuration in expectation_configurations:
-            expectation_configuration.kwargs = deep_filter_properties_iterable(
-                properties=expectation_configuration.kwargs, clean_falsy=True
-            )
-
-        return expectation_configurations
-
-    def get_column_expectations(self) -> List[ExpectationConfiguration]:
-        """Return a list of column map expectations."""
-        expectation_configurations: List[ExpectationConfiguration] = [
-            exp.configuration for exp in self.expectations
-        ]
-        expectation_configurations = list(
-            filter(
-                lambda element: element.get_domain_type() == MetricDomainTypes.COLUMN,
-                expectation_configurations,
-            )
-        )
-
-        expectation_configuration: ExpectationConfiguration
-        kwargs: dict
-        column_name: str
-        for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(
-                properties=expectation_configuration.kwargs, clean_falsy=True
-            )
-            column_name = kwargs.pop("column")
-            expectation_configuration.kwargs = {"column": column_name, **kwargs}
-
-        return expectation_configurations
-
-    # noinspection PyPep8Naming
-    def get_column_pair_expectations(self) -> List[ExpectationConfiguration]:
-        """Return a list of column_pair map expectations."""
-        expectation_configurations: List[ExpectationConfiguration] = [
-            exp.configuration for exp in self.expectations
-        ]
-
-        expectation_configurations = list(
-            filter(
-                lambda element: element.get_domain_type() == MetricDomainTypes.COLUMN_PAIR,
-                expectation_configurations,
-            )
-        )
-
-        expectation_configuration: ExpectationConfiguration
-        kwargs: dict
-        column_A_name: str
-        column_B_name: str
-        for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(
-                properties=expectation_configuration.kwargs, clean_falsy=True
-            )
-            column_A_name = kwargs.pop("column_A")
-            column_B_name = kwargs.pop("column_B")
-            expectation_configuration.kwargs = {
-                "column_A": column_A_name,
-                "column_B": column_B_name,
-                **kwargs,
-            }
-
-        return expectation_configurations
-
-    def get_multicolumn_expectations(self) -> List[ExpectationConfiguration]:
-        """Return a list of multicolumn map expectations."""
-        expectation_configurations: List[ExpectationConfiguration] = [
-            exp.configuration for exp in self.expectations
-        ]
-
-        expectation_configurations = list(
-            filter(
-                lambda element: element.get_domain_type() == MetricDomainTypes.MULTICOLUMN,
-                expectation_configurations,
-            )
-        )
-
-        expectation_configuration: ExpectationConfiguration
-        kwargs: dict
-        column_list: str
-        for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(
-                properties=expectation_configuration.kwargs, clean_falsy=True
-            )
-            column_list = kwargs.pop("column_list")
-            expectation_configuration.kwargs = {"column_list": column_list, **kwargs}
-
-        return expectation_configurations
-
-    def get_grouped_and_ordered_expectations_by_column(
-        self, expectation_type_filter: Optional[str] = None
-    ) -> Tuple[Dict[str, List[ExpectationConfiguration]], List[str]]:
-        expectations_by_column: Dict[str, List[ExpectationConfiguration]] = {}
-        ordered_columns: List[str] = []
-
-        column: str
-        expectation: ExpectationConfiguration
-        expectation_configurations = [exp.configuration for exp in self.expectations]
-        for expectation in expectation_configurations:
-            if "column" in expectation.kwargs:
-                column = expectation.kwargs["column"]
-            else:
-                column = "_nocolumn"
-
-            if column not in expectations_by_column:
-                expectations_by_column[column] = []
-
-            if (
-                expectation_type_filter is None
-                or expectation.expectation_type == expectation_type_filter
-            ):
-                expectations_by_column[column].append(expectation)
-
-            # if possible, get the order of columns from expect_table_columns_to_match_ordered_list
-            if (
-                expectation.expectation_type == "expect_table_columns_to_match_ordered_list"
-                and expectation.kwargs.get("column_list")
-            ):
-                exp_column_list: List[str] = expectation.kwargs["column_list"]
-                if exp_column_list and len(exp_column_list) > 0:
-                    ordered_columns = exp_column_list
-
-        # Group items by column
-        sorted_columns = sorted(list(expectations_by_column.keys()))
-
-        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column  # noqa: E501
-        # names from entire evr, else use alphabetic sort
-        if set(sorted_columns) == set(ordered_columns):
-            return expectations_by_column, ordered_columns
-
-        return expectations_by_column, sorted_columns
-
-    @staticmethod
-    def _get_expectations_by_domain_using_accessor_method(
-        domain_type: str, accessor_method: Callable
-    ) -> Dict[str, List[ExpectationConfiguration]]:
-        expectation_configurations_by_domain: Dict[str, List[ExpectationConfiguration]] = {}
-
-        expectation_configurations: List[ExpectationConfiguration]
-        expectation_configuration: ExpectationConfiguration
-        for expectation_configuration in accessor_method():
-            expectation_configurations = expectation_configurations_by_domain.get(  # type: ignore[assignment]
-                domain_type
-            )
-            if expectation_configurations is None:
-                expectation_configurations = []
-                expectation_configurations_by_domain[domain_type] = expectation_configurations
-
-            expectation_configurations.append(expectation_configuration)
-
-        return expectation_configurations_by_domain
 
     def render(self) -> None:
         """

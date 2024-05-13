@@ -29,6 +29,7 @@ from textwrap import dedent
 
 import great_expectations as gx
 import pandas as pd
+from great_expectations.core.expectation_suite import ExpectationSuite
 import pendulum
 
 # The DAG object; we'll need this to instantiate a DAG
@@ -103,7 +104,7 @@ with DAG(
         data_asset = datasource.add_dataframe_asset(name="my_df", dataframe=df)
         my_batch_request = data_asset.build_batch_request()
         print("Validating data...")
-        context.add_or_update_expectation_suite("my_expectation_suite")
+        context.suites.add(ExpectationSuite(name="my_expectation_suite"))
         validator = context.get_validator(
             batch_request=my_batch_request,
             expectation_suite_name="my_expectation_suite",

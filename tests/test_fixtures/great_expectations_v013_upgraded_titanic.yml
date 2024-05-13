@@ -1,18 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
 config_version: 3
-datasources:
-  # For example, this one.
-  mydatasource:
-    class_name: PandasDatasource
-    data_asset_type:
-      module_name: great_expectations.dataset
-      class_name: PandasDataset
-    batch_kwargs_generators:
-      # The name default is read if no datasource or generator is specified
-      mygenerator:
-        class_name: SubdirReaderBatchKwargsGenerator
-        base_directory: ../data
 plugins_directory: plugins/
 
 suite_parameter_store_name: suite_parameter_store
@@ -52,6 +40,5 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
-anonymous_usage_statistics:
-  data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
-  enabled: true
+data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
+analytics_enabled: true

@@ -27,6 +27,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.datasource.fluent.interfaces import Datasource
 
 yaml = YAMLHandler()
 
@@ -140,7 +141,6 @@ def basic_data_context_config():
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {},
             "stores": {
                 "expectations_store": {
                     "class_name": "ExpectationsStore",
@@ -162,11 +162,8 @@ def basic_data_context_config():
                 },
             },
             "data_docs_sites": {},
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
+            "analytics_enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         }
     )
 
@@ -203,97 +200,11 @@ def data_context_config_with_datasources(conn_string_password):
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {
-                "Datasource 1: Redshift": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"redshift+psycopg2://no_user:{conn_string_password}@111.11.1.1:1111/foo",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
+            "fluent_datasources": {
                 "Datasource 2: Postgres": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_sqlalchemy": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"postgresql://no_user:{conn_string_password}@some_url:1111/postgres?sslmode=prefer",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 3: MySQL": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_sqlalchemy": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"mysql+pymysql://no_user:{conn_string_password}@some_url:1111/foo",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 4: Pandas": {
-                    # no creds to be masked here, shouldnt be affected
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_runtime_data_connector": {
-                            "batch_identifiers": ["col"],
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "RuntimeDataConnector",
-                        }
-                    },
-                    "execution_engine": {"class_name": "PandasExecutionEngine"},
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 5: Snowflake": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_snowflake": {
-                            "assets": {
-                                "taxi_data": {
-                                    "table_name": "taxi_data",
-                                    "type": "table",
-                                }
-                            },
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"snowflake://no_user:{conn_string_password}@some_url/foo/PUBLIC?role=PUBLIC&warehouse=bar",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 6: Spark": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_runtime_data_connector": {
-                            "batch_identifiers": ["batch", "identifiers", "here"],
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "RuntimeDataConnector",
-                        }
-                    },
-                    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-                    "module_name": "great_expectations.datasource",
-                },
+                    "type": "pandas_filesystem",
+                    "base_directory": "/path/to/trip_data",
+                }
             },
             "stores": {
                 "expectations_store": {
@@ -316,11 +227,8 @@ def data_context_config_with_datasources(conn_string_password):
                 },
             },
             "data_docs_sites": {},
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
+            "analytics_enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         }
     )
 
@@ -343,7 +251,6 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
             "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {},
             "stores": {
                 "default_checkpoint_store": {
                     "class_name": "CheckpointStore",
@@ -387,11 +294,8 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                 },
             },
             "data_docs_sites": {},
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
+            "analytics_enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         }
     )
 
@@ -479,36 +383,6 @@ def mock_response_factory() -> Callable[[JSONData, int, Optional[RequestError]],
     return _make_mock_response
 
 
-def basic_block_config_datasource_config() -> DatasourceConfig:
-    return DatasourceConfig(
-        class_name="Datasource",
-        execution_engine={
-            "class_name": "PandasExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        data_connectors={
-            "tripdata_monthly_configured": {
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector",
-                "base_directory": "/path/to/trip_data",
-                "assets": {
-                    "yellow": {
-                        "class_name": "Asset",
-                        "module_name": "great_expectations.datasource.data_connector.asset",
-                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
-                        "group_names": ["year", "month"],
-                    }
-                },
-            }
-        },
-    )
-
-
-@pytest.fixture
-def block_config_datasource_config() -> DatasourceConfig:
-    return basic_block_config_datasource_config()
-
-
 def basic_fluent_datasource_config() -> dict:
     return {
         "type": "pandas_filesystem",
@@ -524,21 +398,19 @@ def basic_fluent_datasource_config() -> dict:
     }
 
 
+def basic_fluent_datasource() -> Datasource:
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_pandas_filesystem(
+        name="pandas_filesystem",
+        base_directory="/path/to/trip_data",  # type: ignore [arg-type]
+    )
+    datasource.add_csv_asset(name="my_csv")
+    return datasource
+
+
 @pytest.fixture
 def fluent_datasource_config() -> dict:
     return basic_fluent_datasource_config()
-
-
-@pytest.fixture(
-    params=[
-        basic_block_config_datasource_config,
-        basic_fluent_datasource_config,
-    ]
-)
-def parametrized_datasource_configs(
-    request,
-) -> DatasourceConfig | dict:
-    return request.param()
 
 
 @pytest.fixture

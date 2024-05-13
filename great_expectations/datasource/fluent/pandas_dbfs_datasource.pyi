@@ -6,7 +6,22 @@ from typing import Hashable, Iterable, Literal, Optional, Sequence, Union
 from great_expectations._docs_decorators import public_api as public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import PandasFilesystemDatasource, Sorter
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
+    CSVAsset,
+    ExcelAsset,
+    FeatherAsset,
+    HDFAsset,
+    HTMLAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
+)
+from great_expectations.datasource.fluent.data_connector import (
     DBFSDataConnector as DBFSDataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import (
@@ -22,21 +37,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset,
-    ExcelAsset,
-    FeatherAsset,
-    HDFAsset,
-    HTMLAsset,
-    JSONAsset,
-    ORCAsset,
-    ParquetAsset,
-    PickleAsset,
-    SASAsset,
-    SPSSAsset,
-    StataAsset,
-    XMLAsset,
 )
 
 logger: Logger

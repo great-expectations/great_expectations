@@ -9,21 +9,21 @@ from moto import mock_s3
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.partitioners import PartitionerYearly
+from great_expectations.core.partitioners import FileNamePartitionerYearly
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
     sanitize_prefix_for_gcs_and_s3,
 )
 from great_expectations.datasource.fluent import BatchRequest
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
+    from great_expectations.datasource.fluent.data_connector import (
         DataConnector,
     )
 
@@ -165,7 +165,7 @@ def test_return_all_batch_definitions_unsorted():
         # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list()
 
-    partitioner = PartitionerYearly(regex=batching_regex)
+    partitioner = FileNamePartitionerYearly(regex=batching_regex)
 
     # with empty options
     unsorted_batch_definition_list: List[LegacyBatchDefinition] = (

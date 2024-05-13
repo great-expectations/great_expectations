@@ -1,9 +1,8 @@
 import os
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 
 def test_ge():
@@ -35,8 +34,6 @@ def test_ge():
     # In normal usage you'd set your path directly in the yaml above.
     datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
-    context.test_yaml_config(yaml.dump(datasource_config))
-
     context.add_datasource(**datasource_config)
 
     # First test for RuntimeBatchRequest using a query
@@ -49,7 +46,7 @@ def test_ge():
         batch_spec_passthrough={"create_temp_table": False},
     )
 
-    context.create_expectation_suite(expectation_suite_name="test_suite", overwrite_existing=True)
+    context.suites.add(ExpectationSuite(name="test_suite"))
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )

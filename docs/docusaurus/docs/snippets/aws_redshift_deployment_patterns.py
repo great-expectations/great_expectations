@@ -1,12 +1,14 @@
 import pathlib
 import tempfile
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 
 # This utility is not for general use. It is only to support testing.
+from great_expectations.exceptions.exceptions import DataContextError
 from tests.test_utils import get_redshift_connection_url
 
 temp_dir = tempfile.TemporaryDirectory()
@@ -31,7 +33,6 @@ pop_stores = [
     "checkpoint_store",
     "suite_parameter_store",
     "validation_results_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -111,7 +112,6 @@ pop_stores = [
     "suite_parameter_store",
     "expectations_store",
     "expectations_S3_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -249,7 +249,12 @@ query_asset = datasource.add_query_asset(
 # <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py add_suite_and_get_validator">
 request = table_asset.build_batch_request()
 
-context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
+try:
+    context.suites.add(ExpectationSuite(name="test_suite"))
+except DataContextError:
+    # If the suite already exists, we will get an error. We can ignore it.
+    ...
+
 
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_suite"
@@ -263,8 +268,4 @@ validator.expect_column_values_to_not_be_null(column="passenger_count")
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
-# </snippet>
-
-# <snippet name="docs/docusaurus/docs/snippets/aws_redshift_deployment_patterns.py save_expectations">
-validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>

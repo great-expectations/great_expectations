@@ -149,7 +149,6 @@ stages:
 
             displayName: "pytest"
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
 
           - task: PublishTestResults@2
@@ -207,7 +206,6 @@ stages:
 
             displayName: "pytest"
             env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
 
           - task: PublishTestResults@2

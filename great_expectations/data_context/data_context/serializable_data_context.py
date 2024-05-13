@@ -22,8 +22,6 @@ from great_expectations.data_context.templates import (
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
-    AnonymizedUsageStatisticsConfig,
-    DataContextConfig,
     DataContextConfigDefaults,
 )
 from great_expectations.data_context.util import file_relative_path
@@ -46,7 +44,6 @@ class SerializableDataContext(AbstractDataContext):
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
-        DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.VALIDATION_DEFINITIONS_BASE_DIRECTORY.value,
         GX_UNCOMMITTED_DIR,
     ]
@@ -105,63 +102,6 @@ class SerializableDataContext(AbstractDataContext):
             context_root_dir = pathlib.Path(context_root_dir).absolute()
 
         return context_root_dir
-
-    def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
-        """
-        If there are differences between the DataContextConfig used to instantiate
-        the DataContext and the DataContextConfig assigned to `self.config`, we want
-        to save those changes to disk so that subsequent instantiations will utilize
-        the same values.
-
-        A small caveat is that if that difference stems from a global override (env var
-        or conf file), we don't want to write to disk. This is due to the fact that
-        those mechanisms allow for dynamic values and saving them will make them static.
-
-        Args:
-            project_config: The DataContextConfig used to instantiate the DataContext.
-
-        Returns:
-            A boolean signifying whether or not the current DataContext's config needs
-            to be persisted in order to recognize changes made to usage statistics.
-        """
-        project_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
-            project_config.anonymous_usage_statistics
-        )
-        context_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
-            self.config.anonymous_usage_statistics
-        )
-
-        if (
-            project_config_usage_stats.enabled is False  # type: ignore[union-attr]
-            or context_config_usage_stats.enabled is False  # type: ignore[union-attr]
-        ):
-            return False
-
-        if project_config_usage_stats.explicit_id is False:  # type: ignore[union-attr]
-            return True
-
-        if project_config_usage_stats == context_config_usage_stats:
-            return False
-
-        if project_config_usage_stats is None or context_config_usage_stats is None:
-            return True
-
-        # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.  # noqa: E501
-        global_data_context_id: Optional[str] = self._get_data_context_id_override()
-        if (
-            project_config_usage_stats.data_context_id  # noqa: PLR1714
-            != context_config_usage_stats.data_context_id
-            and context_config_usage_stats.data_context_id != global_data_context_id
-        ):
-            return True
-
-        # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.  # noqa: E501
-        global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
-        return (
-            project_config_usage_stats.usage_statistics_url  # noqa: PLR1714
-            != context_config_usage_stats.usage_statistics_url
-            and context_config_usage_stats.usage_statistics_url != global_usage_stats_url
-        )
 
     @classmethod
     def _create(
@@ -505,7 +445,7 @@ class SerializableDataContext(AbstractDataContext):
         context = cls._attempt_context_instantiation(ge_dir)
         if not context:
             return False
-        return bool(context.list_expectation_suites())
+        return bool(context.suites.all())
 
     @classmethod
     def _attempt_context_instantiation(cls, ge_dir: PathStr) -> Optional[SerializableDataContext]:

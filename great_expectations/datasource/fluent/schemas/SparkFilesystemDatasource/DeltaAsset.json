@@ -1,6 +1,6 @@
 {
     "title": "DeltaAsset",
-    "description": "Base class for FilePathDataAssets which batch by applying a regex to file names.",
+    "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
     "type": "object",
     "properties": {
         "name": {
@@ -36,14 +36,8 @@
             "title": "Batch Definitions",
             "type": "array",
             "items": {
-                "$ref": "#/definitions/BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__"
+                "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
             }
-        },
-        "batching_regex": {
-            "title": "Batching Regex",
-            "default": ".*",
-            "type": "string",
-            "format": "regex"
         },
         "connect_options": {
             "title": "Connect Options",
@@ -57,6 +51,12 @@
         "versionAsOf": {
             "title": "Versionasof",
             "type": "string"
+        },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "default": ".*",
+            "type": "string",
+            "format": "regex"
         }
     },
     "required": [
@@ -82,8 +82,8 @@
                 "key"
             ]
         },
-        "PartitionerYearly": {
-            "title": "PartitionerYearly",
+        "FileNamePartitionerYearly": {
+            "title": "FileNamePartitionerYearly",
             "type": "object",
             "properties": {
                 "regex": {
@@ -109,8 +109,8 @@
                 "regex"
             ]
         },
-        "PartitionerMonthly": {
-            "title": "PartitionerMonthly",
+        "FileNamePartitionerMonthly": {
+            "title": "FileNamePartitionerMonthly",
             "type": "object",
             "properties": {
                 "regex": {
@@ -137,8 +137,8 @@
                 "regex"
             ]
         },
-        "PartitionerDaily": {
-            "title": "PartitionerDaily",
+        "FileNamePartitionerDaily": {
+            "title": "FileNamePartitionerDaily",
             "type": "object",
             "properties": {
                 "regex": {
@@ -166,8 +166,8 @@
                 "regex"
             ]
         },
-        "PartitionerPath": {
-            "title": "PartitionerPath",
+        "FileNamePartitionerPath": {
+            "title": "FileNamePartitionerPath",
             "type": "object",
             "properties": {
                 "regex": {
@@ -185,8 +185,8 @@
                 "regex"
             ]
         },
-        "BatchDefinition_Union_PartitionerYearly__PartitionerMonthly__PartitionerDaily__PartitionerPath__": {
-            "title": "BatchDefinition[Union[PartitionerYearly, PartitionerMonthly, PartitionerDaily, PartitionerPath]]",
+        "BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__": {
+            "title": "BatchDefinition[Union[FileNamePartitionerYearly, FileNamePartitionerMonthly, FileNamePartitionerDaily, FileNamePartitionerPath]]",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
@@ -202,16 +202,16 @@
                     "title": "Partitioner",
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/PartitionerYearly"
+                            "$ref": "#/definitions/FileNamePartitionerYearly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerMonthly"
+                            "$ref": "#/definitions/FileNamePartitionerMonthly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerDaily"
+                            "$ref": "#/definitions/FileNamePartitionerDaily"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerPath"
+                            "$ref": "#/definitions/FileNamePartitionerPath"
                         }
                     ]
                 }

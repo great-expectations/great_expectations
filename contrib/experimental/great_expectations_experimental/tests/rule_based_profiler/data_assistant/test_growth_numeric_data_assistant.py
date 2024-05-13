@@ -17,10 +17,10 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.rule_based_profiler.data_assistant_result import (
+from great_expectations.experimental.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations.experimental.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )
@@ -343,7 +343,7 @@ def test_pandas_happy_path_growth_numeric_data_assistant(empty_data_context) -> 
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.suites.add(suite)
 
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
@@ -453,7 +453,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.suites.add(suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_data",
@@ -558,7 +558,7 @@ def test_sql_happy_path_growth_numeric_data_assistant(
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.suites.add(expectation_suite=suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_multi_batch_sql_datasource",

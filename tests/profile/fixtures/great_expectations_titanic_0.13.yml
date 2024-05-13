@@ -10,32 +10,6 @@
 # It is auto-generated and usually does not need to be changed.
 config_version: 3
 
-# Datasources tell Great Expectations where your data lives and how to get it.
-# You can use the CLI command `great_expectations datasource new` to help you
-# add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
-datasources:
-  my_pandas_runtime_datasource:
-    class_name: Datasource
-    execution_engine:
-      class_name: PandasExecutionEngine
-    data_connectors:
-      my_data_connector:
-        module_name: great_expectations.datasource.data_connector
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - an_example_key
-          - another_example_key
-  my_spark_datasource:
-    class_name: Datasource
-    execution_engine:
-      class_name: SparkDFExecutionEngine
-    data_connectors:
-      my_data_connector:
-        module_name: great_expectations.datasource.data_connector
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - an_example_key
-          - another_example_key
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules
@@ -93,5 +67,4 @@ data_docs_sites:
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
-anonymous_usage_statistics:
-  enabled: true
+analytics_enabled: true

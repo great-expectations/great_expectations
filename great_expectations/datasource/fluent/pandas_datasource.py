@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.core.batch_definition import BatchDefinition
-    from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.partitioners import ColumnPartitioner
 
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
@@ -117,7 +117,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
     @override
     def get_batch_parameters_keys(
-        self, partitioner: Optional[Partitioner] = None
+        self, partitioner: Optional[ColumnPartitioner] = None
     ) -> Tuple[str, ...]:
         return tuple()
 
@@ -171,13 +171,12 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
         return batch_list
 
-    @public_api
     @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -384,7 +383,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
-    @public_api
     # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>  # noqa: E501
     @new_argument(
         argument_name="dataframe",
@@ -397,7 +395,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 

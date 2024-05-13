@@ -27,16 +27,12 @@ from great_expectations.data_context.data_context_variables import (
     FileDataContextVariables,
 )
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
     DataContextConfig,
     GXCloudConfig,
     ProgressBarsConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-)
-from tests.data_context.conftest import (
-    USAGE_STATISTICS_QA_URL,
 )
 
 if TYPE_CHECKING:
@@ -56,7 +52,6 @@ def data_context_config_dict() -> dict:
         "validation_results_store_name": "validation_results_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
-        "profiler_store_name": "profiler_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -72,11 +67,8 @@ def data_context_config_dict() -> dict:
             },
         },
         "data_docs_sites": {},
-        "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
-            enabled=True,
-            data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url=USAGE_STATISTICS_QA_URL,
-        ),
+        "analytics_enabled": True,
+        "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         "progress_bars": None,
     }
     return config
@@ -193,17 +185,9 @@ def data_docs_sites() -> dict:
 
 
 @pytest.fixture
-def anonymous_usage_statistics() -> AnonymizedUsageStatisticsConfig:
-    return AnonymizedUsageStatisticsConfig(
-        enabled=False,
-    )
-
-
-@pytest.fixture
 def progress_bars() -> ProgressBarsConfig:
     return ProgressBarsConfig(
         globally=True,
-        profilers=False,
     )
 
 
@@ -243,10 +227,6 @@ def progress_bars() -> ProgressBarsConfig:
         pytest.param(
             DataContextVariableSchema.DATA_DOCS_SITES,
             id="data_docs_sites getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            id="anonymous_usage_statistics getter",
         ),
         pytest.param(
             DataContextVariableSchema.PROGRESS_BARS,
@@ -336,21 +316,11 @@ def test_data_context_variables_get_with_substitutions(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             id="checkpoint_store setter",
         ),
-        pytest.param(
-            "my_profiler_store",
-            DataContextVariableSchema.PROFILER_STORE_NAME,
-            id="profiler_store setter",
-        ),
         pytest.param(stores, DataContextVariableSchema.STORES, id="stores setter"),
         pytest.param(
             data_docs_sites,
             DataContextVariableSchema.DATA_DOCS_SITES,
             id="data_docs_sites setter",
-        ),
-        pytest.param(
-            anonymous_usage_statistics,
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            id="anonymous_usage_statistics setter",
         ),
         pytest.param(
             progress_bars,
@@ -417,6 +387,8 @@ def test_data_context_variables_save_config(
     cloud_data_context_variables.save_config()
 
     expected_config_dict = {
+        "analytics_enabled": True,
+        "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 3.0,
         "data_docs_sites": {},
@@ -434,11 +406,9 @@ def test_data_context_variables_save_config(
                 "class_name": "SuiteParameterStore",
             },
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "profiler_store": {"class_name": "ProfilerStore"},
             "validation_results_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
-        "profiler_store_name": "profiler_store",
     }
 
     assert mock_put.call_count == 1
@@ -495,7 +465,6 @@ def test_file_data_context_variables_e2e(
     # Prepare updated progress_bars to set and serialize to disk
     updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
     updated_progress_bars.globally = False
-    updated_progress_bars.profilers = True
 
     # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)  # noqa: E501
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
@@ -523,6 +492,10 @@ def test_file_data_context_variables_e2e(
 
 @pytest.mark.e2e
 @pytest.mark.cloud
+@pytest.mark.xfail(
+    strict=False,
+    reason="GX Cloud E2E tests are failing due to new top-level `analytics` and `data_context_id` variables not yet being recognized by the server",  # noqa: E501
+)
 def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     cloud_data_context: CloudDataContext,
     data_context_config: DataContextConfig,

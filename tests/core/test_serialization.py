@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import copy
-import inspect
 import logging
 from decimal import Decimal
-from typing import TYPE_CHECKING, Union
-from unittest import mock
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import pytest
@@ -17,11 +15,8 @@ from great_expectations.data_context.types.base import (
     AbstractConfig,
     AssetConfig,
     DataConnectorConfig,
-    DatasourceConfig,
-    ExecutionEngineConfig,
     assetConfigSchema,
     dataConnectorConfigSchema,
-    datasourceConfigSchema,
 )
 from great_expectations.util import (
     deep_filter_properties_iterable,
@@ -40,99 +35,6 @@ def spark_schema(spark_session: pyspark.SparkSession) -> pyspark.types.StructTyp
             pyspark.types.StructField("a", pyspark.types.IntegerType(), True, None),
             pyspark.types.StructField("b", pyspark.types.IntegerType(), True, None),
         ]
-    )
-
-
-@pytest.fixture
-def datasource_config_spark(
-    spark_session: pyspark.SparkSession,
-) -> DatasourceConfig:
-    return DatasourceConfig(
-        name="taxi_data",
-        class_name="Datasource",
-        module_name="great_expectations.datasource",
-        execution_engine=ExecutionEngineConfig(
-            class_name="SparkDFExecutionEngine",
-            module_name="great_expectations.execution_engine.sparkdf_execution_engine",
-        ),
-        data_connectors={
-            "configured_asset_connector": DataConnectorConfig(
-                class_name="ConfiguredAssetFilesystemDataConnector",
-                module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
-                assets={
-                    "my_asset": AssetConfig(
-                        class_name="Asset",
-                        module_name="great_expectations.datasource.data_connector.asset",
-                        batch_spec_passthrough={
-                            "reader_options": {"header": True},
-                        },
-                    )
-                },
-            )
-        },
-    )
-
-
-@pytest.fixture
-def datasource_config_with_schema_at_asset_level_spark(
-    spark_session: pyspark.SparkSession, spark_schema
-) -> DatasourceConfig:
-    return DatasourceConfig(
-        name="taxi_data",
-        class_name="Datasource",
-        module_name="great_expectations.datasource",
-        execution_engine=ExecutionEngineConfig(
-            class_name="SparkDFExecutionEngine",
-            module_name="great_expectations.execution_engine.sparkdf_execution_engine",
-        ),
-        data_connectors={
-            "configured_asset_connector": DataConnectorConfig(
-                class_name="ConfiguredAssetFilesystemDataConnector",
-                module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
-                assets={
-                    "my_asset": AssetConfig(
-                        class_name="Asset",
-                        module_name="great_expectations.datasource.data_connector.asset",
-                        batch_spec_passthrough={
-                            "reader_options": {
-                                "header": True,
-                                "schema": spark_schema,
-                            },
-                        },
-                    )
-                },
-            )
-        },
-    )
-
-
-@pytest.fixture
-def datasource_config_with_schema_at_data_connector_level_spark(
-    spark_session: pyspark.SparkSession, spark_schema
-) -> DatasourceConfig:
-    return DatasourceConfig(
-        name="taxi_data",
-        class_name="Datasource",
-        module_name="great_expectations.datasource",
-        execution_engine=ExecutionEngineConfig(
-            class_name="SparkDFExecutionEngine",
-            module_name="great_expectations.execution_engine.sparkdf_execution_engine",
-        ),
-        data_connectors={
-            "configured_asset_connector": DataConnectorConfig(
-                class_name="ConfiguredAssetFilesystemDataConnector",
-                module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
-                batch_spec_passthrough={
-                    "reader_options": {"header": True, "schema": spark_schema},
-                },
-                assets={
-                    "my_asset": AssetConfig(
-                        class_name="Asset",
-                        module_name="great_expectations.datasource.data_connector.asset",
-                    )
-                },
-            )
-        },
     )
 
 
@@ -191,30 +93,6 @@ def test_lossy_serialization_warning(caplog):
     assert caplog.messages[0].startswith(
         "Using lossy conversion for decimal 12345.678901234567890123456789"
     )
-
-    caplog.clear()
-    d = Decimal("0.1")
-    convert_to_json_serializable(d)
-    print(caplog.messages)
-    assert len(caplog.messages) == 0
-
-
-@pytest.mark.unit
-def test_lossy_serialization_rule_based_profiler_no_warning(caplog):
-    caplog.set_level(logging.WARNING, logger="great_expectations.core")
-
-    with mock.patch.multiple(
-        inspect.FrameInfo,
-        filename="great_expectations/rule_based_profiler/parameter_builder/parameter_builder.py",
-        function="get_metrics",
-        frame=inspect.FrameInfo.frame,
-        lineno=260,
-        code_context=None,
-        index=None,
-    ):
-        d = Decimal("12345.678901234567890123456789")
-        convert_to_json_serializable(d)
-        assert len(caplog.messages) == 0
 
     caplog.clear()
     d = Decimal("0.1")
@@ -283,151 +161,6 @@ def test_batch_request_deepcopy():
         properties=batch_request.to_dict(),
         clean_falsy=True,
     )
-
-
-@pytest.mark.parametrize(
-    "datasource_config,expected_serialized_datasource_config",
-    [
-        pytest.param(
-            "datasource_config_spark",
-            {
-                "class_name": "Datasource",
-                "data_connectors": {
-                    "configured_asset_connector": {
-                        "assets": {
-                            "my_asset": {
-                                "batch_spec_passthrough": {
-                                    "reader_options": {
-                                        "header": True,
-                                    }
-                                },
-                                "class_name": "Asset",
-                                "module_name": "great_expectations.datasource.data_connector.asset",
-                            }
-                        },
-                        "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
-                    }
-                },
-                "execution_engine": {
-                    "class_name": "SparkDFExecutionEngine",
-                    "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
-                },
-                "module_name": "great_expectations.datasource",
-                "name": "taxi_data",
-            },
-            id="datasource_with_header_no_schema",
-        ),
-        pytest.param(
-            "datasource_config_with_schema_at_asset_level_spark",
-            {
-                "class_name": "Datasource",
-                "data_connectors": {
-                    "configured_asset_connector": {
-                        "assets": {
-                            "my_asset": {
-                                "batch_spec_passthrough": {
-                                    "reader_options": {
-                                        "header": True,
-                                        "schema": {
-                                            "fields": [
-                                                {
-                                                    "metadata": {},
-                                                    "name": "a",
-                                                    "nullable": True,
-                                                    "type": "integer",
-                                                },
-                                                {
-                                                    "metadata": {},
-                                                    "name": "b",
-                                                    "nullable": True,
-                                                    "type": "integer",
-                                                },
-                                            ],
-                                            "type": "struct",
-                                        },
-                                    }
-                                },
-                                "class_name": "Asset",
-                                "module_name": "great_expectations.datasource.data_connector.asset",
-                            }
-                        },
-                        "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
-                    }
-                },
-                "execution_engine": {
-                    "class_name": "SparkDFExecutionEngine",
-                    "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
-                },
-                "module_name": "great_expectations.datasource",
-                "name": "taxi_data",
-            },
-            id="datasource_with_header_schema_at_asset_level",
-        ),
-        pytest.param(
-            "datasource_config_with_schema_at_data_connector_level_spark",
-            {
-                "class_name": "Datasource",
-                "data_connectors": {
-                    "configured_asset_connector": {
-                        "assets": {
-                            "my_asset": {
-                                "class_name": "Asset",
-                                "module_name": "great_expectations.datasource.data_connector.asset",
-                            }
-                        },
-                        "batch_spec_passthrough": {
-                            "reader_options": {
-                                "header": True,
-                                "schema": {
-                                    "fields": [
-                                        {
-                                            "metadata": {},
-                                            "name": "a",
-                                            "nullable": True,
-                                            "type": "integer",
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "b",
-                                            "nullable": True,
-                                            "type": "integer",
-                                        },
-                                    ],
-                                    "type": "struct",
-                                },
-                            }
-                        },
-                        "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
-                    }
-                },
-                "execution_engine": {
-                    "class_name": "SparkDFExecutionEngine",
-                    "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
-                },
-                "module_name": "great_expectations.datasource",
-                "name": "taxi_data",
-            },
-            id="datasource_with_header_schema_at_data_connector_level",
-        ),
-    ],
-)
-@pytest.mark.spark
-def test_datasource_config_and_nested_objects_are_serialized_spark(
-    datasource_config: Union[DatasourceConfig, str],
-    expected_serialized_datasource_config: dict,
-    spark_session: pyspark.SparkSession,
-    request: FixtureRequest,
-):
-    # when using a fixture value in a parmeterized test, we need to call
-    # request.getfixturevalue()
-    if isinstance(datasource_config, str):
-        datasource_config = request.getfixturevalue(datasource_config)
-
-    observed_dump = datasourceConfigSchema.dump(obj=datasource_config)
-    assert observed_dump == expected_serialized_datasource_config
 
 
 @pytest.mark.parametrize(

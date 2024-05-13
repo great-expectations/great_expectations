@@ -2,10 +2,12 @@ import os
 import pathlib
 import tempfile
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.exceptions.exceptions import DataContextError
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -40,7 +42,6 @@ pop_stores = [
     "checkpoint_store",
     "suite_parameter_store",
     "validation_results_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -126,7 +127,6 @@ pop_stores = [
     "suite_parameter_store",
     "expectations_store",
     "expectations_GCS_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -269,7 +269,10 @@ batch_request = data_asset.build_batch_request(
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py add_expectation_suite">
-context.add_or_update_expectation_suite(expectation_suite_name="test_gcs_suite")
+try:
+    context.suites.add(ExpectationSuite(name="test_gcs_suite"))
+except DataContextError:
+    ...
 
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_gcs_suite"
@@ -285,8 +288,4 @@ validator.expect_column_values_to_not_be_null(column="passenger_count")
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=-3, max_value=1000
 )
-# </snippet>
-
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py save_expectation_suite">
-validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
