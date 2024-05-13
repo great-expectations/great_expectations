@@ -21,7 +21,6 @@ from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: 
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-    from great_expectations.datasource import DataConnector
 
 logger = logging.getLogger(__name__)
 
@@ -550,22 +549,3 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
     )
     return sorter
 
-
-def _build_asset_from_config(runtime_environment: DataConnector, config: dict) -> Asset:
-    """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""  # noqa: E501
-    runtime_environment_dict: Dict[str, DataConnector] = {"data_connector": runtime_environment}
-    config = assetConfigSchema.load(config)
-    config = assetConfigSchema.dump(config)
-    asset: Asset = instantiate_class_from_config(
-        config=config,
-        runtime_environment=runtime_environment_dict,
-        config_defaults={},
-    )
-    if not asset:
-        raise gx_exceptions.ClassInstantiationError(
-            module_name="great_expectations.datasource.data_connector.asset",
-            package_name=None,
-            class_name=config["class_name"],
-        )
-
-    return asset
