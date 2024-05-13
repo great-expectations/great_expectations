@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Mapping, Optional, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -13,16 +12,15 @@ from great_expectations.data_context.data_context_variables import (
     EphemeralDataContextVariables,
 )
 from great_expectations.data_context.migrator.file_migrator import FileMigrator
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    datasourceConfigSchema,
-)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.file_data_context import (
         FileDataContext,
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +71,6 @@ class EphemeralDataContext(AbstractDataContext):
         datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
-            serializer=DictConfigSerializer(schema=datasourceConfigSchema),
         )
 
         return datasource_store
