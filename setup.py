@@ -88,6 +88,15 @@ with open("requirements.txt") as f:
 
 long_description = "Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description)."
 
+packages = find_packages(
+    exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
+)
+
+package_name = packages[0]
+assert (
+    package_name.split(".")[0] == package_name
+), f"Package name {package_name} is not a top-level package."
+
 config = {
     "description": "Always know what to expect from your data.",
     "author": "The Great Expectations Team",
@@ -98,15 +107,13 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": get_extras_require(),
-    "packages": find_packages(
-        exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
-    ),
+    "packages": packages,
     "entry_points": {
         "console_scripts": [
-            "great_expectations=great_expectations.cli:main",
+            f"great_expectations={package_name}.cli:main",
         ]
     },
-    "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
+    "package_data": {package_name: ["**/py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,
     "license": "Apache-2.0",
@@ -130,4 +137,5 @@ config = {
     ],
 }
 
-setup(**config)
+if __name__ == "__main__":
+    setup(**config)
