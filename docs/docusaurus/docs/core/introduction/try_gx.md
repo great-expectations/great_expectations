@@ -33,6 +33,8 @@ More comprehensive guidance on setting up a Python environment, installing GX, a
    pip install great_expectations
    ```
 
+   Since this guide provides sample `.csv` data to work with, no additional dependencies need installation.
+
 2. Verify that GX installed successfully.
 
    Once the {GxData.product_name} library has been installed, you can verify that you are using the correct version with:
@@ -75,13 +77,13 @@ More comprehensive guidance on setting up a Python environment, installing GX, a
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py set up"
    ```
 
-   The sample data that has been retrieved as a Batch will be used to test the Expectations that are created later in this guide.
+   The sample data that has been retrieved will be used to test the Expectations that are created later in this guide.
 
 3. Create an Expectation.
 
    Expectations are fundamental components of GX.  They allow you to explicitly define the state that your data should conform to.
 
-   Since the provided sample data corresponds to paid taxicab trips, some assumptions can be made about what the content of that data should look like.  For example, it wouldn't make sense for the passenger count to be zero, since at least one passenger needs to be present to purchase the ride.  Additionally, the taxicabs in question should not seat more than six individuals.
+   The provided sample data is a table of paid taxicab rides. Knowing that lets you assume some things about what the content of that data should look like.  For example, it wouldn't make sense for the passenger count to be zero, since at least one passenger needs to be present to purchase the ride.  Additionally, the taxicabs in question should not have room to seat more than six passengers.
 
    The following code defines an Expectation that the contents of the column `passenger_count` in the provided data consist of a value ranging from `1` to `6`: 
 
@@ -104,13 +106,15 @@ More comprehensive guidance on setting up a Python environment, installing GX, a
 
 5. Create an Expectation that will fail.
 
-   Not all Expectations will pass successfully when validated.  This is the key to using GX for data quality: If the data does not match the state described in an Expectation, the Expectation will fail.  A failed Expectation lets you know that you have an issue to look into: it could be something wrong with the data itself, or it could be a misunderstanding about the information presented in the data, or any of a variety of issues that impact data quality.
+   Not all Expectations will pass successfully when validated.  If the data does not match the state described in an Expectation, the Expectation will fail.
 
-   The following code creates an Expectation that will fail:
+   A failed Expectation lets you know that you have an issue to look into: it could be something wrong with the data itself, such as missing or incorrect values.  Or it could be a misunderstanding about the data, in which case the Expectation itself should be updated.
+
+   This code creates an Expectation that will fail because it follows the incorrect assumption that taxicabs can only seat a maximum of three passengers:
 
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py validate and view failed results"
    ```
-   
+
    You can see that the results of a failed Expectation are very different, and include metrics to help you assess the severity of the issue you've uncovered:
 
    ```python title="Python output" name="docs/docusaurus/docs/core/introduction/try_gx.py failed output"
@@ -118,7 +122,7 @@ More comprehensive guidance on setting up a Python environment, installing GX, a
 
    By default, only a portion of the failed values and record indexes will be included in the Validation Results to prevent the report from being too bloated to easily review.  However, the failed counts and percentages will correspond to all the failed records in the validated data.
 
-7. Optional.  Experiment with other Expectations.
+6. Optional.  Experiment with other Expectations.
 
    The {GxData.product_name} library comes with numerous Expectations you can apply to your data.  You can browse the available Expectations through the [Expectations Gallery](https://greatexpectations.io/expectations).  Each entry in the Expectations Gallery links to a page with comprehensive information about the Expectation in question.  You can reference these pages to find details on how the Expectation functions and what parameters need to be provided when implementing it. 
 
