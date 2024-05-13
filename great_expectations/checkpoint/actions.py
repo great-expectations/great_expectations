@@ -259,6 +259,7 @@ class SlackNotificationAction(DataDocsAction):
             return result
 
         checkpoint_text_blocks: list[dict] = []
+        suite_to_asset_blocks = {}
         for (
             validation_result_suite_identifier,
             validation_result_suite,

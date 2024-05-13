@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class SlackRenderer(Renderer):
-    def render(  # noqa: PLR0913
+    def render(
         self,
         validation_result: ExpectationSuiteValidationResult,
         data_docs_pages: list[dict] | None = None,
@@ -57,9 +57,9 @@ class SlackRenderer(Renderer):
             if len(validation_result_urls) == 1:
                 validation_link = validation_result_urls[0]
             else:
-                title_hlink = "*Validation Result*"
+                title_hlink = "*Validation Results*"
                 batch_validation_status_hlinks = "".join(
-                    f"*Batch Validation Status*: *<{validation_result_url} | {status}>*"
+                    f"*<{validation_result_url} | {status}>*"
                     for validation_result_url in validation_result_urls
                 )
                 summary_text += f"""{title_hlink}
@@ -68,12 +68,13 @@ class SlackRenderer(Renderer):
 
         expectation_suite_name = validation_result.suite_name
         data_asset_name = validation_result.asset_name or "__no_data_asset_name__"
-        summary_text += f"*Expectation Suite*: {expectation_suite_name}"
-
+        summary_text += f"*Asset*: {data_asset_name}  "
         if validation_link is not None:
-            summary_text += f"\n*Asset*: {data_asset_name}  <{validation_link} | View Results>"
+            summary_text += (
+                f"*Expectation Suite*: {expectation_suite_name}  <{validation_link}|View Results>"
+            )
         else:
-            summary_text += f"\n*Asset*: {data_asset_name}"
+            summary_text += f"*Expectation Suite*: {expectation_suite_name}"
 
         return {
             "type": "section",
@@ -91,24 +92,22 @@ class SlackRenderer(Renderer):
         checkpoint_name: str,
         run_id: RunIdentifier,
     ) -> dict:
-        all_blocks = [self._build_header(name=action_name, success=success)]
+        all_blocks = [
+            self._build_header(name=action_name, success=success, checkpoint_name=checkpoint_name)
+        ]
         all_blocks.append(self._build_run_time_block(run_id=run_id))
-        all_blocks.append(self._build_checkpoint_name(checkpoint_name=checkpoint_name))
         for block in text_blocks:
             all_blocks.append(block)
         all_blocks.append(self._build_divider())
 
         return {"blocks": all_blocks}
 
-    def _build_checkpoint_name(self, checkpoint_name: str) -> dict:
-        return {
-            "type": "section",
-            "text": {"type": "mrkdwn", "text": f"*Checkpoint*: {checkpoint_name}"},
-        }
-
-    def _build_header(self, name: str, success: bool) -> dict:
+    def _build_header(self, name: str, success: bool, checkpoint_name: str) -> dict:
         status = "Success :white_check_mark:" if success else "Failure :no_entry:"
-        return {"type": "header", "text": {"type": "plain_text", "text": f"{name} - {status}"}}
+        return {
+            "type": "header",
+            "text": {"type": "plain_text", "text": f"{name} - {checkpoint_name} - {status}"},
+        }
 
     def _build_run_time_block(self, run_id: RunIdentifier) -> dict:
         if run_id is not None:

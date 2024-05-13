@@ -27,7 +27,7 @@ def test_SlackRenderer_render():
     assert output == [
         {
             "text": {
-                "text": "*Expectation Suite*: my_suite\n*Asset*: __no_data_asset_name__",  # noqa: E501
+                "text": "*Asset*: __no_data_asset_name__  *Expectation Suite*: my_suite",
                 "type": "mrkdwn",
             },
             "type": "section",
