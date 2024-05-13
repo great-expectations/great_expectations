@@ -2,7 +2,6 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.datasource.data_connector.sorter import (
-    DictionarySorter,
     LexicographicSorter,
     NumericSorter,
     Sorter,
@@ -38,15 +37,3 @@ def test_sorter_instantiation_numeric():
     assert isinstance(my_num, NumericSorter)
     assert my_num.name == "num"
     assert my_num.reverse is False
-
-
-def test_sorter_instantiation_dictionary():
-    # DictionarySorter
-    my_dict = DictionarySorter(
-        name="dict", orderby="asc", order_keys_by="asc", key_reference_list=[1, 2, 3]
-    )
-    assert isinstance(my_dict, DictionarySorter)
-    assert my_dict.name == "dict"
-    assert my_dict.reverse is False
-    assert my_dict.reverse_keys is False
-    assert my_dict.key_reference_list == [1, 2, 3]

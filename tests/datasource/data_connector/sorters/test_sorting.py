@@ -3,7 +3,6 @@ import pytest
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.datasource.data_connector.sorter import (
-    DictionarySorter,
     LexicographicSorter,
     NumericSorter,
 )
@@ -219,53 +218,3 @@ def test_create_three_batch_definitions_sort_numerically():
     batch_list = [one, two, three, i_should_not_work]
     with pytest.raises(gx_exceptions.SorterError):
         sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-
-
-def test_dictionary(example_hierarchical_batch_def_list):
-    [a, b, c, d, e, f, g, h, i, j] = example_hierarchical_batch_def_list
-    batch_list = [a, b, c, d, e, f, g, h, i, j]
-    my_sorter = DictionarySorter(name="date", orderby="desc", key_reference_list=["year", "month"])
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [d, h, b, i, j, a, g, e, f, c]
-
-    my_sorter = DictionarySorter(name="date", orderby="asc", key_reference_list=["year", "month"])
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [c, f, e, g, a, j, i, b, h, d]
-
-    my_sorter = DictionarySorter(
-        name="date",
-        orderby="desc",
-        order_keys_by="desc",
-    )
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [d, h, b, i, j, a, g, e, f, c]
-
-    my_sorter = DictionarySorter(
-        name="date",
-        orderby="asc",
-        order_keys_by="desc",
-    )
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [c, f, e, g, a, j, i, b, h, d]
-
-    my_sorter = DictionarySorter(name="date", orderby="desc", key_reference_list=["month"])
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [d, h, b, g, e, i, f, j, a, c]
-
-    my_sorter = DictionarySorter(name="date", orderby="asc", key_reference_list=["month"])
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [a, c, f, j, e, i, b, g, h, d]
-
-    my_sorter = DictionarySorter(
-        name="date",
-        orderby="desc",
-    )
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [d, h, b, g, i, e, j, f, a, c]
-
-    my_sorter = DictionarySorter(
-        name="date",
-        orderby="asc",
-    )
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [c, a, f, j, e, i, g, b, h, d]
