@@ -122,7 +122,7 @@ More comprehensive guidance on setting up a Python environment, installing GX, a
 
    The {GxData.product_name} library comes with numerous Expectations you can apply to your data.  You can browse the available Expectations through the [Expectations Gallery](https://greatexpectations.io/expectations).  Each entry in the Expectations Gallery links to a page with comprehensive information about the Expectation in question.  You can reference these pages to find details on how the Expectation functions and what parameters need to be provided when implementing it. 
 
-   The Expectations Gallery also includes search and filter functionality to facilitate finding appropriate Expectations for your use case.  For instance, this guide uses pandas as the backend for reading data.  As such, you want to try additional Expectations, you should [filter the Expectation Gallery to find Expectations that support pandas](https://greatexpectations.io/expectations/?viewType=Summary&filterType=Backend+support&showFilters=true&subFilterValues=pandas).
+   The Expectations Gallery also includes search and filter functionality to facilitate finding appropriate Expectations for your use case.  For instance, this guide uses pandas as the backend for reading data.  Therefore, if you want to try additional Expectations you should [filter the Expectation Gallery to find Expectations that support pandas](https://greatexpectations.io/expectations/?viewType=Summary&filterType=Backend+support&showFilters=true&subFilterValues=pandas).
 
 </TabItem>
 
