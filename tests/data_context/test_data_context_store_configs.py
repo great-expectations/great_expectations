@@ -29,7 +29,6 @@ def totally_empty_data_context(tmp_path_factory):
         "validation_results_store_name": "another_fake_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
-        "datasources": {},
         "stores": {
             "expectations_store": {
                 "class_name": "ExpectationsStore",

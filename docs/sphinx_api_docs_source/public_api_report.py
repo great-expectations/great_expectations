@@ -374,7 +374,7 @@ def parse_docs_contents_for_class_names(file_contents: Set[FileContents]) -> Set
     SqlAlchemyExecutionEngine in the below example:
 
     name: my_datasource_name
-    class_name: Datasource
+    class_name: Something
     execution_engine:
       class_name: SqlAlchemyExecutionEngine
 

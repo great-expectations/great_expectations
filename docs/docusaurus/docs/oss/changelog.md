@@ -426,6 +426,26 @@ slug: /core/changelog
 * [MAINTENANCE] Only do docs checks and build on develop. ([#9454](https://github.com/great-expectations/great_expectations/pull/9454))
 * [MAINTENANCE] Ignore pandas `DeprecationWarning` for legacy `PandasDataset` ([#9472](https://github.com/great-expectations/great_expectations/pull/9472))
 
+### 0.18.13
+* [FEATURE] Remove [cloud] optional dependency ([#9814](https://github.com/great-expectations/great_expectations/pull/9814))
+* [BUGFIX] `scrapy` compatibility - handle `dir()` inconsistencies ([#9830](https://github.com/great-expectations/great_expectations/pull/9830))
+* [MAINTENANCE] Export `great_expectations.data_context` types ([#9738](https://github.com/great-expectations/great_expectations/pull/9738))
+* [MAINTENANCE] Retire ColumnDescriptiveMetrics - 0.18 ([#9789](https://github.com/great-expectations/great_expectations/pull/9789))
+
+### 0.18.12
+* [FEATURE] MetricListMetricRetriever - 0.18.x ([#9615](https://github.com/great-expectations/great_expectations/pull/9615))
+* [MAINTENANCE] TableMetrics - BatchInspector updates (0.18.x) ([#9630](https://github.com/great-expectations/great_expectations/pull/9630))
+
+### 0.18.11
+* [FEATURE] (0.18.x) Don't break context for invalid datasource configs ([#9596](https://github.com/great-expectations/great_expectations/pull/9596))
+* [MAINTENANCE] Update incorrect contract tests ([#9543](https://github.com/great-expectations/great_expectations/pull/9543))
+* [MAINTENANCE] Update referential integrity test so DB is only created once - `0.18` ([#9545](https://github.com/great-expectations/great_expectations/pull/9545))
+* [MAINTENANCE] CDMs - Metrics as ENUM - 0.18 ([#9572](https://github.com/great-expectations/great_expectations/pull/9572))
+* [MAINTENANCE] Refactor `ColumnDescriptiveMetricsMetricRetriever` to parent class (0.18.x) ([#9612](https://github.com/great-expectations/great_expectations/pull/9612))
+
+### 0.18.10
+* [BUGFIX] - Prevent duplicate Expectations in Validation Results ([#9533](https://github.com/great-expectations/great_expectations/pull/9533))
+
 ### 0.18.9
 * [BUGFIX] Re-enable GCS Docs Integration test ([#9237](https://github.com/great-expectations/great_expectations/pull/9237))
 * [BUGFIX] Fix add or update expectation suite ([#9268](https://github.com/great-expectations/great_expectations/pull/9268))
