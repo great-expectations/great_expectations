@@ -15,10 +15,7 @@ from .configured_asset_filesystem_data_connector import (
 from .inferred_asset_filesystem_data_connector import (
     InferredAssetFilesystemDataConnector,
 )
-from .configured_asset_s3_data_connector import (
-    ConfiguredAssetS3DataConnector,
-)
-from .inferred_asset_s3_data_connector import InferredAssetS3DataConnector
+
 
 from .configured_asset_gcs_data_connector import (
     ConfiguredAssetGCSDataConnector,
