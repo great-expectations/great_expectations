@@ -3,7 +3,6 @@ import pytest
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.datasource.data_connector.sorter import (
-    LexicographicSorter,
     NumericSorter,
 )
 
@@ -139,43 +138,6 @@ def example_hierarchical_batch_def_list():
         batch_identifiers=IDDict({"date": {"month": 2, "year": 2022}}),
     )
     return [a, b, c, d, e, f, g, h, i, j]
-
-
-def test_create_three_batch_definitions_sort_lexicographically():
-    a = LegacyBatchDefinition(
-        datasource_name="A",
-        data_connector_name="a",
-        data_asset_name="aaa",
-        batch_identifiers=IDDict({"id": "A"}),
-    )
-    b = LegacyBatchDefinition(
-        datasource_name="B",
-        data_connector_name="b",
-        data_asset_name="bbb",
-        batch_identifiers=IDDict({"id": "B"}),
-    )
-    c = LegacyBatchDefinition(
-        datasource_name="C",
-        data_connector_name="c",
-        data_asset_name="ccc",
-        batch_identifiers=IDDict({"id": "C"}),
-    )
-
-    batch_list = [a, b, c]
-
-    # sorting by "id" reverse alphabetically (descending)
-    my_sorter = LexicographicSorter(name="id", orderby="desc")
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(
-        batch_list,
-    )
-    assert sorted_batch_list == [c, b, a]
-
-    # sorting by "id" reverse alphabetically (ascending)
-    my_sorter = LexicographicSorter(name="id", orderby="asc")
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(
-        batch_list,
-    )
-    assert sorted_batch_list == [a, b, c]
 
 
 def test_create_three_batch_definitions_sort_numerically():

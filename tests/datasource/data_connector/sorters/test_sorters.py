@@ -2,7 +2,6 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.datasource.data_connector.sorter import (
-    LexicographicSorter,
     NumericSorter,
     Sorter,
 )
@@ -21,14 +20,6 @@ def test_sorter_instantiation_base():
     # with fake orderby
     with pytest.raises(gx_exceptions.SorterError):
         my_sorter = Sorter(name="base", orderby="fake")
-
-
-def test_sorter_instantiation_lexicographic():
-    # Lexicographic
-    my_lex = LexicographicSorter(name="lex", orderby="desc")
-    assert isinstance(my_lex, LexicographicSorter)
-    assert my_lex.name == "lex"
-    assert my_lex.reverse is True
 
 
 def test_sorter_instantiation_numeric():
