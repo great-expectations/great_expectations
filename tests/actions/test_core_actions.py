@@ -569,12 +569,9 @@ class TestV1ActionRun:
                     {"type": "divider"},
                     {
                         "text": {
-                            "text": "*Batch Validation Status*: Success :tada:\n"
-                            "*Expectation Suite Name*: `suite_a`\n"
-                            "*Data Asset Name*: `__no_data_asset_name__`\n"
-                            "*Run ID*: `__no_run_id__`\n"
-                            "*Batch ID*: `None`\n"
-                            "*Summary*: *3* of *3* expectations were met",
+                            "text": "*Checkpoint*: my_checkpoint\n"
+                            "*Expectation Suite*: `suite_a`\n"
+                            "*Asset*: `__no_data_asset_name__`\n",
                             "type": "mrkdwn",
                         },
                         "type": "section",

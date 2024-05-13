@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 from great_expectations.render.renderer.renderer import Renderer
 
 if TYPE_CHECKING:
+    from great_expectations.core import RunIdentifier
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
@@ -18,26 +19,18 @@ class SlackRenderer(Renderer):
     def render(  # noqa: PLR0913
         self,
         validation_result: ExpectationSuiteValidationResult,
-        checkpoint_name: str,
         data_docs_pages: list[dict] | None = None,
         notify_with: list[str] | None = None,
-        show_failed_expectations: bool = False,
         validation_result_urls: list[str] | None = None,
     ) -> list[dict]:
         data_docs_pages = data_docs_pages or []
         notify_with = notify_with or []
         validation_result_urls = validation_result_urls or []
-        run_id = validation_result.meta.get("run_id", "__no_run_id__")
-        run_time = datetime.fromisoformat(str(run_id.run_time))
-        formatted_run_time = run_time.strftime("%Y/%m/%d %I:%M %p")
-
         blocks: list[dict] = []
-        run_time_block = self._build_run_time_block(time=formatted_run_time)
-        blocks.append(run_time_block)
+
         description_block = self._build_description_block(
             validation_result=validation_result,
             validation_result_urls=validation_result_urls,
-            checkpoint_name=checkpoint_name
         )
         blocks.append(description_block)
 
@@ -50,10 +43,9 @@ class SlackRenderer(Renderer):
         return blocks
 
     def _build_description_block(
-            self,
-            validation_result: ExpectationSuiteValidationResult,
-            validation_result_urls: list[str],
-            checkpoint_name: str
+        self,
+        validation_result: ExpectationSuiteValidationResult,
+        validation_result_urls: list[str],
     ) -> dict:
         status = "Failed :x:"
         if validation_result.success:
@@ -76,11 +68,12 @@ class SlackRenderer(Renderer):
 
         expectation_suite_name = validation_result.suite_name
         data_asset_name = validation_result.asset_name or "__no_data_asset_name__"
-        summary_text += \
-            f"*Checkpoint*: {checkpoint_name}\n*Expectation Suite*: {expectation_suite_name}"
+        summary_text += f"*Expectation Suite*: {expectation_suite_name}"
 
         if validation_link is not None:
             summary_text += f"\n*Asset*: {data_asset_name}  <{validation_link} | View Results>"
+        else:
+            summary_text += f"\n*Asset*: {data_asset_name}"
 
         return {
             "type": "section",
@@ -90,37 +83,41 @@ class SlackRenderer(Renderer):
             },
         }
 
-    def concatenate_text_blocks(self, action_name: str, text_blocks: list[dict], success: bool) -> dict:
+    def concatenate_text_blocks(  # noqa: PLR0913
+        self,
+        action_name: str,
+        text_blocks: list[dict],
+        success: bool,
+        checkpoint_name: str,
+        run_id: RunIdentifier,
+    ) -> dict:
         all_blocks = [self._build_header(name=action_name, success=success)]
+        all_blocks.append(self._build_run_time_block(run_id=run_id))
+        all_blocks.append(self._build_checkpoint_name(checkpoint_name=checkpoint_name))
         for block in text_blocks:
             all_blocks.append(block)
         all_blocks.append(self._build_divider())
 
-
         return {"blocks": all_blocks}
 
-    def _build_description(self, checkpoint_name: str, expectation_suite_name: str, data_asset_name: str) \
-            -> dict:
-        summary_text = ""
-        summary_text += f"""
-        *Checkpoint*: {checkpoint_name}
-        *Expectation Suite*: {expectation_suite_name}
-        *Asset*: {data_asset_name}
-        """
+    def _build_checkpoint_name(self, checkpoint_name: str) -> dict:
         return {
             "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": summary_text,
-            },
+            "text": {"type": "mrkdwn", "text": f"*Checkpoint*: {checkpoint_name}"},
         }
 
     def _build_header(self, name: str, success: bool) -> dict:
         status = "Success :white_check_mark:" if success else "Failure :no_entry:"
         return {"type": "header", "text": {"type": "plain_text", "text": f"{name} - {status}"}}
 
-    def _build_run_time_block(self, time: str) -> dict:
-        return {"type": "section", "text": {"type": "plain_text", "text": f"Runtime: {time}"}}
+    def _build_run_time_block(self, run_id: RunIdentifier) -> dict:
+        if run_id is not None:
+            run_time = datetime.fromisoformat(str(run_id.run_time))
+            formatted_run_time = run_time.strftime("%Y/%m/%d %I:%M %p")
+        return {
+            "type": "section",
+            "text": {"type": "plain_text", "text": f"Runtime: {formatted_run_time}"},
+        }
 
     def _build_divider(self) -> dict:
         return {"type": "divider"}
