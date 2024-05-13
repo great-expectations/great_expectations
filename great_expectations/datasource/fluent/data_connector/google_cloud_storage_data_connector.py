@@ -2,17 +2,17 @@ from __future__ import annotations
 
 import logging
 import re
+import warnings
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector.util import (
-    list_gcs_keys,
-    sanitize_prefix_for_gcs_and_s3,
-)
 from great_expectations.datasource.fluent.data_connector import (
     FilePathDataConnector,
+)
+from great_expectations.datasource.fluent.data_connector.file_path_data_connector import (
+    sanitize_prefix_for_gcs_and_s3,
 )
 
 if TYPE_CHECKING:
@@ -213,3 +213,67 @@ requires "file_path_template_map_fn: Callable" to be set.
         }
 
         return self._file_path_template_map_fn(**template_arguments)
+
+
+def list_gcs_keys(
+    gcs_client,
+    query_options: dict,
+    recursive: bool = False,
+) -> List[str]:
+    """
+    Utilizes the GCS connection object to retrieve blob names based on user-provided criteria.
+
+    For InferredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and search for files using RegEx at and below the level
+    specified by those parameters. However, for ConfiguredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and
+    search for files using RegEx only at the level specified by that bucket and prefix.
+
+    This restriction for the ConfiguredAssetGCSDataConnector is needed because paths on GCS are comprised not only the leaf file name
+    but the full path that includes both the prefix and the file name. Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible due to the path ambiguity.
+
+    Please note that the SDK's `list_blobs` method takes in a `delimiter` key that drastically alters the traversal of a given bucket:
+        - If a delimiter is not set (default), the traversal is recursive and the output will contain all blobs in the current directory
+          as well as those in any nested directories.
+        - If a delimiter is set, the traversal will continue until that value is seen; as the default is "/", traversal will be scoped
+          within the current directory and end before visiting nested directories.
+
+    In order to provide users with finer control of their config while also ensuring output that is in line with the `recursive` arg,
+    we deem it appropriate to manually override the value of the delimiter only in cases where it is absolutely necessary.
+
+    Args:
+        gcs_client (storage.Client): GCS connnection object responsible for accessing bucket
+        query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
+        recursive (bool): True for InferredAssetGCSDataConnector and False for ConfiguredAssetGCSDataConnector (see above)
+
+    Returns:
+        List of keys representing GCS file paths (as filtered by the `query_options` dict)
+    """  # noqa: E501
+    # Delimiter determines whether or not traversal of bucket is recursive
+    # Manually set to appropriate default if not already set by user
+    delimiter = query_options["delimiter"]
+    if delimiter is None and not recursive:
+        warnings.warn(
+            'In order to access blobs with a ConfiguredAssetGCSDataConnector, \
+            or with a Fluent datasource without enabling recursive file discovery, \
+            the delimiter that has been passed to gcs_options in your config cannot be empty; \
+            please note that the value is being set to the default "/" in order to work with the Google SDK.'  # noqa: E501
+        )
+        query_options["delimiter"] = "/"
+    elif delimiter is not None and recursive:
+        warnings.warn(
+            "In order to access blobs with an InferredAssetGCSDataConnector, \
+            or enabling recursive file discovery with a Fluent datasource, \
+            the delimiter that has been passed to gcs_options in your config must be empty; \
+            please note that the value is being set to None in order to work with the Google SDK."
+        )
+        query_options["delimiter"] = None
+
+    keys: List[str] = []
+    for blob in gcs_client.list_blobs(**query_options):
+        name: str = blob.name
+        if name.endswith("/"):  # GCS includes directories in blob output
+            continue
+
+        keys.append(name)
+
+    return keys

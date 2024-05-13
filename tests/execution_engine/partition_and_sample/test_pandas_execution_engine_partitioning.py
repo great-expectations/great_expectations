@@ -8,14 +8,12 @@ import pandas.api.types as ptypes
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import IDDict
-from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
 )

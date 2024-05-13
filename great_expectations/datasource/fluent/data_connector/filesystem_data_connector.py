@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 import logging
+import os
 import pathlib
 import re
-from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.datasource.data_connector.util import (
-    get_filesystem_one_level_directory_glob_path_list,
-    normalize_directory_path,
-)
 from great_expectations.datasource.fluent.data_connector import (
     FilePathDataConnector,
 )
@@ -159,3 +156,39 @@ class FilesystemDataConnector(FilePathDataConnector):
     @override
     def _get_full_file_path(self, path: str) -> str:
         return str(self.base_directory.joinpath(path))
+
+
+def normalize_directory_path(
+    dir_path: Union[PathStr],
+    root_directory_path: Optional[PathStr] = None,
+) -> pathlib.Path:
+    dir_path = pathlib.Path(dir_path)
+
+    # If directory is a relative path, interpret it as relative to the root directory.
+    if dir_path.is_absolute() or root_directory_path is None:
+        return dir_path
+
+    root_directory_path = pathlib.Path(root_directory_path)
+
+    return root_directory_path.joinpath(dir_path)
+
+
+def get_filesystem_one_level_directory_glob_path_list(
+    base_directory_path: Union[PathStr], glob_directive: str
+) -> List[str]:
+    """
+    List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
+    :param base_directory_path -- base directory path, relative to which file paths will be collected
+    :param glob_directive -- glob expansion directive
+    :returns -- list of relative file paths
+    """  # noqa: E501
+    if isinstance(base_directory_path, str):
+        base_directory_path = pathlib.Path(base_directory_path)
+
+    globbed_paths = base_directory_path.glob(glob_directive)
+
+    path_list: List[str] = [
+        os.path.relpath(str(posix_path), base_directory_path) for posix_path in globbed_paths
+    ]
+
+    return path_list
