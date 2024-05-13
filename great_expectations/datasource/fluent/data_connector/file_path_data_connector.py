@@ -13,13 +13,13 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector.batch_filter import (
-    BatchFilter,
-    build_batch_filter,
-)
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.data_connector import (
     DataConnector,
+)
+from great_expectations.datasource.fluent.data_connector.batch_filter import (
+    BatchFilter,
+    build_batch_filter,
 )
 from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
