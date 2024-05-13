@@ -19,12 +19,7 @@ from .configured_asset_s3_data_connector import (
     ConfiguredAssetS3DataConnector,
 )
 from .inferred_asset_s3_data_connector import InferredAssetS3DataConnector
-from .configured_asset_azure_data_connector import (
-    ConfiguredAssetAzureDataConnector,
-)
-from .inferred_asset_azure_data_connector import (
-    InferredAssetAzureDataConnector,
-)
+
 from .configured_asset_gcs_data_connector import (
     ConfiguredAssetGCSDataConnector,
 )
