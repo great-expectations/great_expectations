@@ -1,6 +1,6 @@
 parameters:
   vmImage: "" # Must be specified in primary YAML
-  pythonVersion: ["3.8", "3.9", "3.10"]
+  pythonVersion: ["3.8", "3.9", "3.10", "3.11"]
 
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
@@ -18,9 +18,8 @@ jobs:
             displayName: "Install Great Expectations"
 
           - script: |
-              great_expectations --version
-              great_expectations -y init --no-usage-stats
               python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
+              python -c "import great_expectations as gx; gx.get_context(mode='ephemeral')"
             displayName: "Confirm installation"
 
       - job:
@@ -45,7 +44,6 @@ jobs:
 
           - script: |
               source activate gx_dev
-              great_expectations --version
-              great_expectations -y init --no-usage-stats
               python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
+              python -c "import great_expectations as gx; gx.get_context(mode='ephemeral')"
             displayName: "Confirm installation"
