@@ -45,6 +45,47 @@ output1 = """
 # <snippet name="docs/docusaurus/docs/core/introduction/try_gx.py output1">
 {
     "expectation_type": "expect_column_values_to_be_between",
+    "success": true,
+    "kwargs": {
+        "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
+        "column": "passenger_count",
+        "min_value": 1.0,
+        "max_value": 6.0
+    },
+    "result": {
+        "element_count": 10000,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+        "partial_unexpected_counts": [],
+        "partial_unexpected_index_list": []
+    }
+}
+# </snippet>
+"""
+
+output1 = output1.split(">", maxsplit=1)[1].split("#", maxsplit=1)[0].strip()
+assert validation_result.describe() == output1
+
+
+# <snippet name="docs/docusaurus/docs/core/introduction/try_gx.py validate and view failed results">
+# highlight-start
+failed_expectation = gxe.ExpectColumnValuesToBeBetween(
+    column="passenger_count", min_value=1, max_value=3
+)
+# highlight-end
+failed_validation_result = batch.validate(failed_expectation)
+print(failed_validation_result.describe())
+# </snippet>
+
+failed_output = """
+# <snippet name="docs/docusaurus/docs/core/introduction/try_gx.py failed output">
+{
+    "expectation_type": "expect_column_values_to_be_between",
     "success": false,
     "kwargs": {
         "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
@@ -115,4 +156,9 @@ output1 = """
 # </snippet>
 """
 
-assert validation_result.describe() == output1.strip()
+# This section removes the snippet tags from the failed_output string and then verifies
+# that the script ran as expected.  It can be disregarded.
+failed_output = (
+    failed_output.split(">", maxsplit=1)[1].split("#", maxsplit=1)[0].strip()
+)
+assert failed_validation_result.describe() == failed_output
