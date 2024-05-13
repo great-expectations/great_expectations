@@ -17,10 +17,3 @@ from .inferred_asset_filesystem_data_connector import (
 )
 
 
-from .configured_asset_gcs_data_connector import (
-    ConfiguredAssetGCSDataConnector,
-)
-from .inferred_asset_gcs_data_connector import (
-    InferredAssetGCSDataConnector,
-)
-
