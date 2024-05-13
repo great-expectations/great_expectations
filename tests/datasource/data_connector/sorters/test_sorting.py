@@ -1,10 +1,6 @@
 import pytest
 
-import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import IDDict, LegacyBatchDefinition
-from great_expectations.datasource.data_connector.sorter import (
-    NumericSorter,
-)
 
 # module level markers
 pytestmark = pytest.mark.unit
@@ -138,45 +134,3 @@ def example_hierarchical_batch_def_list():
         batch_identifiers=IDDict({"date": {"month": 2, "year": 2022}}),
     )
     return [a, b, c, d, e, f, g, h, i, j]
-
-
-def test_create_three_batch_definitions_sort_numerically():
-    one = LegacyBatchDefinition(
-        datasource_name="A",
-        data_connector_name="a",
-        data_asset_name="aaa",
-        batch_identifiers=IDDict({"id": 1}),
-    )
-    two = LegacyBatchDefinition(
-        datasource_name="B",
-        data_connector_name="b",
-        data_asset_name="bbb",
-        batch_identifiers=IDDict({"id": 2}),
-    )
-    three = LegacyBatchDefinition(
-        datasource_name="C",
-        data_connector_name="c",
-        data_asset_name="ccc",
-        batch_identifiers=IDDict({"id": 3}),
-    )
-
-    batch_list = [one, two, three]
-    my_sorter = NumericSorter(name="id", orderby="desc")
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [three, two, one]
-
-    my_sorter = NumericSorter(name="id", orderby="asc")
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [one, two, three]
-
-    # testing a non-numeric, which should throw an error
-    i_should_not_work = LegacyBatchDefinition(
-        datasource_name="C",
-        data_connector_name="c",
-        data_asset_name="ccc",
-        batch_identifiers=IDDict({"id": "aaa"}),
-    )
-
-    batch_list = [one, two, three, i_should_not_work]
-    with pytest.raises(gx_exceptions.SorterError):
-        sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
