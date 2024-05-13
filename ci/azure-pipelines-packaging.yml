@@ -20,7 +20,7 @@ schedules:
   always: true # As this is run once a day, we always want to run it (regardless of whether or not changes have occurred)
 
 variables:
-  isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
+  isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/0.18.x'), eq(variables['Build.Reason'], 'Schedule'))]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
 
 stages:
