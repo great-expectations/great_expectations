@@ -5,7 +5,6 @@ from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector.sorter import (
     CustomListSorter,
-    DateTimeSorter,
     DictionarySorter,
     LexicographicSorter,
     NumericSorter,
@@ -34,18 +33,6 @@ def test_sorter_instantiation_lexicographic():
     assert isinstance(my_lex, LexicographicSorter)
     assert my_lex.name == "lex"
     assert my_lex.reverse is True
-
-
-def test_sorter_instantiation_datetime():
-    sorter_params: dict = {
-        "datetime_format": "%Y%m%d",
-    }
-    # DateTimeSorter
-    my_dt = DateTimeSorter(name="dt", orderby="desc", **sorter_params)
-    assert isinstance(my_dt, DateTimeSorter)
-    assert my_dt.name == "dt"
-    assert my_dt.reverse is True
-    assert my_dt._datetime_format == "%Y%m%d"
 
 
 def test_sorter_instantiation_numeric():

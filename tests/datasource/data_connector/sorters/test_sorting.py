@@ -1,4 +1,3 @@
-from typing import Iterator
 
 import pytest
 
@@ -6,11 +5,9 @@ import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.datasource.data_connector.sorter import (
     CustomListSorter,
-    DateTimeSorter,
     DictionarySorter,
     LexicographicSorter,
     NumericSorter,
-    Sorter,
 )
 
 # module level markers
@@ -226,55 +223,6 @@ def test_create_three_batch_definitions_sort_numerically():
         sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
 
 
-def test_date_time():
-    first = LegacyBatchDefinition(
-        datasource_name="A",
-        data_connector_name="a",
-        data_asset_name="aaa",
-        batch_identifiers=IDDict({"date": "20210101"}),
-    )
-    second = LegacyBatchDefinition(
-        datasource_name="B",
-        data_connector_name="b",
-        data_asset_name="bbb",
-        batch_identifiers=IDDict({"date": "20210102"}),
-    )
-    third = LegacyBatchDefinition(
-        datasource_name="C",
-        data_connector_name="c",
-        data_asset_name="ccc",
-        batch_identifiers=IDDict({"date": "20210103"}),
-    )
-
-    batch_list = [first, second, third]
-    my_sorter = DateTimeSorter(name="date", datetime_format="%Y%m%d", orderby="desc")
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [third, second, first]
-
-    my_sorter = DateTimeSorter(name="date", datetime_format="%Y%m%d", orderby="asc")
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [first, second, third]
-
-    with pytest.raises(gx_exceptions.SorterError):
-        # numeric date_time_format
-        i_dont_work = DateTimeSorter(  # noqa: F841
-            name="date", datetime_format=12345, orderby="desc"
-        )
-
-    my_date_is_not_a_string = LegacyBatchDefinition(
-        datasource_name="C",
-        data_connector_name="c",
-        data_asset_name="ccc",
-        batch_identifiers=IDDict({"date": 20210103}),
-    )
-
-    batch_list = [first, second, third, my_date_is_not_a_string]
-    my_sorter = DateTimeSorter(name="date", datetime_format="%Y%m%d", orderby="desc")
-
-    with pytest.raises(gx_exceptions.SorterError):
-        sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-
-
 def test_custom_list(periodic_table_of_elements):
     Hydrogen = LegacyBatchDefinition(
         datasource_name="A",
@@ -357,33 +305,3 @@ def test_dictionary(example_hierarchical_batch_def_list):
     )
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [c, a, f, j, e, i, g, b, h, d]
-
-
-def test_example_file_list_sorters(example_batch_def_list):
-    [a, b, c, d, e, f, g, h, i, j] = example_batch_def_list
-    batch_list = [a, b, c, d, e, f, g, h, i, j]
-
-    name_sorter = LexicographicSorter(name="name", orderby="desc")
-    timestamp_sorter = DateTimeSorter(name="timestamp", datetime_format="%Y%m%d", orderby="desc")
-    price_sorter = NumericSorter(name="price", orderby="desc")
-
-    # 1. sorting just by name
-    sorters_list = [name_sorter]
-    sorters: Iterator[Sorter] = reversed(sorters_list)
-    for sorter in sorters:
-        sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
-    assert sorted_batch_list == [f, h, a, i, j, c, g, d, e, b]
-
-    # 2. sorting by timestamp + name
-    sorters_list = [timestamp_sorter, name_sorter]
-    sorters: Iterator[Sorter] = reversed(sorters_list)
-    for sorter in sorters:
-        sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
-    assert sorted_batch_list == [g, d, i, a, f, b, c, e, h, j]
-
-    # 3. sorting just by price + timestamp + name
-    sorters_list = [price_sorter, timestamp_sorter, name_sorter]
-    sorters: Iterator[Sorter] = reversed(sorters_list)
-    for sorter in sorters:
-        sorted_batch_list = sorter.get_sorted_batch_definitions(batch_definitions=batch_list)
-    assert sorted_batch_list == [g, j, c, d, b, i, a, h, f, e]
