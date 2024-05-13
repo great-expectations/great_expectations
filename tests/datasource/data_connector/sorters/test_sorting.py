@@ -1,10 +1,8 @@
-
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.datasource.data_connector.sorter import (
-    CustomListSorter,
     DictionarySorter,
     LexicographicSorter,
     NumericSorter,
@@ -221,40 +219,6 @@ def test_create_three_batch_definitions_sort_numerically():
     batch_list = [one, two, three, i_should_not_work]
     with pytest.raises(gx_exceptions.SorterError):
         sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-
-
-def test_custom_list(periodic_table_of_elements):
-    Hydrogen = LegacyBatchDefinition(
-        datasource_name="A",
-        data_connector_name="a",
-        data_asset_name="aaa",
-        batch_identifiers=IDDict({"element": "Hydrogen"}),
-    )
-    Helium = LegacyBatchDefinition(
-        datasource_name="B",
-        data_connector_name="b",
-        data_asset_name="bbb",
-        batch_identifiers=IDDict({"element": "Helium"}),
-    )
-    Lithium = LegacyBatchDefinition(
-        datasource_name="C",
-        data_connector_name="c",
-        data_asset_name="ccc",
-        batch_identifiers=IDDict({"element": "Lithium"}),
-    )
-
-    batch_list = [Hydrogen, Helium, Lithium]
-    my_sorter = CustomListSorter(
-        name="element", orderby="desc", reference_list=periodic_table_of_elements
-    )
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [Lithium, Helium, Hydrogen]
-
-    my_sorter = CustomListSorter(
-        name="element", orderby="asc", reference_list=periodic_table_of_elements
-    )
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
-    assert sorted_batch_list == [Hydrogen, Helium, Lithium]
 
 
 def test_dictionary(example_hierarchical_batch_def_list):
