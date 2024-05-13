@@ -201,7 +201,8 @@ class FilePathDataConnector(DataConnector):
             A list of batch definitions from the data connector based on the batch request.
         """
         if self._whole_directory_path_override:
-            # if the override is present, we don't build BatchDefinitions based on a regex,
+            # this class is overloaded with two separate implementations:
+            # # Directory data connector doesn't use a regex,
             # we just make a single BatchDefinition to capture the entire directory
             return self._get_whole_directory_batch_definition_list(
                 batch_request=batch_request, data_directory=self._whole_directory_path_override
@@ -214,6 +215,7 @@ class FilePathDataConnector(DataConnector):
         if batch_request.partitioner:
             batching_regex = batch_request.partitioner.regex
         else:
+            # todo: remove
             batching_regex = MATCH_ALL_PATTERN
         for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
             if (
@@ -288,9 +290,16 @@ class FilePathDataConnector(DataConnector):
         Returns:
             dict -- dictionary of "BatchSpec" properties
         """  # noqa: E501
-        batching_regex = batch_definition.batching_regex
-        if not batching_regex:
-            raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
+        # this class is overloaded with two separate implementations:
+        if self._whole_directory_path_override:
+            # Directory data connector doesn't use a regex, but it's required by this
+            # component, so we pass through the match all pattern
+            batching_regex = MATCH_ALL_PATTERN
+        else:
+            if not batch_definition.batching_regex:
+                raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
+            batching_regex = batch_definition.batching_regex
+
         regex_parser = RegExParser(
             regex_pattern=batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
