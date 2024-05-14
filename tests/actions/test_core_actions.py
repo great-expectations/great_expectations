@@ -568,37 +568,24 @@ class TestV1ActionRun:
                     {"text": {"text": mock.ANY, "type": "plain_text"}, "type": "header"},
                     {"type": "divider"},
                     {
-                        "text": {
-                            "text": "*Checkpoint*: my_checkpoint\n"
-                            "*Expectation Suite*: `suite_a`\n"
-                            "*Asset*: `__no_data_asset_name__`\n",
-                            "type": "mrkdwn",
-                        },
                         "type": "section",
+                        "text": {"type": "plain_text", "text": "Runtime: 2024/04/01 08:51 PM"},
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Asset*: __no_data_asset_name__  *Expectation Suite*: suite_a",
+                        },
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Asset*: __no_data_asset_name__  *Expectation Suite*: suite_b",
+                        },
                     },
                     {"type": "divider"},
-                    {
-                        "text": {
-                            "text": "*Batch Validation Status*: Success :tada:\n"
-                            "*Expectation Suite Name*: `suite_b`\n"
-                            "*Data Asset Name*: `__no_data_asset_name__`\n"
-                            "*Run ID*: `__no_run_id__`\n"
-                            "*Batch ID*: `None`\n"
-                            "*Summary*: *2* of *2* expectations were met",
-                            "type": "mrkdwn",
-                        },
-                        "type": "section",
-                    },
-                    {"type": "divider"},
-                    {
-                        "elements": [
-                            {
-                                "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/docs/terms/data_docs",
-                                "type": "mrkdwn",
-                            }
-                        ],
-                        "type": "context",
-                    },
                 ],
                 "text": mock.ANY,
             },
