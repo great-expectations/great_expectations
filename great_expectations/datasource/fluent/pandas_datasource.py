@@ -113,8 +113,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
     @override
-    def test_connection(self) -> None:
-        ...
+    def test_connection(self) -> None: ...
 
     @override
     def get_batch_parameters_keys(
@@ -633,8 +632,7 @@ class PandasDatasource(_PandasDatasource):
         return ds_dict
 
     @override
-    def test_connection(self, test_assets: bool = True) -> None:
-        ...
+    def test_connection(self, test_assets: bool = True) -> None: ...
 
     @staticmethod
     def _validate_asset_name(asset_name: Optional[str] = None) -> str:

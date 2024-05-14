@@ -182,8 +182,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         return dataframe
 
     @override
-    def test_connection(self) -> None:
-        ...
+    def test_connection(self) -> None: ...
 
     @override
     def get_batch_parameters_keys(

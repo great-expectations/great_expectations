@@ -972,15 +972,13 @@ def get_batch_request_as_dict(  # type: ignore[overload-overlap] # Overload with
     | FluentBatchRequest
     | dict
     | BlockConfigBatchRequestTypedDict = ...,
-) -> dict:
-    ...
+) -> dict: ...
 
 
 @overload
 def get_batch_request_as_dict(
     batch_request: None = ...,
-) -> None:
-    ...
+) -> None: ...
 
 
 def get_batch_request_as_dict(

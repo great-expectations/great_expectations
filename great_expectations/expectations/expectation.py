@@ -1015,9 +1015,9 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         )
         runtime_configuration["result_format"] = validation_dependencies.result_format
 
-        validation_dependencies_metric_configurations: List[
-            MetricConfiguration
-        ] = validation_dependencies.get_metric_configurations()
+        validation_dependencies_metric_configurations: List[MetricConfiguration] = (
+            validation_dependencies.get_metric_configurations()
+        )
 
         _validate_dependencies_against_available_metrics(
             validation_dependencies=validation_dependencies_metric_configurations,
@@ -1193,11 +1193,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         configuration.process_suite_parameters(
             suite_parameters, interactive_evaluation, data_context
         )
-        expectation_validation_result_list: list[
-            ExpectationValidationResult
-        ] = validator.graph_validate(
-            configurations=[configuration],
-            runtime_configuration=runtime_configuration,
+        expectation_validation_result_list: list[ExpectationValidationResult] = (
+            validator.graph_validate(
+                configurations=[configuration],
+                runtime_configuration=runtime_configuration,
+            )
         )
         return expectation_validation_result_list[0]
 
@@ -2174,9 +2174,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: Union[
-            Dict[str, Union[int, str, bool, List[str], None]], str
-        ] = self._get_result_format(runtime_configuration=runtime_configuration)
+        result_format: Union[Dict[str, Union[int, str, bool, List[str], None]], str] = (
+            self._get_result_format(runtime_configuration=runtime_configuration)
+        )
 
         unexpected_index_column_names = None
         if isinstance(result_format, dict):
@@ -2254,9 +2254,9 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
 
     column_list: List[str]
 
-    ignore_row_if: Literal[
-        "all_values_are_missing", "any_value_is_missing", "never"
-    ] = "all_values_are_missing"
+    ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
+        "all_values_are_missing"
+    )
     catch_exceptions: bool = True
 
     map_metric: ClassVar[Optional[str]] = None

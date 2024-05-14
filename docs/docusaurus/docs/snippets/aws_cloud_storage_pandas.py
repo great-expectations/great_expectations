@@ -118,9 +118,9 @@ for store in pop_stores:
 
 actual_existing_validation_results_store = {}
 actual_existing_validation_results_store["stores"] = stores
-actual_existing_validation_results_store[
-    "validation_results_store_name"
-] = great_expectations_yaml["validation_results_store_name"]
+actual_existing_validation_results_store["validation_results_store_name"] = (
+    great_expectations_yaml["validation_results_store_name"]
+)
 
 expected_existing_validation_results_store_yaml = """
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py existing_validation_results_store">

@@ -108,8 +108,7 @@ class DirectoryDataAsset(PathDataAsset[DatasourceT, ColumnPartitioner], Generic[
         return batch_definition_list
 
     @singledispatchmethod
-    def _get_dataframe_partitioner(self, partitioner) -> Optional[DataframePartitioner]:
-        ...
+    def _get_dataframe_partitioner(self, partitioner) -> Optional[DataframePartitioner]: ...
 
     @_get_dataframe_partitioner.register
     def _(self, partitioner: ColumnPartitionerYearly) -> DataframePartitionerYearly:

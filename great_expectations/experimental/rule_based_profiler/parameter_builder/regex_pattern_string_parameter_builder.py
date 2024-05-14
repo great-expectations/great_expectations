@@ -242,9 +242,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             success_ratio: float = (nonnull_count - match_regex_unexpected_count) / (
                 nonnull_count + NP_EPSILON
             )
-            regex_string_success_ratios[
-                attributed_resolved_metrics.metric_attributes["regex"]
-            ] = success_ratio
+            regex_string_success_ratios[attributed_resolved_metrics.metric_attributes["regex"]] = (
+                success_ratio
+            )
 
         # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
         threshold: float = get_parameter_value_and_validate_return_type(

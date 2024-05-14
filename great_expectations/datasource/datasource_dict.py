@@ -25,11 +25,9 @@ logger = logging.getLogger(__name__)
 @runtime_checkable
 class SupportsInMemoryDataAssets(Protocol):
     @property
-    def assets(self) -> list[DataAsset]:
-        ...
+    def assets(self) -> list[DataAsset]: ...
 
-    def add_dataframe_asset(self, **kwargs) -> DataAsset:
-        ...
+    def add_dataframe_asset(self, **kwargs) -> DataAsset: ...
 
 
 class DatasourceDict(UserDict):

@@ -145,14 +145,14 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParamete
         ]
 
         # Obtain null_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
-        null_count_parameter_builder_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.null_count_parameter_builder_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        null_count_parameter_builder_name: Optional[str] = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.null_count_parameter_builder_name,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
         )
 
         batch_ids: Optional[List[str]] = self.get_batch_ids(

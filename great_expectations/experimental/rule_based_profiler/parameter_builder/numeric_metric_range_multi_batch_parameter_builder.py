@@ -661,9 +661,9 @@ detected.
                     )
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.  # noqa: E501
-            estimation_histogram[
-                metric_value_estimation_histogram_idx
-            ] = numeric_range_estimation_result.estimation_histogram
+            estimation_histogram[metric_value_estimation_histogram_idx] = (
+                numeric_range_estimation_result.estimation_histogram
+            )
 
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).  # noqa: E501
         if metric_value_range.shape[0] == 1:

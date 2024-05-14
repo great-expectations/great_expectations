@@ -168,14 +168,14 @@ def test_return_all_batch_definitions_unsorted():
     partitioner = FileNamePartitionerYearly(regex=batching_regex)
 
     # with empty options
-    unsorted_batch_definition_list: List[
-        LegacyBatchDefinition
-    ] = my_data_connector.get_batch_definition_list(
-        BatchRequest(
-            datasource_name="my_file_path_datasource",
-            data_asset_name="my_s3_data_asset",
-            options={},
-            partitioner=partitioner,
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_data_connector.get_batch_definition_list(
+            BatchRequest(
+                datasource_name="my_file_path_datasource",
+                data_asset_name="my_s3_data_asset",
+                options={},
+                partitioner=partitioner,
+            )
         )
     )
     processed_batching_regex = re.compile(
@@ -406,14 +406,14 @@ def test_return_only_unique_batch_definitions():
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
 
-    unsorted_batch_definition_list: List[
-        LegacyBatchDefinition
-    ] = my_data_connector.get_batch_definition_list(
-        BatchRequest(
-            datasource_name="my_file_path_datasource",
-            data_asset_name="my_s3_data_asset",
-            options={},
-            # batching_regex=batching_regex,
+    unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_data_connector.get_batch_definition_list(
+            BatchRequest(
+                datasource_name="my_file_path_datasource",
+                data_asset_name="my_s3_data_asset",
+                options={},
+                # batching_regex=batching_regex,
+            )
         )
     )
     assert expected == unsorted_batch_definition_list
@@ -658,9 +658,9 @@ def test_foxtrot():
         data_asset_name="my_s3_data_asset",
         options={},
     )
-    my_batch_definition_list: List[
-        LegacyBatchDefinition
-    ] = my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
+    my_batch_definition_list: List[LegacyBatchDefinition] = (
+        my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
+    )
     assert len(my_batch_definition_list) == 3
 
 

@@ -25,9 +25,9 @@ class ColumnPartitionerMonthly(pydantic.BaseModel):
 class ColumnPartitionerDaily(pydantic.BaseModel):
     column_name: str
     sort_ascending: bool = True
-    method_name: Literal[
+    method_name: Literal["partition_on_year_and_month_and_day"] = (
         "partition_on_year_and_month_and_day"
-    ] = "partition_on_year_and_month_and_day"
+    )
 
 
 @public_api

@@ -106,15 +106,15 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             self._data_references_cache[data_asset_name] = {}
 
             for data_reference in self._get_data_reference_list(data_asset_name=data_asset_name):
-                mapped_batch_definition_list: List[
-                    LegacyBatchDefinition
-                ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
-                    data_reference=data_reference,
-                    data_asset_name=data_asset_name,
+                mapped_batch_definition_list: List[LegacyBatchDefinition] = (
+                    self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
+                        data_reference=data_reference,
+                        data_asset_name=data_asset_name,
+                    )
                 )
-                self._data_references_cache[data_asset_name][
-                    data_reference
-                ] = mapped_batch_definition_list
+                self._data_references_cache[data_asset_name][data_reference] = (
+                    mapped_batch_definition_list
+                )
 
     @override
     def _get_data_reference_list(self, data_asset_name: Optional[str] = None) -> List[str]:

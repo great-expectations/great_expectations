@@ -123,14 +123,14 @@ def _pandas_map_condition_index(
     result_format = metric_value_kwargs["result_format"]
     domain_records_df = domain_records_df[boolean_mapped_unexpected_values]
 
-    unexpected_index_list: Union[
-        List[int], List[Dict[str, Any]]
-    ] = compute_unexpected_pandas_indices(
-        domain_records_df=domain_records_df,
-        result_format=result_format,
-        execution_engine=execution_engine,
-        metrics=metrics,
-        expectation_domain_column_list=domain_column_name_list,
+    unexpected_index_list: Union[List[int], List[Dict[str, Any]]] = (
+        compute_unexpected_pandas_indices(
+            domain_records_df=domain_records_df,
+            result_format=result_format,
+            execution_engine=execution_engine,
+            metrics=metrics,
+            expectation_domain_column_list=domain_column_name_list,
+        )
     )
     if result_format["result_format"] == "COMPLETE":
         return unexpected_index_list

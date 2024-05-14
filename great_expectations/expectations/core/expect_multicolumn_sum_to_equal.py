@@ -146,9 +146,9 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
     """  # noqa: E501
 
     sum_total: float
-    ignore_row_if: Literal[
-        "all_values_are_missing", "any_value_is_missing", "never"
-    ] = "all_values_are_missing"
+    ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
+        "all_values_are_missing"
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

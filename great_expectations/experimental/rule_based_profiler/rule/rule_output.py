@@ -77,9 +77,9 @@ class RuleOutput:
     def get_fully_qualified_parameter_names_for_domain_id(self, domain_id: str) -> List[str]:
         domains_dict: Dict[str, Domain] = self.rule_state.get_domains_as_dict()
         domain: Domain = domains_dict[domain_id]
-        fully_qualified_parameter_names: List[
-            str
-        ] = self.get_fully_qualified_parameter_names_for_domain(domain=domain)
+        fully_qualified_parameter_names: List[str] = (
+            self.get_fully_qualified_parameter_names_for_domain(domain=domain)
+        )
         return fully_qualified_parameter_names
 
     def get_fully_qualified_parameter_names_for_domain(
@@ -109,20 +109,20 @@ class RuleOutput:
     ) -> Dict[str, ParameterNode]:
         domains_dict: Dict[str, Domain] = self.rule_state.get_domains_as_dict()
         domain: Domain = domains_dict[domain_id]
-        parameter_values_for_fully_qualified_parameter_names: Dict[
-            str, ParameterNode
-        ] = self.get_parameter_values_for_fully_qualified_parameter_names_for_domain(domain=domain)
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode] = (
+            self.get_parameter_values_for_fully_qualified_parameter_names_for_domain(domain=domain)
+        )
         return parameter_values_for_fully_qualified_parameter_names
 
     def get_parameter_values_for_fully_qualified_parameter_names_for_domain(
         self,
         domain: Optional[Domain] = None,
     ) -> Dict[str, ParameterNode]:
-        parameter_values_for_fully_qualified_parameter_names: Dict[
-            str, ParameterNode
-        ] = get_parameter_values_for_fully_qualified_parameter_names(
-            domain=domain,
-            variables=self.rule_state.variables,
-            parameters=self.rule_state.parameters,
+        parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode] = (
+            get_parameter_values_for_fully_qualified_parameter_names(
+                domain=domain,
+                variables=self.rule_state.variables,
+                parameters=self.rule_state.parameters,
+            )
         )
         return parameter_values_for_fully_qualified_parameter_names

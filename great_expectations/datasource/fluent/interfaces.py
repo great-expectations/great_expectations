@@ -1056,12 +1056,10 @@ class Batch:
         self._validator.result_format = ResultFormat(result_format)
 
     @overload
-    def validate(self, expect: Expectation) -> ExpectationValidationResult:
-        ...
+    def validate(self, expect: Expectation) -> ExpectationValidationResult: ...
 
     @overload
-    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult:
-        ...
+    def validate(self, expect: ExpectationSuite) -> ExpectationSuiteValidationResult: ...
 
     @public_api
     def validate(

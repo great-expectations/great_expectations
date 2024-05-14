@@ -785,9 +785,9 @@ class Validator:
         # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.  # noqa: E501
         rejected_configurations: List[ExpectationConfiguration] = []
         for expectation_validation_graph in expectation_validation_graphs:
-            metric_exception_info: Dict[
-                str, Union[MetricConfiguration, ExceptionInfo, int]
-            ] = expectation_validation_graph.get_exception_info(metric_info=aborted_metrics_info)
+            metric_exception_info: Dict[str, Union[MetricConfiguration, ExceptionInfo, int]] = (
+                expectation_validation_graph.get_exception_info(metric_info=aborted_metrics_info)
+            )
             # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.  # noqa: E501
             if len(metric_exception_info) > 0:
                 configuration = expectation_validation_graph.configuration

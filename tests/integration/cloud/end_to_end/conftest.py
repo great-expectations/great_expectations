@@ -133,8 +133,7 @@ class TableFactory(Protocol):
         gx_engine: SqlAlchemyExecutionEngine,
         table_names: set[str],
         schema_name: str | None = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 @pytest.fixture(scope="module")

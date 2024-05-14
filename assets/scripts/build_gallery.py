@@ -424,16 +424,16 @@ def combine_backend_results(  # noqa: C901 - too complex
                 tests=diagnostic_object.tests,
                 backend_test_result_counts=backend_test_result_counts_object,
             )
-            expectations_info[expectation_name][
-                "maturity_checklist"
-            ] = maturity_checklist_object.to_dict()
+            expectations_info[expectation_name]["maturity_checklist"] = (
+                maturity_checklist_object.to_dict()
+            )
             expectations_info[expectation_name]["coverage_score"] = Expectation._get_coverage_score(
                 backend_test_result_counts=backend_test_result_counts_object,
                 execution_engines=diagnostic_object.execution_engines,
             )
-            expectations_info[expectation_name]["library_metadata"][
-                "maturity"
-            ] = Expectation._get_final_maturity_level(maturity_checklist=maturity_checklist_object)
+            expectations_info[expectation_name]["library_metadata"]["maturity"] = (
+                Expectation._get_final_maturity_level(maturity_checklist=maturity_checklist_object)
+            )
 
         for bad_key_name in bad_key_names:
             expectations_info.pop(bad_key_name)
