@@ -44,7 +44,6 @@ def replace(file_path: pathlib.Path) -> None:
 
 
 def iterate_files(file_dir: pathlib.Path) -> None:
-    print("📁 Creating new package with updated `great_expectations_v0` references\n")
     for file in file_dir.iterdir():
         if file.is_dir():
             iterate_files(file)
@@ -66,6 +65,7 @@ if __name__ == "__main__":
         NEW_PACKAGE_DIR.rmdir()
         print(f"✅ Removed existing {NEW_PACKAGE_DIR}\n")
 
+    print("📁 Creating new package with updated `great_expectations_v0` references\n")
     iterate_files(CORE_DIRECTORY)
     print(f"\n Untouched files: {UNTOUCED_FILES}\n Updated files: {UPDATED_FILES}\n")
 
