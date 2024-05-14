@@ -89,7 +89,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        # batching_regex=batching_regex,
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
@@ -411,11 +410,6 @@ def test_alpha(tmp_path_factory):
         "B.csv",
         "C.csv",
     ]
-
-    my_batch_definition_list: List[LegacyBatchDefinition]
-    my_batch_definition: LegacyBatchDefinition
-
-    my_batch_request: BatchRequest
 
     # Try to fetch a batch from a nonexistent asset
     my_batch_request = BatchRequest(
