@@ -1,6 +1,6 @@
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Literal
+from typing import Any, Dict, List
 
 import pkg_resources
 from setuptools import find_packages, setup
@@ -120,7 +120,7 @@ def get_config(
             ]
         },
         "package_data": {package_name: ["**/py.typed", "**/*.pyi"]},
-        "name": "great_expectations",
+        "name": package_name,
         "long_description": long_description,
         "license": "Apache-2.0",
         "keywords": "data science testing pipeline data quality dataquality validation datavalidation",
