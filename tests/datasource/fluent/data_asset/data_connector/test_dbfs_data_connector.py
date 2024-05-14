@@ -75,13 +75,14 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
         "bigfile_1.csv",
         "logfile_0.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 2
-    assert sorted(my_data_connector.get_matched_data_references()[:3]) == [
+
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<number>\d+)\.csv")
+    matching_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matching_data_references) == 2
+    assert sorted(matching_data_references[:3]) == [
         "bigfile_1.csv",
         "logfile_0.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
 
 @pytest.mark.spark
@@ -111,7 +112,6 @@ def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     my_data_connector: DataConnector = DBFSDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)_(?P<number>\d+)\.csv"),
         base_directory=pathlib.Path(f"{base_directory}/test_dir_0/A/B/C"),
         glob_directive="*.csv",
         file_path_template_map_fn=DBFSPath.convert_to_protocol_version,
@@ -127,10 +127,11 @@ def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
         "bigfile_1.csv",
         "logfile_0.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 2
-    assert sorted(my_data_connector.get_matched_data_references()[:3]) == [
+
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<number>\d+)\.csv")
+    matching_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matching_data_references) == 2
+    assert sorted(matching_data_references[:3]) == [
         "bigfile_1.csv",
         "logfile_0.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
