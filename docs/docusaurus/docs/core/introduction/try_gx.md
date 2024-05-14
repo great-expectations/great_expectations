@@ -68,7 +68,7 @@ For more comprehensive guidance on setting up a Python environment, installing {
 
    Expectations are a fundamental component of GX.  They allow you to explicitly define the state to which your data should conform.
 
-   The sample data you're using is taxi trip record data. With this data, you can make certain assumptions.  For example, the passenger count shouldn't be zero because at least one passenger needs to be present.  Additionally, ta taxi can accomodate a maximum of six passengers.
+   The sample data you're using is taxi trip record data. With this data, you can make certain assumptions.  For example, the passenger count shouldn't be zero because at least one passenger needs to be present.  Additionally, a taxi can accomodate a maximum of six passengers.
 
    Run the following code to define an Expectation that the contents of the column `passenger_count` consist of values ranging from `1` to `6`: 
 
