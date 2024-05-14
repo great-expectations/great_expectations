@@ -25,19 +25,19 @@ NEW_PACKAGE_DIR: Final[pathlib.Path] = CORE_DIRECTORY.with_name(MIRROR_PACKAGE_N
 
 DIST_DIR: Final[pathlib.Path] = pathlib.Path("dist")
 
-UNTOUCED_FILES: int = 0
+UNTOUCHED_FILES: int = 0
 UPDATED_FILES: int = 0
 
 
 def replace(file_path: pathlib.Path) -> None:
-    global UNTOUCED_FILES, UPDATED_FILES  # noqa: PLW0603
+    global UNTOUCHED_FILES, UPDATED_FILES  # noqa: PLW0603
     with open(file_path) as file:
         contents = file.read()
         new_contents = IMPORT_PATTERN.sub(f"import {MIRROR_PACKAGE_NAME}", contents)
         new_contents = FROM_PATTERN.sub(f"from {MIRROR_PACKAGE_NAME}", new_contents)
         new_contents = MODULE_STRING.sub(f'"{MIRROR_PACKAGE_NAME}.', new_contents)
         if contents == new_contents:
-            UNTOUCED_FILES += 1
+            UNTOUCHED_FILES += 1
             return
     print(f"{file_path.relative_to(CORE_DIRECTORY.parent)} updated")
     with open(file_path, "w") as file:
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     print(f"📁 Creating new package with updated `{MIRROR_PACKAGE_NAME}` references\n")
     iterate_files(CORE_DIRECTORY)
-    print(f"\n Untouched files: {UNTOUCED_FILES}\n Updated files: {UPDATED_FILES}\n")
+    print(f"\n Untouched files: {UNTOUCHED_FILES}\n Updated files: {UPDATED_FILES}\n")
 
     new_core_dir = CORE_DIRECTORY.rename(NEW_PACKAGE_DIR.name)
     assert (
