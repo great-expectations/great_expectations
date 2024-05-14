@@ -19,25 +19,15 @@ If you're new to {GxData.product_name}, start here to learn how to connect to sa
 
 {GxData.product_name} is a Python library you can install with the Python `pip` tool.
 
-For more comprehensive guidance on setting up a Python environment, installing {GxData.product_name}, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/installation_and_setup/install_gx.md). 
+For more comprehensive guidance on setting up a Python environment, installing {GxData.product_name}, and installing additional dependencies for specific data formats and storage environments, see [Set up a GX environment](/core/installation_and_setup/install_gx.md).
 
-<Tabs>
-
-<TabItem value="procedure" label="Procedure">
-
-1. Run the following code to install the {GxData.product_name} library:
-
-  
+1. Run the following terminal command to install the {GxData.product_name} library:
 
    ```bash title="Terminal input"
    pip install great_expectations
    ```
 
-   
-
-2. Verify that GX installed successfully.
-
-3. Run the following code to verify the {GxData.product_name} version:
+2. Verify {GxData.product_name} installed successfully:
 
    ```bash title="Terminal input"
    great_expectations --version
@@ -47,9 +37,6 @@ For more comprehensive guidance on setting up a Python environment, installing {
 
    <ReleaseVersionBox/>
 
-</TabItem>
-
-</Tabs>
 
 ## Test features and functionality
 
@@ -57,44 +44,38 @@ For more comprehensive guidance on setting up a Python environment, installing {
 
 <TabItem value="procedure" label="Procedure">
 
-1. Run the following code in a Python interpreter, IDE, or script to import the required modules from the {GxData.product_name} library:
+1. Import the `great_expectations` library and `expectations` module.
 
-   
-
-   ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py imports"
-   ```
-   
    The `great_expectations` module is the root of the GX library and contains shortcuts and convenience methods for starting a GX project in a Python session.
 
    The `expectations` module contains all the Expectation classes that are provided by the GX library.
 
-2. Run the following code to create a temporary Data Context and connect to sample data:
+   Run the following code in a Python interpreter, IDE, or script:
 
-   A Data Context can be thought of as a GX project.  In Python, it provides the API for interacting with many common GX objects.
+   ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py imports"
+   ```
+
+3. Run the following code to create a temporary Data Context and connect to sample data:
+
+   In Python, a Data Context provides the API for interacting with many common GX objects.
 
    In the following code, a Data Context is initialized and then used to read the contents of a `.csv` file into a Batch of sample data:
 
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py set up"
    ```
 
-   
+3. Create an Expectation.
 
-3. Run the following code to create an Expectation:
+   Expectations are a fundamental component of GX.  They allow you to define the state to which your data should conform explicitly.
 
-   Expectations are fundamental components of GX.  They allow you to explicitly define the state that your data should conform to.
+   The sample data you're using is taxi trip record data. With this data, you can make certain assumptions.  For example, the passenger count shouldn't be zero because at least one passenger needs to be present.  Additionally, ta taxi can accomodate a maximum of six passengers.
 
-   The provided sample data is a table of paid taxicab rides. Knowing that lets you assume some things about what the content of that data should look like.  For example, it wouldn't make sense for the passenger count to be zero, since at least one passenger needs to be present to purchase the ride.  Additionally, the taxicabs in question should not have room to seat more than six passengers.
-
-   The following code defines an Expectation that the contents of the column `passenger_count` in the provided data consist of a value ranging from `1` to `6`: 
+   Run the following code to define an Expectation that the contents of the column `passenger_count` consist of values ranging from `1` to `6`: 
 
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py create an expectation"
    ```
 
 4. Run the following code to validate the sample data against your Expectation and view the results:
- 
-  
-
-   
 
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py validate and view results"
    ```
@@ -104,18 +85,16 @@ For more comprehensive guidance on setting up a Python environment, installing {
    ```python title="Python output" name="docs/docusaurus/docs/core/introduction/try_gx.py output1"
    ```
 
-5. Run the following code to create an Expectation that fails because it assumes that a taxi can seat a maximum of three passengers:
-
-  
+5. Optional. Create an Expectation that will fail when validated against the provided data.
 
    A failed Expectation lets you know there is something wrong with the data, such as missing or incorrect values, or there is a misunderstanding about the data.
 
-   
+   Run the following code to create an Expectation that fails because it assumes that a taxi can seat a maximum of three passengers:
 
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py validate and view failed results"
    ```
 
-  In the following example, the results of the failed Expectation include metrics to help you assess the severity of the issue:
+   When an Expectation fails, the Validation Results of the failed Expectation include metrics to help you assess the severity of the issue:
 
    ```python title="Python output" name="docs/docusaurus/docs/core/introduction/try_gx.py failed output"
    ```
@@ -123,10 +102,6 @@ For more comprehensive guidance on setting up a Python environment, installing {
   To reduce the size of the report and make it easier to review, only a portion of the failed values and record indexes are included in the Validation Results.  The failed counts and percentages correspond to the failed records in the validated data.
 
 6. Optional. Go to the [Expectations Gallery](https://greatexpectations.io/expectations) and experiment with other Expectations.
-
-   
-
-   
 
 </TabItem>
 
@@ -141,13 +116,9 @@ For more comprehensive guidance on setting up a Python environment, installing {
 
 ## Next steps
 
-You can learn more about GX by browsing through [Community resources](/core/introduction/community_resources.md) such as the GX Discourse forum, public Slack channel, and GitHub repo.
-
-### Try GX Cloud
-
 <GxCloudAdvert/>
 
-### Dive in with GX and Python
+To learn more about {GxData.product_name}, see [Community resources](/core/introduction/community_resources.md).
 
 If you're ready to start using {GxData.product_name} with your own data, the [Set up a GX environment](/core/installation_and_setup/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
 
