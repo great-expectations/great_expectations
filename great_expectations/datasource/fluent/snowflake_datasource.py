@@ -214,10 +214,9 @@ class SnowflakeDatasource(SQLDatasource):
         to GX for the Snowflake Partner program.
         """
 
-        # This import is here to avoid a circular import
-        from great_expectations.data_context import CloudDataContext
+        from great_expectations import project_manager
 
-        if isinstance(self._data_context, CloudDataContext):
+        if project_manager.is_using_cloud():
             return SNOWFLAKE_PARTNER_APPLICATION_CLOUD
         return SNOWFLAKE_PARTNER_APPLICATION_OSS
 
