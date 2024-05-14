@@ -19,20 +19,23 @@ CORE_DIRECTORY: Final[pathlib.Path] = pathlib.Path("great_expectations").resolve
     strict=True
 )
 
-UNTOUCED_FILES: Final[list[pathlib.Path]] = []
+UNTOUCED_FILES: int = 0
+UPDATED_FILES: int = 0
 
 
 def replace(file_path: pathlib.Path) -> None:
-    with open(file_path, "r") as file:
+    global UNTOUCED_FILES, UPDATED_FILES  # noqa: PLW0603
+    with open(file_path) as file:
         contents = file.read()
         new_contents = IMPORT_PATTERN.sub("import great_expectations_v0", contents)
         new_contents = FROM_PATTERN.sub("from great_expectations_v0", new_contents)
         if contents == new_contents:
-            UNTOUCED_FILES.append(file_path)
+            UNTOUCED_FILES += 1
             return
     print(f"{file_path.relative_to(CORE_DIRECTORY.parent)} updated")
     with open(file_path, "w") as file:
         file.write(new_contents)
+        UPDATED_FILES += 1
 
 
 def iterate_files(file_dir: pathlib.Path) -> None:
@@ -45,4 +48,4 @@ def iterate_files(file_dir: pathlib.Path) -> None:
 
 if __name__ == "__main__":
     iterate_files(CORE_DIRECTORY)
-    print(f"\n Untouched files: {len(UNTOUCED_FILES)}")
+    print(f"\n Untouched files: {UNTOUCED_FILES}\n Updated files: {UPDATED_FILES}")
