@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import pathlib
-import re
 
 import numpy as np
 import pandas as pd
@@ -15,7 +14,6 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
 )
 from great_expectations.core.partitioners import (
     ColumnPartitionerMonthly,
-    FileNamePartitionerMonthly,
 )
 from great_expectations.data_context import AbstractDataContext, EphemeralDataContext
 from great_expectations.datasource.fluent import (
@@ -96,11 +94,9 @@ def pandas_data(
         order_by=["year", "month"],
         batch_metadata={"my_pipeline": "${pipeline_filename}"},
     )
-    batching_regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
-    batch_request = asset.build_batch_request(
-        {"year": "2019", "month": "01"},
-        partitioner=FileNamePartitionerMonthly(regex=batching_regex),
-    )
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="monthly_batch_def", regex=batching_regex)
+    batch_request = batch_def.build_batch_request(batch_parameters={"year": "2019", "month": "01"})
     return context, pandas_ds, asset, batch_request
 
 
