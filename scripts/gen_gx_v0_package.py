@@ -1,8 +1,7 @@
 """
-Need to replace any instance of
-
-`import great_expectations` or `from great_expectations` with
-`import great_expectations_v0` or `from great_expectations_v0` respectively.
+Generate a new package `great_expectations_v0` from the existing `great_expectations` package.
+This is used to create a mirror of the existing package with the name `great_expectations_v0` so users can
+install the old version of the package alongside a v1 installation.
 
 """
 
