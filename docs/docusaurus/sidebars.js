@@ -18,7 +18,7 @@ module.exports = {
         {
           type: 'doc',
           id: 'core/introduction/try_gx',
-          label: '🚧 Try GX'
+          label: 'Try GX'
         },
         {
           type: 'doc',
