@@ -12,6 +12,8 @@ import re
 import shutil
 from typing import Final, Pattern
 
+MIRROR_PACKAGE_NAME: Final[str] = "great_expectations_v0"
+
 IMPORT_PATTERN: Final[Pattern] = re.compile(r"import great_expectations")
 FROM_PATTERN: Final[Pattern] = re.compile(r"from great_expectations")
 MODULE_STRING: Final[Pattern] = re.compile(r"\"great_expectations\.")
@@ -19,7 +21,7 @@ MODULE_STRING: Final[Pattern] = re.compile(r"\"great_expectations\.")
 CORE_DIRECTORY: Final[pathlib.Path] = pathlib.Path("great_expectations").resolve(
     strict=True
 )
-NEW_PACKAGE_DIR: Final[pathlib.Path] = CORE_DIRECTORY.with_name("great_expectations_v0")
+NEW_PACKAGE_DIR: Final[pathlib.Path] = CORE_DIRECTORY.with_name(MIRROR_PACKAGE_NAME)
 
 DIST_DIR: Final[pathlib.Path] = pathlib.Path("dist")
 
@@ -31,9 +33,9 @@ def replace(file_path: pathlib.Path) -> None:
     global UNTOUCED_FILES, UPDATED_FILES  # noqa: PLW0603
     with open(file_path) as file:
         contents = file.read()
-        new_contents = IMPORT_PATTERN.sub("import great_expectations_v0", contents)
-        new_contents = FROM_PATTERN.sub("from great_expectations_v0", new_contents)
-        new_contents = MODULE_STRING.sub('"great_expectations_v0.', new_contents)
+        new_contents = IMPORT_PATTERN.sub(f"import {MIRROR_PACKAGE_NAME}", contents)
+        new_contents = FROM_PATTERN.sub(f"from {MIRROR_PACKAGE_NAME}", new_contents)
+        new_contents = MODULE_STRING.sub(f'"{MIRROR_PACKAGE_NAME}.', new_contents)
         if contents == new_contents:
             UNTOUCED_FILES += 1
             return
@@ -65,7 +67,7 @@ if __name__ == "__main__":
         NEW_PACKAGE_DIR.rmdir()
         print(f"✅ Removed existing {NEW_PACKAGE_DIR}\n")
 
-    print("📁 Creating new package with updated `great_expectations_v0` references\n")
+    print(f"📁 Creating new package with updated `{MIRROR_PACKAGE_NAME}` references\n")
     iterate_files(CORE_DIRECTORY)
     print(f"\n Untouched files: {UNTOUCED_FILES}\n Updated files: {UPDATED_FILES}\n")
 
