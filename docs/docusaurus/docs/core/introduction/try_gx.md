@@ -55,14 +55,16 @@ For more comprehensive guidance on setting up a Python environment, installing {
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py imports"
    ```
 
-3. Run the following code to create a temporary Data Context and connect to sample data:
+3. Create a temporary Data Context and connect to sample data.
 
    In Python, a Data Context provides the API for interacting with many common GX objects.
 
-   In the following code, a Data Context is initialized and then used to read the contents of a `.csv` file into a Batch of sample data:
+   Run the following code to initialize a Data Context and then use it to read the contents of a `.csv` file into a Batch of sample data:
 
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py set up"
    ```
+   
+   You'll use this sample data to test your Expectations.
 
 3. Create an Expectation.
 
