@@ -345,7 +345,7 @@ class TestV1ActionRun:
                         "active_batch_definition": LegacyBatchDefinition(
                             datasource_name="test_environment",
                             data_connector_name="general_azure_data_connector",
-                            data_asset_name="asset_2",
+                            data_asset_name="asset_2_two_wow_whoa_vroom",
                             batch_identifiers=IDDict(
                                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
                             ),
@@ -682,7 +682,7 @@ class TestV1ActionRun:
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": "*Asset*: asset_2  *Expectation Suite*: suite_b",
+                            "text": "*Asset*: asset_2_two_wow_whoa_vroom  *Expectation Suite*: suite_b",
                         },
                     },
                     {"type": "divider"},
