@@ -182,7 +182,6 @@ module = [
     "great_expectations.compatibility.docstring_parser",
     "great_expectations.data_context.*",
     "great_expectations.dataset.*",
-    "great_expectations.datasource.data_connector.*",
     "great_expectations.expectations.core.*",
     "great_expectations.expectations.metrics.column_map_metrics.*",
     "great_expectations.expectations.metrics.column_pair_map_metrics.*",
