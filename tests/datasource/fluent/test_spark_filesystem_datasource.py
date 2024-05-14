@@ -919,7 +919,6 @@ def test_spark_sorter(spark_filesystem_datasource: SparkFilesystemDatasource, so
     # arrange
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=".*",
         header=True,
         infer_schema=True,
     )
