@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
+import re
 
 import numpy as np
 import pandas as pd
@@ -12,7 +13,10 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.core.partitioners import ColumnPartitionerMonthly
+from great_expectations.core.partitioners import (
+    ColumnPartitionerMonthly,
+    FileNamePartitionerMonthly,
+)
 from great_expectations.data_context import AbstractDataContext, EphemeralDataContext
 from great_expectations.datasource.fluent import (
     BatchRequest,
@@ -89,11 +93,14 @@ def pandas_data(
     pandas_ds = pandas_filesystem_datasource(test_backends=test_backends, context=context)
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
         batch_metadata={"my_pipeline": "${pipeline_filename}"},
     )
-    batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
+    batching_regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+    batch_request = asset.build_batch_request(
+        {"year": "2019", "month": "01"},
+        partitioner=FileNamePartitionerMonthly(regex=batching_regex),
+    )
     return context, pandas_ds, asset, batch_request
 
 
