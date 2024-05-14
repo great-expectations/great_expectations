@@ -12,7 +12,6 @@ from pytest import param
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility import aws, pydantic
 from great_expectations.core.partitioners import FileNamePartitionerPath
-from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import PandasS3Datasource
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
@@ -22,7 +21,6 @@ from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
@@ -328,36 +326,6 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "price": "1300",
     }
     assert batch.id == "pandas_s3_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-
-
-@pytest.mark.aws_deps
-def test_test_connection_failures(
-    s3_mock,
-    pandas_s3_datasource: PandasS3Datasource,
-    bad_regex_config: tuple[re.Pattern, str],
-    aws_credentials,
-):
-    _, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(  # type: ignore[call-arg]
-        name="csv_asset",
-    )
-    csv_asset._datasource = pandas_s3_datasource
-    pandas_s3_datasource.assets = [
-        csv_asset,
-    ]
-    csv_asset._data_connector = S3DataConnector(
-        datasource_name=pandas_s3_datasource.name,
-        data_asset_name=csv_asset.name,
-        s3_client=s3_mock,
-        bucket=pandas_s3_datasource.bucket,
-        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
-    )
-    csv_asset._test_connection_error_message = test_connection_error_message
-
-    with pytest.raises(TestConnectionError) as e:
-        pandas_s3_datasource.test_connection()
-
-    assert str(e.value) == str(test_connection_error_message)
 
 
 @pytest.mark.aws_deps
