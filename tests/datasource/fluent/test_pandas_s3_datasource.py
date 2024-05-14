@@ -344,27 +344,17 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
         name="csv_asset_not_recursive",
         s3_recursive_file_discovery=False,
     )
-    batching_regex = re.compile(
-        r".*",
-    )
     found_files_without_recursion = len(
         no_recursion_asset.get_batch_list_from_batch_request(
-            no_recursion_asset.build_batch_request(
-                partitioner=FileNamePartitionerPath(regex=batching_regex)
-            )
+            no_recursion_asset.build_batch_request()
         )
     )
     recursion_asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset_recursive",
-        batching_regex=r".*",
         s3_recursive_file_discovery=True,
     )
     found_files_with_recursion = len(
-        recursion_asset.get_batch_list_from_batch_request(
-            recursion_asset.build_batch_request(
-                partitioner=FileNamePartitionerPath(regex=batching_regex)
-            )
-        )
+        recursion_asset.get_batch_list_from_batch_request(recursion_asset.build_batch_request())
     )
     # Only 1 additional file was added to the subfolder
     assert found_files_without_recursion + 1 == found_files_with_recursion
