@@ -5,7 +5,7 @@ from great_expectations.compatibility.typing_extensions import override
 """Serializer class interface definition.
 
 Serializers determine how to write an object to disk, json, etc.
-A serializer comprises the object destination and name e.g. YAMLReadyDictDatasourceConfigSerializer.
+A serializer comprises the object destination and name e.g. YAMLReadyDictMyModelConfigSerializer.
 A base implementation (DictConfigSerializer) is provided if no modification needs to be included for the specific object / destination pair.
 
 Typical usage example:

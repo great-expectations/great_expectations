@@ -19,10 +19,6 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    datasourceConfigSchema,
-)
-from great_expectations.datasource.datasource_serializer import (
-    YAMLReadyDictDatasourceConfigSerializer,
 )
 from great_expectations.datasource.fluent.config import GxConfig
 
@@ -134,7 +130,6 @@ class FileDataContext(SerializableDataContext):
             store_name=store_name,
             store_backend=store_backend,
             runtime_environment=runtime_environment,
-            serializer=YAMLReadyDictDatasourceConfigSerializer(schema=datasourceConfigSchema),
         )
         return datasource_store
 
