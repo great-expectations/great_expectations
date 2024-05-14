@@ -563,6 +563,17 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true # prevent against pushing duplicate versions
+      - name: Prepare v0 mirror package
+        run: python scripts/gen_gx_v0_package.py
+      - name: Build v0 distribution
+        run: |
+          python setup.py sdist
+          python setup.py bdist_wheel
+      - name: Publish v0 mirror to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true # prevent against pushing duplicate versions
+
 
   notify_on_failure:
     needs: [
