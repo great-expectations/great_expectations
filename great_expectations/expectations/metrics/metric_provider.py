@@ -165,9 +165,9 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 declared_metric_name = metric_name + metric_definition_kwargs.get(
                     "metric_name_suffix", ""
                 )
-                metric_fn_type: Optional[Union[MetricFunctionTypes, MetricPartialFunctionTypes]] = (
-                    getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
-                )
+                metric_fn_type: Optional[
+                    Union[MetricFunctionTypes, MetricPartialFunctionTypes]
+                ] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
 
                 if not metric_fn_type:
                     # This is not a metric (valid metrics possess exectly one metric function).

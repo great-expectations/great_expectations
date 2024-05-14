@@ -104,9 +104,9 @@ class SqliteTableAsset(SqlTableAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # update the partitioner map with the Sqlite specific partitioner
-        self._partitioner_implementation_map[PartitionerConvertedDatetime] = (
-            SqlitePartitionerConvertedDateTime
-        )
+        self._partitioner_implementation_map[
+            PartitionerConvertedDatetime
+        ] = SqlitePartitionerConvertedDateTime
 
     type: Literal["table"] = "table"
 
@@ -115,9 +115,9 @@ class SqliteQueryAsset(SqlQueryAsset):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # update the partitioner map with the  Sqlite specific partitioner
-        self._partitioner_implementation_map[PartitionerConvertedDatetime] = (
-            SqlitePartitionerConvertedDateTime
-        )
+        self._partitioner_implementation_map[
+            PartitionerConvertedDatetime
+        ] = SqlitePartitionerConvertedDateTime
 
     type: Literal["query"] = "query"
 

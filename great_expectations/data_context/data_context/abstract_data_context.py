@@ -1873,10 +1873,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise
 
     @overload
-    def _normalize_absolute_or_relative_path(self, path: str) -> str: ...
+    def _normalize_absolute_or_relative_path(self, path: str) -> str:
+        ...
 
     @overload
-    def _normalize_absolute_or_relative_path(self, path: None) -> None: ...
+    def _normalize_absolute_or_relative_path(self, path: None) -> None:
+        ...
 
     def _normalize_absolute_or_relative_path(self, path: Optional[str]) -> Optional[str]:
         """
@@ -2302,9 +2304,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                             build_index=build_index,
                         )
                         if index_page_resource_identifier_tuple:
-                            index_page_locator_infos[site_name] = (
-                                index_page_resource_identifier_tuple[0]
-                            )
+                            index_page_locator_infos[
+                                site_name
+                            ] = index_page_resource_identifier_tuple[0]
 
         else:
             logger.debug("No data_docs_config found. No site(s) built.")

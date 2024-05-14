@@ -92,9 +92,9 @@ not supported).
         if details is None:
             details = {}
 
-        inferred_semantic_domain_type: Optional[Dict[str, Union[str, SemanticDomainTypes]]] = (
-            details.get(INFERRED_SEMANTIC_TYPE_KEY)
-        )
+        inferred_semantic_domain_type: Optional[
+            Dict[str, Union[str, SemanticDomainTypes]]
+        ] = details.get(INFERRED_SEMANTIC_TYPE_KEY)
         if inferred_semantic_domain_type:
             semantic_domain_key: str
             metric_domain_key: str

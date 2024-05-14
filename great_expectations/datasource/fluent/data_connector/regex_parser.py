@@ -85,23 +85,23 @@ class RegExParser:
         all_group_names_to_group_indexes_bidirectional_mappings: Tuple[
             Dict[str, int], Dict[int, str]
         ] = self.get_all_group_names_to_group_indexes_bidirectional_mappings()
-        all_group_name_to_group_index_mapping: Dict[str, int] = (
-            all_group_names_to_group_indexes_bidirectional_mappings[0]
-        )
+        all_group_name_to_group_index_mapping: Dict[
+            str, int
+        ] = all_group_names_to_group_indexes_bidirectional_mappings[0]
         return all_group_name_to_group_index_mapping
 
     def get_all_group_index_to_group_name_mapping(self) -> Dict[int, str]:
         all_group_names_to_group_indexes_bidirectional_mappings: Tuple[
             Dict[str, int], Dict[int, str]
         ] = self.get_all_group_names_to_group_indexes_bidirectional_mappings()
-        all_group_index_to_group_name_mapping: Dict[int, str] = (
-            all_group_names_to_group_indexes_bidirectional_mappings[1]
-        )
+        all_group_index_to_group_name_mapping: Dict[
+            int, str
+        ] = all_group_names_to_group_indexes_bidirectional_mappings[1]
         return all_group_index_to_group_name_mapping
 
     def group_names(self) -> List[str]:
-        all_group_name_to_group_index_mapping: Dict[str, int] = (
-            self.get_all_group_name_to_group_index_mapping()
-        )
+        all_group_name_to_group_index_mapping: Dict[
+            str, int
+        ] = self.get_all_group_name_to_group_index_mapping()
         all_group_names: List[str] = list(all_group_name_to_group_index_mapping.keys())
         return all_group_names

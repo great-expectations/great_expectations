@@ -149,9 +149,9 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
                 }
     """  # noqa: E501
 
-    ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
-        "both_values_are_missing"
-    )
+    ignore_row_if: Literal[
+        "both_values_are_missing", "either_value_is_missing", "neither"
+    ] = "both_values_are_missing"
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

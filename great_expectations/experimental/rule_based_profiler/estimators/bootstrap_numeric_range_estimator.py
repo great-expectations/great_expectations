@@ -119,14 +119,14 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             quantile_bias_correction = False
 
         # Obtain quantile_bias_std_error_ratio_threshold override from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
-        quantile_bias_std_error_ratio_threshold: Optional[float] = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.configuration.quantile_bias_std_error_ratio_threshold,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
+        quantile_bias_std_error_ratio_threshold: Optional[
+            float
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.configuration.quantile_bias_std_error_ratio_threshold,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
         )
         if quantile_bias_std_error_ratio_threshold is None:
             quantile_bias_std_error_ratio_threshold = (

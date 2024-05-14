@@ -87,7 +87,8 @@ class FluentBaseModel(pydantic.BaseModel):
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
-    ) -> str: ...
+    ) -> str:
+        ...
 
     @overload
     def yaml(
@@ -103,7 +104,8 @@ class FluentBaseModel(pydantic.BaseModel):
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
-    ) -> pathlib.Path: ...
+    ) -> pathlib.Path:
+        ...
 
     def yaml(  # noqa: PLR0913
         self,
@@ -301,7 +303,8 @@ class FluentBaseModel(pydantic.BaseModel):
         return self.yaml()
 
 
-class GenericBaseModel(FluentBaseModel, pydantic.GenericModel): ...
+class GenericBaseModel(FluentBaseModel, pydantic.GenericModel):
+    ...
 
 
 def _recursively_set_config_value(  # noqa: C901 - too complex

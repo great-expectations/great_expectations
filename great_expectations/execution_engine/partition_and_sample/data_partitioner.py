@@ -73,7 +73,7 @@ class PartitionerMethod(enum.Enum):
         return hash(self.value)
 
 
-class DataPartitioner(abc.ABC):  # noqa: B024
+class DataPartitioner(abc.ABC):
     """Abstract base class containing methods for partitioning data accessible via Execution Engines.
 
     Note, for convenience, you can also access DatePart via the instance variable

@@ -193,7 +193,7 @@ class StoreBackend(metaclass=ABCMeta):
             for key_element in key:
                 if not isinstance(key_element, str):
                     raise TypeError(
-                        "Elements within tuples passed as keys to {} must be instances of {}, not {}".format(  # noqa: E501 UP032
+                        "Elements within tuples passed as keys to {} must be instances of {}, not {}".format(  # noqa: E501
                             self.__class__.__name__,
                             str,
                             type(key_element),

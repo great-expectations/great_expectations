@@ -335,13 +335,13 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     desired_config["stores"][desired_config["checkpoint_store_name"]]["store_backend"][
         "root_directory"
     ] = test_root_directory
-    desired_config["data_docs_sites"]["local_site"]["store_backend"]["root_directory"] = (
-        test_root_directory
-    )
+    desired_config["data_docs_sites"]["local_site"]["store_backend"][
+        "root_directory"
+    ] = test_root_directory
 
-    desired_config["stores"]["validation_definition_store"]["store_backend"]["root_directory"] = (
-        test_root_directory
-    )
+    desired_config["stores"]["validation_definition_store"]["store_backend"][
+        "root_directory"
+    ] = test_root_directory
 
     data_context_config_schema = DataContextConfigSchema()
     assert filter_properties_dict(

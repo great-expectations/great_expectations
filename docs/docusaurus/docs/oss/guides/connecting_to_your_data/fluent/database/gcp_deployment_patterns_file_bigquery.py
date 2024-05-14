@@ -132,9 +132,9 @@ for store in pop_stores:
 
 actual_existing_validation_results_store = {}
 actual_existing_validation_results_store["stores"] = stores
-actual_existing_validation_results_store["validation_results_store_name"] = (
-    great_expectations_yaml["validation_results_store_name"]
-)
+actual_existing_validation_results_store[
+    "validation_results_store_name"
+] = great_expectations_yaml["validation_results_store_name"]
 
 expected_existing_validation_results_store_yaml = """
 stores:
@@ -186,9 +186,9 @@ context.add_store(
 )
 with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
-great_expectations_yaml["validation_results_store_name"] = (
-    "validation_results_GCS_store"
-)
+great_expectations_yaml[
+    "validation_results_store_name"
+] = "validation_results_GCS_store"
 great_expectations_yaml["stores"]["validation_results_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )

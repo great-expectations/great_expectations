@@ -167,9 +167,9 @@ def _get_dictionary_from_block_in_docstring(
                 key, value = line.strip().split(":", 1)
                 block_dict[key] = _escape_markdown_special_characters(value.strip())
             elif _get_indentation(line) > base_indent:
-                block_dict[key] = (
-                    f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
-                )
+                block_dict[
+                    key
+                ] = f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
             elif key is None:
                 raise BlockFormatError(block_heading_text, block_contents, line)
             else:

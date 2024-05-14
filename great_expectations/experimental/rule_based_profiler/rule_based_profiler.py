@@ -197,13 +197,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
             parameter_builder_configs=rule_config.get("parameter_builders"),
             data_context=self._data_context,
         )
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
-            init_rule_expectation_configuration_builders(
-                expectation_configuration_builder_configs=rule_config.get(
-                    "expectation_configuration_builders"
-                ),
-                data_context=self._data_context,
-            )
+        expectation_configuration_builders: List[
+            ExpectationConfigurationBuilder
+        ] = init_rule_expectation_configuration_builders(
+            expectation_configuration_builder_configs=rule_config.get(
+                "expectation_configuration_builders"
+            ),
+            data_context=self._data_context,
         )
 
         # Compile previous steps and package into a Rule object
@@ -634,23 +634,23 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
 
             parameter_builder_configs: List[dict] = rule_config.get("parameter_builders", [])
-            effective_parameter_builder_configs: Optional[List[dict]] = (
-                cls._reconcile_rule_parameter_builder_configs(
-                    rule=rule,
-                    parameter_builder_configs=parameter_builder_configs,
-                    reconciliation_strategy=reconciliation_directives.parameter_builder,
-                )
+            effective_parameter_builder_configs: Optional[
+                List[dict]
+            ] = cls._reconcile_rule_parameter_builder_configs(
+                rule=rule,
+                parameter_builder_configs=parameter_builder_configs,
+                reconciliation_strategy=reconciliation_directives.parameter_builder,
             )
 
             expectation_configuration_builder_configs: List[dict] = rule_config.get(
                 "expectation_configuration_builders", []
             )
-            effective_expectation_configuration_builder_configs: List[dict] = (
-                cls._reconcile_rule_expectation_configuration_builder_configs(
-                    rule=rule,
-                    expectation_configuration_builder_configs=expectation_configuration_builder_configs,
-                    reconciliation_strategy=reconciliation_directives.expectation_configuration_builder,
-                )
+            effective_expectation_configuration_builder_configs: List[
+                dict
+            ] = cls._reconcile_rule_expectation_configuration_builder_configs(
+                rule=rule,
+                expectation_configuration_builder_configs=expectation_configuration_builder_configs,
+                reconciliation_strategy=reconciliation_directives.expectation_configuration_builder,
             )
 
             effective_rule_config = {
@@ -736,9 +736,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         effective_parameter_builder_configs: Dict[str, dict] = {}
 
-        current_parameter_builders: Dict[str, ParameterBuilder] = (
-            rule._get_parameter_builders_as_dict()
-        )
+        current_parameter_builders: Dict[
+            str, ParameterBuilder
+        ] = rule._get_parameter_builders_as_dict()
 
         parameter_builder_name: str
         parameter_builder: ParameterBuilder
@@ -808,9 +808,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         effective_expectation_configuration_builder_configs: Dict[str, dict] = {}
 
-        current_expectation_configuration_builders: Dict[str, ExpectationConfigurationBuilder] = (
-            rule._get_expectation_configuration_builders_as_dict()
-        )
+        current_expectation_configuration_builders: Dict[
+            str, ExpectationConfigurationBuilder
+        ] = rule._get_expectation_configuration_builders_as_dict()
 
         expectation_configuration_builder_name: str
         expectation_configuration_builder: ExpectationConfigurationBuilder
@@ -822,12 +822,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
             expectation_configuration_builder_as_dict = (
                 expectation_configuration_builder.to_json_dict()
             )
-            expectation_configuration_builder_as_dict["class_name"] = (
-                expectation_configuration_builder.__class__.__name__
-            )
-            expectation_configuration_builder_as_dict["module_name"] = (
-                expectation_configuration_builder.__class__.__module__
-            )
+            expectation_configuration_builder_as_dict[
+                "class_name"
+            ] = expectation_configuration_builder.__class__.__name__
+            expectation_configuration_builder_as_dict[
+                "module_name"
+            ] = expectation_configuration_builder.__class__.__module__
 
             # Roundtrip through schema validation to add/or restore any missing fields.
             deserialized_config: ExpectationConfigurationBuilderConfig = (

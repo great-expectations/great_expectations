@@ -516,7 +516,8 @@ def deep_filter_properties_iterable(
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> dict: ...
+) -> dict:
+    ...
 
 
 @overload
@@ -528,7 +529,8 @@ def deep_filter_properties_iterable(
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> list: ...
+) -> list:
+    ...
 
 
 @overload
@@ -540,7 +542,8 @@ def deep_filter_properties_iterable(
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> set: ...
+) -> set:
+    ...
 
 
 @overload
@@ -552,7 +555,8 @@ def deep_filter_properties_iterable(
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> tuple: ...
+) -> tuple:
+    ...
 
 
 @overload
@@ -564,7 +568,8 @@ def deep_filter_properties_iterable(
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
     inplace: bool = ...,
-) -> None: ...
+) -> None:
+    ...
 
 
 def deep_filter_properties_iterable(  # noqa: C901, PLR0913

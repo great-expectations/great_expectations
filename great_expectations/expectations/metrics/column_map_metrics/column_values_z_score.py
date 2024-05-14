@@ -124,11 +124,11 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
             metric.metric_name
             == f"column_values.z_score.under_threshold.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"  # noqa: E501
         ):
-            dependencies[f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"] = (
-                MetricConfiguration(
-                    metric_name=f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                )
+            dependencies[
+                f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+            ] = MetricConfiguration(
+                metric_name=f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
             )
 
         if (

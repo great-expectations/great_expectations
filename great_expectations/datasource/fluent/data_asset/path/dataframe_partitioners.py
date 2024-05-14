@@ -73,9 +73,9 @@ class DataframePartitionerMonthly(_PartitionerDatetime):
 class DataframePartitionerDaily(_PartitionerDatetime):
     column_name: str
     sort_ascending: bool = True
-    method_name: Literal["partition_on_year_and_month_and_day"] = (
+    method_name: Literal[
         "partition_on_year_and_month_and_day"
-    )
+    ] = "partition_on_year_and_month_and_day"
 
     @property
     @override

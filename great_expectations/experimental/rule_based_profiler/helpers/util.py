@@ -208,18 +208,18 @@ def build_batch_request(
         return None
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.  # noqa: E501
-    effective_batch_request: Optional[Union[BatchRequestBase, dict]] = (
-        get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=batch_request,
-            expected_return_type=(BatchRequestBase, dict),
-            variables=variables,
-            parameters=parameters,
-        )
+    effective_batch_request: Optional[
+        Union[BatchRequestBase, dict]
+    ] = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=batch_request,
+        expected_return_type=(BatchRequestBase, dict),
+        variables=variables,
+        parameters=parameters,
     )
-    materialized_batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = (
-        materialize_batch_request(batch_request=effective_batch_request)
-    )
+    materialized_batch_request: Optional[
+        Union[BatchRequest, RuntimeBatchRequest]
+    ] = materialize_batch_request(batch_request=effective_batch_request)
 
     return materialized_batch_request
 
@@ -471,14 +471,14 @@ def build_domains_from_column_names(
 def convert_variables_to_dict(
     variables: Optional[ParameterContainer] = None,
 ) -> Dict[str, Any]:
-    variables_as_dict: Optional[Union[ParameterNode, Dict[str, Any]]] = (
-        get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=VARIABLES_PREFIX,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
-        )
+    variables_as_dict: Optional[
+        Union[ParameterNode, Dict[str, Any]]
+    ] = get_parameter_value_and_validate_return_type(
+        domain=None,
+        parameter_reference=VARIABLES_PREFIX,
+        expected_return_type=None,
+        variables=variables,
+        parameters=None,
     )
     if isinstance(variables_as_dict, ParameterNode):
         return variables_as_dict.to_dict()
@@ -807,25 +807,25 @@ def compute_bootstrap_quantiles_point_estimate(  # noqa: PLR0913
             metric_values, size=(n_resamples, metric_values.size)
         )
 
-    lower_quantile_bias_corrected_point_estimate: Union[np.float64, datetime.datetime] = (
-        _determine_quantile_bias_corrected_point_estimate(
-            bootstraps=bootstraps,
-            quantile_pct=lower_quantile_pct,
-            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-            quantile_bias_correction=quantile_bias_correction,
-            quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
-            sample_quantile=sample_lower_quantile,
-        )
+    lower_quantile_bias_corrected_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = _determine_quantile_bias_corrected_point_estimate(
+        bootstraps=bootstraps,
+        quantile_pct=lower_quantile_pct,
+        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
+        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
+        sample_quantile=sample_lower_quantile,
     )
-    upper_quantile_bias_corrected_point_estimate: Union[np.float64, datetime.datetime] = (
-        _determine_quantile_bias_corrected_point_estimate(
-            bootstraps=bootstraps,
-            quantile_pct=upper_quantile_pct,
-            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-            quantile_bias_correction=quantile_bias_correction,
-            quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
-            sample_quantile=sample_upper_quantile,
-        )
+    upper_quantile_bias_corrected_point_estimate: Union[
+        np.float64, datetime.datetime
+    ] = _determine_quantile_bias_corrected_point_estimate(
+        bootstraps=bootstraps,
+        quantile_pct=upper_quantile_pct,
+        quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
+        quantile_bias_correction=quantile_bias_correction,
+        quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
+        sample_quantile=sample_upper_quantile,
     )
 
     return build_numeric_range_estimation_result(
@@ -1078,7 +1078,8 @@ def sanitize_parameter_name(
 
 class _NumericIterableWithDtype(Iterable, Protocol):
     @property
-    def dtype(self) -> Any: ...
+    def dtype(self) -> Any:
+        ...
 
 
 def _is_iterable_of_numeric_dtypes(

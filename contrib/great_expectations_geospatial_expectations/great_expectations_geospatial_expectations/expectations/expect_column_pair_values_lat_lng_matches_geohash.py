@@ -63,9 +63,9 @@ class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
             modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
     """
 
-    ignore_row_if: Literal["both_values_are_missing", "either_value_is_missing", "neither"] = (
-        "both_values_are_missing"
-    )
+    ignore_row_if: Literal[
+        "both_values_are_missing", "either_value_is_missing", "neither"
+    ] = "both_values_are_missing"
 
     examples: ClassVar[List[dict]] = [
         {

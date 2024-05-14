@@ -38,9 +38,9 @@ class SparkAzureBlobStorageDatasourceError(SparkDatasourceError):
 @public_api
 class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[Type[AzureBlobStorageDataConnector]] = (
-        AzureBlobStorageDataConnector
-    )
+    data_connector_type: ClassVar[
+        Type[AzureBlobStorageDataConnector]
+    ] = AzureBlobStorageDataConnector
 
     # instance attributes
     type: Literal["spark_abs"] = "spark_abs"

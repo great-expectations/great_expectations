@@ -209,12 +209,12 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         if max_unexpected_ratio is None:
             max_unexpected_ratio = max_unexpected_values / mean_table_row_count_as_float
 
-        metric_configurations_by_column_name: Dict[str, List[MetricConfiguration]] = (
-            self._generate_metric_configurations(
-                map_metric_name=map_metric_name,
-                batch_ids=batch_ids,
-                column_names=table_column_names,
-            )
+        metric_configurations_by_column_name: Dict[
+            str, List[MetricConfiguration]
+        ] = self._generate_metric_configurations(
+            map_metric_name=map_metric_name,
+            batch_ids=batch_ids,
+            column_names=table_column_names,
         )
 
         candidate_column_names: List[str] = self._get_column_names_satisfying_tolerance_limits(
@@ -302,12 +302,12 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         column_name: str
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
 
-        resolved_metrics_by_column_name: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = (
-            get_resolved_metrics_by_key(
-                validator=validator,
-                metric_configurations_by_key=metric_configurations_by_column_name,
-                runtime_configuration=runtime_configuration,
-            )
+        resolved_metrics_by_column_name: Dict[
+            str, Dict[Tuple[str, str, str], MetricValue]
+        ] = get_resolved_metrics_by_key(
+            validator=validator,
+            metric_configurations_by_key=metric_configurations_by_column_name,
+            runtime_configuration=runtime_configuration,
         )
 
         metric_value: Any

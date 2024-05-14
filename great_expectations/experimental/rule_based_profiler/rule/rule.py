@@ -218,9 +218,9 @@ class Rule(SerializableDictDot):
     @override
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None
-        parameter_builders: Optional[Dict[str, ParameterBuilder]] = (
-            self._get_parameter_builders_as_dict()
-        )
+        parameter_builders: Optional[
+            Dict[str, ParameterBuilder]
+        ] = self._get_parameter_builders_as_dict()
         parameter_builder: ParameterBuilder
         if parameter_builders is not None:
             # Roundtrip through schema validation to add/or restore any missing fields.
@@ -230,9 +230,9 @@ class Rule(SerializableDictDot):
             ]
 
         expectation_configuration_builder_configs: Optional[List[dict]] = None
-        expectation_configuration_builders: Optional[Dict[str, ExpectationConfigurationBuilder]] = (
-            self._get_expectation_configuration_builders_as_dict()
-        )
+        expectation_configuration_builders: Optional[
+            Dict[str, ExpectationConfigurationBuilder]
+        ] = self._get_expectation_configuration_builders_as_dict()
         expectation_configuration_builder: ExpectationConfigurationBuilder
         if expectation_configuration_builders is not None:
             # Roundtrip through schema validation to add/or restore any missing fields.

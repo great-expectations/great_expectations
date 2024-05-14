@@ -533,10 +533,10 @@ class ExecutionEngine(ABC):
 
         for metric_computation_configuration in metric_fn_direct_configurations:
             try:
-                resolved_metrics[metric_computation_configuration.metric_configuration.id] = (
-                    metric_computation_configuration.metric_fn(  # type: ignore[misc] # F not callable
-                        **metric_computation_configuration.metric_provider_kwargs
-                    )
+                resolved_metrics[
+                    metric_computation_configuration.metric_configuration.id
+                ] = metric_computation_configuration.metric_fn(  # type: ignore[misc] # F not callable
+                    **metric_computation_configuration.metric_provider_kwargs
                 )
             except Exception as e:
                 raise gx_exceptions.MetricResolutionError(
@@ -546,9 +546,9 @@ class ExecutionEngine(ABC):
 
         try:
             # an engine-specific way of computing metrics together
-            resolved_metric_bundle: Dict[Tuple[str, str, str], MetricValue] = (
-                self.resolve_metric_bundle(metric_fn_bundle=metric_fn_bundle_configurations)
-            )
+            resolved_metric_bundle: Dict[
+                Tuple[str, str, str], MetricValue
+            ] = self.resolve_metric_bundle(metric_fn_bundle=metric_fn_bundle_configurations)
             resolved_metrics.update(resolved_metric_bundle)
         except Exception as e:
             raise gx_exceptions.MetricResolutionError(

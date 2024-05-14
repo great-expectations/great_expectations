@@ -90,12 +90,12 @@ class InlineRenderer(Renderer):
             renderer_types=renderer_types,
         )
 
-        rendered_content: List[RenderedAtomicContent] = (
-            self._get_atomic_rendered_content_from_renderer_names(
-                render_object=render_object,
-                renderer_names=renderer_names,
-                expectation_type=expectation_type,
-            )
+        rendered_content: List[
+            RenderedAtomicContent
+        ] = self._get_atomic_rendered_content_from_renderer_names(
+            render_object=render_object,
+            renderer_names=renderer_names,
+            expectation_type=expectation_type,
         )
 
         return rendered_content
@@ -210,9 +210,9 @@ class InlineRenderer(Renderer):
         Returns:
             RenderedAtomicContent for a given object.
         """
-        render_object: Union[ExpectationConfiguration, ExpectationValidationResult] = (
-            self._render_object
-        )
+        render_object: Union[
+            ExpectationConfiguration, ExpectationValidationResult
+        ] = self._render_object
 
         return self._get_atomic_rendered_content_for_object(render_object=render_object)
 

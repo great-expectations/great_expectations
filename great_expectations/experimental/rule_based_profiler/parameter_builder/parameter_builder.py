@@ -499,9 +499,9 @@ specified (empty "metric_name" value detected)."""  # noqa: E501
                     metric_attributes=Attributes(metric_configuration.metric_value_kwargs),
                     metric_values_by_batch_id=None,
                 )
-                attributed_resolved_metrics_map[metric_configuration.metric_value_kwargs_id] = (
-                    attributed_resolved_metrics
-                )
+                attributed_resolved_metrics_map[
+                    metric_configuration.metric_value_kwargs_id
+                ] = attributed_resolved_metrics
 
             if metric_configuration.id in resolved_metrics:
                 resolved_metric_value = resolved_metrics[metric_configuration.id]

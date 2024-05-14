@@ -100,9 +100,9 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """  # noqa: E501
-        batch_definition_list: List[LegacyBatchDefinition] = (
-            self._get_unfiltered_batch_definition_list(batch_request=batch_request)
-        )
+        batch_definition_list: List[
+            LegacyBatchDefinition
+        ] = self._get_unfiltered_batch_definition_list(batch_request=batch_request)
 
         data_connector_query_dict: dict[str, dict | slice] = {}
         if batch_request.options:
@@ -398,9 +398,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         num_all_matched_group_values: int = regex_parser.get_num_all_matched_group_values()
 
         # Check for `(?P<name>)` named group syntax
-        defined_group_name_to_group_index_mapping: Dict[str, int] = (
-            regex_parser.get_named_group_name_to_group_index_mapping()
-        )
+        defined_group_name_to_group_index_mapping: Dict[
+            str, int
+        ] = regex_parser.get_named_group_name_to_group_index_mapping()
         defined_group_name_indexes: Set[int] = set(
             defined_group_name_to_group_index_mapping.values()
         )

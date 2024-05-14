@@ -295,9 +295,9 @@ class ValidationGraph:
                             failed_metric_info[failed_metric.id]["exception_info"] = exception_info
                         else:
                             failed_metric_info[failed_metric.id] = {}
-                            failed_metric_info[failed_metric.id]["metric_configuration"] = (
-                                failed_metric
-                            )
+                            failed_metric_info[failed_metric.id][
+                                "metric_configuration"
+                            ] = failed_metric
                             failed_metric_info[failed_metric.id]["num_failures"] = 1
                             failed_metric_info[failed_metric.id]["exception_info"] = exception_info
 

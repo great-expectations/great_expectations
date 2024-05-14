@@ -190,9 +190,9 @@ class SqlPartitionerYearAndMonth(_PartitionerDatetime):
 class SqlPartitionerYearAndMonthAndDay(_PartitionerDatetime):
     column_name: str
     sort_ascending: bool = True
-    method_name: Literal["partition_on_year_and_month_and_day"] = (
+    method_name: Literal[
         "partition_on_year_and_month_and_day"
-    )
+    ] = "partition_on_year_and_month_and_day"
 
     @property
     @override
@@ -547,9 +547,9 @@ class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT])
             batch_spec_kwargs = self._create_batch_spec_kwargs()
             if sql_partitioner:
                 batch_spec_kwargs["partitioner_method"] = sql_partitioner.method_name
-                batch_spec_kwargs["partitioner_kwargs"] = (
-                    sql_partitioner.partitioner_method_kwargs()
-                )
+                batch_spec_kwargs[
+                    "partitioner_kwargs"
+                ] = sql_partitioner.partitioner_method_kwargs()
                 # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
                 # it is hardcoded to a dict above, so we cast it here.
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(

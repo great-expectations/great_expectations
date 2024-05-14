@@ -63,10 +63,12 @@ class TypeLookup(
             continue
 
     @overload
-    def __getitem__(self, key: str) -> Type: ...
+    def __getitem__(self, key: str) -> Type:
+        ...
 
     @overload
-    def __getitem__(self, key: Type) -> str: ...
+    def __getitem__(self, key: Type) -> str:
+        ...
 
     @override
     def __getitem__(self, key: ValidTypes) -> ValidTypes:

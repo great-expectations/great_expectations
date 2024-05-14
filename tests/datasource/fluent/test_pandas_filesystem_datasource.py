@@ -213,13 +213,16 @@ class TestDynamicPandasAssets:
             )
 
         errors_dict = exc_info.value.errors()
-        assert errors_dict[  # the extra keyword error will always be the last error
-            -1  # we don't care about any other errors for this test
-        ] == {
-            "loc": ("invalid_keyword_arg",),
-            "msg": "extra fields not permitted",
-            "type": "value_error.extra",
-        }
+        assert (
+            errors_dict[  # the extra keyword error will always be the last error
+                -1  # we don't care about any other errors for this test
+            ]
+            == {
+                "loc": ("invalid_keyword_arg",),
+                "msg": "extra fields not permitted",
+                "type": "value_error.extra",
+            }
+        )
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],

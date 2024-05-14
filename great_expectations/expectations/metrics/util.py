@@ -428,7 +428,7 @@ def get_sqlalchemy_column_metadata(
         return None
 
 
-def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
+def column_reflection_fallback(  # noqa: C901, PLR0915
     selectable: sqlalchemy.Select,
     dialect: sqlalchemy.Dialect,
     sqlalchemy_engine: sqlalchemy.Engine,
@@ -707,7 +707,8 @@ def get_dbms_compatible_column_names(
     column_names: str,
     batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
-) -> str | sqlalchemy.quoted_name: ...
+) -> str | sqlalchemy.quoted_name:
+    ...
 
 
 @overload
@@ -715,7 +716,8 @@ def get_dbms_compatible_column_names(
     column_names: List[str],
     batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
-) -> List[str | sqlalchemy.quoted_name]: ...
+) -> List[str | sqlalchemy.quoted_name]:
+    ...
 
 
 def get_dbms_compatible_column_names(
