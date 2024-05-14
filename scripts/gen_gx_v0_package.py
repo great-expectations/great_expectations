@@ -48,4 +48,10 @@ def iterate_files(file_dir: pathlib.Path) -> None:
 
 if __name__ == "__main__":
     iterate_files(CORE_DIRECTORY)
-    print(f"\n Untouched files: {UNTOUCED_FILES}\n Updated files: {UPDATED_FILES}")
+    print(f"\n Untouched files: {UNTOUCED_FILES}\n Updated files: {UPDATED_FILES}\n")
+
+    NEW_CORE_DIR = CORE_DIRECTORY.rename("great_expectations_v0")
+    assert (
+        NEW_CORE_DIR.exists() and not CORE_DIRECTORY.exists()
+    ), "Directory rename failed"
+    print(f"✅ Directory renamed to {NEW_CORE_DIR}\n")
