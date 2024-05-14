@@ -57,7 +57,7 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
         ],
     )
 
-    my_data_connector: DataConnector = DBFSDataConnector(
+    my_data_connector = DBFSDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(f"{base_directory}/test_dir_0/A/B/C"),
