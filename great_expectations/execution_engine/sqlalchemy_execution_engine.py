@@ -5,7 +5,6 @@ import datetime
 import hashlib
 import logging
 import math
-import os
 import random
 import re
 import string
@@ -303,7 +302,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._connection_string = connection_string
         self._url = url
         self._create_temp_table = create_temp_table
-        os.environ["SF_PARTNER"] = "great_expectations_oss"  # noqa: TID251
 
         # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive by  # noqa: E501
         # keeping a reference to it.
