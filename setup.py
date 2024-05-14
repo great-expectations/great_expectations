@@ -6,8 +6,6 @@ from typing import Any, Dict, List
 import pkg_resources  # noqa: TID251: TODO: switch to poetry
 from setuptools import find_packages, setup
 
-import versioneer
-
 
 def get_extras_require():
     results = {}
@@ -110,8 +108,7 @@ def get_config(
         "url": "https://greatexpectations.io",
         "download_url": "https://github.com/great-expectations/great_expectations",
         "author_email": "team@greatexpectations.io",
-        "version": versioneer.get_version(),
-        "cmdclass": versioneer.get_cmdclass(),
+        "version": "1.0.0.a3",
         "install_requires": required,
         "extras_require": get_extras_require(),
         "packages": packages,
