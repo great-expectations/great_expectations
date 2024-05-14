@@ -17,6 +17,7 @@ FROM_PATTERN: Final[Pattern] = re.compile(r"from great_expectations")
 CORE_DIRECTORY: Final[pathlib.Path] = pathlib.Path("great_expectations").resolve(
     strict=True
 )
+NEW_PACKAGE_DIR: Final[pathlib.Path] = CORE_DIRECTORY.with_name("great_expectations_v0")
 
 UNTOUCED_FILES: int = 0
 UPDATED_FILES: int = 0
@@ -49,8 +50,11 @@ if __name__ == "__main__":
     iterate_files(CORE_DIRECTORY)
     print(f"\n Untouched files: {UNTOUCED_FILES}\n Updated files: {UPDATED_FILES}\n")
 
-    NEW_CORE_DIR = CORE_DIRECTORY.rename("great_expectations_v0")
+    if NEW_PACKAGE_DIR.exists():
+        NEW_PACKAGE_DIR.rmdir()
+
+    new_core_dir = CORE_DIRECTORY.rename(NEW_PACKAGE_DIR.name)
     assert (
-        NEW_CORE_DIR.exists() and not CORE_DIRECTORY.exists()
+        new_core_dir.exists() and not CORE_DIRECTORY.exists()
     ), "Directory rename failed"
-    print(f"✅ Directory renamed to {NEW_CORE_DIR}\n")
+    print(f"✅ Directory renamed to {new_core_dir}\n")
