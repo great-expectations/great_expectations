@@ -47,13 +47,13 @@ def iterate_files(file_dir: pathlib.Path) -> None:
 
 
 if __name__ == "__main__":
-    iterate_files(CORE_DIRECTORY)
-    print(f"\n Untouched files: {UNTOUCED_FILES}\n Updated files: {UPDATED_FILES}\n")
-
     if NEW_PACKAGE_DIR.exists():
         print(f"❌ {NEW_PACKAGE_DIR} already exists. Removing...")
         NEW_PACKAGE_DIR.rmdir()
         print(f"✅ Removed existing {NEW_PACKAGE_DIR}\n")
+
+    iterate_files(CORE_DIRECTORY)
+    print(f"\n Untouched files: {UNTOUCED_FILES}\n Updated files: {UPDATED_FILES}\n")
 
     new_core_dir = CORE_DIRECTORY.rename(NEW_PACKAGE_DIR.name)
     assert (
