@@ -41,8 +41,8 @@ def get_config():
     cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = ""
-    cfg.parentdir_prefix = "great_expectations-"
-    cfg.versionfile_source = "great_expectations/_version.py"
+    cfg.parentdir_prefix = "great_expectations_v1-"
+    cfg.versionfile_source = "great_expectations_v1/_version.py"
     cfg.verbose = False
     return cfg
 
