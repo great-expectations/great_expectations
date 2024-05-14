@@ -116,9 +116,9 @@ For more comprehensive guidance on setting up a Python environment, installing {
 
 ## Next steps
 
-<GxCloudAdvert/>
+- <GxCloudAdvert/>
 
-To learn more about {GxData.product_name}, see [Community resources](/core/introduction/community_resources.md).
+- To learn more about {GxData.product_name}, see [Community resources](/core/introduction/community_resources.md).
 
-If you're ready to start using {GxData.product_name} with your own data, the [Set up a GX environment](/core/installation_and_setup/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
+- If you're ready to start using {GxData.product_name} with your own data, the [Set up a GX environment](/core/installation_and_setup/install_gx.md) documentation provides a more comprehensive guide to setting up GX to work with specific data formats and environments.
 
