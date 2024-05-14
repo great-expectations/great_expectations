@@ -13,6 +13,10 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
+from great_expectations.datasource.fluent.constants import (
+    SNOWFLAKE_PARTNER_APPLICATION_CLOUD,
+    SNOWFLAKE_PARTNER_APPLICATION_OSS,
+)
 from great_expectations.datasource.fluent.sql_datasource import (
     FluentBaseModel,
     SQLDatasource,
@@ -126,14 +130,20 @@ class SnowflakeDatasource(SQLDatasource):
         for field_name in tuple(values.keys()):
             if field_name in connection_detail_fields:
                 connection_details[field_name] = values.pop(field_name)
+
+        if values.get("connection_string") and connection_details:
+            raise ValueError(
+                "Cannot provide both a connection string and a combination of account, user, and password."
+            )
+
         if connection_details:
             values["connection_string"] = connection_details
         return values
 
     @pydantic.root_validator
-    def _check_xor_input_args(cls, values: dict) -> dict:
+    def _check_connection_string(cls, values: dict) -> dict:
         # keeping this validator isn't strictly necessary, but it provides a better error message
-        connection_string: str | ConnectionDetails | None = values.get(
+        connection_string: str | ConfigStr | ConnectionDetails | None = values.get(
             "connection_string"
         )
         if connection_string:
@@ -202,6 +212,19 @@ class SnowflakeDatasource(SQLDatasource):
         self._execution_engine = gx_exec_engine
         return gx_exec_engine
 
+    def _get_snowflake_partner_application(self) -> str:
+        """
+        This is used to set the application query parameter in the Snowflake connection URL, which provides attribution
+        to GX for the Snowflake Partner program.
+        """
+
+        # This import is here to avoid a circular import
+        from great_expectations.data_context import CloudDataContext
+
+        if isinstance(self._data_context, CloudDataContext):
+            return SNOWFLAKE_PARTNER_APPLICATION_CLOUD
+        return SNOWFLAKE_PARTNER_APPLICATION_OSS
+
     @override
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
@@ -218,10 +241,21 @@ class SnowflakeDatasource(SQLDatasource):
                 connection_string: str | dict = model_dict.pop("connection_string")
 
                 if isinstance(connection_string, str):
-                    self._engine = sa.create_engine(connection_string, **kwargs)
+                    url = sa.engine.url.make_url(connection_string)
+                    url = url.update_query_dict(
+                        query_parameters={
+                            "application": self._get_snowflake_partner_application()
+                        }
+                    )
+                    self._engine = sa.create_engine(
+                        url,
+                        **kwargs,
+                    )
                 else:
                     self._engine = self._build_engine_with_connect_args(
-                        **connection_string
+                        application=self._get_snowflake_partner_application(),
+                        **connection_string,
+                        **kwargs,
                     )
 
             except Exception as e:
