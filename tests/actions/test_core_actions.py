@@ -566,7 +566,6 @@ class TestV1ActionRun:
             json={
                 "blocks": [
                     {"text": {"text": mock.ANY, "type": "plain_text"}, "type": "header"},
-                    {"type": "divider"},
                     {
                         "type": "section",
                         "text": {"type": "plain_text", "text": "Runtime: 2024/04/01 08:51 PM"},
@@ -587,7 +586,6 @@ class TestV1ActionRun:
                     },
                     {"type": "divider"},
                 ],
-                "text": mock.ANY,
             },
         )
 
