@@ -683,7 +683,7 @@ class TestV1ActionRun:
                         "text": {
                             "type": "mrkdwn",
                             "text": "*Asset*: asset_2_two_wow_whoa_vroom  "
-                                    "*Expectation Suite*: suite_b",
+                            "*Expectation Suite*: suite_b",
                         },
                     },
                     {"type": "divider"},
