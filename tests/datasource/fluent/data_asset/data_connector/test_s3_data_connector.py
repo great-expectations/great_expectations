@@ -376,14 +376,14 @@ def test_return_only_unique_batch_definitions():
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "B/file_1"}),
+            batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "file_1"}),
             batching_regex=processed_batching_regex,
         ),
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"path": "B/file_2.csv", "filename": "B/file_2"}),
+            batch_identifiers=IDDict({"path": "B/file_2.csv", "filename": "file_2"}),
             batching_regex=processed_batching_regex,
         ),
     ]
