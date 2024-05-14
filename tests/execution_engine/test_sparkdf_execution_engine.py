@@ -2,11 +2,10 @@ import datetime
 import logging
 from typing import Dict, Tuple
 
+import great_expectations_v1.exceptions as gx_exceptions
 import numpy as np
 import pandas as pd
 import pytest
-
-import great_expectations_v1.exceptions as gx_exceptions
 from great_expectations_v1.compatibility import pyspark
 from great_expectations_v1.compatibility.pyspark import functions as F
 from great_expectations_v1.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
@@ -20,6 +19,7 @@ from great_expectations_v1.expectations.row_conditions import (
 from great_expectations_v1.self_check.util import build_spark_engine
 from great_expectations_v1.validator.computed_metric import MetricValue
 from great_expectations_v1.validator.metric_configuration import MetricConfiguration
+
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
 

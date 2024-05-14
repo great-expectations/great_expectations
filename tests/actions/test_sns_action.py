@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations_v1.checkpoint.util import send_sns_notification
 from great_expectations_v1.core import ExpectationSuiteValidationResult
 

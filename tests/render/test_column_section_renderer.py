@@ -1,9 +1,8 @@
 import json
 from collections import OrderedDict
 
-import pytest
-
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.core import (
     ExpectationSuite,
 )

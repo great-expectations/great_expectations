@@ -9,9 +9,8 @@ from enum import Enum
 from typing import List, Optional, Tuple
 
 import pytest
-from pytest import raises
-
 from great_expectations_v1.types import DictDot, SerializableDictDot
+from pytest import raises
 
 
 @dataclass

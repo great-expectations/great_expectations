@@ -1,7 +1,6 @@
 import json
 
 import pytest
-
 from great_expectations_v1.core.expectation_validation_result import (
     ExpectationValidationResult,
 )

@@ -1,8 +1,7 @@
 import datetime
 
-import pytest
-
 import great_expectations_v1.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.core.batch_spec import RuntimeDataBatchSpec
 
 # module level markers

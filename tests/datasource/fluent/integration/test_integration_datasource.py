@@ -5,11 +5,10 @@ import pathlib
 from typing import TYPE_CHECKING
 from unittest import mock
 
-import pandas as pd
-import pytest
-
 import great_expectations_v1 as gx
 import great_expectations_v1.expectations as gxe
+import pandas as pd
+import pytest
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.core.partitioners import (
     ColumnPartitionerDaily,
@@ -39,6 +38,7 @@ from great_expectations_v1.datasource.fluent.interfaces import (
     TestConnectionError,
 )
 from great_expectations_v1.validator.v1_validator import Validator
+
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
@@ -46,14 +46,13 @@ from tests.datasource.fluent.integration.integration_test_utils import (
 )
 
 if TYPE_CHECKING:
-    from responses import RequestsMock
-
     from great_expectations_v1.datasource.fluent.pandas_datasource import (
         DataFrameAsset as PandasDataFrameAsset,
     )
     from great_expectations_v1.datasource.fluent.spark_datasource import (
         DataFrameAsset as SparkDataFrameAsset,
     )
+    from responses import RequestsMock
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.

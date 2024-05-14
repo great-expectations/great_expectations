@@ -2,7 +2,6 @@ import os
 
 import pandas as pd
 import pytest
-
 from great_expectations_v1.data_context.util import file_relative_path
 
 

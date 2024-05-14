@@ -3,9 +3,10 @@ from unittest import mock
 
 import pytest
 import pytest_mock
-
 from great_expectations_v1.checkpoint.checkpoint import CheckpointResult
-from great_expectations_v1.core.expectation_validation_result import ExpectationSuiteValidationResult
+from great_expectations_v1.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
 from great_expectations_v1.data_context import get_context
 from great_expectations_v1.data_context.data_context.file_data_context import (
     FileDataContext,

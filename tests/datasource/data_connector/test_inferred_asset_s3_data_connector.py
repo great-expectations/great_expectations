@@ -3,11 +3,9 @@ from contextlib import ExitStack as does_not_raise
 from typing import List
 
 import boto3
+import great_expectations_v1.exceptions.exceptions as gx_exceptions
 import pandas as pd
 import pytest
-from moto import mock_s3
-
-import great_expectations_v1.exceptions.exceptions as gx_exceptions
 from great_expectations_v1.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
 from great_expectations_v1.core.yaml_handler import YAMLHandler
 from great_expectations_v1.data_context.util import instantiate_class_from_config
@@ -19,6 +17,7 @@ from great_expectations_v1.datasource.data_connector.inferred_asset_s3_data_conn
     _check_valid_s3_path,
 )
 from great_expectations_v1.execution_engine import PandasExecutionEngine
+from moto import mock_s3
 
 yaml = YAMLHandler()
 

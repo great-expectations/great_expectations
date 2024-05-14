@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations_v1.core.expectation_diagnostics.expectation_doctor import (
     ExpectationDoctor,
 )
@@ -13,6 +12,7 @@ from great_expectations_v1.core.expectation_diagnostics.supporting_types import 
     ExpectationMetricDiagnostics,
 )
 from great_expectations_v1.expectations.expectation import ColumnMapExpectation
+
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,

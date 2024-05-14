@@ -2,11 +2,10 @@ import logging
 from typing import Any, Dict, List
 
 import pytest
-from packaging.version import Version
-from packaging.version import parse as parse_version
-
 from great_expectations_v1.compatibility import pyspark
 from great_expectations_v1.datasource.fluent import SparkDatasource
+from packaging.version import Version
+from packaging.version import parse as parse_version
 
 logger = logging.getLogger(__name__)
 

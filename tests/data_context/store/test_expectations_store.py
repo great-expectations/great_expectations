@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from uuid import UUID
 
-import pytest
-
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.data_context.store import ExpectationsStore
 from great_expectations_v1.data_context.types.resource_identifiers import (

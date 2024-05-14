@@ -2,10 +2,9 @@ import glob
 import json
 import os
 
+import great_expectations_v1.compatibility.bigquery as BigQueryDialect
 import pandas as pd
 import pytest
-
-import great_expectations_v1.compatibility.bigquery as BigQueryDialect
 from great_expectations_v1.compatibility import snowflake, sqlalchemy, trino
 from great_expectations_v1.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
@@ -26,6 +25,7 @@ from great_expectations_v1.self_check.util import (
     pgDialect,
 )
 from great_expectations_v1.util import build_in_memory_runtime_context
+
 from tests.conftest import build_test_backends_list_v3_api
 
 pytestmark = pytest.mark.all_backends

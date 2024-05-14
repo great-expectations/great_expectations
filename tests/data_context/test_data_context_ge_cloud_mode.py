@@ -2,8 +2,6 @@ from unittest import mock
 
 import pytest
 import responses
-from requests import Response
-
 from great_expectations_v1.data_context import get_context
 from great_expectations_v1.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations_v1.data_context.data_context.cloud_data_context import (
@@ -11,6 +9,7 @@ from great_expectations_v1.data_context.data_context.cloud_data_context import (
 )
 from great_expectations_v1.exceptions import GXCloudError
 from great_expectations_v1.exceptions.exceptions import GXCloudConfigurationError
+from requests import Response
 
 
 @pytest.mark.cloud

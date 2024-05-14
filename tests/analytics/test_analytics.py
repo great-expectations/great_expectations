@@ -1,9 +1,8 @@
 from unittest import mock
 from uuid import UUID
 
-import pytest
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1.analytics.config import (
     DUMMY_UUID,
     ENV_CONFIG,
@@ -12,6 +11,7 @@ from great_expectations_v1.analytics.config import (
     update_config,
 )
 from great_expectations_v1.analytics.events import DataContextInitializedEvent
+
 from tests.datasource.fluent._fake_cloud_api import FAKE_USER_ID
 
 TESTING_UUID = UUID("00000000-c000-0000-0000-000000000000")

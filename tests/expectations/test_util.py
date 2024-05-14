@@ -5,7 +5,6 @@ from typing import Dict, List, cast
 
 import pandas as pd
 import pytest
-
 from great_expectations_v1.compatibility import sqlalchemy
 from great_expectations_v1.compatibility.sqlalchemy import (
     sqlalchemy as sa,

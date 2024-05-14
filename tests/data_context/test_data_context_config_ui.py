@@ -3,7 +3,6 @@ import os
 from typing import Any, Dict, Final, Optional
 
 import pytest
-
 from great_expectations_v1.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )

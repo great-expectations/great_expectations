@@ -1,5 +1,4 @@
 import boto3
-
 from great_expectations_v1.compatibility import pyspark
 from great_expectations_v1.core.batch import RuntimeBatchRequest
 from great_expectations_v1.core.yaml_handler import YAMLHandler

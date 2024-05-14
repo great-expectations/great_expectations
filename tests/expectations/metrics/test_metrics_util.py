@@ -3,10 +3,9 @@ from __future__ import annotations
 import random
 from typing import TYPE_CHECKING, Final, List, Union
 
+import great_expectations_v1.exceptions as gx_exceptions
 import pytest
 from _pytest import monkeypatch
-
-import great_expectations_v1.exceptions as gx_exceptions
 from great_expectations_v1.compatibility import sqlalchemy
 from great_expectations_v1.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -21,6 +20,7 @@ from great_expectations_v1.expectations.metrics.util import (
     get_unexpected_indices_for_single_pandas_named_index,
     sql_statement_with_post_compile_to_string,
 )
+
 from tests.test_utils import (
     get_awsathena_connection_url,
     get_bigquery_connection_url,

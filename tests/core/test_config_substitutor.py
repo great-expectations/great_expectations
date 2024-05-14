@@ -2,7 +2,6 @@ from contextlib import contextmanager
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.compatibility import azure, google
 from great_expectations_v1.core.config_substitutor import (
     _ConfigurationSubstitutor,

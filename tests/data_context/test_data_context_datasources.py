@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import pathlib
 
-import pytest
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1.data_context import get_context
 from great_expectations_v1.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,

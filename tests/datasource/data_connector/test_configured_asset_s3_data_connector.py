@@ -2,11 +2,9 @@ import os
 from typing import List
 
 import boto3
+import great_expectations_v1.exceptions.exceptions as gx_exceptions
 import pandas as pd
 import pytest
-from moto import mock_s3
-
-import great_expectations_v1.exceptions.exceptions as gx_exceptions
 from great_expectations_v1.core.batch import (
     BatchRequest,
     BatchRequestBase,
@@ -21,6 +19,7 @@ from great_expectations_v1.datasource.data_connector.util import (
     sanitize_prefix_for_gcs_and_s3,
 )
 from great_expectations_v1.execution_engine import PandasExecutionEngine
+from moto import mock_s3
 
 yaml = YAMLHandler()
 

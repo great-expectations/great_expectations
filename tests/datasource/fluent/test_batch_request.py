@@ -5,7 +5,6 @@ import re
 from typing import Any, Final
 
 import pytest
-
 from great_expectations_v1.core.batch_definition import PartitionerT
 from great_expectations_v1.core.partitioners import (
     ColumnPartitioner,

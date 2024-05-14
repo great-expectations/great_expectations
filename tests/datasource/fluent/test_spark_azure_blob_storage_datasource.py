@@ -5,10 +5,8 @@ import re
 from typing import Any, Dict, Iterator, List, cast
 from unittest import mock
 
-import pytest
-
 import great_expectations_v1.exceptions as ge_exceptions
-import great_expectations_v1.execution_engine.sparkdf_execution_engine
+import pytest
 from great_expectations_v1.compatibility import azure
 from great_expectations_v1.core.util import AzureUrl
 from great_expectations_v1.datasource.fluent import SparkAzureBlobStorageDatasource

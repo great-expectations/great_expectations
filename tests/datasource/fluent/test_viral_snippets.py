@@ -7,9 +7,8 @@ import random
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
-import pytest
-
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1 import get_context
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.core.partitioners import ColumnPartitionerMonthly
@@ -19,9 +18,8 @@ from great_expectations_v1.datasource.fluent.config import GxConfig
 from great_expectations_v1.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
-
     from great_expectations_v1.datasource.fluent import SqliteDatasource
+    from pytest_mock import MockerFixture
 
 
 YAML = YAMLHandler()

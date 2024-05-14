@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 import pytest
-
 from great_expectations_v1.data_context.store import DatasourceStore
 from great_expectations_v1.datasource.datasource_dict import (
     CacheableDatasourceDict,

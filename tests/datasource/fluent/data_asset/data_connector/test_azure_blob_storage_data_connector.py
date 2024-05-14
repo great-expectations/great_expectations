@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, List, cast
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.compatibility import azure
 from great_expectations_v1.core import IDDict
 from great_expectations_v1.core.batch import LegacyBatchDefinition

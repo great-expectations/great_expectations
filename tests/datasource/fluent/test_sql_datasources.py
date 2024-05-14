@@ -7,18 +7,16 @@ from typing import TYPE_CHECKING, Any, Generator
 from unittest import mock
 
 import pytest
-from pytest import param
-
 from great_expectations_v1.compatibility import sqlalchemy
 from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations_v1.datasource.fluent import GxDatasourceWarning, SQLDatasource
 from great_expectations_v1.datasource.fluent.sql_datasource import TableAsset
 from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
+from pytest import param
 
 if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
-
     from great_expectations_v1.data_context import EphemeralDataContext
+    from pytest_mock import MockerFixture
 
 
 LOGGER = logging.getLogger(__name__)

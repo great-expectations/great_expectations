@@ -5,11 +5,10 @@ import shutil
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
-import pandas as pd
-import pytest
-
 import great_expectations_v1.exceptions as gx_exceptions
 import great_expectations_v1.expectations as gxe
+import pandas as pd
+import pytest
 from great_expectations_v1.core import ExpectationSuite
 from great_expectations_v1.core.batch import (
     BatchRequest,

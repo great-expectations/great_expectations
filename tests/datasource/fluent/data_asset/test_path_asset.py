@@ -3,7 +3,6 @@ import re
 from typing import Final, List, Union
 
 import pytest
-
 from great_expectations_v1.alias_types import PathStr
 from great_expectations_v1.core.batch_definition import BatchDefinition
 from great_expectations_v1.core.partitioners import (

@@ -9,8 +9,6 @@ from unittest import mock
 
 import pytest
 import requests
-from requests import Session
-
 from great_expectations_v1 import set_context
 from great_expectations_v1.checkpoint.actions import (
     APINotificationAction,
@@ -39,6 +37,7 @@ from great_expectations_v1.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations_v1.util import is_library_loadable
+from requests import Session
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

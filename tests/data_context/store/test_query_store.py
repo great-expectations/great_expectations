@@ -3,7 +3,6 @@ import warnings
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.data_context.store.query_store import SqlAlchemyQueryStore
 
 

@@ -4,8 +4,6 @@ import os
 from itertools import product
 
 import pytest
-from moto import mock_glue
-
 from great_expectations_v1.compatibility import sqlalchemy
 from great_expectations_v1.data_context.util import file_relative_path
 from great_expectations_v1.execution_engine.sparkdf_execution_engine import (
@@ -15,6 +13,7 @@ from great_expectations_v1.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations_v1.self_check.util import get_sqlite_connection_url
+from moto import mock_glue
 
 
 def create_partitions_for_table(glue_client, database_name: str, table_name: str, partitions: dict):

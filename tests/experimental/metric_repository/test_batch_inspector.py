@@ -2,7 +2,6 @@ import uuid
 from unittest.mock import MagicMock, Mock  # noqa: TID251
 
 import pytest
-
 from great_expectations_v1.data_context import CloudDataContext
 from great_expectations_v1.datasource.fluent import BatchRequest
 from great_expectations_v1.experimental.metric_repository.batch_inspector import (

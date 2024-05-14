@@ -2,10 +2,9 @@ import logging
 import os
 from typing import Dict, Tuple, cast
 
+import great_expectations_v1.exceptions as gx_exceptions
 import pandas as pd
 import pytest
-
-import great_expectations_v1.exceptions as gx_exceptions
 from great_expectations_v1.compatibility.sqlalchemy import Connection
 from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
@@ -40,6 +39,7 @@ from great_expectations_v1.util import get_sqlalchemy_domain_data
 from great_expectations_v1.validator.computed_metric import MetricValue
 from great_expectations_v1.validator.metric_configuration import MetricConfiguration
 from great_expectations_v1.validator.validator import Validator
+
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import (
     get_sqlite_table_names,

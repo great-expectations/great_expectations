@@ -1,6 +1,5 @@
 import pytest
 from freezegun import freeze_time
-
 from great_expectations_v1.core.run_identifier import RunIdentifier
 from great_expectations_v1.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,

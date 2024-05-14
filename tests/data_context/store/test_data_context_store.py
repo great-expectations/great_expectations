@@ -1,7 +1,6 @@
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.data_context.store.data_context_store import DataContextStore
 from great_expectations_v1.data_context.types.base import DataContextConfig
 

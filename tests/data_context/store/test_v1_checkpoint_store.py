@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1 import set_context
 from great_expectations_v1.checkpoint.actions import SlackNotificationAction
 from great_expectations_v1.checkpoint.checkpoint import Checkpoint

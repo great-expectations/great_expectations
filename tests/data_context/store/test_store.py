@@ -1,6 +1,5 @@
-import pytest
-
 import great_expectations_v1.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.core.configuration import AbstractConfig
 from great_expectations_v1.core.data_context_key import StringKey
 from great_expectations_v1.data_context.store.store import Store

@@ -9,9 +9,8 @@ import os
 from typing import TYPE_CHECKING, List
 
 import pip
-from great_expectations_contrib.commands import read_package_from_file, sync_package
-
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations_contrib.commands import read_package_from_file, sync_package
 
 if TYPE_CHECKING:
     from great_expectations_contrib.package import (

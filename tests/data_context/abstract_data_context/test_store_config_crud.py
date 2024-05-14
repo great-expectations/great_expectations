@@ -1,7 +1,6 @@
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.data_context import EphemeralDataContext
 
 SETTER_METHOD_NAMES = [

@@ -5,17 +5,15 @@ from typing import TYPE_CHECKING
 
 import pytest
 import sqlalchemy as sa
-from pytest import param
-
 from great_expectations_v1.datasource.fluent import (
     SnowflakeDatasource,
     TestConnectionError,
 )
+from pytest import param
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine.reflection import Inspector
-
     from great_expectations_v1.data_context import AbstractDataContext as DataContext
+    from sqlalchemy.engine.reflection import Inspector
 
 
 @pytest.mark.snowflake

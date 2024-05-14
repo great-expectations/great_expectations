@@ -1,7 +1,6 @@
 import datetime
 
 import pytest
-
 from great_expectations_v1.core.run_identifier import RunIdentifier
 
 

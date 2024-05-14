@@ -1,11 +1,10 @@
 import pytest
-from marshmallow import Schema
-
 from great_expectations_v1.core.configuration import AbstractConfigSchema
 from great_expectations_v1.core.serializer import (
     DictConfigSerializer,
     JsonConfigSerializer,
 )
+from marshmallow import Schema
 
 
 @pytest.fixture

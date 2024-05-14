@@ -4,10 +4,9 @@ import logging
 import re
 from typing import TYPE_CHECKING, List, cast
 
+import great_expectations_v1.exceptions as ge_exceptions
 import pandas as pd
 import pytest
-
-import great_expectations_v1.exceptions as ge_exceptions
 from great_expectations_v1.core.util import S3Url
 from great_expectations_v1.datasource.fluent import SparkS3Datasource
 from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset import (

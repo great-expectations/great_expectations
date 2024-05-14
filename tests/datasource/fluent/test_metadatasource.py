@@ -8,7 +8,6 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, Generator, List, Optional, Tuple, Type, Union
 
 import pytest
-
 from great_expectations_v1.compatibility.pydantic import DirectoryPath, validate_arguments
 from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.core.partitioners import ColumnPartitioner

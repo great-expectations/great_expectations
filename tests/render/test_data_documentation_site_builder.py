@@ -3,7 +3,6 @@ import shutil
 from typing import Dict
 
 import pytest
-
 from great_expectations_v1.data_context import get_context
 from great_expectations_v1.data_context.data_context.file_data_context import (
     FileDataContext,

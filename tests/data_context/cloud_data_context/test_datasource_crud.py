@@ -5,9 +5,8 @@ from __future__ import annotations
 import random
 import string
 
-import pytest
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1.data_context import CloudDataContext
 from great_expectations_v1.data_context.types.base import GXCloudConfig
 from great_expectations_v1.datasource.fluent import PandasDatasource

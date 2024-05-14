@@ -2,7 +2,6 @@ import random
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.core.batch import (
     Batch,
     BatchRequest,

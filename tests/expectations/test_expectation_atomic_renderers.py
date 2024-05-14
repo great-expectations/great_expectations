@@ -3,7 +3,6 @@ from pprint import pprint
 from typing import Callable, Dict, Union
 
 import pytest
-
 from great_expectations_v1.core import ExpectationValidationResult
 from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,

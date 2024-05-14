@@ -1,6 +1,5 @@
 import pandas as pd
 import pytest
-
 from great_expectations_v1.compatibility import aws
 from great_expectations_v1.core.expectation_validation_result import (
     ExpectationValidationResult,

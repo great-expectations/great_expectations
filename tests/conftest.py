@@ -13,12 +13,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
 from unittest import mock
 
+import great_expectations_v1 as gx
 import numpy as np
 import packaging
 import pandas as pd
 import pytest
-
-import great_expectations_v1 as gx
 from great_expectations_v1 import project_manager, set_context
 from great_expectations_v1.analytics.config import ENV_CONFIG
 from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
@@ -76,6 +75,7 @@ from great_expectations_v1.util import (
 )
 from great_expectations_v1.validator.metric_configuration import MetricConfiguration
 from great_expectations_v1.validator.validator import Validator
+
 from tests.datasource.fluent._fake_cloud_api import (
     DUMMY_JWT_TOKEN,
     FAKE_ORG_ID,
@@ -87,10 +87,9 @@ from tests.datasource.fluent._fake_cloud_api import (
 if TYPE_CHECKING:
     from unittest.mock import MagicMock  # noqa: TID251 # type-checking only
 
-    from pytest_mock import MockerFixture
-
     from great_expectations_v1.compatibility import pyspark
     from great_expectations_v1.compatibility.sqlalchemy import Engine
+    from pytest_mock import MockerFixture
 
 yaml = YAMLHandler()
 ###

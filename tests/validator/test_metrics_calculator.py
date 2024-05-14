@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any, Union, cast
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations_v1.self_check.util import get_test_validator_with_data
 from great_expectations_v1.util import isclose

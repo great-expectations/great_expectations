@@ -2,9 +2,8 @@ import pathlib
 import shutil
 from unittest import mock
 
-import pytest
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1.data_context import CloudDataContext, EphemeralDataContext
 from great_expectations_v1.data_context.cloud_constants import GXCloudEnvironmentVariable
 from great_expectations_v1.data_context.data_context.file_data_context import (
@@ -18,6 +17,7 @@ from great_expectations_v1.exceptions.exceptions import (
     GitIgnoreScaffoldingError,
     GXCloudConfigurationError,
 )
+
 from tests.test_utils import working_directory
 
 GX_CLOUD_PARAMS_ALL = {

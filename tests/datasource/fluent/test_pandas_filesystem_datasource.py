@@ -9,11 +9,8 @@ from dataclasses import dataclass
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Optional, Type
 
-import pytest
-from pytest import MonkeyPatch, param
-
 import great_expectations_v1.exceptions as ge_exceptions
-import great_expectations_v1.execution_engine.pandas_execution_engine
+import pytest
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.datasource.fluent import PandasFilesystemDatasource
 from great_expectations_v1.datasource.fluent.data_asset.path.file_asset import FileDataAsset
@@ -30,6 +27,7 @@ from great_expectations_v1.datasource.fluent.data_connector import (
 from great_expectations_v1.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations_v1.datasource.fluent.interfaces import TestConnectionError
 from great_expectations_v1.datasource.fluent.sources import _get_field_details
+from pytest import MonkeyPatch, param
 
 if TYPE_CHECKING:
     from great_expectations_v1.alias_types import PathStr

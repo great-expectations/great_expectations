@@ -3,10 +3,9 @@ from __future__ import annotations
 import pathlib
 from typing import Tuple
 
-import pytest
-
 import great_expectations_v1 as gx
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.data_context import AbstractDataContext
 from great_expectations_v1.datasource.fluent.interfaces import Batch, Datasource

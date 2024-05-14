@@ -1,6 +1,5 @@
-import pytest
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )

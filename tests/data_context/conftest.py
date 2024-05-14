@@ -9,10 +9,9 @@ import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
 from unittest.mock import Mock  # noqa: TID251
 
+import great_expectations_v1 as gx
 import pytest
 import requests
-
-import great_expectations_v1 as gx
 from great_expectations_v1.core.yaml_handler import YAMLHandler
 from great_expectations_v1.data_context.data_context.file_data_context import (
     FileDataContext,

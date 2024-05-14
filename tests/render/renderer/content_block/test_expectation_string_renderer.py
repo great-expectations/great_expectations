@@ -3,7 +3,6 @@ The real meat of these tests lives in the test_definitions directory for individ
 """
 
 import pytest
-
 from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )

@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )

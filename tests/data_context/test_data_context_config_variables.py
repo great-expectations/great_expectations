@@ -2,10 +2,8 @@ import os
 import shutil
 from collections import OrderedDict
 
-import pytest
-from pytest_mock import MockerFixture
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1.core.config_provider import _ConfigurationSubstitutor
 from great_expectations_v1.core.yaml_handler import YAMLHandler
 from great_expectations_v1.data_context import get_context
@@ -18,6 +16,8 @@ from great_expectations_v1.data_context.types.base import (
 )
 from great_expectations_v1.data_context.util import file_relative_path
 from great_expectations_v1.exceptions import InvalidConfigError, MissingConfigVariableError
+from pytest_mock import MockerFixture
+
 from tests.data_context.conftest import create_data_context_files
 
 yaml = YAMLHandler()

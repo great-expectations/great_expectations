@@ -2,10 +2,10 @@ import logging
 import os
 
 import pytest
-
 from great_expectations_v1.data_context.store import DatabaseStoreBackend
 from great_expectations_v1.data_context.util import instantiate_class_from_config
 from great_expectations_v1.exceptions import StoreBackendError
+
 from tests import test_utils
 
 # module level markers

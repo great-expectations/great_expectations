@@ -22,7 +22,6 @@ from typing import (
 )
 
 import responses
-
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.data_context.store.gx_cloud_store_backend import (
     ErrorDetail,

@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations_v1.data_context.types.base import ProgressBarsConfig
 from great_expectations_v1.data_context.util import instantiate_class_from_config
 

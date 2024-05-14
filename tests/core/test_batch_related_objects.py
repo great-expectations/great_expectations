@@ -1,6 +1,5 @@
 import pandas as pd
 import pytest
-
 from great_expectations_v1.core.batch import (
     Batch,
     BatchMarkers,

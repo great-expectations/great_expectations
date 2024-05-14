@@ -1,9 +1,8 @@
 from typing import Dict, List
 
+import great_expectations_v1.expectations as gxe
 import pandas as pd
 import pytest
-
-import great_expectations_v1.expectations as gxe
 from great_expectations_v1.core import ExpectationSuite
 from great_expectations_v1.datasource.fluent import BatchRequest as FluentBatchRequest
 

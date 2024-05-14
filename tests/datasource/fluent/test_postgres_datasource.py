@@ -11,10 +11,8 @@ from typing import (
     Tuple,
 )
 
-import pytest
-from sqlalchemy.exc import SQLAlchemyError
-
 import great_expectations_v1.exceptions as ge_exceptions
+import pytest
 from great_expectations_v1.compatibility.pydantic import ValidationError
 from great_expectations_v1.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations_v1.core.partitioners import (
@@ -47,6 +45,8 @@ from great_expectations_v1.datasource.fluent.sql_datasource import (
     TableAsset,
 )
 from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
+from sqlalchemy.exc import SQLAlchemyError
+
 from tests.datasource.fluent.conftest import (
     _DEFAULT_TEST_MONTHS,
     _DEFAULT_TEST_YEARS,
@@ -57,12 +57,11 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 if TYPE_CHECKING:
     from unittest.mock import Mock  # noqa: TID251
 
-    from pytest_mock import MockFixture
-
     from great_expectations_v1.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
     )
+    from pytest_mock import MockFixture
 
 # We set a default time range that we use for testing.
 

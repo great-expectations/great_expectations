@@ -4,7 +4,6 @@ import logging
 from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
-
 from great_expectations_v1.checkpoint.checkpoint import Checkpoint
 from great_expectations_v1.compatibility.pydantic import ValidationError
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
@@ -21,6 +20,7 @@ from great_expectations_v1.execution_engine import ExecutionEngine
 from great_expectations_v1.validator.computed_metric import MetricValue
 from great_expectations_v1.validator.metric_configuration import MetricConfiguration
 from great_expectations_v1.validator.metrics_calculator import MetricsCalculator
+
 from tests.expectations.test_util import get_table_columns_metric
 
 if TYPE_CHECKING:

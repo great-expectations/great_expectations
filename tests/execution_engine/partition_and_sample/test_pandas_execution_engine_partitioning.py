@@ -3,11 +3,10 @@ import os
 from typing import List
 from unittest import mock
 
+import great_expectations_v1.exceptions as gx_exceptions
 import pandas as pd
 import pandas.api.types as ptypes
 import pytest
-
-import great_expectations_v1.exceptions as gx_exceptions
 from great_expectations_v1.core import IDDict
 from great_expectations_v1.core.batch import LegacyBatchDefinition
 from great_expectations_v1.core.batch_spec import (
@@ -23,6 +22,7 @@ from great_expectations_v1.execution_engine.partition_and_sample.data_partitione
 from great_expectations_v1.execution_engine.partition_and_sample.pandas_data_partitioner import (
     PandasDataPartitioner,
 )
+
 from tests.execution_engine.partition_and_sample.partition_and_sample_test_cases import (
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
     MULTIPLE_DATE_PART_DATE_PARTS,

@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations_v1.datasource.types import *  # noqa: F403
 
 

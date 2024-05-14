@@ -1,7 +1,6 @@
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
-
 from great_expectations_v1.experimental.metric_repository.data_store import DataStore
 from great_expectations_v1.experimental.metric_repository.metric_repository import (
     MetricRepository,

@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations_v1.render.view import DefaultJinjaPageView
 
 # module level markers

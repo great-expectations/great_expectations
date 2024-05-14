@@ -3,10 +3,9 @@ import uuid
 from typing import Dict, Iterable, Optional, Set, Tuple, Union, cast
 from unittest import mock
 
-import pytest
-
 import great_expectations_v1.exceptions as gx_exceptions
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.execution_engine import ExecutionEngine
 from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,

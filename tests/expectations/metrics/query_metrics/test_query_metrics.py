@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations_v1.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )

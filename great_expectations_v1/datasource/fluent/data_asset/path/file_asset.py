@@ -22,7 +22,10 @@ from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset imp
 )
 from great_expectations_v1.datasource.fluent.data_connector import FILE_PATH_BATCH_SPEC_KEY
 from great_expectations_v1.datasource.fluent.data_connector.regex_parser import RegExParser
-from great_expectations_v1.datasource.fluent.interfaces import DatasourceT, PartitionerSortingProtocol
+from great_expectations_v1.datasource.fluent.interfaces import (
+    DatasourceT,
+    PartitionerSortingProtocol,
+)
 
 if TYPE_CHECKING:
     from great_expectations_v1.alias_types import PathStr

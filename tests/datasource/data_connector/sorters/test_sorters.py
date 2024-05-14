@@ -1,6 +1,5 @@
-import pytest
-
 import great_expectations_v1.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.core.batch import LegacyBatchDefinition
 from great_expectations_v1.core.id_dict import IDDict
 from great_expectations_v1.datasource.data_connector.sorter import (

@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.core.data_context_key import StringKey
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.core.validation_definition import ValidationDefinition
@@ -16,6 +15,7 @@ if TYPE_CHECKING:
     from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
         EphemeralDataContext,
     )
+
     from tests.datasource.fluent._fake_cloud_api import CloudDetails
 
 

@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations_v1.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
 )

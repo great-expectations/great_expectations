@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Callable, Iterator
 
 import pandas as pd
 import pytest
-
 from great_expectations_v1.datasource.fluent.spark_datasource import DataFrameAsset
 from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,

@@ -4,7 +4,6 @@ from uuid import UUID
 
 import numpy
 import pytest
-
 from great_expectations_v1.data_context import CloudDataContext
 from great_expectations_v1.experimental.metric_repository.cloud_data_store import (
     CloudDataStore,

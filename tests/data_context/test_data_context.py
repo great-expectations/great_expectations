@@ -7,11 +7,9 @@ import shutil
 import uuid
 from typing import Dict, List, Union
 
-import pytest
-from typing_extensions import override
-
 import great_expectations_v1 as gx
 import great_expectations_v1.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.core.yaml_handler import YAMLHandler
 from great_expectations_v1.data_context import get_context
@@ -38,6 +36,8 @@ from great_expectations_v1.render.renderer.renderer import renderer
 from great_expectations_v1.util import (
     gen_directory_tree_str,
 )
+from typing_extensions import override
+
 from tests.test_utils import safe_remove
 
 yaml = YAMLHandler()

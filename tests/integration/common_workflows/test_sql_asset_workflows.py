@@ -6,16 +6,18 @@ based on knowledge of the data in the test set.
 
 from typing import Dict, Optional
 
-import pytest
-
 import great_expectations_v1 as gx
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.checkpoint.checkpoint import Checkpoint
 from great_expectations_v1.core.batch_definition import BatchDefinition
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.core.validation_definition import ValidationDefinition
-from great_expectations_v1.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations_v1.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations_v1.datasource.fluent.sql_datasource import _SQLAsset
+
 from tests.integration.common_workflows.conftest import CONNECTION_STRING, TABLE_NAME
 
 pytestmark = pytest.mark.postgresql

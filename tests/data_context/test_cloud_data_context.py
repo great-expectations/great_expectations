@@ -3,7 +3,6 @@ from typing import Any, Dict
 
 import pytest
 import responses
-
 from great_expectations_v1.data_context.data_context.cloud_data_context import CloudDataContext
 
 CLOUD_BASE_URL = "https://greatexpectations.io/fake-url"

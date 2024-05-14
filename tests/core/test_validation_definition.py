@@ -5,10 +5,9 @@ import uuid
 from typing import TYPE_CHECKING
 from unittest import mock
 
-import pytest
-
 import great_expectations_v1 as gx
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.core.batch_definition import BatchDefinition
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.core.expectation_validation_result import (

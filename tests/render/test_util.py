@@ -2,7 +2,6 @@ import sys
 from typing import List, Union
 
 import pytest
-
 from great_expectations_v1.core.run_identifier import RunIdentifier
 from great_expectations_v1.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,

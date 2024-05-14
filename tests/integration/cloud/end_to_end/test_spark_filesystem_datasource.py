@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Iterator
 
 import pandas as pd
 import pytest
-
 from great_expectations_v1.datasource.data_connector.util import normalize_directory_path
 from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,

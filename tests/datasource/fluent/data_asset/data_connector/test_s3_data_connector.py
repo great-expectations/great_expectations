@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING, List
 
 import pandas as pd
 import pytest
-from moto import mock_s3
-
 from great_expectations_v1.core import IDDict
 from great_expectations_v1.core.batch import LegacyBatchDefinition
 from great_expectations_v1.core.partitioners import FileNamePartitionerYearly
@@ -19,10 +17,10 @@ from great_expectations_v1.datasource.fluent import BatchRequest
 from great_expectations_v1.datasource.fluent.data_connector import (
     S3DataConnector,
 )
+from moto import mock_s3
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
-
     from great_expectations_v1.datasource.fluent.data_connector import (
         DataConnector,
     )

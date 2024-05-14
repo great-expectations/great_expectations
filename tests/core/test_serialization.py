@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 import pytest
-
 from great_expectations_v1.compatibility import pyspark
 from great_expectations_v1.core.batch import RuntimeBatchRequest
 from great_expectations_v1.core.util import convert_to_json_serializable

@@ -4,7 +4,6 @@ import uuid
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.core.run_identifier import RunIdentifier
 from great_expectations_v1.data_context.store import (
     SuiteParameterStore,
@@ -115,7 +114,9 @@ def test_database_suite_parameter_store_store_backend_id(in_memory_param_store):
 @mock.patch(
     "great_expectations_v1.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
 )
-@mock.patch("great_expectations_v1.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
+@mock.patch(
+    "great_expectations_v1.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
+)
 @pytest.mark.cloud
 def test_suite_parameter_store_calls_proper_cloud_tuple_store_methods(
     mock_parent_list_keys,
@@ -139,7 +140,9 @@ def test_suite_parameter_store_calls_proper_cloud_tuple_store_methods(
 @mock.patch(
     "great_expectations_v1.data_context.store.tuple_store_backend.TupleAzureBlobStoreBackend.list_keys"
 )
-@mock.patch("great_expectations_v1.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
+@mock.patch(
+    "great_expectations_v1.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
+)
 @pytest.mark.big
 def test_suite_parameter_store_calls_proper_azure_tuple_store_methods(
     mock_parent_list_keys,
@@ -165,7 +168,9 @@ def test_suite_parameter_store_calls_proper_azure_tuple_store_methods(
 @mock.patch(
     "great_expectations_v1.data_context.store.tuple_store_backend.TupleGCSStoreBackend.list_keys"
 )
-@mock.patch("great_expectations_v1.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
+@mock.patch(
+    "great_expectations_v1.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
+)
 @pytest.mark.big
 def test_suite_parameter_store_calls_proper_gcs_tuple_store_methods(
     mock_parent_list_keys,

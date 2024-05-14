@@ -8,11 +8,9 @@ import uuid
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
-import pytest
-from pytest import MonkeyPatch, param
-
 import great_expectations_v1 as gx
 import great_expectations_v1.execution_engine.pandas_execution_engine
+import pytest
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.datasource.fluent import PandasDatasource
 from great_expectations_v1.datasource.fluent.dynamic_pandas import PANDAS_VERSION
@@ -31,10 +29,10 @@ from great_expectations_v1.datasource.fluent.sources import (
     _get_field_details,
 )
 from great_expectations_v1.util import camel_to_snake
+from pytest import MonkeyPatch, param
 
 if TYPE_CHECKING:
     import pandas as pd
-
     from great_expectations_v1.data_context import AbstractDataContext
 
 

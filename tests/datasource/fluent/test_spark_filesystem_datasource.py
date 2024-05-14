@@ -7,10 +7,9 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Tuple, cast
 
-import pytest
-
 import great_expectations_v1.exceptions as ge_exceptions
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.alias_types import PathStr
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.compatibility.pyspark import functions as F

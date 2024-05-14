@@ -4,9 +4,8 @@ from pathlib import Path
 from typing import Any, Optional
 
 import pytest
-from ruamel.yaml.error import YAMLStreamError
-
 from great_expectations_v1.core.yaml_handler import YAMLHandler
+from ruamel.yaml.error import YAMLStreamError
 
 
 @pytest.fixture

@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Mapping
 
 import pytest
-
 from great_expectations_v1 import set_context
 from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,

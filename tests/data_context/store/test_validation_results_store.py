@@ -4,8 +4,6 @@ import uuid
 import boto3
 import pytest
 from freezegun import freeze_time
-from moto import mock_s3
-
 from great_expectations_v1.core import ExpectationSuiteValidationResult
 from great_expectations_v1.data_context.store import ValidationResultsStore
 from great_expectations_v1.data_context.types.resource_identifiers import (
@@ -13,6 +11,8 @@ from great_expectations_v1.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations_v1.util import gen_directory_tree_str
+from moto import mock_s3
+
 from tests import test_utils
 
 

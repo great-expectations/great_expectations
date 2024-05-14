@@ -2,7 +2,6 @@ from unittest import mock
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
-
 from great_expectations_v1 import set_context
 from great_expectations_v1.analytics.events import (
     ExpectationSuiteCreatedEvent,

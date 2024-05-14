@@ -1,8 +1,7 @@
 import os
 
-import pytest
-
 import great_expectations_v1.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.data_context.util import (
     PasswordMasker,
     parse_substitution_variable,

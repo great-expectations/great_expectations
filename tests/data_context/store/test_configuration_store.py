@@ -3,11 +3,8 @@ import string
 from pathlib import Path
 from typing import List, Optional
 
-import pytest
-from marshmallow import INCLUDE, Schema, fields, validates_schema
-from ruamel.yaml.comments import CommentedMap
-
 import great_expectations_v1.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.core.data_context_key import DataContextKey
 from great_expectations_v1.core.yaml_handler import YAMLHandler
 from great_expectations_v1.data_context.cloud_constants import GXCloudRESTResource
@@ -19,6 +16,9 @@ from great_expectations_v1.data_context.types.resource_identifiers import (
 )
 from great_expectations_v1.exceptions.exceptions import DataContextError
 from great_expectations_v1.util import gen_directory_tree_str
+from marshmallow import INCLUDE, Schema, fields, validates_schema
+from ruamel.yaml.comments import CommentedMap
+
 from tests.test_utils import (
     delete_config_from_filesystem,
     load_config_from_filesystem,

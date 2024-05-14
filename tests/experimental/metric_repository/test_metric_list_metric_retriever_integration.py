@@ -6,8 +6,6 @@ from typing import List
 
 import pandas as pd
 import pytest
-from pandas import Timestamp
-
 from great_expectations_v1.data_context import CloudDataContext
 from great_expectations_v1.datasource.fluent.batch_request import BatchRequest
 from great_expectations_v1.experimental.metric_repository.metric_list_metric_retriever import (
@@ -18,6 +16,7 @@ from great_expectations_v1.experimental.metric_repository.metrics import (
     MetricTypes,
     TableMetric,
 )
+from pandas import Timestamp
 
 
 @pytest.fixture

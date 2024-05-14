@@ -1,5 +1,4 @@
 import pytest
-
 from great_expectations_v1.core.batch_definition import BatchDefinition
 from great_expectations_v1.core.partitioners import (
     ColumnPartitionerDaily,
@@ -8,6 +7,7 @@ from great_expectations_v1.core.partitioners import (
 )
 from great_expectations_v1.datasource.fluent import SQLDatasource
 from great_expectations_v1.datasource.fluent.sql_datasource import TableAsset, _SQLAsset
+
 from tests.datasource.fluent.conftest import CreateSourceFixture
 
 

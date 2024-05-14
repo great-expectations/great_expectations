@@ -2,7 +2,6 @@ import re
 
 import numpy as np
 import pytest
-
 from great_expectations_v1.core.util import convert_to_json_serializable
 
 try:

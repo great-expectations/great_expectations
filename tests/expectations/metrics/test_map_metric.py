@@ -1,7 +1,6 @@
+import great_expectations_v1.expectations as gxe
 import pandas as pd
 import pytest
-
-import great_expectations_v1.expectations as gxe
 from great_expectations_v1.compatibility import sqlalchemy
 from great_expectations_v1.compatibility.pydantic import ValidationError
 from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (

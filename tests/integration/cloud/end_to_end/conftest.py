@@ -7,11 +7,10 @@ import uuid
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Iterator, Literal, Protocol
 
-import numpy as np
-import pytest
-
 import great_expectations_v1 as gx
 import great_expectations_v1.exceptions as gx_exceptions
+import numpy as np
+import pytest
 from great_expectations_v1.compatibility.sqlalchemy import TextClause
 from great_expectations_v1.core import ExpectationSuite
 from great_expectations_v1.core.validation_definition import ValidationDefinition

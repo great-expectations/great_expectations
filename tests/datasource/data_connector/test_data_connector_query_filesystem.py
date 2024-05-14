@@ -1,13 +1,13 @@
 import datetime
 from typing import List
 
-import pytest
-
 import great_expectations_v1.exceptions.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
 from great_expectations_v1.core.yaml_handler import YAMLHandler
 from great_expectations_v1.data_context.util import instantiate_class_from_config
 from great_expectations_v1.datasource.data_connector import DataConnector
+
 from tests.test_utils import create_files_in_directory
 
 yaml = YAMLHandler()

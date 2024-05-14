@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, cast
 import boto3
 import botocore
 import pytest
-
 from great_expectations_v1.core.util import DBFSPath
 from great_expectations_v1.datasource.fluent import PandasDBFSDatasource
 from great_expectations_v1.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
@@ -21,12 +20,12 @@ from great_expectations_v1.datasource.fluent.data_connector import (
 )
 from great_expectations_v1.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations_v1.datasource.fluent.interfaces import TestConnectionError
+
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
-    from pyfakefs.fake_filesystem import FakeFilesystem
-
     from great_expectations_v1.data_context import FileDataContext
+    from pyfakefs.fake_filesystem import FakeFilesystem
 
 
 logger = logging.getLogger(__file__)

@@ -1,9 +1,8 @@
 import datetime
 from typing import List
 
-import pytest
-
 import great_expectations_v1.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
 )

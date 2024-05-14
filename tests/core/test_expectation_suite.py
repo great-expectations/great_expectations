@@ -6,11 +6,10 @@ from unittest import mock
 from unittest.mock import MagicMock, Mock  # noqa: TID251
 from uuid import UUID, uuid4
 
-import pytest
-
 import great_expectations_v1 as gx
 import great_expectations_v1.exceptions.exceptions as gx_exceptions
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1 import __version__ as ge_version
 from great_expectations_v1 import get_context, set_context
 from great_expectations_v1.analytics.events import (

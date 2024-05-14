@@ -17,11 +17,8 @@ from typing import (
     TypedDict,
 )
 
-import pytest
-from packaging.version import Version
-from pytest import param
-
 import great_expectations_v1.expectations.core as gxe
+import pytest
 from great_expectations_v1.checkpoint.checkpoint import Checkpoint
 from great_expectations_v1.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
@@ -51,12 +48,13 @@ from great_expectations_v1.execution_engine.sqlalchemy_dialect import (
     quote_str,
 )
 from great_expectations_v1.expectations.expectation_configuration import ExpectationConfiguration
+from packaging.version import Version
+from pytest import param
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
     from great_expectations_v1.checkpoint.checkpoint import CheckpointResult
     from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
+    from typing_extensions import TypeAlias
 
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
 STAR_SEPARATOR: Final = "*" * TERMINAL_WIDTH

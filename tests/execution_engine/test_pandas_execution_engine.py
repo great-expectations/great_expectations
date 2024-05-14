@@ -2,10 +2,9 @@ import os
 from typing import Dict, Tuple
 from unittest import mock
 
+import great_expectations_v1.exceptions as gx_exceptions
 import pandas as pd
 import pytest
-
-import great_expectations_v1.exceptions as gx_exceptions
 from great_expectations_v1.compatibility import aws, azure, google
 from great_expectations_v1.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 
@@ -17,6 +16,7 @@ from great_expectations_v1.execution_engine.pandas_execution_engine import (
 from great_expectations_v1.util import is_library_loadable
 from great_expectations_v1.validator.computed_metric import MetricValue
 from great_expectations_v1.validator.metric_configuration import MetricConfiguration
+
 from tests.expectations.test_util import get_table_columns_metric
 
 

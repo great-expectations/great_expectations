@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pytest
-
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )

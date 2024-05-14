@@ -1,6 +1,5 @@
 # TODO: <Alex>This module should be broken up -- please see suggestions below.</Alex>
 import pytest
-
 from great_expectations_v1.core.batch import (
     BatchRequest,
     BatchRequestBase,

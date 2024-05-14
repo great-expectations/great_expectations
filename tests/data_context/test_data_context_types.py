@@ -1,7 +1,6 @@
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
-
 from great_expectations_v1.data_context.types.base import (
     ExecutionEngineConfigSchema,
 )

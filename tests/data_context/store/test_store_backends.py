@@ -8,9 +8,6 @@ from unittest import mock
 import boto3
 import pyparsing as pp
 import pytest
-from moto import mock_s3
-from pytest_mock import MockerFixture
-
 from great_expectations_v1.core.data_context_key import DataContextVariableKey
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.core.run_identifier import RunIdentifier
@@ -40,6 +37,9 @@ from great_expectations_v1.util import (
     gen_directory_tree_str,
     is_library_loadable,
 )
+from moto import mock_s3
+from pytest_mock import MockerFixture
+
 from tests import test_utils
 
 yaml = YAMLHandler()

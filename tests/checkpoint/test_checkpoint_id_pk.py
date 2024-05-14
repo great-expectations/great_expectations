@@ -3,10 +3,9 @@ from __future__ import annotations
 import pathlib
 from typing import TYPE_CHECKING
 
-import pytest
-
 import great_expectations_v1 as gx
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1 import project_manager
 from great_expectations_v1.checkpoint import Checkpoint
 from great_expectations_v1.core.expectation_suite import ExpectationSuite

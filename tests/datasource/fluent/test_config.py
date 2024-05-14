@@ -18,9 +18,8 @@ from typing import (  # TODO: revert use of cast
     cast,
 )
 
-import pytest
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.core.batch_definition import BatchDefinition
 from great_expectations_v1.core.partitioners import ColumnPartitionerMonthly
@@ -48,12 +47,12 @@ from great_expectations_v1.datasource.fluent.sql_datasource import (
     SqlPartitionerYearAndMonth,
     TableAsset,
 )
+
 from tests.datasource.fluent.conftest import FLUENT_DATASOURCE_TEST_DIR
 
 if TYPE_CHECKING:
-    from pytest import FixtureRequest
-
     from great_expectations_v1.datasource.fluent import SqliteDatasource
+    from pytest import FixtureRequest
 
 yaml = YAMLHandler()
 LOGGER = logging.getLogger(__file__)

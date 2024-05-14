@@ -6,9 +6,8 @@ import uuid
 from typing import TYPE_CHECKING, List
 from unittest import mock
 
-import pytest
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1 import expectations as gxe
 from great_expectations_v1 import set_context
 from great_expectations_v1.checkpoint.actions import (
@@ -34,7 +33,9 @@ from great_expectations_v1.core.expectation_validation_result import (
 from great_expectations_v1.core.result_format import ResultFormat
 from great_expectations_v1.core.run_identifier import RunIdentifier
 from great_expectations_v1.core.validation_definition import ValidationDefinition
-from great_expectations_v1.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations_v1.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -42,6 +43,7 @@ from great_expectations_v1.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations_v1.expectations.expectation_configuration import ExpectationConfiguration
+
 from tests.test_utils import working_directory
 
 if TYPE_CHECKING:

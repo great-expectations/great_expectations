@@ -2,7 +2,6 @@ from unittest import mock
 
 import pandas as pd
 import pytest
-
 from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
@@ -14,6 +13,7 @@ from great_expectations_v1.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations_v1.expectations.metrics.table_metrics.table_head import TableHead
+
 from tests.test_utils import get_sqlite_temp_table_names_from_engine
 
 

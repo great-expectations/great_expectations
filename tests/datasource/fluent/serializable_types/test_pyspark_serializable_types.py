@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from great_expectations_v1.compatibility.pyspark import types as pyspark_types
 from great_expectations_v1.datasource.fluent.serializable_types.pyspark import (
     SerializableStructType,

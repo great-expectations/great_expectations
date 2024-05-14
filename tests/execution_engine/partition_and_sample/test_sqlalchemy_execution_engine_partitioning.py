@@ -8,7 +8,6 @@ from unittest import mock
 import pandas as pd
 import pytest
 from dateutil.parser import parse
-
 from great_expectations_v1.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations_v1.data_context.util import file_relative_path
 from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
@@ -20,6 +19,7 @@ from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations_v1.self_check.util import build_sa_execution_engine
+
 from tests.execution_engine.partition_and_sample.partition_and_sample_test_cases import (
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
     MULTIPLE_DATE_PART_DATE_PARTS,

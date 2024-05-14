@@ -3,7 +3,6 @@ import re
 
 import mistune
 import pytest
-
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.data_context.util import file_relative_path
 from great_expectations_v1.expectations.expectation_configuration import (

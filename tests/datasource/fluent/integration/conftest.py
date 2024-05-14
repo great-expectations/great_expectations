@@ -6,7 +6,6 @@ import pathlib
 import numpy as np
 import pandas as pd
 import pytest
-
 from great_expectations_v1 import get_context
 from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (

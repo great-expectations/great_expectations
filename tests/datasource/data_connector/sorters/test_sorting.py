@@ -1,8 +1,7 @@
 from typing import Iterator
 
-import pytest
-
 import great_expectations_v1.exceptions.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations_v1.datasource.data_connector.sorter import (
     CustomListSorter,

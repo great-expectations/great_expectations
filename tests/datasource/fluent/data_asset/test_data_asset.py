@@ -1,7 +1,6 @@
 from typing import List
 
 import pytest
-
 from great_expectations_v1.core.batch_definition import BatchDefinition
 from great_expectations_v1.core.partitioners import ColumnPartitionerYearly
 from great_expectations_v1.data_context.data_context.abstract_data_context import (

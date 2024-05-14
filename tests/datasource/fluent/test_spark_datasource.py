@@ -6,7 +6,6 @@ import pathlib
 from typing import TYPE_CHECKING
 
 import pytest
-
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.datasource.fluent import TestConnectionError
 from great_expectations_v1.datasource.fluent.spark_datasource import (
@@ -17,7 +16,6 @@ from great_expectations_v1.util import is_candidate_subset_of_target
 
 if TYPE_CHECKING:
     import pandas as pd
-
     from great_expectations_v1.data_context import AbstractDataContext
 
 

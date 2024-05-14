@@ -20,12 +20,8 @@ from typing import (
     Union,
 )
 
-import pytest
-from moto import mock_s3
-from pytest import MonkeyPatch
-from typing_extensions import TypeAlias, override
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1.compatibility import aws
 from great_expectations_v1.core.batch import BatchData
 from great_expectations_v1.core.batch_spec import (
@@ -33,7 +29,9 @@ from great_expectations_v1.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations_v1.data_context import FileDataContext
-from great_expectations_v1.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations_v1.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations_v1.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
@@ -51,6 +49,10 @@ from great_expectations_v1.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from moto import mock_s3
+from pytest import MonkeyPatch
+from typing_extensions import TypeAlias, override
+
 from tests.datasource.fluent._fake_cloud_api import (
     _CLOUD_API_FAKE_DB,
     FAKE_ORG_ID,
@@ -63,9 +65,8 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 if TYPE_CHECKING:
     import responses
     from botocore.client import BaseClient as BotoBaseClient
-    from pytest import FixtureRequest
-
     from great_expectations_v1.data_context import CloudDataContext
+    from pytest import FixtureRequest
 
 CreateSourceFixture: TypeAlias = Callable[..., ContextManager[PostgresDatasource]]
 FLUENT_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent

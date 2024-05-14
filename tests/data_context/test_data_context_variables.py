@@ -9,7 +9,6 @@ from unittest.mock import ANY as MOCK_ANY
 from unittest.mock import patch as mock_patch
 
 import pytest
-
 from great_expectations_v1 import get_context, project_manager
 from great_expectations_v1.core.config_provider import _ConfigurationProvider
 from great_expectations_v1.core.yaml_handler import YAMLHandler

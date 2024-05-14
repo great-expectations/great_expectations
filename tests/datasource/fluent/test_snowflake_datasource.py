@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import pytest
 import sqlalchemy as sa
-from pytest import param
-
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.compatibility.snowflake import snowflake
 from great_expectations_v1.data_context import AbstractDataContext
@@ -13,6 +11,7 @@ from great_expectations_v1.datasource.fluent.snowflake_datasource import (
     SnowflakeDsn,
 )
 from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
+from pytest import param
 
 
 @pytest.fixture

@@ -1,9 +1,9 @@
 import pytest
-
 from great_expectations_v1.util import (
     get_clickhouse_sqlalchemy_potential_type,
     is_library_loadable,
 )
+
 from tests.test_utils import get_awsathena_connection_url
 
 

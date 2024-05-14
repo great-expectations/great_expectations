@@ -10,7 +10,9 @@ from great_expectations_v1.core.domain import (
     SemanticDomainTypes,
 )
 from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
-from great_expectations_v1.experimental.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations_v1.experimental.rule_based_profiler.domain_builder import (
+    ColumnDomainBuilder,
+)
 from great_expectations_v1.experimental.rule_based_profiler.parameter_container import (
     ParameterContainer,  # noqa: TCH001
 )

@@ -2,10 +2,8 @@ import json
 import pathlib
 from unittest import mock
 
-import pytest
-from pytest_mock import MockerFixture
-
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.analytics.events import (
     ValidationDefinitionCreatedEvent,
     ValidationDefinitionDeletedEvent,
@@ -29,6 +27,7 @@ from great_expectations_v1.data_context.store.validation_definition_store import
     ValidationDefinitionStore,
 )
 from great_expectations_v1.exceptions import DataContextError
+from pytest_mock import MockerFixture
 
 
 @pytest.fixture

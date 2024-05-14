@@ -2,7 +2,6 @@ import os
 import uuid
 
 import pytest
-
 from great_expectations_v1.data_context.store.metric_store import MetricStore
 from great_expectations_v1.data_context.util import instantiate_class_from_config
 

@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from pprint import pformat as pf
 
-import pytest
-
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.core.batch_definition import BatchDefinition
 from great_expectations_v1.core.expectation_suite import ExpectationSuite
 from great_expectations_v1.core.partitioners import PartitionerColumnValue

@@ -1,8 +1,7 @@
 from unittest import mock
 
-import pytest
-
 import great_expectations_v1.exceptions.exceptions as gx_exceptions
+import pytest
 from great_expectations_v1.compatibility import google
 from great_expectations_v1.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
 

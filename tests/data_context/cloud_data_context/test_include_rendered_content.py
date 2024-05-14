@@ -3,7 +3,6 @@ import string
 
 import pandas as pd
 import pytest
-
 from great_expectations_v1.core import (
     ExpectationValidationResult,
 )

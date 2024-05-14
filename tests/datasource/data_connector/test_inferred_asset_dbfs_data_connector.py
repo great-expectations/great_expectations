@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, List
 import boto3
 import botocore
 import pytest
-
 from great_expectations_v1.core.batch import BatchRequest, LegacyBatchDefinition
 from great_expectations_v1.core.batch_spec import PathBatchSpec
 from great_expectations_v1.core.id_dict import BatchSpec
 from great_expectations_v1.datasource.data_connector import InferredAssetDBFSDataConnector
 from great_expectations_v1.execution_engine import PandasExecutionEngine
+
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:

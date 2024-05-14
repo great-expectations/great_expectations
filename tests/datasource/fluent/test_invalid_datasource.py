@@ -6,7 +6,6 @@ from pprint import pformat as pf
 from typing import Any, Callable, Final, Literal, Protocol
 
 import pytest
-
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.datasource.fluent import (
     DataAsset,

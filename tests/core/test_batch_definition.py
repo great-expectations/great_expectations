@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Optional
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
-
 from great_expectations_v1.core.batch_definition import BatchDefinition
 from great_expectations_v1.core.partitioners import FileNamePartitionerYearly
 from great_expectations_v1.core.serdes import _EncodedValidationData, _IdentifierBundle

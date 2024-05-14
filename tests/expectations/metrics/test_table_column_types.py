@@ -1,13 +1,13 @@
 from unittest import mock
 
 import pytest
-
 from great_expectations_v1.data_context.util import file_relative_path
 from great_expectations_v1.exceptions.exceptions import MetricResolutionError
 from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+
 from tests.expectations.test_util import get_table_columns_metric
 
 

@@ -2,9 +2,8 @@ import logging
 import os
 import shutil
 
-import pytest
-
 import great_expectations_v1 as gx
+import pytest
 from great_expectations_v1.data_context.data_context.file_data_context import (
     FileDataContext,
 )

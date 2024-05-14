@@ -2,7 +2,6 @@ import json
 from collections import OrderedDict
 
 import pytest
-
 from great_expectations_v1.data_context.util import file_relative_path
 from great_expectations_v1.render.renderer import ProfilingResultsOverviewSectionRenderer
 from great_expectations_v1.self_check.util import expectationSuiteValidationResultSchema

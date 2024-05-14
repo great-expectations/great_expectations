@@ -1,7 +1,6 @@
 from typing import Union
 
 import pytest
-
 from great_expectations_v1.compatibility.pydantic import (
     error_wrappers as pydantic_error_wrappers,
 )

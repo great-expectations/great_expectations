@@ -2,7 +2,6 @@ from typing import Dict, Tuple
 
 import pandas as pd
 import pytest
-
 from great_expectations_v1.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
@@ -19,6 +18,7 @@ from great_expectations_v1.self_check.util import (
 )
 from great_expectations_v1.validator.computed_metric import MetricValue
 from great_expectations_v1.validator.metric_configuration import MetricConfiguration
+
 from tests.expectations.test_util import get_table_columns_metric
 
 

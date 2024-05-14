@@ -1,7 +1,6 @@
 from typing import Dict
 
 import pytest
-
 from great_expectations_v1.core.config_provider import _CloudConfigurationProvider
 from great_expectations_v1.data_context.cloud_constants import GXCloudEnvironmentVariable
 from great_expectations_v1.data_context.types.base import GXCloudConfig

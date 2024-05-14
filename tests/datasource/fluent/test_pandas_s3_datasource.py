@@ -5,11 +5,9 @@ import re
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, List, cast
 
+import great_expectations_v1.exceptions as ge_exceptions
 import pandas as pd
 import pytest
-from pytest import param
-
-import great_expectations_v1.exceptions as ge_exceptions
 from great_expectations_v1.compatibility import aws, pydantic
 from great_expectations_v1.core.util import S3Url
 from great_expectations_v1.datasource.fluent import PandasS3Datasource
@@ -22,6 +20,7 @@ from great_expectations_v1.datasource.fluent.data_connector import (
 )
 from great_expectations_v1.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations_v1.datasource.fluent.interfaces import TestConnectionError
+from pytest import param
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient

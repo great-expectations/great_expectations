@@ -3,9 +3,8 @@ from __future__ import annotations
 import itertools
 from typing import TYPE_CHECKING, Any, Dict, List
 
-import pytest
-
 import great_expectations_v1.expectations as gxe
+import pytest
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.data_context.util import file_relative_path
 from great_expectations_v1.exceptions import InvalidExpectationConfigurationError

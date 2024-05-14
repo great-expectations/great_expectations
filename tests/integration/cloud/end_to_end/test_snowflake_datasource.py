@@ -5,7 +5,6 @@ import uuid
 from typing import TYPE_CHECKING, Iterator
 
 import pytest
-
 from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -21,6 +20,7 @@ if TYPE_CHECKING:
     )
     from great_expectations_v1.datasource.fluent.sql_datasource import TableAsset
     from great_expectations_v1.validator.validator import Validator
+
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
 

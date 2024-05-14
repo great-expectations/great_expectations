@@ -4,11 +4,10 @@ import logging
 from decimal import Decimal
 from typing import Dict, Tuple, Union
 
+import great_expectations_v1.exceptions as gx_exceptions
 import numpy as np
 import pandas as pd
 import pytest
-
-import great_expectations_v1.exceptions as gx_exceptions
 from great_expectations_v1.compatibility import pyspark, sqlalchemy
 from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
@@ -39,6 +38,7 @@ from great_expectations_v1.self_check.util import (
 from great_expectations_v1.util import isclose
 from great_expectations_v1.validator.computed_metric import MetricValue
 from great_expectations_v1.validator.metric_configuration import MetricConfiguration
+
 from tests.expectations.test_util import get_table_columns_metric
 
 

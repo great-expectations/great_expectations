@@ -1,7 +1,6 @@
 from typing import Dict
 
 import pytest
-
 from great_expectations_v1.core.http import DEFAULT_TIMEOUT, create_session
 
 

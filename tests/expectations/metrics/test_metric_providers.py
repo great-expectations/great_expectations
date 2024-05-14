@@ -4,7 +4,6 @@ import copy
 from typing import Any, Dict, List
 
 import pytest
-
 from great_expectations_v1.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,

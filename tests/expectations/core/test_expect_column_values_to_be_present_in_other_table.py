@@ -5,7 +5,6 @@ import pytest
 from contrib.experimental.great_expectations_experimental.expectations.expect_column_values_to_be_present_in_other_table import (  # noqa: E501
     ExpectColumnValuesToBePresentInOtherTable,  # needed for expectation registration
 )
-
 from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
