@@ -9,7 +9,7 @@ import PrereqPythonInstalled from '../_core_components/prerequisites/_python_ins
 import ReleaseVersionBox from '../../components/versions/_gx_version_code_box.mdx'
 import GxCloudAdvert from '/static/docs/_static_components/_gx_cloud_advert.md'
 
-If you're new to {GxData.product_name}, start here to learn how to connect to sample data, build an Expectation, validate sample data, and review Validation Results. This is an ideal place to start if you're new to GX and want to experiment with features and see what it offers.
+Start here to learn how to connect to sample data, build an Expectation, validate sample data, and review Validation Results. This is an ideal place to start if you're new to {GxData.product_name} and want to experiment with features and see what it offers.
 
 ## Prerequisites
 
