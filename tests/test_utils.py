@@ -770,7 +770,7 @@ def introspect_db(  # noqa: C901, PLR0912
     information_schemas: Optional[List[str]] = None,
     system_tables: Optional[List[str]] = None,
     include_views=True,
-):
+) -> List[Dict[str, str]]:
     # This code was broken out from the InferredAssetSqlDataConnector when it was removed
     if information_schemas is None:
         information_schemas = [
@@ -857,7 +857,7 @@ def introspect_db(  # noqa: C901, PLR0912
         if "UndefinedTable" not in str(e):
             raise e  # noqa: TRY201
 
-        return tables
+    return tables
 
 
 @contextmanager
