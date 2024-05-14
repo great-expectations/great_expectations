@@ -222,7 +222,6 @@ class SnowflakeDatasource(SQLDatasource):
         from great_expectations.data_context import CloudDataContext
 
         if isinstance(self._data_context, CloudDataContext):
-            # TODO: Change this value to "great_expectations_cloud" once configured in Snowflake partner account
             return SNOWFLAKE_PARTNER_APPLICATION_CLOUD
         return SNOWFLAKE_PARTNER_APPLICATION_OSS
 

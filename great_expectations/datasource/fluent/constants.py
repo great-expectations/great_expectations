@@ -25,6 +25,5 @@ DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_pandas_asset"
 
 _IN_MEMORY_DATA_ASSET_TYPE: Final[str] = "dataframe"
 
-SNOWFLAKE_PARTNER_APPLICATION_OSS: Final[str] = "great_expectations_oss"
-# TODO: Change this value to "great_expectations_cloud" once configured in Snowflake partner account
-SNOWFLAKE_PARTNER_APPLICATION_CLOUD: Final[str] = "great_expectations_oss"
+SNOWFLAKE_PARTNER_APPLICATION_OSS: Final[str] = "great_expectations_core"
+SNOWFLAKE_PARTNER_APPLICATION_CLOUD: Final[str] = "great_expectations_platform"

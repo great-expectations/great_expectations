@@ -310,12 +310,12 @@ def test_get_execution_engine_succeeds():
     [
         param(
             "empty_file_context",
-            "great_expectations_oss",
+            "great_expectations_core",
             id="file context",
         ),
         param(
             "empty_cloud_context_fluent",
-            "great_expectations_oss",
+            "great_expectations_platform",
             id="cloud context",
         ),
     ],
