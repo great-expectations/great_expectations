@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import logging
-import re
 import warnings
 from datetime import date, datetime
 from pprint import pformat as pf
@@ -37,16 +36,16 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.core.partitioners import (
-    Partitioner,
+    ColumnPartitioner,
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
     PartitionerColumnValue,
     PartitionerConvertedDatetime,
     PartitionerDatetimePart,
     PartitionerDividedInteger,
     PartitionerModInteger,
     PartitionerMultiColumnValue,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
 )
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
@@ -424,7 +423,7 @@ SqlPartitioner = Union[
 ]
 
 
-class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
+class _SQLAsset(DataAsset[DatasourceT, ColumnPartitioner], Generic[DatasourceT]):
     """A _SQLAsset Mixin
 
     This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
@@ -437,23 +436,25 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
     name: str
-    _partitioner_implementation_map: Dict[Type[Partitioner], Optional[Type[SqlPartitioner]]] = (
-        pydantic.PrivateAttr(
-            default={
-                PartitionerYear: SqlPartitionerYear,
-                PartitionerYearAndMonth: SqlPartitionerYearAndMonth,
-                PartitionerYearAndMonthAndDay: SqlPartitionerYearAndMonthAndDay,
-                PartitionerColumnValue: SqlPartitionerColumnValue,
-                PartitionerDatetimePart: SqlPartitionerDatetimePart,
-                PartitionerDividedInteger: SqlPartitionerDividedInteger,
-                PartitionerModInteger: SqlPartitionerModInteger,
-                PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
-                PartitionerConvertedDatetime: None,  # only implemented for sqlite backend
-            }
-        )
+    _partitioner_implementation_map: Dict[
+        Type[ColumnPartitioner], Optional[Type[SqlPartitioner]]
+    ] = pydantic.PrivateAttr(
+        default={
+            ColumnPartitionerYearly: SqlPartitionerYear,
+            ColumnPartitionerMonthly: SqlPartitionerYearAndMonth,
+            ColumnPartitionerDaily: SqlPartitionerYearAndMonthAndDay,
+            PartitionerColumnValue: SqlPartitionerColumnValue,
+            PartitionerDatetimePart: SqlPartitionerDatetimePart,
+            PartitionerDividedInteger: SqlPartitionerDividedInteger,
+            PartitionerModInteger: SqlPartitionerModInteger,
+            PartitionerMultiColumnValue: SqlPartitionerMultiColumnValue,
+            PartitionerConvertedDatetime: None,  # only implemented for sqlite backend
+        }
     )
 
-    def get_partitioner_implementation(self, abstract_partitioner: Partitioner) -> SqlPartitioner:
+    def get_partitioner_implementation(
+        self, abstract_partitioner: ColumnPartitioner
+    ) -> SqlPartitioner:
         PartitionerClass = self._partitioner_implementation_map.get(type(abstract_partitioner))
         if not PartitionerClass:
             raise ValueError(  # noqa: TRY003
@@ -465,7 +466,7 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     @override
     def get_batch_parameters_keys(
         self,
-        partitioner: Optional[Partitioner] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> tuple[str, ...]:
         option_keys: Tuple[str, ...] = tuple()
         if partitioner:
@@ -592,14 +593,12 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
             self.sort_batches(batch_list, sql_partitioner)
         return batch_list[batch_request.batch_slice]
 
-    @public_api
     @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -610,7 +609,6 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
             batch_slice: A python slice that can be used to limit the sorted batches by index.
                 e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
             partitioner: A Partitioner used to narrow the data returned from the asset.
-            batching_regex: Parameter batching_regex is not supported by this Asset type and must be None.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -627,18 +625,12 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
 
-        if batching_regex is not None:
-            raise ValueError(  # noqa: TRY003
-                "batching_regex is not currently supported and must be None for this DataAsset."
-            )
-
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
             batch_slice=batch_slice,
             partitioner=partitioner,
-            batching_regex=None,
         )
 
     @public_api
@@ -646,7 +638,6 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
         return self.add_batch_definition(
             name=name,
             partitioner=None,
-            batching_regex=None,
         )
 
     @public_api
@@ -655,8 +646,7 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYear(column_name=column, sort_ascending=sort_ascending),
-            batching_regex=None,
+            partitioner=ColumnPartitionerYearly(column_name=column, sort_ascending=sort_ascending),
         )
 
     @public_api
@@ -665,8 +655,7 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonth(column_name=column, sort_ascending=sort_ascending),
-            batching_regex=None,
+            partitioner=ColumnPartitionerMonthly(column_name=column, sort_ascending=sort_ascending),
         )
 
     @public_api
@@ -675,10 +664,7 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
     ) -> BatchDefinition:
         return self.add_batch_definition(
             name=name,
-            partitioner=PartitionerYearAndMonthAndDay(
-                column_name=column, sort_ascending=sort_ascending
-            ),
-            batching_regex=None,
+            partitioner=ColumnPartitionerDaily(column_name=column, sort_ascending=sort_ascending),
         )
 
     @override
@@ -700,7 +686,7 @@ class _SQLAsset(DataAsset[DatasourceT, Partitioner], Generic[DatasourceT]):
                 option: None
                 for option in self.get_batch_parameters_keys(partitioner=batch_request.partitioner)
             }
-            expect_batch_request_form = BatchRequest[Partitioner](
+            expect_batch_request_form = BatchRequest[ColumnPartitioner](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
@@ -881,10 +867,7 @@ class TableAsset(_SQLAsset):
         Returns:
             True if the target string is bracketed by quotes.
         """
-        for quote in ["'", '"']:
-            if target.startswith(quote) and target.endswith(quote):
-                return True
-        return False
+        return any(target.startswith(quote) and target.endswith(quote) for quote in ["'", '"'])
 
 
 def _warn_for_more_specific_datasource_type(connection_string: str) -> None:

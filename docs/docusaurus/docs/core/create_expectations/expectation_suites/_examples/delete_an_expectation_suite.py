@@ -27,7 +27,7 @@ suite = context.suites.get(suite_name)
 
 # highlight-start
 # <snippet name="core/expectation_suites/_examples/delete_an_expectation_suite.py delete Expectation Suite">
-context.suites.delete(suite=suite)
+context.suites.delete(name=suite_name)
 # </snippet>
 # highlight-end
 # </snippet>

@@ -15,10 +15,10 @@ from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_res
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.data_assistant_result import (
+from great_expectations.experimental.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations.experimental.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )
@@ -200,5 +200,5 @@ def test_profile_data_profiler_structured_data_assistant_result_batch_id_to_batc
             parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY]
             if FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY in parameter_node
             else {}
-        ).keys()
+        )
     )

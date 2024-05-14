@@ -30,9 +30,7 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations.validation_operators.types.validation_operator_result import (
-        ValidationOperatorResult,
-    )
+    from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -69,23 +67,6 @@ class ValidationResultsPageRenderer(Renderer):
             )
         self.run_info_at_end = run_info_at_end
         self._data_context = data_context
-
-    def render_validation_operator_result(
-        self, validation_operator_result: ValidationOperatorResult
-    ) -> List[RenderedDocumentContent]:
-        """
-        Render a ValidationOperatorResult which can have multiple ExpectationSuiteValidationResult
-
-        Args:
-            validation_operator_result: ValidationOperatorResult
-
-        Returns:
-            List[RenderedDocumentContent]
-        """
-        return [
-            self.render(validation_result)
-            for validation_result in validation_operator_result.list_validation_results()
-        ]
 
     # TODO: deprecate dual batch api support in 0.14
     def render(
@@ -655,15 +636,55 @@ class ExpectationSuitePageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
 
+    @staticmethod
+    def _get_grouped_and_ordered_expectations_by_column(
+        expectation_suite: ExpectationSuite,
+    ) -> Tuple[Dict[str, List[ExpectationConfiguration]], List[str]]:
+        expectations_by_column: Dict[str, List[ExpectationConfiguration]] = {}
+        ordered_columns: List[str] = []
+
+        column: str
+        expectation: ExpectationConfiguration
+        expectation_configurations = [exp.configuration for exp in expectation_suite.expectations]
+        for expectation in expectation_configurations:
+            if "column" in expectation.kwargs:
+                column = expectation.kwargs["column"]
+            else:
+                column = "_nocolumn"
+
+            if column not in expectations_by_column:
+                expectations_by_column[column] = []
+
+            expectations_by_column[column].append(expectation)
+
+            # if possible, get the order of columns from expect_table_columns_to_match_ordered_list
+            if (
+                expectation.expectation_type == "expect_table_columns_to_match_ordered_list"
+                and expectation.kwargs.get("column_list")
+            ):
+                exp_column_list: List[str] = expectation.kwargs["column_list"]
+                if exp_column_list and len(exp_column_list) > 0:
+                    ordered_columns = exp_column_list
+
+        # Group items by column
+        sorted_columns = sorted(list(expectations_by_column.keys()))
+
+        # only return ordered columns from expect_table_columns_to_match_ordered_list evr if they match set of column  # noqa: E501
+        # names from entire evr, else use alphabetic sort
+        if set(sorted_columns) == set(ordered_columns):
+            return expectations_by_column, ordered_columns
+
+        return expectations_by_column, sorted_columns
+
     def render(self, expectations):
         if isinstance(expectations, dict):
             expectations = ExpectationSuite(**expectations, data_context=None)
         (
             columns,
             ordered_columns,
-        ) = expectations.get_grouped_and_ordered_expectations_by_column()
-        expectation_suite_name = expectations.name
+        ) = self._get_grouped_and_ordered_expectations_by_column(expectations)
 
+        expectation_suite_name = expectations.name
         overview_content_blocks = [
             self._render_expectation_suite_header(),
             self._render_expectation_suite_info(expectations),

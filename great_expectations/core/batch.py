@@ -17,7 +17,7 @@ from typing import (
 
 import pandas as pd
 
-from great_expectations._docs_decorators import deprecated_argument, public_api
+from great_expectations._docs_decorators import deprecated_argument
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -78,7 +78,6 @@ def _get_metrics_calculator_class() -> Type[MetricsCalculator]:
     return load_class(class_name=class_name, module_name=module_name)
 
 
-@public_api
 class LegacyBatchDefinition(SerializableDictDot):
     """Precisely identifies a set of data from a data source.
 
@@ -128,7 +127,6 @@ class LegacyBatchDefinition(SerializableDictDot):
         self._batch_spec_passthrough = batch_spec_passthrough
         self._batching_regex = batching_regex
 
-    @public_api
     @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this BatchDefinition.
@@ -362,7 +360,6 @@ class BatchRequestBase(SerializableDictDot):
 
     # While this class is private, it is inherited from and this method is part
     # of the public api on the child.
-    @public_api
     @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this BatchRequestBase.
@@ -482,7 +479,6 @@ is illegal.
             )
 
 
-@public_api
 class BatchRequest(BatchRequestBase):
     """A BatchRequest is the way to specify which data Great Expectations will validate.
 
@@ -558,7 +554,6 @@ class BatchRequest(BatchRequestBase):
         )
 
 
-@public_api
 class RuntimeBatchRequest(BatchRequestBase):
     """A RuntimeBatchRequest creates a Batch for a RuntimeDataConnector.
 
@@ -710,7 +705,6 @@ class BatchData:
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.  # noqa: E501
 #  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>  # noqa: E501
 # TODO: <Alex>See also "great_expectations/datasource/types/batch_spec.py".</Alex>
-@public_api
 @deprecated_argument(argument_name="data_context", version="0.14.0")
 @deprecated_argument(argument_name="datasource_name", version="0.14.0")
 @deprecated_argument(argument_name="batch_parameters", version="0.14.0")
@@ -852,7 +846,6 @@ class Batch(SerializableDictDot):
         }
         return dict_obj
 
-    @public_api
     @override
     def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this Batch.
@@ -884,7 +877,6 @@ class Batch(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    @public_api
     def head(self, n_rows: int = 5, fetch_all: bool = False) -> pd.DataFrame:
         """Return the first n rows from the Batch.
 

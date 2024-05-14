@@ -75,13 +75,6 @@ DEFAULT_INCLUDES: list[IncludeExcludeDefinition] = [
         filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
     ),
     IncludeExcludeDefinition(
-        reason="DataAssistantResult is returned from running a DataAssistant",
-        name="DataAssistantResult",
-        filepath=pathlib.Path(
-            "great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py"
-        ),
-    ),
-    IncludeExcludeDefinition(
         reason="DataConnectors are part of the public API",
         name="InferredAssetFilePathDataConnector",
         filepath=pathlib.Path(

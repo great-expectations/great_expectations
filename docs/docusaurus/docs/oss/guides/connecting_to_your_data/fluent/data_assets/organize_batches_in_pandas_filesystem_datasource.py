@@ -20,7 +20,7 @@ import great_expectations as gx
 context = gx.get_context()
 
 # data_directory is the full path to a directory containing csv files
-context.sources.add_pandas_filesystem(
+context.data_sources.add_pandas_filesystem(
     name="my_datasource", base_directory=data_directory
 )
 

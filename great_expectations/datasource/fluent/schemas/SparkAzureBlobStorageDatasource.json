@@ -135,6 +135,451 @@
                 "key"
             ]
         },
+        "FileNamePartitionerYearly": {
+            "title": "FileNamePartitionerYearly",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year"
+                    ],
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "FileNamePartitionerMonthly": {
+            "title": "FileNamePartitionerMonthly",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year",
+                        "month"
+                    ],
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "FileNamePartitionerDaily": {
+            "title": "FileNamePartitionerDaily",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year",
+                        "month",
+                        "day"
+                    ],
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "FileNamePartitionerPath": {
+            "title": "FileNamePartitionerPath",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__": {
+            "title": "BatchDefinition[Union[FileNamePartitionerYearly, FileNamePartitionerMonthly, FileNamePartitionerDaily, FileNamePartitionerPath]]",
+            "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "title": "Id",
+                    "type": "string"
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "partitioner": {
+                    "title": "Partitioner",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FileNamePartitionerYearly"
+                        },
+                        {
+                            "$ref": "#/definitions/FileNamePartitionerMonthly"
+                        },
+                        {
+                            "$ref": "#/definitions/FileNamePartitionerDaily"
+                        },
+                        {
+                            "$ref": "#/definitions/FileNamePartitionerPath"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "name"
+            ]
+        },
+        "CSVAsset": {
+            "title": "CSVAsset",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "csv",
+                    "enum": [
+                        "csv"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batch_definitions": {
+                    "title": "Batch Definitions",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
+                    }
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "schema": {
+                    "title": "Schema",
+                    "anyOf": [
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sep": {
+                    "title": "Sep",
+                    "type": "string"
+                },
+                "encoding": {
+                    "title": "Encoding",
+                    "type": "string"
+                },
+                "quote": {
+                    "title": "Quote",
+                    "type": "string"
+                },
+                "escape": {
+                    "title": "Escape",
+                    "type": "string"
+                },
+                "comment": {
+                    "title": "Comment",
+                    "type": "string"
+                },
+                "header": {
+                    "title": "Header",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "inferSchema": {
+                    "title": "Inferschema",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "ignoreLeadingWhiteSpace": {
+                    "title": "Ignoreleadingwhitespace",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "ignoreTrailingWhiteSpace": {
+                    "title": "Ignoretrailingwhitespace",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "nullValue": {
+                    "title": "Nullvalue",
+                    "type": "string"
+                },
+                "nanValue": {
+                    "title": "Nanvalue",
+                    "type": "string"
+                },
+                "positiveInf": {
+                    "title": "Positiveinf",
+                    "type": "string"
+                },
+                "negativeInf": {
+                    "title": "Negativeinf",
+                    "type": "string"
+                },
+                "dateFormat": {
+                    "title": "Dateformat",
+                    "type": "string"
+                },
+                "timestampFormat": {
+                    "title": "Timestampformat",
+                    "type": "string"
+                },
+                "maxColumns": {
+                    "title": "Maxcolumns",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "maxCharsPerColumn": {
+                    "title": "Maxcharspercolumn",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "maxMalformedLogPerPartition": {
+                    "title": "Maxmalformedlogperpartition",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mode": {
+                    "title": "Mode",
+                    "enum": [
+                        "PERMISSIVE",
+                        "DROPMALFORMED",
+                        "FAILFAST"
+                    ],
+                    "type": "string"
+                },
+                "columnNameOfCorruptRecord": {
+                    "title": "Columnnameofcorruptrecord",
+                    "type": "string"
+                },
+                "multiLine": {
+                    "title": "Multiline",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "charToEscapeQuoteEscaping": {
+                    "title": "Chartoescapequoteescaping",
+                    "type": "string"
+                },
+                "samplingRatio": {
+                    "title": "Samplingratio",
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "enforceSchema": {
+                    "title": "Enforceschema",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "emptyValue": {
+                    "title": "Emptyvalue",
+                    "type": "string"
+                },
+                "locale": {
+                    "title": "Locale",
+                    "type": "string"
+                },
+                "lineSep": {
+                    "title": "Linesep",
+                    "type": "string"
+                },
+                "unescapedQuoteHandling": {
+                    "title": "Unescapedquotehandling",
+                    "enum": [
+                        "STOP_AT_CLOSING_QUOTE",
+                        "BACK_TO_DELIMITER",
+                        "STOP_AT_DELIMITER",
+                        "SKIP_VALUE",
+                        "RAISE_ERROR"
+                    ],
+                    "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false
+        },
         "PartitionerColumnValue": {
             "title": "PartitionerColumnValue",
             "description": "--Public API--",
@@ -256,8 +701,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYear": {
-            "title": "PartitionerYear",
+        "ColumnPartitionerYearly": {
+            "title": "ColumnPartitionerYearly",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -283,8 +728,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYearAndMonth": {
-            "title": "PartitionerYearAndMonth",
+        "ColumnPartitionerMonthly": {
+            "title": "ColumnPartitionerMonthly",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -310,8 +755,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYearAndMonthAndDay": {
-            "title": "PartitionerYearAndMonthAndDay",
+        "ColumnPartitionerDaily": {
+            "title": "ColumnPartitionerDaily",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -404,8 +849,8 @@
                 "date_format_string"
             ]
         },
-        "BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__": {
-            "title": "BatchDefinition[Union[PartitionerColumnValue, PartitionerMultiColumnValue, PartitionerDividedInteger, PartitionerModInteger, PartitionerYear, PartitionerYearAndMonth, PartitionerYearAndMonthAndDay, PartitionerDatetimePart, PartitionerConvertedDatetime]]",
+        "BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__": {
+            "title": "BatchDefinition[Union[PartitionerColumnValue, PartitionerMultiColumnValue, PartitionerDividedInteger, PartitionerModInteger, ColumnPartitionerYearly, ColumnPartitionerMonthly, ColumnPartitionerDaily, PartitionerDatetimePart, PartitionerConvertedDatetime]]",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
             "type": "object",
             "properties": {
@@ -433,13 +878,13 @@
                             "$ref": "#/definitions/PartitionerModInteger"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYear"
+                            "$ref": "#/definitions/ColumnPartitionerYearly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYearAndMonth"
+                            "$ref": "#/definitions/ColumnPartitionerMonthly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
+                            "$ref": "#/definitions/ColumnPartitionerDaily"
                         },
                         {
                             "$ref": "#/definitions/PartitionerDatetimePart"
@@ -448,327 +893,15 @@
                             "$ref": "#/definitions/PartitionerConvertedDatetime"
                         }
                     ]
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
                 "name"
             ]
         },
-        "CSVAsset": {
-            "title": "CSVAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "title": "Name",
-                    "type": "string"
-                },
-                "type": {
-                    "title": "Type",
-                    "default": "csv",
-                    "enum": [
-                        "csv"
-                    ],
-                    "type": "string"
-                },
-                "id": {
-                    "title": "Id",
-                    "description": "DataAsset id",
-                    "type": "string",
-                    "format": "uuid"
-                },
-                "order_by": {
-                    "title": "Order By",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Sorter"
-                    }
-                },
-                "batch_metadata": {
-                    "title": "Batch Metadata",
-                    "type": "object"
-                },
-                "batch_definitions": {
-                    "title": "Batch Definitions",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
-                    }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
-                },
-                "connect_options": {
-                    "title": "Connect Options",
-                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
-                    "type": "object"
-                },
-                "pathGlobFilter": {
-                    "title": "Pathglobfilter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "recursiveFileLookup": {
-                    "title": "Recursivefilelookup",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedBefore": {
-                    "title": "Modifiedbefore",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "modifiedAfter": {
-                    "title": "Modifiedafter",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "schema": {
-                    "title": "Schema",
-                    "anyOf": [
-                        {
-                            "type": "object"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sep": {
-                    "title": "Sep",
-                    "type": "string"
-                },
-                "encoding": {
-                    "title": "Encoding",
-                    "type": "string"
-                },
-                "quote": {
-                    "title": "Quote",
-                    "type": "string"
-                },
-                "escape": {
-                    "title": "Escape",
-                    "type": "string"
-                },
-                "comment": {
-                    "title": "Comment",
-                    "type": "string"
-                },
-                "header": {
-                    "title": "Header",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "inferSchema": {
-                    "title": "Inferschema",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "ignoreLeadingWhiteSpace": {
-                    "title": "Ignoreleadingwhitespace",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "ignoreTrailingWhiteSpace": {
-                    "title": "Ignoretrailingwhitespace",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "nullValue": {
-                    "title": "Nullvalue",
-                    "type": "string"
-                },
-                "nanValue": {
-                    "title": "Nanvalue",
-                    "type": "string"
-                },
-                "positiveInf": {
-                    "title": "Positiveinf",
-                    "type": "string"
-                },
-                "negativeInf": {
-                    "title": "Negativeinf",
-                    "type": "string"
-                },
-                "dateFormat": {
-                    "title": "Dateformat",
-                    "type": "string"
-                },
-                "timestampFormat": {
-                    "title": "Timestampformat",
-                    "type": "string"
-                },
-                "maxColumns": {
-                    "title": "Maxcolumns",
-                    "anyOf": [
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "maxCharsPerColumn": {
-                    "title": "Maxcharspercolumn",
-                    "anyOf": [
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "maxMalformedLogPerPartition": {
-                    "title": "Maxmalformedlogperpartition",
-                    "anyOf": [
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "mode": {
-                    "title": "Mode",
-                    "enum": [
-                        "PERMISSIVE",
-                        "DROPMALFORMED",
-                        "FAILFAST"
-                    ],
-                    "type": "string"
-                },
-                "columnNameOfCorruptRecord": {
-                    "title": "Columnnameofcorruptrecord",
-                    "type": "string"
-                },
-                "multiLine": {
-                    "title": "Multiline",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "charToEscapeQuoteEscaping": {
-                    "title": "Chartoescapequoteescaping",
-                    "type": "string"
-                },
-                "samplingRatio": {
-                    "title": "Samplingratio",
-                    "anyOf": [
-                        {
-                            "type": "number"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "enforceSchema": {
-                    "title": "Enforceschema",
-                    "anyOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "emptyValue": {
-                    "title": "Emptyvalue",
-                    "type": "string"
-                },
-                "locale": {
-                    "title": "Locale",
-                    "type": "string"
-                },
-                "lineSep": {
-                    "title": "Linesep",
-                    "type": "string"
-                },
-                "unescapedQuoteHandling": {
-                    "title": "Unescapedquotehandling",
-                    "enum": [
-                        "STOP_AT_CLOSING_QUOTE",
-                        "BACK_TO_DELIMITER",
-                        "STOP_AT_DELIMITER",
-                        "SKIP_VALUE",
-                        "RAISE_ERROR"
-                    ],
-                    "type": "string"
-                }
-            },
-            "required": [
-                "name"
-            ],
-            "additionalProperties": false
-        },
         "DirectoryCSVAsset": {
             "title": "DirectoryCSVAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -804,14 +937,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -1071,6 +1198,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1081,7 +1214,7 @@
         },
         "ParquetAsset": {
             "title": "ParquetAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1117,14 +1250,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -1203,6 +1330,12 @@
                         "LEGACY"
                     ],
                     "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1212,7 +1345,7 @@
         },
         "DirectoryParquetAsset": {
             "title": "DirectoryParquetAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1248,14 +1381,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -1339,6 +1466,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1349,7 +1482,7 @@
         },
         "ORCAsset": {
             "title": "ORCAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1385,14 +1518,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -1454,6 +1581,12 @@
                             "type": "string"
                         }
                     ]
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1463,7 +1596,7 @@
         },
         "DirectoryORCAsset": {
             "title": "DirectoryORCAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1499,14 +1632,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -1573,6 +1700,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1583,7 +1716,7 @@
         },
         "JSONAsset": {
             "title": "JSONAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1619,14 +1752,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -1852,6 +1979,12 @@
                             "type": "string"
                         }
                     ]
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -1861,7 +1994,7 @@
         },
         "DirectoryJSONAsset": {
             "title": "DirectoryJSONAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -1897,14 +2030,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -2135,6 +2262,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -2145,7 +2278,7 @@
         },
         "TextAsset": {
             "title": "TextAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2181,14 +2314,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -2247,6 +2374,12 @@
                 "lineSep": {
                     "title": "Linesep",
                     "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -2256,7 +2389,7 @@
         },
         "DirectoryTextAsset": {
             "title": "DirectoryTextAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2292,14 +2425,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -2363,6 +2490,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -2373,7 +2506,7 @@
         },
         "DeltaAsset": {
             "title": "DeltaAsset",
-            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "Base class for PathDataAssets which batch by applying a regex to file names.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2409,14 +2542,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_FileNamePartitionerYearly__FileNamePartitionerMonthly__FileNamePartitionerDaily__FileNamePartitionerPath__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -2430,6 +2557,12 @@
                 "versionAsOf": {
                     "title": "Versionasof",
                     "type": "string"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [
@@ -2439,7 +2572,7 @@
         },
         "DirectoryDeltaAsset": {
             "title": "DirectoryDeltaAsset",
-            "description": "Used for accessing all the files in a directory as a single batch.",
+            "description": "Base class for PathDataAssets which batch by combining the contents of a directory.",
             "type": "object",
             "properties": {
                 "name": {
@@ -2475,14 +2608,8 @@
                     "title": "Batch Definitions",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__PartitionerYear__PartitionerYearAndMonth__PartitionerYearAndMonthAndDay__PartitionerDatetimePart__PartitionerConvertedDatetime__"
+                        "$ref": "#/definitions/BatchDefinition_Union_PartitionerColumnValue__PartitionerMultiColumnValue__PartitionerDividedInteger__PartitionerModInteger__ColumnPartitionerYearly__ColumnPartitionerMonthly__ColumnPartitionerDaily__PartitionerDatetimePart__PartitionerConvertedDatetime__"
                     }
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 },
                 "connect_options": {
                     "title": "Connect Options",
@@ -2501,6 +2628,12 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
                 }
             },
             "required": [

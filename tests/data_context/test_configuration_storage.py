@@ -54,22 +54,6 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
         os.path.join(context_path, "plugins"),  # noqa: PTH118
         exist_ok=True,
     )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
-    )
     return gx.get_context(context_root_dir=context_path)
 
 
@@ -167,28 +151,8 @@ stores:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
 
-validation_operators:
-  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
-  default:
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          target_store_name: validation_results_store
-      # Uncomment the notify_slack action below to send notifications during evaluation
-      # - name: notify_slack
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     slack_webhook: ${validation_notification_slack_webhook}
-      #     notify_on: all
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
-anonymous_usage_statistics:
-  usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
-  enabled: false
-  data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
+analytics_enabled: false
+data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
 
 
 

@@ -1,21 +1,22 @@
 import pathlib
 import re
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 import pytest
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
+from great_expectations.core.partitioners import FileNamePartitionerYearly
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
+    from great_expectations.datasource.fluent.data_connector import (
         DataConnector,
     )
 
@@ -674,7 +675,7 @@ def test_relative_base_directory_path(tmp_path_factory):
     ],
 )
 def test_filesystem_data_connector_uses_batching_regex_from_batch_request(
-    tmp_path_factory, batching_regex, batch_definition_count
+    tmp_path_factory, batching_regex: Union[str, re.Pattern], batch_definition_count
 ):
     # arrange
     base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
@@ -704,7 +705,7 @@ def test_filesystem_data_connector_uses_batching_regex_from_batch_request(
             datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={},
-            batching_regex=batching_regex,
+            partitioner=FileNamePartitionerYearly(regex=re.compile(batching_regex)),
         )
     )
 

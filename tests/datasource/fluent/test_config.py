@@ -20,9 +20,10 @@ from typing import (  # TODO: revert use of cast
 
 import pytest
 
+import great_expectations as gx
 from great_expectations.compatibility import pydantic
 from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.partitioners import PartitionerYearAndMonth
+from great_expectations.core.partitioners import ColumnPartitionerMonthly
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import (
@@ -753,7 +754,7 @@ def test_partitioners_deserialization(inject_engine_lookup_double, from_all_conf
         asset_name="with_partitioner"
     )
     partitioner = table_asset.batch_definitions[0].partitioner
-    assert isinstance(partitioner, PartitionerYearAndMonth)
+    assert isinstance(partitioner, ColumnPartitionerMonthly)
     assert partitioner.method_name == "partition_on_year_and_month"
 
 
@@ -767,7 +768,7 @@ def test_yaml_config_round_trip_ordering(
 ):
     dumped: str = from_yaml_gx_config.yaml()
 
-    assert PG_CONFIG_YAML_STR == dumped
+    assert dumped == PG_CONFIG_YAML_STR
 
 
 @pytest.mark.xfail(reason="Custom Sorter serialization logic needs to be implemented")
@@ -859,7 +860,7 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     """
     gx_yml = tmp_path / FileDataContext.GX_DIR / FileDataContext.GX_YML
     assert gx_yml.exists() is False
-    FileDataContext.create(tmp_path)
+    gx.get_context(mode="file", project_root_dir=tmp_path)
     assert gx_yml.exists()
 
     tmp_gx_dir = gx_yml.parent.absolute()
@@ -952,7 +953,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     )
 
     # add a new datasource
-    context.sources.add_sqlite("my_new_one", connection_string="sqlite://")
+    context.data_sources.add_sqlite("my_new_one", connection_string="sqlite://")
 
     # add a new asset to an existing data
     sqlite_ds_w_subs: SqliteDatasource = context.get_datasource(  # type: ignore[assignment]

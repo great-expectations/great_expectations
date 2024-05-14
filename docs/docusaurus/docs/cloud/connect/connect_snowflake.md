@@ -37,9 +37,9 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
    - Paste the code you copied in step 2 into the SQL worksheet.
 
-      Replace `secure_password` with your value and `database_name` and `schema_name` with the names of the database and schema you want to access in GX Cloud.
+      Replace `your_password` with your value and `your_database_name` and `your_schema` with the names of the database and schema you want to access in GX Cloud.
 
-      `grant select on future tables in schema "database_name.schema_name" to role gx_role;` is optional and gives the user with the `gx_role` role access to all future tables in the defined schema.
+      `grant select on future tables in schema "your_database.your_schema" to role gx_role;` is optional and gives the user with the `gx_role` role access to all future tables in the defined schema.
 
       The settings in the code example optimize cost and performance. Adjust them to suit your business requirements.
 
@@ -55,11 +55,11 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
 7. Complete the following fields:
 
-    - **Username**: Enter the username you use to access Snowflake.
-
-    - **Account identifier**: Enter your Snowflake organization and account name separated by a hyphen (`oraganizationname-accountname`) or your account name and a legacy account locator separated by a period (`accountname.region`). The legacy account locator value must include the geographical region. For example, `us-east-1`. 
+     - **Account identifier**: Enter your Snowflake organization and account name separated by a hyphen (`oraganizationname-accountname`) or your account name and a legacy account locator separated by a period (`accountname.region`). The legacy account locator value must include the geographical region. For example, `us-east-1`. 
     
         To locate your Snowflake organization name, account name, or legacy account locator values see [Finding the Organization and Account Name for an Account](https://docs.snowflake.com/en/user-guide/admin-account-identifier#finding-the-organization-and-account-name-for-an-account) or [Using an Account Locator as an Identifier](https://docs.snowflake.com/en/user-guide/admin-account-identifier#using-an-account-locator-as-an-identifier).
+    
+    - **Username**: Enter the username you use to access Snowflake.
 
     - **Password**: Enter a Snowflake password. To improve data security, GX recommends using a Snowflake service account to connect to GX Cloud.
 
@@ -71,26 +71,22 @@ You can use an existing Snowflake warehouse, but GX recommends creating a separa
 
     - **Role**: Enter your Snowflake role.
 
-8. Optional. Select **Test connection** to test the Data Source connection. Testing the connection to the Data Source is a preventative measure that makes sure the connection configuration is correct. This verification can help you avoid errors and can reduce troubleshooting downtime.
+8. Click **Connect**.
 
-9. Click **Continue**.
+9. Complete the following fields:
 
-10. Select **Table Asset** or **Query Asset** and complete the following fields:
-
-    - **Table name**: When **Table Asset** is selected, enter the name of the Data Source table you're connecting to.
+    - **Table name**: Enter the name of the Data Source table you're connecting to.
     
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source.
 
-    - **Query**: When **Query Asset** is selected, enter the query that you want to run on the Data Asset. 
-
-11. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
+10. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
 
     - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
 
     - **Column of datetime type** - Enter the name of the column containing the date and time data.
 
-12. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
+11. Optional. Select **Add Data Asset** to add additional tables or queries and repeat steps 8 and 9.
 
-13. Click **Finish**.
+12. Click **Finish**.
 
-14. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
+13. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).

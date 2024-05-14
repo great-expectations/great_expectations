@@ -337,14 +337,16 @@ class _SourceFactories:
         existing_datasource = datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if not existing_datasource:
-            return self._data_context.sources.add_pandas(name=DEFAULT_PANDAS_DATASOURCE_NAME)
+            return self._data_context.data_sources.add_pandas(name=DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if isinstance(existing_datasource, PandasDatasource):
             return existing_datasource
 
         raise DefaultPandasDatasourceError(  # noqa: TRY003
-            f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '  # noqa: E501
-            "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."  # noqa: E501
+            "Another non-pandas datasource already exists "
+            f'with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
+            "Please rename this datasources if you wish "
+            "to use the pandas_default `PandasDatasource`."
         )
 
     @property

@@ -5,6 +5,7 @@ from awsglue.context import GlueContext
 from pyspark.context import SparkContext
 
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
@@ -34,7 +35,6 @@ config = DataContextConfig(
     validation_results_store_name=config_file["validation_results_store_name"],
     suite_parameter_store_name=config_file["suite_parameter_store_name"],
     plugins_directory="/great_expectations/plugins",
-    validation_operators=config_file["validation_operators"],
     stores=config_file["stores"],
     data_docs_sites=config_file["data_docs_sites"],
     config_variables_file_path=config_file["config_variables_file_path"],
@@ -47,7 +47,7 @@ config = DataContextConfig(
 context_gx = get_context(project_config=config)
 
 expectation_suite_name = "suite_name"
-suite = context_gx.add_expectation_suite(expectation_suite_name)
+suite = context_gx.suites.add(ExpectationSuite(name=expectation_suite_name))
 batch_request = RuntimeBatchRequest(
     datasource_name="spark_s3",
     data_asset_name="datafile_name",

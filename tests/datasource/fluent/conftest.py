@@ -144,12 +144,12 @@ def inject_engine_lookup_double(
     Dynamically create a new subclass so that runtime type validation does not fail.
     """
     original_engine_override: dict[Type[Datasource], Type[ExecutionEngine]] = {}
-    for key in _SourceFactories.type_lookup.keys():
+    for key in _SourceFactories.type_lookup:
         if issubclass(type(key), Datasource):
             original_engine_override[key] = key.execution_engine_override
 
     try:
-        for source in original_engine_override.keys():
+        for source in original_engine_override:
             source.execution_engine_override = ExecutionEngineDouble
         yield ExecutionEngineDouble
     finally:
@@ -204,7 +204,7 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     """
     gx_yml = tmp_path / FileDataContext.GX_DIR / FileDataContext.GX_YML
     assert gx_yml.exists() is False
-    FileDataContext.create(tmp_path)
+    gx.get_context(mode="file", project_root_dir=tmp_path)
     assert gx_yml.exists()
 
     tmp_gx_dir = gx_yml.parent.absolute()

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from typing import TYPE_CHECKING, Dict, List, cast
 
 from marshmallow import Schema, fields, post_dump
@@ -18,13 +19,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,  # noqa: TCH001
 )
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    CheckpointConfigSchema,
-    DataContextConfigSchema,
-    DatasourceConfig,
-    DatasourceConfigSchema,
-)
+from great_expectations.data_context.types.base import DataContextConfigSchema
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -42,13 +37,12 @@ class ConfigurationBundle:
 
         self._datasources = self._get_all_datasources()
         self._expectation_suites = self._get_all_expectation_suites()
-        self._checkpoints = self._get_all_checkpoints()
 
         # Treated slightly differently as we require the keys downstream when printing migration status.  # noqa: E501
         self._validation_results = self._get_all_validation_results()
 
     @property
-    def data_context_id(self) -> str:
+    def data_context_id(self) -> uuid.UUID | None:
         return self._context_id
 
     def is_usage_stats_enabled(self) -> bool:
@@ -59,17 +53,17 @@ class ConfigurationBundle:
         Returns: Boolean of whether the usage statistics are enabled.
 
         """
-        if self._data_context_variables.anonymous_usage_statistics:
-            return self._data_context_variables.anonymous_usage_statistics.enabled
-        else:
-            return False
+        enabled = self._data_context_variables.analytics_enabled
+        if enabled is None:
+            enabled = True
+        return enabled
 
     @property
     def data_context_variables(self) -> DataContextVariables:
         return self._data_context_variables
 
     @property
-    def datasources(self) -> List[DatasourceConfig | FluentDatasource]:
+    def datasources(self) -> List[FluentDatasource]:
         return self._datasources
 
     @property
@@ -77,19 +71,15 @@ class ConfigurationBundle:
         return self._expectation_suites
 
     @property
-    def checkpoints(self) -> List[CheckpointConfig]:
-        return self._checkpoints
-
-    @property
     def validation_results(self) -> Dict[str, ExpectationSuiteValidationResult]:
         return self._validation_results
 
-    def _get_all_datasources(self) -> List[DatasourceConfig | FluentDatasource]:
+    def _get_all_datasources(self) -> List[FluentDatasource]:
         datasource_names: List[str] = list(self._context.datasources.keys())
 
         # Note: we are accessing the protected _datasource_store to not add a public property
         # to all Data Contexts.
-        datasource_configs: List[DatasourceConfig | FluentDatasource] = []
+        datasource_configs: List[FluentDatasource] = []
         for datasource_name in datasource_names:
             datasource_config = self._context._datasource_store.retrieve_by_name(
                 datasource_name=datasource_name
@@ -100,15 +90,7 @@ class ConfigurationBundle:
         return datasource_configs
 
     def _get_all_expectation_suites(self) -> List[ExpectationSuite]:
-        return [
-            self._context.suites.get(name) for name in self._context.list_expectation_suite_names()
-        ]
-
-    def _get_all_checkpoints(self) -> List[CheckpointConfig]:
-        return [
-            self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, id=None)
-            for checkpoint_name in self._context.list_checkpoints()
-        ]
+        return list(self._context.suites.all())
 
     def _get_all_validation_results(
         self,
@@ -128,16 +110,8 @@ class ConfigurationBundleSchema(Schema):
 
     data_context_id = fields.String(allow_none=False, required=True)
     data_context_variables = fields.Nested(DataContextConfigSchema, allow_none=False)
-    datasources = fields.List(
-        fields.Nested(DatasourceConfigSchema, allow_none=True, required=True),
-        required=True,
-    )
     expectation_suites = fields.List(
         fields.Nested(ExpectationSuiteSchema, allow_none=True, required=True),
-        required=True,
-    )
-    checkpoints = fields.List(
-        fields.Nested(CheckpointConfigSchema, allow_none=True, required=True),
         required=True,
     )
     validation_results = fields.Dict(

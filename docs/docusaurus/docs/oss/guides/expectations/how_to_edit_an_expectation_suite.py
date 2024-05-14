@@ -1,6 +1,7 @@
 # ruff: noqa: I001, E401, B018
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py import_expectation_configuration">
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
@@ -22,13 +23,13 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py create_validator">
-context.sources.pandas_default.read_csv(
+context.data_sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>
 
 
-my_suite = context.add_expectation_suite("my_suite")
+my_suite = context.suites.add(ExpectationSuite(name="my_suite"))
 my_suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
 my_suite.add_expectation(
     gxe.ExpectColumnValuesToBeBetween(

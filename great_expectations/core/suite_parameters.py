@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 import dateutil
 from pyparsing import (
     CaselessKeyword,
-    Combine,
     Forward,
     Group,
     Literal,
@@ -27,7 +26,6 @@ from pyparsing import (
     dictOf,
 )
 
-from great_expectations.core.urn import ge_urn
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import SuiteParameterError
 
@@ -45,7 +43,7 @@ SuiteParameterDict: TypeAlias = dict
 
 def is_suite_parameter(value: Any) -> TypeGuard[SuiteParameterDict]:
     """Typeguard to check if a value is an suite parameter."""
-    return isinstance(value, dict) and "$PARAMETER" in value.keys()
+    return isinstance(value, dict) and "$PARAMETER" in value
 
 
 def get_suite_parameter_key(suite_parameter: SuiteParameterDict) -> str:
@@ -135,11 +133,7 @@ class SuiteParameterParser:
             # or use provided pyparsing_common.number, but convert back to str:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
             fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
-            ge_urn = Combine(
-                Literal("urn:great_expectations:") + Word(alphas, f"{alphanums}_$:?=%.&")
-            )
             variable = Word(alphas, f"{alphanums}_$")
-            ident = ge_urn | variable
 
             plus, minus, mult, div = map(Literal, "+-*/")
             lpar, rpar = map(Suppress, "()")
@@ -162,20 +156,20 @@ class SuiteParameterParser:
             # add parse action that replaces the function identifier with a (name, number of args, has_fn_kwargs) tuple  # noqa: E501
             # 20211009 - JPC - Note that it's important that we consider kwarglist
             # first as part of disabling backtracking for the function's arguments
-            fn_call = (ident + lpar + rpar).setParseAction(
+            fn_call = (variable + lpar + rpar).setParseAction(
                 lambda t: t.insert(0, (t.pop(0), 0, False))
             ) | (
-                (ident + lpar - Group(expr_list) + rpar).setParseAction(
+                (variable + lpar - Group(expr_list) + rpar).setParseAction(
                     lambda t: t.insert(0, (t.pop(0), len(t[0]), False))
                 )
-                ^ (ident + lpar - Group(kwarglist) + rpar).setParseAction(
+                ^ (variable + lpar - Group(kwarglist) + rpar).setParseAction(
                     lambda t: t.insert(0, (t.pop(0), len(t[0]), True))
                 )
             )
             atom = (
                 addop[...]
                 + (
-                    (fn_call | pi | e | fnumber | ident).setParseAction(self.push_first)
+                    (fn_call | pi | e | fnumber | variable).setParseAction(self.push_first)
                     | Group(lpar + expr + rpar)
                 )
             ).setParseAction(self.push_unary_minus)
@@ -287,66 +281,7 @@ def build_suite_parameters(
 EXPR = SuiteParameterParser()
 
 
-def find_suite_parameter_dependencies(parameter_expression):  # noqa: C901
-    """Parse a parameter expression to identify dependencies including GX URNs.
-
-    Args:
-        parameter_expression: the parameter to parse
-
-    Returns:
-        a dictionary including:
-          - "urns": set of strings that are valid GX URN objects
-          - "other": set of non-GX URN strings that are required to evaluate the parameter expression
-
-    """  # noqa: E501
-    expr = SuiteParameterParser()
-
-    dependencies = {"urns": set(), "other": set()}
-    # Calling get_parser clears the stack
-    parser = expr.get_parser()
-    try:
-        _ = parser.parseString(parameter_expression, parseAll=True)
-    except ParseException as err:
-        raise SuiteParameterError(  # noqa: TRY003
-            f"Unable to parse suite parameter: {err!s} at line {err.line}, column {err.column}"
-        )
-    except AttributeError as err:
-        raise SuiteParameterError(f"Unable to parse suite parameter: {err!s}")  # noqa: TRY003
-
-    for word in expr.exprStack:
-        if isinstance(word, (int, float)):
-            continue
-
-        if not isinstance(word, str):
-            # If we have a function that itself is a tuple (e.g. (trunc, 1))
-            continue
-
-        if word in expr.opn or word in expr.fn or word == "unary -":
-            # operations and functions
-            continue
-
-        # if this is parseable as a number, then we do not include it
-        try:
-            _ = float(word)
-            continue
-        except ValueError:
-            pass
-
-        try:
-            _ = ge_urn.parseString(word)
-            dependencies["urns"].add(word)
-            continue
-        except ParseException:
-            # This particular suite_parameter or operator is not a valid URN
-            pass
-
-        # If we got this far, it's a legitimate "other" suite parameter
-        dependencies["other"].add(word)
-
-    return dependencies
-
-
-def parse_suite_parameter(  # noqa: C901, PLR0912, PLR0915
+def parse_suite_parameter(  # noqa: C901
     parameter_expression: str,
     suite_parameters: Optional[Dict[str, Any]] = None,
     data_context: Optional[AbstractDataContext] = None,
@@ -362,9 +297,7 @@ def parse_suite_parameter(  # noqa: C901, PLR0912, PLR0915
     The parser will allow arithmetic operations +, -, /, *, as well as basic functions, including trunc() and round() to
     obtain integer values when needed for certain expectations (e.g. expect_column_value_length_to_be_between).
 
-    Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$',
-    EXCEPT if they begin with the string "urn:great_expectations" in which case they may also include additional
-    characters to support inclusion of GX URLs (see :ref:`suite_parameters` for more information).
+    Valid variables must begin with an alphabetic character and may contain alphanumeric characters plus '_' and '$'.
     """  # noqa: E501
     if suite_parameters is None:
         suite_parameters = {}
@@ -379,30 +312,9 @@ def parse_suite_parameter(  # noqa: C901, PLR0912, PLR0915
     elif len(parse_results) == 1 and parse_results[0] not in suite_parameters:
         # In this special case there were no operations to find, so only one value, but we don't have something to  # noqa: E501
         # substitute for that value
-        try:
-            res = ge_urn.parseString(parse_results[0])
-            if res["urn_type"] == "stores":
-                store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
-                if store:
-                    return store.get_query_result(res["metric_name"], res.get("metric_kwargs", {}))
-                return None
-            else:
-                logger.error(
-                    "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
-                )
-                raise SuiteParameterError(  # noqa: TRY003
-                    f"No value found for $PARAMETER {parse_results[0]!s}"
-                )
-        except ParseException as e:
-            logger.debug(f"Parse exception while parsing suite parameter: {e!s}")
-            raise SuiteParameterError(  # noqa: TRY003
-                f"No value found for $PARAMETER {parse_results[0]!s}"
-            ) from e
-        except AttributeError as e:
-            logger.warning("Unable to get store for store-type valuation parameter.")
-            raise SuiteParameterError(  # noqa: TRY003
-                f"No value found for $PARAMETER {parse_results[0]!s}"
-            ) from e
+        raise SuiteParameterError(  # noqa: TRY003
+            f"No value found for $PARAMETER {parse_results[0]!s}"
+        )
 
     elif len(parse_results) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this  # noqa: E501
@@ -413,30 +325,9 @@ def parse_suite_parameter(  # noqa: C901, PLR0912, PLR0915
 
     elif len(parse_results) == 0 or parse_results[0] != "Parse Failure":
         # we have a stack to evaluate and there was no parse failure.
-        # iterate through values and look for URNs pointing to a store:
         for i, ob in enumerate(EXPR.exprStack):
             if isinstance(ob, str) and ob in suite_parameters:
                 EXPR.exprStack[i] = str(suite_parameters[ob])
-            elif isinstance(ob, str) and ob not in suite_parameters:
-                # try to retrieve this value from a store
-                try:
-                    res = ge_urn.parseString(ob)
-                    if res["urn_type"] == "stores":
-                        store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
-                        if store:
-                            EXPR.exprStack[i] = str(
-                                store.get_query_result(
-                                    res["metric_name"], res.get("metric_kwargs", {})
-                                )
-                            )  # value placed back in stack must be a string
-                    else:
-                        # handle other urn_types here, but note that validations URNs are being resolved elsewhere.  # noqa: E501
-                        pass
-                # graceful error handling for cases where the value in the stack isn't a URN:
-                except ParseException:
-                    pass
-                except AttributeError:
-                    pass
 
     else:
         err_str, err_line, err_col = parse_results[-1]

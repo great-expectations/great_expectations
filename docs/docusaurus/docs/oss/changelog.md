@@ -11,6 +11,59 @@ slug: /core/changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 1.0.0a3
+* [FEATURE] Add Regex Partitioner ([#9792](https://github.com/great-expectations/great_expectations/pull/9792))
+* [FEATURE] Fluent BatchDefinition API for Pandas Assets ([#9820](https://github.com/great-expectations/great_expectations/pull/9820))
+* [FEATURE] Add fluent-style BatchDefinition API to file-backed DataAssets ([#9823](https://github.com/great-expectations/great_expectations/pull/9823))
+* [FEATURE] BatchDefinition API for Directory DataAsset ([#9827](https://github.com/great-expectations/great_expectations/pull/9827))
+* [FEATURE] Remove [cloud] optional dependency ([#9813](https://github.com/great-expectations/great_expectations/pull/9813))
+* [BUGFIX] limit unexpected count if include_unexpected_rows is set ([#9781](https://github.com/great-expectations/great_expectations/pull/9781))
+* [BUGFIX] Pass in partitioner + batching_regex when creating batch_def… ([#9798](https://github.com/great-expectations/great_expectations/pull/9798))
+* [BUGFIX] Do not persist interactive batch defs ([#9816](https://github.com/great-expectations/great_expectations/pull/9816))
+* [BUGFIX] `scrapy` compatibility - handle `dir()` inconsistencies (#9830) ([#9831](https://github.com/great-expectations/great_expectations/pull/9831))
+* [DOCS] Link Fix ([#9772](https://github.com/great-expectations/great_expectations/pull/9772))
+* [DOCS] Adds clarification of `discard_failed_expectations` to 0.18.x OSS quickstart ([#9782](https://github.com/great-expectations/great_expectations/pull/9782))
+* [DOCS] Remove Feedback Widget from Landing Pages ([#9780](https://github.com/great-expectations/great_expectations/pull/9780))
+* [DOCS] Learn TOC Updates ([#9784](https://github.com/great-expectations/great_expectations/pull/9784))
+* [DOCS] Update About GX Cloud ([#9751](https://github.com/great-expectations/great_expectations/pull/9751))
+* [DOCS] Update Docs for GX-Agent Versioning ([#9783](https://github.com/great-expectations/great_expectations/pull/9783))
+* [DOCS] Add GX Cloud Logs Content ([#9766](https://github.com/great-expectations/great_expectations/pull/9766))
+* [DOCS] Update agent deploy docs to specify imagePullPolicy of Always ([#9805](https://github.com/great-expectations/great_expectations/pull/9805))
+* [DOCS] Updates to how to get support ([#9809](https://github.com/great-expectations/great_expectations/pull/9809))
+* [DOCS] Update docs for Agent Active icon ([#9808](https://github.com/great-expectations/great_expectations/pull/9808))
+* [DOCS] More updates to the how to get support page ([#9818](https://github.com/great-expectations/great_expectations/pull/9818))
+* [MAINTENANCE] Update codecov so PRs start passing. ([#9764](https://github.com/great-expectations/great_expectations/pull/9764))
+* [MAINTENANCE] Make CheckpointAction Annotated ([#9761](https://github.com/great-expectations/great_expectations/pull/9761))
+* [MAINTENANCE] Rename validations -> validation_results ([#9774](https://github.com/great-expectations/great_expectations/pull/9774))
+* [MAINTENANCE] Convert QuantileRange from TypedDict to BaseModel ([#9767](https://github.com/great-expectations/great_expectations/pull/9767))
+* [MAINTENANCE] Remove add_sorters methods ([#9773](https://github.com/great-expectations/great_expectations/pull/9773))
+* [MAINTENANCE] Clean up legacy checkpoint tests and components ([#9749](https://github.com/great-expectations/great_expectations/pull/9749))
+* [MAINTENANCE] Generic type for Partitioner ([#9785](https://github.com/great-expectations/great_expectations/pull/9785))
+* [MAINTENANCE] Retire ColumnDescriptiveMetrics - Develop ([#9790](https://github.com/great-expectations/great_expectations/pull/9790))
+* [MAINTENANCE] Integration tests around SQL validation workflows ([#9788](https://github.com/great-expectations/great_expectations/pull/9788))
+* [MAINTENANCE] Remove Spark Partitioners ([#9796](https://github.com/great-expectations/great_expectations/pull/9796))
+* [MAINTENANCE] Make codecov informational ([#9797](https://github.com/great-expectations/great_expectations/pull/9797))
+* [MAINTENANCE] Delete legacy checkpoint ([#9791](https://github.com/great-expectations/great_expectations/pull/9791))
+* [MAINTENANCE] Add unexpected rows expectation code snippet for docs ([#9800](https://github.com/great-expectations/great_expectations/pull/9800))
+* [MAINTENANCE] Turn on numpy 2 prerelease tests. ([#9707](https://github.com/great-expectations/great_expectations/pull/9707))
+* [MAINTENANCE] Promote V1 Checkpoint objects ([#9803](https://github.com/great-expectations/great_expectations/pull/9803))
+* [MAINTENANCE] Remove `include_rendered_content` flag ([#9807](https://github.com/great-expectations/great_expectations/pull/9807))
+* [MAINTENANCE] Remove gallery build pipeline ([#9777](https://github.com/great-expectations/great_expectations/pull/9777))
+* [MAINTENANCE] Add script to generate public api list. ([#9712](https://github.com/great-expectations/great_expectations/pull/9712))
+* [MAINTENANCE] Bring back sql_datasource integration tests for backend… ([#9812](https://github.com/great-expectations/great_expectations/pull/9812))
+* [MAINTENANCE] Ensure that V1 Validator works with Cloud rendered content ([#9810](https://github.com/great-expectations/great_expectations/pull/9810))
+* [MAINTENANCE] Remove xfail from checkpoint and data docs integration tests ([#9811](https://github.com/great-expectations/great_expectations/pull/9811))
+* [MAINTENANCE] Enable SIM103 ([#9801](https://github.com/great-expectations/great_expectations/pull/9801))
+* [MAINTENANCE] Prework for implementing fluent batch definition api for file path assets ([#9817](https://github.com/great-expectations/great_expectations/pull/9817))
+* [MAINTENANCE] Enable SIM118 ([#9819](https://github.com/great-expectations/great_expectations/pull/9819))
+* [MAINTENANCE] Delete legacy checkpoint config and result ([#9824](https://github.com/great-expectations/great_expectations/pull/9824))
+* [MAINTENANCE] Rename `sources` to `data_sources` ([#9825](https://github.com/great-expectations/great_expectations/pull/9825))
+* [MAINTENANCE] Update Pandas DataAsset type ([#9826](https://github.com/great-expectations/great_expectations/pull/9826))
+* [MAINTENANCE] file system integration tests ([#9793](https://github.com/great-expectations/great_expectations/pull/9793))
+* [MAINTENANCE] Update Pandas Types ([#9828](https://github.com/great-expectations/great_expectations/pull/9828))
+* [MAINTENANCE] Backfill checkpoint ID/PK integration tests ([#9821](https://github.com/great-expectations/great_expectations/pull/9821))
+* [MAINTENANCE] SQL backend integration tests ([#9822](https://github.com/great-expectations/great_expectations/pull/9822))
+
 ### 1.0.0a2
 * [FEATURE] `TableAsset.test_connection()` should fail if table is not queryable. (#9198) ([#9475](https://github.com/great-expectations/great_expectations/pull/9475))
 * [FEATURE] Add backend-agnostic partitioners ([#9460](https://github.com/great-expectations/great_expectations/pull/9460))
@@ -372,6 +425,26 @@ slug: /core/changelog
 * [MAINTENANCE] Add Pandas/SQLAlchemy warning to ignores list to unblock V1 prerelease ([#9453](https://github.com/great-expectations/great_expectations/pull/9453))
 * [MAINTENANCE] Only do docs checks and build on develop. ([#9454](https://github.com/great-expectations/great_expectations/pull/9454))
 * [MAINTENANCE] Ignore pandas `DeprecationWarning` for legacy `PandasDataset` ([#9472](https://github.com/great-expectations/great_expectations/pull/9472))
+
+### 0.18.13
+* [FEATURE] Remove [cloud] optional dependency ([#9814](https://github.com/great-expectations/great_expectations/pull/9814))
+* [BUGFIX] `scrapy` compatibility - handle `dir()` inconsistencies ([#9830](https://github.com/great-expectations/great_expectations/pull/9830))
+* [MAINTENANCE] Export `great_expectations.data_context` types ([#9738](https://github.com/great-expectations/great_expectations/pull/9738))
+* [MAINTENANCE] Retire ColumnDescriptiveMetrics - 0.18 ([#9789](https://github.com/great-expectations/great_expectations/pull/9789))
+
+### 0.18.12
+* [FEATURE] MetricListMetricRetriever - 0.18.x ([#9615](https://github.com/great-expectations/great_expectations/pull/9615))
+* [MAINTENANCE] TableMetrics - BatchInspector updates (0.18.x) ([#9630](https://github.com/great-expectations/great_expectations/pull/9630))
+
+### 0.18.11
+* [FEATURE] (0.18.x) Don't break context for invalid datasource configs ([#9596](https://github.com/great-expectations/great_expectations/pull/9596))
+* [MAINTENANCE] Update incorrect contract tests ([#9543](https://github.com/great-expectations/great_expectations/pull/9543))
+* [MAINTENANCE] Update referential integrity test so DB is only created once - `0.18` ([#9545](https://github.com/great-expectations/great_expectations/pull/9545))
+* [MAINTENANCE] CDMs - Metrics as ENUM - 0.18 ([#9572](https://github.com/great-expectations/great_expectations/pull/9572))
+* [MAINTENANCE] Refactor `ColumnDescriptiveMetricsMetricRetriever` to parent class (0.18.x) ([#9612](https://github.com/great-expectations/great_expectations/pull/9612))
+
+### 0.18.10
+* [BUGFIX] - Prevent duplicate Expectations in Validation Results ([#9533](https://github.com/great-expectations/great_expectations/pull/9533))
 
 ### 0.18.9
 * [BUGFIX] Re-enable GCS Docs Integration test ([#9237](https://github.com/great-expectations/great_expectations/pull/9237))

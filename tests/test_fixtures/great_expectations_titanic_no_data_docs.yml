@@ -1,18 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
 config_version: 3
-datasources:
-  # For example, this one.
-  mydatasource:
-    class_name: PandasDatasource
-    data_asset_type:
-      module_name: great_expectations.dataset
-      class_name: PandasDataset
-    batch_kwargs_generators:
-      # The name default is read if no datasource or generator is specified
-      mygenerator:
-        class_name: SubdirReaderBatchKwargsGenerator
-        base_directory: ../data
 plugins_directory: plugins/
 
 suite_parameter_store_name: suite_parameter_store
@@ -42,15 +30,5 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: checkpoints/
-
-validation_operators:
-  # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html
-  action_list_operator:
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          target_store_name: validation_results_store
 
 data_docs_sites:

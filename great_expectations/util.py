@@ -294,10 +294,7 @@ def load_class(class_name: str, module_name: str) -> type:
     return klass_
 
 
-def build_in_memory_runtime_context(
-    include_pandas: bool = True,
-    include_spark: bool = True,
-) -> AbstractDataContext:
+def build_in_memory_runtime_context() -> AbstractDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
 
@@ -310,46 +307,7 @@ def build_in_memory_runtime_context(
         InMemoryStoreBackendDefaults,
     )
 
-    datasources = {}
-    if include_pandas:
-        datasources["pandas_datasource"] = {
-            "execution_engine": {
-                "class_name": "PandasExecutionEngine",
-                "module_name": "great_expectations.execution_engine",
-            },
-            "class_name": "Datasource",
-            "module_name": "great_expectations.datasource",
-            "data_connectors": {
-                "runtime_data_connector": {
-                    "class_name": "RuntimeDataConnector",
-                    "batch_identifiers": [
-                        "id_key_0",
-                        "id_key_1",
-                    ],
-                }
-            },
-        }
-    if include_spark:
-        datasources["spark_datasource"] = {
-            "execution_engine": {
-                "class_name": "SparkDFExecutionEngine",
-                "module_name": "great_expectations.execution_engine",
-            },
-            "class_name": "Datasource",
-            "module_name": "great_expectations.datasource",
-            "data_connectors": {
-                "runtime_data_connector": {
-                    "class_name": "RuntimeDataConnector",
-                    "batch_identifiers": [
-                        "id_key_0",
-                        "id_key_1",
-                    ],
-                }
-            },
-        }
-
     data_context_config: DataContextConfig = DataContextConfig(
-        datasources=datasources,  # type: ignore[arg-type]
         expectations_store_name="expectations_store",
         validation_results_store_name="validation_results_store",
         suite_parameter_store_name="suite_parameter_store",
@@ -715,10 +673,7 @@ def _is_to_be_removed_from_deep_filter_properties_iterable(
 
 def is_truthy(value: Any) -> bool:
     try:
-        if value:
-            return True
-        else:
-            return False
+        return bool(value)
     except ValueError:
         return False
 

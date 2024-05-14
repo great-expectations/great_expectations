@@ -7,7 +7,8 @@ from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
+from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
@@ -16,9 +17,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
-)
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
 )
 
 logger: Logger

@@ -12,8 +12,7 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
@@ -46,13 +45,13 @@ def datasource(
     """Test Adding and Updating the Datasource associated with this module.
     Note: There is no need to test Get or Delete Datasource.
     Those assertions can be found in the datasource_name fixture."""
-    datasource = context.sources.add_pandas(
+    datasource = context.data_sources.add_pandas(
         name=datasource_name,
     )
     assert datasource.name == datasource_name
     new_datasource_name = f"ds{uuid.uuid4().hex}"
     datasource.name = new_datasource_name
-    datasource = context.sources.add_or_update_pandas(
+    datasource = context.data_sources.add_or_update_pandas(
         datasource=datasource,
     )
     assert (

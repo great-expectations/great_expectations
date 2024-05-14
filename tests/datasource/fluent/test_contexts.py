@@ -14,7 +14,7 @@ import pytest
 import requests
 
 from great_expectations import get_context
-from great_expectations.core.partitioners import PartitionerYear
+from great_expectations.core.partitioners import ColumnPartitionerYearly
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent import (
@@ -66,7 +66,7 @@ def test_add_fluent_datasource_are_persisted(
 
     datasource_name = "save_ds_test"
 
-    datasource = context.sources.add_sqlite(
+    datasource = context.data_sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
     )
 
@@ -86,7 +86,7 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     context = empty_file_context
     datasource_name = "save_ds_test"
 
-    context.sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{db_file}")
+    context.data_sources.add_sqlite(name=datasource_name, connection_string=f"sqlite:///{db_file}")
 
     yaml_path = pathlib.Path(context.root_directory, context.GX_YML)
     assert yaml_path.exists()
@@ -94,7 +94,6 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     yaml_dict: dict = yaml.load(yaml_path.read_text())
     print(pf(yaml_dict, depth=2))
     assert datasource_name in yaml_dict["fluent_datasources"]
-    assert datasource_name not in yaml_dict["datasources"]
 
 
 @pytest.mark.cloud
@@ -106,12 +105,12 @@ def test_partitioners_are_persisted_on_creation(
     context = empty_cloud_context_fluent
 
     datasource_name = "save_ds_partitioners_test"
-    datasource = context.sources.add_sqlite(
+    datasource = context.data_sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
     )
     my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
     my_asset.test_connection()
-    partitioner = PartitionerYear(column_name="date")
+    partitioner = ColumnPartitionerYearly(column_name="date")
     my_asset.add_batch_definition(name="cloud partitioner test", partitioner=partitioner)
 
     datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"]["attributes"][
@@ -137,7 +136,7 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     datasource_name = "my_datasource"
     asset_name = "my_asset"
 
-    context.sources.add_sqlite(
+    context.data_sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
     ).add_query_asset(asset_name, query='SELECT name FROM sqlite_master WHERE type = "table"')
 
@@ -193,7 +192,7 @@ def test_context_add_or_update_datasource(
 ):
     context = empty_contexts
 
-    datasource = context.sources.add_pandas_filesystem(
+    datasource = context.data_sources.add_pandas_filesystem(
         name="save_ds_test", base_directory=taxi_data_samples_dir
     )
     datasource.add_csv_asset(
@@ -220,7 +219,7 @@ def test_context_add_or_update_datasource(
         assert response.json()["data"]["attributes"]["datasource_config"].get("assets")
 
     # add_or_update should be idempotent
-    datasource = context.sources.add_or_update_pandas_filesystem(
+    datasource = context.data_sources.add_or_update_pandas_filesystem(
         name="save_ds_test", base_directory=taxi_data_samples_dir
     )
 
@@ -233,17 +232,17 @@ def test_cloud_add_or_update_datasource_kw_vs_positional(
 ):
     name: str = "kw_vs_positional_test"
 
-    datasource1 = empty_cloud_context_fluent.sources.add_pandas_filesystem(
+    datasource1 = empty_cloud_context_fluent.data_sources.add_pandas_filesystem(
         name=name, base_directory=taxi_data_samples_dir
     )
 
     # pass name as keyword arg
-    datasource2 = empty_cloud_context_fluent.sources.add_or_update_pandas_filesystem(
+    datasource2 = empty_cloud_context_fluent.data_sources.add_or_update_pandas_filesystem(
         name=name, base_directory=taxi_data_samples_dir
     )
 
     # pass name as positional arg
-    datasource3 = empty_cloud_context_fluent.sources.add_or_update_pandas_filesystem(
+    datasource3 = empty_cloud_context_fluent.data_sources.add_or_update_pandas_filesystem(
         name, base_directory=taxi_data_samples_dir
     )
 
@@ -259,12 +258,12 @@ def test_context_add_and_then_update_datasource(
 ):
     context = empty_contexts
 
-    datasource1 = context.sources.add_pandas_filesystem(
+    datasource1 = context.data_sources.add_pandas_filesystem(
         name="update_ds_test", base_directory=taxi_data_samples_dir
     )
 
     # add_or_update should be idempotent
-    datasource2 = context.sources.update_pandas_filesystem(
+    datasource2 = context.data_sources.update_pandas_filesystem(
         name="update_ds_test", base_directory=taxi_data_samples_dir
     )
 
@@ -272,7 +271,7 @@ def test_context_add_and_then_update_datasource(
 
     # modify a field
     datasource2.base_directory = pathlib.Path(__file__)
-    datasource3 = context.sources.update_pandas_filesystem(datasource2)
+    datasource3 = context.data_sources.update_pandas_filesystem(datasource2)
 
     assert datasource1 != datasource3
     assert datasource2 == datasource3
@@ -288,7 +287,7 @@ def test_update_non_existant_datasource(
     context = empty_contexts
 
     with pytest.raises(ValueError, match="I_DONT_EXIST"):
-        context.sources.update_pandas_filesystem(
+        context.data_sources.update_pandas_filesystem(
             name="I_DONT_EXIST", base_directory=taxi_data_samples_dir
         )
 
@@ -301,7 +300,7 @@ def test_cloud_context_delete_datasource(
 ):
     context = empty_cloud_context_fluent
 
-    datasource = context.sources.add_pandas_filesystem(
+    datasource = context.data_sources.add_pandas_filesystem(
         name="delete_ds_test", base_directory=taxi_data_samples_dir
     )
 
@@ -312,7 +311,7 @@ def test_cloud_context_delete_datasource(
     print(f"Before Delete -> {response1}\n{pf(response1.json())}\n")
     assert response1.status_code == 200
 
-    context.sources.delete(datasource.name)
+    context.data_sources.delete(datasource.name)
     assert datasource.name not in context.fluent_datasources
 
     cloud_api_fake.assert_call_count(
@@ -464,9 +463,9 @@ class TestPandasDefaultWithCloud:
         context = empty_cloud_context_fluent
         df = pd.DataFrame.from_dict({"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]})
 
-        context.sources.pandas_default.read_dataframe(df)
+        context.data_sources.pandas_default.read_dataframe(df)
 
-        pandas_default_id = context.sources.pandas_default.id
+        pandas_default_id = context.data_sources.pandas_default.id
         assert pandas_default_id
 
         assert verify_asset_names_mock.assert_call_count(

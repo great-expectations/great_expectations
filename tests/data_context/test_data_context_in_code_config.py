@@ -1,3 +1,4 @@
+import uuid
 from typing import Dict, Optional, Set
 
 import boto3
@@ -8,9 +9,6 @@ from moto import mock_s3
 from great_expectations.data_context import get_context
 from great_expectations.data_context.store import StoreBackend, TupleS3StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
-from tests.data_context.conftest import (
-    USAGE_STATISTICS_QA_URL,
-)
 
 
 def build_in_code_data_context_project_config(
@@ -60,17 +58,6 @@ def build_in_code_data_context_project_config(
         config_version=2,
         plugins_directory=None,
         config_variables_file_path=None,
-        datasources={
-            "my_datasource_name": {
-                "class_name": "Datasource",
-                "data_connectors": {},
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "module_name": "great_expectations.datasource",
-            }
-        },
         stores=stores,
         checkpoint_store_name="checkpoint_store",
         expectations_store_name="expectations_S3_store",
@@ -89,31 +76,11 @@ def build_in_code_data_context_project_config(
                 },
             }
         },
-        validation_operators={
-            "action_list_operator": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {"class_name": "StoreValidationResultAction"},
-                    },
-                    {
-                        "name": "update_data_docs",
-                        "action": {"class_name": "UpdateDataDocsAction"},
-                    },
-                ],
-            }
-        },
-        anonymous_usage_statistics={
-            "enabled": True,
-            # NOTE: No data_context_id set here
-            "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-        },
     )
     return project_config
 
 
-def get_store_backend_id_from_s3(bucket: str, prefix: str, key: str) -> str:
+def get_store_backend_id_from_s3(bucket: str, prefix: str, key: str) -> uuid.UUID:
     """
     Return the UUID store_backend_id from a given s3 file
     Args:
@@ -133,7 +100,7 @@ def get_store_backend_id_from_s3(bucket: str, prefix: str, key: str) -> str:
     parsed_store_backend_id = store_backend_id_file_parser.parseString(
         ge_store_backend_id_file_contents
     )
-    return parsed_store_backend_id[1]
+    return uuid.UUID(parsed_store_backend_id[1])
 
 
 def list_s3_bucket_contents(bucket: str, prefix: str) -> Set[str]:
@@ -190,7 +157,7 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
         prefix=expectations_store_prefix,
     )
     # Make sure store_backend_id is not the error string
-    store_error_uuid = "00000000-0000-0000-0000-00000000e003"
+    store_error_uuid = uuid.UUID("00000000-0000-0000-0000-00000000e003")
     s3_expectations_store_backend_id = s3_expectations_store_backend.store_backend_id
     assert s3_expectations_store_backend_id != store_error_uuid
 
@@ -258,13 +225,11 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     when instantiating the DataContext,
     and also that this data_context_id is used to configure the expectations_store.store_backend_id
     """
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)  # Undo the project-wide test default
-
     bucket = "leakybucket"
     expectations_store_prefix = "expectations_store_prefix"
     validation_results_store_prefix = "validation_results_store_prefix"
     data_docs_store_prefix = "data_docs_store_prefix"
-    manually_created_uuid = "00000000-0000-0000-0000-000000000eee"
+    manually_created_uuid = uuid.UUID("00000000-0000-0000-0000-000000000eee")
 
     # Create a bucket in Moto's mock AWS environment
     conn = boto3.resource("s3", region_name="us-east-1")
@@ -278,57 +243,7 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
         data_docs_store_prefix=data_docs_store_prefix,
     )
     # Manually set the data_context_id in the project_config
-    in_code_data_context_project_config.anonymous_usage_statistics.data_context_id = (
-        manually_created_uuid
-    )
-    in_code_data_context = get_context(project_config=in_code_data_context_project_config)
-
-    # Make sure the manually set data_context_id is propagated to all the appropriate places
-    assert (
-        manually_created_uuid
-        == in_code_data_context.data_context_id
-        == in_code_data_context.stores[
-            in_code_data_context.expectations_store_name
-        ].store_backend_id
-    )
-
-
-@pytest.mark.aws_deps
-@mock_s3
-def test_DataContext_construct_data_context_id_uses_id_stored_in_env_var_GE_DATA_CONTEXT_ID_if_no_configured_expectations_store(  # noqa: E501
-    monkeypatch,
-    aws_credentials,
-):
-    """
-    What does this test and why?
-
-    A DataContext should have an id. This ID should come from either:
-    1. configured expectations store store_backend_id
-    2. great_expectations.yml
-    3. new generated id from DataContextConfig
-    This test verifies that DataContext._construct_data_context_id
-    uses the store_backend_id from the env variable GE_DATA_CONTEXT_ID
-    when there is no configured expectations store
-    when instantiating the DataContext
-    """
-    bucket = "leakybucket"
-    expectations_store_prefix = "expectations_store_prefix"
-    validation_results_store_prefix = "validation_results_store_prefix"
-    data_docs_store_prefix = "data_docs_store_prefix"
-    manually_created_uuid = "00000000-0000-0000-0000-000000000fff"
-    monkeypatch.setenv("GE_DATA_CONTEXT_ID", manually_created_uuid)
-
-    # Create a bucket in Moto's mock AWS environment
-    conn = boto3.resource("s3", region_name="us-east-1")
-    conn.create_bucket(Bucket=bucket)
-
-    # Create a DataContext (note NO existing expectations store already set up)
-    in_code_data_context_project_config = build_in_code_data_context_project_config(
-        bucket="leakybucket",
-        expectations_store_prefix=expectations_store_prefix,
-        validation_results_store_prefix=validation_results_store_prefix,
-        data_docs_store_prefix=data_docs_store_prefix,
-    )
+    in_code_data_context_project_config.data_context_id = manually_created_uuid
     in_code_data_context = get_context(project_config=in_code_data_context_project_config)
 
     # Make sure the manually set data_context_id is propagated to all the appropriate places

@@ -16,6 +16,7 @@ import shutil
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py import_gx">
 import great_expectations as gx
 import great_expectations.expectations as gxe
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 # </snippet>
 
@@ -43,7 +44,7 @@ shutil.copy(sqlite_database_path, "yellow_tripdata.db")
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py connect_to_data">
 # curl https://raw.githubusercontent.com/great-expectations/great_expectations/develop/tests/test_sets/quickstart/yellow_tripdata.db > yellow_tripdata.db
 connection_string = "sqlite:///yellow_tripdata.db"
-batch = context.sources.pandas_default.read_sql(
+batch = context.data_sources.pandas_default.read_sql(
     "SELECT * FROM yellow_tripdata_sample_2022_01", connection_string
 )
 # </snippet>
@@ -65,7 +66,7 @@ assert result.success is False
 expectation.mostly = 0.95
 result = batch.validate(expectation)
 
-suite = context.add_expectation_suite("quickstart")
+suite = context.suites.add(ExpectationSuite(name="quickstart"))
 suite.add_expectation(expectation)
 suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="trip_distance"))
 # </snippet>

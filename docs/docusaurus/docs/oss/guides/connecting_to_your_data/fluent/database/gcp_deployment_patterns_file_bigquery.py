@@ -2,10 +2,12 @@ import os
 import pathlib
 import tempfile
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.exceptions.exceptions import DataContextError
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -14,7 +16,7 @@ yaml: YAMLHandler = YAMLHandler()
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py get_context">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context(mode="file", project_root_dir=full_path_to_project_directory)
 # </snippet>
 
 # NOTE: The following code is only for testing and depends on an environment
@@ -39,7 +41,6 @@ pop_stores = [
     "checkpoint_store",
     "suite_parameter_store",
     "validation_results_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -124,7 +125,6 @@ pop_stores = [
     "suite_parameter_store",
     "expectations_store",
     "expectations_GCS_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -234,14 +234,14 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 CONNECTION_STRING = f"bigquery://{GCP_PROJECT_NAME}/{BIGQUERY_DATASET}"
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource">
-datasource = context.sources.add_or_update_sql(
+datasource = context.data_sources.add_or_update_sql(
     name="my_bigquery_datasource",
     connection_string="bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
 )
 # </snippet>
 
 # For tests, we are replacing the `connection_string`
-datasource = context.sources.add_or_update_sql(
+datasource = context.data_sources.add_or_update_sql(
     name="my_bigquery_datasource", connection_string=CONNECTION_STRING
 )
 
@@ -261,7 +261,10 @@ request = table_asset.build_batch_request()
 
 
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite">
-context.add_or_update_expectation_suite(expectation_suite_name="test_bigquery_suite")
+try:
+    context.suites.add(ExpectationSuite(name="test_bigquery_suite"))
+except DataContextError:
+    ...
 
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_bigquery_suite"
@@ -274,21 +277,3 @@ validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
 # </snippet>
-
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py save_expectation_suite">
-validator.save_expectation_suite(discard_failed_expectations=False)
-# </snippet>
-
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py checkpoint">
-checkpoint = context.add_or_update_checkpoint(
-    name="bigquery_checkpoint",
-    validations=[
-        {"batch_request": request, "expectation_suite_name": "test_bigquery_suite"}
-    ],
-)
-# </snippet>
-
-# <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_bigquery.py run_checkpoint">
-checkpoint_result = checkpoint.run()
-# </snippet>
-assert checkpoint_result.success is True

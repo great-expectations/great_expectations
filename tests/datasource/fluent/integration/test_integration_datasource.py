@@ -10,19 +10,17 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.compatibility import pydantic
 from great_expectations.core.partitioners import (
+    ColumnPartitionerDaily,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerYearly,
     PartitionerColumnValue,
     PartitionerConvertedDatetime,
     PartitionerDatetimePart,
     PartitionerDividedInteger,
     PartitionerModInteger,
     PartitionerMultiColumnValue,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
 )
 from great_expectations.data_context import (
     AbstractDataContext,
@@ -59,14 +57,11 @@ if TYPE_CHECKING:
 
 
 # This is marked by the various backend used in testing in the datasource_test_data fixture.
-@pytest.mark.parametrize("include_rendered_content", [False, True])
 def test_run_checkpoint_and_data_doc(
     datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
-    include_rendered_content: bool,
 ):
     run_checkpoint_and_data_doc(
         datasource_test_data=datasource_test_data,
-        include_rendered_content=include_rendered_content,
     )
 
 
@@ -121,7 +116,7 @@ class TestQueryAssets:
         validator = context.get_validator(
             batch_request=asset.build_batch_request(
                 options={"year": 2019},
-                partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
+                partitioner=ColumnPartitionerMonthly(column_name="pickup_datetime"),
             )
         )
         result = validator.expect_column_distinct_values_to_equal_set(
@@ -224,7 +219,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata_sample_2020_all_months_combined.db",
             "yellow_tripdata_sample_2020",
-            PartitionerYear,
+            ColumnPartitionerYearly,
             {"column_name": "pickup_datetime"},
             1,
             {"year": 2020},
@@ -235,7 +230,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata_sample_2020_all_months_combined.db",
             "yellow_tripdata_sample_2020",
-            PartitionerYearAndMonth,
+            ColumnPartitionerMonthly,
             {"column_name": "pickup_datetime"},
             12,
             {"year": 2020, "month": 6},
@@ -246,7 +241,7 @@ def test_filesystem_data_asset_batching_regex(
         pytest.param(
             "yellow_tripdata.db",
             "yellow_tripdata_sample_2019_02",
-            PartitionerYearAndMonthAndDay,
+            ColumnPartitionerDaily,
             {"column_name": "pickup_datetime"},
             28,
             {"year": 2019, "month": 2, "day": 10},
@@ -440,7 +435,7 @@ def test_success_with_partitioners_from_batch_definitions(
     )
     batch_definition = asset.add_batch_definition(
         name="whatevs",
-        partitioner=PartitionerYearAndMonth(column_name="pickup_datetime"),
+        partitioner=ColumnPartitionerMonthly(column_name="pickup_datetime"),
     )
     validator = Validator(
         batch_definition=batch_definition,
@@ -448,84 +443,6 @@ def test_success_with_partitioners_from_batch_definitions(
     )
     result = validator.validate_expectation(gxe.ExpectTableRowCountToEqual(value=expected))
     assert result.success
-
-
-# This is marked by the various backend used in testing in the datasource_test_data fixture.
-def test_simple_checkpoint_run(
-    datasource_test_data: tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest],
-):
-    context, _datasource, _data_asset, batch_request = datasource_test_data
-    expectation_suite_name = "my_expectation_suite"
-    context.add_expectation_suite(expectation_suite_name)
-
-    checkpoint = Checkpoint(
-        "my_checkpoint",
-        data_context=context,
-        expectation_suite_name=expectation_suite_name,
-        batch_request=batch_request,
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-        ],
-    )
-    result = checkpoint.run()
-    assert result["success"]
-
-    checkpoint = Checkpoint(
-        "my_checkpoint",
-        data_context=context,
-        validations=[
-            {
-                "expectation_suite_name": expectation_suite_name,
-                "batch_request": batch_request,
-            }
-        ],
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-        ],
-    )
-    result = checkpoint.run()
-    assert result["success"]
-
-
-@pytest.mark.filesystem
-def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
-    context = empty_data_context
-    path = pathlib.Path(
-        __file__,
-        "..",
-        "..",
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-    ).resolve(strict=True)
-    datasource = context.sources.add_pandas_filesystem(name="name", base_directory=path)
-    data_asset = datasource.add_csv_asset(name="csv_asset")
-    batch_request = data_asset.build_batch_request(
-        {"path": pathlib.Path("yellow_tripdata_sample_2019-02.csv")}
-    )
-    expectation_suite_name = "my_expectation_suite"
-    context.add_expectation_suite(expectation_suite_name)
-    checkpoint = Checkpoint(
-        "my_checkpoint",
-        data_context=context,
-        expectation_suite_name=expectation_suite_name,
-        batch_request=batch_request,
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-        ],
-    )
-    result = checkpoint.run()
-    assert result["success"]
 
 
 @pytest.mark.parametrize(
@@ -553,7 +470,7 @@ def test_asset_specified_metadata(empty_data_context, add_asset_method, add_asse
         batch_metadata=asset_specified_metadata,
         **add_asset_kwarg,
     )
-    partitioner = PartitionerYearAndMonth(column_name="pickup_datetime")
+    partitioner = ColumnPartitionerMonthly(column_name="pickup_datetime")
     # Test getting all batches
     batches = asset.get_batch_list_from_batch_request(
         asset.build_batch_request(partitioner=partitioner)
@@ -610,7 +527,7 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
 
     context = empty_cloud_context_fluent
 
-    dataframe_asset: PandasDataFrameAsset = context.sources.add_or_update_pandas(
+    dataframe_asset: PandasDataFrameAsset = context.data_sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
@@ -625,15 +542,15 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
 
     context = empty_file_context
 
-    datasource = context.sources.add_or_update_pandas(name="fluent_pandas_datasource")
+    datasource = context.data_sources.add_or_update_pandas(name="fluent_pandas_datasource")
     dataframe_asset: PandasDataFrameAsset = datasource.add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
     assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
-    dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
-        datasource_name="fluent_pandas_datasource"
-    ).get_asset(asset_name="my_df_asset")
+    dataframe_asset = context.get_datasource(datasource_name="fluent_pandas_datasource").get_asset(
+        asset_name="my_df_asset"
+    )
     _ = dataframe_asset.build_batch_request(dataframe=df)
     assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined] # _PandasDataFrameT
 
@@ -650,7 +567,7 @@ def test_spark_data_adding_dataframe_in_cloud_context(
 
     context = empty_cloud_context_fluent
 
-    dataframe_asset: SparkDataFrameAsset = context.sources.add_or_update_spark(
+    dataframe_asset: SparkDataFrameAsset = context.data_sources.add_or_update_spark(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
@@ -668,20 +585,20 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
 
     context = empty_file_context
 
-    dataframe_asset: SparkDataFrameAsset = context.sources.add_or_update_spark(
+    dataframe_asset: SparkDataFrameAsset = context.data_sources.add_or_update_spark(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
     assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
-    datasource = context.sources.add_or_update_spark(name="fluent_pandas_datasource")
+    datasource = context.data_sources.add_or_update_spark(name="fluent_pandas_datasource")
     dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
     assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
-    dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
-        datasource_name="fluent_pandas_datasource"
-    ).get_asset(asset_name="my_df_asset")
+    dataframe_asset = context.get_datasource(datasource_name="fluent_pandas_datasource").get_asset(
+        asset_name="my_df_asset"
+    )
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
     assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]

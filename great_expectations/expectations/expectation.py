@@ -338,7 +338,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         expectation_type: str = camel_to_snake(cls.__name__)
 
         for candidate_renderer_fn_name in dir(cls):
-            attr_obj: Callable = getattr(cls, candidate_renderer_fn_name)
+            attr_obj: Callable | None = getattr(cls, candidate_renderer_fn_name, None)
+            # attrs are not guaranteed to exist https://docs.python.org/3.10/library/functions.html#dir
+            if attr_obj is None:
+                continue
             if not hasattr(attr_obj, "_renderer_type"):
                 continue
             register_renderer(object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj)
@@ -2552,6 +2555,11 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         return_obj["result"]["unexpected_percent_nonmissing"] = unexpected_percent_nonmissing
 
     if result_format["include_unexpected_rows"]:
+        if unexpected_rows is not None:
+            if isinstance(unexpected_rows, pd.DataFrame):
+                unexpected_rows = unexpected_rows.head(result_format["partial_unexpected_count"])
+            elif isinstance(unexpected_rows, list):
+                unexpected_rows = unexpected_rows[: result_format["partial_unexpected_count"]]
         return_obj["result"].update(
             {
                 "unexpected_rows": unexpected_rows,
@@ -2575,7 +2583,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     # Try to return the most common values, if possible.
     partial_unexpected_count: Optional[int] = result_format.get("partial_unexpected_count")
     partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
-    if partial_unexpected_count is not None and 0 < partial_unexpected_count:
+    if partial_unexpected_count is not None and partial_unexpected_count > 0:
         try:
             if not exclude_unexpected_values:
                 partial_unexpected_counts = [

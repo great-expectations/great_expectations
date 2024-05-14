@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import re
 from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar
 
 from great_expectations.compatibility import pydantic
 
 # if we move this import into the TYPE_CHECKING block, we need to provide the
 # Partitioner class when we update forward refs, so we just import here.
-from great_expectations.core.partitioners import Partitioner
+from great_expectations.core.partitioners import ColumnPartitioner, FileNamePartitioner
 from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
 
 if TYPE_CHECKING:
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
 
 # Depending on the Asset
-PartitionerT = TypeVar("PartitionerT", Partitioner, None)
+PartitionerT = TypeVar("PartitionerT", ColumnPartitioner, FileNamePartitioner, None)
 
 
 class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
@@ -30,7 +29,6 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
     id: Optional[str] = None
     name: str
     partitioner: Optional[PartitionerT] = None
-    batching_regex: Optional[re.Pattern] = None
 
     # private attributes that must be set immediately after instantiation
     # Note that we're using type Any, but the getter setter ensure the right types.
@@ -52,7 +50,6 @@ class BatchDefinition(pydantic.GenericModel, Generic[PartitionerT]):
         return self.data_asset.build_batch_request(
             options=batch_parameters,
             partitioner=self.partitioner,
-            batching_regex=self.batching_regex,
         )
 
     def get_batch(self, batch_parameters: Optional[BatchParameters] = None) -> Batch:

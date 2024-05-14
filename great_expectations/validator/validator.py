@@ -37,10 +37,8 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.data_context.types.base import CheckpointValidationDefinition
 from great_expectations.exceptions import (
     GreatExpectationsError,
@@ -54,23 +52,13 @@ from great_expectations.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.domain_builder import (
-    ColumnDomainBuilder,
-)
-from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
-    ReconciliationDirectives,
-    ReconciliationStrategy,
-)
-from great_expectations.rule_based_profiler.rule_based_profiler import (
-    BaseRuleBasedProfiler,
-)
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metrics_calculator import (
     MetricsCalculator,
     _AbortedMetricsInfoDict,
     _MetricsDict,
 )
+from great_expectations.validator.util import recursively_convert_to_json_serializable
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
     MetricEdge,
@@ -96,16 +84,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-        ExpectationConfigurationBuilder,
-    )
-    from great_expectations.rule_based_profiler.parameter_builder import (
-        ParameterBuilder,
-    )
-    from great_expectations.rule_based_profiler.parameter_container import (
-        ParameterContainer,
-    )
-    from great_expectations.rule_based_profiler.rule import Rule
     from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -161,7 +139,6 @@ class Validator:
         expectation_suite_name: The name of the Expectation Suite to validate.
         data_context: The Data Context associated with this Validator.
         batches: The Batches for which to validate.
-        include_rendered_content: If True, the Rendered Content will be included in the ExpectationValidationResult.
     """  # noqa: E501
 
     DEFAULT_RUNTIME_CONFIGURATION = {
@@ -179,7 +156,6 @@ class Validator:
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
         batches: List[Batch] | Sequence[Batch | FluentBatch] = tuple(),
-        include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
         self._data_context: Optional[AbstractDataContext] = data_context
@@ -209,7 +185,11 @@ class Validator:
         # saving expectation config objects
         self._active_validation: bool = False
 
-        self._include_rendered_content: Optional[bool] = include_rendered_content
+    @property
+    def _include_rendered_content(self) -> bool:
+        from great_expectations import project_manager
+
+        return project_manager.is_using_cloud()
 
     @property
     def execution_engine(self) -> ExecutionEngine:
@@ -580,171 +560,6 @@ class Validator:
 
         return inst_expectation
 
-    def _build_rule_based_profiler_from_config_and_runtime_args(  # noqa: PLR0913
-        self,
-        expectation_type: str,
-        expectation_kwargs: dict,
-        success_keys: Tuple[str, ...],
-        profiler_config: RuleBasedProfilerConfig,
-        override_profiler_config: Optional[RuleBasedProfilerConfig] = None,
-    ) -> BaseRuleBasedProfiler:
-        assert (
-            profiler_config.name == expectation_type
-        ), "The name of profiler used to build an ExpectationConfiguration must equal to expectation_type of the expectation being invoked."  # noqa: E501
-
-        profiler = BaseRuleBasedProfiler(
-            profiler_config=profiler_config,
-            data_context=self.data_context,
-        )
-
-        rules: List[Rule] = profiler.rules
-
-        assert (
-            len(rules) == 1
-        ), "A Rule-Based Profiler for an Expectation can have exactly one rule."
-
-        domain_type: MetricDomainTypes
-
-        override_profiler_config_dict: dict = {}
-
-        if isinstance(override_profiler_config, RuleBasedProfilerConfig):
-            override_profiler_config_dict = override_profiler_config.to_json_dict()
-        elif override_profiler_config is not None:
-            # NOTE: we shouldn't get here per the override_profiler_config type, but it is needed per tests  # noqa: E501
-            # See test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes  # noqa: E501
-            override_profiler_config_dict = override_profiler_config
-
-        override_profiler_config_dict.pop("name", None)
-        override_profiler_config_dict.pop("config_version", None)
-
-        override_variables: Dict[str, Any] = override_profiler_config_dict.get("variables", {})
-        effective_variables: Optional[ParameterContainer] = profiler.reconcile_profiler_variables(
-            variables=override_variables,
-            reconciliation_strategy=ReconciliationStrategy.UPDATE,
-        )
-        profiler.variables = effective_variables
-
-        override_rules: Dict[str, Dict[str, Any]] = override_profiler_config_dict.get("rules", {})
-
-        assert (
-            len(override_rules) <= 1
-        ), "An override Rule-Based Profiler for an Expectation can have exactly one rule."
-
-        if override_rules:
-            profiler.rules[0].name = list(override_rules.keys())[0]
-            effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
-                rules=override_rules,
-                reconciliation_directives=ReconciliationDirectives(
-                    domain_builder=ReconciliationStrategy.UPDATE,
-                    parameter_builder=ReconciliationStrategy.REPLACE,
-                    expectation_configuration_builder=ReconciliationStrategy.REPLACE,
-                ),
-            )
-            profiler.rules = effective_rules
-
-        self._validate_profiler_and_update_rules_properties(
-            profiler=profiler,
-            expectation_type=expectation_type,
-            expectation_kwargs=expectation_kwargs,
-            success_keys=success_keys,
-        )
-
-        return profiler
-
-    def _validate_profiler_and_update_rules_properties(
-        self,
-        profiler: BaseRuleBasedProfiler,
-        expectation_type: str,
-        expectation_kwargs: dict,
-        success_keys: Tuple[str, ...],
-    ) -> None:
-        rule: Rule = profiler.rules[0]
-        assert (
-            rule.expectation_configuration_builders
-            and rule.expectation_configuration_builders[0].expectation_type == expectation_type
-        ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."  # noqa: E501
-
-        # TODO: <Alex>Add "metric_domain_kwargs_override" when "Expectation" defines "domain_keys" separately.</Alex>  # noqa: E501
-        key: str
-        value: Any
-        metric_value_kwargs_override: dict = {
-            key: value
-            for key, value in expectation_kwargs.items()
-            if key in success_keys and key not in BaseRuleBasedProfiler.EXPECTATION_SUCCESS_KEYS
-        }
-
-        if not rule.domain_builder:
-            raise TypeError("Rule must include domain_builder.")  # noqa: TRY003
-        domain_type: MetricDomainTypes = rule.domain_builder.domain_type
-        if domain_type not in MetricDomainTypes:
-            raise ValueError(  # noqa: TRY003
-                f'Domain type declaration "{domain_type}" in "MetricDomainTypes" does not exist.'
-            )
-
-        # TODO: <Alex>Handle future domain_type cases as they are defined.</Alex>
-        if domain_type == MetricDomainTypes.COLUMN:
-            assert isinstance(rule.domain_builder, ColumnDomainBuilder)
-
-            column_name = expectation_kwargs.get("column")
-            rule.domain_builder.include_column_names = [column_name] if column_name else None
-
-        parameter_builders: List[ParameterBuilder] = rule.parameter_builders or []
-
-        parameter_builder: ParameterBuilder
-
-        for parameter_builder in parameter_builders:
-            self._update_metric_value_kwargs_for_success_keys(
-                parameter_builder=parameter_builder,
-                metric_value_kwargs=metric_value_kwargs_override,
-            )
-
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
-            rule.expectation_configuration_builders or []
-        )
-
-        expectation_configuration_builder: ExpectationConfigurationBuilder
-        for expectation_configuration_builder in expectation_configuration_builders:
-            validation_parameter_builders: List[ParameterBuilder] = (
-                expectation_configuration_builder.validation_parameter_builders or []
-            )
-            for parameter_builder in validation_parameter_builders:
-                self._update_metric_value_kwargs_for_success_keys(
-                    parameter_builder=parameter_builder,
-                    metric_value_kwargs=metric_value_kwargs_override,
-                )
-
-    def _update_metric_value_kwargs_for_success_keys(
-        self,
-        parameter_builder: ParameterBuilder,
-        metric_value_kwargs: Optional[dict] = None,
-    ) -> None:
-        if metric_value_kwargs is None:
-            metric_value_kwargs = {}
-
-        if hasattr(parameter_builder, "metric_name") and hasattr(
-            parameter_builder, "metric_value_kwargs"
-        ):
-            parameter_builder_metric_value_kwargs: dict = (
-                parameter_builder.metric_value_kwargs or {}
-            )
-
-            parameter_builder_metric_value_kwargs = {
-                key: metric_value_kwargs.get(key) or value
-                for key, value in parameter_builder_metric_value_kwargs.items()
-            }
-            parameter_builder.metric_value_kwargs = parameter_builder_metric_value_kwargs
-
-        suite_parameter_builders: List[ParameterBuilder] = (
-            parameter_builder.suite_parameter_builders or []
-        )
-
-        suite_parameter_builder: ParameterBuilder
-        for suite_parameter_builder in suite_parameter_builders:
-            self._update_metric_value_kwargs_for_success_keys(
-                parameter_builder=suite_parameter_builder,
-                metric_value_kwargs=metric_value_kwargs,
-            )
-
     def list_available_expectation_types(self) -> List[str]:
         """Returns a list of all expectations available to the validator"""
         keys = dir(self)
@@ -755,19 +570,20 @@ class Validator:
         configurations: List[ExpectationConfiguration],
         runtime_configuration: Optional[dict] = None,
     ) -> List[ExpectationValidationResult]:
-        """Obtains validation dependencies for each metric using the implementation of their associated expectation,
-        then proceeds to add these dependencies to the validation graph, supply readily available metric implementations
-        to fulfill current metric requirements, and validate these metrics.
+        """Obtains validation dependencies for each metric using the implementation of their
+        associated expectation, then proceeds to add these dependencies to the validation graph,
+        supply readily available metric implementations to fulfill current metric requirements,
+        and validate these metrics.
 
         Args:
-            configurations(List[ExpectationConfiguration]): A list of needed Expectation Configurations that will be
-            used to supply domain and values for metrics.
-            runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling semantics, such as the
-            result_format.
+            configurations(List[ExpectationConfiguration]): A list of needed Expectation
+            Configurations that will be used to supply domain and values for metrics.
+            runtime_configuration (dict): A dictionary of runtime keyword arguments, controlling
+            semantics, such as the result_format.
 
         Returns:
             A list of Validations, validating that all necessary metrics are available.
-        """  # noqa: E501
+        """
         if runtime_configuration is None:
             runtime_configuration = {}
 
@@ -1250,7 +1066,7 @@ class Validator:
         Raises:
             ValueError: Must configure a Data Context when instantiating the Validator or pass in `filepath`.
         """  # noqa: E501
-        expectation_suite = self.get_expectation_suite(
+        expectation_suite: ExpectationSuite = self.get_expectation_suite(
             discard_failed_expectations,
             discard_result_format_kwargs,
             discard_include_config_kwargs,
@@ -1258,9 +1074,9 @@ class Validator:
             suppress_warnings,
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
+            self._data_context.suites.add(expectation_suite)
             if self.cloud_mode:
-                updated_suite = self._data_context.get_expectation_suite(id=expectation_suite.id)
+                updated_suite = self._data_context.suites.get(expectation_suite.name)
                 self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:
             with open(filepath, "w") as outfile:
@@ -1370,12 +1186,7 @@ class Validator:
             # 3. from data context
             # So, we load them in reverse order
 
-            if data_context is not None:
-                runtime_suite_parameters = data_context.suite_parameter_store.get_bind_params(
-                    run_id
-                )
-            else:
-                runtime_suite_parameters = {}
+            runtime_suite_parameters: dict = {}
 
             if expectation_suite.suite_parameters:
                 runtime_suite_parameters.update(expectation_suite.suite_parameters)
@@ -1408,6 +1219,7 @@ class Validator:
             if self._include_rendered_content:
                 for validation_result in results:
                     validation_result.render()
+
             statistics = calc_validation_statistics(results)
 
             if only_return_failures:
@@ -1507,29 +1319,6 @@ class Validator:
         """
         self._expectation_suite.suite_parameters.update(
             {parameter_name: convert_to_json_serializable(parameter_value)}
-        )
-
-    def add_citation(  # noqa: PLR0913
-        self,
-        comment: str,
-        batch_spec: Optional[dict] = None,
-        batch_markers: Optional[dict] = None,
-        batch_definition: Optional[dict] = None,
-        citation_date: Optional[str] = None,
-    ) -> None:
-        """Adds a citation to an existing Expectation Suite within the validator"""
-        if batch_spec is None:
-            batch_spec = self.batch_spec
-        if batch_markers is None:
-            batch_markers = self.active_batch_markers
-        if batch_definition is None:
-            batch_definition = self.active_batch_definition  # type: ignore [assignment]
-        self._expectation_suite.add_citation(
-            comment,
-            batch_spec=batch_spec,
-            batch_markers=batch_markers,
-            batch_definition=batch_definition,
-            citation_date=citation_date,
         )
 
     def test_expectation_function(self, function: Callable, *args, **kwargs) -> Callable:
@@ -1635,8 +1424,6 @@ class Validator:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(name=expectation_suite_name)
-
-        self._expectation_suite.execution_engine_type = type(self._execution_engine)
 
     def _get_runtime_configuration(
         self,

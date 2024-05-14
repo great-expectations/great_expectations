@@ -3,10 +3,12 @@ import tempfile
 
 import boto3
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.exceptions.exceptions import DataContextError
 
 client = boto3.client("s3")
 temp_dir = tempfile.TemporaryDirectory()
@@ -16,7 +18,7 @@ yaml: YAMLHandler = YAMLHandler()
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py imports">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context(mode="file", project_root_dir=full_path_to_project_directory)
 # </snippet>
 
 # parse great_expectations.yml for comparison
@@ -30,7 +32,6 @@ pop_stores = [
     "checkpoint_store",
     "suite_parameter_store",
     "validation_results_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -110,7 +111,6 @@ pop_stores = [
     "suite_parameter_store",
     "expectations_store",
     "expectations_S3_store",
-    "profiler_store",
     "validation_definition_store",
 ]
 for store in pop_stores:
@@ -221,7 +221,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py add_s3_datasource">
-datasource = context.sources.add_or_update_pandas_s3(
+datasource = context.data_sources.add_or_update_pandas_s3(
     name="s3_datasource", bucket="taxi-data-sample-test"
 )
 # </snippet>
@@ -247,7 +247,10 @@ assert "name: s3_datasource" in config
 assert "type: pandas_s3" in config
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_validator">
-context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
+try:
+    context.suites.add(ExpectationSuite(name="test_suite"))
+except DataContextError:
+    ...
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_suite"
 )
@@ -263,27 +266,7 @@ validator.expect_column_values_to_be_between(
 )
 # </snippet>
 
-# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py save_expectations">
-validator.save_expectation_suite(discard_failed_expectations=False)
-# </snippet>
-
-# build Checkpoint
-# <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py create_checkpoint">
-checkpoint = context.add_or_update_checkpoint(
-    name="my_checkpoint",
-    validations=[{"batch_request": request, "expectation_suite_name": "test_suite"}],
-)
-# </snippet>
-
-checkpoint_result = checkpoint.run()
-
-assert not checkpoint_result.success
-
 # build datadocs
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py build_docs">
 context.build_data_docs()
 # </snippet>
-
-# assert docs have been built
-results = client.list_objects(Bucket="demo-data-docs")
-assert client.head_object(Bucket="demo-data-docs", Key="index.html")

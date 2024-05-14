@@ -12,8 +12,7 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
@@ -21,7 +20,7 @@ if TYPE_CHECKING:
         DataAsset,
         PandasFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
         CSVAsset,
         ParquetAsset,
     )
@@ -57,11 +56,11 @@ def datasource(
     Those assertions can be found in the datasource_name fixture."""
     original_base_dir = base_dir
 
-    datasource = context.sources.add_pandas_filesystem(
+    datasource = context.data_sources.add_pandas_filesystem(
         name=datasource_name, base_directory=original_base_dir
     )
     datasource.base_directory = updated_base_dir
-    datasource = context.sources.add_or_update_pandas_filesystem(datasource=datasource)
+    datasource = context.data_sources.add_or_update_pandas_filesystem(datasource=datasource)
     assert (
         datasource.base_directory == updated_base_dir
     ), "The datasource was not updated in the previous method call."

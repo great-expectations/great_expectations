@@ -27,9 +27,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.datasource.new_datasource import (
-    BaseDatasource as LegacyDatasource,
-)
 from great_expectations.validator.v1_validator import Validator
 
 if TYPE_CHECKING:
@@ -176,10 +173,6 @@ class ValidationDefinition(BaseModel):
         except KeyError as e:
             raise ValueError(f"Could not find datasource named '{ds_name}'.") from e  # noqa: TRY003
 
-        # Should never be raised but necessary for type checking until we delete non-FDS support.
-        if isinstance(ds, LegacyDatasource):
-            raise ValueError("Legacy datasources are not supported.")  # noqa: TRY003, TRY004
-
         try:
             asset = ds.get_asset(asset_name)
         except LookupError as e:
@@ -202,7 +195,7 @@ class ValidationDefinition(BaseModel):
         *,
         batch_parameters: Optional[BatchParameters] = None,
         suite_parameters: Optional[dict[str, Any]] = None,
-        result_format: ResultFormat = ResultFormat.SUMMARY,
+        result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
         validator = Validator(

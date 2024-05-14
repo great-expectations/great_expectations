@@ -1,25 +1,28 @@
-from typing import List, Literal, Union
+from __future__ import annotations
+
+import re
+from typing import Final, List, Literal, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 
 
 @public_api
-class PartitionerYear(pydantic.BaseModel):
+class ColumnPartitionerYearly(pydantic.BaseModel):
     column_name: str
     sort_ascending: bool = True
     method_name: Literal["partition_on_year"] = "partition_on_year"
 
 
 @public_api
-class PartitionerYearAndMonth(pydantic.BaseModel):
+class ColumnPartitionerMonthly(pydantic.BaseModel):
     column_name: str
     sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month"] = "partition_on_year_and_month"
 
 
 @public_api
-class PartitionerYearAndMonthAndDay(pydantic.BaseModel):
+class ColumnPartitionerDaily(pydantic.BaseModel):
     column_name: str
     sort_ascending: bool = True
     method_name: Literal["partition_on_year_and_month_and_day"] = (
@@ -73,14 +76,46 @@ class PartitionerConvertedDatetime(pydantic.BaseModel):
     date_format_string: str
 
 
-Partitioner = Union[
+ColumnPartitioner = Union[
     PartitionerColumnValue,
     PartitionerMultiColumnValue,
     PartitionerDividedInteger,
     PartitionerModInteger,
-    PartitionerYear,
-    PartitionerYearAndMonth,
-    PartitionerYearAndMonthAndDay,
+    ColumnPartitionerYearly,
+    ColumnPartitionerMonthly,
+    ColumnPartitionerDaily,
     PartitionerDatetimePart,
     PartitionerConvertedDatetime,
+]
+
+
+class FileNamePartitionerYearly(pydantic.BaseModel):
+    regex: re.Pattern
+    param_names = ["year"]
+    sort_ascending: bool = True
+
+
+class FileNamePartitionerMonthly(pydantic.BaseModel):
+    regex: re.Pattern
+    param_names = ["year", "month"]
+    sort_ascending: bool = True
+
+
+class FileNamePartitionerDaily(pydantic.BaseModel):
+    regex: re.Pattern
+    param_names = ["year", "month", "day"]
+    sort_ascending: bool = True
+
+
+class FileNamePartitionerPath(pydantic.BaseModel):
+    regex: re.Pattern
+    param_names: Final[List[str]] = []
+    sort_ascending: bool = True
+
+
+FileNamePartitioner = Union[
+    FileNamePartitionerYearly,
+    FileNamePartitionerMonthly,
+    FileNamePartitionerDaily,
+    FileNamePartitionerPath,
 ]

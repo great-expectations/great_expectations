@@ -2,6 +2,7 @@ import pathlib
 import tempfile
 
 import great_expectations as gx
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
@@ -22,7 +23,7 @@ context = gx.get_context(project_root_dir=full_path_to_project_directory)
 
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite">
-suite = context.add_expectation_suite(expectation_suite_name="my_suite")
+suite = context.suites.add(ExpectationSuite(name="my_suite"))
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1">

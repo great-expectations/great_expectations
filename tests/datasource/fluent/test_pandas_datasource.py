@@ -212,13 +212,13 @@ class TestDynamicPandasAssets:
             )
 
         errors_dict = exc_info.value.errors()
-        assert {
+        assert errors_dict[  # the extra keyword error will always be the last error
+            -1  # we don't care about any other errors for this test
+        ] == {
             "loc": ("invalid_keyword_arg",),
             "msg": "extra fields not permitted",
             "type": "value_error.extra",
-        } == errors_dict[  # the extra keyword error will always be the last error
-            -1  # we don't care about any other errors for this test
-        ]
+        }
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
@@ -270,7 +270,7 @@ class TestDynamicPandasAssets:
     ):
         extra_kwargs.update({"filepath_or_buffer": csv_path / "yellow_tripdata_sample_2018-04.csv"})
         batch_request = (
-            empty_data_context.sources.add_pandas(
+            empty_data_context.data_sources.add_pandas(
                 "my_pandas",
             )
             .add_csv_asset(
@@ -336,7 +336,9 @@ class TestDynamicPandasAssets:
             }
 
         add_method_name = "add_" + read_method_name.split("read_")[1] + "_asset"
-        add_method: Callable = getattr(empty_data_context.sources.pandas_default, add_method_name)
+        add_method: Callable = getattr(
+            empty_data_context.data_sources.pandas_default, add_method_name
+        )
 
         asset: _PandasDataAsset = add_method(
             "my_asset",
@@ -345,7 +347,9 @@ class TestDynamicPandasAssets:
         for positional_arg_name, positional_arg in positional_args.items():
             assert getattr(asset, positional_arg_name) == positional_arg
 
-        read_method: Callable = getattr(empty_data_context.sources.pandas_default, read_method_name)
+        read_method: Callable = getattr(
+            empty_data_context.data_sources.pandas_default, read_method_name
+        )
         # This is not a an ideal mock.
         # In this test we are validating that the read_method for a particular pandas datasource
         # has the correct positional arguments.
@@ -359,7 +363,7 @@ class TestDynamicPandasAssets:
         # read_* normally returns batch but, since we've added a mock in the line above, we get a mock object returned.  # noqa: E501
         # We are calling it here for it's side effect on the default asset so get and inspect that afterwards.  # noqa: E501
         _ = read_method(*positional_args.values())
-        default_asset = empty_data_context.sources.pandas_default.get_asset(
+        default_asset = empty_data_context.data_sources.pandas_default.get_asset(
             asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
         )
         for positional_arg_name, positional_arg in positional_args.items():
@@ -370,7 +374,7 @@ class TestDynamicPandasAssets:
 def test_default_pandas_datasource_get_and_set(
     empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
 ):
-    pandas_datasource = empty_data_context.sources.pandas_default
+    pandas_datasource = empty_data_context.data_sources.pandas_default
     assert isinstance(pandas_datasource, PandasDatasource)
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
     assert len(pandas_datasource.assets) == 0
@@ -385,7 +389,7 @@ def test_default_pandas_datasource_get_and_set(
     assert len(pandas_datasource.assets) == 1
 
     # ensure we get the same datasource when we call pandas_default again
-    pandas_datasource = empty_data_context.sources.pandas_default
+    pandas_datasource = empty_data_context.data_sources.pandas_default
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
     assert len(pandas_datasource.assets) == 1
     assert pandas_datasource.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
@@ -413,20 +417,18 @@ def test_default_pandas_datasource_get_and_set(
             assert asset["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
 
 
-@pytest.mark.filesystem
+@pytest.mark.spark
 def test_default_pandas_datasource_name_conflict(
     empty_data_context: AbstractDataContext,
 ):
-    # the datasource name is taken by legacy
-    empty_data_context.add_datasource(
-        name=DEFAULT_PANDAS_DATASOURCE_NAME, class_name="PandasDatasource"
-    )
+    # empty_data_context.data_sources.add_spark(name=DEFAULT_PANDAS_DATASOURCE_NAME)
+    empty_data_context.data_sources.add_spark(name=DEFAULT_PANDAS_DATASOURCE_NAME)
     with pytest.raises(DefaultPandasDatasourceError):
-        _ = empty_data_context.sources.pandas_default
+        _ = empty_data_context.data_sources.pandas_default
 
     # the datasource name is available
     empty_data_context.datasources.pop(DEFAULT_PANDAS_DATASOURCE_NAME)
-    pandas_datasource = empty_data_context.sources.pandas_default
+    pandas_datasource = empty_data_context.data_sources.pandas_default
     assert isinstance(pandas_datasource, PandasDatasource)
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
 
@@ -435,7 +437,7 @@ def test_default_pandas_datasource_name_conflict(
 def test_read_dataframe(empty_data_context: AbstractDataContext, test_df_pandas: pd.DataFrame):
     # validates that a dataframe object is passed
     with pytest.raises(ValueError) as exc_info:
-        _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})  # type: ignore[arg-type]
+        _ = empty_data_context.data_sources.pandas_default.read_dataframe(dataframe={})  # type: ignore[arg-type]
 
     assert (
         'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'
@@ -443,11 +445,11 @@ def test_read_dataframe(empty_data_context: AbstractDataContext, test_df_pandas:
     )
 
     # correct working behavior with read method
-    datasource = empty_data_context.sources.pandas_default
+    datasource = empty_data_context.data_sources.pandas_default
     batch = datasource.read_dataframe(dataframe=test_df_pandas)
     assert isinstance(batch, Batch)
     assert isinstance(
-        empty_data_context.sources.pandas_default.get_asset(
+        empty_data_context.data_sources.pandas_default.get_asset(
             asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
         ),
         DataFrameAsset,
@@ -455,16 +457,16 @@ def test_read_dataframe(empty_data_context: AbstractDataContext, test_df_pandas:
 
     # correct working behavior with add method
     dataframe_asset_name = "my_dataframe_asset"
-    dataframe_asset = empty_data_context.sources.pandas_default.add_dataframe_asset(
+    dataframe_asset = empty_data_context.data_sources.pandas_default.add_dataframe_asset(
         name=dataframe_asset_name
     )
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
-    assert len(empty_data_context.sources.pandas_default.assets) == 2
+    assert len(empty_data_context.data_sources.pandas_default.assets) == 2
     _ = dataframe_asset.build_batch_request(dataframe=test_df_pandas)
     assert all(
         asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-        for asset in empty_data_context.sources.pandas_default.assets
+        for asset in empty_data_context.data_sources.pandas_default.assets
     )
 
 
@@ -473,7 +475,7 @@ def test_cloud_get_csv_asset_not_in_memory(valid_file_path: pathlib.Path):
     # this test runs end-to-end in a real Cloud Data Context
     context = gx.get_context(mode="cloud")
     csv_asset_name = f"DA_{uuid.uuid4().hex}"
-    datasource = context.sources.pandas_default
+    datasource = context.data_sources.pandas_default
     _ = datasource.add_csv_asset(
         name=csv_asset_name,
         filepath_or_buffer=valid_file_path,
@@ -491,7 +493,7 @@ def test_pandas_data_asset_batch_metadata(
     my_config_variables = {"pipeline_filename": __file__}
     empty_data_context.config_variables.update(my_config_variables)
 
-    pandas_datasource = empty_data_context.sources.pandas_default
+    pandas_datasource = empty_data_context.data_sources.pandas_default
 
     batch_metadata = {
         "no_curly_pipeline_filename": "$pipeline_filename",
@@ -527,7 +529,7 @@ def test_pandas_data_asset_batch_metadata(
 def test_build_batch_request_raises_if_missing_dataframe(
     empty_data_context: AbstractDataContext,
 ):
-    dataframe_asset = empty_data_context.sources.add_or_update_pandas(
+    dataframe_asset = empty_data_context.data_sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
 

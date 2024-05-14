@@ -12,11 +12,12 @@ import traceback
 from glob import glob
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, check_output, run
-from typing import Dict, Final, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Final, List, Optional, Tuple
 
 import click
 import pkg_resources  # noqa: TID251 # TODO: switch to importlib.metadata or importlib.resources
 
+import great_expectations as gx
 from great_expectations.compatibility import pydantic
 from great_expectations.core.expectation_diagnostics.expectation_doctor import (
     ExpectationDoctor,
@@ -24,11 +25,13 @@ from great_expectations.core.expectation_diagnostics.expectation_doctor import (
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
-from great_expectations.data_context.data_context.file_data_context import (
-    FileDataContext,
-)
 from great_expectations.exceptions.exceptions import ExpectationNotFoundError
 from great_expectations.expectations.expectation import Expectation
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
 
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
@@ -707,7 +710,7 @@ def _disable_progress_bars() -> Tuple[str, FileDataContext]:
         os.path.sep, "tmp", f"gx-context-{os.getpid()}"
     )
     os.makedirs(context_dir)  # noqa: PTH103
-    context = FileDataContext.create(context_dir)
+    context = gx.get_context(mode="file", context_root_dir=context_dir)
     context.variables.progress_bars = {
         "globally": False,
         "metric_calculations": False,

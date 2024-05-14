@@ -29,7 +29,6 @@ def totally_empty_data_context(tmp_path_factory):
         "validation_results_store_name": "another_fake_store",
         "expectations_store_name": "expectations_store",
         "checkpoint_store_name": "checkpoint_store",
-        "datasources": {},
         "stores": {
             "expectations_store": {
                 "class_name": "ExpectationsStore",
@@ -47,7 +46,6 @@ def totally_empty_data_context(tmp_path_factory):
             },
         },
         "data_docs_sites": {},
-        "validation_operators": {},
     }
     with open(
         os.path.join(project_root_dir, "gx/great_expectations.yml"),  # noqa: PTH118
@@ -65,16 +63,8 @@ def totally_empty_data_context(tmp_path_factory):
 
 
 @pytest.mark.filesystem
-def test_create(tmp_path_factory):
-    project_path = str(tmp_path_factory.mktemp("path_001"))
-    context = gx.data_context.FileDataContext.create(project_path)
-
-    assert isinstance(context, gx.data_context.FileDataContext)
-
-
-@pytest.mark.filesystem
 def test_add_store(totally_empty_data_context):
-    assert len(totally_empty_data_context.stores.keys()) == 6
+    assert len(totally_empty_data_context.stores.keys()) == 5
 
     totally_empty_data_context.add_store(
         "my_new_store",
@@ -83,20 +73,19 @@ def test_add_store(totally_empty_data_context):
             "class_name": "ValidationResultsStore",
         },
     )
-    assert "my_new_store" in totally_empty_data_context.stores.keys()
-    assert len(totally_empty_data_context.stores.keys()) == 7
+    assert "my_new_store" in totally_empty_data_context.stores
+    assert len(totally_empty_data_context.stores.keys()) == 6
 
 
 @pytest.mark.filesystem
 def test_default_config_yml_stores(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("totally_empty_data_context"))
-    context = gx.data_context.FileDataContext.create(project_path)
+    context = gx.get_context(project_root_dir=project_path)
 
     assert set(context.stores.keys()) == {
         "expectations_store",
         "validation_results_store",
         "suite_parameter_store",
-        "profiler_store",
         "checkpoint_store",
         "validation_definition_store",
     }
@@ -114,7 +103,6 @@ def test_default_config_yml_stores(tmp_path_factory):
         "expectations_store",
         "validation_results_store",
         "suite_parameter_store",
-        "profiler_store",
         "validation_definition_store",
         "my_new_validation_results_store",
     }

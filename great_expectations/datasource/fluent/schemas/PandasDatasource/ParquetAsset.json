@@ -227,8 +227,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYear": {
-            "title": "PartitionerYear",
+        "ColumnPartitionerYearly": {
+            "title": "ColumnPartitionerYearly",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -254,8 +254,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYearAndMonth": {
-            "title": "PartitionerYearAndMonth",
+        "ColumnPartitionerMonthly": {
+            "title": "ColumnPartitionerMonthly",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -281,8 +281,8 @@
                 "column_name"
             ]
         },
-        "PartitionerYearAndMonthAndDay": {
-            "title": "PartitionerYearAndMonthAndDay",
+        "ColumnPartitionerDaily": {
+            "title": "ColumnPartitionerDaily",
             "description": "--Public API--",
             "type": "object",
             "properties": {
@@ -375,6 +375,109 @@
                 "date_format_string"
             ]
         },
+        "FileNamePartitionerYearly": {
+            "title": "FileNamePartitionerYearly",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year"
+                    ],
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "FileNamePartitionerMonthly": {
+            "title": "FileNamePartitionerMonthly",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year",
+                        "month"
+                    ],
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "FileNamePartitionerDaily": {
+            "title": "FileNamePartitionerDaily",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "default": [
+                        "year",
+                        "month",
+                        "day"
+                    ],
+                    "type": "array",
+                    "items": {}
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
+        "FileNamePartitionerPath": {
+            "title": "FileNamePartitionerPath",
+            "type": "object",
+            "properties": {
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sort_ascending": {
+                    "title": "Sort Ascending",
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "regex"
+            ]
+        },
         "BatchDefinition": {
             "title": "BatchDefinition",
             "description": "Configuration for a batch of data.\n\nReferences the DataAsset to be used, and any additional parameters needed to fetch the data.",
@@ -404,26 +507,33 @@
                             "$ref": "#/definitions/PartitionerModInteger"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYear"
+                            "$ref": "#/definitions/ColumnPartitionerYearly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYearAndMonth"
+                            "$ref": "#/definitions/ColumnPartitionerMonthly"
                         },
                         {
-                            "$ref": "#/definitions/PartitionerYearAndMonthAndDay"
+                            "$ref": "#/definitions/ColumnPartitionerDaily"
                         },
                         {
                             "$ref": "#/definitions/PartitionerDatetimePart"
                         },
                         {
                             "$ref": "#/definitions/PartitionerConvertedDatetime"
+                        },
+                        {
+                            "$ref": "#/definitions/FileNamePartitionerYearly"
+                        },
+                        {
+                            "$ref": "#/definitions/FileNamePartitionerMonthly"
+                        },
+                        {
+                            "$ref": "#/definitions/FileNamePartitionerDaily"
+                        },
+                        {
+                            "$ref": "#/definitions/FileNamePartitionerPath"
                         }
                     ]
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [

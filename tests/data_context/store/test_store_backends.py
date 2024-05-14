@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import uuid
 from typing import Optional
 from unittest import mock
 
@@ -95,7 +96,7 @@ def check_store_backend_store_backend_id_functionality(
     if store_backend_id:
         assert store_backend.store_backend_id == store_backend_id
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(store_backend.store_backend_id)
+    assert isinstance(store_backend.store_backend_id, uuid.UUID)
     # Check in file stores that the actual file exists
     assert store_backend.has_key(key=(".ge_store_backend_id",))
 
@@ -237,7 +238,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
         project=project,
         base_public_path=base_public_path,
     )
-    store_error_uuid = "00000000-0000-0000-0000-00000000e003"
+    store_error_uuid = uuid.UUID("00000000-0000-0000-0000-00000000e003")
     assert gcs_store_backend_with_base_public_path.store_backend_id == store_error_uuid
 
 
@@ -1338,21 +1339,18 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         resource_type=DataContextVariableSchema.ALL_VARIABLES,
     )
     assert sorted(inline_store_backend.list_keys()) == [
-        ("anonymous_usage_statistics",),
+        ("analytics_enabled",),
         ("checkpoint_store_name",),
         ("config_variables_file_path",),
         ("config_version",),
+        ("data_context_id",),
         ("data_docs_sites",),
-        ("datasources",),
         ("expectations_store_name",),
         ("fluent_datasources",),
-        ("include_rendered_content",),
         ("plugins_directory",),
-        ("profiler_store_name",),
         ("progress_bars",),
         ("stores",),
         ("suite_parameter_store_name",),
-        ("validation_operators",),
         ("validation_results_store_name",),
     ]
 
@@ -1407,89 +1405,14 @@ def test_InlineStoreBackend(empty_data_context) -> None:
 
 
 @pytest.mark.filesystem
-def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
-    path_to_great_expectations_yml: str = os.path.join(  # noqa: PTH118
-        empty_data_context.root_directory, empty_data_context.GX_YML
-    )
-
-    # 1. Set simple string config value and confirm it persists in the GX.yml
-
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.CONFIG_VERSION,
-    )
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["config_version"] == 3.0
-
-    new_config_version: float = 5.0
-    key = DataContextVariableKey()
-    tuple_ = key.to_tuple()
-
-    inline_store_backend.set(tuple_, new_config_version)
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["config_version"] == new_config_version
-
-    # 2. Set nested dictionary config value and confirm it persists in the GX.yml
-
-    inline_store_backend = InlineStoreBackend(
-        data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.DATASOURCES,
-    )
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["datasources"] == {}
-
-    datasource_config_string: str = """
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: my/base/dir/
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-        """
-    datasource_config: dict = yaml.load(datasource_config_string)
-
-    key = DataContextVariableKey(
-        resource_name="my_datasource",
-    )
-    tuple_ = key.to_tuple()
-
-    inline_store_backend.set(tuple_, datasource_config)
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    datasources: dict = config_commented_map_from_yaml["datasources"]
-    assert len(datasources) == 1
-    assert datasources["my_datasource"] == datasource_config
-
-
-@pytest.mark.filesystem
 def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
     inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.DATASOURCES,
+        resource_type=DataContextVariableSchema.FLUENT_DATASOURCES,
     )
 
-    datasource_config_a = empty_data_context.sources.add_pandas(name="a")
-    datasource_config_b = empty_data_context.sources.add_pandas(name="b")
+    datasource_config_a = empty_data_context.data_sources.add_pandas(name="a")
+    datasource_config_b = empty_data_context.data_sources.add_pandas(name="b")
 
     inline_store_backend.set(DataContextVariableKey("a").to_tuple(), datasource_config_a)
     inline_store_backend.set(DataContextVariableKey("b").to_tuple(), datasource_config_b)

@@ -17,7 +17,7 @@ validator.expect_column_values_to_be_between(
 taxi_suite = validator.get_expectation_suite()
 taxi_suite.expectation_suite_name = "taxi_suite"
 
-context.add_expectation_suite(expectation_suite=taxi_suite)
+context.suites.add(taxi_suite)
 
 checkpoint = context.add_or_update_checkpoint(
     name="taxi_checkpoint",

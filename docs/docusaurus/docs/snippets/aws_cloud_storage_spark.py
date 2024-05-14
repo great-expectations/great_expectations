@@ -4,6 +4,7 @@ import tempfile
 
 import boto3
 
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -23,7 +24,7 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py imports">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context(mode="file", project_root_dir=full_path_to_project_directory)
 # </snippet>
 
 # parse great_expectations.yml for comparison
@@ -37,7 +38,6 @@ pop_stores = [
     "checkpoint_store",
     "suite_parameter_store",
     "validation_results_store",
-    "profiler_store",
 ]
 for store in pop_stores:
     stores.pop(store)
@@ -116,7 +116,6 @@ pop_stores = [
     "suite_parameter_store",
     "expectations_store",
     "expectations_S3_store",
-    "profiler_store",
 ]
 for store in pop_stores:
     stores.pop(store)
@@ -230,7 +229,7 @@ awscreds = {
 }
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py add_s3_datasource">
-datasource = context.sources.add_or_update_spark_s3(
+datasource = context.data_sources.add_or_update_spark_s3(
     name="s3_datasource", bucket="taxi-data-sample-test", boto3_options=awscreds
 )
 # </snippet>
@@ -258,7 +257,7 @@ assert "name: s3_datasource" in config
 assert "type: spark_s3" in config
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_spark.py get_validator">
-context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
+context.suites.add(ExpectationSuite(name="test_suite"))
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_suite"
 )

@@ -13,8 +13,7 @@ from great_expectations.expectations.expectation_configuration import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
     from great_expectations.core import ExpectationSuite, ExpectationValidationResult
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import (
@@ -22,9 +21,7 @@ if TYPE_CHECKING:
         DataAsset,
         SparkFilesystemDatasource,
     )
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-    )
+    from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
     from great_expectations.validator.validator import Validator
 
 
@@ -59,12 +56,12 @@ def datasource(
     Those assertions can be found in the datasource_name fixture."""
     original_base_dir = base_dir
 
-    datasource = context.sources.add_spark_filesystem(
+    datasource = context.data_sources.add_spark_filesystem(
         name=datasource_name, base_directory=original_base_dir
     )
 
     datasource.base_directory = normalize_directory_path(updated_base_dir, context.root_directory)
-    datasource = context.sources.add_or_update_spark_filesystem(datasource=datasource)
+    datasource = context.data_sources.add_or_update_spark_filesystem(datasource=datasource)
     assert (
         datasource.base_directory == updated_base_dir
     ), "The datasource was not updated in the previous method call."

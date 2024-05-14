@@ -180,6 +180,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
       containers:
        name: gx-agent
         image: greatexpectations/agent:stable
+        imagePullPolicy: Always
         envFrom:
         secretRef:
          name: gx-agent-secret
@@ -215,7 +216,7 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
     ```
    Replace `user_access_token` and `organization_id` with the values you copied previously. 
 
-3. In GX Cloud, confirm the GX Agent status icon is green. This indicates the GX Agent is running. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
+3. In GX Cloud, confirm the GX Agent status is **Active Agent** and the icon is green. This indicates the GX Agent is active. If it isn't, repeat step 2 and confirm the `user_access_token` and `organization_id` values are correct.
 
     ![GX Agent status](/img/gx_agent_status.png)
 
@@ -229,6 +230,16 @@ You can deploy the GX Agent in any environment in which you create Kubernetes cl
 
 </TabItem>
 </Tabs>
+
+## View GX Cloud logs
+
+If you encounter an issue deploying the GX Agent or performing a GX Cloud task, review log information to troubleshoot the cause and determine a fix.
+
+1. In GX Cloud, click **Logs**.
+
+2. Click **Show log** next to a log entry to display additional log details.
+
+3. Optional. Click **Hide log** to close the log details view.
 
 
 ## Next steps
