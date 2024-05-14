@@ -970,11 +970,12 @@ def test_spark_slice_batch_count(
 ) -> None:
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
+    batching_regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
     batch_request = asset.build_batch_request(
         options={"year": "2019"},
         batch_slice=batch_slice,
+        partitioner=FileNamePartitionerMonthly(regex=batching_regex),
     )
     batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
     assert len(batches) == expected_batch_count
