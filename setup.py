@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from typing import Any, Dict, List
 
 # https://setuptools.pypa.io/en/latest/pkg_resources.html
 import pkg_resources  # noqa: TID251: TODO: switch to poetry
@@ -87,41 +88,64 @@ def get_extras_require():
 with open("requirements.txt") as f:
     required = f.read().splitlines()
 
-long_description = "Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description)."  # noqa: E501
+long_description = "Always know what to expect from your data. (See https://github.com/great-expectations/great_expectations for full description)."
 
-config = {
-    "description": "Always know what to expect from your data.",
-    "author": "The Great Expectations Team",
-    "url": "https://greatexpectations.io",
-    "download_url": "https://github.com/great-expectations/great_expectations",
-    "author_email": "team@greatexpectations.io",
-    "version": versioneer.get_version(),
-    "cmdclass": versioneer.get_cmdclass(),
-    "install_requires": required,
-    "extras_require": get_extras_require(),
-    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]),
-    "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
-    "name": "great_expectations",
-    "long_description": long_description,
-    "license": "Apache-2.0",
-    "keywords": "data science testing pipeline data quality dataquality validation datavalidation",
-    "include_package_data": True,
-    "python_requires": ">=3.8",
-    "classifiers": [
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
-        "Intended Audience :: Other Audience",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Software Development",
-        "Topic :: Software Development :: Testing",
-        "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-    ],
-}
 
-setup(**config)
+def get_config(
+    packages: List[str],
+    long_description: str,
+) -> Dict[str, Any]:
+    package_name: str = packages[0]
+    assert package_name in (
+        "great_expectations",
+        "great_expectations_v1",
+    ), f"Unexpected package name: {package_name}"
+
+    if package_name == "great_expectations_v0":
+        long_description = f"v1 mirror. {long_description}"
+
+    return {
+        "description": "Always know what to expect from your data.",
+        "author": "The Great Expectations Team",
+        "url": "https://greatexpectations.io",
+        "download_url": "https://github.com/great-expectations/great_expectations",
+        "author_email": "team@greatexpectations.io",
+        "version": versioneer.get_version(),
+        "cmdclass": versioneer.get_cmdclass(),
+        "install_requires": required,
+        "extras_require": get_extras_require(),
+        "packages": packages,
+        "entry_points": {
+            "console_scripts": [
+                f"great_expectations={package_name}.cli:main",
+            ]
+        },
+        "package_data": {package_name: ["**/py.typed", "**/*.pyi"]},
+        "name": package_name,
+        "long_description": long_description,
+        "license": "Apache-2.0",
+        "keywords": "data science testing pipeline data quality dataquality validation datavalidation",
+        "include_package_data": True,
+        "python_requires": ">=3.8",
+        "classifiers": [
+            "Development Status :: 4 - Beta",
+            "Intended Audience :: Developers",
+            "Intended Audience :: Science/Research",
+            "Intended Audience :: Other Audience",
+            "Topic :: Scientific/Engineering",
+            "Topic :: Software Development",
+            "Topic :: Software Development :: Testing",
+            "License :: OSI Approved :: Apache Software License",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+        ],
+    }
+
+
+if __name__ == "__main__":
+    packages = find_packages(exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"])
+    config = get_config(packages=packages, long_description=long_description)
+    setup(**config)
