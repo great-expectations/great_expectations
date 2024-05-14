@@ -99,7 +99,7 @@ def get_config(
         "great_expectations_v1",
     ), f"Unexpected package name: {package_name}"
 
-    if package_name == "great_expectations_v0":
+    if package_name == "great_expectations_v1":
         long_description = f"v1 mirror. {long_description}"
 
     return {
