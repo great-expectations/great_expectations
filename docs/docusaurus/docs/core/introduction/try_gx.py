@@ -1,6 +1,6 @@
 """
 This example script allows the user to try out GX by validating Expectations
- against provided sample data.
+ against sample data.
 
 The snippet tags are used to insert the corresponding code into the
  Great Expectations documentation.  They can be disregarded by anyone
