@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import pathlib
 import re
+import shutil
 from typing import Final, Pattern
 
 IMPORT_PATTERN: Final[Pattern] = re.compile(r"import great_expectations")
@@ -19,6 +20,8 @@ CORE_DIRECTORY: Final[pathlib.Path] = pathlib.Path("great_expectations").resolve
     strict=True
 )
 NEW_PACKAGE_DIR: Final[pathlib.Path] = CORE_DIRECTORY.with_name("great_expectations_v0")
+
+DIST_DIR: Final[pathlib.Path] = pathlib.Path("dist")
 
 UNTOUCED_FILES: int = 0
 UPDATED_FILES: int = 0
@@ -41,6 +44,7 @@ def replace(file_path: pathlib.Path) -> None:
 
 
 def iterate_files(file_dir: pathlib.Path) -> None:
+    print("📁 Creating new package with updated `great_expectations_v0` references\n")
     for file in file_dir.iterdir():
         if file.is_dir():
             iterate_files(file)
@@ -48,7 +52,15 @@ def iterate_files(file_dir: pathlib.Path) -> None:
             replace(file)
 
 
+def cleanup_dist_dir() -> None:
+    """Delete the dist (distribution) directory if it exists."""
+    if DIST_DIR.exists():
+        print(f"🗑️  Removing {DIST_DIR}\n")
+        shutil.rmtree(DIST_DIR, ignore_errors=True)
+
+
 if __name__ == "__main__":
+    cleanup_dist_dir()
     if NEW_PACKAGE_DIR.exists():
         print(f"❌ {NEW_PACKAGE_DIR} already exists. Removing...")
         NEW_PACKAGE_DIR.rmdir()
