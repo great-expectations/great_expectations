@@ -80,7 +80,7 @@ For more comprehensive guidance on setting up a Python environment, installing {
    ```python title="Python input" name="docs/docusaurus/docs/core/introduction/try_gx.py validate and view results"
    ```
 
-   The sample data does conform to the defined Expectation and the following Validation Results are returned:
+   The sample data conforms to the defined Expectation and the following Validation Results are returned:
 
    ```python title="Python output" name="docs/docusaurus/docs/core/introduction/try_gx.py output1"
    ```
