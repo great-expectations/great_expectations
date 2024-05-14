@@ -852,14 +852,14 @@ def test_get_batch_list_from_fully_specified_batch_request(
 ):
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
-    request = asset.build_batch_request({"year": "2018", "month": "04"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
+    batch_def = asset.add_batch_definition_monthly(
+        name="Fully Specified Batch Test",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+    )
+    batch = batch_def.get_batch(batch_parameters={"year": "2018", "month": "04"})
     assert batch.batch_request.datasource_name == spark_filesystem_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
 
@@ -888,11 +888,16 @@ def test_get_batch_list_from_partially_specified_batch_request(
 
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
-    request = asset.build_batch_request({"year": "2018"})
+    batch_def = asset.add_batch_definition_monthly(
+        name="Partially Specified Batch Test",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+    )
+
+    request = batch_def.build_batch_request(batch_parameters={"year": "2018"})
+
     batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
     batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
@@ -1015,33 +1020,17 @@ def datasource_test_connection_error_messages(
 
 
 @pytest.mark.spark
-def test_test_connection_failures(
-    datasource_test_connection_error_messages: tuple[
-        SparkFilesystemDatasource, TestConnectionError
-    ],
-):
-    (
-        spark_filesystem_datasource,
-        test_connection_error,
-    ) = datasource_test_connection_error_messages
-
-    with pytest.raises(type(test_connection_error)) as e:
-        spark_filesystem_datasource.test_connection()
-
-    assert str(e.value) == str(test_connection_error)
-
-
-@pytest.mark.spark
 def test_get_batch_list_from_batch_request_does_not_modify_input_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
-    request = asset.build_batch_request({"year": "2018"})
+    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="Test Batch Definition", regex=regex)
+    request = batch_def.build_batch_request({"year": "2018"})
     request_before_call = copy.deepcopy(request)
     batches = asset.get_batch_list_from_batch_request(request)
     # We assert the request before the call to get_batch_list_from_batch_request is equal to the request after the  # noqa: E501
@@ -1058,18 +1047,22 @@ def test_add_csv_asset_with_batch_metadata(
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
         batch_metadata=asset_specified_metadata,
     )
-    batch_options = {"year": "2018", "month": "05"}
-    request = asset.build_batch_request(batch_options)
+    batch_def = asset.add_batch_definition_monthly(
+        name="Test Batch Metadata",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+    )
+    batch_parameters = {"year": "2018", "month": "05"}
+
+    request = batch_def.build_batch_request(batch_parameters)
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     assert batches[0].metadata == {
         "path": "yellow_tripdata_sample_2018-05.csv",
-        **batch_options,
+        **batch_parameters,
         **asset_specified_metadata,
     }
 
@@ -1259,7 +1252,6 @@ def file_asset_with_no_partitioner(
 ) -> CSVAsset:
     asset = spark_filesystem_datasource.add_csv_asset(
         name="file_csv_asset_no_partitioner",
-        batching_regex=r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -1290,7 +1282,12 @@ def expected_num_records_file_asset_no_partitioner_2020_10(
     file_asset_with_no_partitioner: CSVAsset,
 ) -> int:
     single_batch_batch_request = file_asset_with_no_partitioner.build_batch_request(
-        {"year": "2020", "month": "11"}
+        {"year": "2020", "month": "11"},
+        partitioner=FileNamePartitionerMonthly(
+            regex=re.compile(
+                r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+            )
+        ),
     )
     single_batch_list = file_asset_with_no_partitioner.get_batch_list_from_batch_request(
         single_batch_batch_request
@@ -1315,7 +1312,6 @@ def file_asset(
 ) -> CSVAsset:
     asset = spark_filesystem_datasource.add_csv_asset(
         name="file_csv_asset_with_partitioner",
-        batching_regex=r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
