@@ -13,6 +13,7 @@ from typing import Final, Pattern
 
 IMPORT_PATTERN: Final[Pattern] = re.compile(r"import great_expectations")
 FROM_PATTERN: Final[Pattern] = re.compile(r"from great_expectations")
+MODULE_STRING: Final[Pattern] = re.compile(r"\"great_expectations\.")
 
 CORE_DIRECTORY: Final[pathlib.Path] = pathlib.Path("great_expectations").resolve(
     strict=True
@@ -29,6 +30,7 @@ def replace(file_path: pathlib.Path) -> None:
         contents = file.read()
         new_contents = IMPORT_PATTERN.sub("import great_expectations_v0", contents)
         new_contents = FROM_PATTERN.sub("from great_expectations_v0", new_contents)
+        new_contents = MODULE_STRING.sub('"great_expectations_v0.', new_contents)
         if contents == new_contents:
             UNTOUCED_FILES += 1
             return
