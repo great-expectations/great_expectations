@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from types import ModuleType
 from typing import TYPE_CHECKING, Iterator, Type
 from unittest import mock
@@ -24,6 +25,7 @@ from great_expectations.checkpoint.actions import (
     ValidationAction,
 )
 from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
+from great_expectations.core.batch import IDDict, LegacyBatchDefinition
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -264,8 +266,11 @@ class TestV1ActionRun:
 
     @pytest.fixture
     def checkpoint_result(self, mocker: MockerFixture):
+        utc_datetime = datetime.fromisoformat("2024-04-01T20:51:18.077262").replace(
+            tzinfo=timezone.utc
+        )
         return CheckpointResult(
-            run_id=RunIdentifier(run_time="2024-04-01T20:51:18.077262"),
+            run_id=RunIdentifier(run_time=utc_datetime),
             run_results={
                 ValidationResultIdentifier(
                     expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -290,6 +295,62 @@ class TestV1ActionRun:
                     statistics={"successful_expectations": 2, "evaluated_expectations": 2},
                     results=[],
                     suite_name=self.suite_b,
+                ),
+            },
+            checkpoint_config=mocker.Mock(spec=Checkpoint, name="my_checkpoint"),
+        )
+
+    @pytest.fixture
+    def checkpoint_result_with_assets(self, mocker: MockerFixture):
+        utc_datetime = datetime.fromisoformat("2024-04-01T20:51:18.077262").replace(
+            tzinfo=timezone.utc
+        )
+        return CheckpointResult(
+            run_id=RunIdentifier(run_time=utc_datetime),
+            run_results={
+                ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(
+                        name=self.suite_a,
+                    ),
+                    run_id=RunIdentifier(run_name="prod_20240401"),
+                    batch_identifier=self.batch_id_a,
+                ): ExpectationSuiteValidationResult(
+                    success=True,
+                    statistics={"successful_expectations": 3, "evaluated_expectations": 3},
+                    results=[],
+                    suite_name=self.suite_a,
+                    meta={
+                        "active_batch_definition": LegacyBatchDefinition(
+                            datasource_name="test_environment",
+                            data_connector_name="general_azure_data_connector",
+                            data_asset_name="asset_1",
+                            batch_identifiers=IDDict(
+                                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+                            ),
+                        )
+                    },
+                ),
+                ValidationResultIdentifier(
+                    expectation_suite_identifier=ExpectationSuiteIdentifier(
+                        name=self.suite_b,
+                    ),
+                    run_id=RunIdentifier(run_name="prod_20240402"),
+                    batch_identifier=self.batch_id_b,
+                ): ExpectationSuiteValidationResult(
+                    success=True,
+                    statistics={"successful_expectations": 2, "evaluated_expectations": 2},
+                    results=[],
+                    suite_name=self.suite_b,
+                    meta={
+                        "active_batch_definition": LegacyBatchDefinition(
+                            datasource_name="test_environment",
+                            data_connector_name="general_azure_data_connector",
+                            data_asset_name="asset_2_two_wow_whoa_vroom",
+                            batch_identifiers=IDDict(
+                                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+                            ),
+                        ),
+                    },
                 ),
             },
             checkpoint_config=mocker.Mock(spec=Checkpoint, name="my_checkpoint"),
@@ -566,44 +627,67 @@ class TestV1ActionRun:
             json={
                 "blocks": [
                     {"text": {"text": mock.ANY, "type": "plain_text"}, "type": "header"},
-                    {"type": "divider"},
                     {
-                        "text": {
-                            "text": "*Batch Validation Status*: Success :tada:\n"
-                            "*Expectation Suite Name*: `suite_a`\n"
-                            "*Data Asset Name*: `__no_data_asset_name__`\n"
-                            "*Run ID*: `__no_run_id__`\n"
-                            "*Batch ID*: `None`\n"
-                            "*Summary*: *3* of *3* expectations were met",
-                            "type": "mrkdwn",
-                        },
                         "type": "section",
+                        "text": {"type": "plain_text", "text": "Runtime: 2024/04/01 08:51 PM"},
                     },
-                    {"type": "divider"},
                     {
-                        "text": {
-                            "text": "*Batch Validation Status*: Success :tada:\n"
-                            "*Expectation Suite Name*: `suite_b`\n"
-                            "*Data Asset Name*: `__no_data_asset_name__`\n"
-                            "*Run ID*: `__no_run_id__`\n"
-                            "*Batch ID*: `None`\n"
-                            "*Summary*: *2* of *2* expectations were met",
-                            "type": "mrkdwn",
-                        },
                         "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Asset*: __no_data_asset_name__  *Expectation Suite*: suite_a",
+                        },
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Asset*: __no_data_asset_name__  *Expectation Suite*: suite_b",
+                        },
                     },
                     {"type": "divider"},
-                    {
-                        "elements": [
-                            {
-                                "text": "Learn how to review validation results in Data Docs: https://docs.greatexpectations.io/docs/terms/data_docs",
-                                "type": "mrkdwn",
-                            }
-                        ],
-                        "type": "context",
-                    },
                 ],
-                "text": mock.ANY,
+            },
+        )
+
+        assert output == {"slack_notification_result": "Slack notification succeeded."}
+
+    @pytest.mark.unit
+    def test_SlackNotificationAction_run_with_assets(
+        self, checkpoint_result_with_assets: CheckpointResult
+    ):
+        action = SlackNotificationAction(name="my_action", slack_webhook="test", notify_on="all")
+
+        with mock.patch.object(Session, "post") as mock_post:
+            output = action.run(checkpoint_result=checkpoint_result_with_assets)
+
+        mock_post.assert_called_once_with(
+            url="test",
+            headers=None,
+            json={
+                "blocks": [
+                    {"text": {"text": mock.ANY, "type": "plain_text"}, "type": "header"},
+                    {
+                        "type": "section",
+                        "text": {"type": "plain_text", "text": "Runtime: 2024/04/01 08:51 PM"},
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Asset*: asset_1  *Expectation Suite*: suite_a",
+                        },
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Asset*: asset_2_two_wow_whoa_vroom  "
+                            "*Expectation Suite*: suite_b",
+                        },
+                    },
+                    {"type": "divider"},
+                ],
             },
         )
 
