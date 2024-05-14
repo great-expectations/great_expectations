@@ -4,9 +4,9 @@ from typing import Final, List, Union
 
 import pytest
 
-from great_expectations.alias_types import PathStr
-from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.partitioners import (
+from great_expectations_v1.alias_types import PathStr
+from great_expectations_v1.core.batch_definition import BatchDefinition
+from great_expectations_v1.core.partitioners import (
     ColumnPartitionerDaily,
     ColumnPartitionerMonthly,
     ColumnPartitionerYearly,
@@ -15,66 +15,66 @@ from great_expectations.core.partitioners import (
     FileNamePartitionerPath,
     FileNamePartitionerYearly,
 )
-from great_expectations.datasource.fluent import Datasource
-from great_expectations.datasource.fluent.data_asset.path.file_asset import (
+from great_expectations_v1.datasource.fluent import Datasource
+from great_expectations_v1.datasource.fluent.data_asset.path.file_asset import (
     AmbiguousPathError,
     PathNotFoundError,
     RegexMissingRequiredGroupsError,
     RegexUnknownGroupsError,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
+from great_expectations_v1.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset as PandasCSVAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
+from great_expectations_v1.datasource.fluent.data_asset.path.pandas.generated_assets import (
     ExcelAsset,
     FWFAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
+from great_expectations_v1.datasource.fluent.data_asset.path.pandas.generated_assets import (
     JSONAsset as PandasJSONAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
+from great_expectations_v1.datasource.fluent.data_asset.path.pandas.generated_assets import (
     ORCAsset as PandasORCAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
+from great_expectations_v1.datasource.fluent.data_asset.path.pandas.generated_assets import (
     ParquetAsset as PandasParquetAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.csv_asset import (
     CSVAsset as SparkCSVAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.csv_asset import (
     DirectoryCSVAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.delta_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.delta_asset import (
     DeltaAsset,
     DirectoryDeltaAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.json_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.json_asset import (
     DirectoryJSONAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.json_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.json_asset import (
     JSONAsset as SparkJSONAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.orc_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.orc_asset import (
     DirectoryORCAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.orc_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.orc_asset import (
     ORCAsset as SparkORCAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.parquet_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.parquet_asset import (
     DirectoryParquetAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.parquet_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.parquet_asset import (
     ParquetAsset as SparkParquetAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.spark.text_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.spark.text_asset import (
     DirectoryTextAsset,
     TextAsset,
 )
-from great_expectations.datasource.fluent.data_connector import FilePathDataConnector
-from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
+from great_expectations_v1.datasource.fluent.data_connector import FilePathDataConnector
+from great_expectations_v1.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )
 

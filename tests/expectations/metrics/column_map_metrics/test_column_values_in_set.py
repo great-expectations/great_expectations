@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import pytest
 
-from great_expectations.expectations.metrics import ColumnValuesInSet
+from great_expectations_v1.expectations.metrics import ColumnValuesInSet
 
 try:
     import sqlalchemy

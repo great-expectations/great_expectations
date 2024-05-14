@@ -2,18 +2,18 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import azure
-from great_expectations.core import IDDict
-from great_expectations.core.batch import (
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.compatibility import azure
+from great_expectations_v1.core import IDDict
+from great_expectations_v1.core.batch import (
     BatchRequest,
     BatchRequestBase,
     LegacyBatchDefinition,
 )
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import InferredAssetAzureDataConnector
-from great_expectations.execution_engine import (
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations_v1.datasource.data_connector import InferredAssetAzureDataConnector
+from great_expectations_v1.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
@@ -176,11 +176,11 @@ def expected_batch_definitions_sorted():
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_account_url_and_credential(
     mock_azure_conn,
@@ -209,11 +209,11 @@ def test_instantiation_with_account_url_and_credential(
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_conn_str_and_credential(
     mock_azure_conn,
@@ -242,7 +242,7 @@ def test_instantiation_with_conn_str_and_credential(
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_conn):
     my_data_connector = InferredAssetAzureDataConnector(
@@ -265,7 +265,7 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn):
     my_data_connector = InferredAssetAzureDataConnector(
@@ -288,7 +288,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_multiple_auth_methods_raises_error(
     mock_azure_conn,
@@ -315,7 +315,7 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
 
 # noinspection PyUnusedLocal,GrazieInspection
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_raises_error(
     mock_azure_conn,
@@ -354,11 +354,11 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
@@ -391,10 +391,10 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
@@ -438,7 +438,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
             "name": "general_azure_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     # Raises error in `FilePathDataConnector.get_batch_definition_list_from_batch_request()` due to missing a `batch_request` arg  # noqa: E501
@@ -448,10 +448,10 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_raises_error(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
@@ -480,7 +480,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
             "name": "general_azure_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     # Raises error in `Batch._validate_init_parameters()` due to `data_asset_name` being `NoneType` and not the required `str`  # noqa: E501
@@ -495,10 +495,10 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     mock_azure_conn,
@@ -543,7 +543,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
             "name": "general_azure_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).  # noqa: E501
@@ -566,10 +566,10 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     mock_azure_conn,
@@ -614,7 +614,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
             "name": "general_azure_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     # In an actual production environment, Azure Blob Storage will automatically sort these blobs by path (alphabetic order).  # noqa: E501
@@ -635,10 +635,10 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_return_all_batch_definitions_basic_sorted(
     mock_azure_conn,
@@ -694,7 +694,7 @@ def test_return_all_batch_definitions_basic_sorted(
             "name": "general_azure_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -708,10 +708,10 @@ def test_return_all_batch_definitions_basic_sorted(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_return_all_batch_definitions_returns_specified_partition(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
@@ -764,7 +764,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
             "name": "general_azure_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     my_batch_request: BatchRequest = BatchRequest(
@@ -805,10 +805,10 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 def test_return_all_batch_definitions_sorted_without_data_connector_query(
     mock_azure_conn,
@@ -864,7 +864,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
             "name": "general_azure_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -879,10 +879,10 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_match_group(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
@@ -935,16 +935,16 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
                 "name": "general_azure_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+            config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
         )
 
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 def test_return_all_batch_definitions_too_many_sorters(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
@@ -998,16 +998,16 @@ def test_return_all_batch_definitions_too_many_sorters(
                 "name": "general_azure_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+            config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
         )
 
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
 )
 def test_get_full_file_path_pandas(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
@@ -1035,7 +1035,7 @@ azure_options:
             "name": "my_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     mock_list_keys.return_value = [
@@ -1076,10 +1076,10 @@ azure_options:
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
 )
 def test_get_full_file_path_spark(
     mock_azure_conn,
@@ -1110,7 +1110,7 @@ azure_options:
             "name": "my_data_connector",
             "execution_engine": SparkDFExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     mock_list_keys.return_value = [
@@ -1151,10 +1151,10 @@ azure_options:
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
 )
 def test_get_full_file_path_bad_execution_engine(
     mock_azure_conn, mock_list_keys, empty_data_context_stats_enabled
@@ -1185,6 +1185,6 @@ azure_options:
                 runtime_environment={
                     "name": "my_data_connector",
                 },
-                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+                config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
             )
         )

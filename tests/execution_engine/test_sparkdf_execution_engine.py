@@ -6,20 +6,20 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import pyspark
-from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
-from great_expectations.execution_engine import SparkDFExecutionEngine
-from great_expectations.expectations.row_conditions import (
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.compatibility import pyspark
+from great_expectations_v1.compatibility.pyspark import functions as F
+from great_expectations_v1.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
+from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
+from great_expectations_v1.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations_v1.execution_engine import SparkDFExecutionEngine
+from great_expectations_v1.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
-from great_expectations.self_check.util import build_spark_engine
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations_v1.self_check.util import build_spark_engine
+from great_expectations_v1.validator.computed_metric import MetricValue
+from great_expectations_v1.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
 

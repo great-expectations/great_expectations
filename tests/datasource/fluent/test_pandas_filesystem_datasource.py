@@ -12,29 +12,29 @@ from typing import TYPE_CHECKING, Any, Optional, Type
 import pytest
 from pytest import MonkeyPatch, param
 
-import great_expectations.exceptions as ge_exceptions
-import great_expectations.execution_engine.pandas_execution_engine
-from great_expectations.compatibility import pydantic
-from great_expectations.datasource.fluent import PandasFilesystemDatasource
-from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
-from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
+import great_expectations_v1.exceptions as ge_exceptions
+import great_expectations_v1.execution_engine.pandas_execution_engine
+from great_expectations_v1.compatibility import pydantic
+from great_expectations_v1.datasource.fluent import PandasFilesystemDatasource
+from great_expectations_v1.datasource.fluent.data_asset.path.file_asset import FileDataAsset
+from great_expectations_v1.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset,
     JSONAsset,
 )
-from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
-from great_expectations.datasource.fluent.data_connector import (
+from great_expectations_v1.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.sources import _get_field_details
+from great_expectations_v1.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations_v1.datasource.fluent.interfaces import TestConnectionError
+from great_expectations_v1.datasource.fluent.sources import _get_field_details
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
-    from great_expectations.data_context import AbstractDataContext
-    from great_expectations.datasource.fluent.interfaces import (
+    from great_expectations_v1.alias_types import PathStr
+    from great_expectations_v1.data_context import AbstractDataContext
+    from great_expectations_v1.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
     )

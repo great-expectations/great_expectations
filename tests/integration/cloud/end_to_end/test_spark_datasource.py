@@ -6,22 +6,22 @@ from typing import TYPE_CHECKING, Callable, Iterator
 import pandas as pd
 import pytest
 
-from great_expectations.datasource.fluent.spark_datasource import DataFrameAsset
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.datasource.fluent.spark_datasource import DataFrameAsset
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
-    from great_expectations.compatibility import pyspark
-    from great_expectations.core import ExpectationSuite, ExpectationValidationResult
-    from great_expectations.data_context import CloudDataContext
-    from great_expectations.datasource.fluent import (
+    from great_expectations_v1.checkpoint.checkpoint import Checkpoint, CheckpointResult
+    from great_expectations_v1.compatibility import pyspark
+    from great_expectations_v1.core import ExpectationSuite, ExpectationValidationResult
+    from great_expectations_v1.data_context import CloudDataContext
+    from great_expectations_v1.datasource.fluent import (
         BatchRequest,
         DataAsset,
         SparkDatasource,
     )
-    from great_expectations.validator.validator import Validator
+    from great_expectations_v1.validator.validator import Validator
 
 
 @pytest.fixture(scope="module")

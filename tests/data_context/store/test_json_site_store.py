@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.data_context.store.json_site_store import JsonSiteStore
+from great_expectations_v1.data_context.store.json_site_store import JsonSiteStore
 
 
 @pytest.mark.cloud

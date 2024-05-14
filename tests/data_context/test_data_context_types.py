@@ -2,7 +2,7 @@ from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
-from great_expectations.data_context.types.base import (
+from great_expectations_v1.data_context.types.base import (
     ExecutionEngineConfigSchema,
 )
 
@@ -31,7 +31,7 @@ def test_execution_engine_config_conect_args(connect_args):
     cfg = ExecutionEngineConfigSchema().load(
         {
             "class_name": "SqlAlchemyExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
+            "module_name": "great_expectations_v1.execution_engine",
             "connection_string": "sqlite://",
             "connect_args": connect_args,
         }

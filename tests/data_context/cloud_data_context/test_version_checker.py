@@ -1,7 +1,7 @@
 import pytest
 import responses
 
-from great_expectations.data_context._version_checker import _VersionChecker
+from great_expectations_v1.data_context._version_checker import _VersionChecker
 
 # Set to some arbitrary value so tests will continue to work regardless of GX's actual version
 _MOCK_PYPI_VERSION = "0.16.8"

@@ -7,7 +7,7 @@ import pytest
 import sqlalchemy as sa
 from pytest import param
 
-from great_expectations.datasource.fluent import (
+from great_expectations_v1.datasource.fluent import (
     SnowflakeDatasource,
     TestConnectionError,
 )
@@ -15,7 +15,7 @@ from great_expectations.datasource.fluent import (
 if TYPE_CHECKING:
     from sqlalchemy.engine.reflection import Inspector
 
-    from great_expectations.data_context import AbstractDataContext as DataContext
+    from great_expectations_v1.data_context import AbstractDataContext as DataContext
 
 
 @pytest.mark.snowflake

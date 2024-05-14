@@ -2,13 +2,13 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations.compatibility import google
-from great_expectations.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import InferredAssetGCSDataConnector
-from great_expectations.execution_engine import PandasExecutionEngine
+import great_expectations_v1.exceptions.exceptions as gx_exceptions
+from great_expectations_v1.compatibility import google
+from great_expectations_v1.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations_v1.datasource.data_connector import InferredAssetGCSDataConnector
+from great_expectations_v1.execution_engine import PandasExecutionEngine
 
 yaml = YAMLHandler()
 
@@ -48,7 +48,7 @@ def expected_config_dict():
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
         "path/A-100.csv",
         "path/A-101.csv",
@@ -57,7 +57,7 @@ def expected_config_dict():
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_instantiation_without_args(mock_gcs_conn, mock_list_keys, expected_config_dict):
     my_data_connector = InferredAssetGCSDataConnector(
@@ -79,7 +79,7 @@ def test_instantiation_without_args(mock_gcs_conn, mock_list_keys, expected_conf
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
         "path/A-100.csv",
         "path/A-101.csv",
@@ -88,10 +88,10 @@ def test_instantiation_without_args(mock_gcs_conn, mock_list_keys, expected_conf
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.service_account.Credentials.from_service_account_file"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.service_account.Credentials.from_service_account_file"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_instantiation_with_filename_arg(
     mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict
@@ -118,7 +118,7 @@ def test_instantiation_with_filename_arg(
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
         "path/A-100.csv",
         "path/A-101.csv",
@@ -127,10 +127,10 @@ def test_instantiation_with_filename_arg(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.service_account.Credentials.from_service_account_info"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.service_account.Credentials.from_service_account_info"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_instantiation_with_info_arg(
     mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict
@@ -156,7 +156,7 @@ def test_instantiation_with_info_arg(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
         "path/A-100.csv",
         "path/A-101.csv",
@@ -191,7 +191,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
         "2020/01/alpha-1001.csv",
         "2020/01/beta-1002.csv",
@@ -203,7 +203,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_get_batch_definition_list_from_batch_request_with_unknown_data_connector_raises_error(
     mock_gcs_conn,
@@ -235,7 +235,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
         "2020/01/alpha-1001.csv",
         "2020/01/beta-1002.csv",
@@ -247,7 +247,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_complex_regex_example_with_implicit_data_asset_names(
     mock_gcs_conn,
@@ -319,7 +319,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
         "some_bucket/2021/01/01/log_file-20210101.txt.gz",
         "some_bucket/2021/01/02/log_file-20210102.txt.gz",
@@ -331,7 +331,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_redundant_information_in_naming_convention_bucket_sorted(
     mock_gcs_conn,
@@ -366,7 +366,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
             "name": "my_inferred_asset_filesystem_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -439,7 +439,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
         "some_bucket/2021/01/01/log_file-20210101.txt.gz",
         "some_bucket/2021/01/02/log_file-20210102.txt.gz",
@@ -451,7 +451,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match_group(
     mock_gcs_conn,
@@ -488,12 +488,12 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+            config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
         )
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
     return_value=[
         "some_bucket/2021/01/01/log_file-20210101.txt.gz",
         "some_bucket/2021/01/02/log_file-20210102.txt.gz",
@@ -505,7 +505,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
     mock_gcs_conn,
@@ -545,16 +545,16 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
                 "name": "my_inferred_asset_filesystem_data_connector",
                 "execution_engine": PandasExecutionEngine(),
             },
-            config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+            config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
         )
 
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
+    "great_expectations_v1.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",
 )
 def test_get_full_file_path(mock_gcs_conn, mock_list_keys, empty_data_context_stats_enabled):
     yaml_string = """
@@ -588,7 +588,7 @@ default_regex:
 
     my_data_connector: InferredAssetGCSDataConnector = instantiate_class_from_config(
         config,
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
         runtime_environment={
             "name": "my_data_connector",
             "execution_engine": PandasExecutionEngine(),

@@ -8,12 +8,12 @@ import pandas as pd
 import pytest
 from pandas import Timestamp
 
-from great_expectations.data_context import CloudDataContext
-from great_expectations.datasource.fluent.batch_request import BatchRequest
-from great_expectations.experimental.metric_repository.metric_list_metric_retriever import (
+from great_expectations_v1.data_context import CloudDataContext
+from great_expectations_v1.datasource.fluent.batch_request import BatchRequest
+from great_expectations_v1.experimental.metric_repository.metric_list_metric_retriever import (
     MetricListMetricRetriever,
 )
-from great_expectations.experimental.metric_repository.metrics import (
+from great_expectations_v1.experimental.metric_repository.metrics import (
     ColumnMetric,
     MetricTypes,
     TableMetric,

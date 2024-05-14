@@ -1,11 +1,11 @@
 import pandas as pd
 import pytest
 
-from great_expectations.core.expectation_validation_result import (
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.self_check.util import get_test_validator_with_data
-from great_expectations.util import build_in_memory_runtime_context
+from great_expectations_v1.self_check.util import get_test_validator_with_data
+from great_expectations_v1.util import build_in_memory_runtime_context
 
 
 @pytest.fixture

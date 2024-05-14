@@ -2,7 +2,7 @@
 
 import pytest
 
-from great_expectations.data_context.types.base import (
+from great_expectations_v1.data_context.types.base import (
     DataConnectorConfig,
     dataConnectorConfigSchema,
 )

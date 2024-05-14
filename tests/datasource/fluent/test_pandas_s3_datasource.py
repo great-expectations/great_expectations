@@ -9,19 +9,19 @@ import pandas as pd
 import pytest
 from pytest import param
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.compatibility import aws, pydantic
-from great_expectations.core.util import S3Url
-from great_expectations.datasource.fluent import PandasS3Datasource
-from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
-from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
+import great_expectations_v1.exceptions as ge_exceptions
+from great_expectations_v1.compatibility import aws, pydantic
+from great_expectations_v1.core.util import S3Url
+from great_expectations_v1.datasource.fluent import PandasS3Datasource
+from great_expectations_v1.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
+from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
-from great_expectations.datasource.fluent.data_connector import (
+from great_expectations_v1.datasource.fluent.data_connector import (
     S3DataConnector,
 )
-from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations_v1.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations_v1.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient

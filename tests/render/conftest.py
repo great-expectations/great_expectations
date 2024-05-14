@@ -4,16 +4,16 @@ import os
 import pytest
 import pytest_mock
 
-import great_expectations as gx
-from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
-from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResult
-from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context.data_context.file_data_context import (
+import great_expectations_v1 as gx
+from great_expectations_v1.checkpoint.checkpoint import Checkpoint, CheckpointResult
+from great_expectations_v1.core.expectation_validation_result import ExpectationSuiteValidationResult
+from great_expectations_v1.core.run_identifier import RunIdentifier
+from great_expectations_v1.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.self_check.util import expectationSuiteValidationResultSchema
+from great_expectations_v1.data_context.types.resource_identifiers import ValidationResultIdentifier
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.self_check.util import expectationSuiteValidationResultSchema
 
 
 @pytest.fixture(scope="module")
@@ -31,7 +31,7 @@ def empty_data_context_module_scoped(tmp_path_factory):
 def titanic_profiled_name_column_evrs():
     # This is a janky way to fetch expectations matching a specific name from an EVR suite.
     # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column  # noqa: E501
-    from great_expectations.render.renderer.renderer import Renderer
+    from great_expectations_v1.render.renderer.renderer import Renderer
 
     with open(
         file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json"),

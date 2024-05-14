@@ -5,11 +5,11 @@ from typing import Tuple
 
 import pytest
 
-import great_expectations as gx
-import great_expectations.expectations as gxe
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.data_context import AbstractDataContext
-from great_expectations.datasource.fluent.interfaces import Batch, Datasource
+import great_expectations_v1 as gx
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.data_context import AbstractDataContext
+from great_expectations_v1.datasource.fluent.interfaces import Batch, Datasource
 
 DATASOURCE_NAME = "my_pandas"
 ASSET_NAME = "my_csv"

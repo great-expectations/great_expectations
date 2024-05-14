@@ -25,29 +25,29 @@ from moto import mock_s3
 from pytest import MonkeyPatch
 from typing_extensions import TypeAlias, override
 
-import great_expectations as gx
-from great_expectations.compatibility import aws
-from great_expectations.core.batch import BatchData
-from great_expectations.core.batch_spec import (
+import great_expectations_v1 as gx
+from great_expectations_v1.compatibility import aws
+from great_expectations_v1.core.batch import BatchData
+from great_expectations_v1.core.batch_spec import (
     BatchMarkers,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations.data_context import FileDataContext
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
-from great_expectations.datasource.fluent import (
+from great_expectations_v1.data_context import FileDataContext
+from great_expectations_v1.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations_v1.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
     SparkAzureBlobStorageDatasource,
     SparkGoogleCloudStorageDatasource,
 )
-from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import Datasource
-from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
+from great_expectations_v1.datasource.fluent.config import GxConfig
+from great_expectations_v1.datasource.fluent.interfaces import Datasource
+from great_expectations_v1.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )
-from great_expectations.datasource.fluent.postgres_datasource import PostgresDatasource
-from great_expectations.datasource.fluent.sources import _SourceFactories
-from great_expectations.execution_engine import (
+from great_expectations_v1.datasource.fluent.postgres_datasource import PostgresDatasource
+from great_expectations_v1.datasource.fluent.sources import _SourceFactories
+from great_expectations_v1.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from botocore.client import BaseClient as BotoBaseClient
     from pytest import FixtureRequest
 
-    from great_expectations.data_context import CloudDataContext
+    from great_expectations_v1.data_context import CloudDataContext
 
 CreateSourceFixture: TypeAlias = Callable[..., ContextManager[PostgresDatasource]]
 FLUENT_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent

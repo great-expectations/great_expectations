@@ -8,15 +8,15 @@ import boto3
 import botocore
 import pytest
 
-from great_expectations.core.batch import BatchRequest, LegacyBatchDefinition
-from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.core.id_dict import BatchSpec
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import (
+from great_expectations_v1.core.batch import BatchRequest, LegacyBatchDefinition
+from great_expectations_v1.core.batch_spec import PathBatchSpec
+from great_expectations_v1.core.id_dict import BatchSpec
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations_v1.datasource.data_connector import (
     ConfiguredAssetDBFSDataConnector,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations_v1.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
@@ -89,7 +89,7 @@ def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
             "name": "my_configured_asset_filesystem_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
     my_data_connector.data_context_root_directory = base_directory
 
@@ -174,7 +174,7 @@ def test__get_full_file_path_for_asset_spark(basic_spark_df_execution_engine, fs
             "name": "my_configured_asset_filesystem_data_connector",
             "execution_engine": basic_spark_df_execution_engine,
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
     my_data_connector.data_context_root_directory = base_directory
 

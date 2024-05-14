@@ -5,7 +5,7 @@ from typing import List, Pattern, Tuple
 import pytest
 from packaging import version
 
-from great_expectations.data_context.util import file_relative_path
+from great_expectations_v1.data_context.util import file_relative_path
 
 UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 13
 

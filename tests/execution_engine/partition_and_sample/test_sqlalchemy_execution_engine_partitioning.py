@@ -9,17 +9,17 @@ import pandas as pd
 import pytest
 from dateutil.parser import parse
 
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
+from great_expectations_v1.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations_v1.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
     DatePart,
     SqlAlchemyDataPartitioner,
 )
-from great_expectations.execution_engine.sqlalchemy_batch_data import (
+from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.self_check.util import build_sa_execution_engine
+from great_expectations_v1.self_check.util import build_sa_execution_engine
 from tests.execution_engine.partition_and_sample.partition_and_sample_test_cases import (
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
     MULTIPLE_DATE_PART_DATE_PARTS,
@@ -60,7 +60,7 @@ pytestmark = [
 
 
 @mock.patch(
-    "great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.partition_on_date_parts"
+    "great_expectations_v1.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.partition_on_date_parts"
 )
 @pytest.mark.parametrize(
     "partitioner_method_name,called_with_date_parts",
@@ -178,9 +178,9 @@ def test_partition_on_date_parts_multiple_date_parts(batch_identifiers_for_colum
 
 
 @mock.patch(
-    "great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.get_data_for_batch_identifiers_for_partition_on_date_parts"
+    "great_expectations_v1.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.get_data_for_batch_identifiers_for_partition_on_date_parts"
 )
-@mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
+@mock.patch("great_expectations_v1.execution_engine.execution_engine.ExecutionEngine")
 @pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year(
     mock_execution_engine: mock.MagicMock,  # noqa: TID251
@@ -209,9 +209,9 @@ def test_get_data_for_batch_identifiers_year(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.get_data_for_batch_identifiers_for_partition_on_date_parts"
+    "great_expectations_v1.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.get_data_for_batch_identifiers_for_partition_on_date_parts"
 )
-@mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
+@mock.patch("great_expectations_v1.execution_engine.execution_engine.ExecutionEngine")
 @pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year_and_month(
     mock_execution_engine: mock.MagicMock,  # noqa: TID251
@@ -237,9 +237,9 @@ def test_get_data_for_batch_identifiers_year_and_month(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.get_data_for_batch_identifiers_for_partition_on_date_parts"
+    "great_expectations_v1.execution_engine.partition_and_sample.sqlalchemy_data_partitioner.SqlAlchemyDataPartitioner.get_data_for_batch_identifiers_for_partition_on_date_parts"
 )
-@mock.patch("great_expectations.execution_engine.execution_engine.ExecutionEngine")
+@mock.patch("great_expectations_v1.execution_engine.execution_engine.ExecutionEngine")
 @pytest.mark.sqlite
 def test_get_data_for_batch_identifiers_year_and_month_and_day(
     mock_execution_engine: mock.MagicMock,  # noqa: TID251

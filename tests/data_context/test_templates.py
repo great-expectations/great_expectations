@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.data_context import templates
+from great_expectations_v1.data_context import templates
 
 
 @pytest.fixture()

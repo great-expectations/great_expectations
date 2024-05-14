@@ -3,11 +3,11 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.store import DatasourceStore
-from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
-from great_expectations.exceptions import StoreBackendError
+from great_expectations_v1.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations_v1.data_context.store import DatasourceStore
+from great_expectations_v1.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations_v1.datasource.fluent.pandas_datasource import PandasDatasource
+from great_expectations_v1.exceptions import StoreBackendError
 from tests.data_context.conftest import MockResponse
 
 
@@ -85,7 +85,7 @@ def test_datasource_store_get_by_name(
     with mock.patch(
         "requests.Session.get", autospec=True, side_effect=mocked_response
     ) as mock_get, mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.has_key", autospec=True
+        "great_expectations_v1.data_context.store.DatasourceStore.has_key", autospec=True
     ) as mock_has_key:
         # Mocking has_key so that we don't try to connect to the cloud backend to verify key existence.  # noqa: E501
         mock_has_key.return_value = True

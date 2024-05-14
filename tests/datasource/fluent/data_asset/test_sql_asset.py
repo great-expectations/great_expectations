@@ -1,13 +1,13 @@
 import pytest
 
-from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.partitioners import (
+from great_expectations_v1.core.batch_definition import BatchDefinition
+from great_expectations_v1.core.partitioners import (
     ColumnPartitionerDaily,
     ColumnPartitionerMonthly,
     ColumnPartitionerYearly,
 )
-from great_expectations.datasource.fluent import SQLDatasource
-from great_expectations.datasource.fluent.sql_datasource import TableAsset, _SQLAsset
+from great_expectations_v1.datasource.fluent import SQLDatasource
+from great_expectations_v1.datasource.fluent.sql_datasource import TableAsset, _SQLAsset
 from tests.datasource.fluent.conftest import CreateSourceFixture
 
 

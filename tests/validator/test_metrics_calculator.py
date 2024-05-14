@@ -4,12 +4,12 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.self_check.util import get_test_validator_with_data
-from great_expectations.util import isclose
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.metrics_calculator import MetricsCalculator
-from great_expectations.validator.validator import Validator
+from great_expectations_v1.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations_v1.self_check.util import get_test_validator_with_data
+from great_expectations_v1.util import isclose
+from great_expectations_v1.validator.metric_configuration import MetricConfiguration
+from great_expectations_v1.validator.metrics_calculator import MetricsCalculator
+from great_expectations_v1.validator.validator import Validator
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -174,7 +174,7 @@ def test_get_metric_calls_get_metrics_and_returns_correct_result():
     metric_domain_kwargs: dict = {}
 
     with mock.patch(
-        "great_expectations.validator.metrics_calculator.MetricsCalculator.get_metrics",
+        "great_expectations_v1.validator.metrics_calculator.MetricsCalculator.get_metrics",
         return_value={metric_name: actual_metric_value},
     ) as mock_get_metrics_method:
         metric_configuration = MetricConfiguration(

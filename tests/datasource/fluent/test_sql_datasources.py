@@ -9,16 +9,16 @@ from unittest import mock
 import pytest
 from pytest import param
 
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.datasource.fluent import GxDatasourceWarning, SQLDatasource
-from great_expectations.datasource.fluent.sql_datasource import TableAsset
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations_v1.compatibility import sqlalchemy
+from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations_v1.datasource.fluent import GxDatasourceWarning, SQLDatasource
+from great_expectations_v1.datasource.fluent.sql_datasource import TableAsset
+from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
-    from great_expectations.data_context import EphemeralDataContext
+    from great_expectations_v1.data_context import EphemeralDataContext
 
 
 LOGGER = logging.getLogger(__name__)
@@ -176,7 +176,7 @@ def test_table_quoted_name_type_does_not_exist(
     ]
 
     with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource.TableAsset.datasource",
+        "great_expectations_v1.datasource.fluent.sql_datasource.TableAsset.datasource",
         new_callable=mock.PropertyMock,
         return_value=SQLDatasource(
             name="my_snowflake_datasource",
@@ -215,7 +215,7 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
     table_name: str
 
     with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource.TableAsset.datasource",
+        "great_expectations_v1.datasource.fluent.sql_datasource.TableAsset.datasource",
         new_callable=mock.PropertyMock,
         return_value=SQLDatasource(
             name="my_snowflake_datasource",
@@ -274,7 +274,7 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
     table_name: str
 
     with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource.TableAsset.datasource",
+        "great_expectations_v1.datasource.fluent.sql_datasource.TableAsset.datasource",
         new_callable=mock.PropertyMock,
         return_value=SQLDatasource(
             name="my_snowflake_datasource",

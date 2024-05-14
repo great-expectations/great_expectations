@@ -5,17 +5,17 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import great_expectations as gx
-import great_expectations.expectations as gxe
-from great_expectations import project_manager
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.validation_definition import ValidationDefinition
-from great_expectations.datasource.fluent.interfaces import Datasource
+import great_expectations_v1 as gx
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1 import project_manager
+from great_expectations_v1.checkpoint import Checkpoint
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.core.validation_definition import ValidationDefinition
+from great_expectations_v1.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.data_context import AbstractDataContext, FileDataContext
+    from great_expectations_v1.checkpoint.checkpoint import CheckpointResult
+    from great_expectations_v1.data_context import AbstractDataContext, FileDataContext
 
 DATASOURCE_NAME = "my_datasource"
 ANIMAL_ASSET = "animals_names_asset"

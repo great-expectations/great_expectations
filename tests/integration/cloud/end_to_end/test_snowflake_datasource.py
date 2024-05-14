@@ -6,21 +6,21 @@ from typing import TYPE_CHECKING, Iterator
 
 import pytest
 
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
-    from great_expectations.core import ExpectationSuite, ExpectationValidationResult
-    from great_expectations.data_context import CloudDataContext
-    from great_expectations.datasource.fluent import (
+    from great_expectations_v1.checkpoint.checkpoint import Checkpoint, CheckpointResult
+    from great_expectations_v1.core import ExpectationSuite, ExpectationValidationResult
+    from great_expectations_v1.data_context import CloudDataContext
+    from great_expectations_v1.datasource.fluent import (
         BatchRequest,
         DataAsset,
         SnowflakeDatasource,
     )
-    from great_expectations.datasource.fluent.sql_datasource import TableAsset
-    from great_expectations.validator.validator import Validator
+    from great_expectations_v1.datasource.fluent.sql_datasource import TableAsset
+    from great_expectations_v1.validator.validator import Validator
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
 

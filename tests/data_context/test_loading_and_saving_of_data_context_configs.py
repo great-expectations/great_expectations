@@ -19,7 +19,7 @@ def test_add_store_immediately_adds_to_config(empty_data_context):
     context.add_store(
         "my_new_store",
         {
-            "module_name": "great_expectations.data_context.store",
+            "module_name": "great_expectations_v1.data_context.store",
             "class_name": "ExpectationsStore",
         },
     )

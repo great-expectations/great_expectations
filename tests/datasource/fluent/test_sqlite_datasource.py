@@ -6,15 +6,15 @@ from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
 
 import pytest
 
-from great_expectations.compatibility.pydantic import ValidationError
-from great_expectations.core.partitioners import (
+from great_expectations_v1.compatibility.pydantic import ValidationError
+from great_expectations_v1.core.partitioners import (
     PartitionerConvertedDatetime,
 )
-from great_expectations.datasource.fluent import SqliteDatasource
+from great_expectations_v1.datasource.fluent import SqliteDatasource
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations_v1.data_context import AbstractDataContext
 
 
 @pytest.fixture

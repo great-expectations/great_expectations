@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 

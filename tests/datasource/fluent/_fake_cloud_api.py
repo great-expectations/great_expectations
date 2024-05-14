@@ -23,12 +23,12 @@ from typing import (
 
 import responses
 
-from great_expectations.compatibility import pydantic
-from great_expectations.data_context.store.gx_cloud_store_backend import (
+from great_expectations_v1.compatibility import pydantic
+from great_expectations_v1.data_context.store.gx_cloud_store_backend import (
     ErrorDetail,
     ErrorPayload,
 )
-from great_expectations.datasource.fluent.config import GxConfig
+from great_expectations_v1.datasource.fluent.config import GxConfig
 
 if TYPE_CHECKING:
     from requests import PreparedRequest

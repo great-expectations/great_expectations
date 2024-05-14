@@ -1,9 +1,9 @@
 import pytest
 
-from great_expectations.core.expectation_validation_result import (
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
-from great_expectations.render.renderer import SlackRenderer
+from great_expectations_v1.render.renderer import SlackRenderer
 
 
 @pytest.mark.unit

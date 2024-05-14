@@ -6,46 +6,46 @@ from typing import Dict, List, cast
 import pandas as pd
 import pytest
 
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import (
+from great_expectations_v1.compatibility import sqlalchemy
+from great_expectations_v1.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.core import (
+from great_expectations_v1.core import (
     ExpectationValidationResult,
 )
-from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
+from great_expectations_v1.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestCase,
     ExpectationTestDataCases,
     TestBackend,
     TestData,
 )
-from great_expectations.core.expectation_diagnostics.supporting_types import (
+from great_expectations_v1.core.expectation_diagnostics.supporting_types import (
     ExpectationExecutionEngineDiagnostics,
 )
-from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.execution_engine import (
+from great_expectations_v1.exceptions import GreatExpectationsError
+from great_expectations_v1.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import (
+from great_expectations_v1.expectations.expectation import (
     render_suite_parameter_string,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.expectations.metrics.util import column_reflection_fallback
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.self_check.util import (
+from great_expectations_v1.expectations.metrics.util import column_reflection_fallback
+from great_expectations_v1.render import RenderedStringTemplateContent
+from great_expectations_v1.self_check.util import (
     build_sa_validator_with_data,
     generate_expectation_tests,
     generate_test_table_name,
     should_we_generate_this_test,
 )
-from great_expectations.self_check.util import (
+from great_expectations_v1.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import Validator
+from great_expectations_v1.validator.metric_configuration import MetricConfiguration
+from great_expectations_v1.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 

@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import great_expectations.expectations as gxe
-from great_expectations.render.renderer.content_block.content_block import (
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.expectations.expectation import Expectation
+    from great_expectations_v1.expectations.expectation import Expectation
 
 
 @pytest.mark.parametrize(

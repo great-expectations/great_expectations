@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.datasource.types import *  # noqa: F403
+from great_expectations_v1.datasource.types import *  # noqa: F403
 
 
 @pytest.mark.unit

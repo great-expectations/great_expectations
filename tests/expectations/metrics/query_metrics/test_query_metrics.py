@@ -1,9 +1,9 @@
 import pytest
 
-from great_expectations.compatibility.sqlalchemy import (
+from great_expectations_v1.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.expectations.metrics.query_metrics.query_template_values import (
+from great_expectations_v1.expectations.metrics.query_metrics.query_template_values import (
     QueryTemplateValues,
 )
 

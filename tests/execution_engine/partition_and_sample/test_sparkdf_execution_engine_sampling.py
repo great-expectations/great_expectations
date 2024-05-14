@@ -2,8 +2,8 @@ import datetime
 
 import pytest
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch_spec import RuntimeDataBatchSpec
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.core.batch_spec import RuntimeDataBatchSpec
 
 # module level markers
 pytestmark = pytest.mark.spark

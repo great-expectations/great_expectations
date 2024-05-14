@@ -2,19 +2,19 @@ import json
 
 import pytest
 
-from great_expectations.core.expectation_validation_result import (
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render import (
+from great_expectations_v1.expectations.registry import get_renderer_impl
+from great_expectations_v1.render import (
     LegacyDiagnosticRendererType,
     RenderedComponentContent,
     RenderedStringTemplateContent,
 )
-from great_expectations.render.renderer.content_block import (
+from great_expectations_v1.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 

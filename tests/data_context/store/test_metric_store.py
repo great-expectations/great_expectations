@@ -3,8 +3,8 @@ import uuid
 
 import pytest
 
-from great_expectations.data_context.store.metric_store import MetricStore
-from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations_v1.data_context.store.metric_store import MetricStore
+from great_expectations_v1.data_context.util import instantiate_class_from_config
 
 
 @pytest.fixture(
@@ -25,7 +25,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
         },
         {
             "class_name": "MetricStore",
-            "module_name": "great_expectations.data_context.store",
+            "module_name": "great_expectations_v1.data_context.store",
         },
     ]
 )
@@ -40,7 +40,7 @@ def param_store(request, test_backends):
     return instantiate_class_from_config(
         config=request.param,
         config_defaults={
-            "module_name": "great_expectations.data_context.store",
+            "module_name": "great_expectations_v1.data_context.store",
         },
         runtime_environment={},
     )
@@ -56,7 +56,7 @@ def param_store(request, test_backends):
         },
         {
             "class_name": "MetricStore",
-            "module_name": "great_expectations.data_context.store",
+            "module_name": "great_expectations_v1.data_context.store",
         },
     ]
 )
@@ -71,7 +71,7 @@ def in_memory_param_store(request, test_backends):
     return instantiate_class_from_config(
         config=request.param,
         config_defaults={
-            "module_name": "great_expectations.data_context.store",
+            "module_name": "great_expectations_v1.data_context.store",
         },
         runtime_environment={},
     )

@@ -7,20 +7,20 @@ import pandas as pd
 import pandas.api.types as ptypes
 import pytest
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import IDDict
-from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.batch_spec import (
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.core import IDDict
+from great_expectations_v1.core.batch import LegacyBatchDefinition
+from great_expectations_v1.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
+from great_expectations_v1.datasource.data_connector import ConfiguredAssetS3DataConnector
+from great_expectations_v1.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations_v1.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
 )
-from great_expectations.execution_engine.partition_and_sample.pandas_data_partitioner import (
+from great_expectations_v1.execution_engine.partition_and_sample.pandas_data_partitioner import (
     PandasDataPartitioner,
 )
 from tests.execution_engine.partition_and_sample.partition_and_sample_test_cases import (
@@ -226,7 +226,7 @@ def test_partition_on_date_parts_multiple_date_parts(
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.execution_engine.partition_and_sample.pandas_data_partitioner.PandasDataPartitioner.partition_on_date_parts"
+    "great_expectations_v1.execution_engine.partition_and_sample.pandas_data_partitioner.PandasDataPartitioner.partition_on_date_parts"
 )
 @pytest.mark.parametrize(
     "partitioner_method_name,called_with_date_parts",

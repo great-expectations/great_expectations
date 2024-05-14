@@ -5,28 +5,28 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 
-import great_expectations.expectations as gxe
-from great_expectations.compatibility import pydantic
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations.expectation import (
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.compatibility import pydantic
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.exceptions import InvalidExpectationConfigurationError
+from great_expectations_v1.expectations.expectation import (
     ColumnMapExpectation,
     ColumnPairMapExpectation,
     MulticolumnMapExpectation,
     UnexpectedRowsExpectation,
     _validate_dependencies_against_available_metrics,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations_v1.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.abstract_data_context import (
+    from great_expectations_v1.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
-    from great_expectations.datasource.fluent.interfaces import Batch
-    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDatasource
+    from great_expectations_v1.datasource.fluent.interfaces import Batch
+    from great_expectations_v1.datasource.fluent.sqlite_datasource import SqliteDatasource
 
 
 class FakeMulticolumnExpectation(MulticolumnMapExpectation):

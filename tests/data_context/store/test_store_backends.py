@@ -11,14 +11,14 @@ import pytest
 from moto import mock_s3
 from pytest_mock import MockerFixture
 
-from great_expectations.core.data_context_key import DataContextVariableKey
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.data_context_variables import (
+from great_expectations_v1.core.data_context_key import DataContextVariableKey
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.core.run_identifier import RunIdentifier
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
-from great_expectations.data_context.store import (
+from great_expectations_v1.data_context.store import (
     InMemoryStoreBackend,
     StoreBackend,
     TupleAzureBlobStoreBackend,
@@ -26,17 +26,17 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
-from great_expectations.data_context.store.inline_store_backend import (
+from great_expectations_v1.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations_v1.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
-from great_expectations.self_check.util import expectationSuiteSchema
-from great_expectations.util import (
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.exceptions import InvalidKeyError, StoreBackendError, StoreError
+from great_expectations_v1.self_check.util import expectationSuiteSchema
+from great_expectations_v1.util import (
     gen_directory_tree_str,
     is_library_loadable,
 )
@@ -1028,7 +1028,7 @@ def test_TupleGCSStoreBackend_get_all(mocker: MockerFixture):
     val_b = "bbb"
 
     # setup mocks
-    from great_expectations.compatibility import google
+    from great_expectations_v1.compatibility import google
 
     def _create_mock_blob(name: str):
         output = mocker.Mock()
@@ -1092,7 +1092,7 @@ def test_TupleAzureBlobStoreBackend_credential():
         prefix=prefix,
         container=container,
     )
-    with mock.patch("great_expectations.compatibility.azure.BlobServiceClient", autospec=True):
+    with mock.patch("great_expectations_v1.compatibility.azure.BlobServiceClient", autospec=True):
         mock_container_client = my_store._container_client
         my_store.set(("AAA",), "aaa")
         mock_container_client.upload_blob.assert_called_once_with(
@@ -1129,7 +1129,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
     )
 
     with mock.patch(
-        "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
+        "great_expectations_v1.compatibility.azure.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
         mock_container_client = my_store._container_client
         mock_azure_blob_client.from_connection_string.assert_called_once()
@@ -1169,10 +1169,10 @@ def test_TupleAzureBlobStoreBackend_account_url():
     )
 
     with mock.patch(
-        "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
+        "great_expectations_v1.compatibility.azure.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
         with mock.patch(
-            "great_expectations.compatibility.azure.DefaultAzureCredential",
+            "great_expectations_v1.compatibility.azure.DefaultAzureCredential",
             autospec=True,
         ) as mock_azure_credential:
             mock_container_client = my_store._container_client
@@ -1225,7 +1225,7 @@ def test_TupleAzureBlobStoreBackend_get_all(mocker: MockerFixture):
         container=container,
     )
 
-    with mock.patch("great_expectations.compatibility.azure.BlobServiceClient", autospec=True):
+    with mock.patch("great_expectations_v1.compatibility.azure.BlobServiceClient", autospec=True):
         mock_container_client = my_store._container_client
         mock_container_client.list_blobs.return_value = [
             _create_mock_blob(key_a),
@@ -1320,7 +1320,7 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     key = DataContextVariableKey()
     tuple_ = key.to_tuple()
     with mock.patch(
-        "great_expectations.data_context.store.InlineStoreBackend._save_changes"
+        "great_expectations_v1.data_context.store.InlineStoreBackend._save_changes"
     ) as mock_save:
         inline_store_backend.set(tuple_, new_config_version)
 
@@ -1464,7 +1464,7 @@ def test_InMemoryStoreBackend_config_and_defaults() -> None:
     assert store_backend.config == {
         "class_name": "InMemoryStoreBackend",
         "fixed_length_key": False,
-        "module_name": "great_expectations.data_context.store.in_memory_store_backend",
+        "module_name": "great_expectations_v1.data_context.store.in_memory_store_backend",
         "suppress_store_backend_id": False,
     }
 

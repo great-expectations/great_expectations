@@ -3,9 +3,9 @@ from collections import OrderedDict
 
 import pytest
 
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.render.renderer import ProfilingResultsOverviewSectionRenderer
-from great_expectations.self_check.util import expectationSuiteValidationResultSchema
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.render.renderer import ProfilingResultsOverviewSectionRenderer
+from great_expectations_v1.self_check.util import expectationSuiteValidationResultSchema
 
 
 @pytest.fixture(scope="module")

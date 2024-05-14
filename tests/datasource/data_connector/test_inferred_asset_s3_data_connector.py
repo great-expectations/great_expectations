@@ -7,18 +7,18 @@ import pandas as pd
 import pytest
 from moto import mock_s3
 
-import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
+import great_expectations_v1.exceptions.exceptions as gx_exceptions
+from great_expectations_v1.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations_v1.datasource.data_connector import InferredAssetS3DataConnector
 
 # noinspection PyProtectedMember
-from great_expectations.datasource.data_connector.inferred_asset_s3_data_connector import (
+from great_expectations_v1.datasource.data_connector.inferred_asset_s3_data_connector import (
     INVALID_S3_CHARS,
     _check_valid_s3_path,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations_v1.execution_engine import PandasExecutionEngine
 
 yaml = YAMLHandler()
 
@@ -242,7 +242,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             "name": "my_inferred_asset_filesystem_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -369,7 +369,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
                     "name": "my_inferred_asset_filesystem_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+                config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
             )
         )
 
@@ -432,7 +432,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
                     "name": "my_inferred_asset_filesystem_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+                config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
             )
         )
 

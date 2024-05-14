@@ -14,10 +14,10 @@ from typing import (
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.compatibility.pydantic import ValidationError
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.core.partitioners import (
+import great_expectations_v1.exceptions as ge_exceptions
+from great_expectations_v1.compatibility.pydantic import ValidationError
+from great_expectations_v1.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations_v1.core.partitioners import (
     ColumnPartitioner,
     ColumnPartitionerDaily,
     ColumnPartitionerMonthly,
@@ -28,25 +28,25 @@ from great_expectations.core.partitioners import (
     PartitionerModInteger,
     PartitionerMultiColumnValue,
 )
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.data_context.file_data_context import (
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.datasource.fluent.batch_request import (
+from great_expectations_v1.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
 )
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations_v1.datasource.fluent.interfaces import (
     TestConnectionError,
 )
-from great_expectations.datasource.fluent.postgres_datasource import (
+from great_expectations_v1.datasource.fluent.postgres_datasource import (
     PostgresDatasource,
 )
-from great_expectations.datasource.fluent.sql_datasource import (
+from great_expectations_v1.datasource.fluent.sql_datasource import (
     SqlPartitionerYearAndMonth,
     TableAsset,
 )
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
 from tests.datasource.fluent.conftest import (
     _DEFAULT_TEST_MONTHS,
     _DEFAULT_TEST_YEARS,
@@ -59,7 +59,7 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockFixture
 
-    from great_expectations.datasource.fluent.interfaces import (
+    from great_expectations_v1.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
     )

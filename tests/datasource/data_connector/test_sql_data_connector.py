@@ -3,22 +3,22 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.batch import (
+from great_expectations_v1.core.batch import (
     Batch,
     BatchRequest,
     IDDict,
     LegacyBatchDefinition,
 )
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import AbstractDataContext
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import (
+from great_expectations_v1.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context import AbstractDataContext
+from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations_v1.datasource.data_connector import (
     ConfiguredAssetSqlDataConnector,
     InferredAssetSqlDataConnector,
 )
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
+from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations_v1.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
 )
 
@@ -26,7 +26,7 @@ try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
-from great_expectations.validator.validator import Validator
+from great_expectations_v1.validator.validator import Validator
 
 yaml = YAMLHandler()
 
@@ -756,7 +756,7 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
             "datasource_name": "my_test_datasource",
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     assert my_data_connector.get_available_data_asset_names() == [
@@ -808,7 +808,7 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
             "datasource_name": "my_test_datasource",
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     assert my_data_connector.get_available_data_asset_names() == [
@@ -846,7 +846,7 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
 
 
 @pytest.mark.sqlite
-@mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
+@mock.patch("great_expectations_v1.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name(
     mock_sql_alchemy_execution_engine: mock.MagicMock,  # noqa: TID251
@@ -885,7 +885,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 
 
 @pytest.mark.sqlite
-@mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
+@mock.patch("great_expectations_v1.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(  # noqa: E501
     mock_sql_alchemy_execution_engine: mock.MagicMock,  # noqa: TID251
@@ -911,7 +911,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 
 
 @pytest.mark.sqlite
-@mock.patch("great_expectations.execution_engine.SqlAlchemyExecutionEngine.__init__")
+@mock.patch("great_expectations_v1.execution_engine.SqlAlchemyExecutionEngine.__init__")
 @pytest.mark.parametrize("partitioner_method_name_prefix", ["_", ""])
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix_table_name(  # noqa: E501
     mock_sql_alchemy_execution_engine: mock.MagicMock,  # noqa: TID251
@@ -1472,7 +1472,7 @@ def test_introspect_db(
             "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
             "datasource_name": "my_test_datasource",
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     assert my_data_connector._introspect_db() == [

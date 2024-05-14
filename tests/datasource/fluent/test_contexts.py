@@ -13,15 +13,15 @@ import pandas as pd
 import pytest
 import requests
 
-from great_expectations import get_context
-from great_expectations.core.partitioners import ColumnPartitionerYearly
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import CloudDataContext, FileDataContext
-from great_expectations.datasource.fluent import (
+from great_expectations_v1 import get_context
+from great_expectations_v1.core.partitioners import ColumnPartitionerYearly
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context import CloudDataContext, FileDataContext
+from great_expectations_v1.datasource.fluent import (
     GxInvalidDatasourceWarning,
     InvalidDatasource,
 )
-from great_expectations.datasource.fluent.constants import (
+from great_expectations_v1.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
 from tests.datasource.fluent._fake_cloud_api import (

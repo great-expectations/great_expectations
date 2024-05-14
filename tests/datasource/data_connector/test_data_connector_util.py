@@ -2,12 +2,12 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations.compatibility import google
-from great_expectations.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
+import great_expectations_v1.exceptions.exceptions as gx_exceptions
+from great_expectations_v1.compatibility import google
+from great_expectations_v1.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
 
 # noinspection PyProtectedMember
-from great_expectations.datasource.data_connector.util import (
+from great_expectations_v1.datasource.data_connector.util import (
     _invert_regex_to_data_reference_template,
     batch_definition_matches_batch_request,
     build_sorters_from_config,
@@ -500,7 +500,7 @@ def test_build_sorters_from_config_bad_config():
     not google.storage,
     reason="Could not import 'storage' from google.cloud",
 )
-@mock.patch("great_expectations.compatibility.google.Client")
+@mock.patch("great_expectations_v1.compatibility.google.Client")
 @pytest.mark.big
 def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
     # Set defaults for ConfiguredAssetGCSDataConnector

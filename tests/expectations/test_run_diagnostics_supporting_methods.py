@@ -1,18 +1,18 @@
 import pytest
 
-from great_expectations.core.expectation_diagnostics.expectation_doctor import (
+from great_expectations_v1.core.expectation_diagnostics.expectation_doctor import (
     ExpectationDoctor,
 )
-from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
+from great_expectations_v1.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,
 )
-from great_expectations.core.expectation_diagnostics.supporting_types import (
+from great_expectations_v1.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
     ExpectationDescriptionDiagnostics,
     ExpectationExecutionEngineDiagnostics,
     ExpectationMetricDiagnostics,
 )
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations_v1.expectations.expectation import ColumnMapExpectation
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,

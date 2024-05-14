@@ -11,31 +11,31 @@ from typing import TYPE_CHECKING, Any, Callable, Type
 import pytest
 from pytest import MonkeyPatch, param
 
-import great_expectations as gx
-import great_expectations.execution_engine.pandas_execution_engine
-from great_expectations.compatibility import pydantic
-from great_expectations.datasource.fluent import PandasDatasource
-from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.interfaces import Batch
-from great_expectations.datasource.fluent.pandas_datasource import (
+import great_expectations_v1 as gx
+import great_expectations_v1.execution_engine.pandas_execution_engine
+from great_expectations_v1.compatibility import pydantic
+from great_expectations_v1.datasource.fluent import PandasDatasource
+from great_expectations_v1.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations_v1.datasource.fluent.interfaces import Batch
+from great_expectations_v1.datasource.fluent.pandas_datasource import (
     _DYNAMIC_ASSET_TYPES,
     CSVAsset,
     DataFrameAsset,
     TableAsset,
     _PandasDataAsset,
 )
-from great_expectations.datasource.fluent.sources import (
+from great_expectations_v1.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
     DefaultPandasDatasourceError,
     _get_field_details,
 )
-from great_expectations.util import camel_to_snake
+from great_expectations_v1.util import camel_to_snake
 
 if TYPE_CHECKING:
     import pandas as pd
 
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations_v1.data_context import AbstractDataContext
 
 
 logger = logging.getLogger(__file__)
@@ -358,7 +358,7 @@ class TestDynamicPandasAssets:
         # read_json on a csv file). We patch the internal call that actually tries to read and create the batch.  # noqa: E501
         # Ideally, we would rewrite this test so we wouldn't need to mock like this.
         mocker.patch(
-            "great_expectations.datasource.fluent.pandas_datasource._PandasDataAsset.get_batch_list_from_batch_request"
+            "great_expectations_v1.datasource.fluent.pandas_datasource._PandasDataAsset.get_batch_list_from_batch_request"
         )
         # read_* normally returns batch but, since we've added a mock in the line above, we get a mock object returned.  # noqa: E501
         # We are calling it here for it's side effect on the default asset so get and inspect that afterwards.  # noqa: E501

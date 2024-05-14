@@ -6,21 +6,21 @@ import pandas as pd
 import pytest
 from moto import mock_s3
 
-import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations.core.batch import (
+import great_expectations_v1.exceptions.exceptions as gx_exceptions
+from great_expectations_v1.core.batch import (
     BatchRequest,
     BatchRequestBase,
     IDDict,
     LegacyBatchDefinition,
 )
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.datasource.data_connector.util import (
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations_v1.datasource.data_connector import ConfiguredAssetS3DataConnector
+from great_expectations_v1.datasource.data_connector.util import (
     sanitize_prefix,
     sanitize_prefix_for_gcs_and_s3,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations_v1.execution_engine import PandasExecutionEngine
 
 yaml = YAMLHandler()
 
@@ -125,7 +125,7 @@ def test_return_all_batch_definitions_unsorted():
             "name": "general_s3_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     with pytest.raises(TypeError):
@@ -287,7 +287,7 @@ def test_return_all_batch_definitions_sorted():
             "name": "general_s3_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -458,7 +458,7 @@ def test_alpha():
             "name": "general_s3_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
 
     my_batch_definition_list: List[LegacyBatchDefinition]
@@ -552,7 +552,7 @@ def test_foxtrot():
             "name": "general_s3_data_connector",
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
     my_batch_definition_list: List[LegacyBatchDefinition]
     my_batch_definition: LegacyBatchDefinition
@@ -631,7 +631,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
                     "name": "general_s3_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+                config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
             )
         )
 
@@ -696,7 +696,7 @@ def test_return_all_batch_definitions_too_many_sorters():
                     "name": "general_s3_data_connector",
                     "execution_engine": PandasExecutionEngine(),
                 },
-                config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+                config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
             )
         )
 
@@ -753,7 +753,7 @@ assets:
     config = yaml.load(yaml_string)
     my_data_connector = instantiate_class_from_config(
         config,
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
         runtime_environment={
             "name": "my_data_connector",
             "execution_engine": PandasExecutionEngine(),

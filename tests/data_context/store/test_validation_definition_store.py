@@ -5,15 +5,15 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.data_context_key import StringKey
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.validation_definition import ValidationDefinition
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.store import ValidationDefinitionStore
-from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations_v1.core.data_context_key import StringKey
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.core.validation_definition import ValidationDefinition
+from great_expectations_v1.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations_v1.data_context.store import ValidationDefinitionStore
+from great_expectations_v1.data_context.types.resource_identifiers import GXCloudIdentifier
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.ephemeral_data_context import (
+    from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
         EphemeralDataContext,
     )
     from tests.datasource.fluent._fake_cloud_api import CloudDetails

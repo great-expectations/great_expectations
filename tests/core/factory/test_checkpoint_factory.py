@@ -3,16 +3,16 @@ from unittest import mock
 import pytest
 from pytest_mock import MockerFixture
 
-from great_expectations.analytics.events import CheckpointCreatedEvent, CheckpointDeletedEvent
-from great_expectations.checkpoint.checkpoint import Checkpoint
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.factory.checkpoint_factory import CheckpointFactory
-from great_expectations.core.validation_definition import ValidationDefinition
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
-from great_expectations.data_context.store.checkpoint_store import (
+from great_expectations_v1.analytics.events import CheckpointCreatedEvent, CheckpointDeletedEvent
+from great_expectations_v1.checkpoint.checkpoint import Checkpoint
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.core.factory.checkpoint_factory import CheckpointFactory
+from great_expectations_v1.core.validation_definition import ValidationDefinition
+from great_expectations_v1.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations_v1.data_context.store.checkpoint_store import (
     CheckpointStore,
 )
-from great_expectations.exceptions import DataContextError
+from great_expectations_v1.exceptions import DataContextError
 
 
 @pytest.mark.unit
@@ -291,7 +291,7 @@ class TestCheckpointFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations.core.factory.checkpoint_factory.submit_event", autospec=True
+            "great_expectations_v1.core.factory.checkpoint_factory.submit_event", autospec=True
         ) as mock_submit:
             _ = context.checkpoints.add(checkpoint=checkpoint)
 
@@ -324,7 +324,7 @@ class TestCheckpointFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations.core.factory.checkpoint_factory.submit_event", autospec=True
+            "great_expectations_v1.core.factory.checkpoint_factory.submit_event", autospec=True
         ) as mock_submit:
             context.checkpoints.delete(name=name)
 

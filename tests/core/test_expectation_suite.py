@@ -8,24 +8,24 @@ from uuid import UUID, uuid4
 
 import pytest
 
-import great_expectations as gx
-import great_expectations.exceptions.exceptions as gx_exceptions
-import great_expectations.expectations as gxe
-from great_expectations import __version__ as ge_version
-from great_expectations import get_context, set_context
-from great_expectations.analytics.events import (
+import great_expectations_v1 as gx
+import great_expectations_v1.exceptions.exceptions as gx_exceptions
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1 import __version__ as ge_version
+from great_expectations_v1 import get_context, set_context
+from great_expectations_v1.analytics.events import (
     ExpectationSuiteExpectationCreatedEvent,
     ExpectationSuiteExpectationDeletedEvent,
     ExpectationSuiteExpectationUpdatedEvent,
 )
-from great_expectations.core.expectation_suite import (
+from great_expectations_v1.core.expectation_suite import (
     ExpectationSuite,
 )
-from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.data_context import AbstractDataContext
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations.expectation import Expectation
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.core.serdes import _IdentifierBundle
+from great_expectations_v1.data_context import AbstractDataContext
+from great_expectations_v1.exceptions import InvalidExpectationConfigurationError
+from great_expectations_v1.expectations.expectation import Expectation
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 
@@ -971,7 +971,7 @@ class TestExpectationSuiteAnalytics:
         suite = empty_suite
         expectation = expect_column_values_to_be_between
 
-        with mock.patch("great_expectations.core.expectation_suite.submit_event") as mock_submit:
+        with mock.patch("great_expectations_v1.core.expectation_suite.submit_event") as mock_submit:
             _ = suite.add_expectation(expectation)
 
         mock_submit.assert_called_once_with(
@@ -993,7 +993,7 @@ class TestExpectationSuiteAnalytics:
 
         expectation = ExpectColumnValuesToBeBetweenOneAndTen(column="passenger_count")
 
-        with mock.patch("great_expectations.core.expectation_suite.submit_event") as mock_submit:
+        with mock.patch("great_expectations_v1.core.expectation_suite.submit_event") as mock_submit:
             _ = suite.add_expectation(expectation)
 
         mock_submit.assert_called_once_with(
@@ -1017,7 +1017,7 @@ class TestExpectationSuiteAnalytics:
 
         suite.add_expectation(expectation)
 
-        with mock.patch("great_expectations.core.expectation_suite.submit_event") as mock_submit:
+        with mock.patch("great_expectations_v1.core.expectation_suite.submit_event") as mock_submit:
             suite.delete_expectation(expectation)
 
         mock_submit.assert_called_once_with(
@@ -1037,7 +1037,7 @@ class TestExpectationSuiteAnalytics:
         expectation = suite.add_expectation(expectation)
         expectation.column = "fare_amount"
 
-        with mock.patch("great_expectations.core.expectation_suite.submit_event") as mock_submit:
+        with mock.patch("great_expectations_v1.core.expectation_suite.submit_event") as mock_submit:
             expectation.save()
 
         mock_submit.assert_called_once_with(

@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
+from great_expectations_v1.core.expectation_diagnostics.supporting_types import Maturity
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,

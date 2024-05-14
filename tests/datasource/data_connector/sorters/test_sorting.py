@@ -2,9 +2,9 @@ from typing import Iterator
 
 import pytest
 
-import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations.core.batch import IDDict, LegacyBatchDefinition
-from great_expectations.datasource.data_connector.sorter import (
+import great_expectations_v1.exceptions.exceptions as gx_exceptions
+from great_expectations_v1.core.batch import IDDict, LegacyBatchDefinition
+from great_expectations_v1.datasource.data_connector.sorter import (
     CustomListSorter,
     DateTimeSorter,
     DictionarySorter,

@@ -4,12 +4,12 @@ from typing import Callable, Dict, Union
 
 import pytest
 
-from great_expectations.core import ExpectationValidationResult
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.core import ExpectationValidationResult
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render import RenderedAtomicContent
+from great_expectations_v1.expectations.registry import get_renderer_impl
+from great_expectations_v1.render import RenderedAtomicContent
 
 
 @pytest.fixture

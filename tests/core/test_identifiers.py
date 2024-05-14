@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations_v1.core.run_identifier import RunIdentifier
 
 
 @pytest.mark.unit

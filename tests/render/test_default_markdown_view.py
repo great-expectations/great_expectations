@@ -4,26 +4,26 @@ from collections import OrderedDict
 
 import pytest
 
-import great_expectations as gx
-from great_expectations.core import (
+import great_expectations_v1 as gx
+from great_expectations_v1.core import (
     ExpectationSuite,
 )
-from great_expectations.core.expectation_validation_result import (
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.render import (
+from great_expectations_v1.render import (
     RenderedDocumentContent,
     RenderedHeaderContent,
     RenderedSectionContent,
     RenderedTableContent,
 )
-from great_expectations.render.renderer import (
+from great_expectations_v1.render.renderer import (
     ExpectationSuitePageRenderer,
 )
-from great_expectations.render.view import DefaultMarkdownPageView
+from great_expectations_v1.render.view import DefaultMarkdownPageView
 
 # module level markers
 pytestmark = pytest.mark.big

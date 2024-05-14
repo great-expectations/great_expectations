@@ -1,8 +1,8 @@
 import pytest
 
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.store import DatasourceStore
-from great_expectations.data_context.store.gx_cloud_store_backend import (
+from great_expectations_v1.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations_v1.data_context.store import DatasourceStore
+from great_expectations_v1.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
 

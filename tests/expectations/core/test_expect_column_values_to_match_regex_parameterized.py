@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-import great_expectations.expectations as gxe
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.data_context.data_context.abstract_data_context import AbstractDataContext
 
 
 class ExpectColumnValuesAsStringToBePositiveInteger(gxe.ExpectColumnValuesToMatchRegex):

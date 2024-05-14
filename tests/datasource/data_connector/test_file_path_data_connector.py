@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.datasource.data_connector.util import sanitize_prefix
+from great_expectations_v1.datasource.data_connector.util import sanitize_prefix
 
 # module level markers
 pytestmark = pytest.mark.unit

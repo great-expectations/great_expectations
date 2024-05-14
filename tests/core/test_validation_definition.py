@@ -7,41 +7,41 @@ from unittest import mock
 
 import pytest
 
-import great_expectations as gx
-import great_expectations.expectations as gxe
-from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import (
+import great_expectations_v1 as gx
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.core.batch_definition import BatchDefinition
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.result_format import ResultFormat
-from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.validation_definition import ValidationDefinition
-from great_expectations.data_context.data_context.cloud_data_context import (
+from great_expectations_v1.core.result_format import ResultFormat
+from great_expectations_v1.core.serdes import _IdentifierBundle
+from great_expectations_v1.core.validation_definition import ValidationDefinition
+from great_expectations_v1.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.data_context.data_context.context_factory import (
+from great_expectations_v1.data_context.data_context.context_factory import (
     ProjectManager,
 )
-from great_expectations.data_context.data_context.ephemeral_data_context import (
+from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.data_context.store.validation_results_store import ValidationResultsStore
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations_v1.data_context.store.validation_results_store import ValidationResultsStore
+from great_expectations_v1.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.datasource.fluent.pandas_datasource import (
+from great_expectations_v1.datasource.fluent.pandas_datasource import (
     CSVAsset,
     PandasDatasource,
     _PandasDataAsset,
 )
-from great_expectations.execution_engine.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.execution_engine.execution_engine import ExecutionEngine
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.validator.v1_validator import (
+from great_expectations_v1.validator.v1_validator import (
     OldValidator,
 )
 

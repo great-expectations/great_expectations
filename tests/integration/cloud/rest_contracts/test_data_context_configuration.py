@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Final
 import pact
 import pytest
 
-import great_expectations as gx
+import great_expectations_v1 as gx
 from tests.integration.cloud.rest_contracts.conftest import (
     EXISTING_ORGANIZATION_ID,
     PACT_MOCK_SERVICE_URL,

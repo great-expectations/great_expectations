@@ -4,12 +4,12 @@ import string
 import pandas as pd
 import pytest
 
-from great_expectations.core import (
+from great_expectations_v1.core import (
     ExpectationValidationResult,
 )
-from great_expectations.data_context import CloudDataContext
-from great_expectations.render import RenderedAtomicContent
-from great_expectations.validator.validator import Validator
+from great_expectations_v1.data_context import CloudDataContext
+from great_expectations_v1.render import RenderedAtomicContent
+from great_expectations_v1.validator.validator import Validator
 
 
 @pytest.mark.xfail(

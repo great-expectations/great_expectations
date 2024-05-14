@@ -6,12 +6,12 @@ from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 
-from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.core.partitioners import FileNamePartitionerYearly
-from great_expectations.core.serdes import _EncodedValidationData, _IdentifierBundle
-from great_expectations.datasource.fluent.batch_request import BatchParameters
-from great_expectations.datasource.fluent.interfaces import Batch, DataAsset
-from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
+from great_expectations_v1.core.batch_definition import BatchDefinition
+from great_expectations_v1.core.partitioners import FileNamePartitionerYearly
+from great_expectations_v1.core.serdes import _EncodedValidationData, _IdentifierBundle
+from great_expectations_v1.datasource.fluent.batch_request import BatchParameters
+from great_expectations_v1.datasource.fluent.interfaces import Batch, DataAsset
+from great_expectations_v1.datasource.fluent.pandas_datasource import PandasDatasource
 
 if TYPE_CHECKING:
     import pytest_mock

@@ -2,8 +2,8 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.store.data_context_store import DataContextStore
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations_v1.data_context.store.data_context_store import DataContextStore
+from great_expectations_v1.data_context.types.base import DataContextConfig
 
 
 @pytest.mark.unit
@@ -21,7 +21,7 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
     store = DataContextStore(store_name="data_context_store")
 
     with mock.patch(
-        "great_expectations.data_context.store.DataContextStore.cloud_mode"
+        "great_expectations_v1.data_context.store.DataContextStore.cloud_mode"
     ) as mock_cloud_mode:
         type(mock_cloud_mode.return_value).ok = mock.PropertyMock(return_value=True)
         actual = store.serialize(basic_data_context_config)
@@ -43,7 +43,7 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
             },
             "suite_parameter_store": {
                 "class_name": "SuiteParameterStore",
-                "module_name": "great_expectations.data_context.store",
+                "module_name": "great_expectations_v1.data_context.store",
             },
             "expectations_store": {
                 "class_name": "ExpectationsStore",

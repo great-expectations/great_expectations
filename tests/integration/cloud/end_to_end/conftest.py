@@ -10,22 +10,22 @@ from typing import TYPE_CHECKING, Final, Iterator, Literal, Protocol
 import numpy as np
 import pytest
 
-import great_expectations as gx
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.sqlalchemy import TextClause
-from great_expectations.core import ExpectationSuite
-from great_expectations.core.validation_definition import ValidationDefinition
-from great_expectations.data_context import CloudDataContext
-from great_expectations.execution_engine import (
+import great_expectations_v1 as gx
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.compatibility.sqlalchemy import TextClause
+from great_expectations_v1.core import ExpectationSuite
+from great_expectations_v1.core.validation_definition import ValidationDefinition
+from great_expectations_v1.data_context import CloudDataContext
+from great_expectations_v1.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
-    from great_expectations.compatibility import pyspark, sqlalchemy
-    from great_expectations.datasource.fluent import BatchRequest
-    from great_expectations.validator.validator import Validator
+    from great_expectations_v1.checkpoint import Checkpoint
+    from great_expectations_v1.compatibility import pyspark, sqlalchemy
+    from great_expectations_v1.datasource.fluent import BatchRequest
+    from great_expectations_v1.validator.validator import Validator
 
 LOGGER: Final = logging.getLogger("tests")
 
@@ -221,7 +221,7 @@ def spark_df_from_pandas_df():
 
 @pytest.fixture(scope="module")
 def spark_session() -> pyspark.SparkSession:
-    from great_expectations.compatibility import pyspark
+    from great_expectations_v1.compatibility import pyspark
 
     if pyspark.SparkSession:  # type: ignore[truthy-function]
         return SparkDFExecutionEngine.get_or_create_spark_session()

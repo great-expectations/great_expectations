@@ -2,10 +2,10 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions.exceptions import MetricResolutionError
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.sqlalchemy_batch_data import (
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.exceptions.exceptions import MetricResolutionError
+from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from tests.expectations.test_util import get_table_columns_metric
@@ -80,7 +80,7 @@ def test_table_column_type__sqlalchemy_happy_path(sa, capsys):
     eng = sa.create_engine(f"sqlite:///{db_file}", echo=True)
     engine = SqlAlchemyExecutionEngine(engine=eng)
     with mock.patch(
-        "great_expectations.execution_engine.sqlalchemy_execution_engine.sa.inspect",
+        "great_expectations_v1.execution_engine.sqlalchemy_execution_engine.sa.inspect",
         wraps=sa.inspect,
     ) as mock_inspect:
         batch_data = SqlAlchemyBatchData(

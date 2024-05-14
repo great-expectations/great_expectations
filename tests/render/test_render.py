@@ -3,9 +3,9 @@ from collections import OrderedDict
 
 import pytest
 
-from great_expectations.core import ExpectationSuite
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.render.renderer import (
+from great_expectations_v1.core import ExpectationSuite
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ExpectationSuitePageRenderer,
     ProfilingResultsColumnSectionRenderer,
@@ -13,11 +13,11 @@ from great_expectations.render.renderer import (
     ValidationResultsColumnSectionRenderer,
     ValidationResultsPageRenderer,
 )
-from great_expectations.render.renderer.content_block import (
+from great_expectations_v1.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
-from great_expectations.render.view import DefaultJinjaPageView
-from great_expectations.self_check.util import (
+from great_expectations_v1.render.view import DefaultJinjaPageView
+from great_expectations_v1.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
 )

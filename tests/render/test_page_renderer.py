@@ -4,13 +4,13 @@ import re
 import mistune
 import pytest
 
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.render import RenderedContent, RenderedDocumentContent
-from great_expectations.render.renderer import (
+from great_expectations_v1.render import RenderedContent, RenderedDocumentContent
+from great_expectations_v1.render.renderer import (
     ExpectationSuitePageRenderer,
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,

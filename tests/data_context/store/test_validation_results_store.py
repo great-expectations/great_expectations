@@ -6,13 +6,13 @@ import pytest
 from freezegun import freeze_time
 from moto import mock_s3
 
-from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.data_context.store import ValidationResultsStore
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations_v1.core import ExpectationSuiteValidationResult
+from great_expectations_v1.data_context.store import ValidationResultsStore
+from great_expectations_v1.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.util import gen_directory_tree_str
+from great_expectations_v1.util import gen_directory_tree_str
 from tests import test_utils
 
 
@@ -107,7 +107,7 @@ def test_ValidationResultsStore_with_TupleS3StoreBackend(aws_credentials):
 def test_ValidationResultsStore_with_InMemoryStoreBackend():
     my_store = ValidationResultsStore(
         store_backend={
-            "module_name": "great_expectations.data_context.store",
+            "module_name": "great_expectations_v1.data_context.store",
             "class_name": "InMemoryStoreBackend",
         }
     )
@@ -179,7 +179,7 @@ def test_ValidationResultsStore_with_TupleFileSystemStoreBackend(tmp_path_factor
 
     my_store = ValidationResultsStore(
         store_backend={
-            "module_name": "great_expectations.data_context.store",
+            "module_name": "great_expectations_v1.data_context.store",
             "class_name": "TupleFilesystemStoreBackend",
             "base_directory": "my_store/",
         },
@@ -254,7 +254,7 @@ def test_ValidationResultsStore_with_TupleFileSystemStoreBackend(tmp_path_factor
     # Check that another store with the same configuration shares the same store_backend_id
     my_store_duplicate = ValidationResultsStore(
         store_backend={
-            "module_name": "great_expectations.data_context.store",
+            "module_name": "great_expectations_v1.data_context.store",
             "class_name": "TupleFilesystemStoreBackend",
             "base_directory": "my_store/",
         },

@@ -5,34 +5,34 @@ from typing import Any, Dict, List
 
 import pytest
 
-from great_expectations.execution_engine import (
+from great_expectations_v1.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations import registry
-from great_expectations.expectations.metrics.map_metric_provider import (
+from great_expectations_v1.expectations import registry
+from great_expectations_v1.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     ColumnPairMapMetricProvider,
     MulticolumnMapMetricProvider,
 )
-from great_expectations.expectations.metrics.map_metric_provider.column_condition_partial import (
+from great_expectations_v1.expectations.metrics.map_metric_provider.column_condition_partial import (
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.map_metric_provider.column_pair_condition_partial import (  # noqa: E501
+from great_expectations_v1.expectations.metrics.map_metric_provider.column_pair_condition_partial import (  # noqa: E501
     column_pair_condition_partial,
 )
-from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (  # noqa: E501
+from great_expectations_v1.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (  # noqa: E501
     multicolumn_condition_partial,
 )
-from great_expectations.expectations.metrics.metric_provider import (
+from great_expectations_v1.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
 )
-from great_expectations.expectations.metrics.query_metric_provider import (
+from great_expectations_v1.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
 )
-from great_expectations.expectations.metrics.table_metric_provider import (
+from great_expectations_v1.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 

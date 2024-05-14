@@ -7,20 +7,20 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import pyarrow, pyspark
-from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.batch_spec import (
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.compatibility import pyarrow, pyspark
+from great_expectations_v1.compatibility.pyspark import functions as F
+from great_expectations_v1.core.batch_spec import (
     AzureBatchSpec,
     GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
+from great_expectations_v1.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
 )
-from great_expectations.execution_engine.partition_and_sample.sparkdf_data_partitioner import (
+from great_expectations_v1.execution_engine.partition_and_sample.sparkdf_data_partitioner import (
     SparkDataPartitioner,
 )
 from tests.execution_engine.partition_and_sample.partition_and_sample_test_cases import (
@@ -192,7 +192,7 @@ def test_partition_on_date_parts_multiple_date_parts(
 
 
 @mock.patch(
-    "great_expectations.execution_engine.partition_and_sample.sparkdf_data_partitioner.SparkDataPartitioner.partition_on_date_parts"
+    "great_expectations_v1.execution_engine.partition_and_sample.sparkdf_data_partitioner.SparkDataPartitioner.partition_on_date_parts"
 )
 @pytest.mark.parametrize(
     "partitioner_method_name,called_with_date_parts",

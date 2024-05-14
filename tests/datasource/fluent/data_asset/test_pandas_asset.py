@@ -2,8 +2,8 @@ from typing import Final
 
 import pytest
 
-from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.datasource.fluent.pandas_datasource import (
+from great_expectations_v1.core.batch_definition import BatchDefinition
+from great_expectations_v1.datasource.fluent.pandas_datasource import (
     ClipboardAsset,
     CSVAsset,
     ExcelAsset,

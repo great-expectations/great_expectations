@@ -8,10 +8,10 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations as gx
-import great_expectations.expectations as gxe
-from great_expectations.compatibility import pydantic
-from great_expectations.core.partitioners import (
+import great_expectations_v1 as gx
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.compatibility import pydantic
+from great_expectations_v1.core.partitioners import (
     ColumnPartitionerDaily,
     ColumnPartitionerMonthly,
     ColumnPartitionerYearly,
@@ -22,23 +22,23 @@ from great_expectations.core.partitioners import (
     PartitionerModInteger,
     PartitionerMultiColumnValue,
 )
-from great_expectations.data_context import (
+from great_expectations_v1.data_context import (
     AbstractDataContext,
     CloudDataContext,
     FileDataContext,
 )
-from great_expectations.datasource.fluent import (
+from great_expectations_v1.datasource.fluent import (
     BatchRequest,
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
 )
-from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations_v1.datasource.fluent.constants import MATCH_ALL_PATTERN
+from great_expectations_v1.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
     TestConnectionError,
 )
-from great_expectations.validator.v1_validator import Validator
+from great_expectations_v1.validator.v1_validator import Validator
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
@@ -48,10 +48,10 @@ from tests.datasource.fluent.integration.integration_test_utils import (
 if TYPE_CHECKING:
     from responses import RequestsMock
 
-    from great_expectations.datasource.fluent.pandas_datasource import (
+    from great_expectations_v1.datasource.fluent.pandas_datasource import (
         DataFrameAsset as PandasDataFrameAsset,
     )
-    from great_expectations.datasource.fluent.spark_datasource import (
+    from great_expectations_v1.datasource.fluent.spark_datasource import (
         DataFrameAsset as SparkDataFrameAsset,
     )
 
@@ -381,7 +381,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
     assert len(all_batches) == 28
 
     with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource._partitioner_and_sql_asset_to_batch_identifier_data"
+        "great_expectations_v1.datasource.fluent.sql_datasource._partitioner_and_sql_asset_to_batch_identifier_data"
     ) as mock_batch_identifiers:
         mock_batch_identifiers.return_value = [
             {"pickup_date": datetime.date(2019, 2, 1)},
@@ -395,7 +395,7 @@ def test_partitioner_build_batch_request_allows_selecting_by_date_and_datetime_a
         assert len(specified_batches) == 1
 
     with mock.patch(
-        "great_expectations.datasource.fluent.sql_datasource._partitioner_and_sql_asset_to_batch_identifier_data"
+        "great_expectations_v1.datasource.fluent.sql_datasource._partitioner_and_sql_asset_to_batch_identifier_data"
     ) as mock_batch_identifiers:
         mock_batch_identifiers.return_value = [
             {"pickup_date": datetime.datetime(2019, 2, 1)},

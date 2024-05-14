@@ -10,13 +10,13 @@ import pandas
 import pytest
 from packaging.version import Version
 
-from great_expectations.datasource.fluent import (
+from great_expectations_v1.datasource.fluent import (
     _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed  # noqa: E501
     _SCHEMAS_DIR,
     DataAsset,
     Datasource,
 )
-from great_expectations.datasource.fluent.sources import (
+from great_expectations_v1.datasource.fluent.sources import (
     _iter_all_registered_types,
 )
 

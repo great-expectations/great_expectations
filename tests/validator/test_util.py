@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 from numpy.lib.npyio import DataSource
 
-from great_expectations import validator
+from great_expectations_v1 import validator
 
 
 @pytest.mark.big

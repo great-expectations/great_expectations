@@ -4,12 +4,12 @@ import json
 
 import pytest
 
-import great_expectations.expectations as gxe
-from great_expectations.core import (
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.core import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 

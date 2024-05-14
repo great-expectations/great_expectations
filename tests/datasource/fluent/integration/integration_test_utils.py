@@ -5,26 +5,26 @@ from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
 
-from great_expectations.checkpoint.checkpoint import Checkpoint
-from great_expectations.compatibility.pydantic import ValidationError
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.validation_definition import ValidationDefinition
-from great_expectations.data_context import AbstractDataContext
-from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations_v1.checkpoint.checkpoint import Checkpoint
+from great_expectations_v1.compatibility.pydantic import ValidationError
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.core.validation_definition import ValidationDefinition
+from great_expectations_v1.data_context import AbstractDataContext
+from great_expectations_v1.datasource.fluent import BatchRequest, PandasDatasource
+from great_expectations_v1.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
     HeadData,
 )
-from great_expectations.exceptions.exceptions import DataContextError
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.metrics_calculator import MetricsCalculator
+from great_expectations_v1.exceptions.exceptions import DataContextError
+from great_expectations_v1.execution_engine import ExecutionEngine
+from great_expectations_v1.validator.computed_metric import MetricValue
+from great_expectations_v1.validator.metric_configuration import MetricConfiguration
+from great_expectations_v1.validator.metrics_calculator import MetricsCalculator
 from tests.expectations.test_util import get_table_columns_metric
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import Batch
+    from great_expectations_v1.datasource.fluent.interfaces import Batch
 
 
 logger = logging.getLogger(__name__)

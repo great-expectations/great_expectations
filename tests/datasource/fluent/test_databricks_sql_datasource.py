@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from great_expectations.compatibility import pydantic
-from great_expectations.datasource.fluent.databricks_sql_datasource import (
+from great_expectations_v1.compatibility import pydantic
+from great_expectations_v1.datasource.fluent.databricks_sql_datasource import (
     DatabricksSQLDatasource,
 )
 

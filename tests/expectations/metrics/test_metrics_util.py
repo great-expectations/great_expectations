@@ -6,15 +6,15 @@ from typing import TYPE_CHECKING, Final, List, Union
 import pytest
 from _pytest import monkeypatch
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import (
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.compatibility import sqlalchemy
+from great_expectations_v1.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import MetricResolutionError
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.expectations.metrics.util import (
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.exceptions import MetricResolutionError
+from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations_v1.expectations.metrics.util import (
     CaseInsensitiveString,
     get_dbms_compatible_metric_domain_kwargs,
     get_unexpected_indices_for_multiple_pandas_named_indices,

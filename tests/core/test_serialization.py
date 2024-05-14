@@ -8,17 +8,17 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import pytest
 
-from great_expectations.compatibility import pyspark
-from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.types.base import (
+from great_expectations_v1.compatibility import pyspark
+from great_expectations_v1.core.batch import RuntimeBatchRequest
+from great_expectations_v1.core.util import convert_to_json_serializable
+from great_expectations_v1.data_context.types.base import (
     AbstractConfig,
     AssetConfig,
     DataConnectorConfig,
     assetConfigSchema,
     dataConnectorConfigSchema,
 )
-from great_expectations.util import (
+from great_expectations_v1.util import (
     deep_filter_properties_iterable,
     requires_lossy_conversion,
 )
@@ -42,7 +42,7 @@ def spark_schema(spark_session: pyspark.SparkSession) -> pyspark.types.StructTyp
 def data_connector_config_spark(spark_session) -> DataConnectorConfig:
     return DataConnectorConfig(
         class_name="ConfiguredAssetFilesystemDataConnector",
-        module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+        module_name="great_expectations_v1.datasource.data_connector.configured_asset_filesystem_data_connector",
         batch_spec_passthrough={
             "reader_options": {"header": True},
         },
@@ -53,7 +53,7 @@ def data_connector_config_spark(spark_session) -> DataConnectorConfig:
 def datas_connector_config_with_schema_spark(spark_session, spark_schema) -> DataConnectorConfig:
     return DataConnectorConfig(
         class_name="ConfiguredAssetFilesystemDataConnector",
-        module_name="great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",
+        module_name="great_expectations_v1.datasource.data_connector.configured_asset_filesystem_data_connector",
         batch_spec_passthrough={
             "reader_options": {"header": True, "schema": spark_schema},
         },
@@ -64,7 +64,7 @@ def datas_connector_config_with_schema_spark(spark_session, spark_schema) -> Dat
 def asset_config_spark(spark_session) -> AssetConfig:
     return AssetConfig(
         class_name="Asset",
-        module_name="great_expectations.datasource.data_connector.asset",
+        module_name="great_expectations_v1.datasource.data_connector.asset",
         batch_spec_passthrough={
             "reader_options": {"header": True},
         },
@@ -75,7 +75,7 @@ def asset_config_spark(spark_session) -> AssetConfig:
 def asset_config_with_schema_spark(spark_session, spark_schema) -> AssetConfig:
     return AssetConfig(
         class_name="Asset",
-        module_name="great_expectations.datasource.data_connector.asset",
+        module_name="great_expectations_v1.datasource.data_connector.asset",
         batch_spec_passthrough={
             "reader_options": {"header": True, "schema": spark_schema},
         },
@@ -84,7 +84,7 @@ def asset_config_with_schema_spark(spark_session, spark_schema) -> AssetConfig:
 
 @pytest.mark.unit
 def test_lossy_serialization_warning(caplog):
-    caplog.set_level(logging.WARNING, logger="great_expectations.core")
+    caplog.set_level(logging.WARNING, logger="great_expectations_v1.core")
 
     d = Decimal("12345.678901234567890123456789")
 
@@ -175,7 +175,7 @@ def test_batch_request_deepcopy():
                     }
                 },
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
+                "module_name": "great_expectations_v1.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
             },
             id="data_connector_with_schema",
         ),
@@ -205,7 +205,7 @@ def test_batch_request_deepcopy():
                     }
                 },
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
+                "module_name": "great_expectations_v1.datasource.data_connector.configured_asset_filesystem_data_connector",  # noqa: E501
             },
             id="data_connector_without_schema",
         ),
@@ -260,7 +260,7 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
                     }
                 },
                 "class_name": "Asset",
-                "module_name": "great_expectations.datasource.data_connector.asset",
+                "module_name": "great_expectations_v1.datasource.data_connector.asset",
             },
             id="asset_serialized_with_schema",
         ),
@@ -271,7 +271,7 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
                     "reader_options": {"header": True},
                 },
                 "class_name": "Asset",
-                "module_name": "great_expectations.datasource.data_connector.asset",
+                "module_name": "great_expectations_v1.datasource.data_connector.asset",
             },
             id="asset_serialized_without_schema",
         ),

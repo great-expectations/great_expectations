@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from great_expectations.datasource.fluent.data_connector.regex_parser import (
+from great_expectations_v1.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
 )
 

@@ -1,9 +1,9 @@
 import pytest
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.data_connector.sorter import (
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.core.batch import LegacyBatchDefinition
+from great_expectations_v1.core.id_dict import IDDict
+from great_expectations_v1.datasource.data_connector.sorter import (
     CustomListSorter,
     DateTimeSorter,
     DictionarySorter,

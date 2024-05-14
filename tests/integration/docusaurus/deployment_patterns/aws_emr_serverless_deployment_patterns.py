@@ -1,14 +1,14 @@
 import boto3
 
-from great_expectations.compatibility import pyspark
-from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import get_context
-from great_expectations.data_context.types.base import (
+from great_expectations_v1.compatibility import pyspark
+from great_expectations_v1.core.batch import RuntimeBatchRequest
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context import get_context
+from great_expectations_v1.data_context.types.base import (
     DataContextConfig,
     S3StoreBackendDefaults,
 )
-from great_expectations.execution_engine import SparkDFExecutionEngine
+from great_expectations_v1.execution_engine import SparkDFExecutionEngine
 
 yaml = YAMLHandler()
 # </snippet>

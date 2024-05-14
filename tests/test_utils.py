@@ -11,31 +11,31 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.alias_types import PathStr
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import Engine, inspect
-from great_expectations.compatibility.sqlalchemy import (
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.alias_types import PathStr
+from great_expectations_v1.compatibility import sqlalchemy
+from great_expectations_v1.compatibility.sqlalchemy import Engine, inspect
+from great_expectations_v1.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
-from great_expectations.data_context.store import (
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations_v1.data_context.store import (
     CheckpointStore,
     ConfigurationStore,
     Store,
     StoreBackend,
 )
-from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations_v1.data_context.types.base import BaseYamlConfig
+from great_expectations_v1.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations_v1.datasource.fluent.sql_datasource import SQLDatasource
+from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
@@ -180,7 +180,7 @@ def get_sqlite_temp_table_names_from_engine(engine: Engine):
 def build_tuple_filesystem_store_backend(
     base_directory: str,
     *,
-    module_name: str = "great_expectations.data_context.store",
+    module_name: str = "great_expectations_v1.data_context.store",
     class_name: str = "TupleFilesystemStoreBackend",
     **kwargs,
 ) -> StoreBackend:
@@ -258,7 +258,7 @@ def build_configuration_store(
     store_name: str,
     store_backend: Union[StoreBackend, dict],
     *,
-    module_name: str = "great_expectations.data_context.store",
+    module_name: str = "great_expectations_v1.data_context.store",
     overwrite_existing: bool = False,
     **kwargs,
 ) -> ConfigurationStore:
@@ -334,7 +334,7 @@ def build_checkpoint_store_using_store_backend(
         CheckpointStore,
         build_configuration_store(
             class_name="CheckpointStore",
-            module_name="great_expectations.data_context.store",
+            module_name="great_expectations_v1.data_context.store",
             store_name=store_name,
             store_backend=store_backend,
             overwrite_existing=overwrite_existing,
@@ -751,7 +751,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
             "execution_engine": execution_engine,
             "datasource_name": "temp_datasource",
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
     introspection_output = data_connector._introspect_db()
 

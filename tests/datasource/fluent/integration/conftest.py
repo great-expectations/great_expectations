@@ -7,24 +7,24 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from great_expectations import get_context
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+from great_expectations_v1 import get_context
+from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.core.partitioners import ColumnPartitionerMonthly
-from great_expectations.data_context import AbstractDataContext, EphemeralDataContext
-from great_expectations.datasource.fluent import (
+from great_expectations_v1.core.partitioners import ColumnPartitionerMonthly
+from great_expectations_v1.data_context import AbstractDataContext, EphemeralDataContext
+from great_expectations_v1.datasource.fluent import (
     BatchRequest,
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
     SqliteDatasource,
 )
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations_v1.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
-from great_expectations.datasource.fluent.sources import (
+from great_expectations_v1.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
 

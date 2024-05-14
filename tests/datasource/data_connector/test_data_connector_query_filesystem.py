@@ -3,11 +3,11 @@ from typing import List
 
 import pytest
 
-import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import DataConnector
+import great_expectations_v1.exceptions.exceptions as gx_exceptions
+from great_expectations_v1.core.batch import BatchRequest, IDDict, LegacyBatchDefinition
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations_v1.datasource.data_connector import DataConnector
 from tests.test_utils import create_files_in_directory
 
 yaml = YAMLHandler()
@@ -74,7 +74,7 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
             "datasource_name": "test_environment",
             "execution_engine": "BASE_ENGINE",
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
     return my_data_connector
 

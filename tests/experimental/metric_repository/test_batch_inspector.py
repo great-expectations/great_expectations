@@ -3,15 +3,15 @@ from unittest.mock import MagicMock, Mock  # noqa: TID251
 
 import pytest
 
-from great_expectations.data_context import CloudDataContext
-from great_expectations.datasource.fluent import BatchRequest
-from great_expectations.experimental.metric_repository.batch_inspector import (
+from great_expectations_v1.data_context import CloudDataContext
+from great_expectations_v1.datasource.fluent import BatchRequest
+from great_expectations_v1.experimental.metric_repository.batch_inspector import (
     BatchInspector,
 )
-from great_expectations.experimental.metric_repository.metric_retriever import (
+from great_expectations_v1.experimental.metric_repository.metric_retriever import (
     MetricRetriever,
 )
-from great_expectations.experimental.metric_repository.metrics import (
+from great_expectations_v1.experimental.metric_repository.metrics import (
     MetricRun,
     MetricTypes,
     TableMetric,

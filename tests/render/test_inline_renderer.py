@@ -2,21 +2,21 @@ from typing import List
 
 import pytest
 
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import (
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.render import (
+from great_expectations_v1.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
 )
-from great_expectations.render.exceptions import InlineRendererError
-from great_expectations.render.renderer.inline_renderer import InlineRenderer
-from great_expectations.render.renderer_configuration import MetaNotesFormat
+from great_expectations_v1.render.exceptions import InlineRendererError
+from great_expectations_v1.render.renderer.inline_renderer import InlineRenderer
+from great_expectations_v1.render.renderer_configuration import MetaNotesFormat
 
 # module level markers
 pytestmark = pytest.mark.unit

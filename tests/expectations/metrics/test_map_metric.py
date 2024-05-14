@@ -1,44 +1,44 @@
 import pandas as pd
 import pytest
 
-import great_expectations.expectations as gxe
-from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.pydantic import ValidationError
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.compatibility import sqlalchemy
+from great_expectations_v1.compatibility.pydantic import ValidationError
+from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.core import (
+from great_expectations_v1.core import (
     ExpectationValidationResult,
     IDDict,
 )
-from great_expectations.core.batch import Batch, LegacyBatchDefinition
-from great_expectations.core.metric_function_types import (
+from great_expectations_v1.core.batch import Batch, LegacyBatchDefinition
+from great_expectations_v1.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context import AbstractDataContext
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.execution_engine import (
+from great_expectations_v1.core.util import convert_to_json_serializable
+from great_expectations_v1.data_context import AbstractDataContext
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.expectations.metrics import (
+from great_expectations_v1.expectations.metrics import (
     ColumnMax,
     ColumnValuesNonNull,
     CompoundColumnsUnique,
 )
-from great_expectations.expectations.metrics.map_metric_provider import (
+from great_expectations_v1.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     MapMetricProvider,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.validator.validator import Validator
+from great_expectations_v1.validator.validation_graph import MetricConfiguration
+from great_expectations_v1.validator.validator import Validator
 
 
 @pytest.fixture
@@ -47,7 +47,7 @@ def sqlite_table_for_unexpected_rows_with_index(
 ) -> sqlalchemy.Engine:
     if "sqlite" in test_backends:
         try:
-            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+            from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
 
             sqlite_path = file_relative_path(__file__, "../../test_sets/metrics_test.db")
             sqlite_engine = sa.create_engine(f"sqlite:///{sqlite_path}")

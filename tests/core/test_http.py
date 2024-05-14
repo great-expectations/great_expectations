@@ -2,7 +2,7 @@ from typing import Dict
 
 import pytest
 
-from great_expectations.core.http import DEFAULT_TIMEOUT, create_session
+from great_expectations_v1.core.http import DEFAULT_TIMEOUT, create_session
 
 
 @pytest.mark.unit

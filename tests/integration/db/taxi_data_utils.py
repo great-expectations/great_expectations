@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING, List
 
 import sqlalchemy as sa
 
-import great_expectations as gx
-from great_expectations.core.batch_definition import BatchDefinition
-from great_expectations.execution_engine.sqlalchemy_batch_data import (
+import great_expectations_v1 as gx
+from great_expectations_v1.core.batch_definition import BatchDefinition
+from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from tests.integration.fixtures.partition_and_sample_data.partitioner_test_cases_and_fixtures import (  # noqa: E501

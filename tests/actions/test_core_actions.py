@@ -11,8 +11,8 @@ import pytest
 import requests
 from requests import Session
 
-from great_expectations import set_context
-from great_expectations.checkpoint.actions import (
+from great_expectations_v1 import set_context
+from great_expectations_v1.checkpoint.actions import (
     APINotificationAction,
     EmailAction,
     MicrosoftTeamsNotificationAction,
@@ -23,22 +23,22 @@ from great_expectations.checkpoint.actions import (
     UpdateDataDocsAction,
     ValidationAction,
 )
-from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
-from great_expectations.core.expectation_validation_result import (
+from great_expectations_v1.checkpoint.checkpoint import Checkpoint, CheckpointResult
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
-from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.data_context.abstract_data_context import (
+from great_expectations_v1.core.run_identifier import RunIdentifier
+from great_expectations_v1.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations_v1.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations_v1.data_context.data_context.cloud_data_context import CloudDataContext
+from great_expectations_v1.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.util import is_library_loadable
+from great_expectations_v1.util import is_library_loadable
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -141,7 +141,7 @@ class TestActionSerialization:
             "notify_with": None,
             "renderer": {
                 "class_name": "SlackRenderer",
-                "module_name": "great_expectations.render.renderer.slack_renderer",
+                "module_name": "great_expectations_v1.render.renderer.slack_renderer",
             },
             "show_failed_expectations": False,
             "slack_channel": None,
@@ -154,7 +154,7 @@ class TestActionSerialization:
             "notify_on": "all",
             "renderer": {
                 "class_name": "MicrosoftTeamsRenderer",
-                "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+                "module_name": "great_expectations_v1.render.renderer.microsoft_teams_renderer",
             },
             "teams_webhook": EXAMPLE_TEAMS_WEBHOOK,
             "type": "microsoft",
@@ -167,7 +167,7 @@ class TestActionSerialization:
             "region": None,
             "renderer": {
                 "class_name": "OpsgenieRenderer",
-                "module_name": "great_expectations.render.renderer.opsgenie_renderer",
+                "module_name": "great_expectations_v1.render.renderer.opsgenie_renderer",
             },
             "tags": None,
             "type": "opsgenie",
@@ -179,7 +179,7 @@ class TestActionSerialization:
             "receiver_emails": EXAMPLE_EMAILS,
             "renderer": {
                 "class_name": "EmailRenderer",
-                "module_name": "great_expectations.render.renderer.email_renderer",
+                "module_name": "great_expectations_v1.render.renderer.email_renderer",
             },
             "sender_alias": None,
             "sender_login": None,
@@ -347,7 +347,7 @@ class TestV1ActionRun:
             receiver_emails=emails,
         )
 
-        with mock.patch("great_expectations.checkpoint.actions.send_email") as mock_send_email:
+        with mock.patch("great_expectations_v1.checkpoint.actions.send_email") as mock_send_email:
             out = action.run(checkpoint_result=checkpoint_result)
 
         # Should contain success/failure in title
@@ -484,7 +484,7 @@ class TestV1ActionRun:
     def test_PagerdutyAlertAction_run_emits_events(
         self, checkpoint_result: CheckpointResult, mocker: MockerFixture
     ):
-        from great_expectations.checkpoint import actions
+        from great_expectations_v1.checkpoint import actions
 
         with mock_not_imported_module(actions, "pypd", mocker):
             mock_pypd_event = actions.pypd.EventV2.create

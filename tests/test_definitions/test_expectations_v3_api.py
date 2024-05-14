@@ -5,17 +5,17 @@ import os
 import pandas as pd
 import pytest
 
-import great_expectations.compatibility.bigquery as BigQueryDialect
-from great_expectations.compatibility import snowflake, sqlalchemy, trino
-from great_expectations.compatibility.sqlalchemy import (
+import great_expectations_v1.compatibility.bigquery as BigQueryDialect
+from great_expectations_v1.compatibility import snowflake, sqlalchemy, trino
+from great_expectations_v1.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
 )
-from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
-from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
-from great_expectations.execution_engine.sqlalchemy_batch_data import (
+from great_expectations_v1.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations_v1.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.self_check.util import (
+from great_expectations_v1.self_check.util import (
     candidate_test_is_on_temporary_notimplemented_list_v3_api,
     evaluate_json_test_v3_api,
     generate_dataset_name_from_expectation_name,
@@ -25,7 +25,7 @@ from great_expectations.self_check.util import (
     mysqlDialect,
     pgDialect,
 )
-from great_expectations.util import build_in_memory_runtime_context
+from great_expectations_v1.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
 
 pytestmark = pytest.mark.all_backends

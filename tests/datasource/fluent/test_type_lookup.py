@@ -3,7 +3,7 @@ from typing import Iterable, Mapping, Optional, Tuple
 
 import pytest
 
-from great_expectations.datasource.fluent.type_lookup import (
+from great_expectations_v1.datasource.fluent.type_lookup import (
     TypeLookup,
     TypeLookupError,
     ValidTypes,

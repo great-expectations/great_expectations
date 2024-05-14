@@ -9,37 +9,37 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Generator, List, Optional, Tup
 
 import pytest
 
-from great_expectations.compatibility.pydantic import DirectoryPath, validate_arguments
-from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.partitioners import ColumnPartitioner
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import AbstractDataContext, FileDataContext
-from great_expectations.data_context import get_context as get_gx_context
-from great_expectations.datasource.data_connector.batch_filter import BatchSlice
-from great_expectations.datasource.fluent.batch_request import (
+from great_expectations_v1.compatibility.pydantic import DirectoryPath, validate_arguments
+from great_expectations_v1.compatibility.typing_extensions import override
+from great_expectations_v1.core.partitioners import ColumnPartitioner
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context import AbstractDataContext, FileDataContext
+from great_expectations_v1.data_context import get_context as get_gx_context
+from great_expectations_v1.datasource.data_connector.batch_filter import BatchSlice
+from great_expectations_v1.datasource.fluent.batch_request import (
     BatchParameters,
     BatchRequest,
 )
-from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.constants import (
+from great_expectations_v1.datasource.fluent.config import GxConfig
+from great_expectations_v1.datasource.fluent.constants import (
     _FLUENT_DATASOURCES_KEY,
 )
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations_v1.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
-from great_expectations.datasource.fluent.metadatasource import MetaDatasource
-from great_expectations.datasource.fluent.sources import (
+from great_expectations_v1.datasource.fluent.metadatasource import MetaDatasource
+from great_expectations_v1.datasource.fluent.sources import (
     TypeRegistrationError,
     _SourceFactories,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations_v1.execution_engine import ExecutionEngine
 
 yaml = YAMLHandler()
 
 if TYPE_CHECKING:
-    from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.datasource.datasource_dict import DatasourceDict
+    from great_expectations_v1.core.config_provider import _ConfigurationProvider
+    from great_expectations_v1.datasource.datasource_dict import DatasourceDict
 
 
 logger = logging.getLogger(__name__)

@@ -4,17 +4,17 @@ from unittest import mock
 import pytest
 import pytest_mock
 
-from great_expectations.checkpoint.checkpoint import CheckpointResult
-from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResult
-from great_expectations.data_context import get_context
-from great_expectations.data_context.data_context.file_data_context import (
+from great_expectations_v1.checkpoint.checkpoint import CheckpointResult
+from great_expectations_v1.core.expectation_validation_result import ExpectationSuiteValidationResult
+from great_expectations_v1.data_context import get_context
+from great_expectations_v1.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations_v1.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.exceptions import DataContextError
+from great_expectations_v1.exceptions import DataContextError
 
 
 @pytest.mark.unit
@@ -408,7 +408,7 @@ def test_view_validation_result(
     checkpoint_result = mocker.Mock(spec=CheckpointResult, run_results=run_results)
 
     with mock.patch("webbrowser.open") as mock_open, mock.patch(
-        "great_expectations.data_context.store.StoreBackend.has_key", return_value=True
+        "great_expectations_v1.data_context.store.StoreBackend.has_key", return_value=True
     ):
         context.view_validation_result(checkpoint_result)
 

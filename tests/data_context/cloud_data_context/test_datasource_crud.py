@@ -7,10 +7,10 @@ import string
 
 import pytest
 
-import great_expectations as gx
-from great_expectations.data_context import CloudDataContext
-from great_expectations.data_context.types.base import GXCloudConfig
-from great_expectations.datasource.fluent import PandasDatasource
+import great_expectations_v1 as gx
+from great_expectations_v1.data_context import CloudDataContext
+from great_expectations_v1.data_context.types.base import GXCloudConfig
+from great_expectations_v1.datasource.fluent import PandasDatasource
 
 # module level markers
 pytestmark = pytest.mark.cloud

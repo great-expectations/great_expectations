@@ -4,9 +4,9 @@ import random
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch_spec import RuntimeDataBatchSpec
-from great_expectations.execution_engine import PandasExecutionEngine
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.core.batch_spec import RuntimeDataBatchSpec
+from great_expectations_v1.execution_engine import PandasExecutionEngine
 
 
 @pytest.mark.unit

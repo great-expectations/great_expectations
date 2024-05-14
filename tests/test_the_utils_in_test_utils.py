@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.util import (
+from great_expectations_v1.util import (
     get_clickhouse_sqlalchemy_potential_type,
     is_library_loadable,
 )

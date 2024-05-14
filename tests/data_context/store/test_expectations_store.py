@@ -4,14 +4,14 @@ from uuid import UUID
 
 import pytest
 
-import great_expectations.expectations as gxe
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.resource_identifiers import (
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.data_context.store import ExpectationsStore
+from great_expectations_v1.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
 )
-from great_expectations.util import gen_directory_tree_str
+from great_expectations_v1.util import gen_directory_tree_str
 
 
 @pytest.mark.filesystem

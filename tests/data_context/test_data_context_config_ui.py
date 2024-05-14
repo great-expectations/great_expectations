@@ -4,10 +4,10 @@ from typing import Any, Dict, Final, Optional
 
 import pytest
 
-from great_expectations.data_context.data_context.serializable_data_context import (
+from great_expectations_v1.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
-from great_expectations.data_context.types.base import (
+from great_expectations_v1.data_context.types.base import (
     BaseStoreBackendDefaults,
     DatabaseStoreBackendDefaults,
     DataContextConfig,
@@ -18,7 +18,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
     S3StoreBackendDefaults,
 )
-from great_expectations.util import filter_properties_dict
+from great_expectations_v1.util import filter_properties_dict
 
 """
 What does this test and why?

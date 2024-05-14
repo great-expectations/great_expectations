@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.experimental.metric_repository.metrics import Metric
+from great_expectations_v1.experimental.metric_repository.metrics import Metric
 
 pytestmark = pytest.mark.unit
 

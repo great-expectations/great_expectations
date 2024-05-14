@@ -2,14 +2,14 @@ import json
 
 import pytest
 
-from great_expectations.core.expectation_diagnostics.supporting_types import (
+from great_expectations_v1.core.expectation_diagnostics.supporting_types import (
     ExpectationRendererDiagnostics,
 )
-from great_expectations.core.metric_function_types import (
+from great_expectations_v1.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.registry import _registered_expectations
+from great_expectations_v1.expectations.expectation import ColumnMapExpectation
+from great_expectations_v1.expectations.registry import _registered_expectations
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__BrokenIteration,
@@ -343,7 +343,7 @@ def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()
 
-    from great_expectations.expectations.registry import (
+    from great_expectations_v1.expectations.registry import (
         _registered_metrics,
         _registered_renderers,
     )

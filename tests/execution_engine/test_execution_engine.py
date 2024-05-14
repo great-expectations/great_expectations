@@ -6,21 +6,21 @@ import pandas as pd
 import pytest
 from typing_extensions import override
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchData, BatchMarkers
-from great_expectations.core.metric_function_types import (
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.core.batch import BatchData, BatchMarkers
+from great_expectations_v1.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.row_conditions import (
+from great_expectations_v1.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations_v1.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
 
 # Testing ordinary process of adding column row condition
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations_v1.validator.computed_metric import MetricValue
+from great_expectations_v1.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 

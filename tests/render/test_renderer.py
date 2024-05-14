@@ -1,12 +1,12 @@
 import pytest
 
-from great_expectations.core.expectation_validation_result import (
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.render.renderer.renderer import Renderer
+from great_expectations_v1.render.renderer.renderer import Renderer
 
 
 @pytest.mark.unit

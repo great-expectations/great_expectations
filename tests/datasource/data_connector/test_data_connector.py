@@ -1,18 +1,18 @@
 # TODO: <Alex>This module should be broken up -- please see suggestions below.</Alex>
 import pytest
 
-from great_expectations.core.batch import (
+from great_expectations_v1.core.batch import (
     BatchRequest,
     BatchRequestBase,
     IDDict,
     LegacyBatchDefinition,
 )
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector.util import (
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations_v1.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations_v1.execution_engine import PandasExecutionEngine
 
 yaml = YAMLHandler()
 
@@ -41,7 +41,7 @@ assets:
         runtime_environment={
             "execution_engine": PandasExecutionEngine(),
         },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+        config_defaults={"module_name": "great_expectations_v1.datasource.data_connector"},
     )
     return basic_data_connector
 

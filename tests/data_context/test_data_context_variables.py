@@ -10,28 +10,28 @@ from unittest.mock import patch as mock_patch
 
 import pytest
 
-from great_expectations import get_context, project_manager
-from great_expectations.core.config_provider import _ConfigurationProvider
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.data_context.cloud_data_context import (
+from great_expectations_v1 import get_context, project_manager
+from great_expectations_v1.core.config_provider import _ConfigurationProvider
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations.data_context.data_context.file_data_context import (
+from great_expectations_v1.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.data_context_variables import (
+from great_expectations_v1.data_context.data_context_variables import (
     CloudDataContextVariables,
     DataContextVariables,
     DataContextVariableSchema,
     EphemeralDataContextVariables,
     FileDataContextVariables,
 )
-from great_expectations.data_context.types.base import (
+from great_expectations_v1.data_context.types.base import (
     DataContextConfig,
     GXCloudConfig,
     ProgressBarsConfig,
 )
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations_v1.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
 
@@ -62,7 +62,7 @@ def data_context_config_dict() -> dict:
                 },
             },
             "suite_parameter_store": {
-                "module_name": "great_expectations.data_context.store",
+                "module_name": "great_expectations_v1.data_context.store",
                 "class_name": "SuiteParameterStore",
             },
         },
@@ -373,7 +373,7 @@ def test_data_context_variables_save_config(
 
     # FileDataContextVariables
     mock_save = mocker.patch(
-        "great_expectations.data_context.store.InlineStoreBackend._save_changes",
+        "great_expectations_v1.data_context.store.InlineStoreBackend._save_changes",
         autospec=True,
     )
     file_data_context_variables.save_config()
@@ -402,7 +402,7 @@ def test_data_context_variables_save_config(
                 },
             },
             "suite_parameter_store": {
-                "module_name": "great_expectations.data_context.store",
+                "module_name": "great_expectations_v1.data_context.store",
                 "class_name": "SuiteParameterStore",
             },
             "checkpoint_store": {"class_name": "CheckpointStore"},
@@ -515,7 +515,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 @pytest.mark.e2e
 @pytest.mark.cloud
 @mock_patch(
-    "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
+    "great_expectations_v1.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
 )
 @pytest.mark.xfail(
     strict=False,

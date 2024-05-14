@@ -6,11 +6,11 @@ from contrib.experimental.great_expectations_experimental.expectations.expect_co
     ExpectColumnValuesToBePresentInOtherTable,  # needed for expectation registration
 )
 
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.fluent import SqliteDatasource
+from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations_v1.datasource.fluent import SqliteDatasource
 
 DB_PATH: Final[str] = file_relative_path(
     __file__, "../../test_sets/referential_integrity_dataset.db"

@@ -1,10 +1,10 @@
 import pytest
 
-import great_expectations.expectations as gxe
-from great_expectations.core.expectation_validation_result import (
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
+from great_expectations_v1.datasource.fluent.sql_datasource import SQLDatasource
 
 
 @pytest.mark.spark

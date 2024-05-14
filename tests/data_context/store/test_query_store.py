@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.store.query_store import SqlAlchemyQueryStore
+from great_expectations_v1.data_context.store.query_store import SqlAlchemyQueryStore
 
 
 @pytest.fixture()
@@ -78,7 +78,7 @@ def test_queries_with_return_types(sqlalchemy_query_store_specified_return_type)
 
 
 @pytest.mark.unit
-@mock.patch("great_expectations.data_context.store.query_store.sa")
+@mock.patch("great_expectations_v1.data_context.store.query_store.sa")
 def test_init_query_store_with_dict_credentials(mock_sqlalchemy):
     """credentials can take a dict of params to pass to either URL() (< v0.14.0) or
     URL.create() (>= v0.14.0) depending on the sqlalchemy version."""

@@ -4,9 +4,9 @@ import boto3
 import pytest
 from moto import mock_sns
 
-from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations_v1.core import ExpectationSuiteValidationResult, RunIdentifier
+from great_expectations_v1.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations_v1.data_context.types.resource_identifiers import (
     BatchIdentifier,
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,

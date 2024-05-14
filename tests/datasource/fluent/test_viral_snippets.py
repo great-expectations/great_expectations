@@ -9,19 +9,19 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import great_expectations.expectations as gxe
-from great_expectations import get_context
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.partitioners import ColumnPartitionerMonthly
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import CloudDataContext, FileDataContext
-from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import Datasource
+import great_expectations_v1.expectations as gxe
+from great_expectations_v1 import get_context
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.core.partitioners import ColumnPartitionerMonthly
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context import CloudDataContext, FileDataContext
+from great_expectations_v1.datasource.fluent.config import GxConfig
+from great_expectations_v1.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
-    from great_expectations.datasource.fluent import SqliteDatasource
+    from great_expectations_v1.datasource.fluent import SqliteDatasource
 
 
 YAML = YAMLHandler()

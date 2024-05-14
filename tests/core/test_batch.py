@@ -2,12 +2,12 @@ from typing import Dict
 
 import pytest
 
-from great_expectations.core.batch import (
+from great_expectations_v1.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
     get_batch_request_from_acceptable_arguments,
 )
-from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
+from great_expectations_v1.datasource.fluent import BatchRequest as FluentBatchRequest
 
 
 @pytest.fixture()

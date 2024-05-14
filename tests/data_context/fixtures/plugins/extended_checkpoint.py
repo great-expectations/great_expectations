@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations_v1.checkpoint import Checkpoint, LegacyCheckpoint
 
 logger = logging.getLogger(__name__)
 

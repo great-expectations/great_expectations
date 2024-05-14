@@ -1,10 +1,10 @@
 import pytest
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.configuration import AbstractConfig
-from great_expectations.core.data_context_key import StringKey
-from great_expectations.data_context.store.store import Store
-from great_expectations.exceptions.exceptions import StoreBackendError
+import great_expectations_v1.exceptions as gx_exceptions
+from great_expectations_v1.core.configuration import AbstractConfig
+from great_expectations_v1.core.data_context_key import StringKey
+from great_expectations_v1.data_context.store.store import Store
+from great_expectations_v1.exceptions.exceptions import StoreBackendError
 
 
 @pytest.mark.unit
@@ -37,7 +37,7 @@ def test_store_deserialize() -> None:
 def test_build_store_from_config_success():
     store_name = "my_new_store"
     store_config = {
-        "module_name": "great_expectations.data_context.store",
+        "module_name": "great_expectations_v1.data_context.store",
         "class_name": "ExpectationsStore",
     }
     store = Store.build_store_from_config(
@@ -51,10 +51,10 @@ def test_build_store_from_config_success():
 @pytest.mark.parametrize(
     "store_config,module_name",
     [
-        pytest.param(None, "great_expectations.data_context.store", id="config_none"),
+        pytest.param(None, "great_expectations_v1.data_context.store", id="config_none"),
         pytest.param(
             {
-                "module_name": "great_expectations.data_context.store",
+                "module_name": "great_expectations_v1.data_context.store",
                 "class_name": "ExpectationsStore",
             },
             None,
