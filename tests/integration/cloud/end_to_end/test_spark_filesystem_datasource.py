@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING, Iterator
 import pandas as pd
 import pytest
 
-from great_expectations.datasource.data_connector.util import normalize_directory_path
+from great_expectations.datasource.fluent.data_connector.filesystem_data_connector import (
+    normalize_directory_path,
+)
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )

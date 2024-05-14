@@ -52,11 +52,10 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
     IDDict,
 )
-from great_expectations.core.batch import Batch, BatchRequest, LegacyBatchDefinition
+from great_expectations.core.batch import Batch, LegacyBatchDefinition
 from great_expectations.core.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.exceptions.exceptions import (
     ExecutionEngineError,
     InvalidExpectationConfigurationError,
@@ -913,27 +912,14 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if context is None:
         context = build_in_memory_runtime_context()
 
-    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
-        name="my_sql_data_connector",
-        datasource_name="my_test_datasource",
-        execution_engine=execution_engine,
-        assets={
-            "my_asset": {
-                "table_name": "animals_table",
-            },
-        },
-    )
-
     if batch_definition is None:
-        batch_definition = (
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
-                    datasource_name="my_test_datasource",
-                    data_connector_name="my_sql_data_connector",
-                    data_asset_name="my_asset",
-                )
-            )
-        )[0]
+        # maintain legacy behavior - standup a dummy LegacyBatchDefinition
+        batch_definition = LegacyBatchDefinition(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="my_asset",
+            batch_identifiers=IDDict(),
+        )
 
     batch = Batch(data=batch_data, batch_definition=batch_definition)  # type: ignore[arg-type] # got SqlAlchemyBatchData
 
