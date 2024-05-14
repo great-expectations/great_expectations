@@ -83,11 +83,11 @@ if TYPE_CHECKING:
     from great_expectations.data_context import (
         AbstractDataContext as GXDataContext,
     )
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import (
         BatchParameters,
         BatchRequest,
     )
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.type_lookup import (
         TypeLookup,
     )

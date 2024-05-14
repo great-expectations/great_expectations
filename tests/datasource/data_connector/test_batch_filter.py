@@ -4,7 +4,7 @@ from typing import List
 
 import pytest
 
-from great_expectations.datasource.data_connector.batch_filter import (
+from great_expectations.datasource.fluent.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )

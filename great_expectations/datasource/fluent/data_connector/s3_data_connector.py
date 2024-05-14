@@ -1,18 +1,18 @@
 from __future__ import annotations
 
+import copy
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Dict, Generator, List, Optional, Type
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector.util import (
-    list_s3_keys,
-    sanitize_prefix_for_gcs_and_s3,
-)
 from great_expectations.datasource.fluent.data_connector import (
     FilePathDataConnector,
+)
+from great_expectations.datasource.fluent.data_connector.file_path_data_connector import (
+    sanitize_prefix_for_gcs_and_s3,
 )
 
 if TYPE_CHECKING:
@@ -218,3 +218,64 @@ requires "file_path_template_map_fn: Callable" to be set.
         }
 
         return self._file_path_template_map_fn(**template_arguments)
+
+
+def list_s3_keys(  # noqa: C901 - too complex
+    s3, query_options: dict, iterator_dict: dict, recursive: bool = False
+) -> Generator[str, None, None]:
+    """
+    For InferredAssetS3DataConnector, we take bucket and prefix and search for files using RegEx at and below the level
+    specified by that bucket and prefix.  However, for ConfiguredAssetS3DataConnector, we take bucket and prefix and
+    search for files using RegEx only at the level specified by that bucket and prefix.  This restriction for the
+    ConfiguredAssetS3DataConnector is needed, because paths on S3 are comprised not only the leaf file name but the
+    full path that includes both the prefix and the file name.  Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible, due to the path ambiguity.
+    :param s3: s3 client connection
+    :param query_options: s3 query attributes ("Bucket", "Prefix", "Delimiter", "MaxKeys")
+    :param iterator_dict: dictionary to manage "NextContinuationToken" (if "IsTruncated" is returned from S3)
+    :param recursive: True for InferredAssetS3DataConnector and False for ConfiguredAssetS3DataConnector (see above)
+    :return: string valued key representing file path on S3 (full prefix and leaf file name)
+    """  # noqa: E501
+    if iterator_dict is None:
+        iterator_dict = {}
+
+    if "continuation_token" in iterator_dict:
+        query_options.update({"ContinuationToken": iterator_dict["continuation_token"]})
+
+    logger.debug(f"Fetching objects from S3 with query options: {query_options}")
+
+    s3_objects_info: dict = s3.list_objects_v2(**query_options)
+
+    if not any(key in s3_objects_info for key in ["Contents", "CommonPrefixes"]):
+        raise ValueError("S3 query may not have been configured correctly.")  # noqa: TRY003
+
+    if "Contents" in s3_objects_info:
+        keys: List[str] = [item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0]
+        yield from keys
+
+    if recursive and "CommonPrefixes" in s3_objects_info:
+        common_prefixes: List[Dict[str, Any]] = s3_objects_info["CommonPrefixes"]
+        for prefix_info in common_prefixes:
+            query_options_tmp: dict = copy.deepcopy(query_options)
+            query_options_tmp.update({"Prefix": prefix_info["Prefix"]})
+            # Recursively fetch from updated prefix
+            yield from list_s3_keys(
+                s3=s3,
+                query_options=query_options_tmp,
+                iterator_dict={},
+                recursive=recursive,
+            )
+
+    if s3_objects_info["IsTruncated"]:
+        iterator_dict["continuation_token"] = s3_objects_info["NextContinuationToken"]
+        # Recursively fetch more
+        yield from list_s3_keys(
+            s3=s3,
+            query_options=query_options,
+            iterator_dict=iterator_dict,
+            recursive=recursive,
+        )
+
+    if "continuation_token" in iterator_dict:
+        # Make sure we clear the token once we've gotten fully through
+        del iterator_dict["continuation_token"]

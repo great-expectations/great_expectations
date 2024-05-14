@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired, TypeAlias
 
     from great_expectations.alias_types import JSONValues
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import (
         Batch as FluentBatch,
     )

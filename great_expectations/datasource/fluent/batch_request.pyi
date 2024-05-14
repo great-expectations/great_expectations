@@ -5,7 +5,7 @@ from typing_extensions import TypeAlias
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import StrictStr
 from great_expectations.core.batch_definition import PartitionerT
-from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
 
 BatchParameters: TypeAlias = Dict[StrictStr, Any]
 

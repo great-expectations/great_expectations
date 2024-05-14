@@ -3,6 +3,8 @@ from __future__ import annotations
 import copy
 import logging
 import re
+import sre_constants
+import sre_parse
 from abc import abstractmethod
 from collections import defaultdict
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
@@ -11,16 +13,13 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector.batch_filter import (
-    BatchFilter,
-    build_batch_filter,
-)
-from great_expectations.datasource.data_connector.util import (
-    map_batch_definition_to_data_reference_string_using_regex,
-)
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.data_connector import (
     DataConnector,
+)
+from great_expectations.datasource.fluent.data_connector.batch_filter import (
+    BatchFilter,
+    build_batch_filter,
 )
 from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
@@ -430,3 +429,142 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     @abstractmethod
     def _get_full_file_path(self, path: str) -> str:
         pass
+
+
+def map_batch_definition_to_data_reference_string_using_regex(
+    batch_definition: LegacyBatchDefinition,
+    regex_pattern: re.Pattern,
+    group_names: List[str],
+) -> str:
+    if not isinstance(batch_definition, LegacyBatchDefinition):
+        raise TypeError("batch_definition is not of an instance of type BatchDefinition")  # noqa: TRY003
+
+    data_asset_name: str = batch_definition.data_asset_name
+    batch_identifiers: IDDict = batch_definition.batch_identifiers
+    data_reference: str = convert_batch_identifiers_to_data_reference_string_using_regex(
+        batch_identifiers=batch_identifiers,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
+        data_asset_name=data_asset_name,
+    )
+    return data_reference
+
+
+def convert_batch_identifiers_to_data_reference_string_using_regex(
+    batch_identifiers: IDDict,
+    regex_pattern: re.Pattern,
+    group_names: List[str],
+    data_asset_name: Optional[str] = None,
+) -> str:
+    if not isinstance(batch_identifiers, IDDict):
+        raise TypeError("batch_identifiers is not " "an instance of type IDDict")  # noqa: TRY003
+
+    template_arguments: dict = copy.deepcopy(batch_identifiers)
+    # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>  # noqa: E501
+    if data_asset_name is not None:
+        template_arguments["data_asset_name"] = data_asset_name
+
+    filepath_template: str = _invert_regex_to_data_reference_template(
+        regex_pattern=regex_pattern,
+        group_names=group_names,
+    )
+    converted_string: str = filepath_template.format(**template_arguments)
+
+    return converted_string
+
+
+def _invert_regex_to_data_reference_template(  # noqa: C901 - too complex
+    regex_pattern: re.Pattern | str,
+    group_names: List[str],
+) -> str:
+    r"""Create a string template based on a regex and corresponding list of group names.
+
+    For example:
+
+        filepath_template = _invert_regex_to_data_reference_template(
+            regex_pattern=r"^(.+)_(\d+)_(\d+)\.csv$",
+            group_names=["name", "timestamp", "price"],
+        )
+        filepath_template
+        >> "{name}_{timestamp}_{price}.csv"
+
+    Such templates are useful because they can be populated using string substitution:
+
+        filepath_template.format(**{
+            "name": "user_logs",
+            "timestamp": "20200101",
+            "price": "250",
+        })
+        >> "user_logs_20200101_250.csv"
+
+
+    NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
+    """  # noqa: E501
+    data_reference_template: str = ""
+    group_name_index: int = 0
+
+    num_groups = len(group_names)
+
+    if isinstance(regex_pattern, re.Pattern):
+        regex_pattern = regex_pattern.pattern
+
+    # print("-"*80)
+    parsed_sre = sre_parse.parse(str(regex_pattern))
+    for parsed_sre_tuple, char in zip(parsed_sre, list(str(regex_pattern))):  # type: ignore[call-overload]
+        token, value = parsed_sre_tuple
+        if token == sre_constants.LITERAL:
+            # Transcribe the character directly into the template
+            data_reference_template += chr(value)
+        elif token == sre_constants.SUBPATTERN:
+            if not (group_name_index < num_groups):
+                break
+            # Replace the captured group with "{next_group_name}" in the template
+            data_reference_template += f"{{{group_names[group_name_index]}}}"
+            group_name_index += 1
+        elif token in [
+            sre_constants.MAX_REPEAT,
+            sre_constants.IN,
+            sre_constants.BRANCH,
+            sre_constants.ANY,
+        ]:
+            if group_names:
+                # Replace the uncaptured group a wildcard in the template
+                data_reference_template += "*"
+            else:
+                # Don't assume that a `.` in a filename should be a star glob
+                data_reference_template += char
+        elif token in [
+            sre_constants.AT,
+            sre_constants.ASSERT_NOT,
+            sre_constants.ASSERT,
+        ]:
+            pass
+        else:
+            raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")  # noqa: TRY003
+
+    # Collapse adjacent wildcards into a single wildcard
+    data_reference_template: str = re.sub("\\*+", "*", data_reference_template)  # type: ignore[no-redef]
+
+    return data_reference_template
+
+
+def sanitize_prefix_for_gcs_and_s3(text: str) -> str:
+    """
+    Takes in a given user-prefix and cleans it to work with file-system traversal methods
+    (i.e. add '/' to the end of a string meant to represent a directory)
+
+    Customized for S3 paths, ignoring the path separator used by the host OS
+    """
+    text = text.strip()
+    if not text:
+        return text
+
+    path_parts = text.split("/")
+    if not path_parts:  # Empty prefix
+        return text
+
+    if "." in path_parts[-1]:  # File, not folder
+        return text
+
+    # Folder, should have trailing /
+    return f"{text.rstrip('/')}/"
