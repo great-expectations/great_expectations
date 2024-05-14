@@ -913,7 +913,13 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         context = build_in_memory_runtime_context()
 
     if batch_definition is None:
-        raise RuntimeError("Legacy BatchDefinition must be provided")  # noqa: TRY003
+        # maintain legacy behavior - standup a dummy LegacyBatchDefinition
+        batch_definition = LegacyBatchDefinition(
+            datasource_name="my_test_datasource",
+            data_connector_name="my_sql_data_connector",
+            data_asset_name="my_asset",
+            batch_identifiers=IDDict(),
+        )
 
     batch = Batch(data=batch_data, batch_definition=batch_definition)  # type: ignore[arg-type] # got SqlAlchemyBatchData
 
