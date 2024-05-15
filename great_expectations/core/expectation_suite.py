@@ -30,15 +30,15 @@ from great_expectations.analytics.events import (
 )
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.serdes import _IdentifierBundle
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    ensure_json_serializable,
-)
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import (
+    convert_to_json_serializable,
+    ensure_json_serializable,
+)
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues

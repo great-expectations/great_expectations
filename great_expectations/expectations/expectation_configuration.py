@@ -24,10 +24,6 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.suite_parameters import (
     build_suite_parameters,
 )
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    ensure_json_serializable,
-)
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
     InvalidExpectationConfigurationError,
@@ -36,6 +32,10 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import (
+    convert_to_json_serializable,
+    ensure_json_serializable,
+)
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
