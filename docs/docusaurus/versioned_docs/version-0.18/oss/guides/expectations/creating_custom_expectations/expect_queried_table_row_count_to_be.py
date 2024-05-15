@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Optional, Union
 
-from great_expectations.util import convert_to_json_serializable
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
