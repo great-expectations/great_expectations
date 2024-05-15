@@ -326,9 +326,11 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return contents
 
-    @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        keys = [
+            key for key in self.list_keys() if key != StoreBackend.STORE_BACKEND_ID_KEY
+        ]
+        return [self._get(key) for key in keys]
 
     def _set(self, key, value, **kwargs):
         if not isinstance(key, tuple):
@@ -864,12 +866,26 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return gcs_object_key
 
     def _get(self, key):
-        gcs_object_key = self._build_gcs_object_key(key)
-
         from great_expectations.compatibility import google
 
         gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
+        return self._get_by_gcs_object_key(bucket, key)
+
+    @override
+    def _get_all(self) -> list[Any]:
+        from great_expectations.compatibility import google
+
+        gcs = google.storage.Client(project=self.project)
+        bucket = gcs.bucket(self.bucket)
+
+        keys = self.list_keys()
+        keys = [k for k in keys if k != StoreBackend.STORE_BACKEND_ID_KEY]
+
+        return [self._get_by_gcs_object_key(bucket, key) for key in keys]
+
+    def _get_by_gcs_object_key(self, bucket, key):
+        gcs_object_key = self._build_gcs_object_key(key)
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
@@ -877,10 +893,6 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             )
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
-
-    @override
-    def _get_all(self) -> list[Any]:
-        raise NotImplementedError
 
     def _set(
         self,
@@ -1107,7 +1119,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        keys = self.list_keys()
+        return [self._get(key) for key in keys]
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
         from great_expectations.compatibility.azure import ContentSettings
