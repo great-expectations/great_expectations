@@ -212,7 +212,7 @@ class FilePathDataConnector(DataConnector):
         batch_definition_set = set()
         # if the batch request hasn't specified a batching_regex, fallback to a default
         if batch_request.partitioner:
-            batching_regex = batch_request.partitioner.regex
+            batching_regex = self._preprocess_batching_regex(batch_request.partitioner.regex)
         else:
             # todo: remove
             batching_regex = MATCH_ALL_PATTERN
@@ -346,7 +346,6 @@ class FilePathDataConnector(DataConnector):
         self, batching_regex: re.Pattern
     ) -> Dict[str, List[LegacyBatchDefinition] | None]:
         """Access a map where keys are data references and values are LegacyBatchDefinitions."""
-        batching_regex = self._preprocess_batching_regex(regex=batching_regex)
         batch_definitions = self._data_references_cache[batching_regex]
         if batch_definitions:
             return batch_definitions
