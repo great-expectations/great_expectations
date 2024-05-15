@@ -15,7 +15,9 @@ from great_expectations_v1.experimental.rule_based_profiler.metric_computation_r
     MetricComputationDetails,  # noqa: TCH001
     MetricComputationResult,  # noqa: TCH001
 )
-from great_expectations_v1.experimental.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations_v1.experimental.rule_based_profiler.parameter_builder import (
+    ParameterBuilder,
+)
 from great_expectations_v1.experimental.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,

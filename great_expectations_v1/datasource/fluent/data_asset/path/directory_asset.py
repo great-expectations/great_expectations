@@ -17,7 +17,10 @@ from great_expectations_v1.core.partitioners import (
     ColumnPartitionerYearly,
 )
 from great_expectations_v1.datasource.fluent import BatchRequest
-from great_expectations_v1.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
+from great_expectations_v1.datasource.fluent.constants import (
+    _DATA_CONNECTOR_NAME,
+    MATCH_ALL_PATTERN,
+)
 from great_expectations_v1.datasource.fluent.data_asset.path.dataframe_partitioners import (
     DataframePartitioner,
     DataframePartitionerDaily,
@@ -28,7 +31,10 @@ from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset imp
     PathDataAsset,
 )
 from great_expectations_v1.datasource.fluent.data_connector import FILE_PATH_BATCH_SPEC_KEY
-from great_expectations_v1.datasource.fluent.interfaces import DatasourceT, PartitionerSortingProtocol
+from great_expectations_v1.datasource.fluent.interfaces import (
+    DatasourceT,
+    PartitionerSortingProtocol,
+)
 
 if TYPE_CHECKING:
     from great_expectations_v1.alias_types import PathStr

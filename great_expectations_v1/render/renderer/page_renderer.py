@@ -30,7 +30,9 @@ if TYPE_CHECKING:
     from great_expectations_v1.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
     )
-    from great_expectations_v1.expectations.expectation_configuration import ExpectationConfiguration
+    from great_expectations_v1.expectations.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 logger = logging.getLogger(__name__)
 

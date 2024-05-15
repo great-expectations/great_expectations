@@ -18,7 +18,9 @@ from great_expectations_v1.experimental.metric_repository.metrics import (
     MetricTypes,
     TableMetric,
 )
-from great_expectations_v1.experimental.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations_v1.experimental.rule_based_profiler.domain_builder import (
+    ColumnDomainBuilder,
+)
 from great_expectations_v1.validator.exception_info import ExceptionInfo
 from great_expectations_v1.validator.metric_configuration import MetricConfiguration
 

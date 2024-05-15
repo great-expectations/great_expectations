@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import Type
 
 from great_expectations_v1.datasource.fluent.data_asset.path.file_asset import FileDataAsset
-from great_expectations_v1.datasource.fluent.dynamic_pandas import _generate_pandas_data_asset_models
+from great_expectations_v1.datasource.fluent.dynamic_pandas import (
+    _generate_pandas_data_asset_models,
+)
 
 _PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_csv",
