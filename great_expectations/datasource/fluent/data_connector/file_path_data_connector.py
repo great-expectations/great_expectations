@@ -291,13 +291,15 @@ class FilePathDataConnector(DataConnector):
         """  # noqa: E501
         # this class is overloaded with two separate implementations:
         if self._whole_directory_path_override:
-            # Directory data connector doesn't use a regex, but it's required by this
-            # component, so we pass through the match all pattern
-            batching_regex = MATCH_ALL_PATTERN
+            return self._get_batch_spec_params_directory(batch_definition=batch_definition)
         else:
-            if not batch_definition.batching_regex:
-                raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
-            batching_regex = batch_definition.batching_regex
+            return self._get_batch_spec_params_file(batch_definition=batch_definition)
+
+    def _get_batch_spec_params_file(self, batch_definition: LegacyBatchDefinition) -> dict:
+        """File specific implementation of batch spec parameters"""
+        if not batch_definition.batching_regex:
+            raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
+        batching_regex = batch_definition.batching_regex
 
         regex_parser = RegExParser(
             regex_pattern=batching_regex,
@@ -312,11 +314,17 @@ class FilePathDataConnector(DataConnector):
         if not path:
             raise ValueError(  # noqa: TRY003
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
-"""  # noqa: E501
+        batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
+        """  # noqa: E501
             )
 
         path = self._get_full_file_path(path=path)
+
+        return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
+
+    def _get_batch_spec_params_directory(self, batch_definition: LegacyBatchDefinition) -> dict:
+        """Directory specific implementation of batch spec parameters"""
+        path = self._get_full_file_path(path=str(self._whole_directory_path_override))
 
         return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
