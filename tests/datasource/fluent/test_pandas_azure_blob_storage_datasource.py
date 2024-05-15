@@ -301,8 +301,10 @@ def test_get_batch_list_from_fully_specified_batch_request(
         abs_container="my_container",
     )
 
-    # batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
-    batch_definition = asset.add_batch_definition("my_batch_definition")
+    batching_regex = r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
+    batch_definition = asset.add_batch_definition_monthly(
+        "my_batch_definition", regex=batching_regex
+    )
     request = batch_definition.build_batch_request(
         {"name": "alex", "timestamp": "20200819", "price": "1300"}
     )
