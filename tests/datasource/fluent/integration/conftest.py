@@ -165,12 +165,13 @@ def spark_data(
     spark_ds = spark_filesystem_datasource(test_backends=test_backends, context=context)
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
         order_by=["year", "month"],
     )
-    batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_definition = asset.add_batch_definition_path("path_batch_def", regex=batching_regex)
+    batch_request = batch_definition.build_batch_request({"year": "2019", "month": "01"})
     return context, spark_ds, asset, batch_request
 
 
@@ -186,10 +187,11 @@ def multibatch_pandas_data(
     )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
-    batch_request = asset.build_batch_request({"year": "2020"})
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_definition = asset.add_batch_definition_path("monthly_batch_def", regex=batching_regex)
+    batch_request = batch_definition.build_batch_request({"year": "2020"})
     return context, pandas_ds, asset, batch_request
 
 
@@ -224,12 +226,13 @@ def multibatch_spark_data(
     )
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
         order_by=["year", "month"],
     )
-    batch_request = asset.build_batch_request({"year": "2020"})
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_definition = asset.add_batch_definition_path("monthly_batch_def", regex=batching_regex)
+    batch_request = batch_definition.build_batch_request({"year": "2020"})
     return context, spark_ds, asset, batch_request
 
 
