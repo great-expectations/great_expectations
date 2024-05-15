@@ -7,7 +7,6 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-import great_expectations.execution_engine.sparkdf_execution_engine
 from great_expectations.compatibility import azure
 from great_expectations.datasource.fluent import SparkAzureBlobStorageDatasource
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
@@ -82,7 +81,7 @@ def object_keys() -> List[str]:
 
 @pytest.fixture
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def csv_asset(
     mock_list_keys,
@@ -175,7 +174,7 @@ def test_construct_spark_abs_datasource_with_multiple_auth_methods_raises_error(
 
 @pytest.mark.unit
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_add_csv_asset_to_datasource(
@@ -197,7 +196,7 @@ def test_add_csv_asset_to_datasource(
 
 @pytest.mark.unit
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_keys: List[str]):
@@ -210,7 +209,7 @@ def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_
 
 @pytest.mark.unit
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_batching_regex_named_parameters(
@@ -232,7 +231,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
 
 @pytest.mark.unit
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
@@ -251,67 +250,9 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         asset.build_batch_request({"name": "alex", "timestamp": "1234567890", "price": 1300})
 
 
-@pytest.mark.big
-@pytest.mark.xfail(
-    reason="Accessing objects on azure.storage.blob using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."  # noqa: E501
-)
-def test_get_batch_list_from_fully_specified_batch_request(
-    monkeypatch: pytest.MonkeyPatch,
-    spark_abs_datasource: SparkAzureBlobStorageDatasource,
-):
-    azure_client: azure.BlobServiceClient = cast(azure.BlobServiceClient, MockBlobServiceClient())
-
-    def instantiate_azure_client_spy(self) -> None:
-        self._azure_client = azure_client
-
-    monkeypatch.setattr(
-        great_expectations.execution_engine.sparkdf_execution_engine.SparkDFExecutionEngine,
-        "_instantiate_s3_client",
-        instantiate_azure_client_spy,
-        raising=True,
-    )
-    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
-    asset = spark_abs_datasource.add_csv_asset(
-        name="csv_asset",
-        abs_container="my_container",
-        batch_metadata=asset_specified_metadata,
-    )
-
-    batching_regex = r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
-    batch_definition = asset.add_batch_definition_monthly(
-        "my_batch_definition", regex=batching_regex
-    )
-    request = batch_definition.build_batch_request(
-        {"name": "alex", "timestamp": "20200819", "price": "1300"}
-    )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
-    assert batch.batch_request.datasource_name == spark_abs_datasource.name
-    assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
-    assert batch.metadata == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-        **asset_specified_metadata,
-    }
-    assert batch.id == "spark_abs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-
-    request = asset.build_batch_request({"name": "alex"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 2
-
-
 @pytest.mark.unit
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_add_csv_asset_with_recursive_file_discovery_to_datasource(

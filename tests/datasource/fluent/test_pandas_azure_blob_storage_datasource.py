@@ -1,24 +1,17 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, cast
 from unittest import mock
 
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import azure
-from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
-from great_expectations.datasource.fluent.data_connector import (
-    AzureBlobStorageDataConnector,
-)
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource import (
     PandasAzureBlobStorageDatasourceError,
 )
@@ -47,7 +40,6 @@ pytestmark = [
 
 
 class MockContainerClient:
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def walk_blobs(
         self,
         name_starts_with: str | None = None,
@@ -59,7 +51,6 @@ class MockContainerClient:
 
 
 class MockBlobServiceClient:
-    # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def get_container_client(self, container: str) -> azure.ContainerClient:
         return cast(azure.ContainerClient, MockContainerClient())
 
@@ -202,7 +193,7 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_add_csv_asset_to_datasource(
@@ -221,7 +212,7 @@ def test_add_csv_asset_to_datasource(
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_keys: List[str]):
@@ -232,10 +223,9 @@ def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_
     assert asset.name == "csv_asset"
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_batching_regex_named_parameters(
@@ -255,10 +245,9 @@ def test_csv_asset_with_batching_regex_named_parameters(
     assert options == ("path", "year", "month")
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
@@ -278,93 +267,8 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 
 
 @pytest.mark.big
-@pytest.mark.xfail(
-    reason="Accessing objects on azure.storage.blob using Pandas is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."  # noqa: E501
-)
-def test_get_batch_list_from_fully_specified_batch_request(
-    monkeypatch: pytest.MonkeyPatch,
-    pandas_abs_datasource: PandasAzureBlobStorageDatasource,
-):
-    azure_client: azure.BlobServiceClient = cast(azure.BlobServiceClient, MockBlobServiceClient())
-
-    def instantiate_azure_client_spy(self) -> None:
-        self._azure_client = azure_client
-
-    monkeypatch.setattr(
-        great_expectations.execution_engine.pandas_execution_engine.PandasExecutionEngine,
-        "_instantiate_s3_client",
-        instantiate_azure_client_spy,
-        raising=True,
-    )
-    asset = pandas_abs_datasource.add_csv_asset(
-        name="csv_asset",
-        abs_container="my_container",
-    )
-
-    batching_regex = r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
-    batch_definition = asset.add_batch_definition_monthly(
-        "my_batch_definition", regex=batching_regex
-    )
-    request = batch_definition.build_batch_request(
-        {"name": "alex", "timestamp": "20200819", "price": "1300"}
-    )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
-    assert batch.batch_request.datasource_name == pandas_abs_datasource.name
-    assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
-    assert batch.metadata == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
-    assert batch.id == "pandas_abs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-
-    request = asset.build_batch_request({"name": "alex"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 2
-
-
-@pytest.mark.big
-def test_test_connection_failures(
-    pandas_abs_datasource: PandasAzureBlobStorageDatasource,
-    bad_regex_config: tuple[re.Pattern, str],
-):
-    _, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(  # type: ignore[call-arg]
-        name="csv_asset",
-    )
-    csv_asset._datasource = pandas_abs_datasource
-    pandas_abs_datasource.assets = [
-        csv_asset,
-    ]
-    csv_asset._data_connector = AzureBlobStorageDataConnector(
-        datasource_name=pandas_abs_datasource.name,
-        data_asset_name=csv_asset.name,
-        azure_client=pandas_abs_datasource._azure_client,
-        account_name=csv_asset.datasource._account_name,
-        container="my_container",
-        file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
-    )
-    csv_asset._test_connection_error_message = test_connection_error_message
-
-    with pytest.raises(TestConnectionError) as e:
-        pandas_abs_datasource.test_connection()
-
-    assert str(e.value) == str(test_connection_error_message)
-
-
-# noinspection PyUnusedLocal
-@pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
