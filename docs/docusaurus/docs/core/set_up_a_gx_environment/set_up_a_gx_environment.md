@@ -20,15 +20,15 @@ import OverviewCard from '@site/src/components/OverviewCard';
     topIcon 
     label="Install Python"
     description="Install the Python language and set up a virtual environment"
-    to="/core/set_up_a_gx_environment/install_python.md" 
+    to="/core/set_up_a_gx_environment/install_python" 
     icon="/img/expectation_icon.svg" 
   />
   
   <LinkCard 
     topIcon 
     label="Install GX"
-    description="Install the {GxData.product_name} Python library."
-    to="/core/set_up_a_gx_environment/install_gx.md" 
+    description="Install the GX Python library."
+    to="/core/set_up_a_gx_environment/install_gx" 
     icon="/img/expectation_icon.svg" 
   />
 

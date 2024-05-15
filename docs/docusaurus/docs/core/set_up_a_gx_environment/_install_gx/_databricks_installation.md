@@ -15,29 +15,23 @@ DBFS is a distributed file system mounted in a Databricks workspace and availabl
 
 1. Run the following command in your notebook to install GX as a notebook-scoped library:
 
-    ```bash title="Terminal input"
-    %pip install great-expectations
-    ```
+   ```bash title="Terminal input"
+   %pip install great-expectations
+   ```
 
-  A notebook-scoped library is a custom Python environment that is specific to a notebook. You can also install a library at the cluster or workspace level. See [Databricks Libraries](https://docs.databricks.com/data/databricks-file-system.html).
+   A notebook-scoped library is a custom Python environment that is specific to a notebook. You can also install a library at the cluster or workspace level. See [Databricks Libraries](https://docs.databricks.com/data/databricks-file-system.html).
 
 2. Run the following command to import the Python configurations you'll use in the following steps:
 
-  ```python title="Python" name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py imports"
-  ```
+   ```python title="Python" name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py imports"
+   ```
 
 3. Run the following code to specify a `/dbfs/` path for your Data Context:
 
-  ```python title="Python" name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py choose context_root_dir"
-  ```
+   ```python title="Python" name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py choose context_root_dir"
+   ```
+
 4. Run the following code to instantiate your Data Context:
 
-  ```python title="Python" name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py set up context"
-  ```
-
-## Next steps
-
-<InProgress />
-
-- Connect to data in files stored in the DBFS
-- Connect to data in an in-memory Spark Dataframe
+   ```python title="Python" name="docs/docusaurus/docs/snippets/databricks_deployment_patterns_file_python_configs.py set up context"
+   ```
