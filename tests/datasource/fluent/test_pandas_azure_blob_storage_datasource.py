@@ -202,7 +202,7 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_add_csv_asset_to_datasource(
@@ -221,7 +221,7 @@ def test_add_csv_asset_to_datasource(
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_keys: List[str]):
@@ -232,10 +232,9 @@ def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_
     assert asset.name == "csv_asset"
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_batching_regex_named_parameters(
@@ -255,10 +254,9 @@ def test_csv_asset_with_batching_regex_named_parameters(
     assert options == ("path", "year", "month")
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
@@ -359,10 +357,9 @@ def test_test_connection_failures(
     assert str(e.value) == str(test_connection_error_message)
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
