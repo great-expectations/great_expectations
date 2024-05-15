@@ -34,7 +34,7 @@ To use Great Expectations (GX) you need to install Python and the {GxData.produc
    Python 3.8.6
    ```
 
-## (Optional) Create a virtual environment
+## Optional. Create a virtual environment
 
    Although it is optional, the best practice when working with a Python project is to do so in a virtual environment.  A virtual environment ensures that any libraries and dependencies you install as part of your project do not encounter or cause conflicts with libraries and dependencies installed for other Python projects.
 
@@ -42,7 +42,7 @@ To use Great Expectations (GX) you need to install Python and the {GxData.produc
 
 1. Create the virtual environment with `venv`.
 
-   To create your virtual environment, run the following code from the folder the environment should reside in:
+   To create your virtual environment, run the following code from the folder that the environment will be created in:
 
    ```shell title="Terminal input"
    python -m venv my_venv
@@ -52,13 +52,13 @@ To use Great Expectations (GX) you need to install Python and the {GxData.produc
 
    :::tip Virtual environment names
 
-   If you wish to use a different name for your virtual environment, replace `my_venv` in the example with the name you would prefer.  You will also have to replace `my_venv` with your virtual environment's actual name in any other example code that includes `my_venv`.
+   To use a different name for your virtual environment, replace `my_venv` in the example with the name you would prefer.  You will also have to replace `my_venv` with your virtual environment's actual name in any other example code that includes `my_venv`.
 
    :::
 
 2. Optional. Test your virtual environment by activating it.
 
-   Activate your virtual environment by running the following command from the folder it was installed in:
+   Activate your virtual environment by running the following command from the same folder it was installed from:
 
    ```shell title="Terminal input"
    source my_venv/bin/activate

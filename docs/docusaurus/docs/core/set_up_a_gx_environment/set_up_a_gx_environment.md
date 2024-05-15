@@ -4,10 +4,10 @@ description: Learn how to set up a Python environment for GX, install the GX lib
 hide_feedback_survey: true
 hide_title: true
 ---
+
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
-
 
 <OverviewCard title={frontMatter.title}>
   Learn how to set up a Python environment for GX, install the GX library, and get a Data Context for project management from a Python script, IDE, or interpreter.

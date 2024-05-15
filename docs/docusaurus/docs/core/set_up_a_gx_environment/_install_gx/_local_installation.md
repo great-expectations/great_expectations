@@ -1,6 +1,7 @@
 import ReleaseVersionBox from '../../../components/versions/_gx_version_code_box.mdx'
+import GxData from '../../_core_components/_data.jsx'
 
-GX 1.0 is a Python library and as such can be used with a local Python installation to access the functionality of GX through Python scripts.
+{GxData.product_name} is a Python library and as such can be used with a local Python installation to access the functionality of GX through Python scripts.
 
 ## Installation and setup
 
@@ -18,13 +19,13 @@ GX 1.0 is a Python library and as such can be used with a local Python installat
    python -m ensurepip --upgrade
    ```
 
-3. Install the GX 1.0 library:
+3. Install the {GxData.product_name} library:
 
    ```bash title="Terminal input"
    pip install great_expectations
    ```
 
-4. Verify that GX installed successfully with the CLI command:
+4. Verify that GX installed successfully with the terminal command:
 
    ```bash title="Terminal input"
    great_expectations --version
