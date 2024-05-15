@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, List
 
 import pandas as pd
@@ -15,9 +14,6 @@ from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
-
-
-logger = logging.getLogger(__file__)
 
 
 @pytest.fixture()
@@ -75,12 +71,12 @@ def csv_asset(spark_s3_datasource: SparkS3Datasource) -> PathDataAsset:
     return asset
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_construct_spark_s3_datasource(spark_s3_datasource: SparkS3Datasource):
     assert spark_s3_datasource.name == "spark_s3_datasource"
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_add_csv_asset_to_datasource(spark_s3_datasource: SparkS3Datasource):
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_s3_datasource.add_csv_asset(
@@ -93,7 +89,7 @@ def test_add_csv_asset_to_datasource(spark_s3_datasource: SparkS3Datasource):
     assert asset.batch_metadata == asset_specified_metadata
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_construct_csv_asset_directly():
     asset = CSVAsset(
         name="csv_asset",
@@ -101,7 +97,7 @@ def test_construct_csv_asset_directly():
     assert asset.name == "csv_asset"
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_csv_asset_with_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -116,7 +112,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
     assert options == ("path", "year", "month")
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -130,7 +126,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         asset.build_batch_request({"year": "2024", "month": 5})
 
 
-@pytest.mark.big
+@pytest.mark.unit
 def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     spark_s3_datasource: SparkS3Datasource,
 ):
