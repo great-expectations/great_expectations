@@ -227,60 +227,16 @@ def test_asset_connect_options_in_repr(
 
 
 @pytest.mark.aws_deps
-def test_csv_asset_with_batching_regex_unnamed_parameters(
-    pandas_s3_datasource: PandasS3Datasource, aws_credentials
-):
-    asset = pandas_s3_datasource.add_csv_asset(
-        name="csv_asset",
-    )
-    batching_regex = re.compile(r"(.+)_(.+)_(\d{4})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "batch_request_param_1",
-        "batch_request_param_2",
-        "batch_request_param_3",
-        "path",
-    )
-
-
-@pytest.mark.aws_deps
 def test_csv_asset_with_batching_regex_named_parameters(
     pandas_s3_datasource: PandasS3Datasource, aws_credentials
 ):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
     )
-    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "name",
-        "timestamp",
-        "price",
-        "path",
-    )
-
-
-@pytest.mark.aws_deps
-def test_csv_asset_with_some_batching_regex_named_parameters(
-    pandas_s3_datasource: PandasS3Datasource, aws_credentials
-):
-    asset = pandas_s3_datasource.add_csv_asset(
-        name="csv_asset",
-    )
-    batching_regex = re.compile(r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "name",
-        "batch_request_param_2",
-        "price",
-        "path",
-    )
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=batching_regex)
+    options = asset.get_batch_parameters_keys(partitioner=batch_def.partitioner)
+    assert options == ("path", "year", "month")
 
 
 @pytest.mark.aws_deps

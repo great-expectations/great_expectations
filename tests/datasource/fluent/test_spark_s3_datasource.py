@@ -8,7 +8,6 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.partitioners import FileNamePartitionerPath
 from great_expectations.datasource.fluent import SparkS3Datasource
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
@@ -113,27 +112,6 @@ def test_construct_csv_asset_directly():
 
 
 @pytest.mark.big
-def test_csv_asset_with_batching_regex_unnamed_parameters(
-    spark_s3_datasource: SparkS3Datasource,
-):
-    asset = spark_s3_datasource.add_csv_asset(
-        name="csv_asset",
-        header=True,
-        infer_schema=True,
-    )
-    batching_regex = re.compile(r"(.+)_(.+)_(\d{4})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "batch_request_param_1",
-        "batch_request_param_2",
-        "batch_request_param_3",
-        "path",
-    )
-
-
-@pytest.mark.big
 def test_csv_asset_with_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -142,37 +120,10 @@ def test_csv_asset_with_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "name",
-        "timestamp",
-        "price",
-        "path",
-    )
-
-
-@pytest.mark.big
-def test_csv_asset_with_some_batching_regex_named_parameters(
-    spark_s3_datasource: SparkS3Datasource,
-):
-    asset = spark_s3_datasource.add_csv_asset(
-        name="csv_asset",
-        header=True,
-        infer_schema=True,
-    )
-    batching_regex = re.compile(r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "name",
-        "batch_request_param_2",
-        "price",
-        "path",
-    )
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=batching_regex)
+    options = asset.get_batch_parameters_keys(partitioner=batch_def.partitioner)
+    assert options == ("path", "year", "month")
 
 
 @pytest.mark.big

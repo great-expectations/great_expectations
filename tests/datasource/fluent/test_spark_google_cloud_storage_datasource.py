@@ -9,10 +9,8 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-import great_expectations.execution_engine.sparkdf_execution_engine
 from great_expectations.compatibility import google
 from great_expectations.core.partitioners import FileNamePartitionerPath
-from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import (
     SparkGoogleCloudStorageDatasource,
 )
@@ -20,10 +18,6 @@ from great_expectations.datasource.fluent.data_asset.path.path_data_asset import
     PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
-from great_expectations.datasource.fluent.data_connector import (
-    GoogleCloudStorageDataConnector,
-)
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 logger = logging.getLogger(__file__)
 
@@ -99,16 +93,6 @@ def csv_asset(
     return asset
 
 
-@pytest.fixture
-def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    data_connector: GoogleCloudStorageDataConnector = cast(
-        GoogleCloudStorageDataConnector, csv_asset._data_connector
-    )
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket_or_name}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # noqa: E501
-    return regex, test_connection_error_message
-
-
 @pytest.mark.big
 def test_construct_spark_gcs_datasource_without_gcs_options():
     google_cred_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
@@ -126,7 +110,6 @@ def test_construct_spark_gcs_datasource_without_gcs_options():
     assert spark_gcs_datasource.name == "spark_gcs_datasource"
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -149,7 +132,6 @@ def test_construct_spark_gcs_datasource_with_filename_in_gcs_options(
     assert spark_gcs_datasource.name == "spark_gcs_datasource"
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -206,35 +188,6 @@ def test_construct_csv_asset_directly(mock_gcs_client, mock_list_keys, object_ke
     assert asset.name == "csv_asset"
 
 
-# noinspection PyUnusedLocal
-@pytest.mark.big
-@mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
-)
-@mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_batching_regex_unnamed_parameters(
-    mock_gcs_client,
-    mock_list_keys,
-    object_keys: List[str],
-    spark_gcs_datasource: SparkGoogleCloudStorageDatasource,
-):
-    mock_list_keys.return_value = object_keys
-    asset = spark_gcs_datasource.add_csv_asset(
-        name="csv_asset",
-    )
-    batching_regex = re.compile(r"(.+)_(.+)_(\d{4})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "batch_request_param_1",
-        "batch_request_param_2",
-        "batch_request_param_3",
-        "path",
-    )
-
-
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -250,47 +203,12 @@ def test_csv_asset_with_batching_regex_named_parameters(
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
     )
-    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "name",
-        "timestamp",
-        "price",
-        "path",
-    )
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=batching_regex)
+    options = asset.get_batch_parameters_keys(partitioner=batch_def.partitioner)
+    assert options == ("path", "year", "month")
 
 
-# noinspection PyUnusedLocal
-@pytest.mark.big
-@mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
-)
-@mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_some_batching_regex_named_parameters(
-    mock_gcs_client,
-    mock_list_keys,
-    object_keys: List[str],
-    spark_gcs_datasource: SparkGoogleCloudStorageDatasource,
-):
-    mock_list_keys.return_value = object_keys
-    asset = spark_gcs_datasource.add_csv_asset(
-        name="csv_asset",
-    )
-    batching_regex = re.compile(r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "name",
-        "batch_request_param_2",
-        "price",
-        "path",
-    )
-
-
-# noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -313,85 +231,6 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
             {"name": "alex", "timestamp": "1234567890", "price": 1300},
             partitioner=FileNamePartitionerPath(regex=batching_regex),
         )
-
-
-@pytest.mark.big
-@pytest.mark.xfail(
-    reason="Accessing objects on google.cloud.storage using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."  # noqa: E501
-)
-def test_get_batch_list_from_fully_specified_batch_request(
-    monkeypatch: pytest.MonkeyPatch,
-    spark_gcs_datasource: SparkGoogleCloudStorageDatasource,
-):
-    gcs_client: google.Client = cast(google.Client, MockGCSClient())
-
-    def instantiate_gcs_client_spy(self) -> None:
-        self._gcs = gcs_client
-
-    monkeypatch.setattr(
-        great_expectations.execution_engine.sparkdf_execution_engine.SparkDFExecutionEngine,
-        "_instantiate_s3_client",
-        instantiate_gcs_client_spy,
-        raising=True,
-    )
-    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
-    asset = spark_gcs_datasource.add_csv_asset(
-        name="csv_asset",
-        batch_metadata=asset_specified_metadata,
-    )
-
-    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    request = asset.build_batch_request(
-        {"name": "alex", "timestamp": "20200819", "price": "1300"},
-        partitioner=FileNamePartitionerPath(regex=batching_regex),
-    )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
-    assert batch.batch_request.datasource_name == spark_gcs_datasource.name
-    assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
-    assert batch.metadata == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-        **asset_specified_metadata,
-    }
-    assert batch.id == "spark_gcs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
-
-
-@pytest.mark.big
-def test_test_connection_failures(
-    spark_gcs_datasource: SparkGoogleCloudStorageDatasource,
-    bad_regex_config: tuple[re.Pattern, str],
-):
-    _, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
-        name="csv_asset",
-    )
-    csv_asset._datasource = spark_gcs_datasource
-    spark_gcs_datasource.assets = [
-        csv_asset,
-    ]
-    csv_asset._data_connector = GoogleCloudStorageDataConnector(
-        datasource_name=spark_gcs_datasource.name,
-        data_asset_name=csv_asset.name,
-        gcs_client=spark_gcs_datasource._gcs_client,
-        bucket_or_name=spark_gcs_datasource.bucket_or_name,
-        file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
-    )
-    csv_asset._test_connection_error_message = test_connection_error_message
-
-    with pytest.raises(TestConnectionError) as e:
-        spark_gcs_datasource.test_connection()
-
-    assert str(e.value) == str(test_connection_error_message)
 
 
 @pytest.mark.big

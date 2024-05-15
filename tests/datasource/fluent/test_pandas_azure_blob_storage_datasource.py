@@ -267,33 +267,6 @@ def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
-def test_csv_asset_with_batching_regex_unnamed_parameters(
-    mock_azure_client,
-    mock_list_keys,
-    object_keys: List[str],
-    pandas_abs_datasource: PandasAzureBlobStorageDatasource,
-):
-    mock_list_keys.return_value = object_keys
-    asset = pandas_abs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
-        abs_container="my_container",
-    )
-    options = asset.get_batch_parameters_keys()
-    assert options == (
-        "batch_request_param_1",
-        "batch_request_param_2",
-        "batch_request_param_3",
-        "path",
-    )
-
-
-# noinspection PyUnusedLocal
-@pytest.mark.big
-@mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
-)
-@mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_batching_regex_named_parameters(
     mock_azure_client,
     mock_list_keys,
@@ -301,45 +274,14 @@ def test_csv_asset_with_batching_regex_named_parameters(
     pandas_abs_datasource: PandasAzureBlobStorageDatasource,
 ):
     mock_list_keys.return_value = object_keys
+    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     asset = pandas_abs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         abs_container="my_container",
     )
-    options = asset.get_batch_parameters_keys()
-    assert options == (
-        "name",
-        "timestamp",
-        "price",
-        "path",
-    )
-
-
-# noinspection PyUnusedLocal
-@pytest.mark.big
-@mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
-)
-@mock.patch("azure.storage.blob.BlobServiceClient")
-def test_csv_asset_with_some_batching_regex_named_parameters(
-    mock_azure_client,
-    mock_list_keys,
-    object_keys: List[str],
-    pandas_abs_datasource: PandasAzureBlobStorageDatasource,
-):
-    mock_list_keys.return_value = object_keys
-    asset = pandas_abs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
-        abs_container="my_container",
-    )
-    options = asset.get_batch_parameters_keys()
-    assert options == (
-        "name",
-        "batch_request_param_2",
-        "price",
-        "path",
-    )
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=regex)
+    options = asset.get_batch_parameters_keys(partitioner=batch_def.partitioner)
+    assert options == ("path", "year", "month")
 
 
 # noinspection PyUnusedLocal

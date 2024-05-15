@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import re
 from typing import Any, Dict, Iterator, List, cast
 from unittest import mock
 
@@ -10,16 +9,11 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.sparkdf_execution_engine
 from great_expectations.compatibility import azure
-from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import SparkAzureBlobStorageDatasource
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
 from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
-from great_expectations.datasource.fluent.data_connector import (
-    AzureBlobStorageDataConnector,
-)
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.spark_azure_blob_storage_datasource import (
     SparkAzureBlobStorageDatasourceError,
 )
@@ -98,20 +92,9 @@ def csv_asset(
     mock_list_keys.return_value = object_keys
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         abs_container="my_container",
     )
     return asset
-
-
-@pytest.fixture
-def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    data_connector: AzureBlobStorageDataConnector = cast(
-        AzureBlobStorageDataConnector, csv_asset._data_connector
-    )
-    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""  # noqa: E501
-    return regex, test_connection_error_message
 
 
 @pytest.mark.unit
@@ -190,7 +173,6 @@ def test_construct_spark_abs_datasource_with_multiple_auth_methods_raises_error(
         _ = spark_abs_datasource._get_azure_client()
 
 
-# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -226,34 +208,6 @@ def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_
     assert asset.name == "csv_asset"
 
 
-# noinspection PyUnusedLocal
-@pytest.mark.unit
-@mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
-)
-@mock.patch("azure.storage.blob.BlobServiceClient")
-def test_csv_asset_with_batching_regex_unnamed_parameters(
-    mock_azure_client,
-    mock_list_keys,
-    object_keys: List[str],
-    spark_abs_datasource: SparkAzureBlobStorageDatasource,
-):
-    mock_list_keys.return_value = object_keys
-    asset = spark_abs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
-        abs_container="my_container",
-    )
-    options = asset.get_batch_parameters_keys()
-    assert options == (
-        "batch_request_param_1",
-        "batch_request_param_2",
-        "batch_request_param_3",
-        "path",
-    )
-
-
-# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -268,46 +222,14 @@ def test_csv_asset_with_batching_regex_named_parameters(
     mock_list_keys.return_value = object_keys
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         abs_container="my_container",
     )
-    options = asset.get_batch_parameters_keys()
-    assert options == (
-        "name",
-        "timestamp",
-        "price",
-        "path",
-    )
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=batching_regex)
+    options = asset.get_batch_parameters_keys(partitioner=batch_def.partitioner)
+    assert options == ("path", "year", "month")
 
 
-# noinspection PyUnusedLocal
-@pytest.mark.unit
-@mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
-)
-@mock.patch("azure.storage.blob.BlobServiceClient")
-def test_csv_asset_with_some_batching_regex_named_parameters(
-    mock_azure_client,
-    mock_list_keys,
-    object_keys: List[str],
-    spark_abs_datasource: SparkAzureBlobStorageDatasource,
-):
-    mock_list_keys.return_value = object_keys
-    asset = spark_abs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
-        abs_container="my_container",
-    )
-    options = asset.get_batch_parameters_keys()
-    assert options == (
-        "name",
-        "batch_request_param_2",
-        "price",
-        "path",
-    )
-
-
-# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
@@ -383,36 +305,6 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.unit
-def test_test_connection_failures(
-    spark_abs_datasource: SparkAzureBlobStorageDatasource,
-    bad_regex_config: tuple[re.Pattern, str],
-):
-    _, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
-        name="csv_asset",
-    )
-    csv_asset._datasource = spark_abs_datasource
-    spark_abs_datasource.assets = [
-        csv_asset,
-    ]
-    csv_asset._data_connector = AzureBlobStorageDataConnector(
-        datasource_name=spark_abs_datasource.name,
-        data_asset_name=csv_asset.name,
-        azure_client=spark_abs_datasource._azure_client,  # type: ignore[arg-type] # _azure_client could be None
-        account_name=csv_asset.datasource._account_name,
-        container="my_container",
-        file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
-    )
-    csv_asset._test_connection_error_message = test_connection_error_message
-
-    with pytest.raises(TestConnectionError) as e:
-        spark_abs_datasource.test_connection()
-
-    assert str(e.value) == str(test_connection_error_message)
-
-
-# noinspection PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
