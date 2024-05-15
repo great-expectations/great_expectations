@@ -74,7 +74,9 @@ def pandas_filesystem_datasource(
     test_backends,
     context: AbstractDataContext,
 ) -> PandasFilesystemDatasource:
-    relative_path = pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+    relative_path = pathlib.Path(
+        "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples", "first_3_files"
+    )
     csv_path = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     pandas_ds = context.data_sources.add_pandas_filesystem(
         name="my_pandas",

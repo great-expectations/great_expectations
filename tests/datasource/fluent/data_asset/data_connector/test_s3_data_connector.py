@@ -372,7 +372,7 @@ def test_return_only_unique_batch_definitions():
     ]
     for key in keys:
         client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
-    processed_batching_regex = re.compile("(?P<path>(?P<filename>.+).*\\.csv)")
+    processed_batching_regex = re.compile("(?P<path>B/(?P<filename>.+).*\\.csv)")
     expected: List[LegacyBatchDefinition] = [
         LegacyBatchDefinition(
             datasource_name="my_file_path_datasource",
