@@ -108,7 +108,7 @@ def get_config(
         "url": "https://greatexpectations.io",
         "download_url": "https://github.com/great-expectations/great_expectations",
         "author_email": "team@greatexpectations.io",
-        "version": "1.0.0.a3",
+        "version": "1.0.0.a3",  # TODO: make this dynamic
         "install_requires": required,
         "extras_require": get_extras_require(),
         "packages": packages,
