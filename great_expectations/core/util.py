@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
 
 
-
 logger = logging.getLogger(__name__)
 
 try:
