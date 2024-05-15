@@ -52,7 +52,7 @@ from great_expectations.render.renderer import (
     SlackRenderer,
 )
 from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.util import convert_to_json_serializable
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import CheckpointResult

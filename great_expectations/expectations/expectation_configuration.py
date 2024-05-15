@@ -33,7 +33,7 @@ from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicContentSchema
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
-    convert_to_json_serializable,
+    convert_to_json_serializable,  # noqa: TID251
     ensure_json_serializable,
 )
 

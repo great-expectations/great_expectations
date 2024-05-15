@@ -12,7 +12,7 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.types import SerializableDictDot, safe_deep_copy
-from great_expectations.util import convert_to_json_serializable, deep_filter_properties_iterable
+from great_expectations.util import convert_to_json_serializable, deep_filter_properties_iterable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
