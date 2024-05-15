@@ -15,7 +15,7 @@ from pytest import MonkeyPatch, param
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import pydantic
-from great_expectations.core.partitioners import FileNamePartitionerMonthly, FileNamePartitionerPath
+from great_expectations.core.partitioners import FileNamePartitionerMonthly
 from great_expectations.datasource.fluent import PandasFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
     CSVAsset,
@@ -374,49 +374,16 @@ def test_asset_connect_options_in_repr(
 
 
 @pytest.mark.unit
-def test_csv_asset_with_batching_regex_unnamed_parameters(
-    pandas_filesystem_datasource: PandasFilesystemDatasource,
-):
-    asset = pandas_filesystem_datasource.add_csv_asset(
-        name="csv_asset",
-    )
-    batching_regex = re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == (
-        "batch_request_param_1",
-        "batch_request_param_2",
-        "path",
-    )
-
-
-@pytest.mark.unit
 def test_csv_asset_with_batching_regex_named_parameters(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
     )
-    batching_regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == ("year", "month", "path")
-
-
-@pytest.mark.unit
-def test_csv_asset_with_some_batching_regex_named_parameters(
-    pandas_filesystem_datasource: PandasFilesystemDatasource,
-):
-    asset = pandas_filesystem_datasource.add_csv_asset(
-        name="csv_asset",
-    )
-    batching_regex = re.compile(r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv")
-    options = asset.get_batch_parameters_keys(
-        partitioner=FileNamePartitionerPath(regex=batching_regex)
-    )
-    assert options == ("batch_request_param_1", "month", "path")
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=batching_regex)
+    options = asset.get_batch_parameters_keys(partitioner=batch_def.partitioner)
+    assert options == ("path", "year", "month")
 
 
 @pytest.mark.unit
