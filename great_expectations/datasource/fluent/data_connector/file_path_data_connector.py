@@ -299,7 +299,7 @@ class FilePathDataConnector(DataConnector):
         """File specific implementation of batch spec parameters"""
         if not batch_definition.batching_regex:
             raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
-        batching_regex = batch_definition.batching_regex
+        batching_regex = self._preprocess_batching_regex(batch_definition.batching_regex)
 
         regex_parser = RegExParser(
             regex_pattern=batching_regex,
@@ -346,6 +346,7 @@ class FilePathDataConnector(DataConnector):
         self, batching_regex: re.Pattern
     ) -> Dict[str, List[LegacyBatchDefinition] | None]:
         """Access a map where keys are data references and values are LegacyBatchDefinitions."""
+        batching_regex = self._preprocess_batching_regex(regex=batching_regex)
         batch_definitions = self._data_references_cache[batching_regex]
         if batch_definitions:
             return batch_definitions
