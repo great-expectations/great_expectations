@@ -422,6 +422,7 @@ If you are working in a configuration file you may use the inline comment \
 "pydantic".msg = "Please do not import pydantic directly, import from great_expectations.compatibility.pydantic instead."
 "pkg_resources".msg = "pkg_resources module has been deprecated. Use importlib.resources or importlib.metada instead."
 "great_expectations.util.convert_to_json_serializable".msg = "Use pydantic for serialization."
+"great_expectations.util.ensure_json_serializable".msg = "Use pydantic for serialization."
 
 
 # -----------------------------------------------------------------

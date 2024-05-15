@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
 import json
 from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
