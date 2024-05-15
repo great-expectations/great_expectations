@@ -18,7 +18,6 @@ from great_expectations.compatibility.sqlalchemy import SQLALCHEMY_NOT_IMPORTED,
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
 
-# import of private class will be removed when deprecated methods are removed from this module
 
 
 logger = logging.getLogger(__name__)
