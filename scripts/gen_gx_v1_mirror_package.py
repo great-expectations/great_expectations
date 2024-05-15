@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     print(f"📁 Creating new package with updated `{MIRROR_PACKAGE_NAME}` references\n")
     iterate_files(CORE_DIRECTORY)
-    iterate_files(CORE_DIRECTORY.parent / "tests")
+    # iterate_files(CORE_DIRECTORY.parent / "tests")
     print(f"\n Untouched files: {UNTOUCHED_FILES}\n Updated files: {UPDATED_FILES}\n")
 
     new_core_dir = CORE_DIRECTORY.rename(NEW_PACKAGE_DIR.name)
