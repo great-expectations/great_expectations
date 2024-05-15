@@ -206,7 +206,6 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     mock_list_keys.return_value = object_keys
     asset = pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
