@@ -23,12 +23,12 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import convert_to_json_serializable
 
 
 @dataclass(frozen=True)
