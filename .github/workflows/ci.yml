@@ -28,11 +28,11 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+b[0-9]+"
       - "[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
 
-# concurrency:
-#   # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
-#   # https://stackoverflow.com/questions/74117321/if-condition-in-concurrency-in-gha
-#   group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
-#   cancel-in-progress: true
+concurrency:
+  # Only run one instance of this workflow in PRs, but allow multiple instances in develop.
+  # https://stackoverflow.com/questions/74117321/if-condition-in-concurrency-in-gha
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
@@ -77,7 +77,7 @@ jobs:
         run: invoke marker-coverage
 
   docs-snippets:
-    # needs: [unit-tests, doc-checks, ci-is-on-main-repo]
+    needs: [unit-tests, doc-checks, ci-is-on-main-repo]
     # run on non-draft PRs with docs changes
     if: |
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
@@ -85,7 +85,6 @@ jobs:
       github.event_name == 'merge_group'
     runs-on: enterprise-arc
     strategy:
-      fail-fast: false
       matrix:
         doc-step:
           - docs-creds-needed
@@ -177,7 +176,6 @@ jobs:
 
   unit-tests:
     strategy:
-      fail-fast: false
       matrix:
         os: [enterprise-arc]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
@@ -211,7 +209,7 @@ jobs:
           flags: ${{ matrix.python-version }}
 
   doc-checks:
-    # needs: [static-analysis]
+    needs: [static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: enterprise-arc
     steps:
@@ -246,7 +244,7 @@ jobs:
         run: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -sr docs/docusaurus/static -s docs -sp static --skip-external
 
   docs-build:
-    # needs: [doc-checks]
+    needs: [doc-checks]
     # run on non-draft PRs
     if: |
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
@@ -271,7 +269,7 @@ jobs:
         run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   cloud-tests:
-    # needs: [unit-tests, static-analysis, ci-is-on-main-repo]
+    needs: [unit-tests, static-analysis, ci-is-on-main-repo]
     if: github.event.pull_request.draft == false
     permissions:
       id-token: write
@@ -342,7 +340,7 @@ jobs:
           flags: cloud
 
   marker-tests:
-    # needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
       # aws
@@ -435,7 +433,7 @@ jobs:
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py39-min-versions:
-    # needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: enterprise-arc
     steps:
@@ -453,7 +451,7 @@ jobs:
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py310-min-versions:
-    # needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: enterprise-arc
     steps:
@@ -471,7 +469,7 @@ jobs:
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   py311-min-versions:
-    # needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: enterprise-arc
     steps:
@@ -489,7 +487,7 @@ jobs:
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
   pydantic-v1:
-    # needs: [unit-tests, static-analysis]
+    needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: enterprise-arc
     steps:
@@ -545,11 +543,10 @@ jobs:
         run: sh ci/checks/check_min_airflow_dependency_compatibility.sh
 
   import_gx:
-    # needs: [static-analysis]
+    needs: [static-analysis]
     if: github.event.pull_request.draft == false
     runs-on: enterprise-arc
     strategy:
-      fail-fast: false
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
