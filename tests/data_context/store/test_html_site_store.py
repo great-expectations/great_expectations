@@ -3,17 +3,18 @@ import datetime
 import boto3
 import pytest
 from freezegun import freeze_time
-from great_expectations_v1.data_context.store import HtmlSiteStore
-from great_expectations_v1.data_context.types.resource_identifiers import (
+from marshmallow import ValidationError
+from moto import mock_s3
+
+from great_expectations.data_context.store import HtmlSiteStore
+from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     RunIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
     validationResultIdentifierSchema,
 )
-from great_expectations_v1.util import gen_directory_tree_str
-from marshmallow import ValidationError
-from moto import mock_s3
+from great_expectations.util import gen_directory_tree_str
 
 
 @pytest.mark.filesystem

@@ -1,6 +1,7 @@
 import pytest
-from great_expectations_v1.checkpoint.util import send_sns_notification
-from great_expectations_v1.core import ExpectationSuiteValidationResult
+
+from great_expectations.checkpoint.util import send_sns_notification
+from great_expectations.core import ExpectationSuiteValidationResult
 
 
 @pytest.mark.aws_creds

@@ -4,10 +4,11 @@ from typing import Dict, Optional, Set
 import boto3
 import pyparsing as pp
 import pytest
-from great_expectations_v1.data_context import get_context
-from great_expectations_v1.data_context.store import StoreBackend, TupleS3StoreBackend
-from great_expectations_v1.data_context.types.base import DataContextConfig
 from moto import mock_s3
+
+from great_expectations.data_context import get_context
+from great_expectations.data_context.store import StoreBackend, TupleS3StoreBackend
+from great_expectations.data_context.types.base import DataContextConfig
 
 
 def build_in_code_data_context_project_config(

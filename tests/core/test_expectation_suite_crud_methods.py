@@ -1,12 +1,13 @@
 from copy import deepcopy
 
 import pytest
-from great_expectations_v1.core.expectation_suite import ExpectationSuite
-from great_expectations_v1.exceptions import (
+
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.exceptions import (
     DataContextError,
     InvalidExpectationConfigurationError,
 )
-from great_expectations_v1.expectations.expectation_configuration import (
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 

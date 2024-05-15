@@ -1,17 +1,18 @@
 from typing import List
 
 import pytest
-from great_expectations_v1.core.batch_definition import BatchDefinition
-from great_expectations_v1.core.partitioners import ColumnPartitionerYearly
-from great_expectations_v1.data_context.data_context.abstract_data_context import (
+
+from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.partitioners import ColumnPartitionerYearly
+from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations_v1.data_context.data_context.cloud_data_context import (
+from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations_v1.datasource.fluent.fluent_base_model import FluentBaseModel
-from great_expectations_v1.datasource.fluent.interfaces import Batch, DataAsset, Datasource
-from great_expectations_v1.datasource.fluent.pandas_datasource import PandasDatasource
+from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
+from great_expectations.datasource.fluent.interfaces import Batch, DataAsset, Datasource
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 
 DATASOURCE_NAME = "my datasource for batch configs"
 EMPTY_DATA_ASSET_NAME = "my data asset for batch configs"

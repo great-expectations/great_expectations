@@ -15,7 +15,7 @@ def get_partial_config_universal_datasource_config_elements() -> dict:
         # <snippet name="test">
         "name": "my_datasource_name",
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         # </snippet>
     }
     # </snippet>
@@ -35,10 +35,10 @@ def get_full_config_spark_inferred_datasource_single_batch() -> dict:
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SparkDFExecutionEngine",
-            "module_name": "great_expectations_v1.execution_engine",
+            "module_name": "great_expectations.execution_engine",
         },
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
@@ -71,10 +71,10 @@ def get_full_config_spark_inferred_datasource_multi_batch() -> dict:
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SparkDFExecutionEngine",
-            "module_name": "great_expectations_v1.execution_engine",
+            "module_name": "great_expectations.execution_engine",
         },
         "data_connectors": {
             "name_of_my_inferred_data_connector": {
@@ -107,10 +107,10 @@ def get_full_config_spark_configured_datasource_single_batch() -> dict:
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SparkDFExecutionEngine",
-            "module_name": "great_expectations_v1.execution_engine",
+            "module_name": "great_expectations.execution_engine",
         },
         "data_connectors": {
             "name_of_my_configured_data_connector": {
@@ -145,10 +145,10 @@ def get_full_config_spark_configured_datasource_multi_batch() -> dict:
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SparkDFExecutionEngine",
-            "module_name": "great_expectations_v1.execution_engine",
+            "module_name": "great_expectations.execution_engine",
         },
         "data_connectors": {
             "name_of_my_configured_data_connector": {
@@ -183,10 +183,10 @@ def get_full_config_spark_runtime_datasource() -> dict:
     datasource_config: dict = {
         "name": "my_datasource_name",  # Preferably name it something relevant
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SparkDFExecutionEngine",
-            "module_name": "great_expectations_v1.execution_engine",
+            "module_name": "great_expectations.execution_engine",
         },
         "data_connectors": {
             "name_of_my_runtime_data_connector": {
@@ -215,10 +215,10 @@ def get_full_config_sql_inferred_datasource__single_batch_only() -> dict:
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
-            "module_name": "great_expectations_v1.execution_engine",
+            "module_name": "great_expectations.execution_engine",
             "connection_string": CONNECTION_STRING,
         },
         "data_connectors": {
@@ -241,10 +241,10 @@ def get_full_config_sql_inferred_datasource__single_and_multi_batch() -> dict:
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
-            "module_name": "great_expectations_v1.execution_engine",
+            "module_name": "great_expectations.execution_engine",
             "connection_string": CONNECTION_STRING,
         },
         "data_connectors": {
@@ -274,10 +274,10 @@ def get_full_config_sql_configured_datasource() -> dict:
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
-            "module_name": "great_expectations_v1.execution_engine",
+            "module_name": "great_expectations.execution_engine",
             "connection_string": CONNECTION_STRING,
         },
         "data_connectors": {
@@ -313,10 +313,10 @@ def get_full_config_sql_runtime_datasource() -> dict:
     datasource_config: dict = {
         "name": "my_datasource_name",
         "class_name": "Datasource",
-        "module_name": "great_expectations_v1.datasource",
+        "module_name": "great_expectations.datasource",
         "execution_engine": {
             "class_name": "SqlAlchemyExecutionEngine",
-            "module_name": "great_expectations_v1.execution_engine",
+            "module_name": "great_expectations.execution_engine",
             "connection_string": CONNECTION_STRING,
         },
         "data_connectors": {

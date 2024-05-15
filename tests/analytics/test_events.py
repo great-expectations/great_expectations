@@ -1,5 +1,6 @@
 import pytest
-from great_expectations_v1.analytics.events import (
+
+from great_expectations.analytics.events import (
     DataContextInitializedEvent,
     ExpectationSuiteCreatedEvent,
     ExpectationSuiteDeletedEvent,

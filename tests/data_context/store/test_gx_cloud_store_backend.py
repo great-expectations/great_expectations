@@ -13,14 +13,15 @@ in production. The same logic applies to all UUIDs in this test.
 from typing import Callable, Optional, Set, Union
 from unittest import mock
 
-import great_expectations_v1.exceptions as gx_exceptions
 import pytest
 import responses
-from great_expectations_v1.data_context.cloud_constants import (
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudRESTResource,
 )
-from great_expectations_v1.data_context.store.gx_cloud_store_backend import (
+from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
 

@@ -2,13 +2,13 @@ import json
 import uuid
 from unittest import mock
 
-import great_expectations_v1 as gx
 import pact
 import pytest
 import requests
-from great_expectations_v1.data_context import CloudDataContext
-from great_expectations_v1.datasource.fluent import PandasDatasource
 
+import great_expectations as gx
+from great_expectations.data_context import CloudDataContext
+from great_expectations.datasource.fluent import PandasDatasource
 from tests.integration.cloud.rest_contracts.conftest import JsonData, PactBody
 from tests.integration.cloud.rest_contracts.test_data_context_configuration import (
     GET_DATA_CONTEXT_CONFIGURATION_MIN_RESPONSE_BODY,
@@ -101,7 +101,7 @@ def mock_cloud_pandas_datasource(
     )
 
     with mock.patch(
-        target="great_expectations_v1.core.datasource_dict.DatasourceDict.data",
+        target="great_expectations.core.datasource_dict.DatasourceDict.data",
         return_value={},
     ):
         with mock.patch(

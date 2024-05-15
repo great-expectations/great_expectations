@@ -1,9 +1,10 @@
 from typing import Dict
 
 import pytest
-from great_expectations_v1.core.config_provider import _CloudConfigurationProvider
-from great_expectations_v1.data_context.cloud_constants import GXCloudEnvironmentVariable
-from great_expectations_v1.data_context.types.base import GXCloudConfig
+
+from great_expectations.core.config_provider import _CloudConfigurationProvider
+from great_expectations.data_context.cloud_constants import GXCloudEnvironmentVariable
+from great_expectations.data_context.types.base import GXCloudConfig
 
 # Randomly generated values but formatted to represent actual creds
 # Globally scoped so they can be shared across pytest.params

@@ -4,10 +4,11 @@ import logging
 import os
 from typing import TYPE_CHECKING, Any
 
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1.core.util import nested_update
-from great_expectations_v1.util import (
+
+import great_expectations as gx
+from great_expectations.core.util import nested_update
+from great_expectations.util import (
     convert_json_string_to_be_python_compliant,
     convert_ndarray_datetime_to_float_dtype_utc_timezone,
     convert_ndarray_float_to_datetime_tuple,

@@ -1,16 +1,17 @@
 from typing import Union
 
 import pytest
-from great_expectations_v1.compatibility.pydantic import (
+
+from great_expectations.compatibility.pydantic import (
     error_wrappers as pydantic_error_wrappers,
 )
-from great_expectations_v1.core import (
+from great_expectations.core import (
     ExpectationValidationResult,
 )
-from great_expectations_v1.expectations.expectation_configuration import (
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.render.renderer_configuration import (
+from great_expectations.render.renderer_configuration import (
     RendererConfiguration,
     RendererValueType,
 )

@@ -5,31 +5,32 @@ import shutil
 from typing import TYPE_CHECKING
 from unittest.mock import patch
 
-import great_expectations_v1.exceptions as gx_exceptions
-import great_expectations_v1.expectations as gxe
 import pandas as pd
 import pytest
-from great_expectations_v1.core import ExpectationSuite
-from great_expectations_v1.core.batch import (
+
+import great_expectations.exceptions as gx_exceptions
+import great_expectations.expectations as gxe
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import (
     BatchRequest,
 )
-from great_expectations_v1.core.expectation_validation_result import (
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations_v1.core.result_format import ResultFormat
-from great_expectations_v1.data_context import get_context
-from great_expectations_v1.data_context.data_context.file_data_context import (
+from great_expectations.core.result_format import ResultFormat
+from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations_v1.data_context.util import file_relative_path
-from great_expectations_v1.datasource.fluent.pandas_datasource import PandasDatasource
-from great_expectations_v1.execution_engine import PandasExecutionEngine
-from great_expectations_v1.expectations.expectation_configuration import (
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.validator.exception_info import ExceptionInfo
-from great_expectations_v1.validator.validator import Validator
+from great_expectations.validator.exception_info import ExceptionInfo
+from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

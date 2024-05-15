@@ -9,19 +9,20 @@ import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
 from unittest.mock import Mock  # noqa: TID251
 
-import great_expectations_v1 as gx
 import pytest
 import requests
-from great_expectations_v1.core.yaml_handler import YAMLHandler
-from great_expectations_v1.data_context.data_context.file_data_context import (
+
+import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations_v1.data_context.store.gx_cloud_store_backend import (
+from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations_v1.data_context.types.base import DataContextConfig
-from great_expectations_v1.data_context.util import file_relative_path
-from great_expectations_v1.datasource.fluent.interfaces import Datasource
+from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.fluent.interfaces import Datasource
 
 yaml = YAMLHandler()
 
@@ -151,7 +152,7 @@ def basic_data_context_config():
                     },
                 },
                 "suite_parameter_store": {
-                    "module_name": "great_expectations_v1.data_context.store",
+                    "module_name": "great_expectations.data_context.store",
                     "class_name": "SuiteParameterStore",
                 },
             },
@@ -216,7 +217,7 @@ def data_context_config_with_datasources(conn_string_password):
                     },
                 },
                 "suite_parameter_store": {
-                    "module_name": "great_expectations_v1.data_context.store",
+                    "module_name": "great_expectations.data_context.store",
                     "class_name": "SuiteParameterStore",
                 },
             },

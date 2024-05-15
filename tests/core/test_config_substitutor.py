@@ -2,8 +2,9 @@ from contextlib import contextmanager
 from unittest import mock
 
 import pytest
-from great_expectations_v1.compatibility import azure, google
-from great_expectations_v1.core.config_substitutor import (
+
+from great_expectations.compatibility import azure, google
+from great_expectations.core.config_substitutor import (
     _ConfigurationSubstitutor,
 )
 
@@ -87,7 +88,7 @@ def test_substitute_value_from_aws_secrets_manager(
 ):
     with raises:
         with mock.patch(
-            "great_expectations_v1.core.config_substitutor.aws.boto3.session.Session",
+            "great_expectations.core.config_substitutor.aws.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,
@@ -161,7 +162,7 @@ def test_substitute_value_from_aws_ssm(
 ):
     with raises:
         with mock.patch(
-            "great_expectations_v1.core.config_substitutor.aws.boto3.session.Session",
+            "great_expectations.core.config_substitutor.aws.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
             assert (
@@ -231,7 +232,7 @@ def test_substitute_value_from_gcp_secret_manager(
 ):
     with raises:
         with mock.patch(
-            "great_expectations_v1.core.config_substitutor.google.secretmanager.SecretManagerServiceClient",
+            "great_expectations.core.config_substitutor.google.secretmanager.SecretManagerServiceClient",
             return_value=MockedSecretManagerServiceClient(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,
@@ -261,7 +262,7 @@ class MockedSecretClient:
 
 
 @mock.patch(
-    "great_expectations_v1.core.config_substitutor.azure.DefaultAzureCredential",
+    "great_expectations.core.config_substitutor.azure.DefaultAzureCredential",
     new=object,
 )
 @pytest.mark.parametrize(
@@ -305,7 +306,7 @@ def test_substitute_value_from_azure_keyvault(
 ):
     with raises:
         with mock.patch(
-            "great_expectations_v1.core.config_substitutor.azure.SecretClient",
+            "great_expectations.core.config_substitutor.azure.SecretClient",
             return_value=MockedSecretClient(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,

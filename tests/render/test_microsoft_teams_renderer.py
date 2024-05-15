@@ -1,6 +1,7 @@
 import pytest
-from great_expectations_v1.checkpoint.checkpoint import CheckpointResult
-from great_expectations_v1.render.renderer import MicrosoftTeamsRenderer
+
+from great_expectations.checkpoint.checkpoint import CheckpointResult
+from great_expectations.render.renderer import MicrosoftTeamsRenderer
 
 
 @pytest.mark.unit

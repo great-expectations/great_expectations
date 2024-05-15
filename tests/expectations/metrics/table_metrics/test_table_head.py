@@ -2,18 +2,18 @@ from unittest import mock
 
 import pandas as pd
 import pytest
-from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
+
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations_v1.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations_v1.expectations.metrics.table_metrics.table_head import TableHead
-
+from great_expectations.expectations.metrics.table_metrics.table_head import TableHead
 from tests.test_utils import get_sqlite_temp_table_names_from_engine
 
 
@@ -182,7 +182,7 @@ def test_limit_included_in_head_query(
     table_head = TableHead()
 
     with mock.patch(
-        "great_expectations_v1.compatibility.sqlalchemy_and_pandas.pd.read_sql"
+        "great_expectations.compatibility.sqlalchemy_and_pandas.pd.read_sql"
     ) as mock_node:
         table_head._sqlalchemy(
             execution_engine=engine,

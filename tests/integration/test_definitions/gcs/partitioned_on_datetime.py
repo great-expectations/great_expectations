@@ -1,6 +1,6 @@
 import re
 
-import great_expectations_v1 as gx
+import great_expectations as gx
 
 context = gx.get_context()
 

@@ -2,13 +2,14 @@ import os
 import shutil
 from typing import Set, Tuple
 
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1.core import ExpectationSuite
-from great_expectations_v1.data_context.data_context.file_data_context import (
+
+import great_expectations as gx
+from great_expectations.core import ExpectationSuite
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations.data_context.util import file_relative_path
 
 
 @pytest.fixture

@@ -1,10 +1,11 @@
-import great_expectations_v1.exceptions as gx_exceptions
-import great_expectations_v1.expectations as gxe
 import pytest
-from great_expectations_v1.expectations.expectation_configuration import (
+
+import great_expectations.exceptions as gx_exceptions
+import great_expectations.expectations as gxe
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.expectations.registry import get_expectation_impl
+from great_expectations.expectations.registry import get_expectation_impl
 
 # module level markers
 pytestmark = pytest.mark.unit

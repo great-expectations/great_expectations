@@ -2,32 +2,33 @@ import json
 import pathlib
 from unittest import mock
 
-import great_expectations_v1.expectations as gxe
 import pytest
-from great_expectations_v1.analytics.events import (
+from pytest_mock import MockerFixture
+
+import great_expectations.expectations as gxe
+from great_expectations.analytics.events import (
     ValidationDefinitionCreatedEvent,
     ValidationDefinitionDeletedEvent,
 )
-from great_expectations_v1.core.batch_definition import BatchDefinition
-from great_expectations_v1.core.expectation_suite import ExpectationSuite
-from great_expectations_v1.core.factory.validation_definition_factory import (
+from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.factory.validation_definition_factory import (
     ValidationDefinitionFactory,
 )
-from great_expectations_v1.core.validation_definition import ValidationDefinition
-from great_expectations_v1.data_context.data_context.abstract_data_context import (
+from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations_v1.data_context.data_context.cloud_data_context import (
+from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations_v1.data_context.data_context.file_data_context import (
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations_v1.data_context.store.validation_definition_store import (
+from great_expectations.data_context.store.validation_definition_store import (
     ValidationDefinitionStore,
 )
-from great_expectations_v1.exceptions import DataContextError
-from pytest_mock import MockerFixture
+from great_expectations.exceptions import DataContextError
 
 
 @pytest.fixture
@@ -421,7 +422,7 @@ class TestValidationDefinitionFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations_v1.core.factory.validation_definition_factory.submit_event",
+            "great_expectations.core.factory.validation_definition_factory.submit_event",
             autospec=True,
         ) as mock_submit:
             _ = context.validation_definitions.add(validation=validation_definition)
@@ -457,7 +458,7 @@ class TestValidationDefinitionFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations_v1.core.factory.validation_definition_factory.submit_event",
+            "great_expectations.core.factory.validation_definition_factory.submit_event",
             autospec=True,
         ) as mock_submit:
             context.validation_definitions.delete(name=name)

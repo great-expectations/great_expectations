@@ -2,12 +2,13 @@ import sys
 from typing import List, Union
 
 import pytest
-from great_expectations_v1.core.run_identifier import RunIdentifier
-from great_expectations_v1.data_context.types.resource_identifiers import (
+
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations_v1.render.util import (
+from great_expectations.render.util import (
     _convert_unexpected_indices_to_df,
     build_count_and_index_table,
     build_count_table,

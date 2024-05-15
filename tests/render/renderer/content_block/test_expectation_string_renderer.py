@@ -3,10 +3,11 @@ The real meat of these tests lives in the test_definitions directory for individ
 """
 
 import pytest
-from great_expectations_v1.expectations.expectation_configuration import (
+
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.render.renderer.content_block import ExpectationStringRenderer
+from great_expectations.render.renderer.content_block import ExpectationStringRenderer
 
 
 @pytest.mark.unit

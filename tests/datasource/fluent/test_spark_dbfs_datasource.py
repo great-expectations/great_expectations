@@ -9,17 +9,17 @@ from typing import TYPE_CHECKING, cast
 import boto3
 import botocore
 import pytest
-from great_expectations_v1.core.util import DBFSPath
-from great_expectations_v1.datasource.fluent import SparkDBFSDatasource
-from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset import (
+
+from great_expectations.core.util import DBFSPath
+from great_expectations.datasource.fluent import SparkDBFSDatasource
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
-from great_expectations_v1.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
-from great_expectations_v1.datasource.fluent.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
+from great_expectations.datasource.fluent.data_connector import (
     DBFSDataConnector,
 )
-from great_expectations_v1.datasource.fluent.interfaces import TestConnectionError
-
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:

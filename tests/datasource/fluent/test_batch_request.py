@@ -5,8 +5,9 @@ import re
 from typing import Any, Final
 
 import pytest
-from great_expectations_v1.core.batch_definition import PartitionerT
-from great_expectations_v1.core.partitioners import (
+
+from great_expectations.core.batch_definition import PartitionerT
+from great_expectations.core.partitioners import (
     ColumnPartitioner,
     ColumnPartitionerDaily,
     ColumnPartitionerMonthly,
@@ -15,7 +16,7 @@ from great_expectations_v1.core.partitioners import (
     FileNamePartitionerMonthly,
     FileNamePartitionerYearly,
 )
-from great_expectations_v1.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest
 
 
 @pytest.mark.unit

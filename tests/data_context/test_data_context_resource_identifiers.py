@@ -1,11 +1,12 @@
 import pytest
 from freezegun import freeze_time
-from great_expectations_v1.core.run_identifier import RunIdentifier
-from great_expectations_v1.data_context.types.resource_identifiers import (
+
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations_v1.exceptions import InvalidDataContextKeyError
+from great_expectations.exceptions import InvalidDataContextKeyError
 
 
 @pytest.mark.unit

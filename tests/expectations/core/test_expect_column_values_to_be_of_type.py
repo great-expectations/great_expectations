@@ -1,11 +1,12 @@
 import pandas as pd
 import pytest
-from great_expectations_v1.compatibility import aws
-from great_expectations_v1.core.expectation_validation_result import (
+
+from great_expectations.compatibility import aws
+from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations_v1.self_check.util import build_sa_validator_with_data
-from great_expectations_v1.util import is_library_loadable
+from great_expectations.self_check.util import build_sa_validator_with_data
+from great_expectations.util import is_library_loadable
 
 
 @pytest.mark.skipif(

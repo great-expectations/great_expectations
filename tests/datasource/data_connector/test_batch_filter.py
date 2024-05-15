@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import List
 
 import pytest
-from great_expectations_v1.datasource.data_connector.batch_filter import (
+
+from great_expectations.datasource.fluent.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )

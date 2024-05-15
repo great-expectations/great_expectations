@@ -1,7 +1,8 @@
 import datetime
 
 import pytest
-from great_expectations_v1.core.util import (
+
+from great_expectations.core.util import (
     AzureUrl,
     DBFSPath,
     GCSUrl,

@@ -1,5 +1,6 @@
 import pytest
-from great_expectations_v1.execution_engine.sqlalchemy_dialect import GXSqlDialect
+
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 
 @pytest.mark.unit

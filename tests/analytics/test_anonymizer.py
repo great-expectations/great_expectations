@@ -1,5 +1,6 @@
 import pytest
-from great_expectations_v1.analytics.anonymizer import anonymize
+
+from great_expectations.analytics.anonymizer import anonymize
 
 
 @pytest.mark.unit

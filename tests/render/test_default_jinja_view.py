@@ -1,10 +1,11 @@
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1.core.expectation_validation_result import (
+
+import great_expectations as gx
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
-from great_expectations_v1.data_context.util import file_relative_path
-from great_expectations_v1.render import (
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.render import (
     RenderedGraphContent,
     RenderedHeaderContent,
     RenderedSectionContent,
@@ -13,8 +14,8 @@ from great_expectations_v1.render import (
     TextContent,
     ValueListContent,
 )
-from great_expectations_v1.render.renderer import ProfilingResultsPageRenderer
-from great_expectations_v1.render.view import DefaultJinjaPageView
+from great_expectations.render.renderer import ProfilingResultsPageRenderer
+from great_expectations.render.view import DefaultJinjaPageView
 
 # module level markers
 pytestmark = pytest.mark.big

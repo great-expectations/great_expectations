@@ -3,15 +3,16 @@ from __future__ import annotations
 from typing import Callable, List, Union
 
 import pytest
-from great_expectations_v1.compatibility import pydantic
-from great_expectations_v1.core.config_provider import (
+from pytest import MonkeyPatch
+
+from great_expectations.compatibility import pydantic
+from great_expectations.core.config_provider import (
     _ConfigurationProvider,
     _EnvironmentConfigurationProvider,
 )
-from great_expectations_v1.datasource.fluent.config_str import ConfigStr, SecretStr
-from great_expectations_v1.datasource.fluent.fluent_base_model import FluentBaseModel
-from great_expectations_v1.exceptions import MissingConfigVariableError
-from pytest import MonkeyPatch
+from great_expectations.datasource.fluent.config_str import ConfigStr, SecretStr
+from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
+from great_expectations.exceptions import MissingConfigVariableError
 
 pytestmark = pytest.mark.unit
 

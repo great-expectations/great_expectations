@@ -1,9 +1,9 @@
 import os
 from typing import Tuple
 
-from great_expectations_v1.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations_v1.data_context.types.base import DataContextConfig
-from great_expectations_v1.data_context.types.refs import GXCloudResourceRef
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 
 def make_retrieve_data_context_config_from_cloud(data_dir):
@@ -152,7 +152,7 @@ def _cloud_config(data_dir):
             },
             "suite_parameter_store": {
                 "class_name": "SuiteParameterStore",
-                "module_name": "great_expectations_v1.data_context.store",
+                "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {
                 "class_name": "ExpectationsStore",
@@ -182,7 +182,7 @@ def _checkpoint_config(data_file_name, with_slack):
                     "slack_webhook": "https://hooks.slack.com/services/11111111111/22222222222/333333333333333333333333",
                     "notify_on": "all",
                     "renderer": {
-                        "module_name": "great_expectations_v1.render.renderer.slack_renderer",
+                        "module_name": "great_expectations.render.renderer.slack_renderer",
                         "class_name": "SlackRenderer",
                     },
                 },
@@ -262,12 +262,12 @@ def _datasource(data_dir):
                                 "taxi_data": {
                                     "batch_identifiers": ["runtime_batch_identifier_name"],
                                     "class_name": "Asset",
-                                    "module_name": "great_expectations_v1.datasource.data_connector.asset",  # noqa: E501
+                                    "module_name": "great_expectations.datasource.data_connector.asset",  # noqa: E501
                                 }
                             },
                             "class_name": "RuntimeDataConnector",
                             "id": "e0af346c-32ea-44e6-8908-b559c4162a70",
-                            "module_name": "great_expectations_v1.datasource.data_connector",
+                            "module_name": "great_expectations.datasource.data_connector",
                             "name": "default_runtime_data_connector_name",
                         },
                         "taxi_data_connector": {
@@ -278,16 +278,16 @@ def _datasource(data_dir):
                                 "pattern": "(.*)",
                             },
                             "id": "997a7842-195b-4374-a71b-e52f192068d1",
-                            "module_name": "great_expectations_v1.datasource.data_connector",
+                            "module_name": "great_expectations.datasource.data_connector",
                             "name": "taxi_data_connector",
                         },
                     },
                     "execution_engine": {
                         "class_name": "PandasExecutionEngine",
-                        "module_name": "great_expectations_v1.execution_engine",
+                        "module_name": "great_expectations.execution_engine",
                     },
                     "id": "eb0c729d-9457-43a0-8b40-6ec6c79c0fef",
-                    "module_name": "great_expectations_v1.datasource",
+                    "module_name": "great_expectations.datasource",
                     "name": "taxi_datasource",
                 },
             },

@@ -1,17 +1,17 @@
 from unittest import mock
 from uuid import UUID
 
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1.analytics.config import (
+
+import great_expectations as gx
+from great_expectations.analytics.config import (
     DUMMY_UUID,
     ENV_CONFIG,
     Config,
     get_config,
     update_config,
 )
-from great_expectations_v1.analytics.events import DataContextInitializedEvent
-
+from great_expectations.analytics.events import DataContextInitializedEvent
 from tests.datasource.fluent._fake_cloud_api import FAKE_USER_ID
 
 TESTING_UUID = UUID("00000000-c000-0000-0000-000000000000")
@@ -80,7 +80,7 @@ def test_ephemeral_context_init(monkeypatch):
     monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", True)  # Enable usage stats
 
     with mock.patch(
-        "great_expectations_v1.data_context.data_context.abstract_data_context.init_analytics"
+        "great_expectations.data_context.data_context.abstract_data_context.init_analytics"
     ) as mock_init, mock.patch("posthog.capture") as mock_submit:
         _ = gx.get_context(mode="ephemeral")
 
@@ -104,7 +104,7 @@ def test_cloud_context_init(cloud_api_fake, cloud_details, monkeypatch):
     monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", True)  # Enable usage stats
 
     with mock.patch(
-        "great_expectations_v1.data_context.data_context.cloud_data_context.init_analytics"
+        "great_expectations.data_context.data_context.cloud_data_context.init_analytics"
     ) as mock_init, mock.patch("posthog.capture") as mock_submit:
         _ = gx.get_context(
             cloud_access_token=cloud_details.access_token,

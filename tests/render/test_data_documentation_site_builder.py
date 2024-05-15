@@ -3,12 +3,13 @@ import shutil
 from typing import Dict
 
 import pytest
-from great_expectations_v1.data_context import get_context
-from great_expectations_v1.data_context.data_context.file_data_context import (
+
+from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations_v1.data_context.store import ExpectationsStore, ValidationResultsStore
-from great_expectations_v1.data_context.util import (
+from great_expectations.data_context.store import ExpectationsStore, ValidationResultsStore
+from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
@@ -100,7 +101,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
     context = get_context(context_root_dir=project_dir)
     local_site_config = context._project_config.data_docs_sites.get("local_site")
 
-    module_name = "great_expectations_v1.render.renderer.site_builder"
+    module_name = "great_expectations.render.renderer.site_builder"
     site_builder = instantiate_class_from_config(
         config=local_site_config,
         runtime_environment={

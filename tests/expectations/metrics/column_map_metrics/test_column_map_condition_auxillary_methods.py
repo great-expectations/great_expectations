@@ -3,25 +3,25 @@ from typing import Any, Dict, List
 import numpy as np
 import pandas as pd
 import pytest
-from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
+
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations_v1.execution_engine import (
+from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations_v1.expectations.metrics import (
+from great_expectations.expectations.metrics import (
     MapMetricProvider,
 )
-from great_expectations_v1.expectations.metrics.map_metric_provider.column_map_condition_auxilliary_methods import (  # noqa: E501
+from great_expectations.expectations.metrics.map_metric_provider.column_map_condition_auxilliary_methods import (  # noqa: E501
     _spark_column_map_condition_values,
     _sqlalchemy_column_map_condition_values,
 )
-from great_expectations_v1.validator.metric_configuration import MetricConfiguration
-
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 

@@ -1,5 +1,6 @@
 import pytest
-from great_expectations_v1.expectations.expectation import _format_map_output
+
+from great_expectations.expectations.expectation import _format_map_output
 
 # module level markers
 pytestmark = pytest.mark.unit

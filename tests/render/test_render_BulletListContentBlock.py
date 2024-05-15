@@ -4,14 +4,15 @@ import os
 from collections import defaultdict
 
 import pytest
-from great_expectations_v1.data_context.util import file_relative_path
-from great_expectations_v1.expectations.expectation_configuration import (
+
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.render.renderer.content_block import (
+from great_expectations.render.renderer.content_block import (
     ExpectationSuiteBulletListContentBlockRenderer,
 )
-from great_expectations_v1.render.util import (
+from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )

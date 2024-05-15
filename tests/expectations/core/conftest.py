@@ -2,7 +2,8 @@ import os
 
 import pandas as pd
 import pytest
-from great_expectations_v1.data_context.util import file_relative_path
+
+from great_expectations.data_context.util import file_relative_path
 
 
 @pytest.fixture(scope="module")

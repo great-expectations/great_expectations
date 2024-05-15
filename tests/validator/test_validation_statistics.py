@@ -1,8 +1,9 @@
 import pytest
-from great_expectations_v1.core.expectation_validation_result import (
+
+from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations_v1.validator.validation_statistics import (
+from great_expectations.validator.validation_statistics import (
     ValidationStatistics,
     calc_validation_statistics,
 )

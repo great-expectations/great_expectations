@@ -2,44 +2,44 @@ import logging
 import os
 from typing import Dict, Tuple, cast
 
-import great_expectations_v1.exceptions as gx_exceptions
 import pandas as pd
 import pytest
-from great_expectations_v1.compatibility.sqlalchemy import Connection
-from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import Connection
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations_v1.core.batch_spec import (
+from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
-from great_expectations_v1.core.metric_function_types import (
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations_v1.data_context.util import file_relative_path
-from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations_v1.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations_v1.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
     _dialect_requires_persisted_connection,
 )
 
 # Function to test for spark dataframe equality
-from great_expectations_v1.expectations.row_conditions import (
+from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
-from great_expectations_v1.self_check.util import build_sa_execution_engine
-from great_expectations_v1.util import get_sqlalchemy_domain_data
-from great_expectations_v1.validator.computed_metric import MetricValue
-from great_expectations_v1.validator.metric_configuration import MetricConfiguration
-from great_expectations_v1.validator.validator import Validator
-
+from great_expectations.self_check.util import build_sa_execution_engine
+from great_expectations.util import get_sqlalchemy_domain_data
+from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import (
     get_sqlite_table_names,

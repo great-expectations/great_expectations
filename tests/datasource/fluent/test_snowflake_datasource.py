@@ -2,16 +2,17 @@ from __future__ import annotations
 
 import pytest
 import sqlalchemy as sa
-from great_expectations_v1.compatibility import pydantic
-from great_expectations_v1.compatibility.snowflake import snowflake
-from great_expectations_v1.data_context import AbstractDataContext
-from great_expectations_v1.datasource.fluent.config_str import ConfigStr
-from great_expectations_v1.datasource.fluent.snowflake_datasource import (
+from pytest import param
+
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.snowflake import snowflake
+from great_expectations.data_context import AbstractDataContext
+from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
     SnowflakeDsn,
 )
-from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
-from pytest import param
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 @pytest.fixture

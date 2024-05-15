@@ -1,7 +1,7 @@
 # setup
-import great_expectations_v1 as gx
-import great_expectations_v1.expectations as gxe
-from great_expectations_v1.core.expectation_suite import ExpectationSuite
+import great_expectations as gx
+import great_expectations.expectations as gxe
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 context = gx.get_context()
 suite_name = "test-suite"

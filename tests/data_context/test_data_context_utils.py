@@ -1,14 +1,15 @@
 import os
 
-import great_expectations_v1.exceptions as gx_exceptions
 import pytest
-from great_expectations_v1.data_context.util import (
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.data_context.util import (
     PasswordMasker,
     parse_substitution_variable,
 )
-from great_expectations_v1.exceptions.exceptions import StoreConfigurationError
-from great_expectations_v1.types import safe_deep_copy
-from great_expectations_v1.util import load_class
+from great_expectations.exceptions.exceptions import StoreConfigurationError
+from great_expectations.types import safe_deep_copy
+from great_expectations.util import load_class
 
 
 @pytest.mark.unit
@@ -20,20 +21,20 @@ def test_load_class_raises_error_when_module_not_found():
 @pytest.mark.unit
 def test_load_class_raises_error_when_class_not_found():
     with pytest.raises(gx_exceptions.PluginClassNotFoundError):
-        load_class("TotallyNotARealClass", "great_expectations_v1.datasource")
+        load_class("TotallyNotARealClass", "great_expectations.datasource")
 
 
 @pytest.mark.unit
 def test_load_class_raises_error_when_class_name_is_None():
     with pytest.raises(TypeError):
-        load_class(None, "great_expectations_v1.datasource")
+        load_class(None, "great_expectations.datasource")
 
 
 @pytest.mark.unit
 def test_load_class_raises_error_when_class_name_is_not_string():
     for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
         with pytest.raises(TypeError):
-            load_class(bad_input, "great_expectations_v1.datasource")
+            load_class(bad_input, "great_expectations.datasource")
 
 
 @pytest.mark.unit
@@ -46,7 +47,7 @@ def test_load_class_raises_error_when_module_name_is_None():
 def test_load_class_raises_error_when_module_name_is_not_string():
     for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
         with pytest.raises(TypeError):
-            load_class(bad_input, "great_expectations_v1.datasource")
+            load_class(bad_input, "great_expectations.datasource")
 
 
 @pytest.mark.filesystem

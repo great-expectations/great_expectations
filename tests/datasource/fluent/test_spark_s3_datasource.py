@@ -4,19 +4,20 @@ import logging
 import re
 from typing import TYPE_CHECKING, List, cast
 
-import great_expectations_v1.exceptions as ge_exceptions
 import pandas as pd
 import pytest
-from great_expectations_v1.core.util import S3Url
-from great_expectations_v1.datasource.fluent import SparkS3Datasource
-from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset import (
+
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.util import S3Url
+from great_expectations.datasource.fluent import SparkS3Datasource
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
-from great_expectations_v1.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
-from great_expectations_v1.datasource.fluent.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import CSVAsset
+from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
-from great_expectations_v1.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient

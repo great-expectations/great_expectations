@@ -1,5 +1,6 @@
 import pytest
-from great_expectations_v1.render.renderer import EmailRenderer
+
+from great_expectations.render.renderer import EmailRenderer
 
 
 @pytest.mark.big

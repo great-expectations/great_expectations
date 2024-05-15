@@ -2,27 +2,28 @@ import json
 import os
 from collections import OrderedDict
 
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1.core import (
+
+import great_expectations as gx
+from great_expectations.core import (
     ExpectationSuite,
 )
-from great_expectations_v1.core.expectation_validation_result import (
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
-from great_expectations_v1.expectations.expectation_configuration import (
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.render import (
+from great_expectations.render import (
     RenderedDocumentContent,
     RenderedHeaderContent,
     RenderedSectionContent,
     RenderedTableContent,
 )
-from great_expectations_v1.render.renderer import (
+from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
 )
-from great_expectations_v1.render.view import DefaultMarkdownPageView
+from great_expectations.render.view import DefaultMarkdownPageView
 
 # module level markers
 pytestmark = pytest.mark.big

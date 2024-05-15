@@ -2,21 +2,21 @@ import os
 from typing import Dict, Tuple
 from unittest import mock
 
-import great_expectations_v1.exceptions as gx_exceptions
 import pandas as pd
 import pytest
-from great_expectations_v1.compatibility import aws, azure, google
-from great_expectations_v1.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import aws, azure, google
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 
 # noinspection PyBroadException
-from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
-from great_expectations_v1.execution_engine.pandas_execution_engine import (
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
-from great_expectations_v1.util import is_library_loadable
-from great_expectations_v1.validator.computed_metric import MetricValue
-from great_expectations_v1.validator.metric_configuration import MetricConfiguration
-
+from great_expectations.util import is_library_loadable
+from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
@@ -537,7 +537,7 @@ def test_get_batch_with_partition_on_divided_integer_and_sample_on_list(test_df)
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
-    "great_expectations_v1.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
+    "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )
 @pytest.mark.big
 def test_constructor_with_azure_options(mock_azure_conn):
@@ -559,7 +559,7 @@ def test_constructor_with_azure_options(mock_azure_conn):
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
-    "great_expectations_v1.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
+    "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )
 @pytest.mark.big
 def test_get_batch_data_with_azure_batch_spec(
@@ -598,10 +598,10 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations_v1.execution_engine.pandas_execution_engine.google.service_account",
+    "great_expectations.execution_engine.pandas_execution_engine.google.service_account",
 )
 @mock.patch(
-    "great_expectations_v1.execution_engine.pandas_execution_engine.google.storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
 @pytest.mark.big
 def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
@@ -623,7 +623,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations_v1.execution_engine.pandas_execution_engine.google.storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
 @pytest.mark.big
 def test_get_batch_data_with_gcs_batch_spec(

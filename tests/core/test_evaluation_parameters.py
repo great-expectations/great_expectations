@@ -5,13 +5,14 @@ from typing import Any
 
 import dateutil
 import pytest
-from great_expectations_v1.core.suite_parameters import (
+
+from great_expectations.core.suite_parameters import (
     _deduplicate_suite_parameter_dependencies,
     get_suite_parameter_key,
     is_suite_parameter,
     parse_suite_parameter,
 )
-from great_expectations_v1.exceptions import SuiteParameterError
+from great_expectations.exceptions import SuiteParameterError
 
 
 @pytest.mark.parametrize(
@@ -92,7 +93,7 @@ def test_parser_timing():
     assert (
         timeit(
             "parse_suite_parameter('x', {'x': 1})",
-            setup="from great_expectations_v1.core.suite_parameters import parse_suite_parameter",
+            setup="from great_expectations.core.suite_parameters import parse_suite_parameter",
             number=100,
         )
         < 1

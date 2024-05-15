@@ -6,11 +6,12 @@ import uuid
 from typing import TYPE_CHECKING, List
 from unittest import mock
 
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1 import expectations as gxe
-from great_expectations_v1 import set_context
-from great_expectations_v1.checkpoint.actions import (
+
+import great_expectations as gx
+from great_expectations import expectations as gxe
+from great_expectations import set_context
+from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
     PagerdutyAlertAction,
@@ -18,32 +19,29 @@ from great_expectations_v1.checkpoint.actions import (
     UpdateDataDocsAction,
     ValidationAction,
 )
-from great_expectations_v1.checkpoint.checkpoint import (
+from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
     CheckpointAction,
     CheckpointResult,
 )
-from great_expectations_v1.compatibility.pydantic import ValidationError
-from great_expectations_v1.core.batch_definition import BatchDefinition
-from great_expectations_v1.core.expectation_suite import ExpectationSuite
-from great_expectations_v1.core.expectation_validation_result import (
+from great_expectations.compatibility.pydantic import ValidationError
+from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations_v1.core.result_format import ResultFormat
-from great_expectations_v1.core.run_identifier import RunIdentifier
-from great_expectations_v1.core.validation_definition import ValidationDefinition
-from great_expectations_v1.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
-from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
+from great_expectations.core.result_format import ResultFormat
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
+from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations_v1.data_context.types.resource_identifiers import (
+from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations_v1.expectations.expectation_configuration import ExpectationConfiguration
-
+from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 from tests.test_utils import working_directory
 
 if TYPE_CHECKING:
@@ -157,7 +155,7 @@ class TestCheckpointSerialization:
                         "notify_with": None,
                         "renderer": {
                             "class_name": "SlackRenderer",
-                            "module_name": "great_expectations_v1.render.renderer.slack_renderer",
+                            "module_name": "great_expectations.render.renderer.slack_renderer",
                         },
                         "show_failed_expectations": False,
                         "slack_channel": None,
@@ -170,7 +168,7 @@ class TestCheckpointSerialization:
                         "notify_on": "all",
                         "renderer": {
                             "class_name": "MicrosoftTeamsRenderer",
-                            "module_name": "great_expectations_v1.render.renderer.microsoft_teams_renderer",  # noqa: E501
+                            "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",  # noqa: E501
                         },
                         "teams_webhook": "teams_webhook",
                         "type": "microsoft",
@@ -276,7 +274,7 @@ class TestCheckpointSerialization:
                     "notify_with": None,
                     "renderer": {
                         "class_name": "SlackRenderer",
-                        "module_name": "great_expectations_v1.render.renderer.slack_renderer",
+                        "module_name": "great_expectations.render.renderer.slack_renderer",
                     },
                     "show_failed_expectations": False,
                     "slack_channel": None,
@@ -289,7 +287,7 @@ class TestCheckpointSerialization:
                     "notify_on": "all",
                     "renderer": {
                         "class_name": "MicrosoftTeamsRenderer",
-                        "module_name": "great_expectations_v1.render.renderer.microsoft_teams_renderer",  # noqa: E501
+                        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",  # noqa: E501
                     },
                     "teams_webhook": "teams_webhook",
                     "type": "microsoft",

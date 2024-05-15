@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
-from great_expectations_v1.core.batch import (
+
+from great_expectations.core.batch import (
     Batch,
     BatchMarkers,
     BatchRequest,
@@ -8,10 +9,10 @@ from great_expectations_v1.core.batch import (
     IDDict,
     LegacyBatchDefinition,
 )
-from great_expectations_v1.core.batch_spec import RuntimeDataBatchSpec
-from great_expectations_v1.core.id_dict import deep_convert_properties_iterable_to_id_dict
-from great_expectations_v1.core.util import convert_to_json_serializable
-from great_expectations_v1.exceptions import InvalidBatchSpecError
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec
+from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
+from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.exceptions import InvalidBatchSpecError
 
 
 @pytest.mark.unit

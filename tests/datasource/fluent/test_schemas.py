@@ -8,16 +8,17 @@ from typing import Any, Generator, Type
 
 import pandas
 import pytest
-from great_expectations_v1.datasource.fluent import (
+from packaging.version import Version
+
+from great_expectations.datasource.fluent import (
     _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed  # noqa: E501
     _SCHEMAS_DIR,
     DataAsset,
     Datasource,
 )
-from great_expectations_v1.datasource.fluent.sources import (
+from great_expectations.datasource.fluent.sources import (
     _iter_all_registered_types,
 )
-from packaging.version import Version
 
 PANDAS_VERSION: str = pandas.__version__
 PYTHON_VERSION: Version = Version(f"{sys.version_info.major}.{sys.version_info.minor}")

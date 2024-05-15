@@ -7,14 +7,15 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Tuple, cast
 
-import great_expectations_v1.exceptions as ge_exceptions
-import great_expectations_v1.expectations as gxe
 import pytest
-from great_expectations_v1.alias_types import PathStr
-from great_expectations_v1.compatibility import pydantic
-from great_expectations_v1.compatibility.pyspark import functions as F
-from great_expectations_v1.compatibility.pyspark import types as pyspark_types
-from great_expectations_v1.core.partitioners import (
+
+import great_expectations.exceptions as ge_exceptions
+import great_expectations.expectations as gxe
+from great_expectations.alias_types import PathStr
+from great_expectations.compatibility import pydantic
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import types as pyspark_types
+from great_expectations.core.partitioners import (
     ColumnPartitioner,
     ColumnPartitionerDaily,
     ColumnPartitionerMonthly,
@@ -22,48 +23,48 @@ from great_expectations_v1.core.partitioners import (
     FileNamePartitionerMonthly,
     FileNamePartitionerYearly,
 )
-from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset import (
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
-from great_expectations_v1.datasource.fluent.data_asset.path.spark.csv_asset import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
     CSVAsset,
     DirectoryCSVAsset,
 )
-from great_expectations_v1.datasource.fluent.data_asset.path.spark.delta_asset import (
+from great_expectations.datasource.fluent.data_asset.path.spark.delta_asset import (
     DeltaAsset,
     DirectoryDeltaAsset,
 )
-from great_expectations_v1.datasource.fluent.data_asset.path.spark.json_asset import (
+from great_expectations.datasource.fluent.data_asset.path.spark.json_asset import (
     DirectoryJSONAsset,
     JSONAsset,
 )
-from great_expectations_v1.datasource.fluent.data_asset.path.spark.orc_asset import (
+from great_expectations.datasource.fluent.data_asset.path.spark.orc_asset import (
     DirectoryORCAsset,
     ORCAsset,
 )
-from great_expectations_v1.datasource.fluent.data_asset.path.spark.parquet_asset import (
+from great_expectations.datasource.fluent.data_asset.path.spark.parquet_asset import (
     DirectoryParquetAsset,
     ParquetAsset,
 )
-from great_expectations_v1.datasource.fluent.data_asset.path.spark.text_asset import (
+from great_expectations.datasource.fluent.data_asset.path.spark.text_asset import (
     DirectoryTextAsset,
     TextAsset,
 )
-from great_expectations_v1.datasource.fluent.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations_v1.datasource.fluent.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError,
 )
-from great_expectations_v1.datasource.fluent.spark_file_path_datasource import (
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
     _SparkFilePathDatasource,
 )
-from great_expectations_v1.datasource.fluent.spark_filesystem_datasource import (
+from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
 )
 
 if TYPE_CHECKING:
-    from great_expectations_v1.datasource.fluent.interfaces import BatchSlice
+    from great_expectations.datasource.fluent.interfaces import BatchSlice
 
 
 logger = logging.getLogger(__name__)

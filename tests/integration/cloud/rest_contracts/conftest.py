@@ -9,11 +9,12 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Final, List, Union
 
 import pact
 import pytest
-from great_expectations_v1 import project_manager
-from great_expectations_v1.compatibility import pydantic
-from great_expectations_v1.core.http import create_session
-from great_expectations_v1.data_context import CloudDataContext
 from typing_extensions import Annotated, TypeAlias  # noqa: TCH002
+
+from great_expectations import project_manager
+from great_expectations.compatibility import pydantic
+from great_expectations.core.http import create_session
+from great_expectations.data_context import CloudDataContext
 
 if TYPE_CHECKING:
     from requests import Session

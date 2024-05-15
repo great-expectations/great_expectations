@@ -3,23 +3,24 @@ import uuid
 from typing import Dict, Iterable, Optional, Set, Tuple, Union, cast
 from unittest import mock
 
-import great_expectations_v1.exceptions as gx_exceptions
-import great_expectations_v1.expectations as gxe
 import pytest
-from great_expectations_v1.execution_engine import ExecutionEngine
-from great_expectations_v1.expectations.expectation_configuration import (
+
+import great_expectations.exceptions as gx_exceptions
+import great_expectations.expectations as gxe
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.validator.computed_metric import MetricValue
-from great_expectations_v1.validator.exception_info import ExceptionInfo
-from great_expectations_v1.validator.metric_configuration import MetricConfiguration
-from great_expectations_v1.validator.validation_graph import (
+from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.exception_info import ExceptionInfo
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validation_graph import (
     MAX_METRIC_COMPUTATION_RETRIES,
     ExpectationValidationGraph,
     MetricEdge,
     ValidationGraph,
 )
-from great_expectations_v1.validator.validator import ValidationDependencies
+from great_expectations.validator.validator import ValidationDependencies
 
 
 @pytest.fixture
@@ -439,13 +440,13 @@ def test_progress_bar_config(
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
     with mock.patch(
-        "great_expectations_v1.validator.validation_graph.ValidationGraph._parse",
+        "great_expectations.validator.validation_graph.ValidationGraph._parse",
         return_value=(
             {},
             {},
         ),
     ), mock.patch(
-        "great_expectations_v1.validator.validation_graph.ValidationGraph.edges",
+        "great_expectations.validator.validation_graph.ValidationGraph.edges",
         new_callable=mock.PropertyMock,
         return_value=[
             MetricEdge(left=metric_configuration),
@@ -453,7 +454,7 @@ def test_progress_bar_config(
             MetricEdge(left=metric_configuration),
         ],
     ), mock.patch(
-        "great_expectations_v1.validator.validation_graph.tqdm",
+        "great_expectations.validator.validation_graph.tqdm",
     ) as mock_tqdm:
         call_args = {
             "runtime_configuration": None,

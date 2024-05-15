@@ -7,37 +7,37 @@ import shutil
 import uuid
 from typing import Dict, List, Union
 
-import great_expectations_v1 as gx
-import great_expectations_v1.exceptions as gx_exceptions
 import pytest
-from great_expectations_v1.core.expectation_suite import ExpectationSuite
-from great_expectations_v1.core.yaml_handler import YAMLHandler
-from great_expectations_v1.data_context import get_context
-from great_expectations_v1.data_context.data_context.cloud_data_context import CloudDataContext
-from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
+from typing_extensions import override
+
+import great_expectations as gx
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import get_context
+from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
+from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations_v1.data_context.data_context.file_data_context import (
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations_v1.data_context.store import ExpectationsStore
-from great_expectations_v1.data_context.util import file_relative_path
-from great_expectations_v1.expectations.expectation import BatchExpectation
-from great_expectations_v1.expectations.expectation_configuration import (
+from great_expectations.data_context.store import ExpectationsStore
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectations.expectation import BatchExpectation
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.render import (
+from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     AtomicRendererType,
     RenderedAtomicContent,
     renderedAtomicValueSchema,
 )
-from great_expectations_v1.render.renderer.renderer import renderer
-from great_expectations_v1.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.util import (
     gen_directory_tree_str,
 )
-from typing_extensions import override
-
 from tests.test_utils import safe_remove
 
 yaml = YAMLHandler()
@@ -121,7 +121,7 @@ def test_add_store(empty_data_context):
     new_store = empty_data_context.add_store(
         "my_new_store",
         {
-            "module_name": "great_expectations_v1.data_context.store",
+            "module_name": "great_expectations.data_context.store",
             "class_name": "ExpectationsStore",
         },
     )

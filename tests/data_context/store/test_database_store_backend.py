@@ -2,10 +2,10 @@ import logging
 import os
 
 import pytest
-from great_expectations_v1.data_context.store import DatabaseStoreBackend
-from great_expectations_v1.data_context.util import instantiate_class_from_config
-from great_expectations_v1.exceptions import StoreBackendError
 
+from great_expectations.data_context.store import DatabaseStoreBackend
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.exceptions import StoreBackendError
 from tests import test_utils
 
 # module level markers
@@ -206,7 +206,7 @@ def test_database_store_backend_id_initialization(caplog, sa, test_backends):
         },
         runtime_environment=None,
         config_defaults={
-            "module_name": "great_expectations_v1.data_context.store",
+            "module_name": "great_expectations.data_context.store",
             "store_name": "postgres_expectations_store",
         },
     )

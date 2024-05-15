@@ -4,17 +4,18 @@ import uuid
 from unittest import mock
 
 import pytest
-from great_expectations_v1.core.run_identifier import RunIdentifier
-from great_expectations_v1.data_context.store import (
+
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.store import (
     SuiteParameterStore,
     TupleAzureBlobStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
-from great_expectations_v1.data_context.types.resource_identifiers import (
+from great_expectations.data_context.types.resource_identifiers import (
     ValidationMetricIdentifier,
 )
-from great_expectations_v1.data_context.util import instantiate_class_from_config
+from great_expectations.data_context.util import instantiate_class_from_config
 
 
 @pytest.fixture(
@@ -35,7 +36,7 @@ from great_expectations_v1.data_context.util import instantiate_class_from_confi
         },
         {
             "class_name": "SuiteParameterStore",
-            "module_name": "great_expectations_v1.data_context.store",
+            "module_name": "great_expectations.data_context.store",
         },
     ]
 )
@@ -46,7 +47,7 @@ def param_store(request, test_backends):
     return instantiate_class_from_config(
         config=request.param,
         config_defaults={
-            "module_name": "great_expectations_v1.data_context.store",
+            "module_name": "great_expectations.data_context.store",
         },
         runtime_environment={},
     )
@@ -62,7 +63,7 @@ def param_store(request, test_backends):
         },
         {
             "class_name": "SuiteParameterStore",
-            "module_name": "great_expectations_v1.data_context.store",
+            "module_name": "great_expectations.data_context.store",
         },
     ]
 )
@@ -73,7 +74,7 @@ def in_memory_param_store(request, test_backends):
     return instantiate_class_from_config(
         config=request.param,
         config_defaults={
-            "module_name": "great_expectations_v1.data_context.store",
+            "module_name": "great_expectations.data_context.store",
         },
         runtime_environment={},
     )
@@ -112,11 +113,9 @@ def test_database_suite_parameter_store_store_backend_id(in_memory_param_store):
 
 
 @mock.patch(
-    "great_expectations_v1.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
+    "great_expectations.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
 )
-@mock.patch(
-    "great_expectations_v1.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.cloud
 def test_suite_parameter_store_calls_proper_cloud_tuple_store_methods(
     mock_parent_list_keys,
@@ -138,11 +137,9 @@ def test_suite_parameter_store_calls_proper_cloud_tuple_store_methods(
 
 
 @mock.patch(
-    "great_expectations_v1.data_context.store.tuple_store_backend.TupleAzureBlobStoreBackend.list_keys"
+    "great_expectations.data_context.store.tuple_store_backend.TupleAzureBlobStoreBackend.list_keys"
 )
-@mock.patch(
-    "great_expectations_v1.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
 def test_suite_parameter_store_calls_proper_azure_tuple_store_methods(
     mock_parent_list_keys,
@@ -166,11 +163,9 @@ def test_suite_parameter_store_calls_proper_azure_tuple_store_methods(
 
 
 @mock.patch(
-    "great_expectations_v1.data_context.store.tuple_store_backend.TupleGCSStoreBackend.list_keys"
+    "great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend.list_keys"
 )
-@mock.patch(
-    "great_expectations_v1.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
-)
+@mock.patch("great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys")
 @pytest.mark.big
 def test_suite_parameter_store_calls_proper_gcs_tuple_store_methods(
     mock_parent_list_keys,

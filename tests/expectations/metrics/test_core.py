@@ -4,41 +4,41 @@ import logging
 from decimal import Decimal
 from typing import Dict, Tuple, Union
 
-import great_expectations_v1.exceptions as gx_exceptions
 import numpy as np
 import pandas as pd
 import pytest
-from great_expectations_v1.compatibility import pyspark, sqlalchemy
-from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations_v1.core.batch import Batch
-from great_expectations_v1.core.metric_function_types import (
+from great_expectations.core.batch import Batch
+from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations_v1.execution_engine import (
+from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations_v1.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations_v1.expectations.metrics.util import (
+from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
-from great_expectations_v1.expectations.registry import get_metric_provider
-from great_expectations_v1.self_check.util import (
+from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.self_check.util import (
     build_pandas_engine,
     build_sa_execution_engine,
     build_spark_engine,
 )
-from great_expectations_v1.util import isclose
-from great_expectations_v1.validator.computed_metric import MetricValue
-from great_expectations_v1.validator.metric_configuration import MetricConfiguration
-
+from great_expectations.util import isclose
+from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 

@@ -1,23 +1,22 @@
 from typing import Dict, List
 
 import pytest
-from great_expectations_v1.data_context import CloudDataContext
-from great_expectations_v1.datasource.fluent import BatchRequest
-from great_expectations_v1.datasource.fluent.interfaces import Batch
-from great_expectations_v1.experimental.metric_repository.metric_list_metric_retriever import (
+
+from great_expectations.data_context import CloudDataContext
+from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent.interfaces import Batch
+from great_expectations.experimental.metric_repository.metric_list_metric_retriever import (
     MetricListMetricRetriever,
 )
-from great_expectations_v1.experimental.metric_repository.metrics import (
+from great_expectations.experimental.metric_repository.metrics import (
     ColumnMetric,
     MetricException,
     MetricTypes,
     TableMetric,
 )
-from great_expectations_v1.experimental.rule_based_profiler.domain_builder import (
-    ColumnDomainBuilder,
-)
-from great_expectations_v1.validator.exception_info import ExceptionInfo
-from great_expectations_v1.validator.validator import Validator
+from great_expectations.experimental.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.validator.exception_info import ExceptionInfo
+from great_expectations.validator.validator import Validator
 
 pytestmark = pytest.mark.unit
 

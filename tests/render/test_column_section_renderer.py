@@ -1,33 +1,34 @@
 import json
 from collections import OrderedDict
 
-import great_expectations_v1.expectations as gxe
 import pytest
-from great_expectations_v1.core import (
+
+import great_expectations.expectations as gxe
+from great_expectations.core import (
     ExpectationSuite,
 )
-from great_expectations_v1.core.expectation_validation_result import (
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations_v1.data_context.util import file_relative_path
-from great_expectations_v1.expectations.expectation import (
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.expectations.expectation import (
     Expectation,
 )
-from great_expectations_v1.expectations.expectation_configuration import (
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.render.renderer import (
+from great_expectations.render.renderer import (
     ExpectationSuiteColumnSectionRenderer,
     ProfilingResultsColumnSectionRenderer,
     ProfilingResultsOverviewSectionRenderer,
     ValidationResultsColumnSectionRenderer,
 )
-from great_expectations_v1.render.renderer.content_block import (
+from great_expectations.render.renderer.content_block import (
     ProfilingColumnPropertiesTableContentBlockRenderer,
     ValidationResultsTableContentBlockRenderer,
 )
-from great_expectations_v1.self_check.util import (
+from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
 )

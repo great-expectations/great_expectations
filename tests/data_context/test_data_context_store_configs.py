@@ -1,9 +1,10 @@
 import os
 
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1.core.yaml_handler import YAMLHandler
-from great_expectations_v1.data_context.data_context.file_data_context import (
+
+import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 
@@ -68,7 +69,7 @@ def test_add_store(totally_empty_data_context):
     totally_empty_data_context.add_store(
         "my_new_store",
         {
-            "module_name": "great_expectations_v1.data_context.store",
+            "module_name": "great_expectations.data_context.store",
             "class_name": "ValidationResultsStore",
         },
     )
@@ -92,7 +93,7 @@ def test_default_config_yml_stores(tmp_path_factory):
     context.add_store(
         "my_new_validation_results_store",
         {
-            "module_name": "great_expectations_v1.data_context.store",
+            "module_name": "great_expectations.data_context.store",
             "class_name": "ValidationResultsStore",
         },
     )

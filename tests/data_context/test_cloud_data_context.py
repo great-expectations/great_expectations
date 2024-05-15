@@ -3,7 +3,8 @@ from typing import Any, Dict
 
 import pytest
 import responses
-from great_expectations_v1.data_context.data_context.cloud_data_context import CloudDataContext
+
+from great_expectations.data_context.data_context.cloud_data_context import CloudDataContext
 
 CLOUD_BASE_URL = "https://greatexpectations.io/fake-url"
 ACCESS_TOKEN = "my-secret-access-token"
@@ -77,7 +78,7 @@ def _create_cloud_config_response(
             },
             "suite_parameter_store": {
                 "class_name": suite_parameter_store_class_name,
-                "module_name": "great_expectations_v1.data_context.store",
+                "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {
                 "class_name": "ExpectationsStore",

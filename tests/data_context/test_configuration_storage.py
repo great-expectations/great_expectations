@@ -2,12 +2,13 @@ import logging
 import os
 import shutil
 
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1.data_context.data_context.file_data_context import (
+
+import great_expectations as gx
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations_v1.data_context.util import file_relative_path
+from great_expectations.data_context.util import file_relative_path
 
 pytestmark = pytest.mark.filesystem
 
@@ -72,7 +73,7 @@ def test_preserve_comments_in_yml_after_adding_datasource(
 
     data_context_parameterized_expectation_suite_with_usage_statistics_enabled.add_datasource(
         "test_datasource",
-        module_name="great_expectations_v1.datasource",
+        module_name="great_expectations.datasource",
         class_name="PandasDatasource",
         batch_kwargs_generators={
             "subdir_reader": {

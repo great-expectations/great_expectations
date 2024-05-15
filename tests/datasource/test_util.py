@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
-from great_expectations_v1.execution_engine.pandas_execution_engine import (
+
+from great_expectations.execution_engine.pandas_execution_engine import (
     hash_pandas_dataframe,
 )
 

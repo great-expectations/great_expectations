@@ -17,44 +17,46 @@ from typing import (
     TypedDict,
 )
 
-import great_expectations_v1.expectations.core as gxe
 import pytest
-from great_expectations_v1.checkpoint.checkpoint import Checkpoint
-from great_expectations_v1.compatibility.sqlalchemy import (
+from packaging.version import Version
+from pytest import param
+
+import great_expectations.expectations.core as gxe
+from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.compatibility.sqlalchemy import (
     ProgrammingError as SqlAlchemyProgrammingError,
 )
-from great_expectations_v1.compatibility.sqlalchemy import (
+from great_expectations.compatibility.sqlalchemy import (
     TextClause,
     engine,
     inspect,
     quoted_name,
 )
-from great_expectations_v1.compatibility.sqlalchemy import (
+from great_expectations.compatibility.sqlalchemy import (
     __version__ as sqlalchemy_version,
 )
-from great_expectations_v1.core.expectation_suite import ExpectationSuite
-from great_expectations_v1.core.validation_definition import ValidationDefinition
-from great_expectations_v1.data_context import EphemeralDataContext
-from great_expectations_v1.datasource.fluent import (
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context import EphemeralDataContext
+from great_expectations.datasource.fluent import (
     DatabricksSQLDatasource,
     PostgresDatasource,
     SnowflakeDatasource,
     SQLDatasource,
     SqliteDatasource,
 )
-from great_expectations_v1.execution_engine.sqlalchemy_dialect import (
+from great_expectations.execution_engine.sqlalchemy_dialect import (
     DIALECT_IDENTIFIER_QUOTE_STRINGS,
     GXSqlDialect,
     quote_str,
 )
-from great_expectations_v1.expectations.expectation_configuration import ExpectationConfiguration
-from packaging.version import Version
-from pytest import param
+from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations_v1.checkpoint.checkpoint import CheckpointResult
-    from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
     from typing_extensions import TypeAlias
+
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 TERMINAL_WIDTH: Final = shutil.get_terminal_size().columns
 STAR_SEPARATOR: Final = "*" * TERMINAL_WIDTH

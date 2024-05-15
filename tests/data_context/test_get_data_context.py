@@ -2,22 +2,22 @@ import pathlib
 import shutil
 from unittest import mock
 
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1.data_context import CloudDataContext, EphemeralDataContext
-from great_expectations_v1.data_context.cloud_constants import GXCloudEnvironmentVariable
-from great_expectations_v1.data_context.data_context.file_data_context import (
+
+import great_expectations as gx
+from great_expectations.data_context import CloudDataContext, EphemeralDataContext
+from great_expectations.data_context.cloud_constants import GXCloudEnvironmentVariable
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations_v1.data_context.types.base import (
+from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations_v1.exceptions.exceptions import (
+from great_expectations.exceptions.exceptions import (
     GitIgnoreScaffoldingError,
     GXCloudConfigurationError,
 )
-
 from tests.test_utils import working_directory
 
 GX_CLOUD_PARAMS_ALL = {
@@ -290,7 +290,7 @@ def test_get_context_with_context_root_dir_gitignore_error(clear_env_vars, tmp_p
     context_root_dir.mkdir()
 
     with mock.patch(
-        "great_expectations_v1.data_context.data_context.serializable_data_context.SerializableDataContext._scaffold_gitignore",
+        "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._scaffold_gitignore",
         side_effect=OSError("Error"),
     ):
         with pytest.raises(GitIgnoreScaffoldingError):

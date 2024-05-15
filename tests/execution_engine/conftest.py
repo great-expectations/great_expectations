@@ -6,10 +6,11 @@ from typing import List
 
 import pandas as pd
 import pytest
-from great_expectations_v1.compatibility import aws, pyspark
-from great_expectations_v1.compatibility.pyspark import functions as F
-from great_expectations_v1.core.batch_spec import AzureBatchSpec, GCSBatchSpec
 from moto import mock_s3
+
+from great_expectations.compatibility import aws, pyspark
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.core.batch_spec import AzureBatchSpec, GCSBatchSpec
 
 
 @pytest.fixture

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
 
-import great_expectations_v1 as gx
 import pact
 import pytest
 
+import great_expectations as gx
 from tests.integration.cloud.rest_contracts.conftest import (
     EXISTING_ORGANIZATION_ID,
     PACT_MOCK_SERVICE_URL,

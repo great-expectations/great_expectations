@@ -1,18 +1,19 @@
 import copy
 from unittest import mock
 
-import great_expectations_v1.exceptions as gx_exceptions
 import pytest
-from great_expectations_v1.data_context import EphemeralDataContext
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.data_context import EphemeralDataContext
 
 
 @pytest.fixture
 def new_site_config() -> dict:
     return {
         "class_name": "SiteBuilder",
-        "module_name": "great_expectations_v1.render.renderer.site_builder",
+        "module_name": "great_expectations.render.renderer.site_builder",
         "store_backend": {
-            "module_name": "great_expectations_v1.data_context.store.tuple_store_backend",
+            "module_name": "great_expectations.data_context.store.tuple_store_backend",
             "class_name": "TupleFilesystemStoreBackend",
             "base_directory": "/my_new_site/",
         },
@@ -44,7 +45,7 @@ class TestAddDataDocsSite:
     ):
         new_site_name = "my_new_site"
         with mock.patch(
-            "great_expectations_v1.data_context.EphemeralDataContext._save_project_config"
+            "great_expectations.data_context.EphemeralDataContext._save_project_config"
         ) as mock_save_project_config:
             ephemeral_context_with_defaults.add_data_docs_site(
                 site_name=new_site_name, site_config=new_site_config
@@ -118,7 +119,7 @@ class TestUpdateDataDocsSite:
         updated_site_config["store_backend"]["base_directory"] = "/my_updated_site/"
 
         with mock.patch(
-            "great_expectations_v1.data_context.EphemeralDataContext._save_project_config"
+            "great_expectations.data_context.EphemeralDataContext._save_project_config"
         ) as mock_save_project_config:
             ephemeral_context_with_defaults.update_data_docs_site(
                 new_site_name, updated_site_config
@@ -166,7 +167,7 @@ class TestDeleteDataDocsSite:
         assert existing_site_name in ephemeral_context_with_defaults.get_site_names()
 
         with mock.patch(
-            "great_expectations_v1.data_context.EphemeralDataContext._save_project_config"
+            "great_expectations.data_context.EphemeralDataContext._save_project_config"
         ) as mock_save_project_config:
             ephemeral_context_with_defaults.delete_data_docs_site(existing_site_name)
 

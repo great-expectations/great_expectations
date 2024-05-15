@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import pytest
-from great_expectations_v1.data_context.store.data_asset_store import DataAssetStore
+
+from great_expectations.data_context.store.data_asset_store import DataAssetStore
 
 
 @pytest.mark.cloud

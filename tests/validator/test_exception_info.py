@@ -1,5 +1,6 @@
 import pytest
-from great_expectations_v1.validator.exception_info import ExceptionInfo
+
+from great_expectations.validator.exception_info import ExceptionInfo
 
 
 @pytest.fixture

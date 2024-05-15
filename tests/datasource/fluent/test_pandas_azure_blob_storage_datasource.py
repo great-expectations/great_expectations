@@ -5,27 +5,29 @@ import re
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, cast
 from unittest import mock
 
-import great_expectations_v1.exceptions as ge_exceptions
 import pytest
-from great_expectations_v1.compatibility import azure
-from great_expectations_v1.core.util import AzureUrl
-from great_expectations_v1.datasource.fluent import PandasAzureBlobStorageDatasource
-from great_expectations_v1.datasource.fluent.config_str import ConfigStr
-from great_expectations_v1.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
-from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset import (
+
+import great_expectations.exceptions as ge_exceptions
+import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.compatibility import azure
+from great_expectations.core.util import AzureUrl
+from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
+from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
+from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
-from great_expectations_v1.datasource.fluent.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations_v1.datasource.fluent.dynamic_pandas import PANDAS_VERSION
-from great_expectations_v1.datasource.fluent.interfaces import TestConnectionError
-from great_expectations_v1.datasource.fluent.pandas_azure_blob_storage_datasource import (
+from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource import (
     PandasAzureBlobStorageDatasourceError,
 )
 
 if TYPE_CHECKING:
-    from great_expectations_v1.data_context.data_context.file_data_context import (
+    from great_expectations.data_context.data_context.file_data_context import (
         FileDataContext,
     )
 
@@ -101,7 +103,7 @@ def object_keys() -> List[str]:
 
 @pytest.fixture
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def csv_asset(
     mock_list_keys,
@@ -230,7 +232,7 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
 # noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_add_csv_asset_to_datasource(
@@ -255,7 +257,7 @@ def test_add_csv_asset_to_datasource(
 # noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_keys: List[str]):
@@ -274,7 +276,7 @@ def test_construct_csv_asset_directly(mock_azure_client, mock_list_keys, object_
 # noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_batching_regex_unnamed_parameters(
@@ -301,7 +303,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 # noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_batching_regex_named_parameters(
@@ -328,7 +330,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
 # noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_some_batching_regex_named_parameters(
@@ -355,7 +357,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 # noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
@@ -459,7 +461,7 @@ def test_test_connection_failures(
 # noinspection PyUnusedLocal
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_add_csv_asset_with_recursive_file_discovery_to_datasource(

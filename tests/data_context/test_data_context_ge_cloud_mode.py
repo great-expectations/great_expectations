@@ -2,21 +2,22 @@ from unittest import mock
 
 import pytest
 import responses
-from great_expectations_v1.data_context import get_context
-from great_expectations_v1.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
-from great_expectations_v1.data_context.data_context.cloud_data_context import (
+from requests import Response
+
+from great_expectations.data_context import get_context
+from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
+from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
-from great_expectations_v1.exceptions import GXCloudError
-from great_expectations_v1.exceptions.exceptions import GXCloudConfigurationError
-from requests import Response
+from great_expectations.exceptions import GXCloudError
+from great_expectations.exceptions.exceptions import GXCloudConfigurationError
 
 
 @pytest.mark.cloud
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
     with mock.patch(
-        "great_expectations_v1.data_context.CloudDataContext._get_cloud_config_dict",
+        "great_expectations.data_context.CloudDataContext._get_cloud_config_dict",
         return_value={"base_url": None, "organization_id": None, "access_token": None},
     ):
         with pytest.raises(GXCloudConfigurationError):

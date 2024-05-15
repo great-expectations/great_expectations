@@ -1,24 +1,24 @@
 from typing import Optional
 
-from great_expectations_v1.core import (
+from great_expectations.core import (
     ExpectationValidationResult,
 )
-from great_expectations_v1.execution_engine import PandasExecutionEngine
-from great_expectations_v1.expectations.expectation import (
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
-from great_expectations_v1.expectations.expectation_configuration import (
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations_v1.expectations.metrics import (
+from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations_v1.render import RenderedStringTemplateContent
-from great_expectations_v1.render.components import LegacyRendererType
-from great_expectations_v1.render.renderer.renderer import renderer
-from great_expectations_v1.render.util import (
+from great_expectations.render import RenderedStringTemplateContent
+from great_expectations.render.components import LegacyRendererType
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,

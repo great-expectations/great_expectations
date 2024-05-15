@@ -3,20 +3,20 @@ import re
 from typing import TYPE_CHECKING, List, Union
 
 import pytest
-from great_expectations_v1.compatibility import pydantic
-from great_expectations_v1.core import IDDict
-from great_expectations_v1.core.batch import LegacyBatchDefinition
-from great_expectations_v1.core.partitioners import FileNamePartitionerYearly
-from great_expectations_v1.datasource.fluent import BatchRequest
-from great_expectations_v1.datasource.fluent.constants import MATCH_ALL_PATTERN
-from great_expectations_v1.datasource.fluent.data_connector import (
+
+from great_expectations.compatibility import pydantic
+from great_expectations.core import IDDict
+from great_expectations.core.batch import LegacyBatchDefinition
+from great_expectations.core.partitioners import FileNamePartitionerYearly
+from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
-
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
-    from great_expectations_v1.datasource.fluent.data_connector import (
+    from great_expectations.datasource.fluent.data_connector import (
         DataConnector,
     )
 

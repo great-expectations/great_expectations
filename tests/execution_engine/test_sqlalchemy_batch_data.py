@@ -1,22 +1,22 @@
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
-from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
+
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations_v1.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations_v1.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations_v1.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
 
-from great_expectations_v1.execution_engine.sqlalchemy_batch_data import (
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 from tests.test_utils import get_sqlite_temp_table_names_from_engine
 

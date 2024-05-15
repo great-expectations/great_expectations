@@ -2,15 +2,16 @@ import logging
 from typing import Any, Dict, List
 
 import pytest
-from great_expectations_v1.compatibility import pyspark
-from great_expectations_v1.datasource.fluent import SparkDatasource
 from packaging.version import Version
 from packaging.version import parse as parse_version
+
+from great_expectations.compatibility import pyspark
+from great_expectations.datasource.fluent import SparkDatasource
 
 logger = logging.getLogger(__name__)
 
 try:
-    from great_expectations_v1.execution_engine import SparkDFExecutionEngine
+    from great_expectations.execution_engine import SparkDFExecutionEngine
 except ImportError:
     SparkDFExecutionEngine = None
     # TODO: review logging more detail here

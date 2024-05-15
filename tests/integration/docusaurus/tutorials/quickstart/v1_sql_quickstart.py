@@ -14,9 +14,9 @@ import pathlib
 import shutil
 
 # <snippet name="tests/integration/docusaurus/tutorials/quickstart/v1_sql_quickstart.py import_gx">
-import great_expectations_v1 as gx
-import great_expectations_v1.expectations as gxe
-from great_expectations_v1.core.expectation_suite import ExpectationSuite
+import great_expectations as gx
+import great_expectations.expectations as gxe
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 # </snippet>
 

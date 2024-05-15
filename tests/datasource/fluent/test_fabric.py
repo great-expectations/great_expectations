@@ -7,14 +7,16 @@ from typing import TYPE_CHECKING, Any, Callable, Final, Generator, Literal
 
 import pandas as pd
 import pytest
-from great_expectations_v1.experimental.datasource.fabric import (
+from packaging.version import Version
+
+import great_expectations.core.batch_spec
+from great_expectations.experimental.datasource.fabric import (
     FabricPowerBIDatasource,
     _PowerBIAsset,
 )
-from packaging.version import Version
 
 if TYPE_CHECKING:
-    from great_expectations_v1.data_context import AbstractDataContext
+    from great_expectations.data_context import AbstractDataContext
 
 param = pytest.param
 

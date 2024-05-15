@@ -1,7 +1,8 @@
 from unittest import mock
 
 import pytest
-from great_expectations_v1.data_context import EphemeralDataContext
+
+from great_expectations.data_context import EphemeralDataContext
 
 SETTER_METHOD_NAMES = [
     "expectations_store_name",
@@ -35,7 +36,7 @@ def test_store_name_setters_persist(
 ):
     new_store_name = "new_store_name"
     with mock.patch(
-        "great_expectations_v1.data_context.EphemeralDataContext._save_project_config"
+        "great_expectations.data_context.EphemeralDataContext._save_project_config"
     ) as mock_save_project_config:
         setattr(ephemeral_context_with_defaults, store_setter_method_name, new_store_name)
 

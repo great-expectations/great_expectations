@@ -1,9 +1,10 @@
 import shutil
 
 import pytest
-from great_expectations_v1.data_context import get_context
-from great_expectations_v1.data_context.util import file_relative_path
-from great_expectations_v1.exceptions import InvalidConfigError
+
+from great_expectations.data_context import get_context
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.exceptions import InvalidConfigError
 
 
 @pytest.mark.filesystem

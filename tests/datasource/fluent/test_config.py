@@ -18,18 +18,19 @@ from typing import (  # TODO: revert use of cast
     cast,
 )
 
-import great_expectations_v1 as gx
 import pytest
-from great_expectations_v1.compatibility import pydantic
-from great_expectations_v1.core.batch_definition import BatchDefinition
-from great_expectations_v1.core.partitioners import ColumnPartitionerMonthly
-from great_expectations_v1.core.yaml_handler import YAMLHandler
-from great_expectations_v1.data_context import FileDataContext
-from great_expectations_v1.datasource.fluent.config import (
+
+import great_expectations as gx
+from great_expectations.compatibility import pydantic
+from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.partitioners import ColumnPartitionerMonthly
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import FileDataContext
+from great_expectations.datasource.fluent.config import (
     GxConfig,
     _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation,
 )
-from great_expectations_v1.datasource.fluent.constants import (
+from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
     _BATCH_DEFINITION_NAME_KEY,
     _BATCH_DEFINITIONS_KEY,
@@ -37,22 +38,22 @@ from great_expectations_v1.datasource.fluent.constants import (
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
 )
-from great_expectations_v1.datasource.fluent.interfaces import Datasource
-from great_expectations_v1.datasource.fluent.sources import (
+from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
     _SourceFactories,
 )
-from great_expectations_v1.datasource.fluent.sql_datasource import (
+from great_expectations.datasource.fluent.sql_datasource import (
     SqlPartitionerYearAndMonth,
     TableAsset,
 )
-
 from tests.datasource.fluent.conftest import FLUENT_DATASOURCE_TEST_DIR
 
 if TYPE_CHECKING:
-    from great_expectations_v1.datasource.fluent import SqliteDatasource
     from pytest import FixtureRequest
+
+    from great_expectations.datasource.fluent import SqliteDatasource
 
 yaml = YAMLHandler()
 LOGGER = logging.getLogger(__file__)
@@ -896,7 +897,7 @@ def test_config_substitution_retains_original_value_on_save(
         _FLUENT_DATASOURCES_KEY
     ]["my_sqlite_ds_w_subs"]
 
-    from great_expectations_v1 import get_context
+    from great_expectations import get_context
 
     context = get_context(context_root_dir=file_dc_config_file_with_substitutions.parent)
 
@@ -940,7 +941,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     assert original.get("my_pg_ds")  # will be deleted
     assert not original.get("my_sqlite")  # will be added
 
-    from great_expectations_v1 import get_context
+    from great_expectations import get_context
 
     context = get_context(context_root_dir=file_dc_config_file_with_substitutions.parent)
 

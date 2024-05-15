@@ -16,11 +16,11 @@ import pkg_resources
 import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from flaky import flaky
-from great_expectations_v1.data_context.data_context.file_data_context import (
+
+from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations_v1.data_context.util import file_relative_path
-
+from great_expectations.data_context.util import file_relative_path
 from tests.integration.backend_dependencies import BackendDependencies
 from tests.integration.integration_test_fixture import IntegrationTestFixture
 from tests.integration.test_definitions.abs.integration_tests import (

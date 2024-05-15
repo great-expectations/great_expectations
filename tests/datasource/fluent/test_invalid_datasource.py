@@ -6,8 +6,9 @@ from pprint import pformat as pf
 from typing import Any, Callable, Final, Literal, Protocol
 
 import pytest
-from great_expectations_v1.compatibility import pydantic
-from great_expectations_v1.datasource.fluent import (
+
+from great_expectations.compatibility import pydantic
+from great_expectations.datasource.fluent import (
     DataAsset,
     Datasource,
     GxInvalidDatasourceWarning,
@@ -15,7 +16,7 @@ from great_expectations_v1.datasource.fluent import (
     InvalidDatasource,
     TestConnectionError,
 )
-from great_expectations_v1.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import _SourceFactories
 
 pytestmark = pytest.mark.unit
 

@@ -2,16 +2,17 @@ from unittest import mock
 from unittest.mock import Mock  # noqa: TID251
 
 import pytest
-from great_expectations_v1 import set_context
-from great_expectations_v1.analytics.events import (
+
+from great_expectations import set_context
+from great_expectations.analytics.events import (
     ExpectationSuiteCreatedEvent,
     ExpectationSuiteDeletedEvent,
 )
-from great_expectations_v1.core import ExpectationSuite
-from great_expectations_v1.core.factory.suite_factory import SuiteFactory
-from great_expectations_v1.data_context import AbstractDataContext
-from great_expectations_v1.data_context.store import ExpectationsStore
-from great_expectations_v1.exceptions import DataContextError
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.factory.suite_factory import SuiteFactory
+from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.store import ExpectationsStore
+from great_expectations.exceptions import DataContextError
 
 
 @pytest.mark.unit
@@ -239,7 +240,7 @@ class TestSuiteFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations_v1.core.factory.suite_factory.submit_event", autospec=True
+            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
         ) as mock_submit:
             _ = context.suites.add(suite=suite)
 
@@ -264,7 +265,7 @@ class TestSuiteFactoryAnalytics:
 
         # Act
         with mock.patch(
-            "great_expectations_v1.core.factory.suite_factory.submit_event", autospec=True
+            "great_expectations.core.factory.suite_factory.submit_event", autospec=True
         ) as mock_submit:
             context.suites.delete(name=name)
 

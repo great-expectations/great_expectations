@@ -5,8 +5,9 @@ import sys
 
 import numpy as np
 import pytest
-from great_expectations_v1 import validator
 from numpy.lib.npyio import DataSource
+
+from great_expectations import validator
 
 
 @pytest.mark.big

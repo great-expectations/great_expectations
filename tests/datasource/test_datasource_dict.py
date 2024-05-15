@@ -3,15 +3,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 import pytest
-from great_expectations_v1.data_context.store import DatasourceStore
-from great_expectations_v1.datasource.datasource_dict import (
+
+from great_expectations.data_context.store import DatasourceStore
+from great_expectations.datasource.datasource_dict import (
     CacheableDatasourceDict,
     DatasourceDict,
 )
-from great_expectations_v1.datasource.fluent import PandasDatasource
+from great_expectations.datasource.fluent import PandasDatasource
 
 if TYPE_CHECKING:
-    from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
+    from great_expectations.data_context.data_context.ephemeral_data_context import (
         EphemeralDataContext,
     )
 

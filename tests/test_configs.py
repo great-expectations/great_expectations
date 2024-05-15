@@ -1,6 +1,7 @@
 import pytest
-from great_expectations_v1.data_context.types.base import ProgressBarsConfig
-from great_expectations_v1.data_context.util import instantiate_class_from_config
+
+from great_expectations.data_context.types.base import ProgressBarsConfig
+from great_expectations.data_context.util import instantiate_class_from_config
 
 
 @pytest.mark.unit

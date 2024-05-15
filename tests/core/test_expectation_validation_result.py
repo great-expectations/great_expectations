@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import json
 
-import great_expectations_v1.expectations as gxe
 import pytest
-from great_expectations_v1.core import (
+
+import great_expectations.expectations as gxe
+from great_expectations.core import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations_v1.expectations.expectation_configuration import (
+from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
 

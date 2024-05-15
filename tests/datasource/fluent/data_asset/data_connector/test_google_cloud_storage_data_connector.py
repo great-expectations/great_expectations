@@ -4,17 +4,18 @@ from typing import TYPE_CHECKING, Iterator, List, cast
 from unittest import mock
 
 import pytest
-from great_expectations_v1.compatibility import google
-from great_expectations_v1.core import IDDict
-from great_expectations_v1.core.batch import LegacyBatchDefinition
-from great_expectations_v1.core.util import GCSUrl
-from great_expectations_v1.datasource.fluent import BatchRequest
-from great_expectations_v1.datasource.fluent.data_connector import (
+
+from great_expectations.compatibility import google
+from great_expectations.core import IDDict
+from great_expectations.core.batch import LegacyBatchDefinition
+from great_expectations.core.util import GCSUrl
+from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
 
 if TYPE_CHECKING:
-    from great_expectations_v1.datasource.fluent.data_connector import (
+    from great_expectations.datasource.fluent.data_connector import (
         DataConnector,
     )
 
@@ -44,7 +45,7 @@ class MockGCSClient:
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 def test_basic_instantiation(mock_list_keys):
     mock_list_keys.return_value = [
@@ -81,7 +82,7 @@ def test_basic_instantiation(mock_list_keys):
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
     mock_list_keys.return_value = [
@@ -118,7 +119,7 @@ def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 def test_return_all_batch_definitions_unsorted(mock_list_keys):
     mock_list_keys.return_value = [
@@ -307,7 +308,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # @pytest.mark.big
 # @mock.patch(
-#     "great_expectations_v1.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"  # noqa: E501
+#     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"  # noqa: E501
 # )
 # def test_return_all_batch_definitions_sorted(
 #     mock_list_keys,
@@ -449,7 +450,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 def test_return_only_unique_batch_definitions(mock_list_keys):
     mock_list_keys.return_value = [
@@ -530,7 +531,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 def test_alpha(mock_list_keys):
     mock_list_keys.return_value = [
@@ -590,7 +591,7 @@ def test_alpha(mock_list_keys):
 
 @pytest.mark.big
 @mock.patch(
-    "great_expectations_v1.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 def test_foxtrot(mock_list_keys):
     mock_list_keys.return_value = []

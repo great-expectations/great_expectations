@@ -3,20 +3,21 @@ from __future__ import annotations
 from typing import Mapping
 
 import pytest
-from great_expectations_v1 import set_context
-from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
+
+from great_expectations import set_context
+from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations_v1.data_context.store import ExpectationsStore
-from great_expectations_v1.data_context.store.checkpoint_store import CheckpointStore
-from great_expectations_v1.data_context.store.datasource_store import DatasourceStore
-from great_expectations_v1.data_context.types.base import (
+from great_expectations.data_context.store import ExpectationsStore
+from great_expectations.data_context.store.checkpoint_store import CheckpointStore
+from great_expectations.data_context.store.datasource_store import DatasourceStore
+from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
     ProgressBarsConfig,
 )
-from great_expectations_v1.datasource.fluent.sources import _SourceFactories
-from great_expectations_v1.exceptions.exceptions import StoreConfigurationError
+from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.exceptions.exceptions import StoreConfigurationError
 
 
 class DatasourceStoreSpy(DatasourceStore):
@@ -139,7 +140,7 @@ def test_add_store(in_memory_data_context: EphemeralDataContextSpy):
     context.add_store(
         store_name="my_new_store",
         store_config={
-            "module_name": "great_expectations_v1.data_context.store",
+            "module_name": "great_expectations.data_context.store",
             "class_name": "ExpectationsStore",
         },
     )

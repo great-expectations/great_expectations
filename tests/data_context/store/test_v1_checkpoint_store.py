@@ -5,17 +5,18 @@ from typing import TYPE_CHECKING, Any
 from unittest import mock
 
 import pytest
-from great_expectations_v1 import set_context
-from great_expectations_v1.checkpoint.actions import SlackNotificationAction
-from great_expectations_v1.checkpoint.checkpoint import Checkpoint
-from great_expectations_v1.core.batch_definition import BatchDefinition
-from great_expectations_v1.core.data_context_key import StringKey
-from great_expectations_v1.core.expectation_suite import ExpectationSuite
-from great_expectations_v1.core.validation_definition import ValidationDefinition
-from great_expectations_v1.data_context import AbstractDataContext
-from great_expectations_v1.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations_v1.data_context.store.checkpoint_store import CheckpointStore
-from great_expectations_v1.data_context.types.resource_identifiers import GXCloudIdentifier
+
+from great_expectations import set_context
+from great_expectations.checkpoint.actions import SlackNotificationAction
+from great_expectations.checkpoint.checkpoint import Checkpoint
+from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.core.data_context_key import StringKey
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.store.checkpoint_store import CheckpointStore
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
