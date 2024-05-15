@@ -250,13 +250,15 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
     batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     batch_def = asset.add_batch_definition_monthly(name="batch def", regex=batching_regex)
-    batch_parameters = {"year": 2024, "month": 5}
+    batch_parameters = {"year": "2024", "month": "05"}
     batch = batch_def.get_batch(batch_parameters=batch_parameters)
+
     assert batch.batch_request.datasource_name == pandas_s3_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
+
     path = "yellow_tripdata_sample_2024-05.csv"
-    assert batch.batch_request.options == {"path": path, "year": 2024, "month": 5}
-    assert batch.metadata == {"path": path, "year": 2024, "month": 5}
+    assert batch.batch_request.options == {"path": path, "year": "2024", "month": "05"}
+    assert batch.metadata == {"path": path, "year": "2024", "month": "05"}
     assert batch.id == "pandas_s3_datasource-csv_asset-year_2024-month_05"
 
 
