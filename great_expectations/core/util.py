@@ -20,8 +20,6 @@ if TYPE_CHECKING:
 
 # import of private class will be removed when deprecated methods are removed from this module
 
-# Updated from the stack overflow version below to concatenate lists
-# https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 
 
 logger = logging.getLogger(__name__)
