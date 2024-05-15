@@ -14,9 +14,6 @@ from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
-from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
-    PathDataAsset,
-)
 from great_expectations.datasource.fluent.data_connector import (
     AzureBlobStorageDataConnector,
 )
@@ -88,45 +85,19 @@ def pandas_abs_datasource() -> PandasAzureBlobStorageDatasource:
 @pytest.fixture
 def object_keys() -> List[str]:
     return [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
+        "yellow_tripdata_sample_2024-01.csv",
+        "yellow_tripdata_sample_2024-02.csv",
+        "yellow_tripdata_sample_2024-03.csv",
+        "yellow_tripdata_sample_2024-04.csv",
+        "yellow_tripdata_sample_2024-05.csv",
+        "yellow_tripdata_sample_2024-06.csv",
+        "yellow_tripdata_sample_2024-07.csv",
+        "yellow_tripdata_sample_2024-08.csv",
+        "yellow_tripdata_sample_2024-09.csv",
+        "yellow_tripdata_sample_2024-10.csv",
+        "yellow_tripdata_sample_2024-11.csv",
+        "yellow_tripdata_sample_2024-12.csv",
     ]
-
-
-@pytest.fixture
-@mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
-)
-def csv_asset(
-    mock_list_keys,
-    object_keys: List[str],
-    pandas_abs_datasource: PandasAzureBlobStorageDatasource,
-) -> PathDataAsset:
-    mock_list_keys.return_value = object_keys
-    asset = pandas_abs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-        abs_container="my_container",
-    )
-    return asset
-
-
-@pytest.fixture
-def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    data_connector: AzureBlobStorageDataConnector = cast(
-        AzureBlobStorageDataConnector, csv_asset._data_connector
-    )
-    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""  # noqa: E501
-    return regex, test_connection_error_message
 
 
 @pytest.mark.big

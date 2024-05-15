@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import logging
-import re
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, List, cast
+from typing import TYPE_CHECKING, List
 
 import pandas as pd
 import pytest
@@ -11,14 +10,10 @@ from pytest import param
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.compatibility import aws, pydantic
-from great_expectations.core.partitioners import FileNamePartitionerPath
 from great_expectations.datasource.fluent import PandasS3Datasource
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
-)
-from great_expectations.datasource.fluent.data_connector import (
-    S3DataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 
@@ -58,16 +53,18 @@ def pandas_s3_datasource(empty_data_context, s3_mock, s3_bucket: str) -> PandasS
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     keys: List[str] = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
+        "yellow_tripdata_sample_2024-01.csv",
+        "yellow_tripdata_sample_2024-02.csv",
+        "yellow_tripdata_sample_2024-03.csv",
+        "yellow_tripdata_sample_2024-04.csv",
+        "yellow_tripdata_sample_2024-05.csv",
+        "yellow_tripdata_sample_2024-06.csv",
+        "yellow_tripdata_sample_2024-07.csv",
+        "yellow_tripdata_sample_2024-08.csv",
+        "yellow_tripdata_sample_2024-09.csv",
+        "yellow_tripdata_sample_2024-10.csv",
+        "yellow_tripdata_sample_2024-11.csv",
+        "yellow_tripdata_sample_2024-12.csv",
         "subfolder/for_recursive_search.csv",
     ]
 
@@ -93,14 +90,6 @@ def csv_asset(pandas_s3_datasource: PandasS3Datasource) -> PathDataAsset:
         name="csv_asset",
     )
     return asset
-
-
-@pytest.fixture
-def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    data_connector: S3DataConnector = cast(S3DataConnector, csv_asset._data_connector)
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # noqa: E501
-    return regex, test_connection_error_message
 
 
 @pytest.mark.aws_deps
@@ -248,7 +237,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
-        asset.build_batch_request({"name": "alex", "timestamp": "1234567890", "price": 1300})
+        asset.build_batch_request({"year": "2024", "month": 5})
 
 
 @pytest.mark.aws_deps
@@ -259,29 +248,16 @@ def test_get_batch_list_from_fully_specified_batch_request(
         name="csv_asset",
     )
 
-    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    request = asset.build_batch_request(
-        options={"name": "alex", "timestamp": "20200819", "price": "1300"},
-        partitioner=FileNamePartitionerPath(regex=batching_regex),
-    )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
+    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=batching_regex)
+    batch_parameters = {"year": 2024, "month": 5}
+    batch = batch_def.get_batch(batch_parameters=batch_parameters)
     assert batch.batch_request.datasource_name == pandas_s3_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
-    assert batch.metadata == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
-    assert batch.id == "pandas_s3_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
+    path = "yellow_tripdata_sample_2024-05.csv"
+    assert batch.batch_request.options == {"path": path, "year": 2024, "month": 5}
+    assert batch.metadata == {"path": path, "year": 2024, "month": 5}
+    assert batch.id == "pandas_s3_datasource-csv_asset-year_2024-month_05"
 
 
 @pytest.mark.aws_deps

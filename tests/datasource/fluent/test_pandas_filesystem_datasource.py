@@ -405,15 +405,10 @@ def test_get_batch_list_from_fully_specified_batch_request(
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
     )
-    request = asset.build_batch_request(
-        {"year": "2018", "month": "04"},
-        partitioner=FileNamePartitionerMonthly(
-            regex=re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
-        ),
-    )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
+    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=regex)
+    batch_parameters = {"year": "2018", "month": "04"}
+    batch = batch_def.get_batch(batch_parameters=batch_parameters)
     assert batch.batch_request.datasource_name == pandas_filesystem_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
 

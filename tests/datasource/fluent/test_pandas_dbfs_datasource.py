@@ -3,14 +3,12 @@ from __future__ import annotations
 import logging
 import os
 import pathlib
-import re
 from typing import TYPE_CHECKING
 
 import boto3
 import botocore
 import pytest
 
-from great_expectations.core.partitioners import FileNamePartitionerPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
@@ -55,16 +53,18 @@ def pandas_dbfs_datasource(
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
-            "alex_20200809_1000.csv",
-            "eugene_20200809_1500.csv",
-            "james_20200811_1009.csv",
-            "abe_20200809_1040.csv",
-            "will_20200809_1002.csv",
-            "james_20200713_1567.csv",
-            "eugene_20201129_1900.csv",
-            "will_20200810_1001.csv",
-            "james_20200810_1003.csv",
-            "alex_20200819_1300.csv",
+            "yellow_tripdata_sample_2024-01.csv",
+            "yellow_tripdata_sample_2024-02.csv",
+            "yellow_tripdata_sample_2024-03.csv",
+            "yellow_tripdata_sample_2024-04.csv",
+            "yellow_tripdata_sample_2024-05.csv",
+            "yellow_tripdata_sample_2024-06.csv",
+            "yellow_tripdata_sample_2024-07.csv",
+            "yellow_tripdata_sample_2024-08.csv",
+            "yellow_tripdata_sample_2024-09.csv",
+            "yellow_tripdata_sample_2024-10.csv",
+            "yellow_tripdata_sample_2024-11.csv",
+            "yellow_tripdata_sample_2024-12.csv",
         ],
     )
 
@@ -106,27 +106,14 @@ def test_get_batch_list_from_fully_specified_batch_request(
     asset = pandas_dbfs_datasource.add_csv_asset(
         name="csv_asset",
     )
+    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batch_def = asset.add_batch_definition_monthly(name="batch def", regex=regex)
+    batch_parameters = {"year": "2024", "month": "05"}
+    batch = batch_def.get_batch(batch_parameters=batch_parameters)
 
-    batching_regex = re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    request = asset.build_batch_request(
-        options={"name": "alex", "timestamp": "20200819", "price": "1300"},
-        partitioner=FileNamePartitionerPath(regex=batching_regex),
-    )
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
     assert batch.batch_request.datasource_name == pandas_dbfs_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
-    assert batch.metadata == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
-    assert batch.id == "pandas_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
+    path = "yellow_tripdata_sample_2024-05.csv"
+    assert batch.batch_request.options == {"path": path, "year": "2024", "month": "05"}
+    assert batch.metadata == {"path": path, "year": "2024", "month": "05"}
+    assert batch.id == "pandas_dbfs_datasource-csv_asset-year_2024-month_05"
