@@ -5,15 +5,7 @@ import logging
 import re
 import warnings
 from collections import OrderedDict
-from typing import (
-    Any,
-    Callable,
-    Mapping,
-    MutableMapping,
-    Optional,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Mapping, MutableMapping, Optional, TypeVar, Union
 from urllib.parse import urlparse
 
 import dateutil.parser
@@ -21,8 +13,10 @@ import numpy as np
 from IPython import get_ipython
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.sqlalchemy import SQLALCHEMY_NOT_IMPORTED, LegacyRow, Row
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import pyspark
 
 # import of private class will be removed when deprecated methods are removed from this module
 

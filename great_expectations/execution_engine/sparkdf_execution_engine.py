@@ -40,6 +40,7 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import (
     MetricDomainTypes,  # noqa: TCH001
 )
+from great_expectations.core.util import AzureUrl
 from great_expectations.exceptions import (
     BatchSpecError,
     ExecutionEngineError,
