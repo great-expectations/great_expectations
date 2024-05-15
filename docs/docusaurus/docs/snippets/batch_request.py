@@ -48,4 +48,4 @@ options = asset.get_batch_parameters_keys()
 print(options)
 # </snippet>
 
-assert set(options) == {"year", "month", "path"}
+assert set(options) == {"path"}
