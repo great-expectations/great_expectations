@@ -1,6 +1,6 @@
 import InProgress from '../../_core_components/_in_progress.md';
 
-Databricks is a web-based platform automating Spark cluster management and working with them through Python notebooks.
+Databricks is a web-based platform that automates Spark cluster management.
 
 To avoid configuring external resources, you'll use the [Databricks File System (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and Data Docs store.
 

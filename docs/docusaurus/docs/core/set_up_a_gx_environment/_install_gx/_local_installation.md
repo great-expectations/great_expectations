@@ -4,9 +4,9 @@ GX 1.0 is a Python library and as such can be used with a local Python installat
 
 ## Installation and setup
 
-1. (Optional) Activate your virtual environment.
+1. Optional. Activate your virtual environment.
 
-   If you created a virtual environment for your GX Python installation, navigate to the folder that contains your virtual environment and activate it by running the following command:
+   If you created a virtual environment for your GX Python installation, browse to the folder that contains your virtual environment and run the following command to activate it:
 
    ```bash title="Terminal input"
    source my_venv/bin/activate
@@ -30,6 +30,6 @@ GX 1.0 is a Python library and as such can be used with a local Python installat
    great_expectations --version
    ```
 
-   The output you receive if GX was successfully installed will be:
+   If GX was successfully installed, the following output appears:
 
    <ReleaseVersionBox/>

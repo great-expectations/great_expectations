@@ -7,7 +7,7 @@ Use the information provided here to install GX on an EMR Spark cluster and inst
 
 ## Installation and setup
 
-1. To install Great Expectations on your EMR Spark cluster copy this code snippet into a cell in your EMR Spark notebook and then run it:
+1. To install GX on your EMR Spark cluster copy this code snippet into a cell in your EMR Spark notebook and then run it:
 
    ```python title="Python"
    sc.install_pypi_package("great_expectations")

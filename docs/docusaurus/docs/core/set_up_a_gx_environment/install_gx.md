@@ -17,7 +17,7 @@ Great Expectations (GX) is a Python library that provides a framework for descri
 ## Prerequisites
 
 - <PrereqPythonInstalled/>
-- (Recommended) [A Python virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment)
+- Recommended. [A Python virtual environment](/core/installation_and_setup/set_up_a_python_environment.mdx#optional-create-a-virtual-environment)
 - Internet access
 - Permissions to download and install packages in your environment
 
@@ -32,7 +32,7 @@ Great Expectations (GX) is a Python library that provides a framework for descri
 
   <TabItem value="hosted" label="Hosted">
 
-Hosted environments such as EMR Spark clusters or Databricks clusters do not provide for a filesystem where you can install your GX instance.  Instead, you must install GX in-memory using the Python-style notebooks available on those platforms.
+Hosted environments such as EMR Spark or Databricks clusters do not provide a filesystem to install your GX instance.  Instead, you must install GX in memory using the Python-style notebooks available on those platforms.
 
 <Tabs queryString="hosted-type" groupId="hosted-type" defaultValue='spark-notebook' values={[{label: 'EMR Spark notebook', value:'spark-notebook'}, {label: 'Databricks notebook', value:'databricks-notebook'}]}>
 
