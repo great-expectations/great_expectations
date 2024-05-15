@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 # import of private class will be removed when deprecated methods are removed from this module
 
 
-
 logger = logging.getLogger(__name__)
 
 try:
