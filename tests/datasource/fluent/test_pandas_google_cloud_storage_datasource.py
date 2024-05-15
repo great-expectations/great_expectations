@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import re
 from typing import Any, Dict, Iterator, List, cast
 from unittest import mock
 
@@ -14,12 +13,6 @@ from great_expectations.datasource.fluent import (
     PandasGoogleCloudStorageDatasource,
 )
 from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import CSVAsset
-from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
-    PathDataAsset,
-)
-from great_expectations.datasource.fluent.data_connector import (
-    GoogleCloudStorageDataConnector,
-)
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 
 logger = logging.getLogger(__file__)
@@ -86,33 +79,6 @@ def object_keys() -> List[str]:
         "james_20200810_1003.csv",
         "alex_20200819_1300.csv",
     ]
-
-
-@pytest.fixture
-@mock.patch(
-    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
-)
-def csv_asset(
-    mock_list_keys,
-    object_keys: List[str],
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
-) -> PathDataAsset:
-    mock_list_keys.return_value = object_keys
-    asset = pandas_gcs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-    )
-    return asset
-
-
-@pytest.fixture
-def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
-    regex = re.compile(r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv")
-    data_connector: GoogleCloudStorageDataConnector = cast(
-        GoogleCloudStorageDataConnector, csv_asset._data_connector
-    )
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket_or_name}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # noqa: E501
-    return regex, test_connection_error_message
 
 
 @pytest.mark.unit

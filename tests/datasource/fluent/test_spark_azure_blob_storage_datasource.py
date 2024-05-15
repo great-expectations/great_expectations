@@ -244,7 +244,6 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     mock_list_keys.return_value = object_keys
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
         abs_container="my_container",
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
@@ -274,12 +273,15 @@ def test_get_batch_list_from_fully_specified_batch_request(
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         abs_container="my_container",
         batch_metadata=asset_specified_metadata,
     )
 
-    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})
+    batching_regex = r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
+    batch_definition = asset.add_batch_definition_path("my_batch_definition", regex=batching_regex)
+    request = batch_definition.build_batch_request(
+        {"name": "alex", "timestamp": "20200819", "price": "1300"}
+    )
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
