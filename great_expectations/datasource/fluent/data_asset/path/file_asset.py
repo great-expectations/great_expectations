@@ -205,8 +205,7 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         self,
         partitioner: Optional[FileNamePartitioner] = None,
     ) -> tuple[str, ...]:
-        group_names = self._get_group_names(partitioner=partitioner)
-        option_keys: tuple[str, ...] = tuple(group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
+        option_keys: tuple[str, ...] = (FILE_PATH_BATCH_SPEC_KEY,)
         if partitioner:
             option_keys += tuple(partitioner.param_names)
         return option_keys
