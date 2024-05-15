@@ -1,4 +1,4 @@
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 import copy
 import datetime
@@ -61,7 +61,10 @@ from great_expectations.experimental.rule_based_profiler.parameter_container imp
 )
 from great_expectations.experimental.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.experimental.rule_based_profiler.rule.rule_state import RuleState
-from great_expectations.util import convert_to_json_serializable, filter_properties_dict  # noqa: TID251
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    filter_properties_dict,
+)
 from great_expectations.validator.exception_info import ExceptionInfo
 
 if TYPE_CHECKING:

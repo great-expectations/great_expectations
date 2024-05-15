@@ -1,4 +1,4 @@
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 import json
 from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
@@ -12,7 +12,10 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.types import SerializableDictDot, safe_deep_copy
-from great_expectations.util import convert_to_json_serializable, deep_filter_properties_iterable  # noqa: TID251
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    deep_filter_properties_iterable,
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

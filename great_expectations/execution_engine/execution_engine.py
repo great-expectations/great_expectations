@@ -1,4 +1,4 @@
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 import copy
 import logging
@@ -28,7 +28,10 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
 )
 from great_expectations.types import DictDot
-from great_expectations.util import convert_to_json_serializable, filter_properties_dict  # noqa: TID251
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    filter_properties_dict,
+)
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001

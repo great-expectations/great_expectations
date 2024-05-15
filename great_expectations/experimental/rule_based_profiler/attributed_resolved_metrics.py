@@ -1,4 +1,4 @@
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 import logging
 from dataclasses import asdict, dataclass
@@ -10,7 +10,10 @@ import pandas as pd
 from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.types import SerializableDictDot
-from great_expectations.util import convert_to_json_serializable, deep_filter_properties_iterable  # noqa: TID251
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    deep_filter_properties_iterable,
+)
 
 if TYPE_CHECKING:
     from great_expectations.experimental.rule_based_profiler.metric_computation_result import (
