@@ -54,10 +54,12 @@ my_asset = context.get_datasource("my_datasource").get_asset("my_asset")
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_parameters">
-print(my_asset.get_batch_parameters_keys())
+print(my_asset.get_batch_parameters_keys(partitioner=my_batch_definition.partitioner))
 # </snippet>
 
-assert my_asset.get_batch_parameters_keys() == ("year", "month", "path")
+assert my_asset.get_batch_parameters_keys(
+    partitioner=my_batch_definition.partitioner
+) == ("year", "month", "path")
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request">
