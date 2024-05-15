@@ -22,14 +22,13 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
 from great_expectations.types import DictDot
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import convert_to_json_serializable, filter_properties_dict
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001

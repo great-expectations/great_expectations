@@ -9,7 +9,6 @@ from great_expectations.core import (
     ExpectationSuite,  # noqa: TCH001
 )
 from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
@@ -20,6 +19,7 @@ from great_expectations.experimental.rule_based_profiler.parameter_container imp
     ParameterNode,  # noqa: TCH001
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues

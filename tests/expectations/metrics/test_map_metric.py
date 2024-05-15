@@ -17,7 +17,6 @@ from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
@@ -37,6 +36,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     MapMetricProvider,
 )
+from great_expectations.util import convert_to_json_serializable
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 

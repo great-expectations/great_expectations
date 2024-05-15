@@ -11,9 +11,8 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
     get_batch_request_as_dict,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, safe_deep_copy
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.util import convert_to_json_serializable, deep_filter_properties_iterable
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

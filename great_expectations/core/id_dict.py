@@ -5,7 +5,7 @@ import json
 from typing import Any, Set, TypeVar, Union
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.util import convert_to_json_serializable
 
 T = TypeVar("T")
 

@@ -6,7 +6,6 @@ import jsonschema
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -15,6 +14,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+from great_expectations.util import convert_to_json_serializable
 
 
 class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
