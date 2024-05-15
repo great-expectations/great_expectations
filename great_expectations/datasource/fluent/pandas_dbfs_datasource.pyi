@@ -1,4 +1,3 @@
-import re
 import typing
 from logging import Logger
 from typing import Hashable, Iterable, Literal, Optional, Sequence, Union
@@ -49,7 +48,6 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -109,7 +107,6 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -199,7 +196,6 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -236,7 +232,6 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,

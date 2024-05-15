@@ -1,5 +1,4 @@
 import pathlib
-import re
 import typing
 from logging import Logger
 from typing import (
@@ -61,7 +60,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -120,7 +118,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -221,7 +218,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -256,7 +252,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
