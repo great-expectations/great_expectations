@@ -9,7 +9,6 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.partitioners import FileNamePartitionerPath
-from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import SparkS3Datasource
 from great_expectations.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
@@ -18,7 +17,6 @@ from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import
 from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
@@ -74,7 +72,6 @@ def spark_s3_datasource(s3_mock, s3_bucket: str) -> SparkS3Datasource:
 def csv_asset(spark_s3_datasource: SparkS3Datasource) -> PathDataAsset:
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -232,36 +229,6 @@ def test_get_batch_list_from_fully_specified_batch_request(
     request = asset.build_batch_request({"name": "alex"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 2
-
-
-@pytest.mark.spark
-def test_test_connection_failures(
-    spark_session,
-    s3_mock,
-    spark_s3_datasource: SparkS3Datasource,
-    bad_regex_config: tuple[re.Pattern, str],
-):
-    _, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(  # type: ignore[call-arg] # missing args
-        name="csv_asset",
-    )
-    csv_asset._datasource = spark_s3_datasource
-    spark_s3_datasource.assets = [
-        csv_asset,
-    ]
-    csv_asset._data_connector = S3DataConnector(
-        datasource_name=spark_s3_datasource.name,
-        data_asset_name=csv_asset.name,
-        s3_client=s3_mock,
-        bucket=spark_s3_datasource.bucket,
-        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
-    )
-    csv_asset._test_connection_error_message = test_connection_error_message
-
-    with pytest.raises(TestConnectionError) as e:
-        spark_s3_datasource.test_connection()
-
-    assert str(e.value) == str(test_connection_error_message)
 
 
 @pytest.mark.big
