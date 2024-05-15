@@ -182,7 +182,6 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,

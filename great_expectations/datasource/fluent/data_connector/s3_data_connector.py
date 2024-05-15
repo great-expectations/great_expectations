@@ -103,7 +103,6 @@ class S3DataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "S3DataConnector" instance
             data_asset_name: The name of the DataAsset using this "S3DataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             s3_client: S3 Client reference handle
             bucket: bucket for S3
             prefix: S3 prefix
