@@ -504,6 +504,7 @@ def type_schema(  # noqa: C901 - too complex
     Generate json schema for each Datasource & DataAsset with `--sync`.
     """
     import pandas
+
     from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
         BatchRequest,
