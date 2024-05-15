@@ -29,13 +29,18 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Install and manage GX 1.0',
-      link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
+      label: 'Set up a GX environment',
+      link: {type: 'doc', id: 'core/set_up_a_gx_environment/set_up_a_gx_environment'},
       items: [
         {
           type: 'doc',
-          id: 'core/installation_and_setup/install_gx',
-          label: 'Install GX 1.0'
+          id: 'core/set_up_a_gx_environment/install_python',
+          label: 'Install Python'
+        },
+        {
+          type: 'doc',
+          id: 'core/set_up_a_gx_environment/install_gx',
+          label: 'Install GX'
         },
         {
           type: 'doc',
@@ -44,7 +49,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Manage Data Contexts',
+          label: 'Create a Data Context',
           link: {type: 'doc', id: 'core/installation_and_setup/manage_data_contexts'},
           items: [
             {
