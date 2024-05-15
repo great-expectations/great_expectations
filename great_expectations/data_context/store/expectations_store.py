@@ -326,7 +326,7 @@ class ExpectationsStore(Store):
         data = response_json["data"]
         if not isinstance(data, list):
             raise TypeError(
-                "GX Cloud did not return a collection of Datasources when expected"
+                "GX Cloud did not return a list of Expectation Suites when expected"
             )
 
         return [ExpectationsStore._convert_raw_json_to_object_dict(d) for d in data]
