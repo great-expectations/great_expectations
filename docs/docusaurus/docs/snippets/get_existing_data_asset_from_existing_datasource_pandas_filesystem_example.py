@@ -31,6 +31,7 @@ my_asset = my_datasource.add_csv_asset(
     name="my_asset",
 )
 my_batch_definition = my_asset.add_batch_definition_monthly(
+    name="my_batch_definition",
     regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     sort_ascending=True,
 )
