@@ -4,11 +4,7 @@ from typing import TYPE_CHECKING, Callable
 
 import pytest
 
-from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.store import DatasourceStore
-from great_expectations.data_context.types.base import (
-    datasourceConfigSchema,
-)
 from great_expectations.datasource.datasource_dict import (
     CacheableDatasourceDict,
     DatasourceDict,
@@ -29,7 +25,7 @@ class DatasourceStoreSpy(DatasourceStore):
         self.get_count = 0
         self.remove_key_count = 0
 
-        super().__init__(serializer=DictConfigSerializer(schema=datasourceConfigSchema))
+        super().__init__()
 
         datasource_configs = datasource_configs or []
         for config in datasource_configs:

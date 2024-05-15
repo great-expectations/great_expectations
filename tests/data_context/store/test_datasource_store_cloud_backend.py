@@ -6,6 +6,7 @@ import pytest
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import DatasourceStore
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.datasource.fluent.pandas_datasource import PandasDatasource
 from great_expectations.exceptions import StoreBackendError
 from tests.data_context.conftest import MockResponse
 
@@ -128,7 +129,7 @@ def test_datasource_store_delete_by_id(
     "http_verb,method,args",
     [
         ("get", "get", []),
-        ("put", "set", ["foobar"]),
+        ("put", "set", [PandasDatasource(name="my_datasource")]),
         pytest.param(
             "delete",
             "delete",

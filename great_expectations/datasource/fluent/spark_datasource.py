@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 
     from great_expectations.compatibility.pyspark import SparkSession
     from great_expectations.core.partitioners import ColumnPartitioner
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
 

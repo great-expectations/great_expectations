@@ -28,8 +28,8 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.core.batch import LegacyBatchDefinition
     from great_expectations.core.batch_definition import BatchDefinition
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import BatchParameters
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
 
 
 class RegexMissingRequiredGroupsError(ValueError):

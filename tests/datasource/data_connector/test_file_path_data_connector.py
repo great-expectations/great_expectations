@@ -1,6 +1,8 @@
 import pytest
 
-from great_expectations.datasource.data_connector.util import sanitize_prefix
+from great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector import (
+    sanitize_prefix,
+)
 
 # module level markers
 pytestmark = pytest.mark.unit

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import json
 import os
 import pathlib
@@ -8,7 +7,7 @@ import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
-from unittest.mock import Mock, patch  # noqa: TID251
+from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 import requests
@@ -21,12 +20,8 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    DatasourceConfig,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.fluent.interfaces import Datasource
 
 yaml = YAMLHandler()
@@ -414,30 +409,6 @@ def fluent_datasource_config() -> dict:
 
 
 @pytest.fixture
-def datasource_config_with_names_and_ids(
-    datasource_config_with_names: DatasourceConfig,
-    fake_datasource_id: str,
-    fake_data_connector_id: str,
-) -> DatasourceConfig:
-    """
-    An extension of the `datasource_config_with_names` fixture
-    but contains ids for BOTH the top-level Datasource as well
-    as the nested DataConnectors.
-    """
-    updated_config = copy.deepcopy(datasource_config_with_names)
-
-    # Update top-level Datasource
-    updated_config["id"] = fake_datasource_id
-
-    # Update nested DataConnectors
-    data_connector_name = tuple(datasource_config_with_names.data_connectors.keys())[0]
-    updated_config.data_connectors[data_connector_name]["name"] = data_connector_name
-    updated_config.data_connectors[data_connector_name]["id"] = fake_data_connector_id
-
-    return updated_config
-
-
-@pytest.fixture
 def mock_http_unavailable(mock_response_factory: Callable):
     """Mock all request http calls to return a 503 Unavailable response."""
 
@@ -500,43 +471,6 @@ def checkpoint_config() -> dict:
 
 
 @pytest.fixture
-def mocked_datasource_get_response(
-    mock_response_factory: Callable,
-    datasource_config_with_names_and_ids: DatasourceConfig,
-    fake_datasource_id: str,
-) -> Callable[[], MockResponse]:
-    def _mocked_get_response(*args, **kwargs):
-        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
-        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
-
-        return mock_response_factory(
-            {
-                "data": {
-                    "attributes": {
-                        "datasource_config": datasource_config_with_names_and_ids.to_json_dict(),
-                        "created_at": "2022-08-02T17:55:45.107550",
-                        "created_by_id": created_by_id,
-                        "deleted": False,
-                        "deleted_at": None,
-                        "desc": None,
-                        "name": datasource_config_with_names_and_ids.name,
-                        "organization_id": f"{organization_id}",
-                        "updated_at": "2022-08-02T17:55:45.107550",
-                    },
-                    "id": fake_datasource_id,
-                    "links": {
-                        "self": f"/organizations/{organization_id}/datasources/{fake_datasource_id}"
-                    },
-                    "type": "datasource",
-                },
-            },
-            200,
-        )
-
-    return _mocked_get_response
-
-
-@pytest.fixture
 def mocked_datasource_post_response(
     mock_response_factory: Callable,
     fake_datasource_id: str,
@@ -552,23 +486,3 @@ def mocked_datasource_post_response(
         )
 
     return _mocked_post_response
-
-
-@pytest.fixture
-def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_data_context_in_cloud_mode,
-    mocked_datasource_get_response,
-):
-    context = empty_data_context_in_cloud_mode
-    with patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
-    ), patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set"
-    ), patch(
-        "requests.Session.get",
-        autospec=True,
-        side_effect=mocked_datasource_get_response,
-    ):
-        fds = PandasDatasource(name="my_datasource")
-        context.add_datasource(datasource=fds)
-    return context
