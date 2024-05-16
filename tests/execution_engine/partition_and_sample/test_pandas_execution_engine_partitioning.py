@@ -8,15 +8,12 @@ import pandas.api.types as ptypes
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import IDDict
-from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.partition_and_sample.data_partitioner import (
     DatePart,
 )
@@ -333,59 +330,6 @@ def test_get_batch_with_partition_on_whole_table_s3(
 ):
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_with_partition_on_whole_table_s3)
     assert df.dataframe.shape == test_df_small.shape
-
-
-@pytest.mark.big
-def test_get_batch_with_partition_on_whole_table_s3_with_configured_asset_s3_data_connector(
-    test_s3_files, test_df_small
-):
-    bucket, _keys = test_s3_files
-    expected_df = test_df_small
-
-    execution_engine: ExecutionEngine = PandasExecutionEngine()
-
-    my_data_connector = ConfiguredAssetS3DataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        bucket=bucket,
-        execution_engine=execution_engine,
-        prefix="",
-        assets={"alpha": {}},
-        default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
-    )
-    batch_def = LegacyBatchDefinition(
-        datasource_name="FAKE_DATASOURCE_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        batch_identifiers=IDDict(index=1),
-        batch_spec_passthrough={
-            "reader_method": "read_csv",
-            "partitioner_method": "_partition_on_whole_table",
-        },
-    )
-    test_df = execution_engine.get_batch_data(
-        batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def)
-    )
-    assert test_df.dataframe.shape == expected_df.shape
-
-    # if key does not exist
-    batch_def_no_key = LegacyBatchDefinition(
-        datasource_name="FAKE_DATASOURCE_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        batch_identifiers=IDDict(index=9),
-        batch_spec_passthrough={
-            "reader_method": "read_csv",
-            "partitioner_method": "_partition_on_whole_table",
-        },
-    )
-    with pytest.raises(gx_exceptions.ExecutionEngineError):
-        execution_engine.get_batch_data(
-            batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def_no_key)
-        )
 
 
 @pytest.mark.big

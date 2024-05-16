@@ -9,15 +9,17 @@ from moto import mock_s3
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
-from great_expectations.core.partitioners import FileNamePartitionerYearly
+from great_expectations.core.partitioners import FileNamePartitionerPath, FileNamePartitionerYearly
 from great_expectations.core.util import S3Url
-from great_expectations.datasource.data_connector.util import (
-    sanitize_prefix,
-    sanitize_prefix_for_gcs_and_s3,
-)
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_connector import (
     S3DataConnector,
+)
+from great_expectations.datasource.fluent.data_connector.azure_blob_storage_data_connector import (
+    sanitize_prefix,
+)
+from great_expectations.datasource.fluent.data_connector.file_path_data_connector import (
+    sanitize_prefix_for_gcs_and_s3,
 )
 
 if TYPE_CHECKING:
@@ -57,7 +59,6 @@ def test_basic_instantiation():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"alpha-(.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -69,14 +70,14 @@ def test_basic_instantiation():
         "alpha-2.csv",
         "alpha-3.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 3
-    assert my_data_connector.get_matched_data_references()[:3] == [
+    batching_regex = re.compile(r"alpha-(.*)\.csv")
+    matching_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matching_data_references) == 3
+    assert matching_data_references[:3] == [
         "alpha-1.csv",
         "alpha-2.csv",
         "alpha-3.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
 
 @pytest.mark.big
@@ -101,7 +102,6 @@ def test_instantiation_batching_regex_does_not_match_paths():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"beta-(.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -113,14 +113,10 @@ def test_instantiation_batching_regex_does_not_match_paths():
         "alpha-2.csv",
         "alpha-3.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 0
-    assert my_data_connector.get_matched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_references()[:3] == [
-        "alpha-1.csv",
-        "alpha-2.csv",
-        "alpha-3.csv",
-    ]
-    assert my_data_connector.get_unmatched_data_reference_count() == 3
+    batching_regex = re.compile(r"beta-(.*)\.csv")
+    matching_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matching_data_references) == 0
+    assert matching_data_references[:3] == []
 
 
 @pytest.mark.big
@@ -148,13 +144,9 @@ def test_return_all_batch_definitions_unsorted():
     ]
     for key in keys:
         client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
-    batching_regex = re.compile(
-        r"(?P<name>.+)_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})_(?P<price>.*)\.csv"
-    )
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=batching_regex,
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -165,6 +157,9 @@ def test_return_all_batch_definitions_unsorted():
         # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list()
 
+    batching_regex = re.compile(
+        r"(?P<name>.+)_(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})_(?P<price>.*)\.csv"
+    )
     partitioner = FileNamePartitionerYearly(regex=batching_regex)
 
     # with empty options
@@ -395,24 +390,23 @@ def test_return_only_unique_batch_definitions():
         ),
     ]
 
-    batching_regex = re.compile(r"(?P<filename>.+).*\.csv")
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=batching_regex,
         s3_client=client,
         bucket=bucket,
         prefix="B",
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
 
+    batching_regex = re.compile(r"(?P<filename>.+).*\.csv")
     unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_s3_data_asset",
                 options={},
-                # batching_regex=batching_regex,
+                partitioner=FileNamePartitionerPath(regex=batching_regex),
             )
         )
     )
@@ -440,11 +434,9 @@ def test_data_reference_count_methods():
     for key in keys:
         client.put_object(Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key)
 
-    batching_regex = re.compile(r"(?P<name>.+).*\.csv")
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=batching_regex,
         s3_client=client,
         bucket=bucket,
         prefix="A",
@@ -456,14 +448,15 @@ def test_data_reference_count_methods():
         "A/file_2.csv",
         "A/file_3.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 3
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<name>.+).*\.csv")
+    matching_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matching_data_references) == 3
+    assert matching_data_references[:3] == [
         "A/file_1.csv",
         "A/file_2.csv",
         "A/file_3.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
 
 @pytest.mark.big
@@ -489,7 +482,6 @@ def test_alpha():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_alpha",
@@ -501,22 +493,23 @@ def test_alpha():
         "test_dir_alpha/B.csv",
         "test_dir_alpha/C.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 4
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<part_1>.*)\.csv")
+    matching_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matching_data_references) == 4
+    assert matching_data_references[:3] == [
         "test_dir_alpha/A.csv",
         "test_dir_alpha/B.csv",
         "test_dir_alpha/C.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
-
-    my_batch_definition_list: List[LegacyBatchDefinition]
-    my_batch_definition: LegacyBatchDefinition
-
-    my_batch_request: BatchRequest
 
     # Try to fetch a batch from a nonexistent asset
-    my_batch_request = BatchRequest(datasource_name="BASE", data_asset_name="A", options={})
+    my_batch_request = BatchRequest(
+        datasource_name="BASE",
+        data_asset_name="A",
+        options={},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
+    )
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
     )
@@ -526,6 +519,7 @@ def test_alpha():
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
         options={"part_1": "B"},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
     )
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
@@ -568,7 +562,6 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -576,15 +569,15 @@ def test_foxtrot():
     )
     assert my_data_connector.get_data_reference_count() == 0
     assert my_data_connector.get_data_references()[:3] == []
-    assert my_data_connector.get_matched_data_reference_count() == 0
-    assert my_data_connector.get_matched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
+
+    batching_regex = re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv")
+    matching_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matching_data_references) == 0
+    assert matching_data_references[:3] == []
 
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/A",
@@ -596,19 +589,19 @@ def test_foxtrot():
         "test_dir_foxtrot/A/A-2.csv",
         "test_dir_foxtrot/A/A-3.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 3
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 3
+    assert matched_data_references[:3] == [
         "test_dir_foxtrot/A/A-1.csv",
         "test_dir_foxtrot/A/A-2.csv",
         "test_dir_foxtrot/A/A-3.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.txt"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/B",
@@ -620,19 +613,19 @@ def test_foxtrot():
         "test_dir_foxtrot/B/B-2.txt",
         "test_dir_foxtrot/B/B-3.txt",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 3
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.txt")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 3
+    assert matched_data_references[:3] == [
         "test_dir_foxtrot/B/B-1.txt",
         "test_dir_foxtrot/B/B-2.txt",
         "test_dir_foxtrot/B/B-3.txt",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_s3_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/C",
@@ -644,14 +637,15 @@ def test_foxtrot():
         "test_dir_foxtrot/C/C-2018.csv",
         "test_dir_foxtrot/C/C-2019.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 3
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 3
+    assert matched_data_references[:3] == [
         "test_dir_foxtrot/C/C-2017.csv",
         "test_dir_foxtrot/C/C-2018.csv",
         "test_dir_foxtrot/C/C-2019.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_batch_request = BatchRequest(
         datasource_name="my_file_path_datasource",

@@ -3,6 +3,8 @@ from __future__ import annotations
 import copy
 import logging
 import re
+import sre_constants
+import sre_parse
 from abc import abstractmethod
 from collections import defaultdict
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
@@ -11,16 +13,13 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector.batch_filter import (
-    BatchFilter,
-    build_batch_filter,
-)
-from great_expectations.datasource.data_connector.util import (
-    map_batch_definition_to_data_reference_string_using_regex,
-)
-from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
+from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME, MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_connector import (
     DataConnector,
+)
+from great_expectations.datasource.fluent.data_connector.batch_filter import (
+    BatchFilter,
+    build_batch_filter,
 )
 from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
@@ -48,7 +47,6 @@ class FilePathDataConnector(DataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
     """
 
     FILE_PATH_BATCH_SPEC_KEY = "path"
@@ -57,7 +55,6 @@ class FilePathDataConnector(DataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         file_path_template_map_fn: Optional[Callable] = None,
         whole_directory_path_override: PathStr | None = None,
@@ -68,11 +65,6 @@ class FilePathDataConnector(DataConnector):
         )
 
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
-        self._batching_regex: re.Pattern = self._preprocess_batching_regex(regex=batching_regex)
-        self._regex_parser: RegExParser = RegExParser(
-            regex_pattern=self._batching_regex,
-            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
-        )
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
@@ -144,7 +136,10 @@ class FilePathDataConnector(DataConnector):
     # Interface Method
     @override
     def get_data_reference_count(self) -> int:
-        data_references = self._get_data_references_cache(batching_regex=self._batching_regex)
+        # todo: in the world of BatchDefinition, this method must accept a BatchRequest.
+        #       In the meantime, we fall back to a regex that matches everything.
+        regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
+        data_references = self._get_data_references_cache(batching_regex=regex)
         return len(data_references)
 
     # Interface Method
@@ -157,6 +152,8 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are matched by configuration.
         """
+        if regex:
+            regex = self._preprocess_batching_regex(regex)
         return self._get_data_references(matched=True, regex=regex)
 
     # Interface Method
@@ -205,21 +202,24 @@ class FilePathDataConnector(DataConnector):
         Returns:
             A list of batch definitions from the data connector based on the batch request.
         """
+        # this class is overloaded with two separate implementations:
         if self._whole_directory_path_override:
-            # if the override is present, we don't build BatchDefinitions based on a regex,
-            # we just make a single BatchDefinition to capture the entire directory
-            return self._get_whole_directory_batch_definition_list(
-                batch_request=batch_request, data_directory=self._whole_directory_path_override
-            )
+            return self._get_directory_batch_definition_list(batch_request=batch_request)
+        else:
+            return self._get_file_batch_definition_list(batch_request=batch_request)
 
+    def _get_file_batch_definition_list(
+        self, batch_request: BatchRequest
+    ) -> list[LegacyBatchDefinition]:
         # Use a combination of a list and set to preserve iteration order
         batch_definition_list: list[LegacyBatchDefinition] = list()
         batch_definition_set = set()
-        # if the batch request hasn't specified a batching_regex, fallback to a default
         if batch_request.partitioner:
-            batching_regex = batch_request.partitioner.regex
+            batching_regex = self._preprocess_batching_regex(batch_request.partitioner.regex)
         else:
-            batching_regex = self._batching_regex
+            # all batch requests coming from the V1 API should have a regex; to support legacy code
+            # we fall back to the MATCH_ALL_PATTERN if it's missing.
+            batching_regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
         for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
             if (
                 self._batch_definition_matches_batch_request(
@@ -232,9 +232,10 @@ class FilePathDataConnector(DataConnector):
 
         return batch_definition_list
 
-    def _get_whole_directory_batch_definition_list(
-        self, batch_request: BatchRequest, data_directory: PathStr
+    def _get_directory_batch_definition_list(
+        self, batch_request: BatchRequest
     ) -> list[LegacyBatchDefinition]:
+        data_directory = self._whole_directory_path_override
         batch_definition = LegacyBatchDefinition(
             datasource_name=self._datasource_name,
             data_connector_name=_DATA_CONNECTOR_NAME,
@@ -251,9 +252,8 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """  # noqa: E501
-
         if not regex:
-            regex = self._batching_regex
+            regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
 
         def _matching_criterion(
             batch_definition_list: Union[List[LegacyBatchDefinition], None],
@@ -264,7 +264,6 @@ class FilePathDataConnector(DataConnector):
 
         data_reference_mapped_element: Tuple[str, Union[List[LegacyBatchDefinition], None]]
         data_references = self._get_data_references_cache(batching_regex=regex)
-        # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
                 filter(
@@ -294,10 +293,19 @@ class FilePathDataConnector(DataConnector):
         Returns:
             dict -- dictionary of "BatchSpec" properties
         """  # noqa: E501
-        # todo: remove fallback self._batching_regex
-        batching_regex = batch_definition.batching_regex or self._batching_regex
-        if not batching_regex:
+        # this class is overloaded with two separate implementations:
+        if self._whole_directory_path_override:
+            return self._get_batch_spec_params_directory(batch_definition=batch_definition)
+        else:
+            return self._get_batch_spec_params_file(batch_definition=batch_definition)
+
+    def _get_batch_spec_params_file(self, batch_definition: LegacyBatchDefinition) -> dict:
+        """File specific implementation of batch spec parameters"""
+        if not batch_definition.batching_regex:
             raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
+
+        batching_regex = batch_definition.batching_regex
+
         regex_parser = RegExParser(
             regex_pattern=batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
@@ -311,11 +319,17 @@ class FilePathDataConnector(DataConnector):
         if not path:
             raise ValueError(  # noqa: TRY003
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
-"""  # noqa: E501
+        batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
+        """  # noqa: E501
             )
 
         path = self._get_full_file_path(path=path)
+
+        return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
+
+    def _get_batch_spec_params_directory(self, batch_definition: LegacyBatchDefinition) -> dict:
+        """Directory specific implementation of batch spec parameters"""
+        path = self._get_full_file_path(path=str(self._whole_directory_path_override))
 
         return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
@@ -337,7 +351,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self, batching_regex: re.Pattern
     ) -> Dict[str, List[LegacyBatchDefinition] | None]:
         """Access a map where keys are data references and values are LegacyBatchDefinitions."""
-        batching_regex = self._preprocess_batching_regex(regex=batching_regex)
+
         batch_definitions = self._data_references_cache[batching_regex]
         if batch_definitions:
             return batch_definitions
@@ -430,3 +444,141 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     @abstractmethod
     def _get_full_file_path(self, path: str) -> str:
         pass
+
+
+def map_batch_definition_to_data_reference_string_using_regex(
+    batch_definition: LegacyBatchDefinition,
+    regex_pattern: re.Pattern,
+    group_names: List[str],
+) -> str:
+    if not isinstance(batch_definition, LegacyBatchDefinition):
+        raise TypeError("batch_definition is not of an instance of type BatchDefinition")  # noqa: TRY003
+
+    data_asset_name: str = batch_definition.data_asset_name
+    batch_identifiers: IDDict = batch_definition.batch_identifiers
+    data_reference: str = convert_batch_identifiers_to_data_reference_string_using_regex(
+        batch_identifiers=batch_identifiers,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
+        data_asset_name=data_asset_name,
+    )
+    return data_reference
+
+
+def convert_batch_identifiers_to_data_reference_string_using_regex(
+    batch_identifiers: IDDict,
+    regex_pattern: re.Pattern,
+    group_names: List[str],
+    data_asset_name: Optional[str] = None,
+) -> str:
+    if not isinstance(batch_identifiers, IDDict):
+        raise TypeError("batch_identifiers is not " "an instance of type IDDict")  # noqa: TRY003
+
+    template_arguments: dict = copy.deepcopy(batch_identifiers)
+    if data_asset_name is not None:
+        template_arguments["data_asset_name"] = data_asset_name
+
+    filepath_template: str = _invert_regex_to_data_reference_template(
+        regex_pattern=regex_pattern,
+        group_names=group_names,
+    )
+    converted_string: str = filepath_template.format(**template_arguments)
+
+    return converted_string
+
+
+def _invert_regex_to_data_reference_template(  # noqa: C901 - too complex
+    regex_pattern: re.Pattern | str,
+    group_names: List[str],
+) -> str:
+    r"""Create a string template based on a regex and corresponding list of group names.
+
+    For example:
+
+        filepath_template = _invert_regex_to_data_reference_template(
+            regex_pattern=r"^(.+)_(\d+)_(\d+)\.csv$",
+            group_names=["name", "timestamp", "price"],
+        )
+        filepath_template
+        >> "{name}_{timestamp}_{price}.csv"
+
+    Such templates are useful because they can be populated using string substitution:
+
+        filepath_template.format(**{
+            "name": "user_logs",
+            "timestamp": "20200101",
+            "price": "250",
+        })
+        >> "user_logs_20200101_250.csv"
+
+
+    NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
+    """  # noqa: E501
+    data_reference_template: str = ""
+    group_name_index: int = 0
+
+    num_groups = len(group_names)
+
+    if isinstance(regex_pattern, re.Pattern):
+        regex_pattern = regex_pattern.pattern
+
+    # print("-"*80)
+    parsed_sre = sre_parse.parse(str(regex_pattern))
+    for parsed_sre_tuple, char in zip(parsed_sre, list(str(regex_pattern))):  # type: ignore[call-overload]
+        token, value = parsed_sre_tuple
+        if token == sre_constants.LITERAL:
+            # Transcribe the character directly into the template
+            data_reference_template += chr(value)
+        elif token == sre_constants.SUBPATTERN:
+            if not (group_name_index < num_groups):
+                break
+            # Replace the captured group with "{next_group_name}" in the template
+            data_reference_template += f"{{{group_names[group_name_index]}}}"
+            group_name_index += 1
+        elif token in [
+            sre_constants.MAX_REPEAT,
+            sre_constants.IN,
+            sre_constants.BRANCH,
+            sre_constants.ANY,
+        ]:
+            if group_names:
+                # Replace the uncaptured group a wildcard in the template
+                data_reference_template += "*"
+            else:
+                # Don't assume that a `.` in a filename should be a star glob
+                data_reference_template += char
+        elif token in [
+            sre_constants.AT,
+            sre_constants.ASSERT_NOT,
+            sre_constants.ASSERT,
+        ]:
+            pass
+        else:
+            raise ValueError(f"Unrecognized regex token {token} in regex pattern {regex_pattern}.")  # noqa: TRY003
+
+    # Collapse adjacent wildcards into a single wildcard
+    data_reference_template: str = re.sub("\\*+", "*", data_reference_template)  # type: ignore[no-redef]
+
+    return data_reference_template
+
+
+def sanitize_prefix_for_gcs_and_s3(text: str) -> str:
+    """
+    Takes in a given user-prefix and cleans it to work with file-system traversal methods
+    (i.e. add '/' to the end of a string meant to represent a directory)
+
+    Customized for S3 paths, ignoring the path separator used by the host OS
+    """
+    text = text.strip()
+    if not text:
+        return text
+
+    path_parts = text.split("/")
+    if not path_parts:  # Empty prefix
+        return text
+
+    if "." in path_parts[-1]:  # File, not folder
+        return text
+
+    # Folder, should have trailing /
+    return f"{text.rstrip('/')}/"

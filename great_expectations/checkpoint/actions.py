@@ -37,7 +37,6 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pypd import pypd
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -53,6 +52,7 @@ from great_expectations.render.renderer import (
     SlackRenderer,
 )
 from great_expectations.render.renderer.renderer import Renderer
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import CheckpointResult

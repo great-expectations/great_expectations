@@ -1,4 +1,3 @@
-import re
 from logging import Logger
 from typing import Any, ClassVar, Literal, Optional, Type
 
@@ -34,7 +33,6 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,

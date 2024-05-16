@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
-from great_expectations.compatibility import pydantic
+from great_expectations.compatibility import azure, pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector.util import (
-    list_azure_keys,
-    sanitize_prefix,
-)
 from great_expectations.datasource.fluent.data_connector import (
     FilePathDataConnector,
 )
@@ -36,7 +33,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
         azure_client: Reference to instantiated Microsoft Azure Blob Storage client handle
         account_name (str): account name for Microsoft Azure Blob Storage
         container (str): container name for Microsoft Azure Blob Storage
@@ -58,7 +54,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
@@ -82,9 +77,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=re.compile(
-                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
-            ),
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -93,7 +85,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
@@ -107,7 +98,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "AzureBlobStorageDataConnector" instance
             data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             azure_client: Reference to instantiated Microsoft Azure Blob Storage client handle
             account_name: account name for Microsoft Azure Blob Storage
             container: container name for Microsoft Azure Blob Storage
@@ -122,7 +112,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         return AzureBlobStorageDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             azure_client=azure_client,
             account_name=account_name,
             container=container,
@@ -136,7 +125,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
     def build_test_connection_error_message(  # noqa: PLR0913
         cls,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         account_name: str,
         container: str,
         name_starts_with: str = "",
@@ -147,7 +135,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
 
         Args:
             data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             account_name: account name for Microsoft Azure Blob Storage
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage prefix
@@ -157,11 +144,10 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """  # noqa: E501
-        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
+        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" and recursive file discovery set to "{recursive_file_discovery}" found using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex.pattern,
                 "account_name": account_name,
                 "container": container,
                 "name_starts_with": name_starts_with,
@@ -216,3 +202,66 @@ requires "file_path_template_map_fn: Callable" to be set.
         }
 
         return self._file_path_template_map_fn(**template_arguments)
+
+    @override
+    def _preprocess_batching_regex(self, regex: re.Pattern) -> re.Pattern:
+        regex = re.compile(f"{re.escape(self._sanitized_prefix)}{regex.pattern}")
+        return super()._preprocess_batching_regex(regex=regex)
+
+
+def sanitize_prefix(text: str) -> str:
+    """
+    Takes in a given user-prefix and cleans it to work with file-system traversal methods
+    (i.e. add '/' to the end of a string meant to represent a directory)
+    """
+    _, ext = os.path.splitext(text)  # noqa: PTH122
+    if ext:
+        # Provided prefix is a filename so no adjustment is necessary
+        return text
+
+    # Provided prefix is a directory (so we want to ensure we append it with '/')
+    return os.path.join(text, "")  # noqa: PTH118
+
+
+def list_azure_keys(
+    azure_client: azure.BlobServiceClient,
+    query_options: dict,
+    recursive: bool = False,
+) -> List[str]:
+    """
+    Utilizes the Azure Blob Storage connection object to retrieve blob names based on user-provided criteria.
+
+    For InferredAssetAzureDataConnector, we take container and name_starts_with and search for files using RegEx at and below the level
+    specified by those parameters. However, for ConfiguredAssetAzureDataConnector, we take container and name_starts_with and
+    search for files using RegEx only at the level specified by that bucket and prefix.
+
+    This restriction for the ConfiguredAssetAzureDataConnector is needed, because paths on Azure are comprised not only the leaf file name
+    but the full path that includes both the prefix and the file name.  Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible, due to the path ambiguity.
+
+    Args:
+        azure_client (BlobServiceClient): Azure connnection object responsible for accessing container
+        query_options (dict): Azure query attributes ("container", "name_starts_with", "delimiter")
+        recursive (bool): True for InferredAssetAzureDataConnector and False for ConfiguredAssetAzureDataConnector (see above)
+
+    Returns:
+        List of keys representing Azure file paths (as filtered by the query_options dict)
+    """  # noqa: E501
+    container: str = query_options["container"]
+    container_client: azure.ContainerClient = azure_client.get_container_client(container=container)
+
+    path_list: List[str] = []
+
+    def _walk_blob_hierarchy(name_starts_with: str) -> None:
+        for item in container_client.walk_blobs(name_starts_with=name_starts_with):
+            if isinstance(item, azure.BlobPrefix):
+                if recursive:
+                    _walk_blob_hierarchy(name_starts_with=item.name)
+
+            else:
+                path_list.append(item.name)
+
+    name_starts_with: str = query_options["name_starts_with"]
+    _walk_blob_hierarchy(name_starts_with)
+
+    return path_list
