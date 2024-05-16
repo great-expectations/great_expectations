@@ -8,6 +8,7 @@ import uuid
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -512,6 +513,32 @@ def test_data_connectors_are_built_on_config_load(
 
     print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
     assert dc_datasources
+
+
+@pytest.fixture
+def valid_file_path(csv_path: pathlib.Path) -> pathlib.Path:
+    return csv_path / "yellow_tripdata_sample_2018-03.csv"
+
+
+@pytest.mark.cloud
+def test_run_checkpoint_minimizes_suite_request_count(
+    seeded_cloud_context: CloudDataContext,
+    cloud_api_fake_db: FakeDBTypedDict,
+    cloud_api_fake: RequestsMock,
+    mocker: MockerFixture,
+    valid_file_path,
+):
+    validator = seeded_cloud_context.sources.pandas_default.read_csv(valid_file_path)
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.save_expectation_suite()
+    checkpoint = seeded_cloud_context.add_or_update_checkpoint(
+        name="my_quickstart_chekpoint",
+        validator=validator,
+    )
+
+    with patch("tests.datasource.fluent.get_expectation_suites_cb") as mocked_function:
+        checkpoint.run()
+        assert mocked_function.assert_called_once()
 
 
 if __name__ == "__main__":
