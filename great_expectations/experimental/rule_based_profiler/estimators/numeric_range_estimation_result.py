@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.types import DictDot
-from great_expectations.util import convert_to_json_serializable
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     import numpy as np

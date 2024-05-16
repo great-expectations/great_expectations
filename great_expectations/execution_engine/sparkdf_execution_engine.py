@@ -65,7 +65,7 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_spark,
 )
-from great_expectations.util import convert_to_json_serializable
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001

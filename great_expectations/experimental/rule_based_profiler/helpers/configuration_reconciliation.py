@@ -11,7 +11,7 @@ from great_expectations.experimental.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations.types import SerializableDictDot
-from great_expectations.util import convert_to_json_serializable
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.experimental.rule_based_profiler.parameter_container import (

@@ -8,7 +8,7 @@ from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.experimental.metric_repository.metrics import MetricTypes
-from great_expectations.util import convert_to_json_serializable
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 
 @public_api

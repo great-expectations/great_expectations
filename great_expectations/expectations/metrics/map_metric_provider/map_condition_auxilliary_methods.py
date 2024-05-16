@@ -33,7 +33,7 @@ from great_expectations.expectations.metrics.util import (
     sql_statement_with_post_compile_to_string,
 )
 from great_expectations.util import (
-    convert_to_json_serializable,
+    convert_to_json_serializable,  # noqa: TID251
     generate_temporary_table_name,
     get_sqlalchemy_selectable,
 )

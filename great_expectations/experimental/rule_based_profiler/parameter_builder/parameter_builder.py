@@ -56,7 +56,7 @@ from great_expectations.experimental.rule_based_profiler.parameter_container imp
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import convert_to_json_serializable, is_parseable_date
+from great_expectations.util import convert_to_json_serializable, is_parseable_date  # noqa: TID251
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
