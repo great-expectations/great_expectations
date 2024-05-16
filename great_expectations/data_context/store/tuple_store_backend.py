@@ -326,6 +326,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return contents
 
+    @override
     def _get_all(self) -> list[Any]:
         keys = [
             key for key in self.list_keys() if key != StoreBackend.STORE_BACKEND_ID_KEY
