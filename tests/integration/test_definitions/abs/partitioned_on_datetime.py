@@ -30,7 +30,7 @@ asset = datasource.add_csv_asset(
 
 batch_definition = asset.add_batch_definition_monthly(
     "abs batch definition",
-    regex=re.compile(NAME_STARTS_WITH + r"yellow_tripdata_sample_(?P<year>.*)-(?P<month>.*)\.csv"),
+    regex=re.compile(r"yellow_tripdata_sample_(?P<year>.*)-(?P<month>.*)\.csv"),
 )
 
 # first batch request: not passing any parameters

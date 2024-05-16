@@ -230,21 +230,20 @@ datasource = context.data_sources.add_or_update_pandas_s3(
 asset = datasource.add_csv_asset(
     name="csv_taxi_s3_asset",
 )
-batch_definition = asset.add_batch_definition_monthly(
-    name="Monthly Taxi Data",
+batch_definition = asset.add_batch_definition_yearly(
+    name="Yearly Taxi Data",
     regex=r".*_(?P<year>\d{4})\.csv",
 )
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_batch_request">
-# NOTE: It's no longer necessary to build a BatchRequest; instead, use BatchDefinition.get_batch()
-#       to directly get a batch.
 batch_parameters = {"year": "2021"}
 request = batch_definition.build_batch_request(batch_parameters=batch_parameters)
 # </snippet>
 
 
 # <snippet name="docs/docusaurus/docs/snippets/aws_cloud_storage_pandas.py get_batch_list">
+batch_parameters = {"year": "2021"}
 batch = batch_definition.get_batch(batch_parameters=batch_parameters)
 # </snippet>
 
