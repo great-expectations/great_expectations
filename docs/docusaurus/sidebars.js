@@ -622,7 +622,7 @@ module.exports = {
             {
               "type": "link",
               "label": "Add a Validation and an Expectation Suite to a Checkpoint",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-validation-and-an-expectation-suite-to-a-checkpoint"
+              "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-validation-to-a-checkpoint"
             },
             {
               type: 'link',
