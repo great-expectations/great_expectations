@@ -24,7 +24,6 @@ datasource = context.data_sources.add_pandas_abs(
 data_asset_name = "data/taxi_yellow_tripdata_samples"
 asset = datasource.add_csv_asset(
     name=data_asset_name,
-    batching_regex="(.*)\\.csv",
     abs_container=CONTAINER,
     abs_name_starts_with=NAME_STARTS_WITH,
 )

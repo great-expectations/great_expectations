@@ -1,4 +1,3 @@
-import re
 
 import great_expectations as gx
 
@@ -22,7 +21,7 @@ data_asset = datasource.add_csv_asset(
 
 batch_definition = data_asset.add_batch_definition_monthly(
     "monthly",
-    regex=re.compile(gcs_prefix + r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"),
+    regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
 )
 
 # not passing in batch parameters
