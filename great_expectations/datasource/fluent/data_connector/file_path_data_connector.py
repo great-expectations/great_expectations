@@ -213,7 +213,7 @@ class FilePathDataConnector(DataConnector):
         # if the batch request hasn't specified a batching_regex, fallback to a default
         if batch_request.partitioner:
             # --- HEY JOSH! ---: Is this where we want to preprocess?
-            batching_regex = batch_request.partitioner.regex
+            batching_regex = self._preprocess_batching_regex(batch_request.partitioner.regex)
         else:
             # todo: remove
             batching_regex = MATCH_ALL_PATTERN
@@ -302,7 +302,7 @@ class FilePathDataConnector(DataConnector):
             raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
 
         # --- HEY JOSH! ---: Is this where we want to preprocess?
-        batching_regex = batch_definition.batching_regex
+        batching_regex = self._preprocess_batching_regex(batch_definition.batching_regex)
 
         regex_parser = RegExParser(
             regex_pattern=batching_regex,
@@ -333,7 +333,6 @@ class FilePathDataConnector(DataConnector):
 
     def _preprocess_batching_regex(self, regex: re.Pattern) -> re.Pattern:
         """Add the FILE_PATH_BATCH_SPEC_KEY group to regex if not already present."""
-        # --- HEY JOSH! ---: Is this where we want to preprocess?
         regex_parser = RegExParser(
             regex_pattern=regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
