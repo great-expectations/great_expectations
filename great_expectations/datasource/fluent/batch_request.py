@@ -24,7 +24,7 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.batch_definition import PartitionerT
 
 # moving this import into TYPE_CHECKING requires forward refs to be updated.
-from great_expectations.datasource.data_connector.batch_filter import (
+from great_expectations.datasource.fluent.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,
 )

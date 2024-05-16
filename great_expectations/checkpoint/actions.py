@@ -37,7 +37,6 @@ from great_expectations.compatibility.pydantic import (
 )
 from great_expectations.compatibility.pypd import pypd
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -53,6 +52,7 @@ from great_expectations.render.renderer import (
     SlackRenderer,
 )
 from great_expectations.render.renderer.renderer import Renderer
+from great_expectations.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import CheckpointResult
@@ -271,9 +271,11 @@ class SlackNotificationAction(DataDocsAction):
             checkpoint_text_blocks.extend(validation_text_blocks)
 
         payload = self.renderer.concatenate_text_blocks(
+            action_name=self.name,
             text_blocks=checkpoint_text_blocks,
-            name=checkpoint_name,
             success=success,
+            checkpoint_name=checkpoint_name,
+            run_id=checkpoint_result.run_id,
         )
 
         return self._send_slack_notification(payload=payload)
@@ -305,7 +307,6 @@ class SlackNotificationAction(DataDocsAction):
             validation_result=result,
             data_docs_pages=data_docs_pages,
             notify_with=self.notify_with,
-            show_failed_expectations=self.show_failed_expectations,
             validation_result_urls=validation_result_urls,
         )
 

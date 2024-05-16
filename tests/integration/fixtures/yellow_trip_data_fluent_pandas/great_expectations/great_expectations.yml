@@ -1,5 +1,4 @@
 config_version: 3.0
-datasources: {}
 config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: plugins/
 stores:

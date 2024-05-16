@@ -99,50 +99,6 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     assert context_config_commented_map == expected_config_commented_map
 
 
-@pytest.mark.filesystem
-def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypatch):
-    monkeypatch.setenv("FOO", "BAR")
-    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", r"ive_been_\$replaced")
-    value_from_environment = "from_environment"
-    os.environ["replace_me"] = value_from_environment
-
-    value_from_runtime_override = "runtime_var"
-    runtime_environment = {"replace_me": value_from_runtime_override}
-
-    project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
-    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
-    create_data_context_files(
-        context_path,
-        asset_config_path,
-        ge_config_fixture_filename="great_expectations_basic_with_variables.yml",
-        config_variables_fixture_filename="config_variables.yml",
-    )
-
-    data_context = get_context(
-        context_root_dir=context_path, runtime_environment=runtime_environment
-    )
-    config = data_context.get_config_with_variables_substituted()
-
-    try:
-        assert (
-            config.datasources["mydatasource"]["batch_kwargs_generators"]["mygenerator"][
-                "reader_options"
-            ]["test_variable_sub1"]
-            == value_from_runtime_override
-        )
-        assert (
-            config.datasources["mydatasource"]["batch_kwargs_generators"]["mygenerator"][
-                "reader_options"
-            ]["test_variable_sub2"]
-            == value_from_runtime_override
-        )
-    except Exception:  # noqa: TRY302
-        raise
-    finally:
-        del os.environ["replace_me"]
-
-
 @pytest.mark.unit
 def test_substitute_config_variable():
     config_substitutor = _ConfigurationSubstitutor()
@@ -222,31 +178,6 @@ def test_substitute_config_variable():
             config_variables_dict,
         )
         == "prefixval_of_ARG_4.val_of_arg_0/val_of_aRg_3:val_of_ARG_4/$dontsubval_of_arg_0:val_of_aRg_3.suffix"  # noqa: E501
-    )
-
-
-@pytest.mark.filesystem
-def test_substitute_env_var_in_config_variable_file(
-    monkeypatch, empty_data_context_with_config_variables
-):
-    monkeypatch.setenv("FOO", "correct_val_of_replace_me")
-    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", r"ive_been_\$replaced")
-    context = empty_data_context_with_config_variables
-    context_config = context.get_config_with_variables_substituted()
-    my_generator = context_config["datasources"]["mydatasource"]["batch_kwargs_generators"][
-        "mygenerator"
-    ]
-    reader_options = my_generator["reader_options"]
-
-    assert reader_options["test_variable_sub3"] == "correct_val_of_replace_me"
-    assert reader_options["test_variable_sub4"] == {"inner_env_sub": "correct_val_of_replace_me"}
-    assert reader_options["password"] == "dont$replaceme"
-
-    # Escaped variables (variables containing `$` that have been escaped)
-    assert reader_options["test_escaped_env_var_from_config"] == "prefixive_been_$replaced/suffix"
-    assert (
-        my_generator["test_variable_escaped"]
-        == "dont$replace$me$please$$$$thanksive_been_$replaced"
     )
 
 

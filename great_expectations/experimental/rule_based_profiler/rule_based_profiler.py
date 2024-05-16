@@ -16,7 +16,6 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.util import (
-    convert_to_json_serializable,
     determine_progress_bar_method_by_environment,
     nested_update,
 )
@@ -62,7 +61,7 @@ from great_expectations.experimental.rule_based_profiler.parameter_container imp
 )
 from great_expectations.experimental.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.experimental.rule_based_profiler.rule.rule_state import RuleState
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import convert_to_json_serializable, filter_properties_dict
 from great_expectations.validator.exception_info import ExceptionInfo
 
 if TYPE_CHECKING:

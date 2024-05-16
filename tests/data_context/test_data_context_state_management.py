@@ -5,7 +5,6 @@ from typing import Mapping
 import pytest
 
 from great_expectations import set_context
-from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
@@ -16,7 +15,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
     ProgressBarsConfig,
-    datasourceConfigSchema,
 )
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.exceptions.exceptions import StoreConfigurationError
@@ -25,7 +23,7 @@ from great_expectations.exceptions.exceptions import StoreConfigurationError
 class DatasourceStoreSpy(DatasourceStore):
     def __init__(self) -> None:
         self.save_count = 0
-        super().__init__(serializer=DictConfigSerializer(schema=datasourceConfigSchema))
+        super().__init__()
 
     def set(self, key, value, **kwargs):
         ret = super().set(key=key, value=value, **kwargs)

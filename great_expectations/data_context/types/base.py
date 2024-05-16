@@ -43,10 +43,8 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot
-from great_expectations.types.configurations import ClassConfigSchema
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.util import convert_to_json_serializable, deep_filter_properties_iterable
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -1043,212 +1041,6 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(AbstractConfig):
-    def __init__(  # noqa: C901, PLR0912, PLR0913
-        self,
-        name: Optional[
-            str
-        ] = None,  # Note: name is optional currently to avoid updating all documentation within
-        # the scope of this work.
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
-        module_name: str = "great_expectations.datasource",
-        execution_engine=None,
-        data_connectors=None,
-        data_asset_type=None,
-        batch_kwargs_generators=None,
-        connection_string=None,
-        credentials=None,
-        introspection=None,
-        tables=None,
-        boto3_options=None,
-        azure_options=None,
-        gcs_options=None,
-        credentials_info=None,
-        reader_method=None,
-        reader_options=None,
-        limit=None,
-        **kwargs,
-    ) -> None:
-        super().__init__(id=id, name=name)
-        # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
-        self._class_name = class_name
-        self._module_name = module_name
-        if execution_engine is not None:
-            self.execution_engine = execution_engine
-        if data_connectors is not None and isinstance(data_connectors, dict):
-            self.data_connectors = data_connectors
-
-        # NOTE - AJB - 20201202: This should use the datasource class build_configuration method as in DataContext.add_datasource()  # noqa: E501
-        if data_asset_type is None:
-            if class_name == "PandasDatasource":
-                data_asset_type = {
-                    "class_name": "PandasDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-            elif class_name == "SqlAlchemyDatasource":
-                data_asset_type = {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-        if data_asset_type is not None:
-            self.data_asset_type = data_asset_type
-        if batch_kwargs_generators is not None:
-            self.batch_kwargs_generators = batch_kwargs_generators
-        if connection_string is not None:
-            self.connection_string = connection_string
-        if credentials is not None:
-            self.credentials = credentials
-        if introspection is not None:
-            self.introspection = introspection
-        if tables is not None:
-            self.tables = tables
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
-        if azure_options is not None:
-            self.azure_options = azure_options
-        if gcs_options is not None:
-            self.gcs_options = gcs_options
-        if credentials_info is not None:
-            self.credentials_info = credentials_info
-        if reader_method is not None:
-            self.reader_method = reader_method
-        if reader_options is not None:
-            self.reader_options = reader_options
-        if limit is not None:
-            self.limit = limit
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-    @property
-    def class_name(self):
-        return self._class_name
-
-    @property
-    def module_name(self):
-        return self._module_name
-
-    @public_api
-    @override
-    def to_json_dict(self) -> Dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this DatasourceConfig.
-
-        Returns:
-            A JSON-serializable dict representation of this DatasourceConfig.
-        """
-        # # TODO: <Alex>2/4/2022</Alex>
-        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the  # noqa: E501
-        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,  # noqa: E501
-        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules  # noqa: E501
-        # make this refactoring infeasible at the present time.
-        dict_obj: dict = self.to_dict()
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
-        return serializeable_dict
-
-
-class DatasourceConfigSchema(AbstractConfigSchema):
-    class Meta:
-        unknown = INCLUDE
-
-    # Note: name is optional currently to avoid updating all documentation within
-    # the scope of this work.
-    name = fields.String(
-        required=False,
-        allow_none=True,
-    )
-    id = fields.String(
-        required=False,
-        allow_none=True,
-    )
-
-    class_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="Datasource",
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.datasource",
-    )
-    force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
-    persist = fields.Bool(required=False, allow_none=True)
-    spark_config = fields.Raw(required=False, allow_none=True)
-    execution_engine = fields.Nested(ExecutionEngineConfigSchema, required=False, allow_none=True)
-    data_connectors = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DataConnectorConfigSchema),
-        required=False,
-        allow_none=True,
-    )
-
-    data_asset_type = fields.Nested(ClassConfigSchema, required=False, allow_none=True)
-
-    # TODO: Update to generator-specific
-    # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))  # noqa: E501
-    batch_kwargs_generators = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
-    )
-    connection_string = fields.String(required=False, allow_none=True)
-    credentials = fields.Raw(required=False, allow_none=True)
-    introspection = fields.Dict(required=False, allow_none=True)
-    tables = fields.Dict(required=False, allow_none=True)
-    boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    azure_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    gcs_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    # BigQuery Service Account Credentials
-    # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
-    credentials_info = fields.Dict(required=False, allow_none=True)
-    reader_method = fields.String(required=False, allow_none=True)
-    reader_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    limit = fields.Integer(required=False, allow_none=True)
-
-    # noinspection PyUnusedLocal
-    @validates_schema
-    def validate_schema(self, data, **kwargs):
-        if "generators" in data:
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '  # noqa: E501
-                'GX that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'  # noqa: E501
-            )
-        # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.  # noqa: E501
-        if data["class_name"][0] == "$":
-            return
-
-        if (
-            "connection_string" in data
-            or "credentials" in data
-            or "introspection" in data
-            or "tables" in data
-        ) and not (
-            data["class_name"]  # noqa: E713 # membership check
-            in [
-                "SqlAlchemyDatasource",
-            ]
-        ):
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                f"""Your current configuration uses one or more keys in a data source that are required only by a
-sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
-                """  # noqa: E501
-            )
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_datasource_config(self, data, **kwargs):
-        # Add names to data connectors
-        for data_connector_name, data_connector_config in data.get("data_connectors", {}).items():
-            data_connector_config["name"] = data_connector_name
-        return DatasourceConfig(**data)
-
-
 class ProgressBarsConfig(DictDot):
     def __init__(
         self,
@@ -1302,12 +1094,6 @@ class DataContextConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
-    )
-    datasources = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DatasourceConfigSchema),
-        required=False,
-        allow_none=True,
     )
     fluent_datasources = fields.Dict(
         keys=fields.Str(),
@@ -1998,8 +1784,6 @@ class DataContextConfig(BaseYamlConfig):
 
     Args:
         config_version (Optional[float]): config version of this DataContext.
-        datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
-            DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
         fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
         expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
         validation_results_store_name (Optional[str]): name of ValidationResultsStore to be used by DataContext.
@@ -2022,12 +1806,6 @@ class DataContextConfig(BaseYamlConfig):
     def __init__(  # noqa: C901, PLR0913
         self,
         config_version: Optional[float] = None,
-        datasources: Optional[
-            Union[
-                Dict[str, DatasourceConfig],
-                Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
-            ]
-        ] = None,
         fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validation_results_store_name: Optional[str] = None,
@@ -2064,9 +1842,6 @@ class DataContextConfig(BaseYamlConfig):
                 checkpoint_store_name = store_backend_defaults.checkpoint_store_name
 
         self._config_version = config_version
-        if datasources is None:
-            datasources = {}
-        self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
         self.validation_results_store_name = validation_results_store_name
@@ -2236,7 +2011,6 @@ class CheckpointValidationDefinitionSchema(AbstractConfigSchema):
 
 
 dataContextConfigSchema = DataContextConfigSchema()
-datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 executionEngineConfigSchema = ExecutionEngineConfigSchema()
 assetConfigSchema = AssetConfigSchema()

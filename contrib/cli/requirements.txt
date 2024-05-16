@@ -3,6 +3,6 @@ cookiecutter==2.1.1  # Project templating
 mypy==1.10.0            # Type checker
 pydantic>=1.0        # Needed for mypy plugin
 pytest>=5.3.5        # Test framework
-ruff==0.4.2        # Linting / code style / formatting
+ruff==0.4.4        # Linting / code style / formatting
 twine==3.7.1         # Packaging
 wheel==0.38.1        # Packaging
