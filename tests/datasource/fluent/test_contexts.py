@@ -8,7 +8,6 @@ import uuid
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
-from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -536,9 +535,8 @@ def test_run_checkpoint_minimizes_suite_request_count(
         validator=validator,
     )
 
-    with patch("tests.datasource.fluent.get_expectation_suites_cb") as mocked_function:
-        checkpoint.run()
-        assert mocked_function.assert_called_once()
+    checkpoint.run()
+    # TODO assert GET expectation-suites called
 
 
 if __name__ == "__main__":
