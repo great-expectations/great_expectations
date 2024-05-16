@@ -243,12 +243,6 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [

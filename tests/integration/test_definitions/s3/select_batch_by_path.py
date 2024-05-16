@@ -15,7 +15,7 @@ data_asset = datasource.add_csv_asset(name=asset_name, s3_prefix=s3_prefix)
 
 batch_definition = data_asset.add_batch_definition_path(
     "path",
-    path=s3_prefix + "yellow_tripdata_sample_2019-03.csv",
+    path="yellow_tripdata_sample_2019-03.csv",
 )
 
 batch_request = batch_definition.build_batch_request()
