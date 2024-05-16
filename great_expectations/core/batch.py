@@ -24,7 +24,7 @@ from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import (
-    convert_to_json_serializable,
+    convert_to_json_serializable,  # noqa: TID251
     deep_filter_properties_iterable,
     load_class,
 )

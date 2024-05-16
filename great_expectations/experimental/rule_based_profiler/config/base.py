@@ -19,7 +19,7 @@ from great_expectations.experimental.rule_based_profiler.parameter_container imp
 )
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.util import (
-    convert_to_json_serializable,
+    convert_to_json_serializable,  # noqa: TID251
     deep_filter_properties_iterable,
     filter_properties_dict,
 )

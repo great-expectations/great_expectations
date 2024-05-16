@@ -32,8 +32,8 @@ from great_expectations.render import (
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import (
-    convert_to_json_serializable,
-    ensure_json_serializable,
+    convert_to_json_serializable,  # noqa: TID251
+    ensure_json_serializable,  # noqa: TID251
 )
 
 if TYPE_CHECKING:
