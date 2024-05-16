@@ -28,7 +28,7 @@ slug: /core/changelog
 * [DOCS] Gx 1.0 Introductory content initial reorganization (take 2) ([#9869](https://github.com/great-expectations/great_expectations/pull/9869))
 * [DOCS] Minor GX Cloud Docs Fixes ([#9892](https://github.com/great-expectations/great_expectations/pull/9892))
 * [DOCS] Revises the GX component overview for GX 1.0 ([#9896](https://github.com/great-expectations/great_expectations/pull/9896))
-* [DOCS] Change the texts of the "Was this Helpful?" widget ([#9905](https://github.com/great-expectations/great_expectations/pull/9905)) (thanks @deborahniesz)
+* [DOCS] Change the texts of the "Was this Helpful?" widget ([#9905](https://github.com/great-expectations/great_expectations/pull/9905))
 * [DOCS] Updates to About Great Expectations and Community Resources (OSS) ([#9912](https://github.com/great-expectations/great_expectations/pull/9912))
 * [DOCS] Update 0.18 changelog ([#9914](https://github.com/great-expectations/great_expectations/pull/9914))
 * [DOCS] Minor Edits to Connect GX Cloud to PostgreSQL (GX Cloud) ([#9927](https://github.com/great-expectations/great_expectations/pull/9927))
