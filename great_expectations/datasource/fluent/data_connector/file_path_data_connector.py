@@ -24,6 +24,7 @@ from great_expectations.datasource.fluent.data_connector.batch_filter import (
 from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
 )
+from great_expectations.exceptions import InvalidBatchRequestError
 
 if TYPE_CHECKING:
     from typing import DefaultDict
@@ -202,23 +203,21 @@ class FilePathDataConnector(DataConnector):
         Returns:
             A list of batch definitions from the data connector based on the batch request.
         """
+        # this class is overloaded with two separate implementations:
         if self._whole_directory_path_override:
-            # this class is overloaded with two separate implementations:
-            # # Directory data connector doesn't use a regex,
-            # we just make a single BatchDefinition to capture the entire directory
-            return self._get_whole_directory_batch_definition_list(
-                batch_request=batch_request, data_directory=self._whole_directory_path_override
-            )
+            return self._get_directory_batch_definition_list(batch_request=batch_request)
+        else:
+            return self._get_file_batch_definition_list(batch_request=batch_request)
 
+    def _get_file_batch_definition_list(
+        self, batch_request: BatchRequest
+    ) -> list[LegacyBatchDefinition]:
         # Use a combination of a list and set to preserve iteration order
         batch_definition_list: list[LegacyBatchDefinition] = list()
         batch_definition_set = set()
-        # if the batch request hasn't specified a batching_regex, fallback to a default
-        if batch_request.partitioner:
-            batching_regex = self._preprocess_batching_regex(batch_request.partitioner.regex)
-        else:
-            # todo: remove
-            batching_regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
+        if not batch_request.partitioner:
+            raise InvalidBatchRequestError(message="BatchRequest requires a Partitioner.")
+        batching_regex = self._preprocess_batching_regex(batch_request.partitioner.regex)
         for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
             if (
                 self._batch_definition_matches_batch_request(
@@ -231,9 +230,10 @@ class FilePathDataConnector(DataConnector):
 
         return batch_definition_list
 
-    def _get_whole_directory_batch_definition_list(
-        self, batch_request: BatchRequest, data_directory: PathStr
+    def _get_directory_batch_definition_list(
+        self, batch_request: BatchRequest
     ) -> list[LegacyBatchDefinition]:
+        data_directory = self._whole_directory_path_override
         batch_definition = LegacyBatchDefinition(
             datasource_name=self._datasource_name,
             data_connector_name=_DATA_CONNECTOR_NAME,
