@@ -24,7 +24,6 @@ from great_expectations.datasource.fluent.data_connector.batch_filter import (
 from great_expectations.datasource.fluent.data_connector.regex_parser import (
     RegExParser,
 )
-from great_expectations.exceptions import InvalidBatchRequestError
 
 if TYPE_CHECKING:
     from typing import DefaultDict
@@ -215,9 +214,12 @@ class FilePathDataConnector(DataConnector):
         # Use a combination of a list and set to preserve iteration order
         batch_definition_list: list[LegacyBatchDefinition] = list()
         batch_definition_set = set()
-        if not batch_request.partitioner:
-            raise InvalidBatchRequestError(message="BatchRequest requires a Partitioner.")
-        batching_regex = self._preprocess_batching_regex(batch_request.partitioner.regex)
+        if batch_request.partitioner:
+            batching_regex = self._preprocess_batching_regex(batch_request.partitioner.regex)
+        else:
+            # all batch requests coming from the V1 API should have a regex; to support legacy code
+            # we fall back to the MATCH_ALL_PATTERN if it's missing.
+            batching_regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
         for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
             if (
                 self._batch_definition_matches_batch_request(
