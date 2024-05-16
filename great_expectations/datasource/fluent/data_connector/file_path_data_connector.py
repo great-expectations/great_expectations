@@ -138,7 +138,8 @@ class FilePathDataConnector(DataConnector):
     def get_data_reference_count(self) -> int:
         # todo: in the world of BatchDefinition, this method must accept a BatchRequest.
         #       In the meantime, we fall back to a regex that matches everything.
-        data_references = self._get_data_references_cache(batching_regex=MATCH_ALL_PATTERN)
+        regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
+        data_references = self._get_data_references_cache(batching_regex=regex)
         return len(data_references)
 
     # Interface Method
@@ -151,6 +152,8 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are matched by configuration.
         """
+        if regex:
+            regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
         return self._get_data_references(matched=True, regex=regex)
 
     # Interface Method
@@ -212,11 +215,11 @@ class FilePathDataConnector(DataConnector):
         batch_definition_set = set()
         # if the batch request hasn't specified a batching_regex, fallback to a default
         if batch_request.partitioner:
-            # --- HEY JOSH! ---: Is this where we want to preprocess?
+            # --- HEY JOSH! ---: Is this where we want to preprocess? - yes, entrypoint
             batching_regex = self._preprocess_batching_regex(batch_request.partitioner.regex)
         else:
             # todo: remove
-            batching_regex = MATCH_ALL_PATTERN
+            batching_regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
         for batch_definition in self._get_batch_definitions(batching_regex=batching_regex):
             if (
                 self._batch_definition_matches_batch_request(
@@ -249,7 +252,7 @@ class FilePathDataConnector(DataConnector):
             list of data_references that are not matched by configuration.
         """  # noqa: E501
         if not regex:
-            regex = MATCH_ALL_PATTERN
+            regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
 
         def _matching_criterion(
             batch_definition_list: Union[List[LegacyBatchDefinition], None],
@@ -302,7 +305,8 @@ class FilePathDataConnector(DataConnector):
             raise RuntimeError("BatchDefinition must contain a batching_regex.")  # noqa: TRY003
 
         # --- HEY JOSH! ---: Is this where we want to preprocess?
-        batching_regex = self._preprocess_batching_regex(batch_definition.batching_regex)
+        # no - the LegacyBatchDefinition has a processed batching regex
+        batching_regex = batch_definition.batching_regex
 
         regex_parser = RegExParser(
             regex_pattern=batching_regex,
@@ -350,6 +354,7 @@ class FilePathDataConnector(DataConnector):
     ) -> Dict[str, List[LegacyBatchDefinition] | None]:
         """Access a map where keys are data references and values are LegacyBatchDefinitions."""
         # --- HEY JOSH! ---: Is this where we want to preprocess?
+        # no - callers of this need to perform preprocessing themselves
         batch_definitions = self._data_references_cache[batching_regex]
         if batch_definitions:
             return batch_definitions
@@ -399,7 +404,7 @@ class FilePathDataConnector(DataConnector):
     def _build_batch_identifiers(
         self, data_reference: str, batching_regex: re.Pattern
     ) -> Optional[IDDict]:
-        # --- HEY JOSH ---: Is this where we want to preprocess?
+        # --- HEY JOSH ---: Is this where we want to preprocess? no
         regex_parser = RegExParser(
             regex_pattern=batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
