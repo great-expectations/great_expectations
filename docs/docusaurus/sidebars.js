@@ -48,69 +48,10 @@ module.exports = {
           label: 'Install additional dependencies'
         },
         {
-          type: 'category',
-          label: 'Create a Data Context',
-          link: {type: 'doc', id: 'core/installation_and_setup/manage_data_contexts'},
-          items: [
-            {
-              type: 'link',
-              label: 'Request a Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#request-a-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Initialize a new Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#initialize-a-new-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Connect to an existing Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#connect-to-an-existing-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Export an Ephemeral Data Context to a new File Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#export-an-ephemeral-data-context-to-a-new-file-data-context',
-            },
-            {
-              type: 'link',
-              label: 'View a Data Context configuration',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view-a-data-context-configuration',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Manage credentials',
-          link: {type: 'doc', id: 'core/installation_and_setup/manage_credentials'},
-          items: [
-            {
-              type: 'link',
-              label: 'Environment variables',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#environment-variables',
-            },
-            {
-              type: 'link',
-              label: 'YAML file',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#yaml-file',
-            },
-            {
-              type: 'link',
-              label: 'Secrets manager',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#secrets-manager',
-            },
-          ]
-        },
-        {
           type: 'doc',
-          id: 'core/installation_and_setup/manage_metadata_stores',
-          label: '🚧 Manage Metadata Stores'
-        },
-        {
-          type: 'doc',
-          id: 'core/installation_and_setup/manage_data_docs',
-          label: 'Manage Data Docs'
-        },
+          id: 'core/set_up_a_gx_environment/create_a_data_context',
+          label: 'Create a Data Context'
+        }
       ]
     },
     {

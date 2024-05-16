@@ -32,4 +32,12 @@ import OverviewCard from '@site/src/components/OverviewCard';
     icon="/img/expectation_icon.svg" 
   />
 
+  <LinkCard 
+    topIcon 
+    label="Create a Data Context"
+    description="Create an Ephemeral, File, or GX Cloud Data Context."
+    to="/core/set_up_a_gx_environment/create_a_data_context" 
+    icon="/img/expectation_icon.svg" 
+  />
+
 </LinkCardGrid>
