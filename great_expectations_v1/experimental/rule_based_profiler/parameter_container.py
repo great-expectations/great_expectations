@@ -18,8 +18,8 @@ from pyparsing import (
 
 import great_expectations_v1.exceptions as gx_exceptions
 from great_expectations_v1.compatibility.typing_extensions import override
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.types import SerializableDictDot, SerializableDotDict
+from great_expectations_v1.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations_v1.core.domain import Domain

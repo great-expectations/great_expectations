@@ -43,9 +43,11 @@ from great_expectations_v1._docs_decorators import public_api
 from great_expectations_v1.compatibility import pyspark
 from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.core.configuration import AbstractConfig, AbstractConfigSchema
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.types import DictDot, SerializableDictDot
-from great_expectations_v1.util import deep_filter_properties_iterable
+from great_expectations_v1.util import (
+    convert_to_json_serializable,
+    deep_filter_properties_iterable,
+)
 
 if TYPE_CHECKING:
     from io import TextIOWrapper

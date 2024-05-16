@@ -38,7 +38,6 @@ from great_expectations_v1.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations_v1.core.run_identifier import RunIdentifier
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.data_context.types.base import CheckpointValidationDefinition
 from great_expectations_v1.exceptions import (
     GreatExpectationsError,
@@ -52,6 +51,7 @@ from great_expectations_v1.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,
 )
+from great_expectations_v1.util import convert_to_json_serializable
 from great_expectations_v1.validator.exception_info import ExceptionInfo
 from great_expectations_v1.validator.metrics_calculator import (
     MetricsCalculator,

@@ -21,8 +21,6 @@ from great_expectations_v1.core.batch import (  # noqa: TCH001
 from great_expectations_v1.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations_v1.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations_v1.core.util import (
-    convert_to_json_serializable,
-    ensure_json_serializable,
     in_jupyter_notebook,
 )
 from great_expectations_v1.data_context.util import instantiate_class_from_config
@@ -35,6 +33,7 @@ from great_expectations_v1.render import (
     RenderedAtomicContentSchema,
 )
 from great_expectations_v1.types import SerializableDictDot
+from great_expectations_v1.util import convert_to_json_serializable, ensure_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations_v1.expectations.expectation_configuration import (

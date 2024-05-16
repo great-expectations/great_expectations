@@ -735,6 +735,8 @@ def init_parameter_builder(
     parameter_builder: ParameterBuilder = instantiate_class_from_config(
         config=parameter_builder_config,
         runtime_environment={"data_context": data_context},
-        config_defaults={"module_name": "great_expectations_v1.rule_based_profiler.parameter_builder"},
+        config_defaults={
+            "module_name": "great_expectations_v1.rule_based_profiler.parameter_builder"
+        },
     )
     return parameter_builder

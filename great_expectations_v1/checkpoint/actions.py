@@ -37,7 +37,6 @@ from great_expectations_v1.compatibility.pydantic import (
 )
 from great_expectations_v1.compatibility.pypd import pypd
 from great_expectations_v1.compatibility.typing_extensions import override
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations_v1.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -53,6 +52,7 @@ from great_expectations_v1.render.renderer import (
     SlackRenderer,
 )
 from great_expectations_v1.render.renderer.renderer import Renderer
+from great_expectations_v1.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations_v1.checkpoint.checkpoint import CheckpointResult

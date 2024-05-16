@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.experimental.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations_v1.types import SerializableDictDot
+from great_expectations_v1.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations_v1.experimental.rule_based_profiler.rule import Rule

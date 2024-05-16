@@ -22,8 +22,8 @@ import great_expectations_v1.exceptions as gx_exceptions
 from great_expectations_v1.compatibility.pyspark import functions as F
 from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations_v1.compatibility.typing_extensions import override
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.types import SerializableDictDot
+from great_expectations_v1.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations_v1.compatibility import pyspark, sqlalchemy

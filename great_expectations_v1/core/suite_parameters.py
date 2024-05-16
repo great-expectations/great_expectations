@@ -26,8 +26,8 @@ from pyparsing import (
     dictOf,
 )
 
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.exceptions import SuiteParameterError
+from great_expectations_v1.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias, TypeGuard

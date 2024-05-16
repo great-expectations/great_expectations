@@ -18,7 +18,7 @@ serialized_value = serializer.serialize(config)
 import abc
 from typing import TYPE_CHECKING
 
-from great_expectations_v1.core.util import convert_to_json_serializable
+from great_expectations_v1.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from marshmallow import Schema

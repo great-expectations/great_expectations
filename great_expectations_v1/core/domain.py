@@ -8,9 +8,9 @@ from typing import Any, Dict, Optional, TypeVar, Union
 from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.core.id_dict import IDDict
 from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.types import SerializableDictDot, SerializableDotDict
 from great_expectations_v1.util import (
+    convert_to_json_serializable,
     deep_filter_properties_iterable,
     is_candidate_subset_of_target,
 )

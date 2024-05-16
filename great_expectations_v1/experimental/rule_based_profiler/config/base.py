@@ -8,7 +8,6 @@ from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, pos
 
 from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.core.configuration import AbstractConfig, AbstractConfigSchema
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.data_context.types.base import BaseYamlConfig
 from great_expectations_v1.experimental.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
@@ -20,6 +19,7 @@ from great_expectations_v1.experimental.rule_based_profiler.parameter_container 
 )
 from great_expectations_v1.types import DictDot, SerializableDictDot
 from great_expectations_v1.util import (
+    convert_to_json_serializable,
     deep_filter_properties_iterable,
     filter_properties_dict,
 )

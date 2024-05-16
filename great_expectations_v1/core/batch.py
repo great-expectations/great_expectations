@@ -21,10 +21,13 @@ from great_expectations_v1._docs_decorators import deprecated_argument
 from great_expectations_v1.compatibility import pyspark
 from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.core.id_dict import BatchKwargs, BatchSpec, IDDict
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.exceptions import InvalidBatchIdError
 from great_expectations_v1.types import DictDot, SerializableDictDot, safe_deep_copy
-from great_expectations_v1.util import deep_filter_properties_iterable, load_class
+from great_expectations_v1.util import (
+    convert_to_json_serializable,
+    deep_filter_properties_iterable,
+    load_class,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, TypeAlias

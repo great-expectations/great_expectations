@@ -6,7 +6,9 @@ from great_expectations_v1.core.domain import Domain, SemanticDomainTypes  # noq
 from great_expectations_v1.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations_v1.experimental.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations_v1.experimental.rule_based_profiler.domain_builder import (
+    ColumnDomainBuilder,
+)
 from great_expectations_v1.experimental.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     build_domains_from_column_names,

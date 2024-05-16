@@ -6,11 +6,12 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 from great_expectations_v1.compatibility.typing_extensions import override
-from great_expectations_v1.core.util import convert_to_json_serializable, nested_update
+from great_expectations_v1.core.util import nested_update
 from great_expectations_v1.experimental.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations_v1.types import SerializableDictDot
+from great_expectations_v1.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations_v1.experimental.rule_based_profiler.parameter_container import (

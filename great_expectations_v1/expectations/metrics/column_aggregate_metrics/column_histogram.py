@@ -13,7 +13,6 @@ from great_expectations_v1.compatibility.pyspark import (
 from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
 from great_expectations_v1.core.util import (
-    convert_to_json_serializable,
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations_v1.execution_engine import (
@@ -25,6 +24,7 @@ from great_expectations_v1.expectations.metrics.column_aggregate_metric_provider
     ColumnAggregateMetricProvider,
 )
 from great_expectations_v1.expectations.metrics.metric_provider import metric_value
+from great_expectations_v1.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     import pandas as pd

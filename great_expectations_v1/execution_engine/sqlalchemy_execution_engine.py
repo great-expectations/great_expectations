@@ -43,17 +43,17 @@ from great_expectations_v1.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.execution_engine.execution_engine import (
     MetricComputationConfiguration,
     PartitionDomainKwargs,
 )
-from great_expectations_v1.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (
+from great_expectations_v1.execution_engine.partition_and_sample.sqlalchemy_data_partitioner import (  # noqa: E501
     SqlAlchemyDataPartitioner,
 )
 from great_expectations_v1.execution_engine.partition_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
+from great_expectations_v1.util import convert_to_json_serializable
 from great_expectations_v1.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip

@@ -9,9 +9,11 @@ import pandas as pd
 
 from great_expectations_v1.compatibility import pyspark, sqlalchemy
 from great_expectations_v1.compatibility.typing_extensions import override
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.types import SerializableDictDot
-from great_expectations_v1.util import deep_filter_properties_iterable
+from great_expectations_v1.util import (
+    convert_to_json_serializable,
+    deep_filter_properties_iterable,
+)
 
 if TYPE_CHECKING:
     from great_expectations_v1.experimental.rule_based_profiler.metric_computation_result import (

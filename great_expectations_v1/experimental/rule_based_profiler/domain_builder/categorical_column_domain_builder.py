@@ -17,7 +17,9 @@ import great_expectations_v1.exceptions as gx_exceptions
 from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.core.domain import Domain, SemanticDomainTypes
 from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
-from great_expectations_v1.experimental.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations_v1.experimental.rule_based_profiler.domain_builder import (
+    ColumnDomainBuilder,
+)
 from great_expectations_v1.experimental.rule_based_profiler.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,
     CardinalityChecker,

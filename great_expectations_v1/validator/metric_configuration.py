@@ -7,8 +7,8 @@ from great_expectations_v1._docs_decorators import public_api
 from great_expectations_v1.core.domain import Domain
 from great_expectations_v1.core.id_dict import IDDict
 from great_expectations_v1.core.metric_domain_types import MetricDomainTypes
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.experimental.metric_repository.metrics import MetricTypes
+from great_expectations_v1.util import convert_to_json_serializable
 
 
 @public_api

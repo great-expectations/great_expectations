@@ -42,7 +42,6 @@ from great_expectations_v1.core.metric_domain_types import (
 )
 from great_expectations_v1.core.util import (
     AzureUrl,
-    convert_to_json_serializable,
 )
 from great_expectations_v1.exceptions import (
     BatchSpecError,
@@ -68,6 +67,7 @@ from great_expectations_v1.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_spark,
 )
+from great_expectations_v1.util import convert_to_json_serializable
 from great_expectations_v1.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations_v1.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001

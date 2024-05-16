@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from typing import Union, cast
 
 from great_expectations_v1.compatibility.typing_extensions import override
-from great_expectations_v1.core.util import convert_to_json_serializable
 from great_expectations_v1.exceptions import ProfilerConfigurationError
 from great_expectations_v1.types import SerializableDictDot
+from great_expectations_v1.util import convert_to_json_serializable
 
 
 @dataclass(frozen=True)
