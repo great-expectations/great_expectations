@@ -153,7 +153,7 @@ class FilePathDataConnector(DataConnector):
             list of data_references that are matched by configuration.
         """
         if regex:
-            regex = self._preprocess_batching_regex(MATCH_ALL_PATTERN)
+            regex = self._preprocess_batching_regex(regex)
         return self._get_data_references(matched=True, regex=regex)
 
     # Interface Method
