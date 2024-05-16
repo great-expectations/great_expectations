@@ -7,8 +7,10 @@ import decimal
 import importlib
 import inspect
 import io
+import json
 import logging
 import os
+import pathlib
 import pstats
 import re
 import sys
@@ -44,30 +46,45 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
-from great_expectations.compatibility import sqlalchemy
+from great_expectations._docs_decorators import public_api
+from great_expectations.compatibility import pydantic, pyspark, sqlalchemy
+from great_expectations.compatibility.sqlalchemy import LegacyRow, Row
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.data_context.data_context.context_factory import (
-    get_context as context_factory,
-)
+
+# import of private class will be removed when deprecated methods are removed from this module
 from great_expectations.exceptions import (
+    InvalidExpectationConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
-
-logger = logging.getLogger(__name__)
-
+from great_expectations.render import RenderedContent
+from great_expectations.types import SerializableDictDot
+from great_expectations.types.base import SerializableDotDict
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
-    from typing_extensions import TypeGuard
+    from ruamel.yaml.comments import CommentedMap
+    from typing_extensions import TypeAlias, TypeGuard
 
-    from great_expectations.alias_types import PathStr
+    from great_expectations.alias_types import JSONValues, PathStr
     from great_expectations.data_context import (
         AbstractDataContext,
     )
     from great_expectations.data_context.types.base import DataContextConfig
+
+
+try:
+    from shapely.geometry import LineString, MultiPolygon, Point, Polygon
+except ImportError:
+    Point = None
+    Polygon = None
+    MultiPolygon = None
+    LineString = None
+
+
+logger = logging.getLogger(__name__)
 
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
@@ -313,6 +330,10 @@ def build_in_memory_runtime_context() -> AbstractDataContext:
         suite_parameter_store_name="suite_parameter_store",
         checkpoint_store_name="checkpoint_store",
         store_backend_defaults=InMemoryStoreBackendDefaults(),
+    )
+
+    from great_expectations.data_context.data_context.context_factory import (
+        get_context as context_factory,
     )
 
     context = context_factory(project_config=data_context_config, mode="ephemeral")
@@ -1095,3 +1116,359 @@ def pandas_series_between_inclusive(series: pd.Series, min_value: int, max_value
         metric_series = series.between(min_value, max_value)
 
     return metric_series
+
+
+ToBool: TypeAlias = bool
+ToFloat: TypeAlias = Union[float, np.floating]
+ToInt: TypeAlias = Union[int, np.integer]
+ToStr: TypeAlias = Union[
+    str, bytes, slice, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
+]
+
+ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
+ToDict: TypeAlias = Union[
+    dict,
+    "CommentedMap",
+    pd.DataFrame,
+    SerializableDictDot,
+    SerializableDotDict,
+    pydantic.BaseModel,
+]
+
+JSONConvertable: TypeAlias = Union[
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None  # noqa: PYI016
+]
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToDict,
+) -> dict: ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToList,
+) -> list: ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToBool,
+) -> bool: ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToFloat,
+) -> float: ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToInt,
+) -> int: ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToStr,
+) -> str: ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: None,
+) -> None: ...
+
+
+@public_api  # - complexity 32
+def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
+    data: JSONConvertable,
+) -> JSONValues:
+    """Converts an object to one that is JSON-serializable.
+
+    WARNING, data may be converted in place.
+
+    Args:
+        data: an object to convert to a JSON-serializable object
+
+    Returns:
+        A JSON-serializable object. For example:
+
+        >>> convert_to_json_serializable(1)
+        1
+
+        >>> convert_to_json_serializable("hello")
+        "hello"
+
+        >>> convert_to_json_serializable(Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]))
+        "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
+
+    Raises:
+        TypeError: A non-JSON-serializable field was found.
+    """
+    if isinstance(data, pydantic.BaseModel):
+        return json.loads(data.json())
+
+    if isinstance(data, (SerializableDictDot, SerializableDotDict)):
+        return data.to_json_dict()
+
+    # Handling "float(nan)" separately is required by Python-3.6 and Pandas-0.23 versions.
+    if isinstance(data, float) and np.isnan(data):
+        return None
+
+    if isinstance(data, (str, int, float, bool)):
+        # No problem to encode json
+        return data
+
+    if isinstance(data, range):
+        return list(data)
+
+    if isinstance(data, dict):
+        new_dict = {}
+        for key in data:
+            # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string  # noqa: E501
+            new_dict[str(key)] = convert_to_json_serializable(data[key])
+
+        return new_dict
+
+    if isinstance(data, (list, tuple, set)):
+        new_list: List[JSONValues] = []
+        for val in data:
+            new_list.append(convert_to_json_serializable(val))
+
+        return new_list
+
+    if isinstance(data, (np.ndarray, pd.Index)):
+        # test_obj[key] = test_obj[key].tolist()
+        # If we have an array or index, convert it first to a list--causing coercion to float--and then round  # noqa: E501
+        # to the number of digits for which the string representation will equal the float representation  # noqa: E501
+        return [convert_to_json_serializable(x) for x in data.tolist()]
+
+    if isinstance(data, np.int64):
+        return int(data)
+
+    if isinstance(data, np.float64):
+        return float(data)
+
+    if isinstance(data, (datetime.datetime, datetime.date)):
+        return data.isoformat()
+
+    if isinstance(data, (np.datetime64)):
+        return np.datetime_as_string(data)
+
+    if isinstance(data, uuid.UUID):
+        return str(data)
+
+    if isinstance(data, bytes):
+        return str(data)
+
+    if isinstance(data, slice):
+        return str(data)
+
+    if isinstance(data, pathlib.PurePath):
+        return str(data)
+
+    # noinspection PyTypeChecker
+    if Polygon and isinstance(data, (Point, Polygon, MultiPolygon, LineString)):
+        return str(data)
+
+    # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
+    # https://github.com/numpy/numpy/pull/9505
+    if np.issubdtype(type(data), np.bool_):
+        return bool(data)
+
+    if np.issubdtype(type(data), np.integer) or np.issubdtype(type(data), np.uint):
+        return int(data)  # type: ignore[arg-type] # could be None
+
+    if np.issubdtype(type(data), np.floating):
+        # Note: Use np.floating to avoid FutureWarning from numpy
+        return float(round(data, sys.float_info.dig))  # type: ignore[arg-type] # could be None
+
+    # Note: This clause has to come after checking for np.ndarray or we get:
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`  # noqa: E501
+    if data is None:
+        # No problem to encode json
+        return data
+
+    try:
+        if not isinstance(data, list) and pd.isna(data):  # type: ignore[arg-type]
+            # pd.isna is functionally vectorized, but we only want to apply this to single objects
+            # Hence, why we test for `not isinstance(list)`
+            return None
+    except TypeError:
+        pass
+    except ValueError:
+        pass
+
+    if isinstance(data, pd.Series):
+        # Converting a series is tricky since the index may not be a string, but all json
+        # keys must be strings. So, we use a very ugly serialization strategy
+        index_name = data.index.name or "index"
+        value_name = data.name or "value"
+        return [
+            {
+                index_name: convert_to_json_serializable(idx),  # type: ignore[call-overload]
+                value_name: convert_to_json_serializable(val),  # type: ignore[dict-item]
+            }
+            for idx, val in data.items()
+        ]
+
+    if isinstance(data, pd.DataFrame):
+        return convert_to_json_serializable(data.to_dict(orient="records"))
+
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
+        # using StackOverflow suggestion for converting pyspark df into dictionary
+        # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
+        return convert_to_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
+
+    # SQLAlchemy serialization
+    if LegacyRow and isinstance(data, LegacyRow):
+        return dict(data)
+
+    # sqlalchemy text for SqlAlchemy 2 compatibility
+    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
+        return str(data)
+
+    if Row and isinstance(data, Row):
+        return str(data)
+
+    if isinstance(data, decimal.Decimal):
+        return convert_decimal_to_float(d=data)
+
+    from great_expectations.core.run_identifier import RunIdentifier
+
+    if isinstance(data, RunIdentifier):
+        return data.to_json_dict()
+
+    # PySpark schema serialization
+    if pyspark.types and isinstance(data, pyspark.types.StructType):
+        return dict(data.jsonValue())
+
+    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
+        # Connection is a module, which is non-serializable. Return module name instead.
+        return "sqlalchemy.engine.base.Connection"
+
+    if isinstance(data, RenderedContent):
+        return data.to_json_dict()
+
+    if isinstance(data, re.Pattern):
+        return data.pattern
+
+    # Unable to serialize (unrecognized data type).
+    raise TypeError(f"{data!s} is of type {type(data).__name__} which cannot be serialized.")  # noqa: TRY003
+
+
+def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
+    """
+    Helper function to convert an object to one that is json serializable
+    Args:
+        data: an object to attempt to convert a corresponding json-serializable object
+    Warning:
+        test_obj may also be converted in place.
+    """
+    if isinstance(data, pydantic.BaseModel):
+        return
+
+    if isinstance(data, (SerializableDictDot, SerializableDotDict)):
+        return
+
+    if isinstance(data, ((str,), (int,), float, bool)):
+        # No problem to encode json
+        return
+
+    if isinstance(data, dict):
+        for key in data:
+            str(key)  # key must be cast-able to string
+            ensure_json_serializable(data[key])
+
+        return
+
+    if isinstance(data, (list, tuple, set)):
+        for val in data:
+            ensure_json_serializable(val)
+        return
+
+    if isinstance(data, (np.ndarray, pd.Index)):
+        # test_obj[key] = test_obj[key].tolist()
+        # If we have an array or index, convert it first to a list--causing coercion to float--and then round  # noqa: E501
+        # to the number of digits for which the string representation will equal the float representation  # noqa: E501
+        _ = [ensure_json_serializable(x) for x in data.tolist()]  # type: ignore[func-returns-value]
+        return
+
+    if isinstance(data, (datetime.datetime, datetime.date)):
+        return
+
+    if isinstance(data, pathlib.PurePath):
+        return
+
+    # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
+    # https://github.com/numpy/numpy/pull/9505
+    if np.issubdtype(type(data), np.bool_):
+        return
+
+    if np.issubdtype(type(data), np.integer) or np.issubdtype(type(data), np.uint):
+        return
+
+    if np.issubdtype(type(data), np.floating):
+        # Note: Use np.floating to avoid FutureWarning from numpy
+        return
+
+    # Note: This clause has to come after checking for np.ndarray or we get:
+    #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`  # noqa: E501
+    if data is None:
+        # No problem to encode json
+        return
+
+    try:
+        if not isinstance(data, list) and pd.isna(data):
+            # pd.isna is functionally vectorized, but we only want to apply this to single objects
+            # Hence, why we test for `not isinstance(list))`
+            return
+    except TypeError:
+        pass
+    except ValueError:
+        pass
+
+    if isinstance(data, pd.Series):
+        # Converting a series is tricky since the index may not be a string, but all json
+        # keys must be strings. So, we use a very ugly serialization strategy
+        index_name = data.index.name or "index"
+        value_name = data.name or "value"
+        _ = [
+            {
+                index_name: ensure_json_serializable(idx),  # type: ignore[func-returns-value]
+                value_name: ensure_json_serializable(val),  # type: ignore[func-returns-value]
+            }
+            for idx, val in data.items()
+        ]
+        return
+
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function] # ensure pyspark is installed
+        # using StackOverflow suggestion for converting pyspark df into dictionary
+        # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
+        return ensure_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
+
+    if isinstance(data, pd.DataFrame):
+        return ensure_json_serializable(data.to_dict(orient="records"))
+
+    if isinstance(data, decimal.Decimal):
+        return
+
+    from great_expectations.core.run_identifier import RunIdentifier
+
+    if isinstance(data, RunIdentifier):
+        return
+
+    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
+        # TextClause is handled manually by convert_to_json_serializable()
+        return
+
+    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
+        # Connection module is handled manually by convert_to_json_serializable()
+        return
+
+    raise InvalidExpectationConfigurationError(  # noqa: TRY003
+        f"{data!s} is of type {type(data).__name__} which cannot be serialized to json"
+    )

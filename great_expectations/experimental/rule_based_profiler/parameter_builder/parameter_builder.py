@@ -26,7 +26,6 @@ import pandas as pd
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain  # noqa: TCH001
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.experimental.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
@@ -57,7 +56,7 @@ from great_expectations.experimental.rule_based_profiler.parameter_container imp
     get_fully_qualified_parameter_names,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import is_parseable_date
+from great_expectations.util import convert_to_json_serializable, is_parseable_date  # noqa: TID251
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
