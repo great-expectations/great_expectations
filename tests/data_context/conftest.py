@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import pathlib
-import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
@@ -386,7 +385,6 @@ def basic_fluent_datasource_config() -> dict:
             {
                 "name": "my_csv",
                 "type": "csv",
-                "batching_regex": re.compile(r"yellow_tripdata_(\d{4})-(\d{2})\.csv$", re.UNICODE),
             }
         ],
         "base_directory": pathlib.PosixPath("/path/to/trip_data"),

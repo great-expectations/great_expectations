@@ -1,9 +1,9 @@
 from datetime import date, datetime, timedelta
 from typing import Dict, List
 
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import QueryExpectation
+from great_expectations.util import convert_to_json_serializable
 
 TODAY: date = datetime(year=2022, month=8, day=10).date()
 TODAY_STR: str = datetime.strftime(TODAY, "%Y-%m-%d")

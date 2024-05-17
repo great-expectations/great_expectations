@@ -1,4 +1,3 @@
-import re
 from logging import Logger
 from typing import Literal, Optional, Union
 
@@ -33,7 +32,6 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0)
