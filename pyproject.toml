@@ -675,3 +675,16 @@ testpaths = "tests"
 mock_use_standalone_module = false
 # https://docs.pytest.org/en/7.1.x/how-to/logging.html#how-to-manage-logging
 log_level = "info"
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # type-checking imports don't exist at runtime
+    "if TYPE_CHECKING:",
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise NotImplementedError",
+    # Don't complain if non-runnable code isn't run:
+    "if __name__ == .__main__.:",
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+    ]
