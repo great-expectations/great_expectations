@@ -1,0 +1,127 @@
+---
+sidebar_label: 'Validate data schema'
+title: 'Validate data schema'
+description: Use GX to validate data schema.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+Data schema refers to the organization and format of your data. Assessing data schema requires testing across multiple data quality dimensions, including:
+* Validity, which checks that data conforms to the format, type, or range of its definition.
+* Consistency, which checks that data characteristics are the same across instances.
+
+## The importance of schema
+
+Managing and validating data schema is fundamental for successful collaboration between data producers and data consumers.
+
+As a data consumer within an organization, your data producers could be internal or external to your organization. While it might be typical to see more focus on testing and validation of externally-sourced data, a common source of frustration within organizations are unexpected schema changes that go unnoticed by internal producers and consumers until something mysteriously breaks.
+
+Schema changes to upstream data sources can have unintended downstream consequences. Without explicit agreements and contracts between data providers and consumers, organizations expose themselves to the risk of bad data or schema changes negatively impacting their operations and products.
+
+## GX can validate schema in your data pipeline
+
+Proactive data testing with a tool like Great Expectations provides a means to communicate and codify schema requirements between data producers and consumers within an organization. GX provides a collection of Expectations that cover table level and column level schema characteristics.
+
+The GX Python API enables you to integrate GX at any point in your data pipeline to verify schema requirements. For example:
+* GX can be used to validate CSV files landed in a file store before the data is ingested into a database
+* GX can be used in your medallion architecture pipeline to verify that bronze, silver, and gold table data retains the expected schema as it moves through the hierarchy.
+* GX can be used to routinely check that shared tables meet agreed-upon schema requirements.
+
+## How to use GX to validate the schema of a Pandas DataFrame
+
+Below is a simple recipe that demonstrates schema validation of a Pandas DataFrame using GX. This recipe runs against the following sample data:
+
+<Tabs>
+<TabItem value="pandas" label="Pandas">
+
+```python
+import pandas as pd
+
+data = [
+    {'id': 1, 'animal': 'zebra', 'fruit': 'apple', 'quantity': 2343, 'rating': 'five stars', 'phone_number': '(123) 456-7890', 'shape': 'circle', 'color': 'red'},
+    {'id': 2, 'animal': 'monkey', 'fruit': 'banana', 'quantity': 1231, 'rating': '5', 'phone_number': '(000) 000-0000', 'shape': None, 'color': 'purple'},
+    {'id': 3, 'animal': 'antelope', 'fruit': 'banana', 'quantity': 567, 'rating': '3', 'phone_number': '123 456-7890', 'shape': None, 'color': 'green'},
+    {'id': 4, 'animal': 'elephant', 'fruit': 'banana', 'quantity': 8342, 'rating': '2', 'phone_number': '1234567890', 'shape': None, 'color': None},
+    {'id': 5, 'animal': 'unicorn', 'fruit': 'apple', 'quantity': 477, 'rating': '1 star', 'phone_number': '123.456.7890', 'shape': None, 'color': None},
+    {'id': 6, 'animal': 'turtle', 'fruit': 'orange', 'quantity': 349, 'rating': None, 'phone_number': '(408) 112-1007', 'shape': None, 'color': None},
+    {'id': 7, 'animal': 'crocodile', 'fruit': 'orange', 'quantity': 9823, 'rating': '4', 'phone_number': '(557) 434-2646', 'shape': None, 'color': '#FF33E0'},
+    {'id': 8, 'animal': 'penguin', 'fruit': 'mango', 'quantity': 540, 'rating': '4', 'phone_number': '(983) 274-9327', 'shape': None, 'color': 'blue'}
+]
+
+df = pd.DataFrame(data)
+```
+
+</TabItem>
+
+<TabItem value="csv" label="CSV">
+
+```csv
+id,animal,fruit,quantity,rating,phone_number,shape,color
+1,zebra,apple,2343,five stars,(123) 456-7890,circle,red
+2,monkey,banana,1231,5,(000) 000-0000,,purple
+3,antelope,banana,567,3,123 456-7890,,green
+4,elephant,banana,8342,2,1234567890,,
+5,unicorn,apple,477,1 star,123.456.7890,,
+6,turtle,orange,349,,(408) 112-1007,,
+7,crocodile,orange,9823,4,(557) 434-2646,,#FF33E0
+8,penguin,mango,540,4,(983) 274-9327,,blue
+```
+
+</TabItem>
+</Tabs>
+
+The recipe code creates a GX:
+* Data Context, Data Source, and Data Asset using a Pandas DataFrame that contains the sample data
+* Validator used to interactively Expectations against the Data Asset that test aspects of the sample data schema
+* Expectation Suite containing the defined Expectations
+* Checkpoint that runs the Expectation Suite against the Data Asset
+
+```python
+import great_expectations as gx
+
+# Sample data is contained in a Pandas DataFrame assigned to the df variable.
+
+context = gx.get_context()
+
+data_source = context.sources.add_pandas(name="pandas dataframe")
+data_asset = data_source.add_dataframe_asset(name="sample data")
+batch_request = data_asset.build_batch_request(dataframe=df)
+
+context.add_or_update_expectation_suite(expectation_suite_name="schema expectations")
+
+validator = context.get_validator(
+    batch_request=batch_request,
+    expectation_suite_name="schema expectations"
+)
+
+# Schema validations that pass.
+validator.expect_table_columns_to_match_ordered_list(column_list=["id", "animal", "fruit", "quantity", "rating", "phone_number", "shape", "color"])
+validator.expect_column_values_to_be_of_type("animal", type_="str")
+validator.expect_column_values_to_not_be_null("id")
+validator.expect_column_values_to_be_increasing("id")
+
+# Schema validations that fail.
+validator.expect_column_values_to_be_in_set("fruit", value_set=["apple", "banana", "orange"])
+validator.expect_column_values_to_match_regex("phone_number", regex=r'\(\d{3}\)\s\d{3}-\d{4}')
+validator.expect_column_values_to_be_of_type("rating", type_="int64")
+
+validator.save_expectation_suite(discard_failed_expectations=False)
+
+checkpoint = context.add_or_update_checkpoint(
+    name="checkpoint",
+    validator=validator,
+)
+
+checkpoint_result = checkpoint.run()
+```
+
+## Next steps
+The tests that you run to validate data schema are dependent on the backend data source that you are using. For instance, schema checks that you might run on a Pandas DataFrame differ from checks you would run on a Postgres table because the two data source types enforce schema differently by default. Key considerations as you build out schema validation using GX include:
+
+**Identifying and using relevant Expectations.** When creating an Expectation Suite to validate data schema for a given data source type, consider the opportunities afforded by the data source type for bad data to be introduced into your ecosystem. As an example, if you validate the data schema of incoming CSV files, it makes sense to check that all required columns are present, as CSV files are a medium that does not enforce the presence of certain columns. If you were to validate Snowflake table data, you might instead need to [check that data in a given column only contains values defined in a column of another table](/docs/1.0-prerelease/learn/use_cases/use_case_2).
+
+Visit the [GX Expectations Gallery](https://greatexpectations.io/expectations/) to explore Expectations that  test for your data source-specific schema requirements.
+
+**Efficient organization and reuse of Expectation Suites.** It is common for iterations or duplicates of data to be housed in different backend stores as the data advances through an organization's pipeline. In this case, it can be useful to organize Expectations into distinct Suites that cover schema testing based on the business requirements of the data and the technical specifics of the data store. Semantic schema tests can be grouped into an Expectation Suite that is run against collections of Data Assets that are also tested by individual Suites that contain Expectations relevant to the type of backend data store.
+
