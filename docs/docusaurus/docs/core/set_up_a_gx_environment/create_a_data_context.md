@@ -17,11 +17,11 @@ All scripts that utilize {GxData.product_name} should start with the creation of
 
 The following are the available Data Context types:
 
-- **File Data Context** - A persistent Data Context that stores metadata and configuration information as YAML files.
+- **File Data Context:** A persistent Data Context that stores metadata and configuration information as YAML files.
 
-- **Ephemeral Data Context** - A temporary Data Context that stores metadata and configuration information in memory. This Data Context will not persist beyond the current Python session.
+- **Ephemeral Data Context:** A temporary Data Context that stores metadata and configuration information in memory. This Data Context will not persist beyond the current Python session.
 
-- **GX Cloud Data Context** - A Data Context that connects to a GX Cloud Account to retrieve and store GX Cloud metadata and configuration information.
+- **GX Cloud Data Context:** A Data Context that connects to a GX Cloud Account to retrieve and store GX Cloud metadata and configuration information.
 
 <Tabs queryString="context_type" groupId="context_type" defaultValue='quick' values={[{label: 'Quick Start', value:'quick'}, {label: 'File', value:'file'}, {label: 'Ephemeral', value:'ephemeral'}, {label: 'GX Cloud', value:'gx_cloud'}]}>
 

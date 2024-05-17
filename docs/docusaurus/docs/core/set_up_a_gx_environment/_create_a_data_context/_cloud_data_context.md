@@ -16,7 +16,7 @@ import PrereqGxInstallation from '../../_core_components/prerequisites/_gx_insta
 
 <TabItem value="procedure" label="Procedure">
 
-1. Run the following code to request a Cloud Data Context:
+1. Run the following code to request a GX Cloud Data Context:
 
    ```python title='Python input' name="core/set_up_a_gx_environment/_create_a_data_context/cloud_data_context.py import great_expectations and get a context"
    ```
