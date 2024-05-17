@@ -79,7 +79,6 @@ def csv_asset(
 ) -> CSVAsset:
     return datasource.add_csv_asset(
         name=asset_name,
-        batching_regex="data.csv",
     )
 
 
@@ -89,7 +88,6 @@ def parquet_asset(
 ) -> ParquetAsset:
     return datasource.add_parquet_asset(
         name=asset_name,
-        batching_regex="data.parquet",
     )
 
 

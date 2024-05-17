@@ -292,12 +292,6 @@
                 "RAISE_ERROR"
             ],
             "type": "string"
-        },
-        "batching_regex": {
-            "title": "Batching Regex",
-            "default": ".*",
-            "type": "string",
-            "format": "regex"
         }
     },
     "required": [
