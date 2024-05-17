@@ -52,7 +52,7 @@ def pandas_file_system_asset(context: AbstractDataContext) -> PandasCSVAsset:
         DATASOURCE_NAME,
         base_directory="tests/test_sets/taxi_yellow_tripdata_samples/first_ten_trips_in_each_file",  # type: ignore [arg-type]
     )
-    data_asset = datasource.add_csv_asset(name=ASSET_NAME, batching_regex=BATCHING_REGEX)
+    data_asset = datasource.add_csv_asset(name=ASSET_NAME)
 
     return data_asset
 
@@ -93,7 +93,6 @@ def spark_file_system_asset(context: AbstractDataContext) -> SparkCSVAsset:
     )
     data_asset = datasource.add_csv_asset(
         name=ASSET_NAME,
-        batching_regex=BATCHING_REGEX,
         header=True,
         infer_schema=True,
     )

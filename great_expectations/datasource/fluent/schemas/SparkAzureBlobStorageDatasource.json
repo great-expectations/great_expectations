@@ -567,12 +567,6 @@
                         "RAISE_ERROR"
                     ],
                     "type": "string"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -1198,12 +1192,6 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -1330,12 +1318,6 @@
                         "LEGACY"
                     ],
                     "type": "string"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -1466,12 +1448,6 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -1581,12 +1557,6 @@
                             "type": "string"
                         }
                     ]
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -1700,12 +1670,6 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -1979,12 +1943,6 @@
                             "type": "string"
                         }
                     ]
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -2262,12 +2220,6 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -2374,12 +2326,6 @@
                 "lineSep": {
                     "title": "Linesep",
                     "type": "string"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -2490,12 +2436,6 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -2557,12 +2497,6 @@
                 "versionAsOf": {
                     "title": "Versionasof",
                     "type": "string"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [
@@ -2628,12 +2562,6 @@
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
-                },
-                "batching_regex": {
-                    "title": "Batching Regex",
-                    "default": ".*",
-                    "type": "string",
-                    "format": "regex"
                 }
             },
             "required": [

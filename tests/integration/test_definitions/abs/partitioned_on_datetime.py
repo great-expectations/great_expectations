@@ -24,14 +24,13 @@ datasource = context.data_sources.add_pandas_abs(
 data_asset_name = "data/taxi_yellow_tripdata_samples"
 asset = datasource.add_csv_asset(
     name=data_asset_name,
-    batching_regex="(.*)\\.csv",
     abs_container=CONTAINER,
     abs_name_starts_with=NAME_STARTS_WITH,
 )
 
 batch_definition = asset.add_batch_definition_monthly(
     "abs batch definition",
-    regex=re.compile(NAME_STARTS_WITH + r"yellow_tripdata_sample_(?P<year>.*)-(?P<month>.*)\.csv"),
+    regex=re.compile(r"yellow_tripdata_sample_(?P<year>.*)-(?P<month>.*)\.csv"),
 )
 
 # first batch request: not passing any parameters

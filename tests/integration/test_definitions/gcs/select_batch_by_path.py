@@ -19,7 +19,7 @@ data_asset = datasource.add_csv_asset(
 )
 
 batch_definition = data_asset.add_batch_definition_path(
-    "path", path=gcs_prefix + "yellow_tripdata_sample_2019-02.csv"
+    "path", path="yellow_tripdata_sample_2019-02.csv"
 )
 
 my_batch_request = batch_definition.build_batch_request()

@@ -3,7 +3,7 @@ import re
 import numpy as np
 import pytest
 
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.util import convert_to_json_serializable
 
 try:
     from shapely.geometry import LineString, MultiPolygon, Point, Polygon

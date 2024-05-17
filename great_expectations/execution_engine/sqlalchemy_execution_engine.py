@@ -42,7 +42,6 @@ from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import (
     MetricComputationConfiguration,
     PartitionDomainKwargs,
@@ -53,6 +52,7 @@ from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_pa
 from great_expectations.execution_engine.partition_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip

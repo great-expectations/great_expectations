@@ -255,14 +255,15 @@ prefix = "data/taxi_yellow_tripdata_samples/"
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py asset">
-data_asset = datasource.add_csv_asset(
-    name="csv_taxi_gcs_asset", batching_regex=batching_regex, gcs_prefix=prefix
-)
+data_asset = datasource.add_csv_asset(name="csv_taxi_gcs_asset", gcs_prefix=prefix)
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/oss/guides/connecting_to_your_data/fluent/database/gcp_deployment_patterns_file_gcs.py batch_request">
-batch_request = data_asset.build_batch_request(
-    options={
+batch_definition = data_asset.add_batch_definition_monthly(
+    name="Monthly Taxi Data", regex=batching_regex
+)
+batch_request = batch_definition.build_batch_request(
+    batch_parameters={
         "month": "03",
     }
 )
