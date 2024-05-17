@@ -17,7 +17,7 @@ To validate data stored on SQL databases with {GxData.product_name}, you create 
 
    <SqlDialectInstallationCommands/>
    
-   To install dependencies for a specific SQL dialect, use the corresponding command from the SQL dialect dependency commands table.
+   To install dependencies for a specific SQL dialect, use the corresponding command from the table above.
 
    If you are not using one of the listed dialects, you can install the dependencies for SQLAlchemy with the command:
 
