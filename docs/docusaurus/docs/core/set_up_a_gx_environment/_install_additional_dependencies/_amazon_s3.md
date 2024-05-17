@@ -40,7 +40,7 @@ To set up boto3 with AWS, and use boto3 within Python, see the [Boto3 documentat
    python3 -m pip install boto3
    ```
    
-   If neither of these pip commands work, you may need to verify that [Python is installed correctly](core/set_up_a_gx_environment/install_gx.md).
+   If these `pip` commands work, verify that [Python is installed correctly](core/set_up_a_gx_environment/install_gx.md).
 
    :::
 
