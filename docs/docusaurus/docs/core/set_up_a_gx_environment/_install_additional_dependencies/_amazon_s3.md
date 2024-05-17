@@ -14,9 +14,9 @@ import InfoUsingAVirtualEnvironment from '../../_core_components/admonitions/_if
 
 ## Installation
 
-Python interacts with AWS through the `boto3` library. {GxData.product_name} makes use of this library in the background when working with AWS. Although you won't use `boto3` directly, you'll need to install it in your python environment.
+Python interacts with AWS through the `boto3` library. {GxData.product_name} uses the library in the background when working with AWS. Although you won't use `boto3` directly, must install it in your Python environment.
 
-To set up boto3 with AWS, and use boto3 within Python, see the [Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html).
+To set up `boto3` with AWS, and use `boto3` within Python, see the [Boto3 documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html).
 
 1. Run the following code to verify the AWS CLI version:
 
@@ -58,7 +58,7 @@ To set up boto3 with AWS, and use boto3 within Python, see the [Boto3 documentat
    <InfoUsingAVirtualEnvironment/>
    :::
 
-   Run the following terminal command to install the optional dependencies required by GX to work with AWS S3:
+   Run the following terminal command to install the optional dependencies required by {GxData.product_name} to work with AWS S3:
 
    ```bash title="Terminal input"
    python -m pip install 'great_expectations[s3]'
