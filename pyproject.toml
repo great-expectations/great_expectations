@@ -677,6 +677,7 @@ mock_use_standalone_module = false
 log_level = "info"
 
 [tool.coverage.report]
+# https://coverage.readthedocs.io/en/7.5.1/config.html
 # Regexes for lines to exclude from consideration
 exclude_also = [
     # type-checking imports don't exist at runtime
