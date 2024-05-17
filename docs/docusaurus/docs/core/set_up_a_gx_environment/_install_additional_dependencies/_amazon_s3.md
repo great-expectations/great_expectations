@@ -54,11 +54,11 @@ To set up `boto3` with AWS, and use `boto3` within Python, see the [Boto3 docume
   
 4. Install the Python dependencies for AWS S3 support.
 
+   Run the following terminal command to install the optional dependencies required by {GxData.product_name} to work with AWS S3:
+
    :::info
    <InfoUsingAVirtualEnvironment/>
    :::
-
-   Run the following terminal command to install the optional dependencies required by {GxData.product_name} to work with AWS S3:
 
    ```bash title="Terminal input"
    python -m pip install 'great_expectations[s3]'

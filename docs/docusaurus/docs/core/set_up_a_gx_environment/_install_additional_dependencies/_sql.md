@@ -49,6 +49,6 @@ To validate data stored on SQL databases with {GxData.product_name}, you create 
    "postgresql+psycopg2://<username>:${MY_DB_PW}@<host>:<port>/<database>"
    ```
 
-   If you do not want to store your credentials as environment variables, you can [store them in the file `config_variables.yml`](/core/installation_and_setup/manage_credentials.md#yaml-file) after you have [created a File Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=file#initialize-a-new-data-context).
+   As an alternative to environment variables, you can also [store credentials in the file `config_variables.yml`](/core/installation_and_setup/manage_credentials.md#yaml-file) after you have [created a File Data Context](/core/installation_and_setup/manage_data_contexts.md?context-type=file#initialize-a-new-data-context).
 
    :::
