@@ -2159,15 +2159,12 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
 
     base_url = env_vars.get(
         GXCloudEnvironmentVariable.BASE_URL,
-        env_vars.get(GXCloudEnvironmentVariable._OLD_BASE_URL),
     )
     organization_id = env_vars.get(
         GXCloudEnvironmentVariable.ORGANIZATION_ID,
-        env_vars.get(GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID),
     )
     access_token = env_vars.get(
         GXCloudEnvironmentVariable.ACCESS_TOKEN,
-        env_vars.get(GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN),
     )
     cloud_config = GXCloudConfig(
         base_url=base_url,  # type: ignore[arg-type]
