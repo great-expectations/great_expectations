@@ -1,13 +1,15 @@
 from great_expectations.expectations import core
-from great_expectations.expectations.expectation import Expectation
+from great_expectations.expectations.expectation import MetaExpectation
 
 
 def test_all_core_models_are_serializable():
     all_models = [
         expectation
-        for name, expectation in core.__dict__.items()
-        if isinstance(expectation, Expectation)
+        for expectation in core.__dict__.values()
+        if isinstance(expectation, MetaExpectation)
     ]
+    # are they still there?
+    assert len(all_models) > 50
     for model in all_models:
         model.schema_json()
 
