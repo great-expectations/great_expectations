@@ -286,7 +286,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
             # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
-            schema["title"] = re.sub(r"(\w)([A-Z])", r"\1 \2", schema.get("title"))
+            schema["title"] = re.sub(r"(\w)([A-Z])", r"\1 \2", schema.get("title", ""))
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
