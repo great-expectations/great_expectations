@@ -1,7 +1,10 @@
+import pytest
+
 from great_expectations.expectations import core
 from great_expectations.expectations.expectation import MetaExpectation
 
 
+@pytest.mark.unit
 def test_all_core_models_are_serializable():
     all_models = [
         expectation
@@ -14,6 +17,7 @@ def test_all_core_models_are_serializable():
         model.schema_json()
 
 
+@pytest.mark.unit
 def test_title_serialization():
     expectation = core.ExpectColumnValuesToNotBeNull
     title = expectation.schema()["title"]
