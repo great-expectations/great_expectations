@@ -412,19 +412,19 @@ class CloudDataContext(SerializableDataContext):
         cloud_base_url = (
             cloud_base_url
             or cls._get_global_config_value(
-                primary_environment_variable=GXCloudEnvironmentVariable.BASE_URL,
+                environment_variable=GXCloudEnvironmentVariable.BASE_URL,
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
             )
             or CLOUD_DEFAULT_BASE_URL
         )
         cloud_organization_id = cloud_organization_id or cls._get_global_config_value(
-            primary_environment_variable=GXCloudEnvironmentVariable.ORGANIZATION_ID,
+            environment_variable=GXCloudEnvironmentVariable.ORGANIZATION_ID,
             conf_file_section="ge_cloud_config",
             conf_file_option="organization_id",
         )
         cloud_access_token = cloud_access_token or cls._get_global_config_value(
-            primary_environment_variable=GXCloudEnvironmentVariable.ACCESS_TOKEN,
+            environment_variable=GXCloudEnvironmentVariable.ACCESS_TOKEN,
             conf_file_section="ge_cloud_config",
             conf_file_option="access_token",
         )
