@@ -78,6 +78,9 @@ services:
       interval: 5s
       timeout: 2s
       retries: 20
+    depends_on:
+      db-provisioner:
+        condition: service_completed_successfully
   mercury-service-api-v1:
     image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/api:v1api-latest
     platform: linux/amd64
