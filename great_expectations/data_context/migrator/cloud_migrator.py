@@ -278,7 +278,7 @@ class CloudMigrator:
         # a more central location.
         resource_type = "expectation_validation_result"
         resource_name = GXCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[resource_type]
-        attributes_key = GXCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
+        attributes_key = GXCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]  # type: ignore[index]
 
         unsuccessful_validations = {}
 
