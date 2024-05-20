@@ -29,8 +29,11 @@ my_datasource = context.data_sources.add_pandas_filesystem(
 
 my_asset = my_datasource.add_csv_asset(
     name="my_asset",
-    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-    order_by=["year", "month"],
+)
+my_batch_definition = my_asset.add_batch_definition_monthly(
+    name="my_batch_definition",
+    regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+    sort_ascending=True,
 )
 
 import pandas as pd
@@ -51,14 +54,16 @@ my_asset = context.get_datasource("my_datasource").get_asset("my_asset")
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_parameters">
-print(my_asset.get_batch_parameters_keys())
+print(my_asset.get_batch_parameters_keys(partitioner=my_batch_definition.partitioner))
 # </snippet>
 
-assert my_asset.get_batch_parameters_keys() == ("year", "month", "path")
+assert my_asset.get_batch_parameters_keys(
+    partitioner=my_batch_definition.partitioner
+) == ("path", "year", "month")
 
 # Python
 # <snippet name="docs/docusaurus/docs/snippets/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request">
-my_batch_request = my_asset.build_batch_request()
+my_batch_request = my_batch_definition.build_batch_request()
 # </snippet>
 
 assert my_batch_request.datasource_name == "my_datasource"

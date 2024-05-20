@@ -15,9 +15,7 @@ asset_name = "my_taxi_data_asset"
 s3_prefix = "data/taxi_yellow_tripdata_samples/"
 data_asset = datasource.add_csv_asset(name=asset_name, s3_prefix=s3_prefix)
 
-batching_regex = re.compile(
-    s3_prefix + r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-)
+batching_regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
 batch_definition = data_asset.add_batch_definition_monthly("monthly", regex=batching_regex)
 
 # Get all batches by month
