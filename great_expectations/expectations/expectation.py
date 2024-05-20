@@ -283,6 +283,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         extra = pydantic.Extra.forbid
         json_encoders = {RenderedAtomicContent: lambda data: data.to_json_dict()}
 
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+            # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
+            schema["title"] = re.sub(r"(\w)([A-Z])", r"\1 \2", schema.get("title"))
+
     id: Union[str, None] = None
     meta: Union[dict, None] = None
     notes: Union[str, List[str], None] = None
@@ -290,7 +295,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     description: ClassVar[Union[str, None]] = None
 
     catch_exceptions: bool = False
-    rendered_content: Optional[List[RenderedAtomicContent]] = None
+    rendered_content: ClassVar[Optional[List[RenderedAtomicContent]]] = None
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
