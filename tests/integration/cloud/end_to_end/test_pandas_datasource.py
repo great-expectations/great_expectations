@@ -130,6 +130,9 @@ def expectation_suite(
     return expectation_suite
 
 
+@pytest.mark.xfail(
+    reason="Fails due reuse of expectation suite fixture, but we will not support this flow in v1"
+)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
