@@ -329,6 +329,7 @@ class TestV1ActionRun:
                             ),
                         )
                     },
+                    result_url="www.testing",
                 ),
                 ValidationResultIdentifier(
                     expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -675,7 +676,8 @@ class TestV1ActionRun:
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": "*Asset*: asset_1  *Expectation Suite*: suite_a",
+                            "text": "*Asset*: asset_1  *Expectation Suite*: suite_a  "
+                            "<www.testing?slack=true|View Results>",
                         },
                     },
                     {
