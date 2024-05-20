@@ -46,7 +46,7 @@ services:
     platform: linux/amd64
     restart: always
     ports:
-      - 6000:5000
+      - 5001:5000
     environment:
       LOGGING_LEVEL: ${LOGGING_LEVEL}
       ENVIRONMENT: ${ENVIRONMENT}
@@ -73,8 +73,13 @@ services:
         cd /app/services/ge_cloud
         python -m tests.utils.dev_db_seed_script
         gunicorn mercury.api:get_app\(\) --config ./gunicorn.conf.py --workers=1
+    healthcheck:
+      test: bash -c ':> /dev/tcp/0.0.0.0/5000' || exit 1
+      interval: 5s
+      timeout: 2s
+      retries: 20
   mercury-service-api-v1:
-    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/api:latest
+    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/api:v1api-latest
     platform: linux/amd64
     restart: always
     ports:
@@ -94,11 +99,6 @@ services:
       AUTH0_MERCURY_API_CLIENT_SECRET: ${AUTH0_MERCURY_API_CLIENT_SECRET}
       SENDGRID_API_KEY: fake_key
       LD_SDK_KEY: ${LD_SDK_KEY}
-    # healthcheck:
-    #   test: bash -c ':> /dev/tcp/0.0.0.0/7000' || exit 1
-    #   interval: 5s
-    #   timeout: 2s
-    #   retries: 20
     depends_on:
       mercury-service-api:
         condition: service_started
@@ -112,7 +112,7 @@ services:
         cd /app/services/ge_cloud/mercury
         alembic upgrade head
         cd /app/services/ge_cloud
-        gunicorn mercury.api_v1:get_app() --config ./fastapi-gunicorn.conf.py
+        gunicorn "mercury.api_v1:get_app()" -c ./fastapi-gunicorn.conf.py
   nginx:
     image: nginx:latest
     container_name: nginx
