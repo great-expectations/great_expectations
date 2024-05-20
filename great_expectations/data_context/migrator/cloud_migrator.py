@@ -28,7 +28,6 @@ import requests
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.configuration import AbstractConfig  # noqa: TCH001
 from great_expectations.core.http import create_session
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -277,7 +276,7 @@ class CloudMigrator:
         # 20220928 - Chetan - We want to use the static lookup tables in GXCloudStoreBackend
         # to ensure the appropriate URL and payload shape. This logic should be moved to
         # a more central location.
-        resource_type = GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT
+        resource_type = "expectation_validation_result"
         resource_name = GXCloudStoreBackend.RESOURCE_PLURALITY_LOOKUP_DICT[resource_type]
         attributes_key = GXCloudStoreBackend.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
 
