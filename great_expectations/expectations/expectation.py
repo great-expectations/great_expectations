@@ -295,7 +295,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     description: ClassVar[Union[str, None]] = None
 
     catch_exceptions: bool = False
-    rendered_content: ClassVar[Optional[List[RenderedAtomicContent]]] = None
+    rendered_content: Optional[List[RenderedAtomicContent]] = Field(default=None, exclude=True)
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
