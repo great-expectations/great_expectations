@@ -301,6 +301,7 @@ class SlackNotificationAction(DataDocsAction):
             if data_docs_url["site_url"]
         ]
         if result.result_url:
+            result.result_url += "?slack=true"
             validation_result_urls.append(result.result_url)
 
         return self.renderer.render(
