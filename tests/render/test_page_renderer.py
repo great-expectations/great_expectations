@@ -619,9 +619,11 @@ def checkpoint_results(request: pytest.FixtureRequest) -> CheckpointResult:
         )
 
         checkpoint_result = checkpoint.run()
+        assert len(re.findall("my_asset", str(checkpoint_result))) == 6
     else:
         pass
 
+    context.view_validation_result(checkpoint_result)
     return checkpoint_result
 
 
@@ -630,7 +632,3 @@ def test_asset_name_is_rendered_in_data_doc(checkpoint_results: CheckpointResult
     data_asset_names = checkpoint_results.list_data_asset_names()
     assert "my_asset" in data_asset_names
     print(f"checkpoint_result: {pf(checkpoint_results, depth=1)}")
-
-    assert False
-    # TODO: don't actually open it just look at the results
-    context.view_validation_result(checkpoint_results)
