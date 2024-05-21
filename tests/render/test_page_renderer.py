@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import json
 import re
+from typing import TYPE_CHECKING
 
 import mistune
 import pytest
 
-from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
@@ -16,6 +18,12 @@ from great_expectations.render.renderer import (
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
+if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.data_context import AbstractDataContext
+
 # module level markers
 pytestmark = pytest.mark.filesystem
 
@@ -23,7 +31,7 @@ pytestmark = pytest.mark.filesystem
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     empty_data_context,
 ):
-    context: DataContext = empty_data_context
+    context: AbstractDataContext = empty_data_context
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context
@@ -139,9 +147,9 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
 
 
 def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes(
-    empty_data_context,
+    empty_data_context: AbstractDataContext,
 ):
-    context: ExpectationSuite = empty_data_context
+    context: AbstractDataContext = empty_data_context
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
         ExpectationSuite(
             expectation_suite_name="test",
@@ -206,14 +214,16 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
     )
 
 
-def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
+def test_ProfilingResultsPageRenderer(
+    titanic_profiled_evrs_1: ExpectationValidationResult,
+):
     document = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     assert isinstance(document, RenderedDocumentContent)
     assert len(document.sections) == 8
 
 
 def test_ValidationResultsPageRenderer_render_validation_header(
-    titanic_profiled_evrs_1,
+    titanic_profiled_evrs_1: ExpectationValidationResult,
 ):
     validation_header = ValidationResultsPageRenderer._render_validation_header(
         titanic_profiled_evrs_1
@@ -269,7 +279,9 @@ def test_ValidationResultsPageRenderer_render_validation_header(
     assert validation_header == expected_validation_header
 
 
-def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
+def test_ValidationResultsPageRenderer_render_validation_info(
+    titanic_profiled_evrs_1: ExpectationValidationResult,
+):
     validation_info = ValidationResultsPageRenderer._render_validation_info(
         titanic_profiled_evrs_1
     ).to_json_dict()
@@ -532,7 +544,7 @@ def ValidationResultsPageRenderer_render_with_run_info_at_start():
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
-    titanic_profiled_evrs_1,
+    titanic_profiled_evrs_1: ExpectationValidationResult,
     ValidationResultsPageRenderer_render_with_run_info_at_end,
 ):
     validation_results_page_renderer = ValidationResultsPageRenderer(
@@ -556,7 +568,7 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
-    titanic_profiled_evrs_1,
+    titanic_profiled_evrs_1: ExpectationValidationResult,
     ValidationResultsPageRenderer_render_with_run_info_at_start,
 ):
     validation_results_page_renderer = ValidationResultsPageRenderer(
