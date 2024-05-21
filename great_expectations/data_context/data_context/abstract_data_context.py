@@ -152,6 +152,9 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -3875,9 +3878,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def get_docs_sites_urls(
         self,
-        resource_identifier=None,
+        resource_identifier: ExpectationSuiteIdentifier
+        | ValidationResultIdentifier
+        | GXCloudIdentifier
+        | str
+        | None = None,
         site_name: Optional[str] = None,
-        only_if_exists=True,
+        only_if_exists: bool = True,
         site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
@@ -4794,7 +4801,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         validations_store_name=None,
         failed_only=False,
         include_rendered_content=None,
-    ):
+    ) -> ExpectationValidationResult | dict:
         """Get validation results from a configured store.
 
         Args:
@@ -5272,11 +5279,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @public_api
     def build_data_docs(
         self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
+        site_names: list[str] | None = None,
+        resource_identifiers: list[ExpectationSuiteIdentifier]
+        | list[ValidationResultIdentifier]
+        | None = None,
+        dry_run: bool = False,
         build_index: bool = True,
-    ):
+    ) -> dict[str, str]:
         """Build Data Docs for your project.
 
         --Documentation--

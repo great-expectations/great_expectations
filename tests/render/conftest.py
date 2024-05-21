@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import json
 import os
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -10,9 +13,14 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.self_check.util import expectationSuiteValidationResultSchema
 
+if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
+
 
 @pytest.fixture(scope="module")
-def empty_data_context_module_scoped(tmp_path_factory):
+def empty_data_context_module_scoped(tmp_path_factory) -> FileDataContext:
     # Re-enable GE_USAGE_STATS
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = gx.data_context.FileDataContext.create(project_path)
@@ -23,7 +31,7 @@ def empty_data_context_module_scoped(tmp_path_factory):
 
 
 @pytest.fixture
-def titanic_profiled_name_column_evrs():
+def titanic_profiled_name_column_evrs() -> ExpectationSuiteValidationResult:
     # This is a janky way to fetch expectations matching a specific name from an EVR suite.
     # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
     from great_expectations.render.renderer.renderer import Renderer
