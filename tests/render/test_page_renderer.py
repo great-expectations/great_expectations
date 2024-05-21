@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import json
 import re
-from typing import TYPE_CHECKING
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Literal
 
 import mistune
 import pytest
@@ -19,6 +20,7 @@ from great_expectations.render.renderer import (
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint.checkpoint import CheckpointResult
     from great_expectations.core.expectation_validation_result import (
         ExpectationValidationResult,
     )
@@ -591,33 +593,44 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     )
 
 
-@pytest.mark.big
-def test_fds_asset_name_is_rendered_in_data_doc():
+@pytest.fixture(params=["fluent", "block"])
+def checkpoint_results(request: pytest.FixtureRequest) -> CheckpointResult:
+    """Parametrized fixture that returns checkpoint results for FDS and BDS datasources"""
     import great_expectations as gx
 
     context = gx.get_context(mode="ephemeral")
 
-    validator = context.sources.pandas_default.read_csv(
-        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
-        asset_name="my_asset",
-    )
+    style: Literal["fluent", "block"] = request.param
+    if style == "fluent":
+        validator = context.sources.pandas_default.read_csv(
+            "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
+            asset_name="my_asset",
+        )
 
-    validator.expect_column_values_to_not_be_null("pickup_datetime")
-    validator.expect_column_values_to_be_between(
-        "passenger_count", min_value=1, max_value=6
-    )
-    validator.save_expectation_suite(discard_failed_expectations=False)
+        validator.expect_column_values_to_not_be_null("pickup_datetime")
+        validator.expect_column_values_to_be_between(
+            "passenger_count", min_value=1, max_value=6
+        )
+        validator.save_expectation_suite(discard_failed_expectations=False)
 
-    checkpoint = context.add_or_update_checkpoint(
-        name="my_quickstart_checkpoint",
-        validator=validator,
-    )
+        checkpoint = context.add_or_update_checkpoint(
+            name="my_quickstart_checkpoint",
+            validator=validator,
+        )
 
-    checkpoint_result = checkpoint.run()
-    data_asset_names = checkpoint_result.list_data_asset_names()
+        checkpoint_result = checkpoint.run()
+    else:
+        pass
+
+    return checkpoint_result
+
+
+@pytest.mark.big
+def test_asset_name_is_rendered_in_data_doc(checkpoint_results: CheckpointResult):
+    data_asset_names = checkpoint_results.list_data_asset_names()
     assert "my_asset" in data_asset_names
-    print(f"checkpoint_result: {pf(checkpoint_result, depth=1)}")
+    print(f"checkpoint_result: {pf(checkpoint_results, depth=1)}")
 
     assert False
     # TODO: don't actually open it just look at the results
-    context.view_validation_result(checkpoint_result)
+    context.view_validation_result(checkpoint_results)
