@@ -152,6 +152,9 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -169,9 +172,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
-        ExpectationSuiteIdentifier,
         GXCloudIdentifier,
-        ValidationResultIdentifier,
     )
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.fluent.interfaces import (
@@ -4798,7 +4799,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         validations_store_name=None,
         failed_only=False,
         include_rendered_content=None,
-    ):
+    ) -> ExpectationValidationResult:
         """Get validation results from a configured store.
 
         Args:
