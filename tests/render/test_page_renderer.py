@@ -589,3 +589,35 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
         rendered_validation_results
         == ValidationResultsPageRenderer_render_with_run_info_at_start
     )
+
+
+@pytest.mark.big
+def test_fds_asset_name_is_rendered_in_data_doc():
+    import great_expectations as gx
+
+    context = gx.get_context(mode="ephemeral")
+
+    validator = context.sources.pandas_default.read_csv(
+        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
+        asset_name="my_asset",
+    )
+
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between(
+        "passenger_count", min_value=1, max_value=6
+    )
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_quickstart_checkpoint",
+        validator=validator,
+    )
+
+    checkpoint_result = checkpoint.run()
+    data_asset_names = checkpoint_result.list_data_asset_names()
+    assert "my_asset" in data_asset_names
+    print(f"checkpoint_result: {pf(checkpoint_result, depth=1)}")
+
+    assert False
+    # TODO: don't actually open it just look at the results
+    context.view_validation_result(checkpoint_result)
