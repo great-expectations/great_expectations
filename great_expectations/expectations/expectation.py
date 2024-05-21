@@ -296,7 +296,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
                 .lstrip()
                 .split(" ")
             )
-            join_multi_caps_and_nums = []
+            join_multi_caps_and_nums: list[str] = []
             for idx, token in enumerate(split_between_caps_and_nums):
                 if idx > 0:
                     consecutive_caps = (
