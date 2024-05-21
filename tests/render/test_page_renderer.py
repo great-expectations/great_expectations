@@ -594,7 +594,6 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     )
 
 
-@pytest.mark.big
 def test_asset_name_is_part_of_resource_info_index(mocker: MockerFixture):
     """
     DefaultSiteIndexBuilder.add_resource_info_to_index_links_dict is what supplies the
