@@ -1,7 +1,7 @@
 """
 Utilities to account for Expectation behavior that is specific to Snowflake.
 """
-from typing import Literal, Union
+from typing import Dict, Literal, Union
 
 SNOWFLAKE_SCHEMA_COLUMN_TYPE_NAMES = Union[
     # all possible values of `select data_type from information_schema.columns;`
@@ -37,7 +37,7 @@ def map_sfsqlalchemy_type_to_sf_type(
         If not recognized, the original input value.
     """
 
-    sfsqlalchemy_type_to_sf_type: dict[str, SNOWFLAKE_SCHEMA_COLUMN_TYPE_NAMES] = {
+    sfsqlalchemy_type_to_sf_type: Dict[str, SNOWFLAKE_SCHEMA_COLUMN_TYPE_NAMES] = {
         "ARRAY": "ARRAY",
         "BIGINT": "NUMBER",
         "BINARY": "BINARY",
