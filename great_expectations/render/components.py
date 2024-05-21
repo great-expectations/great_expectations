@@ -926,8 +926,8 @@ class RenderedAtomicContent(RenderedContent):
     @classmethod
     def validate(cls, v):
         if not isinstance(v, RenderedAtomicContent):
-            invalid_type = f"Invalid type {type(v)} for RenderedAtomicContent"
-            raise TypeError(invalid_type)
+            invalid_type_msg = f"Invalid type {type(v)} for RenderedAtomicContent"
+            raise TypeError(invalid_type_msg)
         return v
 
     @classmethod
