@@ -5,7 +5,7 @@ from great_expectations.expectations.expectation import MetaExpectation
 
 
 @pytest.mark.unit
-def test_all_core_models_are_serializable():
+def test_all_core_model_schemas_are_serializable():
     all_models = [
         expectation
         for expectation in core.__dict__.values()
