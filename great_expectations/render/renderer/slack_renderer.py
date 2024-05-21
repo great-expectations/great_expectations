@@ -31,7 +31,7 @@ class SlackRenderer(Renderer):
             validation_result_urls = []
 
         status = "Failed :no_entry:"
-        if validation_result.success:
+        if validation_result and validation_result.success:
             status = "Success :white_check_mark:"
         title_block = {
             "type": "header",
@@ -128,9 +128,10 @@ class SlackRenderer(Renderer):
 
         divider_block = {"type": "divider"}
         query["blocks"].append(divider_block)
-        query["blocks"].insert(
-            1, self._build_run_time_block(run_id=validation_result.meta["run_id"])
-        )
+        if validation_result and validation_result.meta:
+            query["blocks"].insert(
+                1, self._build_run_time_block(run_id=validation_result.meta["run_id"])
+            )
         return query
 
     def _build_run_time_block(self, run_id: RunIdentifier) -> dict:

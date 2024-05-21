@@ -140,11 +140,8 @@ class ValidationAction:
 
 
 class NoOpAction(ValidationAction):
-    def __init__(
-        self,
-        data_context,
-    ) -> None:
-        super().__init__(data_context)
+    def __init__(self, data_context, name) -> None:
+        super().__init__(data_context=data_context, name=name)
 
     @override
     def _run(  # noqa: PLR0913

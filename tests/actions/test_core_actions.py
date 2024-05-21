@@ -591,7 +591,7 @@ def test_api_action_create_payload():
     mock_validation_results = []
     expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
     api_notification_action = APINotificationAction(
-        mock_data_context, "http://www.example.com"
+        data_context=mock_data_context, url="http://www.example.com", name="testing"
     )
     payload = api_notification_action.create_payload(
         "my_schema.my_table", "my_suite", mock_validation_results
