@@ -4801,7 +4801,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         validations_store_name=None,
         failed_only=False,
         include_rendered_content=None,
-    ) -> ExpectationValidationResult:
+    ) -> ExpectationValidationResult | dict:
         """Get validation results from a configured store.
 
         Args:
@@ -4839,7 +4839,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             # run_id_set = set([key.run_id for key in filtered_key_list])
             if len(filtered_key_list) == 0:
                 logger.warning("No valid run_id values found.")
-                return {}  # type: ignore[return-value]
+                return {}
 
             filtered_key_list = sorted(filtered_key_list, key=lambda x: x.run_id)
 
