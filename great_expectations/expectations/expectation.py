@@ -286,7 +286,38 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
             # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
-            schema["title"] = re.sub(r"(\w)([A-Z])", r"\1 \2", schema.get("title", ""))
+            split_between_caps_and_nums = (
+                "".join(
+                    [
+                        " " + c if (c.isdigit() or c == c.upper()) else c
+                        for c in schema.get("title", "")
+                    ]
+                )
+                .lstrip()
+                .split(" ")
+            )
+            join_multi_caps_and_nums = []
+            for idx, token in enumerate(split_between_caps_and_nums):
+                if idx > 0:
+                    consecutive_caps = (
+                        token.upper() == token
+                        and split_between_caps_and_nums[idx - 1].upper()
+                        == split_between_caps_and_nums[idx - 1]
+                    )
+                    consecutive_digits = (
+                        token.isdigit() and split_between_caps_and_nums[idx - 1].isdigit()
+                    )
+                    if (
+                        len(token) == 1
+                        and len(split_between_caps_and_nums[idx - 1]) == 1
+                        and (consecutive_caps or consecutive_digits)
+                    ):
+                        join_multi_caps_and_nums[-1] = join_multi_caps_and_nums[-1] + token
+                    else:
+                        join_multi_caps_and_nums.append(token)
+                else:
+                    join_multi_caps_and_nums.append(token)
+            schema["title"] = " ".join(join_multi_caps_and_nums)
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
