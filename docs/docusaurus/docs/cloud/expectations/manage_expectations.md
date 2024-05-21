@@ -8,6 +8,12 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 <!-- [//]: # (TODO: To learn more about Expectations, see Expectation.) -->
 
+:::info Custom SQL Query Expectations
+
+Support for custom SQL query Expectations is currently unavailable in GX Cloud. To create custom SQL query Expectations, see [Customize an Expectation Class](/core/create_expectations/expectations/manage_expectations.md#customize-an-expectation-class).
+
+:::
+
 ## Prerequisites
 
 - You have deployed the GX Agent. See [Deploy the GX Agent](../deploy_gx_agent.md).
