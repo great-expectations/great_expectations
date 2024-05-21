@@ -76,6 +76,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-lite.txt"]
         | req_set_dict["requirements-dev-api-docs-test.txt"]
+        | req_set_dict["requirements-dev-snowflake.txt"]
         == req_set_dict["requirements-dev-test.txt"]
     )
 
@@ -184,7 +185,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 78
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 79
     assert set(sorted_packages_with_pins_or_upper_bounds) == {
         (
             "requirements-dev-api-docs-test.txt",
