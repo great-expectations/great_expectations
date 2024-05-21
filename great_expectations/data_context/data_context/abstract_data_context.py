@@ -4796,9 +4796,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     **expectation_suite_dict, data_context=self
                 )
 
-                dependencies: dict = (
-                    expectation_suite.get_evaluation_parameter_dependencies()
-                )
+                dependencies = expectation_suite.get_evaluation_parameter_dependencies()
                 if len(dependencies) > 0:
                     nested_update(self._evaluation_parameter_dependencies, dependencies)
 
