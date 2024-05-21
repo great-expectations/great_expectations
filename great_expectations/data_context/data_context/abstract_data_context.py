@@ -3880,6 +3880,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self,
         resource_identifier: ExpectationSuiteIdentifier
         | ValidationResultIdentifier
+        | GXCloudIdentifier
+        | str
         | None = None,
         site_name: Optional[str] = None,
         only_if_exists: bool = True,
