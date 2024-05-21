@@ -302,6 +302,7 @@ class SlackNotificationAction(ValidationAction):
                 )
                 validation_result_urls.append(cloud_validation_url)
 
+        checkpoint_name = None
         if checkpoint_identifier is not None:
             checkpoint_name = checkpoint_identifier.resource_name
         if (

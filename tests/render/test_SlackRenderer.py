@@ -466,6 +466,6 @@ def test_slack_renderer_shows_gx_cloud_url(failed_expectation_suite_validation_r
 
     assert (
         ""
-        f"<app.greatexpectations.io/?validationResultId=123-456-789|View Results>"
+        "<app.greatexpectations.io/?validationResultId=123-456-789|View Results>"
         "" in rendered_msg["blocks"][2]["text"]["text"]
     )
