@@ -247,6 +247,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-test.txt", "ipykernel", (("<=", "6.17.1"),)),
         ("requirements-dev-test.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
         ("requirements-dev-test.txt", "mypy", (("==", "1.7.1"),)),
+        ("requirements-dev-test.txt", "pandas", (("<", "2.2.0"),)),
         ("requirements-dev-test.txt", "ruff", (("==", "0.1.11"),)),
         ("requirements-dev-test.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
