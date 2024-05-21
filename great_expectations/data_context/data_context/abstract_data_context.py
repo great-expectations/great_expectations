@@ -4762,11 +4762,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         if self.expectations_store.cloud_mode:
             # use get_all to prevent round trips to GX Cloud.
-            for expectation_suite_dict in self.expectations_store.get_all():
-                if not expectation_suite_dict:
+            for exp_suite_dict in self.expectations_store.get_all():
+                if not exp_suite_dict:
                     continue
                 expectation_suite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=self
+                    **exp_suite_dict, data_context=self
                 )
 
                 dependencies: dict = (
