@@ -952,6 +952,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
                     batch_spec = validation.meta.get("batch_spec", {})
 
+                    asset_name = batch_kwargs.get("data_asset_name") or batch_spec.get(
+                        "data_asset_name"
+                    )
+                    # FDS does not store data_asset_name in batch_kwargs or batch_spec
+                    active_batch = validation.meta.get("active_batch_definition", {})
+                    if not asset_name and active_batch:
+                        asset_name = active_batch.get("data_asset_name")
+
                     self.add_resource_info_to_index_links_dict(
                         index_links_dict=index_links_dict,
                         expectation_suite_name=validation_result_key.expectation_suite_identifier.expectation_suite_name,
@@ -961,8 +969,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         validation_success=validation_success,
                         run_time=validation_result_key.run_id.run_time,
                         run_name=validation_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name")
-                        or batch_spec.get("data_asset_name"),
+                        asset_name=asset_name,
                         batch_kwargs=batch_kwargs,
                         batch_spec=batch_spec,
                     )
