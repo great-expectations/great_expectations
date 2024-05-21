@@ -27,9 +27,6 @@ organization_id = "0dcf5ce1-806f-4199-9e69-e24dfba5e62a"
                 GXCloudEnvironmentVariable.BASE_URL: base_url,
                 GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
                 GXCloudEnvironmentVariable.ORGANIZATION_ID: organization_id,
-                GXCloudEnvironmentVariable._OLD_BASE_URL: base_url,
-                GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,
-                GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID: organization_id,
             },
             id="include_org_id",
         ),
@@ -38,8 +35,6 @@ organization_id = "0dcf5ce1-806f-4199-9e69-e24dfba5e62a"
             {
                 GXCloudEnvironmentVariable.BASE_URL: base_url,
                 GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
-                GXCloudEnvironmentVariable._OLD_BASE_URL: base_url,
-                GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,
             },
             id="omit_org_id",
         ),
