@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 import mistune
 import pytest
@@ -20,7 +20,8 @@ from great_expectations.render.renderer import (
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint.checkpoint import CheckpointResult
+    from pytest_mock import MockerFixture
+
     from great_expectations.core.expectation_validation_result import (
         ExpectationValidationResult,
     )
@@ -593,42 +594,42 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     )
 
 
-@pytest.fixture(params=["fluent", "block"])
-def checkpoint_results(request: pytest.FixtureRequest) -> CheckpointResult:
-    """Parametrized fixture that returns checkpoint results for FDS and BDS datasources"""
+@pytest.mark.big
+def test_asset_name_is_part_of_resource_info_index(mocker: MockerFixture):
+    """
+    DefaultSiteIndexBuilder.add_resource_info_to_index_links_dict is what supplies the
+    the resource meta-data to the index page.
+    This test checks that the asset_name is being provided when checkpoints with fluent datasources are run.
+    """
     import great_expectations as gx
+    from great_expectations.render.renderer.site_builder import DefaultSiteIndexBuilder
 
     context = gx.get_context(mode="ephemeral")
 
-    style: Literal["fluent", "block"] = request.param
-    if style == "fluent":
-        validator = context.sources.pandas_default.read_csv(
-            "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
-            asset_name="my_asset",
-        )
+    add_resource_info_spy = mocker.spy(
+        DefaultSiteIndexBuilder,
+        "add_resource_info_to_index_links_dict",
+    )
 
-        validator.expect_column_values_to_not_be_null("pickup_datetime")
-        validator.expect_column_values_to_be_between(
-            "passenger_count", min_value=1, max_value=6
-        )
-        validator.save_expectation_suite(discard_failed_expectations=False)
+    asset_name = "my_asset"
+    validator = context.sources.pandas_default.read_csv(
+        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
+        asset_name=asset_name,
+    )
 
-        checkpoint = context.add_or_update_checkpoint(
-            name="my_quickstart_checkpoint",
-            validator=validator,
-        )
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between(
+        "passenger_count", min_value=1, max_value=6
+    )
+    validator.save_expectation_suite(discard_failed_expectations=False)
 
-        checkpoint_result = checkpoint.run()
-        assert len(re.findall("my_asset", str(checkpoint_result))) == 6
-    else:
-        pass
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_quickstart_checkpoint",
+        validator=validator,
+    )
 
-    context.view_validation_result(checkpoint_result)
-    return checkpoint_result
+    checkpoint.run()
 
-
-@pytest.mark.big
-def test_asset_name_is_rendered_in_data_doc(checkpoint_results: CheckpointResult):
-    data_asset_names = checkpoint_results.list_data_asset_names()
-    assert "my_asset" in data_asset_names
-    print(f"checkpoint_result: {pf(checkpoint_results, depth=1)}")
+    last_call = add_resource_info_spy.call_args_list[-1]
+    print(f"Last call kwargs:\n{pf(last_call.kwargs, depth=1)}")
+    assert last_call.kwargs["asset_name"] == asset_name
