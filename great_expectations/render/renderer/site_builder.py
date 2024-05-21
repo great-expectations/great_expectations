@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import logging
 import os
 import pathlib
 import traceback
 import urllib
 from collections import OrderedDict
-from typing import Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from great_expectations import exceptions
 from great_expectations.core import ExpectationSuite
@@ -22,6 +24,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import resource_key_passes_run_name_filter
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +119,7 @@ class SiteBuilder:
 
     def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
-        data_context,
+        data_context: AbstractDataContext,
         store_backend,
         site_name=None,
         site_index_builder=None,
@@ -347,7 +352,7 @@ class DefaultSiteSectionBuilder:
     def __init__(  # noqa: PLR0913
         self,
         name,
-        data_context,
+        data_context: AbstractDataContext,
         target_store,
         source_store_name,
         custom_styles_directory=None,
@@ -516,7 +521,7 @@ class DefaultSiteIndexBuilder:
         self,
         name,
         site_name,
-        data_context,
+        data_context: AbstractDataContext,
         target_store,
         site_section_builders_config,
         custom_styles_directory=None,
