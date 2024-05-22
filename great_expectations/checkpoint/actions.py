@@ -199,6 +199,8 @@ class SlackNotificationAction(ValidationAction):
         show_failed_expectations: Shows a list of failed expectation types.
     """
 
+    SLACK_CLOUD_ANALYTICS_PARAMETER = "?slack=true"
+
     def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
@@ -298,7 +300,7 @@ class SlackNotificationAction(ValidationAction):
             ):
                 cloud_validation_url = (
                     payload["store_validation_result"]["validation_result_url"]
-                    + "?slack=true"
+                    + self.SLACK_CLOUD_ANALYTICS_PARAMETER
                 )
                 validation_result_urls.append(cloud_validation_url)
 
@@ -313,13 +315,13 @@ class SlackNotificationAction(ValidationAction):
             and not validation_success
         ):
             query: Dict = self.renderer.render(
-                self.name,
-                checkpoint_name,
-                validation_result_suite,
-                data_docs_pages,
-                self.notify_with,
-                self.show_failed_expectations,
-                validation_result_urls,
+                name=self.name,
+                checkpoint_name=checkpoint_name,
+                validation_result=validation_result_suite,
+                data_docs_pages=data_docs_pages,
+                notify_with=self.notify_with,
+                show_failed_expectations=self.show_failed_expectations,
+                validation_result_urls=validation_result_urls,
             )
 
             # this will actually send the POST request to the Slack webapp server

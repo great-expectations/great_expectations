@@ -689,6 +689,7 @@ def test_cloud_sns_notification_action(
         sns_topic_arn=arn,
         sns_message_subject="Subject",
         data_context=cloud_data_context_with_datasource_pandas_engine,
+        name="testing",
     )
     assert sns_action.run(
         validation_result_suite=validation_result_suite,
