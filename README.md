@@ -21,6 +21,8 @@ Great Expectations
 
 *Always know what to expect from your data.*
 
+I've changed
+
 What is GX?
 --------------------------------------------------------------------------------
 
