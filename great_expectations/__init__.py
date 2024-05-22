@@ -36,3 +36,5 @@ register_core_expectations()
 
 
 rtd_url_ge_version = __version__.replace(".", "_")
+
+foo = "bar"
