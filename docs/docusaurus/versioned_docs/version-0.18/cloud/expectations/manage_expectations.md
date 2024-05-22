@@ -8,7 +8,7 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 :::info Custom SQL Query Expectations
 
-Support for custom SQL query Expectations is currently unavailable in GX Cloud. To create custom SQL query Expectations, see [Create a Custom Query Expectation](/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations.md).
+To create custom SQL query Expectations, you'll need to use the GX API. See [Create a Custom Query Expectation](/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations.md).
 
 :::
 
