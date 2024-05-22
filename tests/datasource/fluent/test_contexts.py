@@ -524,7 +524,6 @@ def test_run_checkpoint_minimizes_suite_request_count(
     seeded_cloud_context: CloudDataContext,
     cloud_api_fake_db: FakeDBTypedDict,
     cloud_api_fake: RequestsMock,
-    mocker: MockerFixture,
     valid_file_path,
 ):
     validator = seeded_cloud_context.sources.pandas_default.read_csv(valid_file_path)
@@ -535,8 +534,21 @@ def test_run_checkpoint_minimizes_suite_request_count(
         validator=validator,
     )
 
+    expectation_suite_url = (
+        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/expectation-suites"
+    )
+    print(f"Looking for Match\n{expectation_suite_url}\n")
+    initial_call_count: int = 0
+    for call in cloud_api_fake.registered():
+        if call.url == expectation_suite_url and call.method == "GET":
+            print("Match")
+            initial_call_count = call.call_count
+            print(call.url, call.call_count)
     checkpoint.run()
-    # TODO assert GET expectation-suites called
+
+    cloud_api_fake.assert_call_count(
+        f"{expectation_suite_url}?name=default", count=initial_call_count
+    )
 
 
 if __name__ == "__main__":

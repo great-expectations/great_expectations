@@ -273,7 +273,7 @@ class FluentBaseModel(pydantic.BaseModel):
                 f" {class_name} may be missing a context."
             )
         else:
-            logger.info(
+            logger.debug(
                 f"{class_name}.dict() - missing `config_provider`, skipping config substitution"
             )
 

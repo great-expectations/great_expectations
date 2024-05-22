@@ -465,6 +465,20 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
+    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
+    exp_suite_list: list[dict] = list(x["data"] for x in exp_suites.values())
+
+    resp_body = {"data": exp_suite_list}
+
+    result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(resp_body))
+    LOGGER.debug(f"Response {result.status}")
+    return result
+
+
+def get_expectation_suite_by_name_cb(request: PreparedRequest) -> CallbackResult:
+    url = request.url
+    LOGGER.warning(f"{request.method} {url}")
+
     parsed_url = urllib.parse.urlparse(url)
     query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
     queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
@@ -802,8 +816,15 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.GET,
+            f"{org_url_base}/expectation-suites?name=default",
+            get_expectation_suite_by_name_cb,
+            match_querystring=True,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
             f"{org_url_base}/expectation-suites",
             get_expectation_suites_cb,
+            match_querystring=False,
         )
         resp_mocker.add_callback(
             responses.GET,
