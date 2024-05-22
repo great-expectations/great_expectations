@@ -37,11 +37,9 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
             "id": pact.Format().uuid,
             "type": "pandas",
             "attributes": {
-                "datasource_config": {
-                    "assets": [
-                        {},
-                    ],
-                },
+                # pact doesn't test optional attributes like an empty "assets" list
+                # this is the minimum response. https://docs.pact.io/faq#why-is-there-no-support-for-specifying-optional-attributes
+                "datasource_config": pact.Like({}),
             },
         },
     )
@@ -52,19 +50,6 @@ GET_DATASOURCE_MIN_RESPONSE_BODY: Final[PactBody] = {
 @pytest.mark.parametrize(
     "contract_interaction",
     [
-        # ContractInteraction(
-        #     method="POST",
-        #     request_path=pathlib.Path(
-        #         "/",
-        #         "organizations",
-        #         EXISTING_ORGANIZATION_ID,
-        #         "datasources",
-        #     ),
-        #     upon_receiving="a request to add a Data Source",
-        #     given="the Data Source does not exist",
-        #     response_status=200,
-        #     response_body=POST_DATASOURCE_MIN_RESPONSE_BODY,
-        # ),
         ContractInteraction(
             method="GET",
             request_path=pathlib.Path(

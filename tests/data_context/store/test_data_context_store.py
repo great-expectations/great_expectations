@@ -38,6 +38,13 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
         "notebooks": None,
         "plugins_directory": "plugins/",
         "stores": {
+            "checkpoint_store": {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "base_directory": "checkpoints/",
+                    "class_name": "TupleFilesystemStoreBackend",
+                },
+            },
             "evaluation_parameter_store": {
                 "class_name": "EvaluationParameterStore",
                 "module_name": "great_expectations.data_context.store",

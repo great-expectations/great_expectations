@@ -201,7 +201,7 @@ def test_interactive_validator(
         expectation_suite_name=expectation_suite_name
     )
 
-    assert len(expectation_suite.expectations) == expectation_count
+    assert len(expectation_suite.expectations) == expectation_count + 1
 
 
 @pytest.mark.cloud

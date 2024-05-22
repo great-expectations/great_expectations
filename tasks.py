@@ -8,9 +8,9 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+
 from __future__ import annotations
 
-import json
 import logging
 import os
 import pathlib
@@ -278,7 +278,7 @@ def type_check(  # noqa: PLR0913, PLR0912
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
-            print("✅"),
+            print("✅")
         except FileNotFoundError as exc:
             print(f"❌\n  {exc}")
 
@@ -319,50 +319,6 @@ def type_check(  # noqa: PLR0913, PLR0912
         cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
-
-
-@invoke.task(aliases=["get-stats"])
-def get_usage_stats_json(ctx: Context):
-    """
-    Dump usage stats event examples to json file
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    events = usage_stats_utils.get_usage_stats_example_events()
-    version = usage_stats_utils.get_gx_version()
-
-    outfile = f"v{version}_example_events.json"
-    with open(outfile, "w") as f:
-        json.dump(events, f)
-
-    print(f"File written to '{outfile}'.")
-
-
-@invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
-def mv_usage_stats_json(ctx: Context):
-    """
-    Use databricks-cli lib to move usage stats event examples to dbfs:/
-    """
-    try:
-        from tests.integration.usage_statistics import usage_stats_utils
-    except ModuleNotFoundError:
-        raise invoke.Exit(
-            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
-            code=1,
-        )
-
-    version = usage_stats_utils.get_gx_version()
-    outfile = f"v{version}_example_events.json"
-    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
-    cmd = cmd.format(outfile)
-    ctx.run(cmd)
-    print(f"'{outfile}' copied to dbfs.")
 
 
 UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
@@ -955,7 +911,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud, etc. Can be specified multiple times.",
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
@@ -1040,7 +996,11 @@ def docs_snippet_tests(
 
 
 @invoke.task(
-    help={"pty": _PTY_HELP_DESC},
+    help={
+        "pty": _PTY_HELP_DESC,
+        "reports": "Generate coverage reports to be uploaded to codecov",
+        "W": "Warnings control",
+    },
     iterable=["service_names", "up_services", "verbose"],
 )
 def ci_tests(  # noqa: PLR0913
@@ -1053,6 +1013,7 @@ def ci_tests(  # noqa: PLR0913
     slowest: int = 5,
     timeout: float = 0.0,  # 0 indicates no timeout
     xdist: bool = False,
+    W: str | None = None,
     pty: bool = True,
 ):
     """
@@ -1082,6 +1043,10 @@ def ci_tests(  # noqa: PLR0913
 
     if verbose:
         pytest_options.append("-vv")
+
+    if W:
+        # https://docs.python.org/3/library/warnings.html#describing-warning-filters
+        pytest_options.append(f"-W={W}")
 
     for test_deps in _get_marker_dependencies(marker):
         if restart_services or up_services:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Hashable
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.validator.computed_metric import MetricValue
@@ -24,7 +24,7 @@ _MetricKey: TypeAlias = Union[Tuple[str, Hashable, Hashable], Tuple[str, str, st
 _MetricsDict: TypeAlias = Dict[_MetricKey, MetricValue]
 _AbortedMetricsInfoDict: TypeAlias = Dict[
     _MetricKey,
-    Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+    Dict[str, Union[MetricConfiguration, ExceptionInfo, int]],
 ]
 
 
@@ -218,13 +218,7 @@ class MetricsCalculator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> Tuple[
-        _MetricsDict,
-        Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ],
-    ]:
+    ) -> Tuple[_MetricsDict, _AbortedMetricsInfoDict]:
         """
         Args:
             graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
@@ -233,12 +227,10 @@ class MetricsCalculator:
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+            Dictionary with aborted metrics information, with metric ID as key.
         """
         resolved_metrics: _MetricsDict
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
+        aborted_metrics_info: _AbortedMetricsInfoDict
         (
             resolved_metrics,
             aborted_metrics_info,
@@ -264,13 +256,7 @@ class MetricsCalculator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> Tuple[
-        _MetricsDict,
-        Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ],
-    ]:
+    ) -> Tuple[_MetricsDict, _AbortedMetricsInfoDict]:
         """
         Calls "ValidationGraph.resolve()" method with supplied arguments.
 
@@ -281,13 +267,10 @@ class MetricsCalculator:
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
-            Aborted metrics information, with metric ID as key.
+            Dictionary with aborted metrics information, with metric ID as key.
         """
         resolved_metrics: _MetricsDict
-        aborted_metrics_info: Dict[
-            _MetricKey,
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-        ]
+        aborted_metrics_info: _AbortedMetricsInfoDict
         resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,

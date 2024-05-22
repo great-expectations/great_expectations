@@ -8,6 +8,9 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
+from great_expectations.core.usage_statistics.usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import get_context
 from great_expectations.data_context.types.base import (
@@ -21,9 +24,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.validator.validator import Validator
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 from tests.test_utils import create_files_in_directory, get_sqlite_temp_table_names
 
 yaml = YAMLHandler()

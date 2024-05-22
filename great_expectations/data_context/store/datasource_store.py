@@ -2,10 +2,14 @@ from __future__ import annotations
 
 import copy
 import logging
+import warnings
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Optional, Union, overload
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.pydantic import (
+    ValidationError as PydanticValidationError,
+)
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import (
     DataContextKey,
@@ -18,6 +22,10 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
+from great_expectations.datasource.fluent import (
+    GxInvalidDatasourceWarning,
+    InvalidDatasource,
+)
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
@@ -113,12 +121,19 @@ class DatasourceStore(Store):
             return value
         elif isinstance(value, dict):
             # presence of a 'type' field means it's a fluent datasource
-            type_ = value.get("type")
+            type_: str | None = value.get("type")
             if type_:
-                datasource_model = _SourceFactories.type_lookup.get(type_)
-                if not datasource_model:
-                    raise LookupError(f"Unknown Datasource 'type': '{type_}'")
-                return datasource_model(**value)
+                try:
+                    datasource_model = _SourceFactories.type_lookup[type_]
+                    return datasource_model(**value)
+                except (PydanticValidationError, LookupError) as config_error:
+                    warnings.warn(
+                        f"Datasource {value.get('name', '')} configuration is invalid."
+                        " Check `my_datasource.config_error` attribute for more details.",
+                        GxInvalidDatasourceWarning,
+                    )
+                    # Any fields that are not part of the schema are ignored
+                    return InvalidDatasource(config_error=config_error, **value)
             return self._schema.load(value)
         else:
             return self._schema.loads(value)

@@ -1,1 +1,2 @@
 clickhouse-sqlalchemy>=0.2.2
+pandas<2.2.0; python_version >= "3.9"

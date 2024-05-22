@@ -45,6 +45,12 @@ if TYPE_CHECKING:
     )
 
 
+# No longer used but keeping around for tests
+USAGE_STATISTICS_QA_URL = (
+    "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+)
+
+
 STOP_SIGNAL = object()
 
 logger = logging.getLogger(__name__)

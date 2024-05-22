@@ -21,6 +21,7 @@ DB_PATH: Final[str] = file_relative_path(
 
 @pytest.fixture
 def referential_integrity_db(sa):
+    """Create a sqlite database with 3 tables: order_table_1, order_table_2, and customer_table. We only run this once to create the database."""
     sqlite_engine = sa.create_engine(f"sqlite:///{DB_PATH}")
     order_table_1 = pd.DataFrame(
         {
@@ -65,9 +66,7 @@ def referential_integrity_db(sa):
 
 
 @pytest.fixture()
-def sqlite_context(
-    in_memory_runtime_context, referential_integrity_db
-) -> SqliteDatasource:
+def sqlite_context(in_memory_runtime_context) -> SqliteDatasource:
     context = in_memory_runtime_context
     datasource_name = "my_snowflake_datasource"
     context.sources.add_sqlite(
@@ -144,11 +143,16 @@ def test_configuration_invalid_column_name(sqlite_context):
     )
 
     with pytest.raises(gx_exceptions.MetricResolutionError):
-        validator.expect_column_values_to_be_present_in_other_table(
+        res = validator.expect_column_values_to_be_present_in_other_table(
             foreign_key_column="I_DONT_EXIST",
             foreign_table="CUSTOMER_TABLE",
             foreign_table_key_column="CUSTOMER_ID",
         )
+
+        assert res.success is False
+        for k, v in res["exception_info"].items():
+            assert v["raised_exception"] is True
+            assert "no such column: a.I_DONT_EXIST" in v["exception_message"]
 
 
 @pytest.mark.unit

@@ -1,4 +1,5 @@
 """Test using actual sample data."""
+
 from __future__ import annotations
 
 from typing import List
@@ -9,11 +10,12 @@ from pandas import Timestamp
 
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent.batch_request import BatchRequest
-from great_expectations.experimental.metric_repository.column_descriptive_metrics_metric_retriever import (
-    ColumnDescriptiveMetricsMetricRetriever,
+from great_expectations.experimental.metric_repository.metric_list_metric_retriever import (
+    MetricListMetricRetriever,
 )
 from great_expectations.experimental.metric_repository.metrics import (
     ColumnMetric,
+    MetricTypes,
     TableMetric,
 )
 
@@ -46,15 +48,88 @@ def cloud_context_and_batch_request_with_simple_dataframe(
 
 
 @pytest.mark.cloud
-def test_get_metrics(
+def test_get_metrics_table_metrics_only(
     cloud_context_and_batch_request_with_simple_dataframe: tuple[
         CloudDataContext, BatchRequest
     ],
 ):
     context, batch_request = cloud_context_and_batch_request_with_simple_dataframe
+    table_metrics_list: List[MetricTypes] = [
+        MetricTypes.TABLE_ROW_COUNT,
+        MetricTypes.TABLE_COLUMNS,
+        MetricTypes.TABLE_COLUMN_TYPES,
+    ]
+    metric_retriever = MetricListMetricRetriever(context)
+    metrics = metric_retriever.get_metrics(
+        batch_request=batch_request, metric_list=table_metrics_list
+    )
+    validator = context.get_validator(batch_request=batch_request)
+    batch_id = validator.active_batch.id
 
-    metric_retriever = ColumnDescriptiveMetricsMetricRetriever(context)
-    metrics = metric_retriever.get_metrics(batch_request=batch_request)
+    expected_metrics = [
+        TableMetric[int](
+            batch_id=batch_id,
+            metric_name="table.row_count",
+            value=3,
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id=batch_id,
+            metric_name="table.columns",
+            value=[
+                "numeric_with_nulls_1",
+                "numeric_with_nulls_2",
+                "string",
+                "string_with_nulls",
+                "boolean",
+                "datetime",
+            ],
+            exception=None,
+        ),
+        TableMetric[List[str]](
+            batch_id=batch_id,
+            metric_name="table.column_types",
+            value=[
+                {"name": "numeric_with_nulls_1", "type": "float64"},
+                {"name": "numeric_with_nulls_2", "type": "float64"},
+                {"name": "string", "type": "object"},
+                {"name": "string_with_nulls", "type": "object"},
+                {"name": "boolean", "type": "bool"},
+                {"name": "datetime", "type": "datetime64[ns]"},
+            ],
+            exception=None,
+        ),
+    ]
+
+    # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):
+    assert len(metrics) == len(expected_metrics)
+    for metric in metrics:
+        assert metric.dict() in [
+            expected_metric.dict() for expected_metric in expected_metrics
+        ]
+
+
+@pytest.mark.cloud
+def test_get_metrics_full_cdm(
+    cloud_context_and_batch_request_with_simple_dataframe: tuple[
+        CloudDataContext, BatchRequest
+    ],
+):
+    context, batch_request = cloud_context_and_batch_request_with_simple_dataframe
+    cdm_metrics_list: List[MetricTypes] = [
+        MetricTypes.TABLE_ROW_COUNT,
+        MetricTypes.TABLE_COLUMNS,
+        MetricTypes.TABLE_COLUMN_TYPES,
+        MetricTypes.COLUMN_MIN,
+        MetricTypes.COLUMN_MAX,
+        MetricTypes.COLUMN_MEAN,
+        MetricTypes.COLUMN_MEDIAN,
+        MetricTypes.COLUMN_NULL_COUNT,
+    ]
+    metric_retriever = MetricListMetricRetriever(context)
+    metrics = metric_retriever.get_metrics(
+        batch_request=batch_request, metric_list=cdm_metrics_list
+    )
     validator = context.get_validator(batch_request=batch_request)
     batch_id = validator.active_batch.id
 
@@ -205,7 +280,6 @@ def test_get_metrics(
         ),
     ]
 
-    # Assert each metric so it is easier to see which one fails (instead of assert metrics == expected_metrics):
     assert len(metrics) == len(expected_metrics)
     for metric in metrics:
         assert metric.dict() in [

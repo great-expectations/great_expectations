@@ -113,16 +113,23 @@ logger = logging.getLogger(__name__)
 
 if sqlalchemy.sqlite:
     SQLITE_TYPES = {
-        "VARCHAR": sqlalchemy.sqlite.VARCHAR,
-        "CHAR": sqlalchemy.sqlite.CHAR,
-        "INTEGER": sqlalchemy.sqlite.INTEGER,
-        "SMALLINT": sqlalchemy.sqlite.SMALLINT,
-        "DATETIME": sqlalchemy.sqlite.DATETIME(truncate_microseconds=True),
-        "DATE": sqlalchemy.sqlite.DATE,
-        "FLOAT": sqlalchemy.sqlite.FLOAT,
-        "BOOLEAN": sqlalchemy.sqlite.BOOLEAN,
-        "TIMESTAMP": sqlalchemy.sqlite.TIMESTAMP,
+        sqlite_type: getattr(sqlalchemy.sqlite, sqlite_type, None)
+        for sqlite_type in [
+            "VARCHAR",
+            "CHAR",
+            "INTEGER",
+            "SMALLINT",
+            "DATE",
+            "FLOAT",
+            "BOOLEAN",
+            "TIMESTAMP",
+        ]
     }
+    SQLITE_TYPES.update(
+        {
+            "DATETIME": sqlalchemy.sqlite.DATETIME(truncate_microseconds=True),
+        }
+    )
 else:
     SQLITE_TYPES = {}
 
@@ -142,16 +149,19 @@ try:
     from sqlalchemy.dialects.postgresql import dialect as pgDialect  # noqa: TID251
 
     POSTGRESQL_TYPES = {
-        "TEXT": postgresqltypes.TEXT,
-        "CHAR": postgresqltypes.CHAR,
-        "INTEGER": postgresqltypes.INTEGER,
-        "SMALLINT": postgresqltypes.SMALLINT,
-        "BIGINT": postgresqltypes.BIGINT,
-        "TIMESTAMP": postgresqltypes.TIMESTAMP,
-        "DATE": postgresqltypes.DATE,
-        "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
-        "BOOLEAN": postgresqltypes.BOOLEAN,
-        "NUMERIC": postgresqltypes.NUMERIC,
+        postgresql_type: getattr(postgresqltypes, postgresql_type, None)
+        for postgresql_type in [
+            "TEXT",
+            "CHAR",
+            "INTEGER",
+            "SMALLINT",
+            "BIGINT",
+            "TIMESTAMP",
+            "DATE",
+            "DOUBLE_PRECISION",
+            "BOOLEAN",
+            "NUMERIC",
+        ]
     }
 except (ImportError, KeyError):
     postgresqltypes = None
@@ -164,20 +174,27 @@ try:
     # noinspection PyPep8Naming
     from sqlalchemy.dialects.mysql import dialect as mysqlDialect  # noqa: TID251
 
-    MYSQL_TYPES = {
-        "TEXT": mysqltypes.TEXT,
-        "CHAR": mysqltypes.CHAR,
-        "INTEGER": mysqltypes.INTEGER,
-        "SMALLINT": mysqltypes.SMALLINT,
-        "BIGINT": mysqltypes.BIGINT,
-        "DATETIME": mysqltypes.DATETIME,
-        "TIMESTAMP": mysqltypes.TIMESTAMP,
-        "DATE": mysqltypes.DATE,
-        "FLOAT": mysqltypes.FLOAT,
-        "DOUBLE": mysqltypes.DOUBLE,
-        "BOOLEAN": mysqltypes.BOOLEAN,
-        "TINYINT": mysqltypes.TINYINT,
-    }
+    MYSQL_TYPES = (
+        {
+            mysql_type: getattr(mysqltypes, mysql_type, None)
+            for mysql_type in [
+                "TEXT",
+                "CHAR",
+                "INTEGER",
+                "SMALLINT",
+                "BIGINT",
+                "DATETIME",
+                "TIMESTAMP",
+                "DATE",
+                "FLOAT",
+                "DOUBLE",
+                "BOOLEAN",
+                "TINYINT",
+            ]
+        }
+        if mysqltypes
+        else {}
+    )
 except (ImportError, KeyError):
     mysqltypes = None
     mysqlDialect = None
@@ -198,36 +215,39 @@ try:
 
     # noinspection PyUnresolvedReferences
     MSSQL_TYPES = {
-        "BIGINT": mssqltypes.BIGINT,
-        "BINARY": mssqltypes.BINARY,
-        "BIT": mssqltypes.BIT,
-        "CHAR": mssqltypes.CHAR,
-        "DATE": mssqltypes.DATE,
-        "DATETIME": mssqltypes.DATETIME,
-        "DATETIME2": mssqltypes.DATETIME2,
-        "DATETIMEOFFSET": mssqltypes.DATETIMEOFFSET,
-        "DECIMAL": mssqltypes.DECIMAL,
-        "FLOAT": mssqltypes.FLOAT,
-        "IMAGE": mssqltypes.IMAGE,
-        "INT": mssqltypes.INT,
-        "INTEGER": mssqltypes.INTEGER,
-        "MONEY": mssqltypes.MONEY,
-        "NCHAR": mssqltypes.NCHAR,
-        "NTEXT": mssqltypes.NTEXT,
-        "NUMERIC": mssqltypes.NUMERIC,
-        "NVARCHAR": mssqltypes.NVARCHAR,
-        "REAL": mssqltypes.REAL,
-        "SMALLDATETIME": mssqltypes.SMALLDATETIME,
-        "SMALLINT": mssqltypes.SMALLINT,
-        "SMALLMONEY": mssqltypes.SMALLMONEY,
-        "SQL_VARIANT": mssqltypes.SQL_VARIANT,
-        "TEXT": mssqltypes.TEXT,
-        "TIME": mssqltypes.TIME,
-        "TIMESTAMP": mssqltypes.TIMESTAMP,
-        "TINYINT": mssqltypes.TINYINT,
-        "UNIQUEIDENTIFIER": mssqltypes.UNIQUEIDENTIFIER,
-        "VARBINARY": mssqltypes.VARBINARY,
-        "VARCHAR": mssqltypes.VARCHAR,
+        mssql_type: getattr(mssqltypes, mssql_type, None)
+        for mssql_type in [
+            "BIGINT",
+            "BINARY",
+            "BIT",
+            "CHAR",
+            "DATE",
+            "DATETIME",
+            "DATETIME2",
+            "DATETIMEOFFSET",
+            "DECIMAL",
+            "FLOAT",
+            "IMAGE",
+            "INT",
+            "INTEGER",
+            "MONEY",
+            "NCHAR",
+            "NTEXT",
+            "NUMERIC",
+            "NVARCHAR",
+            "REAL",
+            "SMALLDATETIME",
+            "SMALLINT",
+            "SMALLMONEY",
+            "SQL_VARIANT",
+            "TEXT",
+            "TIME",
+            "TIMESTAMP",
+            "TINYINT",
+            "UNIQUEIDENTIFIER",
+            "VARBINARY",
+            "VARCHAR",
+        ]
     }
 except (ImportError, KeyError):
     mssqltypes = None
@@ -242,37 +262,50 @@ try:
     )
 
     CLICKHOUSE_TYPES = {
-        "INT256": clickhousetypes.Int256,
-        "INT128": clickhousetypes.Int128,
-        "INT64": clickhousetypes.Int64,
-        "INT32": clickhousetypes.Int32,
-        "INT16": clickhousetypes.Int16,
-        "INT8": clickhousetypes.Int8,
-        "UINT256": clickhousetypes.UInt256,
-        "UINT128": clickhousetypes.UInt128,
-        "UINT64": clickhousetypes.UInt64,
-        "UINT32": clickhousetypes.UInt32,
-        "UINT16": clickhousetypes.UInt16,
-        "UINT8": clickhousetypes.UInt8,
-        "DATE": clickhousetypes.Date,
-        "DATETIME": clickhousetypes.DateTime,
-        "DATETIME64": clickhousetypes.DateTime64,
-        "FLOAT64": clickhousetypes.Float64,
-        "FLOAT32": clickhousetypes.Float32,
-        "DECIMAL": clickhousetypes.Decimal,
-        "STRING": clickhousetypes.String,
-        "BOOL": clickhousetypes.Boolean,
-        "BOOLEAN": clickhousetypes.Boolean,
-        "UUID": clickhousetypes.UUID,
-        "FIXEDSTRING": clickhousetypes.String,
-        "ENUM8": clickhousetypes.Enum8,
-        "ENUM16": clickhousetypes.Enum16,
-        "ARRAY": clickhousetypes.Array,
-        "NULLABLE": clickhousetypes.Nullable,
-        "LOWCARDINALITY": clickhousetypes.LowCardinality,
-        "TUPLE": clickhousetypes.Tuple,
-        "MAP": clickhousetypes.Map,
+        clickhouse_type.upper(): getattr(clickhousetypes, clickhouse_type, None)
+        for clickhouse_type in [
+            "Int256",
+            "Int128",
+            "Int64",
+            "Int32",
+            "Int16",
+            "Int8",
+            "UInt256",
+            "UInt128",
+            "UInt64",
+            "UInt32",
+            "UInt16",
+            "UInt8",
+            "Date",
+            "DateTime",
+            "DateTime64",
+            "Float64",
+            "Float32",
+            "Decimal",
+            "String",
+            "UUID",
+            "Enum8",
+            "Enum16",
+            "Array",
+            "Nullable",
+            "LowCardinality",
+            "Tuple",
+            "Map",
+        ]
     }
+    if getattr(clickhousetypes, "String", None):
+        CLICKHOUSE_TYPES.update(
+            {
+                "FIXEDSTRING": clickhousetypes.String,
+            }
+        )
+    if getattr(clickhousetypes, "Boolean", None):
+        CLICKHOUSE_TYPES.update(
+            {
+                "BOOL": clickhousetypes.Boolean,
+                "BOOLEAN": clickhousetypes.Boolean,
+            }
+        )
 except (ImportError, KeyError):
     clickhouse = None
     clickhousetypes = None
@@ -282,22 +315,25 @@ except (ImportError, KeyError):
 
 TRINO_TYPES: Dict[str, Any] = (
     {
-        "BOOLEAN": trino.trinotypes._type_map["boolean"],
-        "TINYINT": trino.trinotypes._type_map["tinyint"],
-        "SMALLINT": trino.trinotypes._type_map["smallint"],
-        "INT": trino.trinotypes._type_map["int"],
-        "INTEGER": trino.trinotypes._type_map["integer"],
-        "BIGINT": trino.trinotypes._type_map["bigint"],
-        "REAL": trino.trinotypes._type_map["real"],
-        "DOUBLE": trino.trinotypes._type_map["double"],
-        "DECIMAL": trino.trinotypes._type_map["decimal"],
-        "VARCHAR": trino.trinotypes._type_map["varchar"],
-        "CHAR": trino.trinotypes._type_map["char"],
-        "VARBINARY": trino.trinotypes._type_map["varbinary"],
-        "JSON": trino.trinotypes._type_map["json"],
-        "DATE": trino.trinotypes._type_map["date"],
-        "TIME": trino.trinotypes._type_map["time"],
-        "TIMESTAMP": trino.trinotypes._type_map["timestamp"],
+        trino_type.upper(): trino.trinotypes._type_map.get(trino_type)
+        for trino_type in [
+            "boolean",
+            "tinyint",
+            "smallint",
+            "int",
+            "integer",
+            "bigint",
+            "real",
+            "double",
+            "decimal",
+            "varchar",
+            "char",
+            "varbinary",
+            "json",
+            "date",
+            "time",
+            "timestamp",
+        ]
     }
     if trino.trinotypes
     else {}
@@ -305,22 +341,25 @@ TRINO_TYPES: Dict[str, Any] = (
 
 REDSHIFT_TYPES: Dict[str, Any] = (
     {
-        "BIGINT": aws.redshiftdialect.BIGINT,
-        "BOOLEAN": aws.redshiftdialect.BOOLEAN,
-        "CHAR": aws.redshiftdialect.CHAR,
-        "DATE": aws.redshiftdialect.DATE,
-        "DECIMAL": aws.redshiftdialect.DECIMAL,
-        "DOUBLE_PRECISION": aws.redshiftdialect.DOUBLE_PRECISION,
-        "FOREIGN_KEY_RE": aws.redshiftdialect.FOREIGN_KEY_RE,
-        "GEOMETRY": aws.redshiftdialect.GEOMETRY,
-        "INTEGER": aws.redshiftdialect.INTEGER,
-        "PRIMARY_KEY_RE": aws.redshiftdialect.PRIMARY_KEY_RE,
-        "REAL": aws.redshiftdialect.REAL,
-        "SMALLINT": aws.redshiftdialect.SMALLINT,
-        "TIMESTAMP": aws.redshiftdialect.TIMESTAMP,
-        "TIMESTAMPTZ": aws.redshiftdialect.TIMESTAMPTZ,
-        "TIMETZ": aws.redshiftdialect.TIMETZ,
-        "VARCHAR": aws.redshiftdialect.VARCHAR,
+        redshift_type: getattr(aws.redshiftdialect, redshift_type, None)
+        for redshift_type in [
+            "BIGINT",
+            "BOOLEAN",
+            "CHAR",
+            "DATE",
+            "DECIMAL",
+            "DOUBLE_PRECISION",
+            "FOREIGN_KEY_RE",
+            "GEOMETRY",
+            "INTEGER",
+            "PRIMARY_KEY_RE",
+            "REAL",
+            "SMALLINT",
+            "TIMESTAMP",
+            "TIMESTAMPTZ",
+            "TIMETZ",
+            "VARCHAR",
+        ]
     }
     if aws.redshiftdialect
     else {}
@@ -339,61 +378,92 @@ if (
     )
 
     SNOWFLAKE_TYPES = {
-        "ARRAY": snowflake.snowflaketypes.ARRAY,
-        "BYTEINT": snowflake.snowflaketypes.BYTEINT,
-        "CHARACTER": snowflake.snowflaketypes.CHARACTER,
-        "DEC": snowflake.snowflaketypes.DEC,
-        "BOOLEAN": snowflake.snowflakedialect.BOOLEAN,
-        "DOUBLE": snowflake.snowflaketypes.DOUBLE,
-        "FIXED": snowflake.snowflaketypes.FIXED,
-        "NUMBER": snowflake.snowflaketypes.NUMBER,
-        "INTEGER": snowflake.snowflakedialect.INTEGER,
-        "OBJECT": snowflake.snowflaketypes.OBJECT,
-        "STRING": snowflake.snowflaketypes.STRING,
-        "TEXT": snowflake.snowflaketypes.TEXT,
-        "TIMESTAMP_LTZ": snowflake.snowflaketypes.TIMESTAMP_LTZ,
-        "TIMESTAMP_NTZ": snowflake.snowflaketypes.TIMESTAMP_NTZ,
-        "TIMESTAMP_TZ": snowflake.snowflaketypes.TIMESTAMP_TZ,
-        "TINYINT": snowflake.snowflaketypes.TINYINT,
-        "VARBINARY": snowflake.snowflaketypes.VARBINARY,
-        "VARIANT": snowflake.snowflaketypes.VARIANT,
+        snowflake_type: getattr(snowflake.snowflaketypes, snowflake_type, None)
+        for snowflake_type in [
+            "ARRAY",
+            "BYTEINT",
+            "CHARACTER",
+            "DEC",
+            "DOUBLE",
+            "FIXED",
+            "NUMBER",
+            "OBJECT",
+            "STRING",
+            "TEXT",
+            "TIMESTAMP_LTZ",
+            "TIMESTAMP_NTZ",
+            "TIMESTAMP_TZ",
+            "TINYINT",
+            "VARBINARY",
+            "VARIANT",
+        ]
     }
+    SNOWFLAKE_TYPES.update(
+        {
+            snowflake_type: getattr(snowflake.snowflakedialect, snowflake_type, None)
+            for snowflake_type in ["INTEGER", "BOOLEAN"]
+        }
+    )
 else:
     SNOWFLAKE_TYPES = {}
 
-ATHENA_TYPES: Dict[str, Any] = (
-    # athenatypes is just `from sqlalchemy import types`
-    # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L692
-    #   - the _get_column_type method of AthenaDialect does some mapping via conditional statements
-    # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L105
-    #   - The AthenaTypeCompiler has some methods named `visit_<TYPE>`
-    {
-        "BOOLEAN": aws.athenatypes.BOOLEAN,
-        "FLOAT": aws.athenatypes.FLOAT,
-        "DOUBLE": aws.athenatypes.FLOAT,
-        "REAL": aws.athenatypes.FLOAT,
-        "TINYINT": aws.athenatypes.INTEGER,
-        "SMALLINT": aws.athenatypes.INTEGER,
-        "INTEGER": aws.athenatypes.INTEGER,
-        "INT": aws.athenatypes.INTEGER,
-        "BIGINT": aws.athenatypes.BIGINT,
-        "DECIMAL": aws.athenatypes.DECIMAL,
-        "CHAR": aws.athenatypes.CHAR,
-        "VARCHAR": aws.athenatypes.VARCHAR,
-        "STRING": aws.athenatypes.String,
-        "DATE": aws.athenatypes.DATE,
-        "TIMESTAMP": aws.athenatypes.TIMESTAMP,
-        "BINARY": aws.athenatypes.BINARY,
-        "VARBINARY": aws.athenatypes.BINARY,
-        "ARRAY": aws.athenatypes.String,
-        "MAP": aws.athenatypes.String,
-        "STRUCT": aws.athenatypes.String,
-        "ROW": aws.athenatypes.String,
-        "JSON": aws.athenatypes.String,
-    }
-    if aws.pyathena and aws.athenatypes
-    else {}
-)
+if aws.pyathena and aws.athenatypes:
+    ATHENA_TYPES: Dict[str, Any] = (
+        # athenatypes is just `from sqlalchemy import types`
+        # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L692
+        #   - the _get_column_type method of AthenaDialect does some mapping via conditional statements
+        # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L105
+        #   - The AthenaTypeCompiler has some methods named `visit_<TYPE>`
+        {
+            athena_type: getattr(aws.athenatypes, athena_type, None)
+            for athena_type in [
+                "BOOLEAN",
+                "BIGINT",
+                "DECIMAL",
+                "CHAR",
+                "VARCHAR",
+                "DATE",
+                "TIMESTAMP",
+            ]
+        }
+    )
+    if getattr(aws.athenatypes, "BINARY", None):
+        ATHENA_TYPES.update(
+            {
+                "BINARY": aws.athenatypes.BINARY,
+                "VARBINARY": aws.athenatypes.BINARY,
+            }
+        )
+    if getattr(aws.athenatypes, "INTEGER", None):
+        ATHENA_TYPES.update(
+            {
+                "TINYINT": aws.athenatypes.INTEGER,
+                "SMALLINT": aws.athenatypes.INTEGER,
+                "INTEGER": aws.athenatypes.INTEGER,
+                "INT": aws.athenatypes.INTEGER,
+            }
+        )
+    if getattr(aws.athenatypes, "FLOAT", None):
+        ATHENA_TYPES.update(
+            {
+                "FLOAT": aws.athenatypes.FLOAT,
+                "DOUBLE": aws.athenatypes.FLOAT,
+                "REAL": aws.athenatypes.FLOAT,
+            }
+        )
+    if getattr(aws.athenatypes, "String", None):
+        ATHENA_TYPES.update(
+            {
+                "STRING": aws.athenatypes.String,
+                "ARRAY": aws.athenatypes.String,
+                "MAP": aws.athenatypes.String,
+                "STRUCT": aws.athenatypes.String,
+                "ROW": aws.athenatypes.String,
+                "JSON": aws.athenatypes.String,
+            }
+        )
+else:
+    ATHENA_TYPES = {}
 
 # # Others from great_expectations/dataset/sqlalchemy_dataset.py
 # try:
@@ -515,7 +585,6 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
         # We need to allow null values in some column types that do not support them natively, so we skip
@@ -1930,9 +1999,11 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
             _debug(f"Getting validators with data: {c}")
 
             tests_suppressed_for_backend = [
-                c in sup or ("sqlalchemy" in sup and c in SQL_DIALECT_NAMES)
-                if sup
-                else False
+                (
+                    c in sup or ("sqlalchemy" in sup and c in SQL_DIALECT_NAMES)
+                    if sup
+                    else False
+                )
                 for sup in suppress_test_fors
             ]
             only_fors_ok = []
@@ -2639,15 +2710,27 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     )
 
             elif key == "traceback_substring":
-                assert result["exception_info"][
-                    "raised_exception"
-                ], f"{result['exception_info']['raised_exception']}"
-                assert value in result["exception_info"]["exception_traceback"], (
-                    "expected to find "
-                    + value
-                    + " in "
-                    + result["exception_info"]["exception_traceback"]
-                )
+                if "raised_exception" not in result["exception_info"]:
+                    # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
+                    #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
+                    for k, v in result["exception_info"].items():
+                        assert v["raised_exception"], f"{v['raised_exception']}"
+                        assert value in v["exception_traceback"], (
+                            "expected to find "
+                            + value
+                            + " in "
+                            + value["exception_traceback"]
+                        )
+                else:
+                    assert result["exception_info"][
+                        "raised_exception"
+                    ], f"{result['exception_info']['raised_exception']}"
+                    assert value in result["exception_info"]["exception_traceback"], (
+                        "expected to find "
+                        + value
+                        + " in "
+                        + result["exception_info"]["exception_traceback"]
+                    )
 
             elif key == "expected_partition":
                 assert np.allclose(

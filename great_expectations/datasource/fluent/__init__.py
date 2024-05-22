@@ -10,6 +10,11 @@ from great_expectations.datasource.fluent.interfaces import (
     GxDatasourceWarning,
     TestConnectionError,
 )
+from great_expectations.datasource.fluent.invalid_datasource import (
+    InvalidAsset,
+    InvalidDatasource,
+    GxInvalidDatasourceWarning,
+)
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,

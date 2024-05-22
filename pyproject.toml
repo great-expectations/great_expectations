@@ -330,9 +330,14 @@ If you are working in a configuration file you may use the inline comment \
 # -----------------------------------------------------------------
 
 [tool.pytest.ini_options]
+# https://docs.python.org/3/library/warnings.html#the-warnings-filter
 filterwarnings = [
     # Turn all warnings not explicitly filtered below into errors
     "error",
+    # PendingDeprecationWarning: these relate to the use of methods that are not even deprecated yet.
+    # We want to see the warnings in the logs, but not have them cause CI to fail.
+    "once::PendingDeprecationWarning",
+
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
     "ignore:Setting result format to COMPLETE for a SqlAlchemyDataset:UserWarning",
@@ -445,6 +450,14 @@ filterwarnings = [
     'ignore: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.',
     # Example Actual Warning: FutureWarning: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.
     'ignore: Returning a DataFrame from Series.apply when the supplied function returns a Series is deprecated and will be removed in a future version.',
+    # Example Actual Warning: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+    'ignore: In a future version of pandas, parsing datetimes with mixed time zones will raise an error:FutureWarning',
+    # Example Actual Warning: DeprecationWarning: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.
+    # This is a legacy pattern that will be removed from GX
+    'ignore: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
+    # Example Actual Warning: DeprecationWarning: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.
+    # This is a legacy pattern that will be removed from GX
+    'ignore: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
@@ -456,6 +469,9 @@ filterwarnings = [
     # Found when running test_case_runner_v2_api[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:basic_positive_test_without_nulls]    'ignore: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate\(\) instead.:FutureWarning',
     # Example Acutal Warning: FutureWarning: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance(dtype, pd.DatetimeTZDtype)` instead.
     'ignore: is_datetime64tz_dtype is deprecated and will be removed in a future version. Check `isinstance\(dtype, pd.DatetimeTZDtype\)` instead.',
+    # Example Actual Warning:
+    # ResourceWarning: unclosed <socket.socket fd=231, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6, laddr=('127.0.0.1', 60004), raddr=('127.0.0.1', 46627)>
+    "ignore: unclosed <socket.socket:ResourceWarning",
     # pymysql
     # Example Actual Warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
     # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
@@ -506,8 +522,6 @@ filterwarnings = [
     # Example Actual Warning:
     # DeprecationWarning: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.
     "ignore: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.:DeprecationWarning",
-
-
     # sqlalchemy
     # Example Actual Warning:
     # sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)

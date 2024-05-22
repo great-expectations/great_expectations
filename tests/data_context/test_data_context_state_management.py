@@ -1156,7 +1156,6 @@ def test_add_or_update_checkpoint_adds_successfully(
     context = in_memory_data_context
 
     if use_existing_checkpoint:
-        checkpoint_config.pop("class_name")
         checkpoint = Checkpoint(**checkpoint_config, data_context=context)
         checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
     else:
@@ -1318,7 +1317,6 @@ def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
     assert len(checkpoint.validations) == 0
     assert context.checkpoint_store.save_count == 1
 
-    checkpoint_config.pop("class_name")
     checkpoint = Checkpoint(**checkpoint_config, data_context=context)
     checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
 
