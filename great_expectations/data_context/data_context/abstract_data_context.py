@@ -99,7 +99,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.checkpoint.checkpoint import CheckpointResult
-    from great_expectations.core.datasource_dict import DatasourceDict
+    from great_expectations.datasource.datasource_dict import DatasourceDict
     from great_expectations.core.expectation_validation_result import (
         ExpectationValidationResult,
     )
