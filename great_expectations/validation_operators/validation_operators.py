@@ -241,7 +241,7 @@ class ActionListValidationOperator(ValidationOperator):
                     # We currently only support SlackNotifications but setting this for any notification.
                     notify_before_store = action_config["action"]["class_name"]
 
-            config = action_config["action"]
+            config = {**action_config["action"], "name": action_config["name"]}
             module_name = "great_expectations.validation_operators"
             new_action = instantiate_class_from_config(
                 config=config,

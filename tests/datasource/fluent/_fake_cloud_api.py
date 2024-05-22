@@ -53,6 +53,7 @@ FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
 FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
 FAKE_CHECKPOINT_ID: Final[str] = str(uuid.uuid4())
+FAKE_VALIDATION_ID: Final[str] = str(uuid.uuid4())
 UUID_REGEX: Final[str] = r"[a-f0-9-]{36}"
 
 DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
@@ -469,13 +470,12 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
 
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
-    exp_suite_list: list[dict] = list(exp_suites.values())
+    exp_suite_list: list[dict] = list(x["data"] for x in exp_suites.values())
     if queried_names:
         exp_suite_list = [
-            d["data"]
+            d
             for d in exp_suite_list
-            if d["data"]["attributes"]["suite"]["expectation_suite_name"]
-            in queried_names
+            if d["attributes"]["suite"]["expectation_suite_name"] in queried_names
         ]
 
     resp_body = {"data": exp_suite_list}
@@ -624,9 +624,15 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
             ).json(),
         )
     else:
-        id_ = FAKE_CHECKPOINT_ID
-        payload["data"]["id"] = id_
-        checkpoints[id_] = payload
+        payload["data"]["id"] = FAKE_CHECKPOINT_ID
+        payload["data"]["attributes"]["checkpoint_config"]["id"] = FAKE_CHECKPOINT_ID
+        payload["data"]["attributes"]["checkpoint_config"][
+            "ge_cloud_id"
+        ] = FAKE_CHECKPOINT_ID
+        payload["data"]["attributes"]["checkpoint_config"]["validations"][0][
+            "id"
+        ] = FAKE_VALIDATION_ID
+        checkpoints[FAKE_CHECKPOINT_ID] = payload
         checkpoint_names.add(name)
         result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
 
@@ -644,7 +650,81 @@ def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
     payload: dict = json.loads(request.body)
     validation_id = payload["data"]["attributes"]["result"]["meta"]["validation_id"]
     if validation_id:
-        raise NotImplementedError("TODO: Handling the validation_id success case")
+        # example response body
+        resp_body = {
+            "data": {
+                "attributes": {
+                    "created_by_id": str(uuid.uuid4()),
+                    "organization_id": payload["data"]["attributes"]["organization_id"],
+                    "validation_result": {
+                        "display_url": "DISPLAY_URL",
+                        "evaluation_parameters": {},
+                        "ge_cloud_id": str(uuid.uuid4()),
+                        "meta": {
+                            "active_batch_definition": {
+                                "data_asset_name": "my_data_asset",
+                                "data_connector_name": "my_data_connector",
+                                "datasource_name": "data__dir",
+                                "partition_definition": {},
+                            },
+                            "batch_markers": {
+                                "ge_load_time": "20210304T194810.134247Z",
+                                "pandas_data_fingerprint": "bbb50ee4b76ccdcb57e861fb52f535d9",
+                            },
+                            "batch_spec": {
+                                "path": "/foo/bar/yellow_tripdata_sample_2019-01.csv"
+                            },
+                            "checkpoint_id": payload["data"]["attributes"][
+                                "checkpoint_id"
+                            ],
+                            "run_id": {
+                                "run_name": "20210304-114810-my-run-name-template",
+                                "run_time": "2021-03-04T11:48:10.122928+00:00",
+                            },
+                            "validation_id": payload["data"]["attributes"]["result"][
+                                "meta"
+                            ]["validation_id"],
+                        },
+                        "results": [
+                            {
+                                "exception_info": {
+                                    "exception_message": None,
+                                    "exception_traceback": None,
+                                    "raised_exception": False,
+                                },
+                                "expectation_config": {
+                                    "expectation_type": "expect_table_row_count_to_be_between",
+                                    "ge_cloud_id": str(uuid.uuid4()),
+                                    "kwargs": {"max_value": 11000, "min_value": 9000},
+                                    "meta": {
+                                        "BasicSuiteBuilderProfiler": {
+                                            "confidence": "very low"
+                                        }
+                                    },
+                                },
+                                "meta": {},
+                                "result": {"observed_value": 10000},
+                                "success": True,
+                            }
+                        ],
+                        "statistics": {
+                            "evaluated_expectations": 1,
+                            "success_percent": 100.0,
+                            "successful_expectations": None,
+                            "unsuccessful_expectations": None,
+                        },
+                        "success": True,
+                    },
+                },
+                "id": str(uuid.uuid4()),
+                "type": "validation-result",
+            }
+        }
+        result = CallbackResult(
+            200,
+            headers=DEFAULT_HEADERS,
+            body=json.dumps(resp_body),
+        )
     else:
         result = CallbackResult(
             422,  # 400 in prod but this is a more informative status code

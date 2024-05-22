@@ -328,7 +328,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        keys = [
+            key for key in self.list_keys() if key != StoreBackend.STORE_BACKEND_ID_KEY
+        ]
+        return [self._get(key) for key in keys]
 
     def _set(self, key, value, **kwargs):
         if not isinstance(key, tuple):
@@ -561,13 +564,29 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return s3_object_key
 
     def _get(self, key):
+        client = self._create_client()
         s3_object_key = self._build_s3_object_key(key)
+        return self._get_by_s3_object_key(client, s3_object_key)
 
-        s3 = self._create_client()
+    @override
+    def _get_all(self) -> list[Any]:
+        """Get all objects from the store.
+        NOTE: This is non-performant because we download each object separately.
+        See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/bucket/objects.html#objects
+        for the docs.
+        """
+        client = self._create_client()
+        keys = self.list_keys()
+        keys = [k for k in keys if k != StoreBackend.STORE_BACKEND_ID_KEY]
+        s3_object_keys = [self._build_s3_object_key(key) for key in keys]
+        return [self._get_by_s3_object_key(client, key) for key in s3_object_keys]
 
+    def _get_by_s3_object_key(self, s3_client, s3_object_key):
         try:
-            s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
-        except (s3.exceptions.NoSuchKey, s3.exceptions.NoSuchBucket):
+            s3_response_object = s3_client.get_object(
+                Bucket=self.bucket, Key=s3_object_key
+            )
+        except (s3_client.exceptions.NoSuchKey, s3_client.exceptions.NoSuchBucket):
             raise InvalidKeyError(
                 f"Unable to retrieve object from TupleS3StoreBackend with the following Key: {s3_object_key!s}"
             )
@@ -577,10 +596,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
             .read()
             .decode(s3_response_object.get("ContentEncoding", "utf-8"))
         )
-
-    @override
-    def _get_all(self) -> list[Any]:
-        raise NotImplementedError
 
     def _set(
         self,
@@ -852,12 +867,26 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return gcs_object_key
 
     def _get(self, key):
-        gcs_object_key = self._build_gcs_object_key(key)
-
         from great_expectations.compatibility import google
 
         gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
+        return self._get_by_gcs_object_key(bucket, key)
+
+    @override
+    def _get_all(self) -> list[Any]:
+        from great_expectations.compatibility import google
+
+        gcs = google.storage.Client(project=self.project)
+        bucket = gcs.bucket(self.bucket)
+
+        keys = self.list_keys()
+        keys = [k for k in keys if k != StoreBackend.STORE_BACKEND_ID_KEY]
+
+        return [self._get_by_gcs_object_key(bucket, key) for key in keys]
+
+    def _get_by_gcs_object_key(self, bucket, key):
+        gcs_object_key = self._build_gcs_object_key(key)
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
@@ -865,10 +894,6 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             )
         else:
             return gcs_response_object.download_as_bytes().decode("utf-8")
-
-    @override
-    def _get_all(self) -> list[Any]:
-        raise NotImplementedError
 
     def _set(
         self,
@@ -1095,7 +1120,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        keys = self.list_keys()
+        return [self._get(key) for key in keys]
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
         from great_expectations.compatibility.azure import ContentSettings

@@ -257,7 +257,30 @@ class DatabaseStoreBackend(StoreBackend):
 
     @override
     def _get_all(self) -> list[Any]:
-        raise NotImplementedError
+        keys = self.list_keys()
+        sel = (
+            sa.select(sa.column("value"))
+            .select_from(self._table)
+            .where(
+                sa.or_(
+                    sa.and_(
+                        *(
+                            getattr(self._table.columns, key_col) == val
+                            for key_col, val in zip(self.key_columns, key)
+                        )
+                    )
+                    for key in keys
+                )
+            )
+        )
+
+        try:
+            with self.engine.begin() as connection:
+                rows = connection.execute(sel).fetchall()
+                return [r[0] for r in rows]
+        except (IndexError, SQLAlchemyError) as e:
+            logger.debug(f"Error fetching value: {e!s}")
+            raise gx_exceptions.StoreError("Unable to fetch values for keys")
 
     @override
     def _set(self, key, value, allow_update=True, **kwargs) -> None:

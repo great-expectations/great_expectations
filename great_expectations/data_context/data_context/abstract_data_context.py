@@ -152,6 +152,9 @@ if TYPE_CHECKING:
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
     )
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -3875,9 +3878,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def get_docs_sites_urls(
         self,
-        resource_identifier=None,
+        resource_identifier: ExpectationSuiteIdentifier
+        | ValidationResultIdentifier
+        | GXCloudIdentifier
+        | str
+        | None = None,
         site_name: Optional[str] = None,
-        only_if_exists=True,
+        only_if_exists: bool = True,
         site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
@@ -4759,30 +4766,46 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self._evaluation_parameter_dependencies = {}
         # we have to iterate through all expectation suites because evaluation parameters
         # can reference metric values from other suites
-        for key in self.expectations_store.list_keys():
-            try:
-                expectation_suite_dict: dict = cast(
-                    dict, self.expectations_store.get(key)
-                )
-            except ValidationError as e:
-                # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
-                # we should ignore that instead of breaking all checkpoints in the entire context
-                logger.info(
-                    f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "
-                    f"because it failed to load with message: {e}"
-                )
-                continue
-            if not expectation_suite_dict:
-                continue
-            expectation_suite = ExpectationSuite(
-                **expectation_suite_dict, data_context=self
-            )
 
-            dependencies: dict = (
-                expectation_suite.get_evaluation_parameter_dependencies()
-            )
-            if len(dependencies) > 0:
-                nested_update(self._evaluation_parameter_dependencies, dependencies)
+        if self.expectations_store.cloud_mode:
+            # use get_all to prevent round trips to GX Cloud.
+            for exp_suite_dict in self.expectations_store.get_all():
+                if not exp_suite_dict:
+                    continue
+                expectation_suite = ExpectationSuite(
+                    **exp_suite_dict, data_context=self
+                )
+
+                dependencies: dict = (
+                    expectation_suite.get_evaluation_parameter_dependencies()
+                )
+                if len(dependencies) > 0:
+                    nested_update(self._evaluation_parameter_dependencies, dependencies)
+
+        else:
+            for key in self.expectations_store.list_keys():
+                try:
+                    expectation_suite_dict: dict = cast(
+                        dict, self.expectations_store.get(key)
+                    )
+                except ValidationError as e:
+                    # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
+                    # we should ignore that instead of breaking all checkpoints in the entire context
+                    logger.info(
+                        f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "
+                        f"because it failed to load with message: {e}"
+                    )
+                    continue
+
+                if not expectation_suite_dict:
+                    continue
+                expectation_suite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=self
+                )
+
+                dependencies = expectation_suite.get_evaluation_parameter_dependencies()
+                if len(dependencies) > 0:
+                    nested_update(self._evaluation_parameter_dependencies, dependencies)
 
         self._evaluation_parameter_dependencies_compiled = True
 
@@ -4794,7 +4817,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         validations_store_name=None,
         failed_only=False,
         include_rendered_content=None,
-    ):
+    ) -> ExpectationValidationResult | dict:
         """Get validation results from a configured store.
 
         Args:
@@ -5272,11 +5295,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @public_api
     def build_data_docs(
         self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
+        site_names: list[str] | None = None,
+        resource_identifiers: list[ExpectationSuiteIdentifier]
+        | list[ValidationResultIdentifier]
+        | None = None,
+        dry_run: bool = False,
         build_index: bool = True,
-    ):
+    ) -> dict[str, str]:
         """Build Data Docs for your project.
 
         --Documentation--
