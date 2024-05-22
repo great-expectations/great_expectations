@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import json
 import re
+from pprint import pformat as pf
+from typing import TYPE_CHECKING
 
 import mistune
 import pytest
@@ -15,6 +19,13 @@ from great_expectations.render.renderer import (
     ProfilingResultsPageRenderer,
     ValidationResultsPageRenderer,
 )
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
 
 # module level markers
 pytestmark = pytest.mark.filesystem
@@ -183,14 +194,16 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
     )
 
 
-def test_ProfilingResultsPageRenderer(titanic_profiled_evrs_1):
+def test_ProfilingResultsPageRenderer(
+    titanic_profiled_evrs_1: ExpectationValidationResult,
+):
     document = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     assert isinstance(document, RenderedDocumentContent)
     assert len(document.sections) == 8
 
 
 def test_ValidationResultsPageRenderer_render_validation_header(
-    titanic_profiled_evrs_1,
+    titanic_profiled_evrs_1: ExpectationValidationResult,
 ):
     validation_header = ValidationResultsPageRenderer._render_validation_header(
         titanic_profiled_evrs_1
@@ -244,7 +257,9 @@ def test_ValidationResultsPageRenderer_render_validation_header(
     assert validation_header == expected_validation_header
 
 
-def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_evrs_1):
+def test_ValidationResultsPageRenderer_render_validation_info(
+    titanic_profiled_evrs_1: ExpectationValidationResult,
+):
     validation_info = ValidationResultsPageRenderer._render_validation_info(
         titanic_profiled_evrs_1
     ).to_json_dict()
@@ -489,7 +504,7 @@ def ValidationResultsPageRenderer_render_with_run_info_at_start():
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
-    titanic_profiled_evrs_1,
+    titanic_profiled_evrs_1: ExpectationValidationResult,
     ValidationResultsPageRenderer_render_with_run_info_at_end,
 ):
     validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=True)
@@ -508,7 +523,7 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
-    titanic_profiled_evrs_1,
+    titanic_profiled_evrs_1: ExpectationValidationResult,
     ValidationResultsPageRenderer_render_with_run_info_at_start,
 ):
     validation_results_page_renderer = ValidationResultsPageRenderer(run_info_at_end=False)
@@ -526,3 +541,41 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     assert (
         rendered_validation_results == ValidationResultsPageRenderer_render_with_run_info_at_start
     )
+
+
+def test_asset_name_is_part_of_resource_info_index(mocker: MockerFixture):
+    """
+    DefaultSiteIndexBuilder.add_resource_info_to_index_links_dict is what supplies the
+    the resource meta-data to the index page.
+    This test checks that the asset_name is being provided when checkpoints are run.
+    """
+    import great_expectations as gx
+    from great_expectations.render.renderer.site_builder import DefaultSiteIndexBuilder
+
+    context = gx.get_context(mode="ephemeral")
+
+    add_resource_info_spy = mocker.spy(
+        DefaultSiteIndexBuilder,
+        "add_resource_info_to_index_links_dict",
+    )
+
+    asset_name = "my_asset"
+    validator = context.data_sources.pandas_default.read_csv(
+        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
+        asset_name=asset_name,
+    )
+
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between("passenger_count", min_value=1, max_value=6)
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_quickstart_checkpoint",
+        validator=validator,
+    )
+
+    checkpoint.run()
+
+    last_call = add_resource_info_spy.call_args_list[-1]
+    print(f"Last call kwargs:\n{pf(last_call.kwargs, depth=1)}")
+    assert last_call.kwargs["asset_name"] == asset_name

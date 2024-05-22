@@ -6,7 +6,7 @@ import pathlib
 import traceback
 import urllib
 from collections import OrderedDict
-from typing import Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from great_expectations import exceptions
 from great_expectations.core import ExpectationSuite
@@ -24,6 +24,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import resource_key_passes_run_name_filter
+
+if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationValidationResult,
+    )
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +122,7 @@ class SiteBuilder:
 
     def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
-        data_context,
+        data_context: AbstractDataContext,
         store_backend,
         site_name=None,
         site_index_builder=None,
@@ -337,7 +343,7 @@ class DefaultSiteSectionBuilder:
     def __init__(  # noqa: PLR0913
         self,
         name,
-        data_context,
+        data_context: AbstractDataContext,
         target_store,
         source_store_name,
         custom_styles_directory=None,
@@ -492,7 +498,7 @@ class DefaultSiteIndexBuilder:
         self,
         name,
         site_name,
-        data_context,
+        data_context: AbstractDataContext,
         target_store,
         site_section_builders_config,
         custom_styles_directory=None,
@@ -866,8 +872,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         run_id=profiling_result_key.run_id,
                         run_time=profiling_result_key.run_id.run_time,
                         run_name=profiling_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name")
-                        or batch_spec.get("data_asset_name"),
+                        asset_name=_resolve_asset_name(validation),
                         batch_kwargs=batch_kwargs,
                         batch_spec=batch_spec,
                     )
@@ -923,14 +928,30 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         validation_success=validation_success,
                         run_time=validation_result_key.run_id.run_time,
                         run_name=validation_result_key.run_id.run_name,
-                        asset_name=batch_kwargs.get("data_asset_name")
-                        or batch_spec.get("data_asset_name"),
+                        asset_name=_resolve_asset_name(validation),
                         batch_kwargs=batch_kwargs,
                         batch_spec=batch_spec,
                     )
                 except Exception:
                     error_msg = f"Validation result not found: {validation_result_key.to_tuple()!s:s} - skipping"  # noqa: E501
                     logger.warning(error_msg)
+
+
+def _resolve_asset_name(validation_results: ExpectationValidationResult) -> str | None:
+    """
+    Resolve the asset name from the validation results meta data.
+    FDS does not store data_asset_name in batch_kwargs or batch_spec and it must be
+    pulled from the active batch definition.
+    """
+    batch_kwargs = validation_results.meta.get("batch_kwargs", {})
+    batch_spec = validation_results.meta.get("batch_spec", {})
+
+    asset_name = batch_kwargs.get("data_asset_name") or batch_spec.get("data_asset_name")
+    if asset_name:
+        return asset_name
+    # FDS does not store data_asset_name in batch_kwargs or batch_spec
+    active_batch = validation_results.meta.get("active_batch_definition", {})
+    return active_batch.get("data_asset_name")
 
 
 class CallToActionButton:
