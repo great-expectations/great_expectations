@@ -10,6 +10,14 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.14
+* [FEATURE] update slack notifications design ([#9952](https://github.com/great-expectations/great_expectations/pull/9952))
+* [BUGFIX] Set application query param for SnowflakeDatasource ([#9863](https://github.com/great-expectations/great_expectations/pull/9863))
+* [BUGFIX] Show FDS Asset name in DataDocs ([#9950](https://github.com/great-expectations/great_expectations/pull/9950))
+* [MAINTENANCE] Remove TIME from supported metric list ([#9844](https://github.com/great-expectations/great_expectations/pull/9844))
+* [MAINTENANCE] Schedule packaging pipeline to run on 0.18.x ([#9921](https://github.com/great-expectations/great_expectations/pull/9921))
+* [MAINTENANCE] performance, avoid HTTP round trips ([#9929](https://github.com/great-expectations/great_expectations/pull/9929))
+
 ### 0.18.13
 * [FEATURE] Remove [cloud] optional dependency ([#9814](https://github.com/great-expectations/great_expectations/pull/9814))
 * [BUGFIX] `scrapy` compatibility - handle `dir()` inconsistencies ([#9830](https://github.com/great-expectations/great_expectations/pull/9830))
