@@ -34,9 +34,9 @@ import OverviewCard from '@site/src/components/OverviewCard';
 
   <LinkCard 
     topIcon 
-    label="Create a Data Context"
-    description="Create an Ephemeral, File, or GX Cloud Data Context."
-    to="/core/set_up_a_gx_environment/create_a_data_context" 
+    label="Install additional dependencies"
+    description="Install additional dependencies for specific data sources or environments."
+    to="/core/set_up_a_gx_environment/install_additional_dependencies" 
     icon="/img/expectation_icon.svg" 
   />
 

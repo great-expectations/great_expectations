@@ -44,7 +44,7 @@ module.exports = {
         },
         {
           type: 'doc',
-          id: 'core/installation_and_setup/additional_dependencies/additional_dependencies',
+          id: 'core/set_up_a_gx_environment/install_additional_dependencies',
           label: 'Install additional dependencies'
         },
         {
