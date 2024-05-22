@@ -42,8 +42,8 @@ def run_checkpoint_and_data_doc(
         context.suites.add(ExpectationSuite(name=suite_name))
     except DataContextError:
         ...
+
     context.suites.get(name=suite_name)
-    # noinspection PyTypeChecker
     validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=suite_name,

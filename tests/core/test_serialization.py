@@ -10,7 +10,6 @@ import pytest
 
 from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
     AbstractConfig,
     AssetConfig,
@@ -19,6 +18,7 @@ from great_expectations.data_context.types.base import (
     dataConnectorConfigSchema,
 )
 from great_expectations.util import (
+    convert_to_json_serializable,
     deep_filter_properties_iterable,
     requires_lossy_conversion,
 )

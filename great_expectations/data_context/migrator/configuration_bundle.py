@@ -15,11 +15,11 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,  # noqa: TCH001
 )
 from great_expectations.data_context.types.base import DataContextConfigSchema
+from great_expectations.util import convert_to_json_serializable  # noqa: TID251
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (

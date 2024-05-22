@@ -33,7 +33,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
         azure_client: Reference to instantiated Microsoft Azure Blob Storage client handle
         account_name (str): account name for Microsoft Azure Blob Storage
         container (str): container name for Microsoft Azure Blob Storage
@@ -55,7 +54,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
@@ -79,9 +77,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=re.compile(
-                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
-            ),
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -90,7 +85,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
@@ -104,7 +98,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "AzureBlobStorageDataConnector" instance
             data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             azure_client: Reference to instantiated Microsoft Azure Blob Storage client handle
             account_name: account name for Microsoft Azure Blob Storage
             container: container name for Microsoft Azure Blob Storage
@@ -119,7 +112,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         return AzureBlobStorageDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             azure_client=azure_client,
             account_name=account_name,
             container=container,
@@ -133,7 +125,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
     def build_test_connection_error_message(  # noqa: PLR0913
         cls,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         account_name: str,
         container: str,
         name_starts_with: str = "",
@@ -144,7 +135,6 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
 
         Args:
             data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             account_name: account name for Microsoft Azure Blob Storage
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage prefix
@@ -154,11 +144,10 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """  # noqa: E501
-        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
+        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" and recursive file discovery set to "{recursive_file_discovery}" found using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex.pattern,
                 "account_name": account_name,
                 "container": container,
                 "name_starts_with": name_starts_with,
@@ -213,6 +202,11 @@ requires "file_path_template_map_fn: Callable" to be set.
         }
 
         return self._file_path_template_map_fn(**template_arguments)
+
+    @override
+    def _preprocess_batching_regex(self, regex: re.Pattern) -> re.Pattern:
+        regex = re.compile(f"{re.escape(self._sanitized_prefix)}{regex.pattern}")
+        return super()._preprocess_batching_regex(regex=regex)
 
 
 def sanitize_prefix(text: str) -> str:

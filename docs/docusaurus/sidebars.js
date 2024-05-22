@@ -29,82 +29,28 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Install and manage GX 1.0',
-      link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
+      label: 'Set up a GX environment',
+      link: {type: 'doc', id: 'core/set_up_a_gx_environment/set_up_a_gx_environment'},
       items: [
         {
           type: 'doc',
-          id: 'core/installation_and_setup/install_gx',
-          label: 'Install GX 1.0'
+          id: 'core/set_up_a_gx_environment/install_python',
+          label: 'Install Python'
         },
         {
           type: 'doc',
-          id: 'core/installation_and_setup/additional_dependencies/additional_dependencies',
+          id: 'core/set_up_a_gx_environment/install_gx',
+          label: 'Install GX'
+        },
+        {
+          type: 'doc',
+          id: 'core/set_up_a_gx_environment/install_additional_dependencies',
           label: 'Install additional dependencies'
         },
         {
-          type: 'category',
-          label: 'Manage Data Contexts',
-          link: {type: 'doc', id: 'core/installation_and_setup/manage_data_contexts'},
-          items: [
-            {
-              type: 'link',
-              label: 'Request a Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#request-a-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Initialize a new Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#initialize-a-new-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Connect to an existing Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#connect-to-an-existing-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Export an Ephemeral Data Context to a new File Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#export-an-ephemeral-data-context-to-a-new-file-data-context',
-            },
-            {
-              type: 'link',
-              label: 'View a Data Context configuration',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view-a-data-context-configuration',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Manage credentials',
-          link: {type: 'doc', id: 'core/installation_and_setup/manage_credentials'},
-          items: [
-            {
-              type: 'link',
-              label: 'Environment variables',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#environment-variables',
-            },
-            {
-              type: 'link',
-              label: 'YAML file',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#yaml-file',
-            },
-            {
-              type: 'link',
-              label: 'Secrets manager',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#secrets-manager',
-            },
-          ]
-        },
-        {
           type: 'doc',
-          id: 'core/installation_and_setup/manage_metadata_stores',
-          label: '🚧 Manage Metadata Stores'
-        },
-        {
-          type: 'doc',
-          id: 'core/installation_and_setup/manage_data_docs',
-          label: 'Manage Data Docs'
+          id: 'core/installation_and_setup/manage_data_contexts',
+          label: 'Create a Data Context'
         },
       ]
     },

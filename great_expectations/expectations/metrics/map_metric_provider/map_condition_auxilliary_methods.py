@@ -22,7 +22,6 @@ from great_expectations.compatibility.sqlalchemy import (
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (  # noqa: E501
     _is_sqlalchemy_metric_selectable,
@@ -34,6 +33,7 @@ from great_expectations.expectations.metrics.util import (
     sql_statement_with_post_compile_to_string,
 )
 from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
     generate_temporary_table_name,
     get_sqlalchemy_selectable,
 )
