@@ -4766,30 +4766,46 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         self._evaluation_parameter_dependencies = {}
         # we have to iterate through all expectation suites because evaluation parameters
         # can reference metric values from other suites
-        for key in self.expectations_store.list_keys():
-            try:
-                expectation_suite_dict: dict = cast(
-                    dict, self.expectations_store.get(key)
-                )
-            except ValidationError as e:
-                # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
-                # we should ignore that instead of breaking all checkpoints in the entire context
-                logger.info(
-                    f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "
-                    f"because it failed to load with message: {e}"
-                )
-                continue
-            if not expectation_suite_dict:
-                continue
-            expectation_suite = ExpectationSuite(
-                **expectation_suite_dict, data_context=self
-            )
 
-            dependencies: dict = (
-                expectation_suite.get_evaluation_parameter_dependencies()
-            )
-            if len(dependencies) > 0:
-                nested_update(self._evaluation_parameter_dependencies, dependencies)
+        if self.expectations_store.cloud_mode:
+            # use get_all to prevent round trips to GX Cloud.
+            for exp_suite_dict in self.expectations_store.get_all():
+                if not exp_suite_dict:
+                    continue
+                expectation_suite = ExpectationSuite(
+                    **exp_suite_dict, data_context=self
+                )
+
+                dependencies: dict = (
+                    expectation_suite.get_evaluation_parameter_dependencies()
+                )
+                if len(dependencies) > 0:
+                    nested_update(self._evaluation_parameter_dependencies, dependencies)
+
+        else:
+            for key in self.expectations_store.list_keys():
+                try:
+                    expectation_suite_dict: dict = cast(
+                        dict, self.expectations_store.get(key)
+                    )
+                except ValidationError as e:
+                    # if a suite that isn't associated with the checkpoint compiling eval params is misconfigured
+                    # we should ignore that instead of breaking all checkpoints in the entire context
+                    logger.info(
+                        f"Suite with identifier {key} was not considered when compiling evaluation parameter dependencies "
+                        f"because it failed to load with message: {e}"
+                    )
+                    continue
+
+                if not expectation_suite_dict:
+                    continue
+                expectation_suite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=self
+                )
+
+                dependencies = expectation_suite.get_evaluation_parameter_dependencies()
+                if len(dependencies) > 0:
+                    nested_update(self._evaluation_parameter_dependencies, dependencies)
 
         self._evaluation_parameter_dependencies_compiled = True
 

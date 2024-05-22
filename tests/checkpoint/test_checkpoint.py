@@ -4699,6 +4699,13 @@ def fake_cloud_context_basic(_fake_cloud_context_setup, monkeypatch):
             data_file_name=data_file, data_dir=data_dir, with_slack=False
         ),
     )
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_get_all",
+        cloud_config.make_store_get_all(
+            data_file_name=data_file, data_dir=data_dir, with_slack=False
+        ),
+    )
     context = gx.data_context.CloudDataContext()
     yield context
 
@@ -4710,6 +4717,13 @@ def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
         gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
         "_get",
         cloud_config.make_store_get(
+            data_file_name=data_file, data_dir=data_dir, with_slack=True
+        ),
+    )
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_get_all",
+        cloud_config.make_store_get_all(
             data_file_name=data_file, data_dir=data_dir, with_slack=True
         ),
     )

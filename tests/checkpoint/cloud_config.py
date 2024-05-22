@@ -31,6 +31,24 @@ def make_store_get(data_file_name, data_dir, with_slack):
     return store_get
 
 
+def make_store_get_all(data_file_name, data_dir, with_slack):
+    def store_get_all(self):
+        # key is a 3-tuple with the form
+        # (GXCloudRESTResource, cloud_id as a string uuid, name as string)
+        # For example:
+        # (<GXCloudRESTResource.CHECKPOINT: 'checkpoint'>, '731dc2a5-45d8-4827-9118-39b77c5cd413', 'my_checkpoint')
+        type_ = self.ge_cloud_resource_type
+        if type_ == GXCloudRESTResource.CHECKPOINT:
+            return {"data": _checkpoint_config(data_file_name, with_slack)}
+        elif type_ == GXCloudRESTResource.EXPECTATION_SUITE:
+            return {"data": _expectation_suite()}
+        elif type_ == GXCloudRESTResource.DATASOURCE:
+            return {"data": _datasource(data_dir)}
+        return None
+
+    return store_get_all
+
+
 def store_set(self, key, value, **kwargs):
     base_url = os.environ["GX_CLOUD_BASE_URL"]
     org_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
@@ -23,6 +23,19 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
+
+if TYPE_CHECKING:
+    from typing import Literal
+
+    from typing_extensions import TypedDict
+
+    class DataPayload(TypedDict):
+        id: str
+        attributes: dict
+        type: Literal["expectation_suite"]
+
+    class CloudResponsePayloadTD(TypedDict):
+        data: DataPayload | list[DataPayload]
 
 
 class ExpectationsStore(Store):
@@ -300,3 +313,25 @@ class ExpectationsStore(Store):
             print()
 
         return return_obj
+
+    @override
+    @staticmethod
+    def gx_cloud_response_json_to_object_collection(
+        response_json: CloudResponsePayloadTD,  # type: ignore[override]
+    ) -> list[dict]:
+        """
+        This method takes full json response from GX cloud and outputs a list of dicts appropriate for
+        deserialization into a collection of GX objects
+        """
+        data = response_json["data"]
+        if not isinstance(data, list):
+            raise TypeError(
+                "GX Cloud did not return a list of Expectation Suites when expected"
+            )
+
+        return [ExpectationsStore._convert_raw_json_to_object_dict(d) for d in data]
+
+    @staticmethod
+    def _convert_raw_json_to_object_dict(data: DataPayload) -> dict:
+        data["attributes"]["suite"]["ge_cloud_id"] = data["id"]
+        return data["attributes"]["suite"]

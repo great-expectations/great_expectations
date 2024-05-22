@@ -44,6 +44,47 @@ def test_database_store_backend_schema_spec(caplog, sa, test_backends):
         connection.execute(sa.text(f"DROP TABLE {store_backend._table};"))
 
 
+def test_database_store_backend_get_all(caplog, sa, test_backends):
+    if "postgresql" not in test_backends:
+        pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
+
+    store_backend = DatabaseStoreBackend(
+        credentials={
+            "drivername": "postgresql",
+            "username": "postgres",
+            "password": "",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+            "port": "5432",
+            "schema": "special",
+            "database": "test_ci",
+        },
+        table_name="test_database_store_backend_url_key",
+        key_columns=["k1", "k2"],
+    )
+
+    FOO = "foo"
+    BAR = "bar"
+    store_backend.set(
+        (
+            "1",
+            "2",
+        ),
+        FOO,
+    )
+    store_backend.set(
+        (
+            "aaa",
+            "bbb",
+        ),
+        BAR,
+    )
+    assert store_backend.get_all() == [FOO, BAR]
+
+    # clean up values
+    with store_backend.engine.begin() as connection:
+        connection.execute(sa.text(f"DROP TABLE {store_backend._table};"))
+
+
 def test_database_store_backend_get_url_for_key(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
