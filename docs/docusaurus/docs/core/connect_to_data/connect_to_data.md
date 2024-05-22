@@ -3,6 +3,7 @@ title: "Connect to data"
 description: Learn how to connect to data using GX and how to organize that data into Batches for validation.
 hide_feedback_survey: true
 hide_title: true
+---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
 import LinkCard from '@site/src/components/LinkCard';

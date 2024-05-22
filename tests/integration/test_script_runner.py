@@ -17,6 +17,9 @@ import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from flaky import flaky
 
+from docs.docusaurus.docs.components.examples_under_test import (
+    docs_tests,
+)
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -391,6 +394,7 @@ docs_test_matrix += athena_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 docs_test_matrix += failed_rows_tests
+docs_test_matrix += docs_tests
 
 pandas_integration_tests: List[IntegrationTestFixture] = []
 
