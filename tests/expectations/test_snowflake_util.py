@@ -10,6 +10,7 @@ from great_expectations.expectations.snowflake_util import (
 )
 
 
+@pytest.mark.snowflake
 @pytest.mark.parametrize(
     "val,expected",
     [
@@ -19,11 +20,11 @@ from great_expectations.expectations.snowflake_util import (
         ("", ""),
     ],
 )
-@pytest.mark.snowflake
 def test_normalize_snowflake_data_type_name(val, expected):
     assert normalize_snowflake_data_type_name(val) == expected
 
 
+@pytest.mark.snowflake
 @pytest.mark.parametrize(
     "val,expected",
     [
@@ -66,6 +67,5 @@ def test_normalize_snowflake_data_type_name(val, expected):
         ("foo", "foo"),
     ],
 )
-@pytest.mark.snowflake
 def test_map_sfsqlalchemy_type_to_sf_type(val, expected):
     assert map_sfsqlalchemy_type_to_sf_type(val) == expected

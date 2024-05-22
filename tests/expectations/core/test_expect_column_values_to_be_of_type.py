@@ -102,6 +102,7 @@ def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
     )
 
 
+@pytest.mark.snowflake
 @pytest.mark.parametrize(
     "actual_column_type,expected_type,expected_success,expected_observed_value",
     [
@@ -150,7 +151,6 @@ def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
         ("FOO", "TEXT", False, "FOO"),
     ],
 )
-@pytest.mark.snowflake
 def test_expect_column_values_to_be_of_type_snowflake_types(
     actual_column_type, expected_type, expected_success, expected_observed_value
 ):

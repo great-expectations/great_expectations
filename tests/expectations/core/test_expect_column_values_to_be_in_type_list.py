@@ -170,6 +170,7 @@ def test_expect_column_values_to_be_in_type_list_nullable_int():
     )
 
 
+@pytest.mark.snowflake
 @pytest.mark.parametrize(
     "actual_column_type,expected_types_list,expected_success,expected_observed_value",
     [
@@ -218,7 +219,6 @@ def test_expect_column_values_to_be_in_type_list_nullable_int():
         ("FOO", ["TEXT"], False, "FOO"),
     ],
 )
-@pytest.mark.snowflake
 def test_expect_column_values_to_be_in_types_list_snowflake_types(
     actual_column_type, expected_types_list, expected_success, expected_observed_value
 ):
