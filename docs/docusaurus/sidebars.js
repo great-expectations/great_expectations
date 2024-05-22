@@ -49,9 +49,9 @@ module.exports = {
         },
         {
           type: 'doc',
-          id: 'core/installation_and_setup/manage_data_contexts',
+          id: 'core/set_up_a_gx_environment/create_a_data_context',
           label: 'Create a Data Context'
-        },
+        }
       ]
     },
     {
