@@ -13,7 +13,7 @@ title: Changelog
 ### 0.18.14
 * [FEATURE] update slack notifications design ([#9952](https://github.com/great-expectations/great_expectations/pull/9952))
 * [BUGFIX] Set application query param for SnowflakeDatasource ([#9863](https://github.com/great-expectations/great_expectations/pull/9863))
-* [BUGFIX] Show FDS Asset name in DataDocs ([#9950](https://github.com/great-expectations/great_expectations/pull/9950))
+* [BUGFIX] Show FDS Asset name in DataDocs ([#9950](https://github.com/great-expectations/great_expectations/pull/9950))(thanks @morphatic)
 * [MAINTENANCE] Remove TIME from supported metric list ([#9844](https://github.com/great-expectations/great_expectations/pull/9844))
 * [MAINTENANCE] Schedule packaging pipeline to run on 0.18.x ([#9921](https://github.com/great-expectations/great_expectations/pull/9921))
 * [MAINTENANCE] performance, avoid HTTP round trips ([#9929](https://github.com/great-expectations/great_expectations/pull/9929))
