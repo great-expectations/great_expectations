@@ -20,5 +20,7 @@ pytest-timeout>=2.1.0
 pytest-xdist>=3.3.1
 requirements-parser>=0.2.0
 responses>=0.23.1 # requests mocking
-snapshottest==0.6.0 # GX Cloud atomic renderer tests
+# https://github.com/syrusakbary/snapshottest/issues/166
+# not compatible with python 3.12
+snapshottest==0.6.0; python_version < "3.12" # GX Cloud atomic renderer tests
 sqlalchemy>=1.4.0
