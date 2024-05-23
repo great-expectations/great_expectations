@@ -11,7 +11,7 @@ plugins = [
     "sqlalchemy.ext.mypy.plugin"
     ]
 files = [
-    "great_expectations",
+    "great_expectations_v1",
     "docs",
     "tests",
     # "contrib" # ignore entire `contrib` package
@@ -178,16 +178,16 @@ exclude = [
 # TODO: remove these overrides once we have typed the modules
 module = [
     "contrib.experimental.great_expectations_experimental.*",
-    "great_expectations.checkpoint.checkpoint",
-    "great_expectations.compatibility.docstring_parser",
-    "great_expectations.data_context.*",
-    "great_expectations.dataset.*",
-    "great_expectations.expectations.core.*",
-    "great_expectations.expectations.metrics.column_map_metrics.*",
-    "great_expectations.expectations.metrics.column_pair_map_metrics.*",
-    "great_expectations.experimental.rule_based_profiler.*",
-    "great_expectations.render.renderer.*",
-    "great_expectations.self_check.*",
+    "great_expectations_v1.checkpoint.checkpoint",
+    "great_expectations_v1.compatibility.docstring_parser",
+    "great_expectations_v1.data_context.*",
+    "great_expectations_v1.dataset.*",
+    "great_expectations_v1.expectations.core.*",
+    "great_expectations_v1.expectations.metrics.column_map_metrics.*",
+    "great_expectations_v1.expectations.metrics.column_pair_map_metrics.*",
+    "great_expectations_v1.experimental.rule_based_profiler.*",
+    "great_expectations_v1.render.renderer.*",
+    "great_expectations_v1.self_check.*",
     "tests.rule_based_profiler.*",
     "tests.test_utils",
 ]
@@ -196,7 +196,7 @@ follow_imports = 'silent'
 [[tool.mypy.overrides]]
 # need to use override because a mypy bug prevents ignoring an assignment warning inline
 # for `from azure import storage`
-module = ["great_expectations.compatibility.azure"]
+module = ["great_expectations_v1.compatibility.azure"]
 disable_error_code = [
     'assignment', # cannot assign NotImported to a ModuleType
 ]
@@ -208,7 +208,7 @@ module = [
     "botocore.*",
     "clickhouse_sqlalchemy.*",
     "google.*",
-    "great_expectations.compatibility.pydantic.*",
+    "great_expectations_v1.compatibility.pydantic.*",
     "ipywidgets.*",
     "mistune.*",
     "moto.*",
@@ -372,10 +372,10 @@ extend-exclude = [
 "*.pyi" = [
     "TID251", # flake8-banned-api - type stubs are not executed
 ]
-"great_expectations/_version.py" = [
+"great_expectations_v1/_version.py" = [
     "PLR", # pylint - versioneer code
 ]
-"great_expectations/compatibility/*.py" = [
+"great_expectations_v1/compatibility/*.py" = [
     "TID251", # flake8-banned-api
 ]
 "tasks.py" = [
@@ -392,10 +392,10 @@ extend-exclude = [
 runtime-evaluated-base-classes = [
     # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
-    "great_expectations.checkpoint.checkpoint.Checkpoint",
-    "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
-    "great_expectations.datasource.fluent.interfaces.Datasource",
-    "great_expectations.datasource.fluent.sql_datasource.SQLDatasource",
+    "great_expectations_v1.checkpoint.checkpoint.Checkpoint",
+    "great_expectations_v1.datasource.fluent.fluent_base_model.FluentBaseModel",
+    "great_expectations_v1.datasource.fluent.interfaces.Datasource",
+    "great_expectations_v1.datasource.fluent.sql_datasource.SQLDatasource",
 ]
 runtime-evaluated-decorators = ["pydantic.dataclasses.dataclass"]
 
@@ -410,19 +410,19 @@ convention = "google"
 "os.environ".msg = """Please do not use os.environ outside of configuration files.
 If you are working in a configuration file you may use the inline comment \
 "# noqa: TID251 # os.environ allowed in config files" to ignore this error."""
-"sqlalchemy".msg = "Please do not import sqlalchemy directly, import from great_expectations.compatibility.sqlalchemy instead."
-"pyspark".msg = "Please do not import pyspark directly, import from great_expectations.compatibility.pyspark instead."
-"boto3".msg = "Please do not import boto3 directly, import from great_expectations.compatibility.aws instead."
-"google".msg = "Please do not import google directly, import from great_expectations.compatibility.google instead."
-"azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
-"trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
-"pyarrow".msg = "Please do not import pyarrow directly, import from great_expectations.compatibility.pyarrow instead."
-"typing_extensions.override".msg = "Do not import typing_extensions.override directly, import `override` from great_expectations.compatibility.typing_extensions instead."
+"sqlalchemy".msg = "Please do not import sqlalchemy directly, import from great_expectations_v1.compatibility.sqlalchemy instead."
+"pyspark".msg = "Please do not import pyspark directly, import from great_expectations_v1.compatibility.pyspark instead."
+"boto3".msg = "Please do not import boto3 directly, import from great_expectations_v1.compatibility.aws instead."
+"google".msg = "Please do not import google directly, import from great_expectations_v1.compatibility.google instead."
+"azure".msg = "Please do not import azure directly, import from great_expectations_v1.compatibility.azure instead."
+"trino".msg = "Please do not import trino directly, import from great_expectations_v1.compatibility.trino instead."
+"pyarrow".msg = "Please do not import pyarrow directly, import from great_expectations_v1.compatibility.pyarrow instead."
+"typing_extensions.override".msg = "Do not import typing_extensions.override directly, import `override` from great_expectations_v1.compatibility.typing_extensions instead."
 # TODO: remove pydantic once our min version is pydantic v2
-"pydantic".msg = "Please do not import pydantic directly, import from great_expectations.compatibility.pydantic instead."
+"pydantic".msg = "Please do not import pydantic directly, import from great_expectations_v1.compatibility.pydantic instead."
 "pkg_resources".msg = "pkg_resources module has been deprecated. Use importlib.resources or importlib.metada instead."
-"great_expectations.util.convert_to_json_serializable".msg = "Use pydantic for serialization."
-"great_expectations.util.ensure_json_serializable".msg = "Use pydantic for serialization."
+"great_expectations_v1.util.convert_to_json_serializable".msg = "Use pydantic for serialization."
+"great_expectations_v1.util.ensure_json_serializable".msg = "Use pydantic for serialization."
 
 
 # -----------------------------------------------------------------
@@ -517,12 +517,12 @@ filterwarnings = [
     "ignore: module 'sre_parse' is deprecated:DeprecationWarning",
 
     # trino
-    # example actual warning: found in great_expectations/self_check/util.py:2752: in _create_trino_engine
+    # example actual warning: found in great_expectations_v1/self_check/util.py:2752: in _create_trino_engine
     # sqlalchemy.exc.SADeprecationWarning: The dbapi() classmethod on dialect classes has been renamed to import_dbapi().  Implement an import_dbapi() classmethod directly on class <class 'trino.sqlalchemy.dialect.TrinoDialect'> to remove this warning; the old .dbapi() classmethod may be maintained for backwards compatibility.
     'ignore: The dbapi\(\) classmethod on dialect classes has been renamed to import_dbapi\(\):DeprecationWarning',
 
     # six
-    # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
+    # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations_v1/tests/conftest.py'.
     # ImportWarning: _SixMetaPathImporter.exec_module() not found; falling back to load_module()
     'ignore: _SixMetaPathImporter.exec_module\(\) not found:ImportWarning',
 
