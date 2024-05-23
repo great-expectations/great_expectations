@@ -19,7 +19,7 @@ PYTHON_VERSION: Final[Version] = Version(
 
 pytestmark = pytest.mark.skipif(
     Version("3.12") <= PYTHON_VERSION,
-    reason="Snapshot incompatible with Python 3.12",
+    reason="`snapshottest` incompatible with Python 3.12",
 )
 # https://github.com/syrusakbary/snapshottest/issues/166
 
