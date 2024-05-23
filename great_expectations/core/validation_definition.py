@@ -204,6 +204,7 @@ class ValidationDefinition(BaseModel):
             result_format=result_format,
         )
         results = validator.validate_expectation_suite(self.suite, suite_parameters)
+        results.meta["validation_id"] = self.id
 
         # NOTE: We should promote this to a top-level field of the result.
         #       Meta should be reserved for user-defined information.

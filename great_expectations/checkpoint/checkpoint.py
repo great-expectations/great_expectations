@@ -153,11 +153,7 @@ class Checkpoint(BaseModel):
             run_id=run_id,
         )
 
-        checkpoint_result = CheckpointResult(
-            run_id=run_id,
-            run_results=run_results,
-            checkpoint_config=self,
-        )
+        checkpoint_result = self._construct_result(run_id=run_id, run_results=run_results)
         self._run_actions(checkpoint_result=checkpoint_result)
 
         return checkpoint_result
@@ -198,6 +194,20 @@ class Checkpoint(BaseModel):
             ),
             run_id=run_id,
             batch_identifier=batch_identifier,
+        )
+
+    def _construct_result(
+        self,
+        run_id: RunIdentifier,
+        run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult],
+    ) -> CheckpointResult:
+        for result in run_results.values():
+            result.meta["checkpoint_id"] = self.id
+
+        return CheckpointResult(
+            run_id=run_id,
+            run_results=run_results,
+            checkpoint_config=self,
         )
 
     def _run_actions(

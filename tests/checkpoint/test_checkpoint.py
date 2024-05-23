@@ -678,6 +678,7 @@ class TestCheckpointResult:
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
+        checkpoint = context.checkpoints.add(checkpoint)
         result = checkpoint.run()
 
         assert result.success is False
@@ -737,3 +738,15 @@ class TestCheckpointResult:
                 },
             ],
         }
+
+        run_results = tuple(result.run_results.values())
+        assert len(run_results) == 1
+
+        meta = run_results[0].meta
+        assert sorted(meta.keys()) == ["checkpoint_id", "run_id", "validation_id"]
+
+        for identifier in ("checkpoint_id", "validation_id"):
+            try:
+                uuid.UUID(meta[identifier])
+            except ValueError:
+                pytest.fail(f"{meta[identifier]} is not a valid UUID.")
