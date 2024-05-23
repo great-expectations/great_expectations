@@ -13,69 +13,66 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Final, Generator, List, Optional
 from unittest import mock
 
+import great_expectations_v1 as gx
 import numpy as np
 import packaging
 import pandas as pd
 import pytest
-
-import great_expectations as gx
-from great_expectations import project_manager, set_context
-from great_expectations.analytics.config import ENV_CONFIG
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+from great_expectations_v1 import project_manager, set_context
+from great_expectations_v1.analytics.config import ENV_CONFIG
+from great_expectations_v1.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import (
+from great_expectations_v1.core.expectation_suite import ExpectationSuite
+from great_expectations_v1.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import (
+from great_expectations_v1.core.metric_function_types import MetricPartialFunctionTypes
+from great_expectations_v1.core.yaml_handler import YAMLHandler
+from great_expectations_v1.data_context import (
     AbstractDataContext,
     CloudDataContext,
     get_context,
 )
-from great_expectations.data_context._version_checker import _VersionChecker
-from great_expectations.data_context.cloud_constants import (
+from great_expectations_v1.data_context._version_checker import _VersionChecker
+from great_expectations_v1.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
 )
-from great_expectations.data_context.data_context.ephemeral_data_context import (
-    EphemeralDataContext,
-)
-from great_expectations.data_context.data_context.file_data_context import (
+from great_expectations_v1.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.store.gx_cloud_store_backend import (
+from great_expectations_v1.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations.data_context.types.base import (
+from great_expectations_v1.data_context.types.base import (
     DataContextConfig,
     GXCloudConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations_v1.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import (
+from great_expectations_v1.data_context.util import (
     file_relative_path,
 )
-from great_expectations.datasource.fluent import GxDatasourceWarning, PandasDatasource
-from great_expectations.execution_engine import SparkDFExecutionEngine
-from great_expectations.expectations.expectation_configuration import (
+from great_expectations_v1.datasource.fluent import GxDatasourceWarning, PandasDatasource
+from great_expectations_v1.execution_engine import SparkDFExecutionEngine
+from great_expectations_v1.expectations.expectation_configuration import (
     ExpectationConfiguration,
 )
-from great_expectations.self_check.util import (
+from great_expectations_v1.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
-from great_expectations.self_check.util import (
+from great_expectations_v1.self_check.util import (
     expectationSuiteValidationResultSchema,
 )
-from great_expectations.util import (
+from great_expectations_v1.util import (
     build_in_memory_runtime_context,
     is_library_loadable,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import Validator
+from great_expectations_v1.validator.metric_configuration import MetricConfiguration
+from great_expectations_v1.validator.validator import Validator
+
 from tests.datasource.fluent._fake_cloud_api import (
     DUMMY_JWT_TOKEN,
     FAKE_ORG_ID,
@@ -87,10 +84,12 @@ from tests.datasource.fluent._fake_cloud_api import (
 if TYPE_CHECKING:
     from unittest.mock import MagicMock  # noqa: TID251 # type-checking only
 
+    from great_expectations_v1.compatibility import pyspark
+    from great_expectations_v1.compatibility.sqlalchemy import Engine
+    from great_expectations_v1.data_context.data_context.ephemeral_data_context import (
+        EphemeralDataContext,
+    )
     from pytest_mock import MockerFixture
-
-    from great_expectations.compatibility import pyspark
-    from great_expectations.compatibility.sqlalchemy import Engine
 
 yaml = YAMLHandler()
 ###
@@ -438,7 +437,7 @@ def preload_latest_gx_cache():
     when creating contexts as part of normal testing.
     """
     # setup
-    import great_expectations as gx
+    import great_expectations_v1 as gx
 
     current_version = packaging.version.Version(gx.__version__)
     logger.info(f"Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with {current_version}")
@@ -468,7 +467,7 @@ def sa(test_backends):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         try:
-            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+            from great_expectations_v1.compatibility.sqlalchemy import sqlalchemy as sa
 
             return sa
         except ImportError:
@@ -478,7 +477,7 @@ def sa(test_backends):
 @pytest.mark.order(index=2)
 @pytest.fixture
 def spark_session(test_backends) -> pyspark.SparkSession:
-    from great_expectations.compatibility import pyspark
+    from great_expectations_v1.compatibility import pyspark
 
     if pyspark.SparkSession:  # type: ignore[truthy-function]
         return SparkDFExecutionEngine.get_or_create_spark_session()
@@ -488,7 +487,7 @@ def spark_session(test_backends) -> pyspark.SparkSession:
 
 @pytest.fixture
 def basic_spark_df_execution_engine(spark_session):
-    from great_expectations.execution_engine import SparkDFExecutionEngine
+    from great_expectations_v1.execution_engine import SparkDFExecutionEngine
 
     conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
     spark_config: Dict[str, Any] = dict(conf)
@@ -506,7 +505,7 @@ def spark_df_taxi_data_schema(spark_session):
     """
 
     # will not import unless we have a spark_session already passed in as fixture
-    from great_expectations.compatibility import pyspark
+    from great_expectations_v1.compatibility import pyspark
 
     schema = pyspark.types.StructType(
         [
@@ -1660,7 +1659,7 @@ def filesystem_csv_data_context_with_validation_operators(
 ):
     titanic_data_context_stats_enabled.add_datasource(
         "rad_datasource",
-        module_name="great_expectations.datasource",
+        module_name="great_expectations_v1.datasource",
         class_name="PandasDatasource",
         batch_kwargs_generators={
             "subdir_reader": {
@@ -1679,7 +1678,7 @@ def filesystem_csv_data_context(
 ) -> FileDataContext:
     empty_data_context.add_datasource(
         "rad_datasource",
-        module_name="great_expectations.datasource",
+        module_name="great_expectations_v1.datasource",
         class_name="PandasDatasource",
         batch_kwargs_generators={
             "subdir_reader": {
@@ -1698,7 +1697,7 @@ def data_context_with_block_datasource(
 ) -> FileDataContext:
     empty_data_context.add_datasource(
         "rad_datasource",
-        module_name="great_expectations.datasource",
+        module_name="great_expectations_v1.datasource",
         class_name="PandasDatasource",
         batch_kwargs_generators={
             "subdir_reader": {
@@ -1733,7 +1732,7 @@ def data_context_with_fluent_datasource_and_block_datasource(
     )
     empty_data_context.add_datasource(
         name="my_block_datasource",
-        module_name="great_expectations.datasource",
+        module_name="great_expectations_v1.datasource",
         class_name="PandasDatasource",
         batch_kwargs_generators={
             "subdir_reader": {
@@ -2176,7 +2175,7 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
 
 @pytest.fixture
 @mock.patch(
-    "great_expectations.data_context.store.DatasourceStore.list_keys",
+    "great_expectations_v1.data_context.store.DatasourceStore.list_keys",
     return_value=[],
 )
 def empty_base_data_context_in_cloud_mode(
@@ -2216,13 +2215,13 @@ def empty_data_context_in_cloud_mode(
         return ge_cloud_config
 
     with mock.patch(
-        "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
+        "great_expectations_v1.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
     ), mock.patch(
-        "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
+        "great_expectations_v1.data_context.data_context.cloud_data_context.CloudDataContext.retrieve_data_context_config_from_cloud",
         autospec=True,
         side_effect=mocked_config,
     ), mock.patch(
-        "great_expectations.data_context.data_context.CloudDataContext.get_cloud_config",
+        "great_expectations_v1.data_context.data_context.CloudDataContext.get_cloud_config",
         autospec=True,
         side_effect=mocked_get_cloud_config,
     ):
@@ -2285,7 +2284,7 @@ def empty_cloud_context_fluent(cloud_api_fake, cloud_details: CloudDetails) -> C
 
 @pytest.fixture
 @mock.patch(
-    "great_expectations.data_context.store.DatasourceStore.get_all",
+    "great_expectations_v1.data_context.store.DatasourceStore.get_all",
     return_value=[],
 )
 def empty_base_data_context_in_cloud_mode_custom_base_url(

@@ -1,7 +1,6 @@
 import pytest
-
-from great_expectations.expectations import core
-from great_expectations.expectations.expectation import Expectation, MetaExpectation
+from great_expectations_v1.expectations import core
+from great_expectations_v1.expectations.expectation import Expectation, MetaExpectation
 
 
 @pytest.mark.unit
