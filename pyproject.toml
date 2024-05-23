@@ -461,7 +461,7 @@ filterwarnings = [
     "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
 
     # docstring_parser - not making this call directly (should be fixed upstream)
-    'ignore: ast.NameConstant is deprecated and will be removed in Python 3.14; use ast.Constant instead:DeprecationWarning',
+    "ignore:ast.NameConstant is deprecated and will be removed in Python 3.14; use ast.Constant instead:DeprecationWarning",
 
     # --------------------------------------- Great Expectations Warnings ----------------------------------
     # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
