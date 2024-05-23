@@ -253,7 +253,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements-dev.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements-dev.txt", "moto", (("<", "5.0"), (">=", "4.2.13"))),
-        ("requirements-dev.txt", "numpy", (("<", "2.0.0"), (">=", "1.22.4"))),
+        ("requirements-dev.txt", "numpy", (("<", "2.0.0"), (">=", "1.26.0"))),
         ("requirements-dev.txt", "pandas", (("<", "2.2.0"),)),
         ("requirements-dev.txt", "posthog", (("<", "3"), (">=", "2.1.0"))),
         ("requirements-dev.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
@@ -267,7 +267,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
         ("requirements.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
-        ("requirements.txt", "numpy", (("<", "2.0.0"), (">=", "1.22.4"))),
+        ("requirements.txt", "numpy", (("<", "2.0.0"), (">=", "1.26.0"))),
         ("requirements.txt", "posthog", (("<", "3"), (">=", "2.1.0"))),
         ("requirements.txt", "ruamel.yaml", (("<", "0.17.18"), (">=", "0.16"))),
     }
