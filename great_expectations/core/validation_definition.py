@@ -198,6 +198,9 @@ class ValidationDefinition(BaseModel):
         result_format: ResultFormat | dict = ResultFormat.SUMMARY,
         run_id: RunIdentifier | None = None,
     ) -> ExpectationSuiteValidationResult:
+        if not self.id:
+            self._save_before_run()
+
         validator = Validator(
             batch_definition=self.batch_definition,
             batch_parameters=batch_parameters,
@@ -273,3 +276,20 @@ class ValidationDefinition(BaseModel):
         self.suite.identifier_bundle()
 
         return _IdentifierBundle(name=self.name, id=self.id)
+
+    @public_api
+    def save(self) -> None:
+        from great_expectations import project_manager
+
+        store = project_manager.get_validation_definition_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        store.update(key=key, value=self)
+
+    def _save_before_run(self) -> None:
+        from great_expectations import project_manager
+
+        store = project_manager.get_validation_definition_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        store.set(key=key, value=self)

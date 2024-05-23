@@ -145,6 +145,9 @@ class Checkpoint(BaseModel):
         expectation_parameters: Dict[str, Any] | None = None,
         run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
+        if not self.id:
+            self._save_before_run()
+
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
             batch_parameters=batch_parameters,
@@ -238,6 +241,14 @@ class Checkpoint(BaseModel):
         key = store.get_key(name=self.name, id=self.id)
 
         store.update(key=key, value=self)
+
+    def _save_before_run(self) -> None:
+        from great_expectations import project_manager
+
+        store = project_manager.get_checkpoints_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        store.set(key=key, value=self)
 
 
 class CheckpointResult(BaseModel):
