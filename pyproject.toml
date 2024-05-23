@@ -442,6 +442,10 @@ filterwarnings = [
     # https://pytest-mock.readthedocs.io/en/latest/remarks.html#usage-as-context-manager
     "default::pytest_mock.plugin.PytestMockWarning",
 
+    # Find and fix ruff DTZ violations
+    "once: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version:DeprecationWarning",
+
+
     # the pkg_resources module distributed with setuptools has been deprecated
     # we should never use it but it is used in some of our dependencies
     # https://setuptools.pypa.io/en/latest/pkg_resources.html
