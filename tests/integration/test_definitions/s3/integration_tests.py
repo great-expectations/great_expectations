@@ -1,36 +1,11 @@
+from typing import List
+
 from tests.integration.backend_dependencies import BackendDependencies
 from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 s3_integration_tests = []
 
-connecting_to_your_data = [
-    IntegrationTestFixture(
-        name="s3_pandas_inferred_and_runtime_yaml",
-        user_flow_script="docs/docusaurus/docs/snippets/inferred_and_runtime_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="s3_pandas_inferred_and_runtime_python",
-        user_flow_script="docs/docusaurus/docs/snippets/inferred_and_runtime_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_an_inferredassetdataconnector",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_a_configuredassetdataconnector",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-]
+connecting_to_your_data: List[IntegrationTestFixture] = []
 
 deployment_patterns = [
     IntegrationTestFixture(
@@ -41,9 +16,22 @@ deployment_patterns = [
     ),
 ]
 
-partition_data = []
+partition_data = [
+    IntegrationTestFixture(
+        name="partition_on_datetime_s3",
+        user_flow_script="tests/integration/test_definitions/s3/partition_on_datetime.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+    IntegrationTestFixture(
+        name="select_batch_by_path",
+        user_flow_script="tests/integration/test_definitions/s3/select_batch_by_path.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+]
 
-sample_data = []
+sample_data: List[IntegrationTestFixture] = []
 
 fluent_datasources = [
     IntegrationTestFixture(

@@ -1,11 +1,20 @@
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        informational: true
+
 flag_management:
   default_rules: # the rules that will be followed for any flag added, generally
-    after_n_builds: 10
+    after_n_builds: 12
     carryforward: false
     statuses:
       - type: project
-        target: auto # the default target for the project
-        threshold: 60% # the default minimum threshold for the project
+        target: 80%
+        threshold: 2% # We allow the coverage to drop by this percent on a PR
       - type: patch
         target: 90%
   # in general these individual flags should correspond to pytest markers

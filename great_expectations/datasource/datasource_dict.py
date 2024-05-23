@@ -2,16 +2,13 @@ from __future__ import annotations
 
 import logging
 from collections import UserDict
-from typing import TYPE_CHECKING, Protocol, TypeVar, overload, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, TypeVar, runtime_checkable
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.data_context.types.base import (
-    DatasourceConfig,
-    datasourceConfigSchema,
-)
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent.constants import _IN_MEMORY_DATA_ASSET_TYPE
+from great_expectations.exceptions.exceptions import DataContextError
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -19,9 +16,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.datasource.fluent.interfaces import DataAsset
-    from great_expectations.datasource.new_datasource import (
-        BaseDatasource,
-    )
 
 T = TypeVar("T", bound=FluentDatasource)
 
@@ -65,14 +59,14 @@ class DatasourceDict(UserDict):
 
     @override
     @property
-    def data(self) -> dict[str, FluentDatasource | BaseDatasource]:  # type: ignore[override] # `data` is meant to be a writeable attr (not a read-only property)
+    def data(self) -> dict[str, FluentDatasource]:  # type: ignore[override] # `data` is meant to be a writeable attr (not a read-only property)
         """
         `data` is referenced by the parent `UserDict` and enables the class to fulfill its various dunder methods
         (__setitem__, __getitem__, etc)
 
         This is generated just-in-time as the contents of the store may have changed.
         """  # noqa: E501
-        datasources: dict[str, FluentDatasource | BaseDatasource] = {}
+        datasources: dict[str, FluentDatasource] = {}
 
         configs = self._datasource_store.get_all()
         for config in configs:
@@ -81,35 +75,20 @@ class DatasourceDict(UserDict):
                     name = config.name
                     datasources[name] = self._init_fluent_datasource(name=name, ds=config)
                 else:
-                    name = config["name"]
-                    datasources[name] = self._init_block_style_datasource(name=name, config=config)
+                    raise DataContextError("Datasource is not a FluentDatasource")  # noqa: TRY003
             except gx_exceptions.DatasourceInitializationError as e:
                 logger.warning(f"Cannot initialize datasource {name}: {e}")
 
         return datasources
 
-    @overload
-    def set_datasource(self, name: str, ds: T) -> T: ...
-
-    @overload
-    def set_datasource(self, name: str, ds: BaseDatasource) -> None: ...
-
-    def set_datasource(
-        self, name: str, ds: FluentDatasource | BaseDatasource
-    ) -> FluentDatasource | None:
-        config: FluentDatasource | DatasourceConfig
-        if isinstance(ds, FluentDatasource):
-            config = self._prep_fds_config_for_set(name=name, ds=ds)
-        else:
-            config = self._prep_legacy_datasource_config_for_set(name=name, ds=ds)
+    def set_datasource(self, name: str, ds: FluentDatasource) -> FluentDatasource | None:
+        config = self._prep_fds_config_for_set(name=name, ds=ds)
 
         datasource = self._datasource_store.set(key=None, value=config)
-        if isinstance(datasource, FluentDatasource):
-            return self._init_fluent_datasource(name=name, ds=datasource)
-        return None
+        return self._init_fluent_datasource(name=name, ds=datasource)
 
     @override
-    def __setitem__(self, name: str, ds: FluentDatasource | BaseDatasource) -> None:
+    def __setitem__(self, name: str, ds: FluentDatasource) -> None:
         self.set_datasource(name=name, ds=ds)
 
     def _prep_fds_config_for_set(self, name: str, ds: FluentDatasource) -> FluentDatasource:
@@ -123,17 +102,7 @@ class DatasourceDict(UserDict):
                     self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
-    def _prep_legacy_datasource_config_for_set(
-        self, name: str, ds: BaseDatasource
-    ) -> DatasourceConfig:
-        config = ds.config
-        # 20230824 - Chetan - Kind of gross but this ensures that we have what we need for instantiate_class_from_config  # noqa: E501
-        # There's probably a better way to do this with Marshmallow but this works
-        config["name"] = name
-        config["class_name"] = ds.__class__.__name__
-        return datasourceConfigSchema.load(config)
-
-    def _get_ds_from_store(self, name: str) -> FluentDatasource | DatasourceConfig:
+    def _get_ds_from_store(self, name: str) -> FluentDatasource:
         try:
             return self._datasource_store.retrieve_by_name(name)
         except ValueError:
@@ -145,12 +114,10 @@ class DatasourceDict(UserDict):
         self._datasource_store.delete(ds)
 
     @override
-    def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
+    def __getitem__(self, name: str) -> FluentDatasource:
         ds = self._get_ds_from_store(name)
 
-        if isinstance(ds, FluentDatasource):
-            return self._init_fluent_datasource(name=name, ds=ds)
-        return self._init_block_style_datasource(name=name, config=ds)
+        return self._init_fluent_datasource(name=name, ds=ds)
 
     def _init_fluent_datasource(self, name: str, ds: FluentDatasource) -> FluentDatasource:
         ds._data_context = self._context
@@ -171,12 +138,6 @@ class DatasourceDict(UserDict):
                         self._in_memory_data_assets[in_memory_asset_name] = asset
         return ds
 
-    # To be removed once block-style is fully removed (deprecated as of v0.17.2)
-    def _init_block_style_datasource(self, name: str, config: DatasourceConfig) -> BaseDatasource:
-        return self._context._init_block_style_datasource(
-            datasource_name=name, datasource_config=config
-        )
-
 
 class CacheableDatasourceDict(DatasourceDict):
     """
@@ -195,11 +156,11 @@ class CacheableDatasourceDict(DatasourceDict):
             context=context,
             datasource_store=datasource_store,
         )
-        self._cache: dict[str, FluentDatasource | BaseDatasource] = {}
+        self._cache: dict[str, FluentDatasource] = {}
 
     @override
     @property
-    def data(self) -> dict[str, FluentDatasource | BaseDatasource]:  # type: ignore[override] # `data` is meant to be a writeable attr (not a read-only property)
+    def data(self) -> dict[str, FluentDatasource]:  # type: ignore[override] # `data` is meant to be a writeable attr (not a read-only property)
         return self._cache
 
     @override
@@ -213,16 +174,8 @@ class CacheableDatasourceDict(DatasourceDict):
         except KeyError:
             return False
 
-    @overload
-    def set_datasource(self, name: str, ds: T) -> T: ...
-
-    @overload
-    def set_datasource(self, name: str, ds: BaseDatasource) -> None: ...
-
     @override
-    def set_datasource(
-        self, name: str, ds: FluentDatasource | BaseDatasource
-    ) -> FluentDatasource | None:
+    def set_datasource(self, name: str, ds: FluentDatasource) -> FluentDatasource | None:
         self.data[name] = ds
 
         # FDS do not use stores
@@ -239,7 +192,7 @@ class CacheableDatasourceDict(DatasourceDict):
             super().__delitem__(name)
 
     @override
-    def __getitem__(self, name: str) -> FluentDatasource | BaseDatasource:
+    def __getitem__(self, name: str) -> FluentDatasource:
         if name in self.data:
             return self.data[name]
 

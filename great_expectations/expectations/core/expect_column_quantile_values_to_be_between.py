@@ -4,13 +4,12 @@ from numbers import Number
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
-from typing_extensions import TypedDict
 
 from great_expectations.compatibility import pydantic
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
@@ -50,9 +49,9 @@ if TYPE_CHECKING:
     )
 
 
-class QuantileRange(TypedDict):
+class QuantileRange(pydantic.BaseModel):
     quantiles: List[float]
-    value_ranges: List[List[Union[None, int, float]]]
+    value_ranges: List[List[Union[float, int, None]]]
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
@@ -245,12 +244,12 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         try:
             assert all(
                 True if None in x else x == sorted([val for val in x if val is not None])
-                for x in quantile_ranges["value_ranges"]
+                for x in quantile_ranges.value_ranges
             ), "quantile_ranges must consist of ordered pairs"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-        if len(quantile_ranges["quantiles"]) != len(quantile_ranges["value_ranges"]):
+        if len(quantile_ranges.quantiles) != len(quantile_ranges.value_ranges):
             raise ValueError("quantile_values and quantiles must have the same number of elements")  # noqa: TRY003
 
         return quantile_ranges
@@ -330,7 +329,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
 
     @classmethod
     @renderer(renderer_type=AtomicPrescriptiveRendererType.SUMMARY)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_summary(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -372,7 +371,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -381,9 +380,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration["kwargs"],

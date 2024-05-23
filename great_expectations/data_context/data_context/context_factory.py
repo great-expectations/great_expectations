@@ -17,6 +17,7 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
 )
+from great_expectations.exceptions.exceptions import DataContextRequiredError
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +34,11 @@ if TYPE_CHECKING:
         FileDataContext,
     )
     from great_expectations.data_context.store import (
-        EvaluationParameterStore,
         ExpectationsStore,
-        ValidationsStore,
+        SuiteParameterStore,
+        ValidationResultsStore,
     )
-    from great_expectations.data_context.store.checkpoint_store import V1CheckpointStore
+    from great_expectations.data_context.store.checkpoint_store import CheckpointStore
     from great_expectations.data_context.store.validation_definition_store import (
         ValidationDefinitionStore,
     )
@@ -82,32 +83,29 @@ class ProjectManager:
         )
         return self.__project
 
-    def set_project(self, project: AbstractDataContext) -> None:
+    def set_project(self, project: AbstractDataContext | None) -> None:
         self.__project = project
 
     @property
     def _project(self) -> AbstractDataContext:
         if not self.__project:
-            raise RuntimeError(
-                "This action requires an active DataContext. "
-                + "Please call `great_expectations.get_context()` first, then try your action again."  # noqa: E501
-            )
+            raise DataContextRequiredError()
         return self.__project
 
     def get_expectations_store(self) -> ExpectationsStore:
         return self._project.expectations_store
 
-    def get_checkpoints_store(self) -> V1CheckpointStore:
-        return self._project.v1_checkpoint_store
+    def get_checkpoints_store(self) -> CheckpointStore:
+        return self._project.checkpoint_store
 
-    def get_validations_store(self) -> ValidationsStore:
-        return self._project.validations_store
+    def get_validation_results_store(self) -> ValidationResultsStore:
+        return self._project.validation_results_store
 
     def get_validation_definition_store(self) -> ValidationDefinitionStore:
         return self._project.validation_definition_store
 
-    def get_evaluation_parameters_store(self) -> EvaluationParameterStore:
-        return self._project.evaluation_parameter_store
+    def get_suite_parameters_store(self) -> SuiteParameterStore:
+        return self._project.suite_parameter_store
 
     def get_datasources(self) -> DatasourceDict:
         return self._project.datasources

@@ -1,5 +1,4 @@
 import pathlib
-import re
 import typing
 from logging import Logger
 from typing import (
@@ -15,7 +14,23 @@ from typing import (
 from great_expectations._docs_decorators import public_api as public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import Sorter, _PandasFilePathDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.pandas.generated_assets import (
+    CSVAsset,
+    ExcelAsset,
+    FeatherAsset,
+    FWFAsset,
+    HDFAsset,
+    HTMLAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
+)
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector as FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.dynamic_pandas import (
@@ -32,22 +47,6 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
 )
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset,
-    ExcelAsset,
-    FeatherAsset,
-    FWFAsset,
-    HDFAsset,
-    HTMLAsset,
-    JSONAsset,
-    ORCAsset,
-    ParquetAsset,
-    PickleAsset,
-    SASAsset,
-    SPSSAsset,
-    StataAsset,
-    XMLAsset,
-)
 
 logger: Logger
 
@@ -61,7 +60,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -120,7 +118,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -152,7 +149,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -164,7 +160,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -179,7 +174,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -198,7 +192,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -221,7 +214,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -245,7 +237,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -256,7 +247,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Union[re.Pattern, str] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -270,7 +260,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -281,7 +270,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -296,7 +284,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -307,7 +294,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -327,7 +313,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: typing.Pattern = ...,
         glob_directive: str = ...,
         order_by: typing.List[Sorter] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,

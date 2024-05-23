@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-import re
 from typing import (
     TYPE_CHECKING,
     AbstractSet,
     Any,
     Callable,
     Dict,
+    Generic,
     Mapping,
     Optional,
     Union,
 )
 
-from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, StrictStr
 from great_expectations.compatibility.pydantic import json as pydantic_json
@@ -22,10 +21,10 @@ from great_expectations.compatibility.pydantic import (
 
 # default_ref_template
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.core.batch_definition import PartitionerT
 
 # moving this import into TYPE_CHECKING requires forward refs to be updated.
-from great_expectations.core.partitioners import Partitioner  # noqa: TCH001
-from great_expectations.datasource.data_connector.batch_filter import (
+from great_expectations.datasource.fluent.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,
 )
@@ -47,8 +46,7 @@ if TYPE_CHECKING:
 BatchParameters: TypeAlias = Dict[StrictStr, Any]
 
 
-@public_api
-class BatchRequest(pydantic.BaseModel):
+class BatchRequest(pydantic.GenericModel, Generic[PartitionerT]):
     """A BatchRequest is the way to specify which data Great Expectations will validate.
 
     A Batch Request is provided to a Data Asset in order to create one or more Batches.
@@ -84,8 +82,7 @@ class BatchRequest(pydantic.BaseModel):
             "The structure and types depends on the asset type."
         ),
     )
-    partitioner: Optional[Partitioner] = None
-    batching_regex: Optional[re.Pattern] = None
+    partitioner: Optional[PartitionerT] = None
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
     )
@@ -102,7 +99,6 @@ class BatchRequest(pydantic.BaseModel):
         """A built-in slice that can be used to filter a list of batches by index."""
         return parse_batch_slice(batch_slice=self._batch_slice_input)
 
-    @public_api
     def update_batch_slice(self, value: Optional[BatchSlice] = None) -> None:
         """Updates the batch_slice on this BatchRequest.
 
@@ -140,7 +136,6 @@ class BatchRequest(pydantic.BaseModel):
             raise TypeError("BatchParameters keys must all be strings.")  # noqa: TRY003
         return options
 
-    @public_api
     @override
     def json(  # noqa: PLR0913
         self,
@@ -173,7 +168,6 @@ class BatchRequest(pydantic.BaseModel):
             **dumps_kwargs,
         )
 
-    @public_api
     @override
     def dict(  # noqa: PLR0913
         self,

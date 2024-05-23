@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import uuid
 from typing import Optional
 from unittest import mock
 
@@ -14,7 +15,6 @@ from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import get_context
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -29,7 +29,6 @@ from great_expectations.data_context.store import (
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
-from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -44,87 +43,6 @@ from great_expectations.util import (
 from tests import test_utils
 
 yaml = YAMLHandler()
-
-
-@pytest.fixture()
-def basic_data_context_config_for_validation_operator():
-    return DataContextConfig(
-        config_version=2,
-        plugins_directory=None,
-        evaluation_parameter_store_name="evaluation_parameter_store",
-        expectations_store_name="expectations_store",
-        datasources={},
-        stores={
-            "expectations_store": {"class_name": "ExpectationsStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
-            "metrics_store": {"class_name": "MetricStore"},
-        },
-        validations_store_name="validation_result_store",
-        data_docs_sites={},
-        validation_operators={
-            "store_val_res_and_extract_eval_params": {
-                "class_name": "ActionListValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-            "errors_and_warnings_validation_operator": {
-                "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                            "target_store_name": "validation_result_store",
-                        },
-                    },
-                ],
-            },
-        },
-    )
-
-
-@pytest.fixture
-def validation_operators_data_context(
-    basic_data_context_config_for_validation_operator, filesystem_csv_4
-):
-    data_context = get_context(basic_data_context_config_for_validation_operator)
-
-    data_context.add_datasource(
-        "my_datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_4),
-            }
-        },
-    )
-    data_context.add_expectation_suite("f1.foo")
-
-    df = data_context._get_batch_v2(
-        batch_kwargs=data_context.build_batch_kwargs("my_datasource", "subdir_reader", "f1"),
-        expectation_suite_name="f1.foo",
-    )
-    df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
-    failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-
-    df.expect_column_values_to_not_be_null(column="y")
-    warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-
-    failure_expectations.name = "f1.failure"
-    data_context.add_expectation_suite(expectation_suite=failure_expectations)
-    warning_expectations.name = "f1.warning"
-    data_context.add_expectation_suite(expectation_suite=warning_expectations)
-
-    return data_context
 
 
 @pytest.fixture()
@@ -178,7 +96,7 @@ def check_store_backend_store_backend_id_functionality(
     if store_backend_id:
         assert store_backend.store_backend_id == store_backend_id
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(store_backend.store_backend_id)
+    assert isinstance(store_backend.store_backend_id, uuid.UUID)
     # Check in file stores that the actual file exists
     assert store_backend.has_key(key=(".ge_store_backend_id",))
 
@@ -320,7 +238,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory, aws_credentials):
         project=project,
         base_public_path=base_public_path,
     )
-    store_error_uuid = "00000000-0000-0000-0000-00000000e003"
+    store_error_uuid = uuid.UUID("00000000-0000-0000-0000-00000000e003")
     assert gcs_store_backend_with_base_public_path.store_backend_id == store_error_uuid
 
 
@@ -1421,22 +1339,19 @@ def test_InlineStoreBackend(empty_data_context) -> None:
         resource_type=DataContextVariableSchema.ALL_VARIABLES,
     )
     assert sorted(inline_store_backend.list_keys()) == [
-        ("anonymous_usage_statistics",),
+        ("analytics_enabled",),
         ("checkpoint_store_name",),
         ("config_variables_file_path",),
         ("config_version",),
+        ("data_context_id",),
         ("data_docs_sites",),
-        ("datasources",),
-        ("evaluation_parameter_store_name",),
         ("expectations_store_name",),
         ("fluent_datasources",),
-        ("include_rendered_content",),
         ("plugins_directory",),
-        ("profiler_store_name",),
         ("progress_bars",),
         ("stores",),
-        ("validation_operators",),
-        ("validations_store_name",),
+        ("suite_parameter_store_name",),
+        ("validation_results_store_name",),
     ]
 
     # test .move
@@ -1490,89 +1405,14 @@ def test_InlineStoreBackend(empty_data_context) -> None:
 
 
 @pytest.mark.filesystem
-def test_InlineStoreBackend_with_mocked_fs(empty_data_context) -> None:
-    path_to_great_expectations_yml: str = os.path.join(  # noqa: PTH118
-        empty_data_context.root_directory, empty_data_context.GX_YML
-    )
-
-    # 1. Set simple string config value and confirm it persists in the GX.yml
-
-    inline_store_backend: InlineStoreBackend = InlineStoreBackend(
-        data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.CONFIG_VERSION,
-    )
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["config_version"] == 3.0
-
-    new_config_version: float = 5.0
-    key = DataContextVariableKey()
-    tuple_ = key.to_tuple()
-
-    inline_store_backend.set(tuple_, new_config_version)
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["config_version"] == new_config_version
-
-    # 2. Set nested dictionary config value and confirm it persists in the GX.yml
-
-    inline_store_backend = InlineStoreBackend(
-        data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.DATASOURCES,
-    )
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    assert config_commented_map_from_yaml["datasources"] == {}
-
-    datasource_config_string: str = """
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: my/base/dir/
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-        """
-    datasource_config: dict = yaml.load(datasource_config_string)
-
-    key = DataContextVariableKey(
-        resource_name="my_datasource",
-    )
-    tuple_ = key.to_tuple()
-
-    inline_store_backend.set(tuple_, datasource_config)
-
-    with open(path_to_great_expectations_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
-
-    datasources: dict = config_commented_map_from_yaml["datasources"]
-    assert len(datasources) == 1
-    assert datasources["my_datasource"] == datasource_config
-
-
-@pytest.mark.filesystem
 def test_InlineStoreBackend_get_all_success(empty_data_context) -> None:
     inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,
-        resource_type=DataContextVariableSchema.DATASOURCES,
+        resource_type=DataContextVariableSchema.FLUENT_DATASOURCES,
     )
 
-    datasource_config_a = empty_data_context.sources.add_pandas(name="a")
-    datasource_config_b = empty_data_context.sources.add_pandas(name="b")
+    datasource_config_a = empty_data_context.data_sources.add_pandas(name="a")
+    datasource_config_b = empty_data_context.data_sources.add_pandas(name="b")
 
     inline_store_backend.set(DataContextVariableKey("a").to_tuple(), datasource_config_a)
     inline_store_backend.set(DataContextVariableKey("b").to_tuple(), datasource_config_b)

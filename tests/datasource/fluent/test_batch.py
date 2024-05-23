@@ -7,20 +7,24 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.datasource.fluent.interfaces import Batch
+from great_expectations.datasource.fluent.interfaces import Batch, Datasource
+
+DATASOURCE_NAME = "my_pandas"
+ASSET_NAME = "my_csv"
 
 
 @pytest.fixture
 def pandas_setup(csv_path: pathlib.Path) -> Tuple[AbstractDataContext, Batch]:
-    context = gx.get_context()
-    source = context.sources.add_pandas("my_pandas")
+    context = gx.get_context(mode="ephemeral")
+    source = context.data_sources.add_pandas(DATASOURCE_NAME)
     filepath = (
         csv_path
         / "ten_trips_from_each_month"
         / "yellow_tripdata_sample_10_trips_from_each_month.csv"
     )
-    asset = source.add_csv_asset("my_csv", filepath_or_buffer=filepath)
+    asset = source.add_csv_asset(ASSET_NAME, filepath_or_buffer=filepath)
     batch = asset.get_batch_list_from_batch_request(asset.build_batch_request())[0]
     return context, batch
 
@@ -47,7 +51,7 @@ def test_batch_validate_expectation_suite(
     context, batch = pandas_setup
 
     # Make Expectation Suite
-    suite = context.add_expectation_suite("my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     suite.add_expectation(
         gxe.ExpectColumnValuesToNotBeNull(
             column="vendor_id",
@@ -87,7 +91,7 @@ def test_batch_validate_expectation_suite_with_updated_expectation(
     context, batch = pandas_setup
 
     # Make Expectation Suite
-    suite = context.add_expectation_suite("my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="vendor_id"))
     # Validate
     result = batch.validate(suite)
@@ -137,7 +141,7 @@ def test_batch_validate_change_expectation_suite_result_format(
     # "SUMMARY"" is the default result format
     assert batch.result_format == "SUMMARY"
     # Make Expectation Suite
-    suite = context.add_expectation_suite("my_suite")
+    suite = context.suites.add(ExpectationSuite(name="my_suite"))
     suite.add_expectation(
         gxe.ExpectColumnValuesToNotBeNull(
             column="vendor_id",
@@ -156,3 +160,46 @@ def test_batch_validate_change_expectation_suite_result_format(
     assert boolean_result.success is True
     assert len(boolean_result.results) == 1
     assert len(boolean_result.results[0].result) == 0
+
+
+@pytest.mark.filesystem
+def test_batch_validate_expectation_does_not_persist_a_batch_definition(
+    pandas_setup: Tuple[AbstractDataContext, Batch],
+):
+    context, batch = pandas_setup
+    datasource = context.get_datasource(DATASOURCE_NAME)
+    assert isinstance(datasource, Datasource)
+    asset = datasource.get_asset(ASSET_NAME)
+
+    expectation = gxe.ExpectColumnValuesToNotBeNull(
+        column="vendor_id",
+        mostly=0.95,
+    )
+    result = batch.validate(expectation)
+
+    assert result.success
+    assert len(asset.batch_definitions) == 0
+
+
+@pytest.mark.filesystem
+def test_batch_validate_expectation_suite_does_not_persist_a_batch_definition(
+    pandas_setup: Tuple[AbstractDataContext, Batch],
+):
+    context, batch = pandas_setup
+    datasource = context.get_datasource(DATASOURCE_NAME)
+    assert isinstance(datasource, Datasource)
+    asset = datasource.get_asset(ASSET_NAME)
+
+    suite = ExpectationSuite(
+        "suite",
+        expectations=[
+            gxe.ExpectColumnValuesToNotBeNull(
+                column="vendor_id",
+                mostly=0.95,
+            )
+        ],
+    )
+    result = batch.validate(suite)
+
+    assert result.success
+    assert len(asset.batch_definitions) == 0

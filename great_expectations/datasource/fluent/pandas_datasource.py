@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import re
 import sqlite3
 import uuid
 from pprint import pformat as pf
@@ -65,12 +64,13 @@ if TYPE_CHECKING:
 
     from typing_extensions import TypeAlias
 
-    from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.batch_definition import BatchDefinition
+    from great_expectations.core.partitioners import ColumnPartitioner
 
     MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
     AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import PandasExecutionEngine
 
@@ -117,7 +117,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
     @override
     def get_batch_parameters_keys(
-        self, partitioner: Optional[Partitioner] = None
+        self, partitioner: Optional[ColumnPartitioner] = None
     ) -> Tuple[str, ...]:
         return tuple()
 
@@ -171,14 +171,12 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
         return batch_list
 
-    @public_api
     @override
     def build_batch_request(
         self,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -186,7 +184,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
             partitioner: This is not currently supported and must be None for this data asset.
-            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -211,7 +208,13 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options={},
-            batching_regex=batching_regex,
+        )
+
+    @public_api
+    def add_batch_definition_whole_dataframe(self, name: str) -> BatchDefinition:
+        return self.add_batch_definition(
+            name=name,
+            partitioner=None,
         )
 
     @override
@@ -226,7 +229,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             and batch_request.data_asset_name == self.name
             and not batch_request.options
         ):
-            expect_batch_request_form = BatchRequest(
+            expect_batch_request_form = BatchRequest[None](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
@@ -379,7 +382,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
-    @public_api
     # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>  # noqa: E501
     @new_argument(
         argument_name="dataframe",
@@ -387,13 +389,12 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         version="0.16.15",
     )
     @override
-    def build_batch_request(  # type: ignore[override]  # noqa: PLR0913
+    def build_batch_request(  # type: ignore[override]
         self,
         dataframe: Optional[pd.DataFrame] = None,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -402,7 +403,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
             partitioner: This is not currently supported and must be None for this data asset.
-            batching_regex: This is currently not supported and must be None for this data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -421,11 +421,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         if partitioner is not None:
             raise ValueError(  # noqa: TRY003
                 "partitioner is not currently supported and must be None for this DataAsset."
-            )
-
-        if batching_regex is not None:
-            raise ValueError(  # noqa: TRY003
-                "batching_regex is not currently supported and must be None for this DataAsset."
             )
 
         if dataframe is None:

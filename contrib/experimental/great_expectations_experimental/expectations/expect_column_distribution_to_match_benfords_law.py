@@ -86,10 +86,7 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnAggregateMetricProvider):
         for i in range(9):
             stat += ((listdata[i] - matchvalues[i]) ** 2) / (matchvalues[i])
 
-        if stat >= 5.071:
-            return False
-        else:
-            return True
+        return not stat >= 5.071
 
     # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
@@ -242,7 +239,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnAggregateExpectation):
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")
-    # @render_evaluation_parameter_string
+    # @render_suite_parameter_string
     # def _prescriptive_renderer(
     #     cls,
     #     configuration=None,

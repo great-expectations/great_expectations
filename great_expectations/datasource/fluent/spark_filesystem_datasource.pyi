@@ -1,5 +1,4 @@
 import pathlib
-import re
 from logging import Logger
 from typing import ClassVar, Literal, Optional, Type, Union
 
@@ -7,25 +6,35 @@ from great_expectations.compatibility.pyspark import (
     types as pyspark_types,
 )
 from great_expectations.datasource.fluent import BatchMetadata, _SparkFilePathDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.path.spark.csv_asset import (
+    CSVAsset,
+    DirectoryCSVAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.delta_asset import (
+    DeltaAsset,
+    DirectoryDeltaAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.json_asset import (
+    DirectoryJSONAsset,
+    JSONAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.orc_asset import (
+    DirectoryORCAsset,
+    ORCAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.parquet_asset import (
+    DirectoryParquetAsset,
+    ParquetAsset,
+)
+from great_expectations.datasource.fluent.data_asset.path.spark.text_asset import (
+    DirectoryTextAsset,
+    TextAsset,
+)
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition,
-)
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
-    DeltaAsset,
-    DirectoryCSVAsset,
-    DirectoryDeltaAsset,
-    DirectoryJSONAsset,
-    DirectoryORCAsset,
-    DirectoryParquetAsset,
-    DirectoryTextAsset,
-    JSONAsset,
-    ORCAsset,
-    ParquetAsset,
-    TextAsset,
 )
 
 logger: Logger
@@ -44,7 +53,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0)
@@ -252,7 +260,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
@@ -282,7 +289,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
@@ -315,7 +321,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
@@ -341,7 +346,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
@@ -370,7 +374,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0)
@@ -447,7 +450,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
@@ -527,7 +529,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
@@ -556,7 +557,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv
@@ -588,7 +588,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Delta Specific Options vvv
@@ -601,7 +600,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Directory Reader Options vvv

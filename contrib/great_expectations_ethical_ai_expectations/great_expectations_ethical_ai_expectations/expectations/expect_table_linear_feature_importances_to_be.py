@@ -163,7 +163,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
                 isinstance(n_features, int) or n_features is None
             ), "n_features must be an integer"
             if columns is not None:
-                assert (isinstance(columns, tuple) or isinstance(columns, list)) and all(
+                assert (isinstance(columns, (tuple, list))) and all(
                     isinstance(i, str) for i in columns
                 ), "columns must be a tuple or list of string column names"
             assert (
@@ -206,7 +206,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
 
         if n_features:
             n_features_success = []
-            for i in importances.keys():
+            for i in importances:
                 if importances[i] >= threshold:
                     n_features_success.append(True)
             n_features_success = len(n_features_success) == int(n_features)

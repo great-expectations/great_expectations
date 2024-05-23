@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -225,7 +225,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -234,7 +234,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        _ = False if runtime_configuration.get("include_column_name") is False else True
+        _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

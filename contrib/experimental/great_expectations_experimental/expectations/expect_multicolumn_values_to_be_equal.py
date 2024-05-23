@@ -10,11 +10,11 @@ from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
     ExpectationValidationResult,
 )
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
-)
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
+)
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,
 )
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
@@ -26,7 +26,7 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
     _format_map_output,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -137,8 +137,8 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         [expect_column_pair_values_to_be_equal](https://greatexpectations.io/expectations/expect_column_pair_values_to_be_equal)
     """
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
 
     map_metric = "multicolumn_values_to_be_equal"
 
@@ -259,7 +259,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -268,9 +268,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

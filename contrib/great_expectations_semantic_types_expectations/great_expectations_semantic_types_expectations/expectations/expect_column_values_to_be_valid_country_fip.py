@@ -14,14 +14,9 @@ def is_valid_country_fip(country_fip: str):
     list_of_countries = [d for d in dict_of_countries.values()]
     list_of_country_fips = [item["fips"] for item in list_of_countries]
     cleaned_list_of_country_fips = [string for string in list_of_country_fips if string.strip()]
-    if len(country_fip) > 2:
+    if len(country_fip) > 2 or type(country_fip) != str:  # noqa: E721
         return False
-    elif type(country_fip) != str:  # noqa: E721
-        return False
-    elif country_fip in cleaned_list_of_country_fips:
-        return True
-    else:
-        return False
+    return country_fip in cleaned_list_of_country_fips
 
 
 # This class defines a Metric to support your Expectation.

@@ -20,11 +20,7 @@ from great_expectations.core.batch import (  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    ensure_json_serializable,
-    in_jupyter_notebook,
-)
+from great_expectations.core.util import in_jupyter_notebook
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render import (
@@ -35,6 +31,10 @@ from great_expectations.render import (
     RenderedAtomicContentSchema,
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    ensure_json_serializable,  # noqa: TID251
+)
 
 if TYPE_CHECKING:
     from great_expectations.expectations.expectation_configuration import (
@@ -293,9 +293,7 @@ class ExpectationValidationResult(SerializableDictDot):
             or result["unexpected_percent_nonmissing"] > 100  # noqa: PLR2004
         ):
             return False
-        if result.get("missing_count") and result["missing_count"] < 0:
-            return False
-        return True
+        return not (result.get("missing_count") and result["missing_count"] < 0)
 
     @public_api
     @override
@@ -500,7 +498,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
     Args:
         success: Boolean indicating the success or failure of this collection of results, or None.
         results: List of ExpectationValidationResults, or None.
-        evaluation_parameters: Dict of Evaluation Parameters used to produce these results, or None.
+        suite_parameters: Dict of Suite Parameters used to produce these results, or None.
         statistics: Dict of values describing the results.
         meta: Instance of ExpectationSuiteValidationResult, a Dict of meta values, or None.
         batch_id: A unique identifier for the batch of data that was validated.
@@ -512,7 +510,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         success: bool,
         results: list[ExpectationValidationResult],
         suite_name: str,
-        evaluation_parameters: Optional[dict] = None,
+        suite_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
         meta: Optional[ExpectationSuiteValidationResultMeta | dict] = None,
         batch_id: Optional[str] = None,
@@ -522,7 +520,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         self.success = success
         self.results = results
         self.suite_name = suite_name
-        self.evaluation_parameters = evaluation_parameters or {}
+        self.suite_parameters = suite_parameters or {}
         self.statistics = statistics or {}
         meta = meta or {}
         ensure_json_serializable(meta)  # We require meta information to be serializable.
@@ -547,7 +545,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             (
                 self.success == other.success,
                 self.results == other.results,
-                self.evaluation_parameters == other.evaluation_parameters,
+                self.suite_parameters == other.suite_parameters,
                 self.statistics == other.statistics,
                 self.meta == other.meta,
             )
@@ -569,9 +567,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         myself = deepcopy(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed  # noqa: E501
         # schemas to get serialization all-the-way down via dump
-        myself["evaluation_parameters"] = convert_to_json_serializable(
-            myself["evaluation_parameters"]
-        )
+        myself["suite_parameters"] = convert_to_json_serializable(myself["suite_parameters"])
         myself["statistics"] = convert_to_json_serializable(myself["statistics"])
         myself["meta"] = convert_to_json_serializable(myself["meta"])
         myself["results"] = [convert_to_json_serializable(result) for result in myself["results"]]
@@ -636,7 +632,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             success=success,
             results=validation_results,
             suite_name=self.suite_name,
-            evaluation_parameters=self.evaluation_parameters,
+            suite_parameters=self.suite_parameters,
             statistics=statistics,
             meta=self.meta,
         )
@@ -659,7 +655,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
     success = fields.Bool()
     results = fields.List(fields.Nested(ExpectationValidationResultSchema))
     suite_name = fields.String(required=True, allow_none=False)
-    evaluation_parameters = fields.Dict()
+    suite_parameters = fields.Dict()
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
     id = fields.UUID(required=False, allow_none=True)

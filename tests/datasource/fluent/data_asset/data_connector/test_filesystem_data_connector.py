@@ -1,21 +1,22 @@
 import pathlib
 import re
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 import pytest
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core import IDDict
 from great_expectations.core.batch import LegacyBatchDefinition
+from great_expectations.core.partitioners import FileNamePartitionerPath, FileNamePartitionerYearly
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
+    from great_expectations.datasource.fluent.data_connector import (
         DataConnector,
     )
 
@@ -36,7 +37,6 @@ def test_basic_instantiation(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"alpha-(.*)\.csv"),
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
@@ -68,46 +68,6 @@ def test_basic_instantiation(tmp_path_factory):
 
 @pytest.mark.filesystem
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
-def test_instantiation_batching_regex_does_not_match_paths(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_instantiation_from_a_config_batching_regex_does_not_match_paths"
-        )
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-    )
-
-    my_data_connector: DataConnector = FilesystemDataConnector(
-        datasource_name="my_file_path_datasource",
-        data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"beta-(.*)\.csv"),
-        base_directory=pathlib.Path(base_directory),
-        glob_directive="*.csv",
-    )
-    assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector.get_data_references()[:3] == [
-        "alpha-1.csv",
-        "alpha-2.csv",
-        "alpha-3.csv",
-    ]
-    assert my_data_connector.get_matched_data_reference_count() == 0
-    assert my_data_connector.get_matched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_references()[:3] == [
-        "alpha-1.csv",
-        "alpha-2.csv",
-        "alpha-3.csv",
-    ]
-    assert my_data_connector.get_unmatched_data_reference_count() == 3
-
-
-@pytest.mark.filesystem
-@pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted"))
     create_files_in_directory(
@@ -129,7 +89,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=batching_regex,
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
@@ -145,6 +104,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_filesystem_data_asset",
                 options={},
+                partitioner=FileNamePartitionerPath(regex=batching_regex),
             )
         )
     )
@@ -301,6 +261,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={"name": "alex", "timestamp": "20200819", "price": "1300"},
+            partitioner=FileNamePartitionerPath(regex=batching_regex),
         )
     )
     assert expected[2:3] == unsorted_batch_definition_list
@@ -326,27 +287,24 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         base_directory=pathlib.Path(base_directory),
-        # glob_directive="*.csv",  # omitting for purposes of this test
     )
+
     assert my_data_connector.get_data_reference_count() == 7
     assert my_data_connector.get_data_references()[:3] == [
         "A",
         "A/file_1.csv",
         "A/file_2.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 5
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<name>.+)/.+\.csv")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 5
+    assert matched_data_references[:3] == [
         "A/file_1.csv",
         "A/file_2.csv",
         "A/file_3.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == [
-        "A",
-        "B",
-    ]
-    assert my_data_connector.get_unmatched_data_reference_count() == 2
 
     processed_batching_regex = re.compile("(?P<path>(?P<directory>.+)/(?P<filename>.+\\.csv))")
     expected: List[LegacyBatchDefinition] = [
@@ -400,17 +358,17 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         base_directory=pathlib.Path(base_directory),
-        # glob_directive="*.csv",  # omitting for purposes of this test
     )
 
+    batching_regex = re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)")
     unsorted_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="my_file_path_datasource",
                 data_asset_name="my_filesystem_data_asset",
                 options={},
+                partitioner=FileNamePartitionerPath(regex=batching_regex),
             )
         )
     )
@@ -434,7 +392,6 @@ def test_alpha(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_alpha",
         glob_directive="*.csv",
     )
@@ -444,22 +401,23 @@ def test_alpha(tmp_path_factory):
         "B.csv",
         "C.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 4
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<part_1>.+)\.csv")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 4
+    assert matched_data_references[:3] == [
         "A.csv",
         "B.csv",
         "C.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
-
-    my_batch_definition_list: List[LegacyBatchDefinition]
-    my_batch_definition: LegacyBatchDefinition
-
-    my_batch_request: BatchRequest
 
     # Try to fetch a batch from a nonexistent asset
-    my_batch_request = BatchRequest(datasource_name="BASE", data_asset_name="A", options={})
+    my_batch_request = BatchRequest(
+        datasource_name="BASE",
+        data_asset_name="A",
+        options={},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
+    )
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
     )
@@ -469,6 +427,7 @@ def test_alpha(tmp_path_factory):
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         options={"part_1": "B"},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
     )
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
@@ -505,21 +464,19 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot",
         glob_directive="*.csv",
     )
+
+    batching_regex = re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
     assert my_data_connector.get_data_reference_count() == 0
     assert my_data_connector.get_data_references()[:3] == []
-    assert my_data_connector.get_matched_data_reference_count() == 0
-    assert my_data_connector.get_matched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
+    assert len(matched_data_references) == 0
 
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "A",
         glob_directive="*.csv",
     )
@@ -529,8 +486,11 @@ def test_foxtrot(tmp_path_factory):
         "A-2.csv",
         "A-3.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 3
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 3
+    assert matched_data_references[:3] == [
         "A-1.csv",
         "A-2.csv",
         "A-3.csv",
@@ -541,7 +501,6 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "B",
         glob_directive="*.*",
     )
@@ -551,20 +510,20 @@ def test_foxtrot(tmp_path_factory):
         "B-2.txt",
         "B-3.txt",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 3
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 3
+    assert matched_data_references[:3] == [
         "B-1.txt",
         "B-2.txt",
         "B-3.txt",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
     assert my_data_connector.get_data_reference_count() == 3
 
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "C",
         glob_directive="*",
     )
@@ -574,19 +533,21 @@ def test_foxtrot(tmp_path_factory):
         "C-2018.csv",
         "C-2019.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 3
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 3
+    assert matched_data_references[:3] == [
         "C-2017.csv",
         "C-2018.csv",
         "C-2019.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_batch_request = BatchRequest(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         options={},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
     )
     my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
@@ -611,7 +572,6 @@ def test_relative_base_directory_path(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A",
         glob_directive="*",
     )
@@ -621,20 +581,18 @@ def test_relative_base_directory_path(tmp_path_factory):
         "filename2.csv",
         "filename3.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 2
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<part_1>.+)\.csv")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 2
+    assert matched_data_references[:3] == [
         "filename2.csv",
         "filename3.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == [
-        "B",
-    ]
-    assert my_data_connector.get_unmatched_data_reference_count() == 1
 
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)_(?P<number>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A" / "B" / "C",
         glob_directive="log*.csv",
     )
@@ -642,11 +600,13 @@ def test_relative_base_directory_path(tmp_path_factory):
     assert my_data_connector.get_data_references()[:3] == [
         "logfile_0.csv",
     ]
-    assert my_data_connector.get_matched_data_reference_count() == 1
-    assert my_data_connector.get_matched_data_references()[:3] == [
+
+    batching_regex = re.compile(r"(?P<name>.+)_(?P<number>.+)\.csv")
+    matched_data_references = my_data_connector.get_matched_data_references(regex=batching_regex)
+    assert len(matched_data_references) == 1
+    assert matched_data_references[:3] == [
         "logfile_0.csv",
     ]
-    assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert (
         my_data_connector._get_full_file_path(path="bigfile_1.csv")
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
@@ -656,6 +616,7 @@ def test_relative_base_directory_path(tmp_path_factory):
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         options={},
+        partitioner=FileNamePartitionerPath(regex=batching_regex),
     )
     my_batch_definition_list: List[LegacyBatchDefinition] = (
         my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
@@ -674,7 +635,7 @@ def test_relative_base_directory_path(tmp_path_factory):
     ],
 )
 def test_filesystem_data_connector_uses_batching_regex_from_batch_request(
-    tmp_path_factory, batching_regex, batch_definition_count
+    tmp_path_factory, batching_regex: Union[str, re.Pattern], batch_definition_count
 ):
     # arrange
     base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
@@ -693,7 +654,6 @@ def test_filesystem_data_connector_uses_batching_regex_from_batch_request(
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
-        batching_regex=MATCH_ALL_PATTERN,  # todo: remove this from signature
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
@@ -704,7 +664,7 @@ def test_filesystem_data_connector_uses_batching_regex_from_batch_request(
             datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={},
-            batching_regex=batching_regex,
+            partitioner=FileNamePartitionerYearly(regex=re.compile(batching_regex)),
         )
     )
 

@@ -50,20 +50,18 @@ def test_base_context(clear_env_vars):
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
-        evaluation_parameter_store_name="evaluation_parameter_store",
+        suite_parameter_store_name="suite_parameter_store",
         expectations_store_name="expectations_store",
         checkpoint_store_name="checkpoint_store",
-        datasources={},
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
+            "suite_parameter_store": {"class_name": "SuiteParameterStore"},
+            "validation_result_store": {"class_name": "ValidationResultsStore"},
             "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
         },
-        validations_store_name="validation_result_store",
+        validation_results_store_name="validation_result_store",
         data_docs_sites={},
-        validation_operators={},
     )
     assert isinstance(gx.get_context(project_config=config), EphemeralDataContext)
 
@@ -72,7 +70,6 @@ def test_base_context(clear_env_vars):
 def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_vars):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    gx.data_context.FileDataContext.create(project_path)
     context_path = project_path / FileDataContext.GX_DIR
     context = gx.get_context(context_root_dir=context_path)
     assert isinstance(context, FileDataContext)
@@ -81,32 +78,21 @@ def test_base_context__with_overridden_yml(tmp_path: pathlib.Path, clear_env_var
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
-        evaluation_parameter_store_name="new_evaluation_parameter_store",
+        suite_parameter_store_name="new_suite_parameter_store",
         expectations_store_name="new_expectations_store",
         checkpoint_store_name="new_checkpoint_store",
-        datasources={},
         stores={
             "new_expectations_store": {"class_name": "ExpectationsStore"},
             "new_checkpoint_store": {"class_name": "CheckpointStore"},
-            "new_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "new_validation_result_store": {"class_name": "ValidationsStore"},
+            "new_suite_parameter_store": {"class_name": "SuiteParameterStore"},
+            "new_validation_result_store": {"class_name": "ValidationResultsStore"},
         },
-        validations_store_name="new_validation_result_store",
+        validation_results_store_name="new_validation_result_store",
         data_docs_sites={},
-        validation_operators={},
     )
     context = gx.get_context(project_config=config, context_root_dir=context_path)
     assert isinstance(context, FileDataContext)
     assert context.expectations_store_name == "new_expectations_store"
-
-
-@pytest.mark.unit
-def test_data_context(tmp_path: pathlib.Path, clear_env_vars):
-    project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
-    FileDataContext.create(project_path)
-    with working_directory(project_path):
-        assert isinstance(gx.get_context(), FileDataContext)
 
 
 @pytest.mark.unit
@@ -116,7 +102,6 @@ def test_data_context_root_dir_returns_data_context(
 ):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
-    gx.data_context.FileDataContext.create(project_path)
     context_path = project_path / FileDataContext.GX_DIR
     assert isinstance(gx.get_context(context_root_dir=str(context_path)), FileDataContext)
 
@@ -126,19 +111,17 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
-        evaluation_parameter_store_name="evaluation_parameter_store",
+        suite_parameter_store_name="suite_parameter_store",
         expectations_store_name="expectations_store",
         checkpoint_store_name="checkpoint_store",
-        datasources={},
         stores={
             "expectations_store": {"class_name": "ExpectationsStore"},
             "checkpoint_store": {"class_name": "CheckpointStore"},
-            "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-            "validation_result_store": {"class_name": "ValidationsStore"},
+            "suite_parameter_store": {"class_name": "SuiteParameterStore"},
+            "validation_result_store": {"class_name": "ValidationResultsStore"},
         },
-        validations_store_name="validation_result_store",
+        validation_results_store_name="validation_result_store",
         data_docs_sites={},
-        validation_operators={},
     )
 
     context_root_dir = tmp_path / "root"
@@ -161,15 +144,6 @@ def test_cloud_context_env(set_up_cloud_envs, empty_ge_cloud_data_context_config
             gx.get_context(cloud_mode=ge_cloud_mode),
             CloudDataContext,
         )
-
-
-@pytest.mark.cloud
-def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
-    project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
-    gx.data_context.FileDataContext.create(project_path)
-    with working_directory(project_path):
-        assert isinstance(gx.get_context(cloud_mode=False), FileDataContext)
 
 
 @pytest.mark.cloud
@@ -208,24 +182,21 @@ def test_cloud_context_with_in_memory_config_overrides(
         )
         assert isinstance(context, CloudDataContext)
         assert context.expectations_store_name == "default_expectations_store"
-        assert context.variables.include_rendered_content.globally
 
         config: DataContextConfig = DataContextConfig(
             config_version=3.0,
             plugins_directory=None,
-            evaluation_parameter_store_name="new_evaluation_parameter_store",
+            suite_parameter_store_name="new_suite_parameter_store",
             expectations_store_name="new_expectations_store",
             checkpoint_store_name="new_checkpoint_store",
-            datasources={},
             stores={
                 "new_expectations_store": {"class_name": "ExpectationsStore"},
                 "new_checkpoint_store": {"class_name": "CheckpointStore"},
-                "new_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
-                "new_validation_result_store": {"class_name": "ValidationsStore"},
+                "new_suite_parameter_store": {"class_name": "SuiteParameterStore"},
+                "new_validation_result_store": {"class_name": "ValidationResultsStore"},
             },
-            validations_store_name="new_validation_result_store",
+            validation_results_store_name="new_validation_result_store",
             data_docs_sites={},
-            validation_operators={},
         )
         context = gx.get_context(
             project_config=config,
@@ -274,24 +245,6 @@ def test_get_context_with_mode_equals_cloud_returns_cloud_data_context(
 
     mock_retrieve_config.assert_called_once()
     assert isinstance(context, CloudDataContext)
-
-
-@pytest.mark.parametrize("ge_cloud_mode", [True, None])
-@pytest.mark.cloud
-def test_cloud_context_include_rendered_content(
-    set_up_cloud_envs, empty_ge_cloud_data_context_config, ge_cloud_mode
-):
-    with mock.patch.object(
-        CloudDataContext,
-        "retrieve_data_context_config_from_cloud",
-        return_value=empty_ge_cloud_data_context_config,
-    ):
-        context = gx.get_context(cloud_mode=ge_cloud_mode)
-        assert isinstance(
-            context,
-            CloudDataContext,
-        )
-        assert context.variables.include_rendered_content.globally
 
 
 @pytest.mark.filesystem

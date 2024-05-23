@@ -14,14 +14,9 @@ def is_valid_state(state: str, dc_statehood: bool):
         list_of_states.append("District Of Columbia")
     else:
         pass
-    if len(state) > 20:
+    if len(state) > 20 or type(state) != str:  # noqa: E721
         return False
-    elif type(state) != str:  # noqa: E721
-        return False
-    elif state in list_of_states:
-        return True
-    else:
-        return False
+    return state in list_of_states
 
 
 # This class defines a Metric to support your Expectation.

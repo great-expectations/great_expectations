@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, Any, List, Optional, Union
 from great_expectations.compatibility.pydantic import (
     root_validator,
 )
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import (
     LegacyRendererType,
@@ -179,8 +179,8 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    min_value: Union[int, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[int, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[int, SuiteParameterDict, datetime, None] = None
+    max_value: Union[int, SuiteParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 
@@ -280,7 +280,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(  # noqa: C901 - too complex
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -299,9 +299,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

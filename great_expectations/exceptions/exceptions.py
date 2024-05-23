@@ -48,6 +48,15 @@ class ExpectationSuiteError(DataContextError):
     pass
 
 
+class ExpectationSuiteNotAddedToStoreError(DataContextError):
+    def __init__(self) -> None:
+        super().__init__(
+            "ExpectationSuite must be added to the DataContext store before it can be saved. "
+            "Please call my_data_context.suites.add(my_expectation_suite), "
+            "then try your action again."
+        )
+
+
 class CheckpointError(DataContextError):
     pass
 
@@ -102,7 +111,7 @@ class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
                 validation_error
                 and validation_error.messages
                 and isinstance(validation_error.messages, dict)
-                and all(key is None for key in validation_error.messages.keys())
+                and all(key is None for key in validation_error.messages)
             ):
                 validation_error.messages = list(
                     itertools.chain.from_iterable(validation_error.messages.values())
@@ -143,7 +152,20 @@ class UnsupportedConfigVersionError(DataContextError):
     pass
 
 
-class EvaluationParameterError(GreatExpectationsError):
+class MissingDataContextError(DataContextError):
+    def __init__(self) -> None:
+        super().__init__("Missing DataContext")
+
+
+class DataContextRequiredError(DataContextError):
+    def __init__(self) -> None:
+        super().__init__(
+            "This action requires an active data context. "
+            "Please call `great_expectations.get_context()` first, then try your action again."
+        )
+
+
+class SuiteParameterError(GreatExpectationsError):
     pass
 
 
@@ -286,9 +308,9 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "FixedLengthTupleFilesystemStoreBackend": "TupleFilesystemStoreBackend",
             "FixedLengthTupleS3StoreBackend": "TupleS3StoreBackend",
             "FixedLengthTupleGCSStoreBackend": "TupleGCSStoreBackend",
-            "InMemoryEvaluationParameterStore": "EvaluationParameterStore",
+            "InMemorySuiteParameterStore": "SuiteParameterStore",
             "SubdirReaderGenerator": "SubdirReaderBatchKwargsGenerator",
-            "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
+            "ExtractAndStoreSuiteParamsAction": "StoreSuiteParametersAction",
             "StoreAction": "StoreValidationResultAction",
             "PartitionDefinitionSubset": "IDDict",
             "PartitionRequest": "IDDict",
@@ -375,10 +397,6 @@ class DatasourceError(DataContextError):
     def __init__(self, datasource_name: str, message: str) -> None:
         self.message = f"Cannot initialize datasource {datasource_name}, error: {message}"
         super().__init__(self.message)
-
-
-class DatasourceConfigurationError(DatasourceError):
-    pass
 
 
 class DatasourceInitializationError(DatasourceError):

@@ -45,11 +45,9 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
         """Generate an annual seasonality component for a time series."""
 
         return sum(
-            [
-                alpha * np.cos(2 * np.pi * (i + 1) * date_range / 365)
-                + beta * np.sin(2 * np.pi * (i + 1) * date_range / 365)
-                for i, (alpha, beta) in enumerate(annual_seasonality_params)
-            ]
+            alpha * np.cos(2 * np.pi * (i + 1) * date_range / 365)
+            + beta * np.sin(2 * np.pi * (i + 1) * date_range / 365)
+            for i, (alpha, beta) in enumerate(annual_seasonality_params)
         )
 
     def _generate_posneg_pareto(

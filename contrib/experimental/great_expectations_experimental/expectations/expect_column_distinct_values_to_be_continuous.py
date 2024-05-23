@@ -11,7 +11,7 @@ from great_expectations.expectations.expectation_configuration import (
 )
 from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -180,7 +180,7 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnAggregateExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

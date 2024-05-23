@@ -4,29 +4,29 @@ from contrib.experimental.great_expectations_experimental.rule_based_profiler.da
     StatisticsDataAssistantResult,
 )
 from great_expectations.core.domain import SemanticDomainTypes
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.data_assistant import DataAssistant
-from great_expectations.rule_based_profiler.data_assistant_result import (
+from great_expectations.experimental.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.experimental.rule_based_profiler.data_assistant import DataAssistant
+from great_expectations.experimental.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain_builder import (
+from great_expectations.experimental.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     DomainBuilder,
     TableDomainBuilder,
 )
-from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
+from great_expectations.experimental.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.experimental.rule_based_profiler.parameter_builder import (
     MeanTableColumnsSetMatchMultiBatchParameterBuilder,
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
+from great_expectations.experimental.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     VARIABLES_KEY,
 )
-from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.experimental.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
 
 
@@ -114,7 +114,7 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" configurations for all additional statistics needed.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
             ParameterBuilderConfig(
                 **table_row_count_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -123,14 +123,14 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
         mean_table_columns_set_match_multi_batch_parameter_builder_for_validations = (
             MeanTableColumnsSetMatchMultiBatchParameterBuilder(
                 name="column_names_set_estimator",
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
-                evaluation_parameter_builder_configs=None,
+                suite_parameter_builder_configs=None,
             )
         )
 
@@ -199,14 +199,14 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" configurations for all additional statistics needed.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         if total_count_metric_multi_batch_parameter_builder_for_evaluations is None:
             total_count_metric_multi_batch_parameter_builder_for_evaluations = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
 
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations = column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
             ParameterBuilderConfig(
                 **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
@@ -225,7 +225,7 @@ class StatisticsDataAssistant(DataAssistant):
             null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=None,
         )
         map_metric_name = "column_values.null"
@@ -236,7 +236,7 @@ class StatisticsDataAssistant(DataAssistant):
             null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=None,
         )
         map_metric_name = "column_values.nonnull"
@@ -247,7 +247,7 @@ class StatisticsDataAssistant(DataAssistant):
             null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
             data_context=None,
         )
 
@@ -309,9 +309,9 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" configurations for all additional statistics needed.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_min_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -320,10 +320,10 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_max_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -332,10 +332,10 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_quantile_values_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -347,10 +347,10 @@ class StatisticsDataAssistant(DataAssistant):
                 "quantiles": f"{VARIABLES_KEY}quantiles",
                 "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
             },
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_median_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -359,10 +359,10 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_mean_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -371,10 +371,10 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_standard_deviation_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -383,7 +383,7 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
         # Step-4: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
@@ -461,9 +461,9 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" configurations for all additional statistics needed.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_min_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -472,10 +472,10 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_max_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -484,7 +484,7 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
         # Step-4: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
@@ -549,9 +549,9 @@ class StatisticsDataAssistant(DataAssistant):
 
         # Step-3: Declare "ParameterBuilder" configurations for all additional statistics needed.
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+        suite_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_min_length_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -560,10 +560,10 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
-        evaluation_parameter_builder_configs = [
+        suite_parameter_builder_configs = [
             ParameterBuilderConfig(
                 **column_max_length_metric_multi_batch_parameter_builder_for_metrics.to_json_dict()
             ),
@@ -572,7 +572,7 @@ class StatisticsDataAssistant(DataAssistant):
             metric_name=None,
             suffix=None,
             metric_value_kwargs=None,
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+            suite_parameter_builder_configs=suite_parameter_builder_configs,
         )
 
         # Step-4: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.

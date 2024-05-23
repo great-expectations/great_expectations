@@ -22,9 +22,7 @@ class ColumnValuesContainValidEmail(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         def matches_email_regex(x):
-            if re.match(EMAIL_REGEX, str(x)):
-                return True
-            return False
+            return bool(re.match(EMAIL_REGEX, str(x)))
 
         return column.apply(lambda x: matches_email_regex(x) if x else False)
 
@@ -236,7 +234,7 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
 # This method defines a prescriptive Renderer
 #     @classmethod
 #     @renderer(renderer_type="renderer.prescriptive")
-#     @render_evaluation_parameter_string
+#     @render_suite_parameter_string
 #     def _prescriptive_renderer(
 #         cls,
 #         configuration=None,

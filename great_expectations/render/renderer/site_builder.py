@@ -137,16 +137,7 @@ class SiteBuilder:
         self.cloud_mode = cloud_mode
         self.ge_cloud_mode = cloud_mode
 
-        usage_statistics_config = data_context.anonymous_usage_statistics
-        data_context_id = None
-        if (
-            usage_statistics_config
-            and usage_statistics_config.enabled
-            and usage_statistics_config.data_context_id
-        ):
-            data_context_id = usage_statistics_config.data_context_id
-
-        self.data_context_id = data_context_id
+        self.data_context_id = data_context.variables.data_context_id
 
         # set custom_styles_directory if present
         custom_styles_directory = None
@@ -193,13 +184,13 @@ class SiteBuilder:
             },
             "validations": {
                 "class_name": "DefaultSiteSectionBuilder",
-                "source_store_name": data_context.validations_store_name,
+                "source_store_name": data_context.validation_results_store_name,
                 "renderer": {"class_name": "ValidationResultsPageRenderer"},
                 "validation_results_limit": site_index_builder.get("validation_results_limit"),
             },
             "profiling": {
                 "class_name": "DefaultSiteSectionBuilder",
-                "source_store_name": data_context.validations_store_name,
+                "source_store_name": data_context.validation_results_store_name,
                 "renderer": {"class_name": "ProfilingResultsPageRenderer"},
             },
         }
@@ -861,7 +852,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_identifier=profiling_result_key.batch_identifier,
                         expectation_suite_name=profiling_result_key.expectation_suite_identifier.name,
                         run_id=profiling_result_key.run_id,
-                        validations_store_name=self.source_stores.get("profiling"),
+                        validation_results_store_name=self.source_stores.get("profiling"),
                     )
 
                     batch_kwargs = validation.meta.get("batch_kwargs", {})
@@ -916,7 +907,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_identifier=validation_result_key.batch_identifier,
                         expectation_suite_name=validation_result_key.expectation_suite_identifier.name,
                         run_id=validation_result_key.run_id,
-                        validations_store_name=self.source_stores.get("validations"),
+                        validation_results_store_name=self.source_stores.get("validations"),
                     )
 
                     validation_success = validation.success

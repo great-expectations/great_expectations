@@ -227,5 +227,5 @@
     "unsuccessful_expectations": 1,
     "success_percent": 90.0
   },
-  "evaluation_parameters": {}
+  "suite_parameters": {}
 }

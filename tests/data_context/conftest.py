@@ -1,25 +1,17 @@
 from __future__ import annotations
 
-import copy
-import datetime as dt
 import json
 import os
 import pathlib
-import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
-from unittest.mock import Mock, patch  # noqa: TID251
+from unittest.mock import Mock  # noqa: TID251
 
 import pytest
 import requests
 
 import great_expectations as gx
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
-from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -27,17 +19,9 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    DataContextConfig,
-    DatasourceConfig,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.datasource.fluent.interfaces import Datasource
 
 yaml = YAMLHandler()
 
@@ -133,22 +117,6 @@ def create_common_data_context_files(context_path, asset_config_path):
         os.path.join(context_path, "plugins"),  # noqa: PTH118
         exist_ok=True,
     )
-    copy_relative_path(
-        "../test_fixtures/custom_pandas_dataset.py",
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    copy_relative_path(
-        "../test_fixtures/custom_sparkdf_dataset.py",
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sparkdf_dataset.py"
-            )
-        ),
-    )
 
 
 def copy_relative_path(relative_src, dest):
@@ -162,12 +130,11 @@ def basic_data_context_config():
             "commented_map": {},
             "config_version": 2,
             "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "suite_parameter_store_name": "suite_parameter_store",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {},
             "stores": {
                 "expectations_store": {
                     "class_name": "ExpectationsStore",
@@ -183,23 +150,14 @@ def basic_data_context_config():
                         "base_directory": "checkpoints/",
                     },
                 },
-                "evaluation_parameter_store": {
+                "suite_parameter_store": {
                     "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
+                    "class_name": "SuiteParameterStore",
                 },
             },
             "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
+            "analytics_enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         }
     )
 
@@ -231,102 +189,16 @@ def data_context_config_with_datasources(conn_string_password):
             "commented_map": {},
             "config_version": 2,
             "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "suite_parameter_store_name": "suite_parameter_store",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {
-                "Datasource 1: Redshift": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"redshift+psycopg2://no_user:{conn_string_password}@111.11.1.1:1111/foo",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
+            "fluent_datasources": {
                 "Datasource 2: Postgres": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_sqlalchemy": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"postgresql://no_user:{conn_string_password}@some_url:1111/postgres?sslmode=prefer",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 3: MySQL": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_sqlalchemy": {
-                            "assets": {},
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"mysql+pymysql://no_user:{conn_string_password}@some_url:1111/foo",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 4: Pandas": {
-                    # no creds to be masked here, shouldnt be affected
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_runtime_data_connector": {
-                            "batch_identifiers": ["col"],
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "RuntimeDataConnector",
-                        }
-                    },
-                    "execution_engine": {"class_name": "PandasExecutionEngine"},
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 5: Snowflake": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_configured_asset_sql_data_connector_snowflake": {
-                            "assets": {
-                                "taxi_data": {
-                                    "table_name": "taxi_data",
-                                    "type": "table",
-                                }
-                            },
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "ConfiguredAssetSqlDataConnector",
-                        }
-                    },
-                    "execution_engine": {
-                        "class_name": "SqlAlchemyExecutionEngine",
-                        "connection_string": f"snowflake://no_user:{conn_string_password}@some_url/foo/PUBLIC?role=PUBLIC&warehouse=bar",
-                    },
-                    "module_name": "great_expectations.datasource",
-                },
-                "Datasource 6: Spark": {
-                    "class_name": "Datasource",
-                    "data_connectors": {
-                        "default_runtime_data_connector": {
-                            "batch_identifiers": ["batch", "identifiers", "here"],
-                            "batch_spec_passthrough": {"sample": "value"},
-                            "class_name": "RuntimeDataConnector",
-                        }
-                    },
-                    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-                    "module_name": "great_expectations.datasource",
-                },
+                    "type": "pandas_filesystem",
+                    "base_directory": "/path/to/trip_data",
+                }
             },
             "stores": {
                 "expectations_store": {
@@ -343,23 +215,14 @@ def data_context_config_with_datasources(conn_string_password):
                         "base_directory": "checkpoints/",
                     },
                 },
-                "evaluation_parameter_store": {
+                "suite_parameter_store": {
                     "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
+                    "class_name": "SuiteParameterStore",
                 },
             },
             "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
+            "analytics_enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         }
     )
 
@@ -378,11 +241,10 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
             "commented_map": {},
             "config_version": 2,
             "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
+            "suite_parameter_store_name": "suite_parameter_store",
+            "validation_results_store_name": "does_not_have_to_be_real",
             "expectations_store_name": "expectations_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {},
             "stores": {
                 "default_checkpoint_store": {
                     "class_name": "CheckpointStore",
@@ -397,7 +259,7 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+                "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {
@@ -411,8 +273,8 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_validations_store": {
-                    "class_name": "ValidationsStore",
+                "default_validation_results_store": {
+                    "class_name": "ValidationResultsStore",
                     "store_backend": {
                         "class_name": GXCloudStoreBackend.__name__,
                         "ge_cloud_base_url": "http://foo/bar/",
@@ -426,17 +288,8 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
                 },
             },
             "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
+            "analytics_enabled": True,
+            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         }
     )
 
@@ -524,36 +377,6 @@ def mock_response_factory() -> Callable[[JSONData, int, Optional[RequestError]],
     return _make_mock_response
 
 
-def basic_block_config_datasource_config() -> DatasourceConfig:
-    return DatasourceConfig(
-        class_name="Datasource",
-        execution_engine={
-            "class_name": "PandasExecutionEngine",
-            "module_name": "great_expectations.execution_engine",
-        },
-        data_connectors={
-            "tripdata_monthly_configured": {
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "module_name": "great_expectations.datasource.data_connector",
-                "base_directory": "/path/to/trip_data",
-                "assets": {
-                    "yellow": {
-                        "class_name": "Asset",
-                        "module_name": "great_expectations.datasource.data_connector.asset",
-                        "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
-                        "group_names": ["year", "month"],
-                    }
-                },
-            }
-        },
-    )
-
-
-@pytest.fixture
-def block_config_datasource_config() -> DatasourceConfig:
-    return basic_block_config_datasource_config()
-
-
 def basic_fluent_datasource_config() -> dict:
     return {
         "type": "pandas_filesystem",
@@ -562,52 +385,25 @@ def basic_fluent_datasource_config() -> dict:
             {
                 "name": "my_csv",
                 "type": "csv",
-                "batching_regex": re.compile(r"yellow_tripdata_(\d{4})-(\d{2})\.csv$", re.UNICODE),
             }
         ],
         "base_directory": pathlib.PosixPath("/path/to/trip_data"),
     }
 
 
+def basic_fluent_datasource() -> Datasource:
+    context = gx.get_context(mode="ephemeral")
+    datasource = context.data_sources.add_pandas_filesystem(
+        name="pandas_filesystem",
+        base_directory="/path/to/trip_data",  # type: ignore [arg-type]
+    )
+    datasource.add_csv_asset(name="my_csv")
+    return datasource
+
+
 @pytest.fixture
 def fluent_datasource_config() -> dict:
     return basic_fluent_datasource_config()
-
-
-@pytest.fixture(
-    params=[
-        basic_block_config_datasource_config,
-        basic_fluent_datasource_config,
-    ]
-)
-def parametrized_datasource_configs(
-    request,
-) -> DatasourceConfig | dict:
-    return request.param()
-
-
-@pytest.fixture
-def datasource_config_with_names_and_ids(
-    datasource_config_with_names: DatasourceConfig,
-    fake_datasource_id: str,
-    fake_data_connector_id: str,
-) -> DatasourceConfig:
-    """
-    An extension of the `datasource_config_with_names` fixture
-    but contains ids for BOTH the top-level Datasource as well
-    as the nested DataConnectors.
-    """
-    updated_config = copy.deepcopy(datasource_config_with_names)
-
-    # Update top-level Datasource
-    updated_config["id"] = fake_datasource_id
-
-    # Update nested DataConnectors
-    data_connector_name = tuple(datasource_config_with_names.data_connectors.keys())[0]
-    updated_config.data_connectors[data_connector_name]["name"] = data_connector_name
-    updated_config.data_connectors[data_connector_name]["id"] = fake_data_connector_id
-
-    return updated_config
 
 
 @pytest.fixture
@@ -673,72 +469,6 @@ def checkpoint_config() -> dict:
 
 
 @pytest.fixture
-def checkpoint_result(checkpoint_config: dict) -> CheckpointResult:
-    timestamp = dt.datetime(1996, 6, 1)
-    run_id = RunIdentifier(run_time=timestamp)
-    run_results = {
-        ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier("my_suite"),
-            run_id=RunIdentifier(run_time=timestamp),
-            batch_identifier="default_pandas_datasource-#ephemeral_pandas_asset",
-        ): {
-            "validation_result": ExpectationSuiteValidationResult(
-                success=True, results=[], suite_name="my_suite"
-            ),
-            "actions_results": {"my_action": {"class": "StoreValidationResultAction"}},
-        }
-    }
-
-    config = CheckpointConfig(**checkpoint_config)
-
-    validation_result_url = "https://my.cloud.app/validation-result/123"
-
-    return CheckpointResult(
-        run_id=run_id,
-        run_results=run_results,  # type: ignore[arg-type]
-        checkpoint_config=config,
-        validation_result_url=validation_result_url,
-    )
-
-
-@pytest.fixture
-def mocked_datasource_get_response(
-    mock_response_factory: Callable,
-    datasource_config_with_names_and_ids: DatasourceConfig,
-    fake_datasource_id: str,
-) -> Callable[[], MockResponse]:
-    def _mocked_get_response(*args, **kwargs):
-        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
-        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
-
-        return mock_response_factory(
-            {
-                "data": {
-                    "attributes": {
-                        "datasource_config": datasource_config_with_names_and_ids.to_json_dict(),
-                        "created_at": "2022-08-02T17:55:45.107550",
-                        "created_by_id": created_by_id,
-                        "deleted": False,
-                        "deleted_at": None,
-                        "desc": None,
-                        "name": datasource_config_with_names_and_ids.name,
-                        "organization_id": f"{organization_id}",
-                        "updated_at": "2022-08-02T17:55:45.107550",
-                    },
-                    "id": fake_datasource_id,
-                    "links": {
-                        "self": f"/organizations/{organization_id}/datasources/{fake_datasource_id}"
-                    },
-                    "type": "datasource",
-                },
-            },
-            200,
-        )
-
-    return _mocked_get_response
-
-
-@pytest.fixture
 def mocked_datasource_post_response(
     mock_response_factory: Callable,
     fake_datasource_id: str,
@@ -754,23 +484,3 @@ def mocked_datasource_post_response(
         )
 
     return _mocked_post_response
-
-
-@pytest.fixture
-def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
-    empty_data_context_in_cloud_mode,
-    mocked_datasource_get_response,
-):
-    context = empty_data_context_in_cloud_mode
-    with patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
-    ), patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set"
-    ), patch(
-        "requests.Session.get",
-        autospec=True,
-        side_effect=mocked_datasource_get_response,
-    ):
-        fds = PandasDatasource(name="my_datasource")
-        context.add_datasource(datasource=fds)
-    return context

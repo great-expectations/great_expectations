@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Mapping, Optional, Union
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -13,17 +12,15 @@ from great_expectations.data_context.data_context_variables import (
     EphemeralDataContextVariables,
 )
 from great_expectations.data_context.migrator.file_migrator import FileMigrator
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    DatasourceConfig,
-    datasourceConfigSchema,
-)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.file_data_context import (
         FileDataContext,
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +48,7 @@ class EphemeralDataContext(AbstractDataContext):
     def _init_project_config(
         self, project_config: Union[DataContextConfig, Mapping]
     ) -> DataContextConfig:
-        project_config = EphemeralDataContext.get_or_create_data_context_config(project_config)
-        return self._apply_global_config_overrides(project_config)
+        return EphemeralDataContext.get_or_create_data_context_config(project_config)
 
     @override
     def _init_variables(self) -> EphemeralDataContextVariables:
@@ -75,12 +71,7 @@ class EphemeralDataContext(AbstractDataContext):
         datasource_store = DatasourceStore(
             store_name=store_name,
             store_backend=store_backend,
-            serializer=DictConfigSerializer(schema=datasourceConfigSchema),
         )
-        # As the store is in-memory, it needs to be populated immediately
-        datasources = cast(Dict[str, DatasourceConfig], self.config.datasources or {})
-        for name, config in datasources.items():
-            datasource_store.add_by_name(datasource_name=name, datasource_config=config)
 
         return datasource_store
 

@@ -15,10 +15,7 @@ from great_expectations.expectations.metrics import (
 
 
 def is_not_disposable(email_address: str) -> bool:
-    if email_address in blocklist:
-        return False
-    else:
-        return True
+    return email_address not in blocklist
 
 
 # This class defines a Metric to support your Expectation.

@@ -4,12 +4,12 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -130,8 +130,8 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
                 }
     """  # noqa: E501
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None]
-    max_value: Union[float, EvaluationParameterDict, datetime, None]
+    min_value: Union[float, SuiteParameterDict, datetime, None]
+    max_value: Union[float, SuiteParameterDict, datetime, None]
 
     library_metadata = {
         "maturity": "production",
@@ -201,7 +201,7 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     @classmethod
     @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(  # type: ignore[override] # TODO: Fix this type ignore
         cls,
         configuration: ExpectationConfiguration,
@@ -210,7 +210,7 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        _ = False if runtime_configuration.get("include_column_name") is False else True
+        _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

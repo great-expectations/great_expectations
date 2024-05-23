@@ -68,7 +68,7 @@ def fds_data_asset_with_event_type_partitioner(
 def batch_definition(
     fds_data_asset: DataAsset,
 ) -> BatchDefinition:
-    batch_definition = BatchDefinition(name="test_batch_definition")
+    batch_definition = BatchDefinition[None](name="test_batch_definition")
     batch_definition.set_data_asset(fds_data_asset)
     return batch_definition
 
@@ -197,7 +197,7 @@ def test_validate_expectation_suite(validator: Validator, expectation_suite: Exp
     ],
 )
 @pytest.mark.unit
-def test_validate_expectation_suite_evaluation_parameters(
+def test_validate_expectation_suite_suite_parameters(
     validator: Validator,
     parameter: list[str],
     expected: bool,

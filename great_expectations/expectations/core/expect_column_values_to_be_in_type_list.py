@@ -10,8 +10,8 @@ from packaging import version
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
-    EvaluationParameterDict,
+from great_expectations.core.suite_parameters import (  # noqa: TCH001
+    SuiteParameterDict,
 )
 from great_expectations.expectations.core.expect_column_values_to_be_of_type import (
     _get_dialect_type_module,
@@ -19,7 +19,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -180,7 +180,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """  # noqa: E501
 
     condition_parser: Union[str, None] = "pandas"
-    type_list: Union[List[str], EvaluationParameterDict, None]
+    type_list: Union[List[str], SuiteParameterDict, None]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -262,7 +262,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     @classmethod
     @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -271,9 +271,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs if configuration else {},

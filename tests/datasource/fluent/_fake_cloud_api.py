@@ -164,10 +164,10 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
             "datasources": datasource_config,
             "checkpoint_store_name": "default_checkpoint_store",
             "expectations_store_name": "default_expectations_store",
-            "evaluation_parameter_store_name": "default_evaluation_parameter_store",
-            "validations_store_name": "default_validations_store",
+            "suite_parameter_store_name": "default_suite_parameter_store",
+            "validation_results_store_name": "default_validation_results_store",
             "stores": {
-                "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+                "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "default_expectations_store": {
                     "class_name": "ExpectationsStore",
                     "store_backend": {
@@ -194,8 +194,8 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
                         "suppress_store_backend_id": True,
                     },
                 },
-                "default_validations_store": {
-                    "class_name": "ValidationsStore",
+                "default_validation_results_store": {
+                    "class_name": "ValidationResultsStore",
                     "store_backend": {
                         "class_name": "GXCloudStoreBackend",
                         "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",
@@ -699,6 +699,29 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
     return result
 
 
+def delete_checkpoint_by_id_cb(
+    request: PreparedRequest,
+) -> CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+    path = str(parsed_url.path)
+    checkpoint_id = path.split("/")[-1]
+    checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
+
+    deleted_cp = checkpoints.pop(checkpoint_id, None)
+    if not deleted_cp:
+        errors = ErrorPayloadSchema(errors=[{"code": "mock 404", "detail": None, "source": None}])
+        return CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
+
+    print(pf(deleted_cp, depth=5))
+    cp_name = deleted_cp["attributes"]["checkpoint_config"]["name"]
+    _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"].remove(cp_name)
+    LOGGER.debug(f"Deleted checkpoint '{cp_name}'")
+    return CallbackResult(204, headers={}, body="")
+
+
 def delete_checkpoint_by_name_cb(
     request: PreparedRequest,
 ) -> CallbackResult:
@@ -853,6 +876,11 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             f"{org_url_base_V0}/checkpoints",
             post_checkpoints_cb,
+        )
+        resp_mocker.add_callback(
+            responses.DELETE,
+            re.compile(f"{org_url_base_V0}/checkpoints/{UUID_REGEX}"),
+            delete_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,

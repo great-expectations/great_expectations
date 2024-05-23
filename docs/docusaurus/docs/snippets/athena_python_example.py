@@ -4,6 +4,7 @@ import os
 import great_expectations as gx
 
 # </snippet>
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from tests.test_utils import check_athena_table_count, clean_athena_db
 
@@ -26,7 +27,7 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/athena_python_example.py Connect and Build Batch Request">
-athena_source: SQLDatasource = context.sources.add_or_update_sql(
+athena_source: SQLDatasource = context.data_sources.add_or_update_sql(
     "my_awsathena_datasource", connection_string=connection_string
 )
 athena_table = athena_source.add_table_asset("taxitable", table_name="taxitable")
@@ -42,9 +43,7 @@ clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")
 
 # <snippet name="docs/docusaurus/docs/snippets/athena_python_example.py Create Expectation Suite">
 expectation_suite_name = "my_awsathena_expectation_suite"
-suite = context.add_or_update_expectation_suite(
-    expectation_suite_name=expectation_suite_name
-)
+suite = context.suites.add(ExpectationSuite(name=expectation_suite_name))
 # </snippet>
 
 # <snippet name="docs/docusaurus/docs/snippets/athena_python_example.py Test Datasource with Validator">

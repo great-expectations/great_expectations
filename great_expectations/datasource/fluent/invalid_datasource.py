@@ -25,10 +25,12 @@ from great_expectations.datasource.fluent import (
 from great_expectations.datasource.fluent.type_lookup import TypeLookup, ValidTypes
 
 if TYPE_CHECKING:
-    from great_expectations.core.partitioners import Partitioner
+    from great_expectations.core.partitioners import ColumnPartitioner
     from great_expectations.datasource.fluent.batch_request import BatchRequest
-    from great_expectations.datasource.fluent.interfaces import Batch
-
+    from great_expectations.datasource.fluent.interfaces import (
+        Batch,
+        PartitionerSortingProtocol,
+    )
 
 # Controls which methods should raise an error when called on an InvalidDatasource
 METHOD_SHOULD_RAISE_ERROR: Final[set] = {
@@ -81,16 +83,11 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def add_sorters(self, sorters: List[Any]) -> NoReturn:
-        self._raise_type_error()
-
-    @override
     def build_batch_request(
         self,
         options: dict | None = None,
         batch_slice: Any = None,
         partitioner: Any = None,
-        batching_regex: Any = None,
     ) -> NoReturn:
         self._raise_type_error()
 
@@ -99,11 +96,13 @@ class InvalidAsset(DataAsset):
         self._raise_type_error()
 
     @override
-    def sort_batches(self, batch_list: List[Batch]) -> None:
+    def sort_batches(
+        self, batch_list: List[Batch], partitioner: PartitionerSortingProtocol
+    ) -> None:
         self._raise_type_error()
 
     @override
-    def get_batch_parameters_keys(self, partitioner: Partitioner | None = None) -> NoReturn:
+    def get_batch_parameters_keys(self, partitioner: ColumnPartitioner | None = None) -> NoReturn:
         self._raise_type_error()
 
 

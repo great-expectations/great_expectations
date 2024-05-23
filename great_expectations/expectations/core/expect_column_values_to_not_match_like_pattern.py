@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -144,7 +144,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    like_pattern: Union[str, EvaluationParameterDict]
+    like_pattern: Union[str, SuiteParameterDict]
 
     library_metadata = {
         "maturity": "production",
@@ -177,7 +177,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         **kwargs,
     ) -> List[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
-        _ = False if runtime_configuration.get("include_column_name") is False else True
+        _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(

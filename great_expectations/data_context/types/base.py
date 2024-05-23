@@ -17,7 +17,6 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Sequence,
     Set,
     Type,
     TypeVar,
@@ -40,20 +39,20 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations._docs_decorators import deprecated_argument, public_api
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
-from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
-from great_expectations.types.configurations import ClassConfigSchema
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.util import (
+    convert_to_json_serializable,  # noqa: TID251
+    deep_filter_properties_iterable,
+)
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
 
     from great_expectations.alias_types import JSONValues, PathStr
-    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.core.batch import BatchRequestBase
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest as FluentBatchRequest,
@@ -1045,308 +1044,13 @@ configuration to continue.
         return ExecutionEngineConfig(**data)
 
 
-class DatasourceConfig(AbstractConfig):
-    def __init__(  # noqa: C901, PLR0912, PLR0913
-        self,
-        name: Optional[
-            str
-        ] = None,  # Note: name is optional currently to avoid updating all documentation within
-        # the scope of this work.
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
-        module_name: str = "great_expectations.datasource",
-        execution_engine=None,
-        data_connectors=None,
-        data_asset_type=None,
-        batch_kwargs_generators=None,
-        connection_string=None,
-        credentials=None,
-        introspection=None,
-        tables=None,
-        boto3_options=None,
-        azure_options=None,
-        gcs_options=None,
-        credentials_info=None,
-        reader_method=None,
-        reader_options=None,
-        limit=None,
-        **kwargs,
-    ) -> None:
-        super().__init__(id=id, name=name)
-        # NOTE - JPC - 20200316: Currently, we are mostly inconsistent with respect to this type...
-        self._class_name = class_name
-        self._module_name = module_name
-        if execution_engine is not None:
-            self.execution_engine = execution_engine
-        if data_connectors is not None and isinstance(data_connectors, dict):
-            self.data_connectors = data_connectors
-
-        # NOTE - AJB - 20201202: This should use the datasource class build_configuration method as in DataContext.add_datasource()  # noqa: E501
-        if data_asset_type is None:
-            if class_name == "PandasDatasource":
-                data_asset_type = {
-                    "class_name": "PandasDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-            elif class_name == "SqlAlchemyDatasource":
-                data_asset_type = {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                }
-        if data_asset_type is not None:
-            self.data_asset_type = data_asset_type
-        if batch_kwargs_generators is not None:
-            self.batch_kwargs_generators = batch_kwargs_generators
-        if connection_string is not None:
-            self.connection_string = connection_string
-        if credentials is not None:
-            self.credentials = credentials
-        if introspection is not None:
-            self.introspection = introspection
-        if tables is not None:
-            self.tables = tables
-        if boto3_options is not None:
-            self.boto3_options = boto3_options
-        if azure_options is not None:
-            self.azure_options = azure_options
-        if gcs_options is not None:
-            self.gcs_options = gcs_options
-        if credentials_info is not None:
-            self.credentials_info = credentials_info
-        if reader_method is not None:
-            self.reader_method = reader_method
-        if reader_options is not None:
-            self.reader_options = reader_options
-        if limit is not None:
-            self.limit = limit
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-    @property
-    def class_name(self):
-        return self._class_name
-
-    @property
-    def module_name(self):
-        return self._module_name
-
-    @public_api
-    @override
-    def to_json_dict(self) -> Dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this DatasourceConfig.
-
-        Returns:
-            A JSON-serializable dict representation of this DatasourceConfig.
-        """
-        # # TODO: <Alex>2/4/2022</Alex>
-        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the  # noqa: E501
-        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,  # noqa: E501
-        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules  # noqa: E501
-        # make this refactoring infeasible at the present time.
-        dict_obj: dict = self.to_dict()
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
-        return serializeable_dict
-
-
-class DatasourceConfigSchema(AbstractConfigSchema):
-    class Meta:
-        unknown = INCLUDE
-
-    # Note: name is optional currently to avoid updating all documentation within
-    # the scope of this work.
-    name = fields.String(
-        required=False,
-        allow_none=True,
-    )
-    id = fields.String(
-        required=False,
-        allow_none=True,
-    )
-
-    class_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="Datasource",
-    )
-    module_name = fields.String(
-        required=False,
-        allow_none=True,
-        missing="great_expectations.datasource",
-    )
-    force_reuse_spark_context = fields.Bool(required=False, allow_none=True)
-    persist = fields.Bool(required=False, allow_none=True)
-    spark_config = fields.Raw(required=False, allow_none=True)
-    execution_engine = fields.Nested(ExecutionEngineConfigSchema, required=False, allow_none=True)
-    data_connectors = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DataConnectorConfigSchema),
-        required=False,
-        allow_none=True,
-    )
-
-    data_asset_type = fields.Nested(ClassConfigSchema, required=False, allow_none=True)
-
-    # TODO: Update to generator-specific
-    # batch_kwargs_generators = fields.Mapping(keys=fields.Str(), values=fields.Nested(fields.GeneratorSchema))  # noqa: E501
-    batch_kwargs_generators = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
-    )
-    connection_string = fields.String(required=False, allow_none=True)
-    credentials = fields.Raw(required=False, allow_none=True)
-    introspection = fields.Dict(required=False, allow_none=True)
-    tables = fields.Dict(required=False, allow_none=True)
-    boto3_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    azure_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    gcs_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    # BigQuery Service Account Credentials
-    # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
-    credentials_info = fields.Dict(required=False, allow_none=True)
-    reader_method = fields.String(required=False, allow_none=True)
-    reader_options = fields.Dict(
-        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
-    )
-    limit = fields.Integer(required=False, allow_none=True)
-
-    # noinspection PyUnusedLocal
-    @validates_schema
-    def validate_schema(self, data, **kwargs):
-        if "generators" in data:
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                'Your current configuration uses the "generators" key in a datasource, but in version 0.10 of '  # noqa: E501
-                'GX that key is renamed to "batch_kwargs_generators". Please update your configuration to continue.'  # noqa: E501
-            )
-        # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.  # noqa: E501
-        if data["class_name"][0] == "$":
-            return
-
-        if (
-            "connection_string" in data
-            or "credentials" in data
-            or "introspection" in data
-            or "tables" in data
-        ) and not (
-            data["class_name"]  # noqa: E713 # membership check
-            in [
-                "SqlAlchemyDatasource",
-                "SimpleSqlalchemyDatasource",
-            ]
-        ):
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                f"""Your current configuration uses one or more keys in a data source that are required only by a
-sqlalchemy data source (your data source is "{data['class_name']}").  Please update your configuration to continue.
-                """  # noqa: E501
-            )
-
-    # noinspection PyUnusedLocal
-    @post_load
-    def make_datasource_config(self, data, **kwargs):
-        # Add names to data connectors
-        for data_connector_name, data_connector_config in data.get("data_connectors", {}).items():
-            data_connector_config["name"] = data_connector_name
-        return DatasourceConfig(**data)
-
-
-class AnonymizedUsageStatisticsConfig(DictDot):
-    def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None) -> None:
-        self._enabled = enabled
-
-        if data_context_id is None:
-            data_context_id = str(uuid.uuid4())
-            self._explicit_id = False
-        else:
-            self._explicit_id = True
-
-        self._data_context_id = data_context_id
-
-        if usage_statistics_url is None:
-            usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
-            self._explicit_url = False
-        else:
-            self._explicit_url = True
-
-        self._usage_statistics_url = usage_statistics_url
-
-    @property
-    def enabled(self) -> bool:
-        return self._enabled
-
-    @enabled.setter
-    def enabled(self, enabled) -> None:
-        if not isinstance(enabled, bool):
-            raise ValueError("usage statistics enabled property must be boolean")  # noqa: TRY003, TRY004
-
-        self._enabled = enabled
-
-    @property
-    def data_context_id(self) -> str:
-        return self._data_context_id
-
-    @data_context_id.setter
-    def data_context_id(self, data_context_id) -> None:
-        try:
-            uuid.UUID(data_context_id)
-        except ValueError:
-            raise gx_exceptions.InvalidConfigError("data_context_id must be a valid uuid")  # noqa: TRY003
-
-        self._data_context_id = data_context_id
-        self._explicit_id = True
-
-    @property
-    def explicit_id(self) -> bool:
-        return self._explicit_id
-
-    @property
-    def explicit_url(self) -> bool:
-        return self._explicit_url
-
-    @property
-    def usage_statistics_url(self) -> str:
-        return self._usage_statistics_url
-
-    @usage_statistics_url.setter
-    def usage_statistics_url(self, usage_statistics_url) -> None:
-        self._usage_statistics_url = usage_statistics_url
-        self._explicit_url = True
-
-
-class AnonymizedUsageStatisticsConfigSchema(Schema):
-    data_context_id = fields.UUID()
-    enabled = fields.Boolean(default=True)
-    usage_statistics_url = fields.URL(allow_none=True)
-    _explicit_url = fields.Boolean(required=False)
-
-    # noinspection PyUnusedLocal
-    @post_load()
-    def make_usage_statistics_config(self, data, **kwargs):
-        if "data_context_id" in data:
-            data["data_context_id"] = str(data["data_context_id"])
-        return AnonymizedUsageStatisticsConfig(**data)
-
-    # noinspection PyUnusedLocal
-    @post_dump()
-    def filter_implicit(self, data, **kwargs):
-        if not data.get("_explicit_url") and "usage_statistics_url" in data:
-            del data["usage_statistics_url"]
-        if "_explicit_url" in data:
-            del data["_explicit_url"]
-        return data
-
-
 class ProgressBarsConfig(DictDot):
     def __init__(
         self,
         globally: Optional[bool] = None,
-        profilers: Optional[bool] = None,
         metric_calculations: Optional[bool] = None,
     ) -> None:
         self.globally: bool = True if globally is None else globally
-        self.profilers: bool = profilers if profilers is not None else self.globally
         self.metric_calculations: bool = (
             metric_calculations if metric_calculations is not None else self.globally
         )
@@ -1354,26 +1058,7 @@ class ProgressBarsConfig(DictDot):
 
 class ProgressBarsConfigSchema(Schema):
     globally = fields.Boolean()
-    profilers = fields.Boolean()
     metric_calculations = fields.Boolean()
-
-
-class IncludeRenderedContentConfig(DictDot):
-    def __init__(
-        self,
-        globally: bool = False,
-        expectation_suite: bool = False,
-        expectation_validation_result: bool = False,
-    ) -> None:
-        self.globally = globally
-        self.expectation_suite = expectation_suite
-        self.expectation_validation_result = expectation_validation_result
-
-
-class IncludeRenderedContentConfigSchema(Schema):
-    globally = fields.Boolean(default=False)
-    expectation_suite = fields.Boolean(default=False)
-    expectation_validation_result = fields.Boolean(default=False)
 
 
 class GXCloudConfig(DictDot):
@@ -1413,12 +1098,6 @@ class DataContextConfigSchema(Schema):
         validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
     )
-    datasources = fields.Dict(
-        keys=fields.Str(),
-        values=fields.Nested(DatasourceConfigSchema),
-        required=False,
-        allow_none=True,
-    )
     fluent_datasources = fields.Dict(
         keys=fields.Str(),
         required=False,
@@ -1426,28 +1105,21 @@ class DataContextConfigSchema(Schema):
         load_only=True,
     )
     expectations_store_name = fields.Str()
-    validations_store_name = fields.Str()
-    evaluation_parameter_store_name = fields.Str()
+    validation_results_store_name = fields.Str()
+    suite_parameter_store_name = fields.Str()
     checkpoint_store_name = fields.Str(required=False, allow_none=True)
-    profiler_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
-    validation_operators = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
-    )
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
     config_variables_file_path = fields.Str(allow_none=True)
-    anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    analytics_enabled = fields.Boolean(allow_none=True)
+    data_context_id = fields.UUID(allow_none=True)
     progress_bars = fields.Nested(ProgressBarsConfigSchema, required=False, allow_none=True)
-    include_rendered_content = fields.Nested(
-        IncludeRenderedContentConfigSchema, required=False, allow_none=True
-    )
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
     # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook  # noqa: E501
     REMOVE_KEYS_IF_NONE = [
         "progress_bars",  # 0.13.49
-        "include_rendered_content",  # 0.15.19,
         "fluent_datasources",
     ]
 
@@ -1467,7 +1139,7 @@ class DataContextConfigSchema(Schema):
             exc
             and exc.messages
             and isinstance(exc.messages, dict)
-            and all(key is None for key in exc.messages.keys())
+            and all(key is None for key in exc.messages)
         ):
             exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
 
@@ -1494,7 +1166,7 @@ class DataContextConfigSchema(Schema):
 
         # When migrating from 0.7.x to 0.8.0
         if data["config_version"] == 0 and any(
-            store_config["class_name"] == "ValidationsStore"
+            store_config["class_name"] == "ValidationResultsStore"
             for store_config in data["stores"].values()
         ):
             raise gx_exceptions.UnsupportedConfigVersionError(  # noqa: TRY003
@@ -1558,7 +1230,7 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     EXPECTATIONS_BASE_DIRECTORY = "expectations"
     DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{EXPECTATIONS_BASE_DIRECTORY}/"
-    DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
+    DEFAULT_VALIDATIONS_STORE_NAME = "validation_results_store"
     VALIDATIONS_BASE_DIRECTORY = "validations"
     DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{UNCOMMITTED}/{VALIDATIONS_BASE_DIRECTORY}/"
@@ -1569,8 +1241,8 @@ class DataContextConfigDefaults(enum.Enum):
         f"{VALIDATION_DEFINITIONS_BASE_DIRECTORY}/"
     )
 
-    DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
-    DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = "evaluation_parameters/"
+    DEFAULT_SUITE_PARAMETER_STORE_NAME = "suite_parameter_store"
+    DEFAULT_SUITE_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = "suite_parameters/"
     DATA_DOCS_BASE_DIRECTORY = "data_docs"
     DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
 
@@ -1584,11 +1256,6 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
     CHECKPOINTS_BASE_DIRECTORY = "checkpoints"
     DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{CHECKPOINTS_BASE_DIRECTORY}/"
-
-    # Profilers
-    DEFAULT_PROFILER_STORE_NAME = "profiler_store"
-    PROFILERS_BASE_DIRECTORY = "profilers"
-    DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{PROFILERS_BASE_DIRECTORY}/"
 
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
     DEFAULT_CONFIG_VARIABLES_FILEPATH = f"{UNCOMMITTED}/config_variables.yml"
@@ -1604,13 +1271,6 @@ class DataContextConfigDefaults(enum.Enum):
             "action": {"class_name": "UpdateDataDocsAction"},
         },
     ]
-    DEFAULT_VALIDATION_OPERATORS = {
-        "action_list_operator": {
-            "class_name": "ActionListValidationOperator",
-            "action_list": DEFAULT_ACTION_LIST,
-        }
-    }
-
     DEFAULT_EXPECTATIONS_STORE = {
         "class_name": "ExpectationsStore",
         "store_backend": {
@@ -1619,7 +1279,7 @@ class DataContextConfigDefaults(enum.Enum):
         },
     }
     DEFAULT_VALIDATIONS_STORE = {
-        "class_name": "ValidationsStore",
+        "class_name": "ValidationResultsStore",
         "store_backend": {
             "class_name": "TupleFilesystemStoreBackend",
             "base_directory": DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
@@ -1632,7 +1292,7 @@ class DataContextConfigDefaults(enum.Enum):
             "base_directory": DEFAULT_VALIDATION_DEFINITION_STORE_BASE_DIRECTORY_RELATIVE_NAME,
         },
     }
-    DEFAULT_EVALUATION_PARAMETER_STORE = {"class_name": "EvaluationParameterStore"}
+    DEFAULT_SUITE_PARAMETER_STORE = {"class_name": "SuiteParameterStore"}
     DEFAULT_CHECKPOINT_STORE = {
         "class_name": "CheckpointStore",
         "store_backend": {
@@ -1641,21 +1301,12 @@ class DataContextConfigDefaults(enum.Enum):
             "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
         },
     }
-    DEFAULT_PROFILER_STORE = {
-        "class_name": "ProfilerStore",
-        "store_backend": {
-            "class_name": "TupleFilesystemStoreBackend",
-            "suppress_store_backend_id": True,
-            "base_directory": DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME,
-        },
-    }
     DEFAULT_STORES = {
         DEFAULT_EXPECTATIONS_STORE_NAME: DEFAULT_EXPECTATIONS_STORE,
         DEFAULT_VALIDATIONS_STORE_NAME: DEFAULT_VALIDATIONS_STORE,
         DEFAULT_VALIDATION_DEFINITION_STORE_NAME: DEFAULT_VALIDATION_DEFINITION_STORE,
-        DEFAULT_EVALUATION_PARAMETER_STORE_NAME: DEFAULT_EVALUATION_PARAMETER_STORE,
+        DEFAULT_SUITE_PARAMETER_STORE_NAME: DEFAULT_SUITE_PARAMETER_STORE,
         DEFAULT_CHECKPOINT_STORE_NAME: DEFAULT_CHECKPOINT_STORE,
-        DEFAULT_PROFILER_STORE_NAME: DEFAULT_PROFILER_STORE,
     }
 
     DEFAULT_DATA_DOCS_SITES = {
@@ -1683,24 +1334,20 @@ class BaseStoreBackendDefaults(DictDot):
     def __init__(  # noqa: PLR0913
         self,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,  # noqa: E501
-        validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
-        evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,  # noqa: E501
+        validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
+        suite_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,  # noqa: E501
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
-        profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-        validation_operators: Optional[dict] = None,
         stores: Optional[dict] = None,
         data_docs_sites: Optional[dict] = None,
     ) -> None:
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.validation_results_store_name = validation_results_store_name
+        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
-        self.profiler_store_name = profiler_store_name
         self.validation_definition_store_name = (
             DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value
         )
-        self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
 
@@ -1719,42 +1366,36 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
     Args:
         default_bucket_name: Use this bucket name for stores that do not have a bucket name provided
         expectations_store_bucket_name: Overrides default_bucket_name if supplied
-        validations_store_bucket_name: Overrides default_bucket_name if supplied
+        validation_results_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
         checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
-        profiler_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_prefix: Overrides default if supplied
-        validations_store_prefix: Overrides default if supplied
+        validation_results_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
-        profiler_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
-        validations_store_name: Overrides default if supplied
-        evaluation_parameter_store_name: Overrides default if supplied
+        validation_results_store_name: Overrides default if supplied
+        suite_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
-        profiler_store_name: Overrides default if supplied
     """
 
     def __init__(  # noqa: PLR0913
         self,
         default_bucket_name: Optional[str] = None,
         expectations_store_bucket_name: Optional[str] = None,
-        validations_store_bucket_name: Optional[str] = None,
+        validation_results_store_bucket_name: Optional[str] = None,
         validation_definition_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
-        profiler_store_bucket_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
-        validations_store_prefix: str = "validations",
+        validation_results_store_prefix: str = "validations",
         validation_definition_store_prefix: str = "validation_definitions",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
-        profiler_store_prefix: str = "profilers",
         expectations_store_name: str = "expectations_S3_store",
-        validations_store_name: str = "validations_S3_store",
-        evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        validation_results_store_name: str = "validation_results_S3_store",
+        suite_parameter_store_name: str = "suite_parameter_store",
         checkpoint_store_name: str = "checkpoint_S3_store",
-        profiler_store_name: str = "profiler_S3_store",
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -1762,23 +1403,20 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         # Use default_bucket_name if separate store buckets are not provided
         if expectations_store_bucket_name is None:
             expectations_store_bucket_name = default_bucket_name
-        if validations_store_bucket_name is None:
-            validations_store_bucket_name = default_bucket_name
+        if validation_results_store_bucket_name is None:
+            validation_results_store_bucket_name = default_bucket_name
         if validation_definition_store_bucket_name is None:
             validation_definition_store_bucket_name = default_bucket_name
         if data_docs_bucket_name is None:
             data_docs_bucket_name = default_bucket_name
         if checkpoint_store_bucket_name is None:
             checkpoint_store_bucket_name = default_bucket_name
-        if profiler_store_bucket_name is None:
-            profiler_store_bucket_name = default_bucket_name
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.validation_results_store_name = validation_results_store_name
+        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
-        self.profiler_store_name = profiler_store_name
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -1788,12 +1426,12 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": expectations_store_prefix,
                 },
             },
-            validations_store_name: {
-                "class_name": "ValidationsStore",
+            validation_results_store_name: {
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
-                    "bucket": validations_store_bucket_name,
-                    "prefix": validations_store_prefix,
+                    "bucket": validation_results_store_bucket_name,
+                    "prefix": validation_results_store_prefix,
                 },
             },
             self.validation_definition_store_name: {
@@ -1804,21 +1442,13 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": validation_definition_store_prefix,
                 },
             },
-            evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
                     "bucket": checkpoint_store_bucket_name,
                     "prefix": checkpoint_store_prefix,
-                },
-            },
-            profiler_store_name: {
-                "class_name": "ProfilerStore",
-                "store_backend": {
-                    "class_name": "TupleS3StoreBackend",
-                    "bucket": profiler_store_bucket_name,
-                    "prefix": profiler_store_prefix,
                 },
             },
         }
@@ -1863,13 +1493,10 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             self.stores[self.expectations_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
-            self.stores[self.validations_store_name]["store_backend"][  # type: ignore[index]
+            self.stores[self.validation_results_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
             self.stores[self.checkpoint_store_name]["store_backend"][  # type: ignore[index]
-                "root_directory"
-            ] = root_directory
-            self.stores[self.profiler_store_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
             self.stores[self.validation_definition_store_name]["store_backend"][  # type: ignore[index]
@@ -1901,21 +1528,15 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "InMemoryStoreBackend",
                 },
             },
-            self.validations_store_name: {
-                "class_name": "ValidationsStore",
+            self.validation_results_store_name: {
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 },
             },
-            self.evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            self.suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
             self.checkpoint_store_name: {
                 "class_name": "CheckpointStore",
-                "store_backend": {
-                    "class_name": "InMemoryStoreBackend",
-                },
-            },
-            self.profiler_store_name: {
-                "class_name": "ProfilerStore",
                 "store_backend": {
                     "class_name": "InMemoryStoreBackend",
                 },
@@ -1945,25 +1566,21 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         default_bucket_name: Use this bucket name for stores that do not have a bucket name provided
         default_project_name: Use this project name for stores that do not have a project name provided
         expectations_store_bucket_name: Overrides default_bucket_name if supplied
-        validations_store_bucket_name: Overrides default_bucket_name if supplied
+        validation_results_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
         checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
-        profiler_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_project_name: Overrides default_project_name if supplied
-        validations_store_project_name: Overrides default_project_name if supplied
+        validation_results_store_project_name: Overrides default_project_name if supplied
         data_docs_project_name: Overrides default_project_name if supplied
         checkpoint_store_project_name: Overrides default_project_name if supplied
-        profiler_store_project_name: Overrides default_project_name if supplied
         expectations_store_prefix: Overrides default if supplied
-        validations_store_prefix: Overrides default if supplied
+        validation_results_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
-        profiler_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
-        validations_store_name: Overrides default if supplied
-        evaluation_parameter_store_name: Overrides default if supplied
+        validation_results_store_name: Overrides default if supplied
+        suite_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
-        profiler_store_name: Overrides default if supplied
     """  # noqa: E501
 
     def __init__(  # noqa: C901, PLR0913
@@ -1971,28 +1588,24 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         default_bucket_name: Optional[str] = None,
         default_project_name: Optional[str] = None,
         expectations_store_bucket_name: Optional[str] = None,
-        validations_store_bucket_name: Optional[str] = None,
+        validation_results_store_bucket_name: Optional[str] = None,
         validation_definition_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
-        profiler_store_bucket_name: Optional[str] = None,
         expectations_store_project_name: Optional[str] = None,
-        validations_store_project_name: Optional[str] = None,
+        validation_results_store_project_name: Optional[str] = None,
         validation_definition_store_project_name: Optional[str] = None,
         data_docs_project_name: Optional[str] = None,
         checkpoint_store_project_name: Optional[str] = None,
-        profiler_store_project_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
-        validations_store_prefix: str = "validations",
+        validation_results_store_prefix: str = "validations",
         validation_definition_store_prefix: str = "validation_definitions",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
-        profiler_store_prefix: str = "profilers",
         expectations_store_name: str = "expectations_GCS_store",
-        validations_store_name: str = "validations_GCS_store",
-        evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        validation_results_store_name: str = "validation_results_GCS_store",
+        suite_parameter_store_name: str = "suite_parameter_store",
         checkpoint_store_name: str = "checkpoint_GCS_store",
-        profiler_store_name: str = "profiler_GCS_store",
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -2000,37 +1613,32 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         # Use default_bucket_name if separate store buckets are not provided
         if expectations_store_bucket_name is None:
             expectations_store_bucket_name = default_bucket_name
-        if validations_store_bucket_name is None:
-            validations_store_bucket_name = default_bucket_name
+        if validation_results_store_bucket_name is None:
+            validation_results_store_bucket_name = default_bucket_name
         if validation_definition_store_bucket_name is None:
             validation_definition_store_bucket_name = default_bucket_name
         if data_docs_bucket_name is None:
             data_docs_bucket_name = default_bucket_name
         if checkpoint_store_bucket_name is None:
             checkpoint_store_bucket_name = default_bucket_name
-        if profiler_store_bucket_name is None:
-            profiler_store_bucket_name = default_bucket_name
 
         # Use default_project_name if separate store projects are not provided
         if expectations_store_project_name is None:
             expectations_store_project_name = default_project_name
-        if validations_store_project_name is None:
-            validations_store_project_name = default_project_name
+        if validation_results_store_project_name is None:
+            validation_results_store_project_name = default_project_name
         if validation_definition_store_project_name is None:
             validation_definition_store_project_name = default_project_name
         if data_docs_project_name is None:
             data_docs_project_name = default_project_name
         if checkpoint_store_project_name is None:
             checkpoint_store_project_name = default_project_name
-        if profiler_store_project_name is None:
-            profiler_store_project_name = default_project_name
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.validation_results_store_name = validation_results_store_name
+        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
-        self.profiler_store_name = profiler_store_name
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -2041,13 +1649,13 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": expectations_store_prefix,
                 },
             },
-            validations_store_name: {
-                "class_name": "ValidationsStore",
+            validation_results_store_name: {
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleGCSStoreBackend",
-                    "project": validations_store_project_name,
-                    "bucket": validations_store_bucket_name,
-                    "prefix": validations_store_prefix,
+                    "project": validation_results_store_project_name,
+                    "bucket": validation_results_store_bucket_name,
+                    "prefix": validation_results_store_prefix,
                 },
             },
             self.validation_definition_store_name: {
@@ -2059,7 +1667,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": validation_definition_store_prefix,
                 },
             },
-            evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -2067,15 +1675,6 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "project": checkpoint_store_project_name,
                     "bucket": checkpoint_store_bucket_name,
                     "prefix": checkpoint_store_prefix,
-                },
-            },
-            profiler_store_name: {
-                "class_name": "ProfilerStore",
-                "store_backend": {
-                    "class_name": "TupleGCSStoreBackend",
-                    "project": profiler_store_project_name,
-                    "bucket": profiler_store_bucket_name,
-                    "prefix": profiler_store_prefix,
                 },
             },
         }
@@ -2102,51 +1701,44 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
     Args:
         default_credentials: Use these credentials for all stores that do not have credentials provided
         expectations_store_credentials: Overrides default_credentials if supplied
-        validations_store_credentials: Overrides default_credentials if supplied
+        validation_results_store_credentials: Overrides default_credentials if supplied
         checkpoint_store_credentials: Overrides default_credentials if supplied
-        profiler_store_credentials: Overrides default_credentials if supplied
         expectations_store_name: Overrides default if supplied
-        validations_store_name: Overrides default if supplied
-        evaluation_parameter_store_name: Overrides default if supplied
+        validation_results_store_name: Overrides default if supplied
+        suite_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
-        profiler_store_name: Overrides default if supplied
     """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
         self,
         default_credentials: Optional[Dict] = None,
         expectations_store_credentials: Optional[Dict] = None,
-        validations_store_credentials: Optional[Dict] = None,
+        validation_results_store_credentials: Optional[Dict] = None,
         validation_definition_store_credentials: Optional[Dict] = None,
         checkpoint_store_credentials: Optional[Dict] = None,
-        profiler_store_credentials: Optional[Dict] = None,
         expectations_store_name: str = "expectations_database_store",
-        validations_store_name: str = "validations_database_store",
-        evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        validation_results_store_name: str = "validation_results_database_store",
+        suite_parameter_store_name: str = "suite_parameter_store",
         checkpoint_store_name: str = "checkpoint_database_store",
-        profiler_store_name: str = "profiler_database_store",
     ) -> None:
         # Initialize base defaults
         super().__init__()
 
-        # Use default credentials if separate credentials not supplied for expectations_store and validations_store  # noqa: E501
+        # Use default credentials if separate credentials not supplied for expectations_store and validation_results_store  # noqa: E501
         if expectations_store_credentials is None:
             expectations_store_credentials = default_credentials
-        if validations_store_credentials is None:
-            validations_store_credentials = default_credentials
+        if validation_results_store_credentials is None:
+            validation_results_store_credentials = default_credentials
         if validation_definition_store_credentials is None:
             validation_definition_store_credentials = default_credentials
         if checkpoint_store_credentials is None:
             checkpoint_store_credentials = default_credentials
-        if profiler_store_credentials is None:
-            profiler_store_credentials = default_credentials
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.validation_results_store_name = validation_results_store_name
+        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
-        self.profiler_store_name = profiler_store_name
 
         self.stores = {
             expectations_store_name: {
@@ -2156,11 +1748,11 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                     "credentials": expectations_store_credentials,
                 },
             },
-            validations_store_name: {
-                "class_name": "ValidationsStore",
+            validation_results_store_name: {
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "DatabaseStoreBackend",
-                    "credentials": validations_store_credentials,
+                    "credentials": validation_results_store_credentials,
                 },
             },
             self.validation_definition_store_name: {
@@ -2170,7 +1762,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                     "credentials": validation_definition_store_credentials,
                 },
             },
-            evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
@@ -2178,18 +1770,10 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                     "credentials": checkpoint_store_credentials,
                 },
             },
-            profiler_store_name: {
-                "class_name": "ProfilerStore",
-                "store_backend": {
-                    "class_name": "DatabaseStoreBackend",
-                    "credentials": profiler_store_credentials,
-                },
-            },
         }
 
 
 @public_api
-@deprecated_argument(argument_name="validation_operators", version="0.14.0")
 class DataContextConfig(BaseYamlConfig):
     """Config class for DataContext.
 
@@ -2203,57 +1787,42 @@ class DataContextConfig(BaseYamlConfig):
 
     Args:
         config_version (Optional[float]): config version of this DataContext.
-        datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
-            DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
         fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
         expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
-        validations_store_name (Optional[str]): name of ValidationsStore to be used by DataContext.
-        evaluation_parameter_store_name (Optional[str]): name of EvaluationParamterStore to be used by DataContext.
+        validation_results_store_name (Optional[str]): name of ValidationResultsStore to be used by DataContext.
+        suite_parameter_store_name (Optional[str]): name of SuiteParamterStore to be used by DataContext.
         checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
-        profiler_store_name (Optional[str]): name of ProfilerStore to be used by DataContext.
         plugins_directory (Optional[str]): the directory in which custom plugin modules should be placed.
-        validation_operators: list of validation operators configured by this DataContext.
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
         config_variables_file_path (Optional[str]): path for config_variables file, if used.
-        anonymous_usage_statistics (Optional[AnonymizedUsageStatisticsConfig]): configuration for enabling or disabling
-            anonymous usage statistics for GX.
+        analytics_enabled (Optional[bool]): whether or not to send usage statistics to the Great Expectations team.
+        data_context_id (Optional[UUID]): unique identifier for the DataContext.
         store_backend_defaults (Optional[BaseStoreBackendDefaults]):  define base defaults for platform specific StoreBackendDefaults.
             For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults
             and you may be able to specify fewer parameters.
         commented_map (Optional[CommentedMap]): the CommentedMap associated with DataContext configuration. Used when
             instantiating with yml file.
-        progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally, for
-            profilers, or metrics calculations.
-        include_rendered_content (Optional[IncludedRenderedContentConfig]): allows rendered content to be configured
-            globally, at the ExpectationSuite or ExpectationValidationResults-level.
+        progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally or for metrics calculations.
     """  # noqa: E501
 
-    def __init__(  # noqa: C901, PLR0912, PLR0913
+    def __init__(  # noqa: C901, PLR0913
         self,
         config_version: Optional[float] = None,
-        datasources: Optional[
-            Union[
-                Dict[str, DatasourceConfig],
-                Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
-            ]
-        ] = None,
         fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
-        validations_store_name: Optional[str] = None,
-        evaluation_parameter_store_name: Optional[str] = None,
+        validation_results_store_name: Optional[str] = None,
+        suite_parameter_store_name: Optional[str] = None,
         checkpoint_store_name: Optional[str] = None,
-        profiler_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
-        validation_operators=None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
         config_variables_file_path: Optional[str] = None,
-        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
+        analytics_enabled: Optional[bool] = None,
+        data_context_id: Optional[uuid.UUID] = None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         progress_bars: Optional[ProgressBarsConfig] = None,
-        include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
         # Set defaults
         if config_version is None:
@@ -2266,47 +1835,28 @@ class DataContextConfig(BaseYamlConfig):
                 stores = store_backend_defaults.stores
             if expectations_store_name is None:
                 expectations_store_name = store_backend_defaults.expectations_store_name
-            if validations_store_name is None:
-                validations_store_name = store_backend_defaults.validations_store_name
-            if evaluation_parameter_store_name is None:
-                evaluation_parameter_store_name = (
-                    store_backend_defaults.evaluation_parameter_store_name
-                )
+            if validation_results_store_name is None:
+                validation_results_store_name = store_backend_defaults.validation_results_store_name
+            if suite_parameter_store_name is None:
+                suite_parameter_store_name = store_backend_defaults.suite_parameter_store_name
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
             if checkpoint_store_name is None:
                 checkpoint_store_name = store_backend_defaults.checkpoint_store_name
-            if profiler_store_name is None:
-                profiler_store_name = store_backend_defaults.profiler_store_name
 
         self._config_version = config_version
-        if datasources is None:
-            datasources = {}
-        self.datasources = datasources
         self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
-        self.validations_store_name = validations_store_name
-        self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.validation_results_store_name = validation_results_store_name
+        self.suite_parameter_store_name = suite_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
-        self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
-        self.validation_operators = validation_operators
         self.stores = self._init_stores(stores)
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
-        if anonymous_usage_statistics is None:
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig()
-        elif isinstance(anonymous_usage_statistics, dict):
-            anonymous_usage_statistics = AnonymizedUsageStatisticsConfig(
-                **anonymous_usage_statistics
-            )
-        self.anonymous_usage_statistics = anonymous_usage_statistics
+        self.analytics_enabled = analytics_enabled
+        self.data_context_id = data_context_id
         self.progress_bars = progress_bars
-        if include_rendered_content is None:
-            include_rendered_content = IncludeRenderedContentConfig()
-        elif isinstance(include_rendered_content, dict):
-            include_rendered_content = IncludeRenderedContentConfig(**include_rendered_content)
-        self.include_rendered_content = include_rendered_content
 
         super().__init__(commented_map=commented_map)
 
@@ -2463,299 +2013,9 @@ class CheckpointValidationDefinitionSchema(AbstractConfigSchema):
         return data
 
 
-class CheckpointConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-        fields = (
-            "name",
-            "expectation_suite_name",
-            "batch_request",
-            "action_list",
-            "evaluation_parameters",
-            "runtime_configuration",
-            "validations",
-            "default_validation_id",
-            "profilers",
-            # Next fields are used by configurators
-            "site_names",
-            "id",
-            "expectation_suite_id",
-        )
-        ordered = True
-
-    # if keys have None value, remove in post_dump
-    REMOVE_KEYS_IF_NONE = [
-        "default_validation_id",
-    ]
-
-    id = fields.UUID(required=False, allow_none=True)
-    name = fields.String(required=False, allow_none=True)
-    expectation_suite_name = fields.String(required=False, allow_none=True)
-    expectation_suite_id = fields.UUID(required=False, allow_none=True)
-    batch_request = fields.Dict(required=False, allow_none=True)
-    action_list = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
-    evaluation_parameters = fields.Dict(required=False, allow_none=True)
-    runtime_configuration = fields.Dict(required=False, allow_none=True)
-    validations = fields.List(
-        cls_or_instance=fields.Nested(CheckpointValidationDefinitionSchema),
-        required=False,
-        allow_none=True,
-    )
-    default_validation_id = fields.String(required=False, allow_none=True)
-
-    profilers = fields.List(cls_or_instance=fields.Dict(), required=False, allow_none=True)
-
-    # noinspection PyUnusedLocal
-    @validates_schema
-    def validate_schema(self, data, **kwargs) -> None:
-        if not ("name" in data or "validation_operator_name" in data or "batches" in data):
-            raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                """Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
-                continue.
-                """  # noqa: E501
-            )
-
-        if data.get("config_version"):
-            if "name" not in data:
-                raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
-                    """Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
-                    configuration to continue.
-                    """  # noqa: E501
-                )
-
-    # noinspection PyUnusedLocal
-    @pre_dump
-    def prepare_dump(self, data, **kwargs):
-        data = copy.deepcopy(data)
-        for key, value in data.items():
-            data[key] = convert_to_json_serializable(data=value)
-
-        return data
-
-    # noinspection PyUnusedLocal
-    @post_dump
-    def remove_keys_if_none(self, data, **kwargs):
-        data = copy.deepcopy(data)
-        for key in self.REMOVE_KEYS_IF_NONE:
-            if key in data and data[key] is None:
-                data.pop(key)
-
-        return data
-
-
-@public_api
-class CheckpointConfig(BaseYamlConfig):
-    # TODO: <Alex>ALEX (does not work yet)</Alex>
-    # _config_schema_class = CheckpointConfigSchema
-    """Initializes the CheckpointConfig using a BaseYamlConfig.
-
-    Args:
-        name: The name of the checkpoint.
-        expectation_suite_name: The expectation suite name of your checkpoint
-        batch_request: The batch request
-        action_list: The action list
-        evaluation_parameters: The evaluation parameters
-        runtime_configuration: The runtime configuration for your checkpoint
-        validations: An optional list of validations in your checkpoint
-        default_validation_id: The default validation id of your checkpoint
-        validation_operator_name: The validation operator name
-        batches: An optional list of batches
-        commented_map: The commented map
-        id: Your GE Cloud ID
-        expectation_suite_id: Your expectation suite
-    """
-
-    def __init__(  # noqa: PLR0913
-        self,
-        name: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
-        action_list: Optional[Sequence[ActionDict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationDefinition]] = None,
-        default_validation_id: Optional[str] = None,
-        commented_map: Optional[CommentedMap] = None,
-        id: Optional[str] = None,
-        expectation_suite_id: Optional[str] = None,
-    ) -> None:
-        self._name = name
-        self._expectation_suite_name = expectation_suite_name
-        self._expectation_suite_id = expectation_suite_id
-        self._batch_request = batch_request or {}
-        self._action_list = action_list or []
-        self._evaluation_parameters = evaluation_parameters or {}
-        self._runtime_configuration = runtime_configuration or {}
-        self._validations = validations or []
-        self._default_validation_id = default_validation_id
-        self._id = id
-
-        super().__init__(commented_map=commented_map)
-
-    # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
-    @classmethod
-    def get_config_class(cls):
-        return cls  # CheckpointConfig
-
-    @classmethod
-    def get_schema_class(cls):
-        return CheckpointConfigSchema
-
-    @property
-    def id(self) -> Optional[str]:
-        return self._id
-
-    @id.setter
-    def id(self, value: str) -> None:
-        self._id = value
-
-    @property
-    def expectation_suite_id(self) -> Optional[str]:
-        return self._expectation_suite_id
-
-    @expectation_suite_id.setter
-    def expectation_suite_id(self, value: str) -> None:
-        self._expectation_suite_id = value
-
-    @property
-    def name(self) -> str:
-        return self._name  # type: ignore[return-value]
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
-
-    @property
-    def validations(self) -> List[CheckpointValidationDefinition]:
-        return self._validations
-
-    @validations.setter
-    def validations(self, value: List[CheckpointValidationDefinition]) -> None:
-        self._validations = value
-
-    @property
-    def default_validation_id(self) -> Optional[str]:
-        return self._default_validation_id
-
-    @default_validation_id.setter
-    def default_validation_id(self, validation_id: str) -> None:
-        self._default_validation_id = validation_id
-
-    @property
-    def batch_request(self) -> dict:
-        return self._batch_request
-
-    @batch_request.setter
-    def batch_request(self, value: dict) -> None:
-        self._batch_request = value
-
-    @property
-    def expectation_suite_name(self) -> str:
-        return self._expectation_suite_name  # type: ignore[return-value]
-
-    @expectation_suite_name.setter
-    def expectation_suite_name(self, value: str) -> None:
-        self._expectation_suite_name = value
-
-    @property
-    def action_list(self) -> Sequence[ActionDict]:
-        return self._action_list
-
-    @action_list.setter
-    def action_list(self, value: Sequence[ActionDict]) -> None:
-        self._action_list = value
-
-    @property
-    def evaluation_parameters(self) -> dict:
-        return self._evaluation_parameters
-
-    @evaluation_parameters.setter
-    def evaluation_parameters(self, value: dict) -> None:
-        self._evaluation_parameters = value
-
-    @property
-    def runtime_configuration(self) -> dict:
-        return self._runtime_configuration
-
-    @runtime_configuration.setter
-    def runtime_configuration(self, value: dict) -> None:
-        self._runtime_configuration = value
-
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-
-        memo[id(self)] = result
-
-        attributes_to_copy = set(CheckpointConfigSchema().fields.keys())
-        for key in attributes_to_copy:
-            try:
-                value = self[key]
-                value_copy = safe_deep_copy(data=value, memo=memo)
-                setattr(result, key, value_copy)
-            except AttributeError:
-                pass
-
-        return result
-
-    @public_api
-    @override
-    def to_json_dict(self) -> Dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this CheckpointConfig.
-
-        Returns:
-            A JSON-serializable dict representation of this CheckpointConfig.
-        """
-        # # TODO: <Alex>2/4/2022</Alex>
-        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the  # noqa: E501
-        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,  # noqa: E501
-        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules  # noqa: E501
-        # make this refactoring infeasible at the present time.
-        dict_obj: dict = self.to_dict()
-        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
-        return serializeable_dict
-
-    @override
-    def __repr__(self) -> str:
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
-        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
-        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
-        refactoring infeasible at the present time.
-        """  # noqa: E501
-        json_dict: dict = self.to_json_dict()
-        deep_filter_properties_iterable(
-            properties=json_dict,
-            inplace=True,
-        )
-
-        keys: List[str] = sorted(list(json_dict.keys()))
-
-        key: str
-        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
-
-        return json.dumps(sorted_json_dict, indent=2)
-
-    @override
-    def __str__(self) -> str:
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
-        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
-        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
-        refactoring infeasible at the present time.
-        """  # noqa: E501
-        return self.__repr__()
-
-
 dataContextConfigSchema = DataContextConfigSchema()
-datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
 executionEngineConfigSchema = ExecutionEngineConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
-# noinspection SpellCheckingInspection
-anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
-checkpointConfigSchema = CheckpointConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()

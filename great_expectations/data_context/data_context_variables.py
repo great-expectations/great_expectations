@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import enum
 import logging
+import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
@@ -23,9 +24,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store import DataContextStore
     from great_expectations.data_context.types.base import (
-        AnonymizedUsageStatisticsConfig,
         DataContextConfig,
-        IncludeRenderedContentConfig,
         ProgressBarsConfig,
     )
     from great_expectations.datasource.fluent.interfaces import (
@@ -39,19 +38,18 @@ class DataContextVariableSchema(str, enum.Enum):
     ALL_VARIABLES = "data_context_variables"  # If retrieving/setting the entire config at once
     CONFIG_VERSION = "config_version"
     DATASOURCES = "datasources"
+    FLUENT_DATASOURCES = "fluent_datasources"
     EXPECTATIONS_STORE_NAME = "expectations_store_name"
-    VALIDATIONS_STORE_NAME = "validations_store_name"
-    EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store_name"
+    VALIDATIONS_STORE_NAME = "validation_results_store_name"
+    SUITE_PARAMETER_STORE_NAME = "suite_parameter_store_name"
     CHECKPOINT_STORE_NAME = "checkpoint_store_name"
-    PROFILER_STORE_NAME = "profiler_store_name"
     PLUGINS_DIRECTORY = "plugins_directory"
-    VALIDATION_OPERATORS = "validation_operators"
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
     CONFIG_VARIABLES_FILE_PATH = "config_variables_file_path"
-    ANONYMOUS_USAGE_STATISTICS = "anonymous_usage_statistics"
+    ANALYTICS_ENABLED = "analytics_enabled"
+    DATA_CONTEXT_ID = "data_context_id"
     PROGRESS_BARS = "progress_bars"
-    INCLUDE_RENDERED_CONTENT = "include_rendered_content"
 
     @classmethod
     def has_value(cls, value: str) -> bool:
@@ -151,14 +149,6 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
 
     @property
-    def validation_operators(self) -> Optional[dict]:
-        return self._get(DataContextVariableSchema.VALIDATION_OPERATORS)
-
-    @validation_operators.setter
-    def validation_operators(self, validation_operators: dict) -> None:
-        self._set(DataContextVariableSchema.VALIDATION_OPERATORS, validation_operators)
-
-    @property
     def expectations_store_name(self) -> Optional[str]:
         return self._get(DataContextVariableSchema.EXPECTATIONS_STORE_NAME)
 
@@ -167,22 +157,22 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.EXPECTATIONS_STORE_NAME, expectations_store_name)
 
     @property
-    def validations_store_name(self) -> Optional[str]:
+    def validation_results_store_name(self) -> Optional[str]:
         return self._get(DataContextVariableSchema.VALIDATIONS_STORE_NAME)
 
-    @validations_store_name.setter
-    def validations_store_name(self, validations_store_name: str) -> None:
-        self._set(DataContextVariableSchema.VALIDATIONS_STORE_NAME, validations_store_name)
+    @validation_results_store_name.setter
+    def validation_results_store_name(self, validation_results_store_name: str) -> None:
+        self._set(DataContextVariableSchema.VALIDATIONS_STORE_NAME, validation_results_store_name)
 
     @property
-    def evaluation_parameter_store_name(self) -> Optional[str]:
-        return self._get(DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME)
+    def suite_parameter_store_name(self) -> Optional[str]:
+        return self._get(DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME)
 
-    @evaluation_parameter_store_name.setter
-    def evaluation_parameter_store_name(self, evaluation_parameter_store_name: str) -> None:
+    @suite_parameter_store_name.setter
+    def suite_parameter_store_name(self, suite_parameter_store_name: str) -> None:
         self._set(
-            DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME,
-            evaluation_parameter_store_name,
+            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
+            suite_parameter_store_name,
         )
 
     @property
@@ -194,17 +184,6 @@ class DataContextVariables(ABC):
         self._set(
             DataContextVariableSchema.CHECKPOINT_STORE_NAME,
             checkpoint_store_name,
-        )
-
-    @property
-    def profiler_store_name(self) -> Optional[str]:
-        return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
-
-    @profiler_store_name.setter
-    def profiler_store_name(self, profiler_store_name: str) -> None:
-        self._set(
-            DataContextVariableSchema.PROFILER_STORE_NAME,
-            profiler_store_name,
         )
 
     @property
@@ -224,18 +203,29 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.DATA_DOCS_SITES, data_docs_sites)
 
     @property
-    def anonymous_usage_statistics(
+    def analytics_enabled(
         self,
-    ) -> Optional[AnonymizedUsageStatisticsConfig]:
-        return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
+    ) -> Optional[bool]:
+        return self._get(DataContextVariableSchema.ANALYTICS_ENABLED)
 
-    @anonymous_usage_statistics.setter
-    def anonymous_usage_statistics(
-        self, anonymous_usage_statistics: AnonymizedUsageStatisticsConfig
-    ) -> None:
+    @analytics_enabled.setter
+    def analytics_enabled(self, analytics_enabled: bool) -> None:
         self._set(
-            DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS,
-            anonymous_usage_statistics,
+            DataContextVariableSchema.ANALYTICS_ENABLED,
+            analytics_enabled,
+        )
+
+    @property
+    def data_context_id(
+        self,
+    ) -> Optional[uuid.UUID]:
+        return self._get(DataContextVariableSchema.DATA_CONTEXT_ID)
+
+    @data_context_id.setter
+    def data_context_id(self, data_context_id: uuid.UUID) -> None:
+        self._set(
+            DataContextVariableSchema.DATA_CONTEXT_ID,
+            data_context_id,
         )
 
     @property
@@ -247,19 +237,6 @@ class DataContextVariables(ABC):
         self._set(
             DataContextVariableSchema.PROGRESS_BARS,
             progress_bars,
-        )
-
-    @property
-    def include_rendered_content(self) -> IncludeRenderedContentConfig:
-        return self._get(DataContextVariableSchema.INCLUDE_RENDERED_CONTENT)
-
-    @include_rendered_content.setter
-    def include_rendered_content(
-        self, include_rendered_content: IncludeRenderedContentConfig
-    ) -> None:
-        self._set(
-            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
-            include_rendered_content,
         )
 
 
@@ -350,7 +327,7 @@ class FileDataContextVariables(DataContextVariables):
                 logger.info(
                     f"Stashing `FluentDatasource` during {type(self).__name__}.save_config() - {len(config_fluent_datasources_stash)} stashed"  # noqa: E501
                 )
-                for fluent_datasource_name in config_fluent_datasources_stash.keys():
+                for fluent_datasource_name in config_fluent_datasources_stash:
                     self.data_context.datasources.pop(fluent_datasource_name)
                 # this would be `deep_copy'ed in `instantiate_class_from_config` too
                 self.data_context.fluent_config.fluent_datasources = []

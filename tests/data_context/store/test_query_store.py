@@ -1,10 +1,10 @@
+import uuid
 import warnings
 from unittest import mock
 
 import pytest
 
 from great_expectations.data_context.store.query_store import SqlAlchemyQueryStore
-from tests import test_utils
 
 
 @pytest.fixture()
@@ -100,4 +100,4 @@ def test_query_store_store_backend_id(basic_sqlalchemy_query_store):
     # Check that store_backend_id exists can be read
     assert basic_sqlalchemy_query_store.store_backend_id is not None
     # Check that store_backend_id is a valid UUID
-    assert test_utils.validate_uuid4(basic_sqlalchemy_query_store.store_backend_id)
+    assert isinstance(basic_sqlalchemy_query_store.store_backend_id, uuid.UUID)

@@ -9,7 +9,7 @@ from great_expectations.core import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -264,7 +264,7 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     # This method defines a prescriptive Renderer
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -273,9 +273,7 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

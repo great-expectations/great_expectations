@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -32,7 +32,7 @@ try:
 except ImportError:
     pass
 from great_expectations.expectations.expectation import (
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 
 if TYPE_CHECKING:
@@ -161,7 +161,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Union[list, set, EvaluationParameterDict] = pydantic.Field([])
+    value_set: Union[list, set, SuiteParameterDict] = pydantic.Field([])
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -238,7 +238,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,

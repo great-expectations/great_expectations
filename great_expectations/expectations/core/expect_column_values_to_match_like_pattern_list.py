@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -148,13 +148,13 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    like_pattern_list: Union[List[str], EvaluationParameterDict]
+    like_pattern_list: Union[List[str], SuiteParameterDict]
     match_on: Literal["any", "all"] = "any"
 
     @pydantic.validator("like_pattern_list")
     def validate_like_pattern_list(
-        cls, like_pattern_list: list[str] | EvaluationParameterDict
-    ) -> list[str] | EvaluationParameterDict:
+        cls, like_pattern_list: list[str] | SuiteParameterDict
+    ) -> list[str] | SuiteParameterDict:
         if len(like_pattern_list) < 1:
             raise ValueError("At least one like_pattern must be supplied in the like_pattern_list.")  # noqa: TRY003
 
@@ -188,7 +188,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         **kwargs,
     ) -> List[RenderedStringTemplateContent]:
         runtime_configuration = runtime_configuration or {}
-        _ = False if runtime_configuration.get("include_column_name") is False else True
+        _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(

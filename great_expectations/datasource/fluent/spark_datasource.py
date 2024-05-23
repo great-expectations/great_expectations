@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import re
 import warnings
 from pprint import pformat as pf
 from typing import (
@@ -49,8 +48,8 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from great_expectations.compatibility.pyspark import SparkSession
-    from great_expectations.core.partitioners import Partitioner
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.core.partitioners import ColumnPartitioner
+    from great_expectations.datasource.fluent.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
@@ -187,7 +186,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
     @override
     def get_batch_parameters_keys(
-        self, partitioner: Optional[Partitioner] = None
+        self, partitioner: Optional[ColumnPartitioner] = None
     ) -> tuple[str, ...]:
         return tuple()
 
@@ -201,20 +200,18 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""  # noqa: E501
         )
 
-    @public_api
     @new_argument(
         argument_name="dataframe",
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',  # noqa: E501
         version="0.16.15",
     )
     @override
-    def build_batch_request(  # type: ignore[override]   # noqa: PLR0913
+    def build_batch_request(  # type: ignore[override]
         self,
         dataframe: Optional[_SparkDataFrameT] = None,
         options: Optional[BatchParameters] = None,
         batch_slice: Optional[BatchSlice] = None,
-        partitioner: Optional[Partitioner] = None,
-        batching_regex: Optional[re.Pattern] = None,
+        partitioner: Optional[ColumnPartitioner] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -223,7 +220,6 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
             partitioner: This is not currently supported and must be None for this data asset.
-            batching_regex: This is currently not supported and must be None for this data asset.
 
 
         Returns:
@@ -243,10 +239,6 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         if partitioner is not None:
             raise ValueError(  # noqa: TRY003
                 "partitioner is not currently supported and must be None for this DataAsset."
-            )
-        if batching_regex is not None:
-            raise ValueError(  # noqa: TRY003
-                "batching_regex is not currently supported and must be None for this DataAsset."
             )
 
         if dataframe is None:
@@ -277,7 +269,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             and batch_request.data_asset_name == self.name
             and not batch_request.options
         ):
-            expect_batch_request_form = BatchRequest(
+            expect_batch_request_form = BatchRequest[None](
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},

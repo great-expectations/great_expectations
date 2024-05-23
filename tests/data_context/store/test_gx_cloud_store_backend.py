@@ -10,7 +10,6 @@ matter here but we leverage an existing fixture to mimic the contents of request
 in production. The same logic applies to all UUIDs in this test.
 """
 
-from collections import OrderedDict
 from typing import Callable, Optional, Set, Union
 from unittest import mock
 
@@ -18,7 +17,6 @@ import pytest
 import responses
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint.configurator import ActionDetails, ActionDict
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudRESTResource,
@@ -26,7 +24,6 @@ from great_expectations.data_context.cloud_constants import (
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
-from great_expectations.data_context.types.base import CheckpointConfig
 
 # module level markers
 pytestmark = pytest.mark.cloud
@@ -238,73 +235,6 @@ def test_construct_json_payload_raises_error_with_V1_resource_and_wrong_attribut
             organization_id=organization_id,
             attributes_key="",
             attributes_value=attributes_value_of_legacy_type,
-        )
-
-
-def test_set(
-    construct_ge_cloud_store_backend: Callable[[GXCloudRESTResource], GXCloudStoreBackend],
-) -> None:
-    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
-
-    my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
-        name="my_minimal_simple_checkpoint",
-        action_list=[
-            ActionDict(
-                name="store_validation_result",
-                action=ActionDetails(class_name="StoreValidationResultAction"),
-            ),
-            ActionDict(
-                name="update_data_docs",
-                action=ActionDetails(class_name="UpdateDataDocsAction"),
-            ),
-        ],
-    )
-    my_simple_checkpoint_config_serialized = my_simple_checkpoint_config.get_schema_class()().dump(
-        my_simple_checkpoint_config
-    )
-
-    with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        store_backend.set(("checkpoint", None, None), my_simple_checkpoint_config_serialized)
-        mock_post.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "attributes": {
-                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-                        "checkpoint_config": OrderedDict(
-                            [
-                                ("name", "my_minimal_simple_checkpoint"),
-                                ("expectation_suite_name", None),
-                                ("batch_request", {}),
-                                (
-                                    "action_list",
-                                    [
-                                        {
-                                            "name": "store_validation_result",
-                                            "action": {
-                                                "class_name": "StoreValidationResultAction",
-                                            },
-                                        },
-                                        {
-                                            "name": "update_data_docs",
-                                            "action": {
-                                                "class_name": "UpdateDataDocsAction",
-                                            },
-                                        },
-                                    ],
-                                ),
-                                ("evaluation_parameters", {}),
-                                ("runtime_configuration", {}),
-                                ("validations", []),
-                                ("id", None),
-                                ("expectation_suite_id", None),
-                            ]
-                        ),
-                    },
-                }
-            },
         )
 
 
@@ -535,3 +465,35 @@ def test_config_property_and_defaults(
         "module_name": GXCloudStoreBackend.__module__,
         "suppress_store_backend_id": True,
     }
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        pytest.param(("checkpoint", None), id="invalid length"),
+        pytest.param(
+            (
+                "my_fake_gx_resource",
+                "9805c644-6728-459f-846e-db7b40e8e811",
+                "test_resource",
+            ),
+            id="invalid resource type",
+        ),
+    ],
+)
+def test_ge_cloud_store_backend_invalid_key_raises_error(
+    ge_cloud_access_token: str,
+    key: tuple,
+) -> None:
+    ge_cloud_credentials = {
+        "access_token": ge_cloud_access_token,
+        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
+    }
+
+    backend = GXCloudStoreBackend(
+        ge_cloud_credentials=ge_cloud_credentials,
+        ge_cloud_resource_type=GXCloudRESTResource.CHECKPOINT,
+    )
+
+    with pytest.raises(TypeError):
+        backend.get(key)

@@ -11,9 +11,11 @@ To show task help page `invoke <NAME> --help`
 
 from __future__ import annotations
 
+import importlib
 import logging
 import os
 import pathlib
+import pkgutil
 import shutil
 import sys
 from collections.abc import Generator, Mapping, Sequence
@@ -125,6 +127,7 @@ def format(
         "path": _PATH_HELP_DESC,
         "fmt": "Disable formatting. Runs by default.",
         "fix": "Attempt to automatically fix lint violations.",
+        "unsafe-fixes": "Enable potentially unsafe fixes.",
         "watch": "Run in watch mode by re-running whenever files change.",
         "pty": _PTY_HELP_DESC,
     }
@@ -134,6 +137,7 @@ def lint(
     path: str = ".",
     fmt_: bool = True,
     fix: bool = False,
+    unsafe_fixes: bool = False,
     watch: bool = False,
     pty: bool = True,
 ):
@@ -145,16 +149,23 @@ def lint(
     cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
+    if unsafe_fixes:
+        cmds.append("--unsafe-fixes")
     if watch:
         cmds.append("--watch")
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
-@invoke.task(help={"path": _PATH_HELP_DESC})
-def fix(ctx: Context, path: str = "."):
-    """Automatically fix all possible code issues."""
-    lint(ctx, path=path, fix=True)
-    format(ctx, path=path, sort_=True)
+@invoke.task(help={"path": _PATH_HELP_DESC, "safe-only": "Only apply 'safe' fixes."})
+def fix(ctx: Context, path: str = ".", safe_only: bool = False):
+    """
+    Automatically fix all possible code issues.
+    Applies unsafe fixes by default.
+    https://docs.astral.sh/ruff/linter/#fix-safety
+    """
+    unsafe_fixes = not safe_only
+    lint(ctx, path=path, fmt_=False, fix=True, unsafe_fixes=unsafe_fixes)
+    format(ctx, path=path, check=False, sort_=False)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
@@ -539,7 +550,7 @@ def type_schema(  # noqa: C901 - too complex
 
         if (
             datasource_dir.name.startswith("Pandas")
-            and _PANDAS_SCHEMA_VERSION != pandas.__version__
+            and pandas.__version__ != _PANDAS_SCHEMA_VERSION
         ):
             print(
                 f"🙈  {name} - was generated with pandas"
@@ -628,7 +639,7 @@ def docs(
         ctx.run(" ".join(["yarn lint"]), echo=True)
     elif version:
         docs_builder = DocsBuilder(ctx, docusaurus_dir)
-        docs_builder.create_version(version=parse_version(version))  # type: ignore[arg-type]
+        docs_builder.create_version(version=parse_version(version))
     elif start:
         ctx.run(" ".join(["yarn start"]), echo=True)
     elif clear:
@@ -909,7 +920,7 @@ def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependenc
     iterable=["markers", "requirements_dev"],
     help={
         "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",  # noqa: E501
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud, etc. Can be specified multiple times.",  # noqa: E501
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
@@ -1160,3 +1171,15 @@ def service(
         ctx.run("sleep 15")
     else:
         print("  No matching services to start")
+
+
+@invoke.task()
+def print_public_api(ctx: Context):
+    """Prints to STDOUT all of our public api."""
+    # Walk the GX package to make sure we import all submodules to ensure we
+    # retrieve all things decorated with our public api decorator.
+    import great_expectations
+
+    for module_info in pkgutil.walk_packages(["great_expectations"], prefix="great_expectations."):
+        importlib.import_module(module_info.name)
+    print(great_expectations._docs_decorators.public_api_introspector)

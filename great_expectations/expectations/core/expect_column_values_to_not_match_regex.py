@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Union
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -166,7 +166,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    regex: Union[str, EvaluationParameterDict]
+    regex: Union[str, SuiteParameterDict]
 
     library_metadata = {
         "maturity": "production",
@@ -226,7 +226,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -235,9 +235,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

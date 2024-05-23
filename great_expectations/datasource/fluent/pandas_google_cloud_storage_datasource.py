@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     GoogleCloudStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
@@ -20,9 +20,7 @@ from great_expectations.datasource.fluent.pandas_datasource import PandasDatasou
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.google import Client
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
-    )
+    from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +123,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     @override
     def _build_data_connector(  # noqa: PLR0913
         self,
-        data_asset: _FilePathDataAsset,
+        data_asset: FileDataAsset,
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,
@@ -141,7 +139,6 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=data_asset.name,
             gcs_client=self._get_gcs_client(),
-            batching_regex=data_asset.batching_regex,
             bucket_or_name=self.bucket_or_name,
             prefix=gcs_prefix,
             delimiter=gcs_delimiter,
@@ -154,7 +151,6 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         data_asset._test_connection_error_message = (
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
                 bucket_or_name=self.bucket_or_name,
                 prefix=gcs_prefix,
                 delimiter=gcs_delimiter,

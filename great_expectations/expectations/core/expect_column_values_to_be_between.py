@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from great_expectations.compatibility.pydantic import root_validator
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.evaluation_parameters import (  # noqa: TCH001
-    EvaluationParameterDict,
+from great_expectations.core.suite_parameters import (  # noqa: TCH001
+    SuiteParameterDict,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -160,8 +160,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 
@@ -267,7 +267,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     @classmethod
     @override
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -276,9 +276,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        include_column_name = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs if configuration else {},

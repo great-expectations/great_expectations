@@ -3,10 +3,10 @@ from typing import Dict, Optional, Union
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,
-)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,
+)
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -19,7 +19,7 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     ExpectationValidationResult,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -142,8 +142,8 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     ]
     # </snippet>
 
-    min_value: Union[float, EvaluationParameterDict, datetime, None] = None
-    max_value: Union[float, EvaluationParameterDict, datetime, None] = None
+    min_value: Union[float, SuiteParameterDict, datetime, None] = None
+    max_value: Union[float, SuiteParameterDict, datetime, None] = None
     strict_min: bool = False
     strict_max: bool = False
 
@@ -255,7 +255,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     # </snippet>
 
     @renderer(renderer_type="render.prescriptive")
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: ExpectationConfiguration = None,
@@ -269,7 +269,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
 
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+            runtime_configuration.get("include_column_name") is not False
         )
         styling = runtime_configuration.get("styling")
         # get params dict with all expected kwargs

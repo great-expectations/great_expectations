@@ -95,61 +95,15 @@ def make_send_slack_notifications(counter: CallCounter):
 
 def _cloud_config(data_dir):
     return {
-        "anonymous_usage_statistics": {
-            "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-            "enabled": True,
-        },
+        "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
+        "analytics_enabled": True,
         "checkpoint_store_name": "default_checkpoint_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 3.0,
         "data_docs_sites": {},
-        "datasources": {
-            "taxi_datasource": {
-                "class_name": "Datasource",
-                "data_connectors": {
-                    "default_runtime_data_connector_name": {
-                        "assets": {
-                            "taxi_data": {
-                                "batch_identifiers": ["runtime_batch_identifier_name"],
-                                "class_name": "Asset",
-                                "module_name": "great_expectations.datasource.data_connector.asset",
-                            }
-                        },
-                        "class_name": "RuntimeDataConnector",
-                        "id": "e0af346c-32ea-44e6-8908-b559c4162a70",
-                        "module_name": "great_expectations.datasource.data_connector",
-                        "name": "default_runtime_data_connector_name",
-                    },
-                    "taxi_data_connector": {
-                        "base_directory": str(data_dir),
-                        "class_name": "InferredAssetFilesystemDataConnector",
-                        "default_regex": {
-                            "group_names": ["data_asset_name"],
-                            "pattern": "(.*)",
-                        },
-                        "id": "997a7842-195b-4374-a71b-e52f192068d1",
-                        "module_name": "great_expectations.datasource.data_connector",
-                        "name": "taxi_data_connector",
-                    },
-                },
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "id": "eb0c729d-9457-43a0-8b40-6ec6c79c0fef",
-                "module_name": "great_expectations.datasource",
-                "name": "taxi_datasource",
-            }
-        },
-        "evaluation_parameter_store_name": "evaluation_parameter_store",
+        "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "default_expectations_store",
-        "include_rendered_content": {
-            "expectation_suite": True,
-            "expectation_validation_result": True,
-            "globally": True,
-        },
         "plugins_directory": "plugins/",
-        "profiler_store_name": "default_profiler_store",
         "progress_bars": {
             "globally": False,
             "metric_calculations": False,
@@ -169,7 +123,7 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},
+            "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
             "default_expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
@@ -183,22 +137,8 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_profiler_store": {
-                "class_name": "ProfilerStore",
-                "store_backend": {
-                    "class_name": "GXCloudStoreBackend",
-                    "ge_cloud_base_url": os.environ["GX_CLOUD_BASE_URL"],
-                    "ge_cloud_credentials": {
-                        "access_token": os.environ["GX_CLOUD_ACCESS_TOKEN"],
-                        "organization_id": os.environ["GX_CLOUD_ORGANIZATION_ID"],
-                    },
-                    "ge_cloud_resource_name": "profilers",
-                    "ge_cloud_resource_type": "profiler",
-                    "suppress_store_backend_id": True,
-                },
-            },
-            "default_validations_store": {
-                "class_name": "ValidationsStore",
+            "default_validation_results_store": {
+                "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "GXCloudStoreBackend",
                     "ge_cloud_base_url": os.environ["GX_CLOUD_BASE_URL"],
@@ -210,8 +150,8 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "evaluation_parameter_store": {
-                "class_name": "EvaluationParameterStore",
+            "suite_parameter_store": {
+                "class_name": "SuiteParameterStore",
                 "module_name": "great_expectations.data_context.store",
             },
             "expectations_store": {
@@ -222,7 +162,7 @@ def _cloud_config(data_dir):
                 },
             },
         },
-        "validations_store_name": "default_validations_store",
+        "validation_results_store_name": "default_validation_results_store",
     }
 
 
@@ -256,7 +196,7 @@ def _checkpoint_config(data_file_name, with_slack):
                     "action_list": action_list,
                     "batch_request": {},
                     "default_validation_id": "51c303bd-2396-4f04-b567-79f746b09173",
-                    "evaluation_parameters": {},
+                    "suite_parameters": {},
                     "expectation_suite_id": None,
                     "expectation_suite_name": None,
                     "id": "731dc2a5-45d8-4827-9118-39b77c5cd413",

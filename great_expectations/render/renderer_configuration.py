@@ -188,7 +188,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     class _RendererParamArgs(_RequiredRendererParamArgs, total=False):
         """Used for building up a dictionary that is unpacked into RendererParams upon initialization."""  # noqa: E501
 
-        evaluation_parameter: Dict[str, Any]
+        suite_parameter: Dict[str, Any]
 
     class _RendererParamBase(_RendererValueBase):
         """
@@ -198,7 +198,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
 
         renderer_schema: RendererSchema = Field(alias="schema")
         value: Any
-        evaluation_parameter: Optional[Dict[str, Any]]
+        suite_parameter: Optional[Dict[str, Any]]
 
         class Config:
             validate_assignment = True
@@ -268,7 +268,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         )
 
     @staticmethod
-    def _get_evaluation_parameter_params_from_raw_kwargs(
+    def _get_suite_parameter_params_from_raw_kwargs(
         raw_kwargs: Dict[str, Any],
     ) -> Dict[str, RendererConfiguration._RendererParamArgs]:
         renderer_params_args = {}
@@ -276,7 +276,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             renderer_params_args[kwarg_name] = RendererConfiguration._RendererParamArgs(
                 schema=RendererSchema(type=RendererValueType.OBJECT),
                 value=None,
-                evaluation_parameter={
+                suite_parameter={
                     "schema": RendererSchema(type=RendererValueType.OBJECT),
                     "value": value,
                 },
@@ -305,7 +305,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
                     if (key, value) not in values["kwargs"].items()
                 }
                 renderer_params_args: Dict[str, RendererConfiguration._RendererParamArgs] = (
-                    RendererConfiguration._get_evaluation_parameter_params_from_raw_kwargs(
+                    RendererConfiguration._get_suite_parameter_params_from_raw_kwargs(
                         raw_kwargs=values["_raw_kwargs"]
                     )
                 )
@@ -324,9 +324,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
     def _validate_for_include_column_name(cls, values: dict) -> dict:
         if values.get("runtime_configuration"):
             values["include_column_name"] = (
-                False
-                if values["runtime_configuration"].get("include_column_name") is False
-                else True
+                values["runtime_configuration"].get("include_column_name") is not False
             )
         return values
 
@@ -566,16 +564,16 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
         else:
             assert isinstance(param_type, RendererValueType)
             renderer_params_args = self.params.dict(exclude_none=False)
-            # if we already moved the evaluation parameter raw_kwargs to a param,
+            # if we already moved the suite parameter raw_kwargs to a param,
             # we need to combine the param passed to add_param() with those existing raw_kwargs
             if (
-                name in renderer_params_args and renderer_params_args[name]["evaluation_parameter"]  # type: ignore[index]
+                name in renderer_params_args and renderer_params_args[name]["suite_parameter"]  # type: ignore[index]
             ):
                 new_args = {
                     name: renderer_param(
                         schema=RendererSchema(type=param_type),
                         value=value,
-                        evaluation_parameter=renderer_params_args[name]["evaluation_parameter"],  # type: ignore[index]
+                        suite_parameter=renderer_params_args[name]["suite_parameter"],  # type: ignore[index]
                     )
                 }
             else:

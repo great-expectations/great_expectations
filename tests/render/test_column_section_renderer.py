@@ -96,7 +96,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
         except KeyError:
             pass
 
-    for column in evrs.keys():
+    for column in evrs:
         with open(
             file_relative_path(
                 __file__,
@@ -130,7 +130,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
         except KeyError:
             pass
 
-    for column in exp_groups.keys():
+    for column in exp_groups:
         with open(
             file_relative_path(
                 __file__,
@@ -1401,11 +1401,11 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         ),
     )
 
-    # evaluation_parameters are usually stored at the ExpectationSuiteValidationResult
+    # suite_parameters are usually stored at the ExpectationSuiteValidationResult
     # and passed along as a kwarg to the ValidationResultsTableContentBlockRenderer
     evaluation_parameter = {"MIN_VAL_PARAM": 10, "MAX_VAL_PARAM": 40}
     result = ValidationResultsTableContentBlockRenderer.render(
-        [evr], evaluation_parameters=evaluation_parameter
+        [evr], suite_parameters=evaluation_parameter
     ).to_json_dict()
 
     assert result == {
@@ -1501,7 +1501,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
         "table_options": {"search": True, "icon-size": "sm"},
     }
 
-    # also test case where evaluation_parameters aren't required at runtime such as using now()
+    # also test case where suite_parameters aren't required at runtime such as using now()
     evr = ExpectationValidationResult(
         success=True,
         result={

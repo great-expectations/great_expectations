@@ -73,7 +73,7 @@ class PartitionerMethod(enum.Enum):
         return hash(self.value)
 
 
-class DataPartitioner(abc.ABC):
+class DataPartitioner(abc.ABC):  # noqa: B024
     """Abstract base class containing methods for partitioning data accessible via Execution Engines.
 
     Note, for convenience, you can also access DatePart via the instance variable
@@ -139,10 +139,7 @@ class DataPartitioner(abc.ABC):
             raise gx_exceptions.InvalidConfigError(  # noqa: TRY003
                 "date_parts are required when using partition_on_date_parts."
             )
-        if not all(
-            (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701
-            for dp in date_parts
-        ):
+        if not all(isinstance(dp, (DatePart, str)) for dp in date_parts):
             raise gx_exceptions.InvalidConfigError("date_parts should be of type DatePart or str.")  # noqa: TRY003
 
     @staticmethod

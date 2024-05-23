@@ -1,5 +1,4 @@
 config_version: 3.0
-datasources: {}
 config_variables_file_path: uncommitted/config_variables.yml
 plugins_directory: plugins/
 stores:
@@ -8,28 +7,22 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: expectations/
-  validations_store:
-    class_name: ValidationsStore
+  validation_results_store:
+    class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       base_directory: uncommitted/validations/
-  evaluation_parameter_store:
-    class_name: EvaluationParameterStore
+  suite_parameter_store:
+    class_name: SuiteParameterStore
   checkpoint_store:
     class_name: CheckpointStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
       suppress_store_backend_id: true
       base_directory: checkpoints/
-  profiler_store:
-    class_name: ProfilerStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      suppress_store_backend_id: true
-      base_directory: profilers/
 expectations_store_name: expectations_store
-validations_store_name: validations_store
-evaluation_parameter_store_name: evaluation_parameter_store
+validation_results_store_name: validation_results_store
+suite_parameter_store_name: suite_parameter_store
 checkpoint_store_name: checkpoint_store
 data_docs_sites:
   local_site:
@@ -48,10 +41,6 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-include_rendered_content:
-  expectation_validation_result: false
-  globally: false
-  expectation_suite: false
 fluent_datasources:
   taxi_datasource:
     type: pandas_filesystem

@@ -21,9 +21,7 @@ def fits_regex(x):
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
-    if re.match(regex, str(x)):
-        return True
-    return False
+    return bool(re.match(regex, str(x)))
 
 
 # This class defines a Metric to support your Expectation
@@ -155,7 +153,7 @@ class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
 # This method defines a prescriptive Renderer
 #     @classmethod
 #     @renderer(renderer_type="renderer.prescriptive")
-#     @render_evaluation_parameter_string
+#     @render_suite_parameter_string
 #     def _prescriptive_renderer(
 #         cls,
 #         configuration=None,

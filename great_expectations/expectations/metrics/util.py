@@ -428,7 +428,7 @@ def get_sqlalchemy_column_metadata(
         return None
 
 
-def column_reflection_fallback(  # noqa: C901, PLR0915
+def column_reflection_fallback(  # noqa: C901, PLR0912, PLR0915
     selectable: sqlalchemy.Select,
     dialect: sqlalchemy.Dialect,
     sqlalchemy_engine: sqlalchemy.Engine,
@@ -993,7 +993,7 @@ def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError(f"Invalid parameters: {chi2_msg}:")  # noqa: TRY003
 
-    elif isinstance(params, tuple) or isinstance(params, list):  # noqa: PLR1701
+    elif isinstance(params, (tuple, list)):
         scale = None
 
         # `params` is a tuple or a list

@@ -7,15 +7,13 @@ from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
-from great_expectations.datasource.fluent.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
-    )
+    from great_expectations.datasource.fluent.data_asset.path.file_asset import FileDataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +56,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
 
     @override
     def _build_data_connector(
-        self, data_asset: _FilePathDataAsset, glob_directive: str = "**/*", **kwargs
+        self, data_asset: FileDataAsset, glob_directive: str = "**/*", **kwargs
     ) -> None:
         """Builds and attaches the `FilesystemDataConnector` to the asset."""
         if kwargs:
@@ -68,7 +66,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
             data_asset_name=data_asset.name,
-            batching_regex=data_asset.batching_regex,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
@@ -78,7 +75,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         data_asset._test_connection_error_message = (
             self.data_connector_type.build_test_connection_error_message(
                 data_asset_name=data_asset.name,
-                batching_regex=data_asset.batching_regex,
                 glob_directive=glob_directive,
                 base_directory=self.base_directory,
             )

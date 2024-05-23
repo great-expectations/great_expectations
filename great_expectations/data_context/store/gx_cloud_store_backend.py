@@ -75,16 +75,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GXCloudRESTResource.DATA_CONTEXT: "data_context_config",
         GXCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
         GXCloudRESTResource.EXPECTATION_SUITE: "suite",
-        GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "result",
-        GXCloudRESTResource.PROFILER: "profiler",
-        GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_doc",
         GXCloudRESTResource.VALIDATION_RESULT: "result",
         GXCloudRESTResource.VALIDATION_DEFINITION: "validation_definition",
     }
 
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE: Dict[GXCloudRESTResource, Set[str]] = {
         GXCloudRESTResource.EXPECTATION_SUITE: {"clause_id"},
-        GXCloudRESTResource.RENDERED_DATA_DOC: {"source_type", "source_id"},
         GXCloudRESTResource.VALIDATION_RESULT: {
             "checkpoint_id",
             "expectation_suite_id",
@@ -93,18 +89,13 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     RESOURCE_PLURALITY_LOOKUP_DICT: bidict = bidict(  # type: ignore[misc] # Keywords must be str
         **{  # type: ignore[arg-type]
-            GXCloudRESTResource.BATCH: "batches",
             GXCloudRESTResource.CHECKPOINT: "checkpoints",
+            GXCloudRESTResource.DATASOURCE: "datasources",
             GXCloudRESTResource.DATA_ASSET: "data_assets",
             GXCloudRESTResource.DATA_CONTEXT_VARIABLES: "data_context_variables",
-            GXCloudRESTResource.DATASOURCE: "datasources",
-            GXCloudRESTResource.EXPECTATION: "expectations",
             GXCloudRESTResource.EXPECTATION_SUITE: "expectation_suites",
-            GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT: "expectation_validation_results",
-            GXCloudRESTResource.PROFILER: "profilers",
-            GXCloudRESTResource.RENDERED_DATA_DOC: "rendered_data_docs",
-            GXCloudRESTResource.VALIDATION_RESULT: "validation_results",
             GXCloudRESTResource.VALIDATION_DEFINITION: "validation_definitions",
+            GXCloudRESTResource.VALIDATION_RESULT: "validation_results",
         }
     )
 
@@ -114,11 +105,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V0,
         GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V0,
         GXCloudRESTResource.EXPECTATION_SUITE: EndpointVersion.V1,
-        GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT: EndpointVersion.V0,
-        GXCloudRESTResource.PROFILER: EndpointVersion.V0,
-        GXCloudRESTResource.RENDERED_DATA_DOC: EndpointVersion.V0,
-        GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,
         GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V0,
+        GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,
     }
     # we want to support looking up EndpointVersion from either GXCloudRESTResource
     # or a pluralized version of it, as defined by RESOURCE_PLURALITY_LOOKUP_DICT.

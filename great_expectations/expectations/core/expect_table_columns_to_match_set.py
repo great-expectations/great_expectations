@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from great_expectations.core.evaluation_parameters import (
-    EvaluationParameterDict,  # noqa: TCH001
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    render_evaluation_parameter_string,
+    render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -140,7 +140,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                 }
     """  # noqa: E501
 
-    column_set: Union[list, set, EvaluationParameterDict, None]
+    column_set: Union[list, set, SuiteParameterDict, None]
     exact_match: Union[bool, None]
 
     library_metadata = {
@@ -208,7 +208,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
-    @render_evaluation_parameter_string
+    @render_suite_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -217,7 +217,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        _ = False if runtime_configuration.get("include_column_name") is False else True
+        _ = runtime_configuration.get("include_column_name") is not False
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["column_set", "exact_match"])
 

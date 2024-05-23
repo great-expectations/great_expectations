@@ -1,94 +1,57 @@
 module.exports = {
   gx_core: [
     {
-      type: 'doc',
-      id: 'core/introduction/about_gx',
-      label: 'About GX'
-    },
-    {
-      type: 'doc',
-      id: 'core/introduction/try_gx',
-      label: '🚧 Try GX'
-    },
-    {
       type: 'category',
-      label: 'Install and manage GX 1.0',
-      link: {type: 'doc', id: 'core/installation_and_setup/installation_and_setup'},
+      label: 'Introduction to Great Expectations',
+      link: {type: 'doc', id: 'core/introduction/introduction'},
       items: [
         {
           type: 'doc',
-          id: 'core/installation_and_setup/install_gx',
-          label: 'Install GX 1.0'
+          id: 'core/introduction/about_gx',
+          label: 'About GX'
         },
         {
           type: 'doc',
-          id: 'core/installation_and_setup/additional_dependencies/additional_dependencies',
+          id: 'core/introduction/gx_overview',
+          label: 'GX overview'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/try_gx',
+          label: 'Try GX'
+        },
+        {
+          type: 'doc',
+          id: 'core/introduction/community_resources',
+          label: 'Community resources'
+        },
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Set up a GX environment',
+      link: {type: 'doc', id: 'core/set_up_a_gx_environment/set_up_a_gx_environment'},
+      items: [
+        {
+          type: 'doc',
+          id: 'core/set_up_a_gx_environment/install_python',
+          label: 'Install Python'
+        },
+        {
+          type: 'doc',
+          id: 'core/set_up_a_gx_environment/install_gx',
+          label: 'Install GX'
+        },
+        {
+          type: 'doc',
+          id: 'core/set_up_a_gx_environment/install_additional_dependencies',
           label: 'Install additional dependencies'
         },
         {
-          type: 'category',
-          label: 'Manage Data Contexts',
-          link: {type: 'doc', id: 'core/installation_and_setup/manage_data_contexts'},
-          items: [
-            {
-              type: 'link',
-              label: 'Request a Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#request-a-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Initialize a new Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#initialize-a-new-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Connect to an existing Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#connect-to-an-existing-data-context',
-            },
-            {
-              type: 'link',
-              label: 'Export an Ephemeral Data Context to a new File Data Context',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#export-an-ephemeral-data-context-to-a-new-file-data-context',
-            },
-            {
-              type: 'link',
-              label: 'View a Data Context configuration',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_data_contexts#view-a-data-context-configuration',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Manage credentials',
-          link: {type: 'doc', id: 'core/installation_and_setup/manage_credentials'},
-          items: [
-            {
-              type: 'link',
-              label: 'Environment variables',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#environment-variables',
-            },
-            {
-              type: 'link',
-              label: 'YAML file',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#yaml-file',
-            },
-            {
-              type: 'link',
-              label: 'Secrets manager',
-              href: '/docs/1.0-prerelease/core/installation_and_setup/manage_credentials#secrets-manager',
-            },
-          ]
-        },
-        {
           type: 'doc',
-          id: 'core/installation_and_setup/manage_metadata_stores',
-          label: '🚧 Manage Metadata Stores'
-        },
-        {
-          type: 'doc',
-          id: 'core/installation_and_setup/manage_data_docs',
-          label: 'Manage Data Docs'
-        },
+          id: 'core/set_up_a_gx_environment/create_a_data_context',
+          label: 'Create a Data Context'
+        }
       ]
     },
     {
@@ -309,14 +272,6 @@ module.exports = {
             },
           ]
         },
-        // {
-        //   type: 'category',
-        //   label: 'Data Assistants',
-        //   link: { type: 'doc', id: 'oss/guides/expectations/data_assistants_lp' },
-        //   items: [
-        //     'oss/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant',
-        //   ]
-        // },
       ]
     },
     {
@@ -409,13 +364,18 @@ module.exports = {
           ]
         },
       ]
-    }
+    },
+    {
+      type: 'doc',
+      id: 'oss/changelog',
+      label: 'Changelog'
+    },
   ],
   gx_cloud: [
     {type: 'doc', id: 'cloud/why_gx_cloud'},
         {
           type: 'category',
-          label: 'About GX Cloud',
+          label: 'GX Cloud deployment patterns and architecture',
           link: { type: 'doc', id: 'cloud/about_gx' },
           items: [
             {
@@ -682,8 +642,6 @@ module.exports = {
     },
   ],
   learn: [
-      'reference/learn/conceptual_guides/expectation_classes',
-      'reference/learn/conceptual_guides/metricproviders',
       'reference/learn/usage_statistics',
       'reference/learn/glossary'
   ],
