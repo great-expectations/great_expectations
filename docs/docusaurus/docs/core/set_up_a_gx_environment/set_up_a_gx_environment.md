@@ -32,4 +32,12 @@ import OverviewCard from '@site/src/components/OverviewCard';
     icon="/img/expectation_icon.svg" 
   />
 
+  <LinkCard 
+    topIcon 
+    label="Install additional dependencies"
+    description="Install additional dependencies for specific data sources or environments."
+    to="/core/set_up_a_gx_environment/install_additional_dependencies" 
+    icon="/img/expectation_icon.svg" 
+  />
+
 </LinkCardGrid>
