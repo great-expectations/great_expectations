@@ -460,9 +460,6 @@ filterwarnings = [
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
     "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
 
-    # docstring_parser - not making this call directly (should be fixed upstream)
-    "ignore: ast.Num is deprecated and will be removed in Python 3.14; use ast.Constant instead:DeprecationWarning",
-
     # --------------------------------------- Great Expectations Warnings ----------------------------------
     # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
     # but is still useful for building the configuration.
