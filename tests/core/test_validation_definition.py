@@ -189,6 +189,9 @@ class TestValidationRun:
                 "unsuccessful_expectations": 0,
                 "success_percent": 100.0,
             },
+            meta={
+                "validation_id": None,
+            },
         )
 
     @mock.patch.object(ValidationResultsStore, "set")
