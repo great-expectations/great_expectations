@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, List, Optional, Pattern, Union
+from typing import TYPE_CHECKING, Generic, Optional, Union
 
 from great_expectations_v1 import exceptions as gx_exceptions
 from great_expectations_v1._docs_decorators import public_api
@@ -16,7 +16,6 @@ from great_expectations_v1.core.partitioners import (
     FileNamePartitionerYearly,
 )
 from great_expectations_v1.datasource.fluent import BatchRequest
-from great_expectations_v1.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations_v1.datasource.fluent.data_asset.path.path_data_asset import (
     PathDataAsset,
 )
@@ -72,23 +71,7 @@ class AmbiguousPathError(ValueError):
 class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[DatasourceT], ABC):
     """Base class for PathDataAssets which batch by applying a regex to file names."""
 
-    batching_regex: Pattern = (  # must use typing.Pattern for pydantic < v1.10
-        MATCH_ALL_PATTERN
-    )
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(default="batch_request_param_")
-    _regex_parser: RegExParser = pydantic.PrivateAttr()
-
-    _group_names: List[str] = pydantic.PrivateAttr()
-
-    def __init__(self, **data):
-        super().__init__(**data)
-
-        self._regex_parser = RegExParser(
-            regex_pattern=self.batching_regex,
-            unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
-        )
-
-        self._group_names = self._regex_parser.group_names()
 
     @public_api
     def add_batch_definition_path(self, name: str, path: PathStr) -> BatchDefinition:
@@ -211,12 +194,21 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         )
         return batch_definition_list
 
+    def _get_group_names(self, partitioner: Optional[FileNamePartitioner]) -> list[str]:
+        if not partitioner:
+            return []
+        regex_parser = RegExParser(
+            regex_pattern=partitioner.regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
+        )
+        return regex_parser.group_names()
+
     @override
     def get_batch_parameters_keys(
         self,
         partitioner: Optional[FileNamePartitioner] = None,
     ) -> tuple[str, ...]:
-        option_keys: tuple[str, ...] = tuple(self._group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
+        option_keys: tuple[str, ...] = (FILE_PATH_BATCH_SPEC_KEY,)
         if partitioner:
             option_keys += tuple(partitioner.param_names)
         return option_keys
@@ -255,7 +247,11 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
         """  # noqa: E501
         if options:
             for option, value in options.items():
-                if option in self._group_names and value and not isinstance(value, str):
+                if (
+                    option in self._get_group_names(partitioner=partitioner)
+                    and value
+                    and not isinstance(value, str)
+                ):
                     raise gx_exceptions.InvalidBatchRequestError(  # noqa: TRY003
                         f"All batching_regex matching options must be strings. The value of '{option}' is "  # noqa: E501
                         f"not a string: {value}"
@@ -312,5 +308,5 @@ class FileDataAsset(PathDataAsset[DatasourceT, FileNamePartitioner], Generic[Dat
     def _get_sortable_partitioner(
         self, partitioner: Optional[FileNamePartitioner]
     ) -> Optional[PartitionerSortingProtocol]:
-        # RegexPartitioner already implements PartitionerSortingProtocol
+        # FileNamePartitioner already implements PartitionerSortingProtocol
         return partitioner

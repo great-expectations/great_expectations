@@ -36,7 +36,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        batching_regex: A regex pattern for partitioning data references
         gcs_client: Reference to instantiated Google Cloud Storage client handle
         bucket_or_name (str): bucket name for Google Cloud Storage
         prefix (str): GCS prefix
@@ -58,7 +57,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
@@ -82,9 +80,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=re.compile(
-                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
-            ),
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
@@ -93,7 +88,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
@@ -107,7 +101,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         Args:
             datasource_name: The name of the Datasource associated with this "GoogleCloudStorageDataConnector" instance
             data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             gcs_client: Reference to instantiated Google Cloud Storage client handle
             bucket_or_name: bucket name for Google Cloud Storage
             prefix: GCS prefix
@@ -122,7 +115,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         return GoogleCloudStorageDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
             gcs_client=gcs_client,
             bucket_or_name=bucket_or_name,
             prefix=prefix,
@@ -136,7 +128,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
     def build_test_connection_error_message(  # noqa: PLR0913
         cls,
         data_asset_name: str,
-        batching_regex: re.Pattern,
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
@@ -146,7 +137,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
 
         Args:
             data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
-            batching_regex: A regex pattern for partitioning data references
             bucket_or_name: bucket name for Google Cloud Storage
             prefix: GCS prefix
             delimiter: GCS delimiter
@@ -155,11 +145,10 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """  # noqa: E501
-        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
+        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" found using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'  # noqa: E501
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex.pattern,
                 "bucket_or_name": bucket_or_name,
                 "prefix": prefix,
                 "delimiter": delimiter,
@@ -213,6 +202,11 @@ requires "file_path_template_map_fn: Callable" to be set.
         }
 
         return self._file_path_template_map_fn(**template_arguments)
+
+    @override
+    def _preprocess_batching_regex(self, regex: re.Pattern) -> re.Pattern:
+        regex = re.compile(f"{re.escape(self._sanitized_prefix)}{regex.pattern}")
+        return super()._preprocess_batching_regex(regex=regex)
 
 
 def list_gcs_keys(

@@ -6,7 +6,6 @@ import json
 import logging
 import os
 import pathlib
-import re
 import uuid
 from pprint import pformat as pf
 from pprint import pprint as pp
@@ -121,7 +120,6 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                 {
                     "type": "csv",
                     "name": "my_csv_asset",
-                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",  # noqa: E501
                     "sep": "|",
                     "names": ["col1", "col2"],
                     "batch_definitions": [
@@ -136,7 +134,6 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                 {
                     "type": "json",
                     "name": "my_json_asset",
-                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",  # noqa: E501
                     "connect_options": {"glob_directive": "**/*.json"},
                     "orient": "records",
                 },
@@ -247,7 +244,6 @@ class TestExcludeUnsetAssetFields:
         asset_dict_config.update(
             {
                 "name": "my_asset",
-                "batching_regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_name = asset_dict_config["name"]
@@ -278,7 +274,6 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "batching_regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_dict_config = copy.deepcopy(asset_dict)

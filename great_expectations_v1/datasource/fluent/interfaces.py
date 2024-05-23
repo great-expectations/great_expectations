@@ -58,7 +58,7 @@ from great_expectations_v1.exceptions.exceptions import (
 from great_expectations_v1.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
-from great_expectations_v1.datasource.fluent.data_connector import (
+from great_expectations_v1.datasource.fluent.data_connector import (  # noqa: TCH001  # pydantic validates this type
     DataConnector,
 )
 
@@ -343,7 +343,6 @@ class DataAsset(GenericBaseModel, Generic[DatasourceT, PartitionerT]):
         Args:
             name (str): Name of the new batch definition.
             partitioner: Optional Partitioner to partition this BatchDefinition
-            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             BatchDefinition: The new batch definition.

@@ -184,7 +184,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             options: This is not currently supported and must be {}/None for this data asset.
             batch_slice: This is not currently supported and must be None for this data asset.
             partitioner: This is not currently supported and must be None for this data asset.
-            batching_regex: A Regular Expression used to build batches in path based Assets.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the

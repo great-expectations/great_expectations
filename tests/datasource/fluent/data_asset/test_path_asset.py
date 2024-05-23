@@ -120,7 +120,6 @@ def test_get_batch_list_from_batch_request__sort_ascending(
     """
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=batching_regex,
     )
     batch_definition = asset.add_batch_definition_monthly(
         name="foo", sort_ascending=True, regex=batching_regex
@@ -159,7 +158,6 @@ def test_get_batch_list_from_batch_request__sort_descending(
     """
     asset = validated_pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        batching_regex=batching_regex,
     )
     batch_definition = asset.add_batch_definition_monthly(
         name="foo", regex=batching_regex, sort_ascending=False
