@@ -443,7 +443,7 @@ filterwarnings = [
     "default::pytest_mock.plugin.PytestMockWarning",
 
     # Find and fix ruff DTZ violations
-    "once: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version:DeprecationWarning",
+    'once: datetime.datetime.utcnow\(\) is deprecated .*:DeprecationWarning',
 
 
     # the pkg_resources module distributed with setuptools has been deprecated
