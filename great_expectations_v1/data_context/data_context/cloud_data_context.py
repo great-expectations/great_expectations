@@ -411,23 +411,20 @@ class CloudDataContext(SerializableDataContext):
     ) -> Dict[GXCloudEnvironmentVariable, Optional[str]]:
         cloud_base_url = (
             cloud_base_url
-            or cls._get_cloud_env_var(
-                primary_environment_variable=GXCloudEnvironmentVariable.BASE_URL,
-                deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_BASE_URL,
+            or cls._get_global_config_value(
+                environment_variable=GXCloudEnvironmentVariable.BASE_URL,
                 conf_file_section="ge_cloud_config",
                 conf_file_option="base_url",
             )
             or CLOUD_DEFAULT_BASE_URL
         )
-        cloud_organization_id = cloud_organization_id or cls._get_cloud_env_var(
-            primary_environment_variable=GXCloudEnvironmentVariable.ORGANIZATION_ID,
-            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID,
+        cloud_organization_id = cloud_organization_id or cls._get_global_config_value(
+            environment_variable=GXCloudEnvironmentVariable.ORGANIZATION_ID,
             conf_file_section="ge_cloud_config",
             conf_file_option="organization_id",
         )
-        cloud_access_token = cloud_access_token or cls._get_cloud_env_var(
-            primary_environment_variable=GXCloudEnvironmentVariable.ACCESS_TOKEN,
-            deprecated_environment_variable=GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN,
+        cloud_access_token = cloud_access_token or cls._get_global_config_value(
+            environment_variable=GXCloudEnvironmentVariable.ACCESS_TOKEN,
             conf_file_section="ge_cloud_config",
             conf_file_option="access_token",
         )
@@ -436,33 +433,6 @@ class CloudDataContext(SerializableDataContext):
             GXCloudEnvironmentVariable.ORGANIZATION_ID: cloud_organization_id,
             GXCloudEnvironmentVariable.ACCESS_TOKEN: cloud_access_token,
         }
-
-    @classmethod
-    def _get_cloud_env_var(
-        cls,
-        primary_environment_variable: GXCloudEnvironmentVariable,
-        deprecated_environment_variable: GXCloudEnvironmentVariable,
-        conf_file_section: str,
-        conf_file_option: str,
-    ) -> Optional[str]:
-        """
-        Utility to gradually deprecate environment variables prefixed with `GE`.
-
-        This method is aimed to initially attempt retrieval with the `GX` prefix
-        and only attempt to grab the deprecated value if unsuccessful.
-        """
-        val = cls._get_global_config_value(
-            environment_variable=primary_environment_variable,
-            conf_file_section=conf_file_section,
-            conf_file_option=conf_file_option,
-        )
-        if val:
-            return val
-        return cls._get_global_config_value(
-            environment_variable=deprecated_environment_variable,
-            conf_file_section=conf_file_section,
-            conf_file_option=conf_file_option,
-        )
 
     @override
     def _init_datasources(self) -> None:

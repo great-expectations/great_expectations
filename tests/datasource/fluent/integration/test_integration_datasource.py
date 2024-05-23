@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import pathlib
 from typing import TYPE_CHECKING
 from unittest import mock
 
@@ -29,14 +28,10 @@ from great_expectations.data_context import (
 )
 from great_expectations.datasource.fluent import (
     BatchRequest,
-    PandasFilesystemDatasource,
-    SparkFilesystemDatasource,
 )
-from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
-    TestConnectionError,
 )
 from great_expectations.validator.v1_validator import Validator
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
@@ -145,62 +140,6 @@ class TestQueryAssets:
         unique_event_types = set(result.data["event_type"].unique())
         print(f"{unique_event_types=}")
         assert unique_event_types == {"start"}
-
-
-@pytest.mark.filesystem
-@pytest.mark.parametrize(
-    ["base_directory", "batching_regex", "raises_test_connection_error"],
-    [
-        pytest.param(
-            pathlib.Path(__file__).parent.joinpath(
-                pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
-            ),
-            r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-            False,
-            id="good filename",
-        ),
-        pytest.param(
-            pathlib.Path(__file__).parent.joinpath(
-                pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
-            ),
-            r"bad_yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-            True,
-            id="bad filename",
-        ),
-        pytest.param(
-            pathlib.Path(__file__).parent.joinpath(pathlib.Path("..", "..", "..", "test_sets")),
-            r"taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-            False,
-            id="good path",
-        ),
-        pytest.param(
-            pathlib.Path(__file__).parent.joinpath(pathlib.Path("..", "..", "..", "test_sets")),
-            r"bad_taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-            True,
-            id="bad path",
-        ),
-        pytest.param(
-            pathlib.Path(__file__).parent.joinpath(
-                pathlib.Path("..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples")
-            ),
-            MATCH_ALL_PATTERN,
-            False,
-            id="default regex",
-        ),
-    ],
-)
-def test_filesystem_data_asset_batching_regex(
-    filesystem_datasource: PandasFilesystemDatasource | SparkFilesystemDatasource,
-    base_directory: pathlib.Path,
-    batching_regex: str,
-    raises_test_connection_error: bool,
-):
-    filesystem_datasource.base_directory = base_directory
-    if raises_test_connection_error:
-        with pytest.raises(TestConnectionError):
-            filesystem_datasource.add_csv_asset(name="csv_asset", batching_regex=batching_regex)
-    else:
-        filesystem_datasource.add_csv_asset(name="csv_asset", batching_regex=batching_regex)
 
 
 @pytest.mark.sqlite

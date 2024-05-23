@@ -1,4 +1,3 @@
-import re
 from logging import Logger
 from typing import Any, ClassVar, Literal, Optional, Type
 
@@ -39,7 +38,6 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         name: str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
         abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",

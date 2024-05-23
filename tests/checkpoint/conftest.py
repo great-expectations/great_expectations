@@ -1,11 +1,10 @@
 from typing import Dict, List
 
+import great_expectations_v1.expectations as gxe
 import pandas as pd
 import pytest
-
-import great_expectations.expectations as gxe
-from great_expectations.core import ExpectationSuite
-from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
+from great_expectations_v1.core import ExpectationSuite
+from great_expectations_v1.datasource.fluent import BatchRequest as FluentBatchRequest
 
 
 @pytest.fixture
@@ -39,7 +38,7 @@ def slack_notification_action(webhook):
             "notify_on": "all",
             "notify_with": None,
             "renderer": {
-                "module_name": "great_expectations.render.renderer.slack_renderer",
+                "module_name": "great_expectations_v1.render.renderer.slack_renderer",
                 "class_name": "SlackRenderer",
             },
         },
