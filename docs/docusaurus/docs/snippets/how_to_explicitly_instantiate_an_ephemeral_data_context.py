@@ -53,11 +53,6 @@ if isinstance(context, EphemeralDataContext):
     print("It's Ephemeral!")
 # </snippet>
 
-# Python
-# <snippet name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py convert_ephemeral_data_context_filesystem_data_context">
-context = context.convert_to_file_context()
-# </snippet>
-
 assert context
 
 project_root_dir = pathlib.Path.cwd().absolute()

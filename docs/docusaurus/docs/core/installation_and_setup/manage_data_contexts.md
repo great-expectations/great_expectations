@@ -328,13 +328,6 @@ The method for converting an Ephemeral Data Context to a Filesystem Data Context
 
 You can determine if your current working directory already has a Filesystem Data Context by looking for a `great_expectations.yml` file.  The presence of that file indicates that a Filesystem Data Context has already been initialized in the corresponding directory.
 
-### Convert the Ephemeral Data Context into a Filesystem Data Context
-
-Converting an Ephemeral Data Context into a Filesystem Data Context can be done with one line of code:
-
-```python title="Python" name="docs/docusaurus/docs/snippets/how_to_explicitly_instantiate_an_ephemeral_data_context.py convert_ephemeral_data_context_filesystem_data_context"
-```
-
 :::info Replacing the Ephemeral Data Context
 
 The `convert_to_file_context()` method does not change the Ephemeral Data Context itself.  Rather, it initializes a new Filesystem Data Context with the contents of the Ephemeral Data Context and then returns an instance of the new Filesystem Data Context.  If you do not replace the Ephemeral Data Context instance with the Filesystem Data Context instance, it will be possible for you to continue using the Ephemeral Data Context.  
