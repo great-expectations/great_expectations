@@ -25,10 +25,6 @@ def totally_empty_data_context(tmp_path_factory):
     config = {
         "config_version": 3,
         "plugins_directory": "plugins/",
-        "suite_parameter_store_name": "not_a_real_store_name",
-        "validation_results_store_name": "another_fake_store",
-        "expectations_store_name": "expectations_store",
-        "checkpoint_store_name": "checkpoint_store",
         "stores": {
             "expectations_store": {
                 "class_name": "ExpectationsStore",

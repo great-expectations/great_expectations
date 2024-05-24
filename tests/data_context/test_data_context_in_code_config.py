@@ -35,7 +35,7 @@ def build_in_code_data_context_project_config(
     """
     if stores is None:
         stores = {
-            "expectations_S3_store": {
+            "expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -43,7 +43,7 @@ def build_in_code_data_context_project_config(
                     "prefix": expectations_store_prefix,
                 },
             },
-            "validation_results_S3_store": {
+            "validation_results_store": {
                 "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -59,10 +59,6 @@ def build_in_code_data_context_project_config(
         plugins_directory=None,
         config_variables_file_path=None,
         stores=stores,
-        checkpoint_store_name="checkpoint_store",
-        expectations_store_name="expectations_S3_store",
-        validation_results_store_name="validation_results_S3_store",
-        suite_parameter_store_name="suite_parameter_store",
         data_docs_sites={
             "s3_site": {
                 "class_name": "SiteBuilder",
@@ -195,7 +191,7 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
 
     # Make sure ids are consistent
     in_code_data_context_expectations_store_store_backend_id = in_code_data_context.stores[
-        "expectations_S3_store"
+        "expectations_store"
     ].store_backend_id
     in_code_data_context_data_context_id = in_code_data_context.data_context_id
     constructed_data_context_id = in_code_data_context._construct_data_context_id()
@@ -250,261 +246,5 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     assert (
         manually_created_uuid
         == in_code_data_context.data_context_id
-        == in_code_data_context.stores[
-            in_code_data_context.expectations_store_name
-        ].store_backend_id
-    )
-
-
-@pytest.mark.big
-@mock_s3
-def test_suppress_store_backend_id_is_true_for_inactive_stores():
-    """
-    What does this test and why?
-
-    Trying to read / set the store_backend_id for inactive stores should not be attempted during DataContext initialization. This test ensures that the _suppress_store_backend_id parameter is set to True for inactive stores.
-
-    """  # noqa: E501
-
-    bucket = "leakybucket"
-    expectations_store_prefix = "expectations_store_prefix"
-    validation_results_store_prefix = "validation_results_store_prefix"
-    data_docs_store_prefix = "data_docs_store_prefix"
-
-    # Create a bucket in Moto's mock AWS environment
-    conn = boto3.resource("s3", region_name="us-east-1")
-    conn.create_bucket(Bucket=bucket)
-
-    # Create a DataContext
-    # Add inactive stores
-    inactive_bucket = "inactive_leakybucket"
-    stores = {
-        "expectations_S3_store": {
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": bucket,
-                "prefix": expectations_store_prefix,
-            },
-        },
-        "validation_results_S3_store": {
-            "class_name": "ValidationResultsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": bucket,
-                "prefix": validation_results_store_prefix,
-            },
-        },
-        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
-        "inactive_expectations_S3_store": {
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": inactive_bucket,
-                "prefix": expectations_store_prefix,
-            },
-        },
-        "inactive_validation_results_S3_store": {
-            "class_name": "ValidationResultsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": inactive_bucket,
-                "prefix": validation_results_store_prefix,
-            },
-        },
-        "inactive_suite_parameter_store": {"class_name": "SuiteParameterStore"},
-    }
-    in_code_data_context_project_config = build_in_code_data_context_project_config(
-        bucket="leakybucket",
-        expectations_store_prefix=expectations_store_prefix,
-        validation_results_store_prefix=validation_results_store_prefix,
-        data_docs_store_prefix=data_docs_store_prefix,
-        stores=stores,
-    )
-    in_code_data_context = get_context(project_config=in_code_data_context_project_config)
-
-    # Check here that suppress_store_backend_id == True for inactive stores
-    # and False for active stores
-    assert (
-        in_code_data_context.stores.get(
-            "inactive_expectations_S3_store"
-        ).store_backend._suppress_store_backend_id
-        is True
-    )
-    assert (
-        in_code_data_context.stores.get(
-            "inactive_validation_results_S3_store"
-        ).store_backend._suppress_store_backend_id
-        is True
-    )
-    assert (
-        in_code_data_context.stores.get(
-            "expectations_S3_store"
-        ).store_backend._suppress_store_backend_id
-        is False
-    )
-    assert (
-        in_code_data_context.stores.get(
-            "validation_results_S3_store"
-        ).store_backend._suppress_store_backend_id
-        is False
-    )
-    # InMemoryStoreBackend created for suite_parameters_store & inactive_suite_parameters_store  # noqa: E501
-    assert (
-        in_code_data_context.stores.get(
-            "inactive_suite_parameter_store"
-        ).store_backend._suppress_store_backend_id
-        is False
-    )
-    assert (
-        in_code_data_context.stores.get(
-            "suite_parameter_store"
-        ).store_backend._suppress_store_backend_id
-        is False
-    )
-
-
-@pytest.mark.aws_deps
-@mock_s3
-def test_inaccessible_active_bucket_warning_messages(caplog, aws_credentials):
-    """
-    What does this test do and why?
-
-    Trying to create a data context with unreachable ACTIVE stores should show a warning message once per store
-    e.g. Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store
-    Active stores are those named in:
-    "expectations_store_name", "validation_results_store_name", "suite_parameter_store_name"
-    """  # noqa: E501
-
-    bucket = "leakybucket"
-    expectations_store_prefix = "expectations_store_prefix"
-    validation_results_store_prefix = "validation_results_store_prefix"
-    data_docs_store_prefix = "data_docs_store_prefix"
-
-    # Create a bucket in Moto's mock AWS environment
-    conn = boto3.resource("s3", region_name="us-east-1")
-    conn.create_bucket(Bucket=bucket)
-
-    # Create a DataContext
-    # Add inactive stores
-    inactive_bucket = "inactive_leakybucket"
-    stores = {
-        "expectations_S3_store": {
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": inactive_bucket,
-                "prefix": expectations_store_prefix,
-            },
-        },
-        "validation_results_S3_store": {
-            "class_name": "ValidationResultsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": inactive_bucket,
-                "prefix": validation_results_store_prefix,
-            },
-        },
-        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
-    }
-    in_code_data_context_project_config = build_in_code_data_context_project_config(
-        bucket="leakybucket",
-        expectations_store_prefix=expectations_store_prefix,
-        validation_results_store_prefix=validation_results_store_prefix,
-        data_docs_store_prefix=data_docs_store_prefix,
-        stores=stores,
-    )
-    _ = get_context(project_config=in_code_data_context_project_config)
-    assert (
-        caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store. Exception was: \n Unable to set object in s3."  # noqa: E501
-        )
-        == 1
-    )
-    assert (
-        caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validation_results_S3_store. Exception was: \n Unable to set object in s3."  # noqa: E501
-        )
-        == 1
-    )
-
-
-@pytest.mark.big
-@mock_s3
-def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
-    """
-    What does this test do and why?
-
-    Trying to create a data context with unreachable INACTIVE stores should show no warning messages
-    Inactive stores are those NOT named in:
-    "expectations_store_name", "validation_results_store_name", "suite_parameter_store_name"
-    """
-
-    bucket = "leakybucket"
-    expectations_store_prefix = "expectations_store_prefix"
-    validation_results_store_prefix = "validation_results_store_prefix"
-    data_docs_store_prefix = "data_docs_store_prefix"
-
-    # Create a bucket in Moto's mock AWS environment
-    conn = boto3.resource("s3", region_name="us-east-1")
-    conn.create_bucket(Bucket=bucket)
-
-    # Create a DataContext
-    # Add inactive stores
-    inactive_bucket = "inactive_leakybucket"
-    stores = {
-        "expectations_S3_store": {
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": bucket,
-                "prefix": expectations_store_prefix,
-            },
-        },
-        "validation_results_S3_store": {
-            "class_name": "ValidationResultsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": bucket,
-                "prefix": validation_results_store_prefix,
-            },
-        },
-        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
-        "inactive_expectations_S3_store": {
-            "class_name": "ExpectationsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": inactive_bucket,
-                "prefix": expectations_store_prefix,
-            },
-        },
-        "inactive_validation_results_S3_store": {
-            "class_name": "ValidationResultsStore",
-            "store_backend": {
-                "class_name": "TupleS3StoreBackend",
-                "bucket": inactive_bucket,
-                "prefix": validation_results_store_prefix,
-            },
-        },
-        "inactive_suite_parameter_store": {"class_name": "SuiteParameterStore"},
-    }
-    in_code_data_context_project_config = build_in_code_data_context_project_config(
-        bucket="leakybucket",
-        expectations_store_prefix=expectations_store_prefix,
-        validation_results_store_prefix=validation_results_store_prefix,
-        data_docs_store_prefix=data_docs_store_prefix,
-        stores=stores,
-    )
-    _ = get_context(project_config=in_code_data_context_project_config)
-    assert (
-        caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store"  # noqa: E501
-        )
-        == 0
-    )
-    assert (
-        caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validation_results_S3_store"  # noqa: E501
-        )
-        == 0
+        == in_code_data_context.stores["expectations_store"].store_backend_id
     )

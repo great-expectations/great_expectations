@@ -2094,10 +2094,10 @@ def empty_ge_cloud_data_context_config(
 ):
     config_yaml_str = f"""
 stores:
-  default_suite_parameter_store:
+  suite_parameter_store:
     class_name: SuiteParameterStore
 
-  default_expectations_store:
+  expectations_store:
     class_name: ExpectationsStore
     store_backend:
       class_name: {GXCloudStoreBackend.__name__}
@@ -2108,7 +2108,7 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
-  default_validation_results_store:
+  validation_results_store:
     class_name: ValidationResultsStore
     store_backend:
       class_name: {GXCloudStoreBackend.__name__}
@@ -2130,7 +2130,7 @@ stores:
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
-  default_checkpoint_store:
+  checkpoint_store:
     class_name: CheckpointStore
     store_backend:
       class_name: {GXCloudStoreBackend.__name__}
@@ -2140,11 +2140,6 @@ stores:
         access_token: {ge_cloud_access_token}
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
-
-suite_parameter_store_name: default_suite_parameter_store
-expectations_store_name: default_expectations_store
-validation_results_store_name: default_validation_results_store
-checkpoint_store_name: default_checkpoint_store
 """
     data_context_config_dict = yaml.load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)

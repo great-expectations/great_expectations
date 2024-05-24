@@ -45,14 +45,11 @@ stores:
     class_name: ValidationResultsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/validations/
+      base_directory: ${my_secret_var}
   suite_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/en/latest/reference/suite_parameters.html
     class_name: InMemorySuiteParameterStore
-expectations_store_name: expectations_store
-validation_results_store_name: ${secret_validation_results_store_name}
-suite_parameter_store_name: suite_parameter_store
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These

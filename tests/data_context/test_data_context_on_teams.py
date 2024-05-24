@@ -26,7 +26,7 @@ def test_incomplete_uncommitted(tmp_path):
 
     assert (
         "Unable to find a match for config substitution variable: "
-        "`secret_validation_results_store_name`." in exc.value.message
+        "`my_secret_var`." in exc.value.message
     )
     assert (
         "See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials"

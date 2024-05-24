@@ -97,12 +97,9 @@ def _cloud_config(data_dir):
     return {
         "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
         "analytics_enabled": True,
-        "checkpoint_store_name": "default_checkpoint_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "config_version": 3.0,
         "data_docs_sites": {},
-        "suite_parameter_store_name": "suite_parameter_store",
-        "expectations_store_name": "default_expectations_store",
         "plugins_directory": "plugins/",
         "progress_bars": {
             "globally": False,
@@ -110,7 +107,7 @@ def _cloud_config(data_dir):
             "profilers": False,
         },
         "stores": {
-            "default_checkpoint_store": {
+            "checkpoint_store": {
                 "class_name": "CheckpointStore",
                 "store_backend": {
                     "class_name": "GXCloudStoreBackend",
@@ -123,8 +120,7 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_suite_parameter_store": {"class_name": "SuiteParameterStore"},
-            "default_expectations_store": {
+            "expectations_store": {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "GXCloudStoreBackend",
@@ -137,7 +133,7 @@ def _cloud_config(data_dir):
                     "suppress_store_backend_id": True,
                 },
             },
-            "default_validation_results_store": {
+            "validation_results_store": {
                 "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "GXCloudStoreBackend",
@@ -154,15 +150,7 @@ def _cloud_config(data_dir):
                 "class_name": "SuiteParameterStore",
                 "module_name": "great_expectations.data_context.store",
             },
-            "expectations_store": {
-                "class_name": "ExpectationsStore",
-                "store_backend": {
-                    "base_directory": "expectations/",
-                    "class_name": "TupleFilesystemStoreBackend",
-                },
-            },
         },
-        "validation_results_store_name": "default_validation_results_store",
     }
 
 

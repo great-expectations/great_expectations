@@ -117,10 +117,6 @@ datasources:
 config_variables_file_path: uncommitted/config_variables.yml
 
 plugins_directory: plugins/
-suite_parameter_store_name: suite_parameter_store
-expectations_store_name: expectations_store
-validation_results_store_name: validation_results_store
-checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
   local_site:
