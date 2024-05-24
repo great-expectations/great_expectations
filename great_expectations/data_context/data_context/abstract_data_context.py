@@ -61,10 +61,10 @@ from great_expectations.core.factory import (
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store.manager import StoreManager
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DataContextConfigDefaults,
     ProgressBarsConfig,
     dataContextConfigSchema,
 )
@@ -236,8 +236,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             None  # This variable *may* be used in case we cannot save an instance id
         )
         # Init stores
-        self._stores: dict = {}
-        self._init_primary_stores(self.project_config_with_variables_substituted.stores)
+        self._stores = self._init_primary_stores(
+            self.project_config_with_variables_substituted.stores
+        )
 
         # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.  # noqa: E501
         # As such, it must be instantiated separately.
@@ -260,21 +261,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _init_factories(self) -> None:
         self._data_sources: _SourceFactories = _SourceFactories(self)
-
-        self._suites: SuiteFactory | None = None
-        if expectations_store := self.stores.get(self.expectations_store_name):
-            self._suites = SuiteFactory(
-                store=expectations_store,
-            )
-
-        self._checkpoints: CheckpointFactory | None = None
-        if checkpoint_store := self.stores.get(self.checkpoint_store_name):
-            self._checkpoints = CheckpointFactory(
-                store=checkpoint_store,
-            )
-
+        self._suites = SuiteFactory(
+            store=self.stores.expectations_store,
+        )
+        self._checkpoints = CheckpointFactory(
+            store=self.stores.checkpoint_store,
+        )
         self._validation_definitions: ValidationDefinitionFactory = ValidationDefinitionFactory(
-            store=self.validation_definition_store
+            store=self.stores.validation_definition_store
         )
 
     def _init_analytics(self) -> None:
@@ -419,7 +413,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._normalize_absolute_or_relative_path(self.variables.plugins_directory)
 
     @property
-    def stores(self) -> dict:
+    def stores(self) -> StoreManager:
         """A single holder for all Stores in this context"""
         return self._stores
 
@@ -454,40 +448,43 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def expectations_store_name(self) -> str:
-        return DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value
+        return StoreManager.expectations_store_name
 
     @property
     def expectations_store(self) -> ExpectationsStore:
-        return self.stores[self.expectations_store_name]
+        return self.stores.expectations_store
 
     @property
     def suite_parameter_store_name(self) -> str:
-        return DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value
+        return StoreManager.suite_parameter_store_name
 
     @property
     def suite_parameter_store(self) -> SuiteParameterStore:
-        return self.stores[self.suite_parameter_store_name]
+        return self.stores.suite_parameter_store
 
     @property
     def validation_results_store_name(self) -> str:
-        return DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
+        return StoreManager.validation_results_store_name
 
     @property
     def validation_results_store(self) -> ValidationResultsStore:
-        return self.stores[self.validation_results_store_name]
+        return self.stores.validation_results_store
+
+    @property
+    def validation_definition_store_name(self) -> str:
+        return StoreManager.validation_definition_store_name
 
     @property
     def validation_definition_store(self) -> ValidationDefinitionStore:
-        # Purposely not exposing validation_definition_store_name as a user-configurable property
-        return self.stores[DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value]
+        return self.stores.validation_definition_store
 
     @property
     def checkpoint_store_name(self) -> str:
-        return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+        return StoreManager.checkpoint_store_name
 
     @property
     def checkpoint_store(self) -> CheckpointStore:
-        return self.stores[self.checkpoint_store_name]
+        return self.stores.checkpoint_store
 
     @property
     def data_sources(self) -> _SourceFactories:
@@ -843,26 +840,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasource
 
     @public_api
-    def add_store(self, store_name: str, store_config: StoreConfigTypedDict) -> Store:
-        """Add a new Store to the DataContext.
-
-        Args:
-            store_name: the name to associate with the created store.
-            store_config: the config to use to construct the store.
-
-        Returns:
-            The instantiated Store.
-        """
-        store = self._build_store_from_config(store_name, store_config)
-
-        # Both the config and the actual stores need to be kept in sync
-        self.config.stores[store_name] = store_config
-        self._stores[store_name] = store
-
-        self._save_project_config()
-        return store
-
-    @public_api
     @new_method_or_class(version="0.17.2")
     def add_data_docs_site(self, site_name: str, site_config: DataDocsSiteConfigTypedDict) -> None:
         """Add a new Data Docs Site to the DataContext.
@@ -938,28 +915,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             sites.pop(site_name)
             self.variables.data_docs_sites = sites
             self._save_project_config()
-
-    @public_api
-    @new_method_or_class(version="0.15.48")
-    def delete_store(self, store_name: str) -> None:
-        """Delete an existing Store from the DataContext.
-
-        Args:
-            store_name: The name of the Store to be deleted.
-
-        Raises:
-            StoreConfigurationError if the target Store is not found.
-        """
-        if store_name not in self.config.stores and store_name not in self._stores:
-            raise gx_exceptions.StoreConfigurationError(  # noqa: TRY003
-                f'Attempted to delete a store named: "{store_name}". It is not a configured store.'
-            )
-
-        # Both the config and the actual stores need to be kept in sync
-        self.config.stores.pop(store_name, None)
-        self._stores.pop(store_name, None)
-
-        self._save_project_config()
 
     @public_api
     def list_datasources(self) -> List[dict]:
@@ -1856,7 +1811,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         # the expectations_store does not yet exist by:
         # adding the data_context_id from the project_config
         # to the store_config under the key manually_initialize_store_backend_id
-        if (store_name == self.expectations_store_name) and store_config.get("store_backend"):
+        if (store_name == StoreManager.expectations_store_name) and store_config.get(
+            "store_backend"
+        ):
             store_config["store_backend"].update(
                 {"manually_initialize_store_backend_id": self.variables.data_context_id}
             )
@@ -1868,7 +1825,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ):
             store_config["store_backend"].update({"suppress_store_backend_id": True})
 
-        new_store = Store.build_store_from_config(
+        return Store.build_store_from_config(
             store_name=store_name,
             store_config=store_config,
             module_name=module_name,
@@ -1876,8 +1833,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "root_directory": self.root_directory,
             },
         )
-        self._stores[store_name] = new_store
-        return new_store
 
     # properties
     @property
@@ -1905,7 +1860,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def data_context_id(self) -> uuid.UUID | None:
         return self.variables.data_context_id
 
-    def _init_primary_stores(self, store_configs: Dict[str, StoreConfigTypedDict]) -> None:
+    def _init_primary_stores(
+        self, store_configs: Dict[str, StoreConfigTypedDict]
+    ) -> dict[str, Store]:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
@@ -1914,8 +1871,13 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Note that stores do NOT manage plugins.
         """
+        stores: dict[str, Store] = {}
         for store_name, store_config in store_configs.items():
-            self._build_store_from_config(store_name, store_config)
+            store = self._build_store_from_config(store_name, store_config)
+            stores[store_name] = store
+
+        print("STORES", stores.keys())
+        return StoreManager(**stores)
 
     @abstractmethod
     def _init_datasource_store(self) -> DatasourceStore:

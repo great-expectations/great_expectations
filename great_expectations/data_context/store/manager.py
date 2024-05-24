@@ -1,0 +1,52 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, ClassVar
+
+from great_expectations.compatibility.pydantic import BaseModel
+from great_expectations.data_context.store import (
+    CheckpointStore,  # noqa: TCH001
+    ExpectationsStore,  # noqa: TCH001
+    SuiteParameterStore,  # noqa: TCH001
+    ValidationDefinitionStore,  # noqa: TCH001
+    ValidationResultsStore,  # noqa: TCH001
+)
+from great_expectations.data_context.types.base import DataContextConfigDefaults
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.store.store import Store
+
+
+class StoreManager(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    expectations_store: ExpectationsStore
+    checkpoint_store: CheckpointStore
+    validation_results_store: ValidationResultsStore
+    validation_definition_store: ValidationDefinitionStore
+    suite_parameter_store: SuiteParameterStore
+
+    expectations_store_name: ClassVar[str] = (
+        DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value
+    )
+    checkpoint_store_name: ClassVar[str] = (
+        DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+    )
+    validation_results_store_name: ClassVar[str] = (
+        DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
+    )
+    validation_definition_store_name: ClassVar[str] = (
+        DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value
+    )
+    suite_parameter_store_name: ClassVar[str] = (
+        DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value
+    )
+
+    def __getitem__(self, item: str) -> Store:
+        try:
+            return getattr(self, item)
+        except AttributeError as e:
+            raise KeyError(  # noqa: TRY003
+                f"Store with name {item} not found;"
+                f"only supports the following keys: {self.__fields__.keys()}"
+            ) from e

@@ -22,7 +22,6 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.expectation_configuration import (
@@ -112,23 +111,6 @@ def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
 ):
     with pytest.raises(ValueError):
         _ = titanic_data_context.get_datasource("fakey_mc_fake")
-
-
-@pytest.mark.unit
-def test_add_store(empty_data_context):
-    assert "my_new_store" not in empty_data_context.stores
-    assert "my_new_store" not in empty_data_context.get_config()["stores"]
-    new_store = empty_data_context.add_store(
-        "my_new_store",
-        {
-            "module_name": "great_expectations.data_context.store",
-            "class_name": "ExpectationsStore",
-        },
-    )
-    assert "my_new_store" in empty_data_context.stores
-    assert "my_new_store" in empty_data_context.get_config()["stores"]
-
-    assert isinstance(new_store, ExpectationsStore)
 
 
 @pytest.mark.unit

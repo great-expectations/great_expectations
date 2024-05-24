@@ -22,5 +22,5 @@ stores:
   suite_parameter_store:
     module_name: great_expectations.data_context.store
     class_name: SuiteParameterStore
-  validation_store:
+  validation_results_store:
     class_name: ValidationResultsStore
