@@ -21,11 +21,7 @@ class DataContextStore(ConfigurationStore):
     _configuration_class = DataContextConfig
 
     cloud_exclude_field_names: Set[DataContextVariableSchema] = {
-        DataContextVariableSchema.CHECKPOINT_STORE_NAME,
         DataContextVariableSchema.DATASOURCES,
-        DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-        DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
-        DataContextVariableSchema.VALIDATIONS_STORE_NAME,
     }
 
     @override

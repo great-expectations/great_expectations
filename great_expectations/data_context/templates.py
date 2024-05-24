@@ -120,10 +120,6 @@ stores:
     {SUITE_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
   {VALIDATION_DEFINITION_STORE_STRING}
-expectations_store_name: expectations_store
-validation_results_store_name: validation_results_store
-suite_parameter_store_name: suite_parameter_store
-checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These

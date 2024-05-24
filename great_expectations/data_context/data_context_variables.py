@@ -39,10 +39,6 @@ class DataContextVariableSchema(str, enum.Enum):
     CONFIG_VERSION = "config_version"
     DATASOURCES = "datasources"
     FLUENT_DATASOURCES = "fluent_datasources"
-    EXPECTATIONS_STORE_NAME = "expectations_store_name"
-    VALIDATIONS_STORE_NAME = "validation_results_store_name"
-    SUITE_PARAMETER_STORE_NAME = "suite_parameter_store_name"
-    CHECKPOINT_STORE_NAME = "checkpoint_store_name"
     PLUGINS_DIRECTORY = "plugins_directory"
     STORES = "stores"
     DATA_DOCS_SITES = "data_docs_sites"
@@ -147,44 +143,6 @@ class DataContextVariables(ABC):
     @plugins_directory.setter
     def plugins_directory(self, plugins_directory: str) -> None:
         self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
-
-    @property
-    def expectations_store_name(self) -> Optional[str]:
-        return self._get(DataContextVariableSchema.EXPECTATIONS_STORE_NAME)
-
-    @expectations_store_name.setter
-    def expectations_store_name(self, expectations_store_name: str) -> None:
-        self._set(DataContextVariableSchema.EXPECTATIONS_STORE_NAME, expectations_store_name)
-
-    @property
-    def validation_results_store_name(self) -> Optional[str]:
-        return self._get(DataContextVariableSchema.VALIDATIONS_STORE_NAME)
-
-    @validation_results_store_name.setter
-    def validation_results_store_name(self, validation_results_store_name: str) -> None:
-        self._set(DataContextVariableSchema.VALIDATIONS_STORE_NAME, validation_results_store_name)
-
-    @property
-    def suite_parameter_store_name(self) -> Optional[str]:
-        return self._get(DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME)
-
-    @suite_parameter_store_name.setter
-    def suite_parameter_store_name(self, suite_parameter_store_name: str) -> None:
-        self._set(
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-            suite_parameter_store_name,
-        )
-
-    @property
-    def checkpoint_store_name(self) -> Optional[str]:
-        return self._get(DataContextVariableSchema.CHECKPOINT_STORE_NAME)
-
-    @checkpoint_store_name.setter
-    def checkpoint_store_name(self, checkpoint_store_name: str) -> None:
-        self._set(
-            DataContextVariableSchema.CHECKPOINT_STORE_NAME,
-            checkpoint_store_name,
-        )
 
     @property
     def stores(self) -> Optional[dict]:

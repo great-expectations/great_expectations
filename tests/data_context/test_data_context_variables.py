@@ -48,10 +48,6 @@ def data_context_config_dict() -> dict:
     config: dict = {
         "config_version": 3.0,
         "plugins_directory": "plugins/",
-        "suite_parameter_store_name": "suite_parameter_store",
-        "validation_results_store_name": "validation_results_store",
-        "expectations_store_name": "expectations_store",
-        "checkpoint_store_name": "checkpoint_store",
         "config_variables_file_path": "uncommitted/config_variables.yml",
         "stores": {
             "expectations_store": {
@@ -207,22 +203,6 @@ def progress_bars() -> ProgressBarsConfig:
             DataContextVariableSchema.PLUGINS_DIRECTORY,
             id="plugins_directory getter",
         ),
-        pytest.param(
-            DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
-            id="expectations_store getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validation_results_store getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-            id="suite_parameter_store getter",
-        ),
-        pytest.param(
-            DataContextVariableSchema.CHECKPOINT_STORE_NAME,
-            id="checkpoint_store getter",
-        ),
         pytest.param(DataContextVariableSchema.STORES, id="stores getter"),
         pytest.param(
             DataContextVariableSchema.DATA_DOCS_SITES,
@@ -295,26 +275,6 @@ def test_data_context_variables_get_with_substitutions(
             "other_plugins/",
             DataContextVariableSchema.PLUGINS_DIRECTORY,
             id="plugins_directory setter",
-        ),
-        pytest.param(
-            "my_expectations_store",
-            DataContextVariableSchema.EXPECTATIONS_STORE_NAME,
-            id="expectations_store setter",
-        ),
-        pytest.param(
-            "my_validation_results_store",
-            DataContextVariableSchema.VALIDATIONS_STORE_NAME,
-            id="validation_results_store setter",
-        ),
-        pytest.param(
-            "my_suite_parameter_store",
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-            id="suite_parameter_store setter",
-        ),
-        pytest.param(
-            "my_checkpoint_store",
-            DataContextVariableSchema.CHECKPOINT_STORE_NAME,
-            id="checkpoint_store setter",
         ),
         pytest.param(stores, DataContextVariableSchema.STORES, id="stores setter"),
         pytest.param(

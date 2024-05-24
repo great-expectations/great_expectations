@@ -453,49 +453,24 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._validation_definitions
 
     @property
-    def expectations_store_name(self) -> Optional[str]:
-        return self.variables.expectations_store_name
-
-    @expectations_store_name.setter
-    @public_api
-    @new_method_or_class(version="0.17.2")
-    def expectations_store_name(self, value: str) -> None:
-        """Set the name of the expectations store.
-
-        Args:
-            value: New value for the expectations store name.
-        """
-
-        self.variables.expectations_store_name = value
-        self._save_project_config()
+    def expectations_store_name(self) -> str:
+        return DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value
 
     @property
     def expectations_store(self) -> ExpectationsStore:
         return self.stores[self.expectations_store_name]
 
     @property
-    def suite_parameter_store_name(self) -> Optional[str]:
-        return self.variables.suite_parameter_store_name
+    def suite_parameter_store_name(self) -> str:
+        return DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value
 
     @property
     def suite_parameter_store(self) -> SuiteParameterStore:
         return self.stores[self.suite_parameter_store_name]
 
     @property
-    def validation_results_store_name(self) -> Optional[str]:
-        return self.variables.validation_results_store_name
-
-    @validation_results_store_name.setter
-    @public_api
-    @new_method_or_class(version="0.17.2")
-    def validation_results_store_name(self, value: str) -> None:
-        """Set the name of the validations store.
-
-        Args:
-            value: New value for the validations store name.
-        """
-        self.variables.validation_results_store_name = value
-        self._save_project_config()
+    def validation_results_store_name(self) -> str:
+        return DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
 
     @property
     def validation_results_store(self) -> ValidationResultsStore:
@@ -507,32 +482,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value]
 
     @property
-    def checkpoint_store_name(self) -> Optional[str]:
-        from great_expectations.data_context.store.checkpoint_store import (
-            CheckpointStore,
-        )
-
-        if name := self.variables.checkpoint_store_name:
-            return name
-
-        if CheckpointStore.default_checkpoints_exist(
-            directory_path=self.root_directory  # type: ignore[arg-type]
-        ):
-            return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-
-        return None
-
-    @checkpoint_store_name.setter
-    @public_api
-    @new_method_or_class(version="0.17.2")
-    def checkpoint_store_name(self, value: str) -> None:
-        """Set the name of the checkpoint store.
-
-        Args:
-            value: New value for the checkpoint store name.
-        """
-        self.variables.checkpoint_store_name = value
-        self._save_project_config()
+    def checkpoint_store_name(self) -> str:
+        return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
 
     @property
     def checkpoint_store(self) -> CheckpointStore:
@@ -2074,6 +2025,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _construct_data_context_id(self) -> uuid.UUID | None:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
+        print(self.stores.keys())
         expectations_store = self.stores[self.expectations_store_name]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation  # noqa: E501

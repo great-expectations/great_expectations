@@ -6,10 +6,6 @@ config_version: 3
 config_variables_file_path: uncommitted/config_variables.yml
 
 plugins_directory: ${l}
-suite_parameter_store_name: ${m}
-expectations_store_name: ${n}
-validation_results_store_name: ${o}
-checkpoint_store_name: ${cps}
 
 data_docs_sites:
   local_site:

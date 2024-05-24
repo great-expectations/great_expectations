@@ -1104,10 +1104,6 @@ class DataContextConfigSchema(Schema):
         allow_none=True,
         load_only=True,
     )
-    expectations_store_name = fields.Str()
-    validation_results_store_name = fields.Str()
-    suite_parameter_store_name = fields.Str()
-    checkpoint_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     data_docs_sites = fields.Dict(keys=fields.Str(), values=fields.Dict(), allow_none=True)
@@ -1331,20 +1327,23 @@ class BaseStoreBackendDefaults(DictDot):
     For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults and you may be able to specify less parameters.
     """  # noqa: E501
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
-        expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,  # noqa: E501
-        validation_results_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,  # noqa: E501
-        suite_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,  # noqa: E501
-        checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
         stores: Optional[dict] = None,
         data_docs_sites: Optional[dict] = None,
     ) -> None:
-        self.expectations_store_name = expectations_store_name
-        self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
+        self.expectations_store_name = (
+            DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value
+        )
+        self.validation_results_store_name = (
+            DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
+        )
+        self.suite_parameter_store_name = (
+            DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value
+        )
+        self.checkpoint_store_name = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+        self.data_docs_site_name = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
         self.validation_definition_store_name = (
             DataContextConfigDefaults.DEFAULT_VALIDATION_DEFINITION_STORE_NAME.value
         )
@@ -1373,10 +1372,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         validation_results_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
-        expectations_store_name: Overrides default if supplied
-        validation_results_store_name: Overrides default if supplied
-        suite_parameter_store_name: Overrides default if supplied
-        checkpoint_store_name: Overrides default if supplied
     """
 
     def __init__(  # noqa: PLR0913
@@ -1392,10 +1387,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         validation_definition_store_prefix: str = "validation_definitions",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
-        expectations_store_name: str = "expectations_S3_store",
-        validation_results_store_name: str = "validation_results_S3_store",
-        suite_parameter_store_name: str = "suite_parameter_store",
-        checkpoint_store_name: str = "checkpoint_S3_store",
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -1413,12 +1404,8 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
             checkpoint_store_bucket_name = default_bucket_name
 
         # Overwrite defaults
-        self.expectations_store_name = expectations_store_name
-        self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
         self.stores = {
-            expectations_store_name: {
+            self.expectations_store_name: {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -1426,7 +1413,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": expectations_store_prefix,
                 },
             },
-            validation_results_store_name: {
+            self.validation_results_store_name: {
                 "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -1442,8 +1429,8 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": validation_definition_store_prefix,
                 },
             },
-            suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
-            checkpoint_store_name: {
+            self.suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
+            self.checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -1577,10 +1564,6 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         validation_results_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
-        expectations_store_name: Overrides default if supplied
-        validation_results_store_name: Overrides default if supplied
-        suite_parameter_store_name: Overrides default if supplied
-        checkpoint_store_name: Overrides default if supplied
     """  # noqa: E501
 
     def __init__(  # noqa: C901, PLR0913
@@ -1602,10 +1585,6 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         validation_definition_store_prefix: str = "validation_definitions",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
-        expectations_store_name: str = "expectations_GCS_store",
-        validation_results_store_name: str = "validation_results_GCS_store",
-        suite_parameter_store_name: str = "suite_parameter_store",
-        checkpoint_store_name: str = "checkpoint_GCS_store",
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -1635,12 +1614,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             checkpoint_store_project_name = default_project_name
 
         # Overwrite defaults
-        self.expectations_store_name = expectations_store_name
-        self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
         self.stores = {
-            expectations_store_name: {
+            self.expectations_store_name: {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "TupleGCSStoreBackend",
@@ -1649,7 +1624,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": expectations_store_prefix,
                 },
             },
-            validation_results_store_name: {
+            self.validation_results_store_name: {
                 "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "TupleGCSStoreBackend",
@@ -1667,8 +1642,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": validation_definition_store_prefix,
                 },
             },
-            suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
-            checkpoint_store_name: {
+            self.suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
+            self.checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
                     "class_name": "TupleGCSStoreBackend",
@@ -1703,10 +1678,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_credentials: Overrides default_credentials if supplied
         validation_results_store_credentials: Overrides default_credentials if supplied
         checkpoint_store_credentials: Overrides default_credentials if supplied
-        expectations_store_name: Overrides default if supplied
-        validation_results_store_name: Overrides default if supplied
-        suite_parameter_store_name: Overrides default if supplied
-        checkpoint_store_name: Overrides default if supplied
     """  # noqa: E501
 
     def __init__(  # noqa: PLR0913
@@ -1716,10 +1687,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         validation_results_store_credentials: Optional[Dict] = None,
         validation_definition_store_credentials: Optional[Dict] = None,
         checkpoint_store_credentials: Optional[Dict] = None,
-        expectations_store_name: str = "expectations_database_store",
-        validation_results_store_name: str = "validation_results_database_store",
-        suite_parameter_store_name: str = "suite_parameter_store",
-        checkpoint_store_name: str = "checkpoint_database_store",
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -1734,21 +1701,15 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         if checkpoint_store_credentials is None:
             checkpoint_store_credentials = default_credentials
 
-        # Overwrite defaults
-        self.expectations_store_name = expectations_store_name
-        self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
-
         self.stores = {
-            expectations_store_name: {
+            self.expectations_store_name: {
                 "class_name": "ExpectationsStore",
                 "store_backend": {
                     "class_name": "DatabaseStoreBackend",
                     "credentials": expectations_store_credentials,
                 },
             },
-            validation_results_store_name: {
+            self.validation_results_store_name: {
                 "class_name": "ValidationResultsStore",
                 "store_backend": {
                     "class_name": "DatabaseStoreBackend",
@@ -1762,8 +1723,8 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                     "credentials": validation_definition_store_credentials,
                 },
             },
-            suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
-            checkpoint_store_name: {
+            self.suite_parameter_store_name: {"class_name": "SuiteParameterStore"},
+            self.checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
                     "class_name": "DatabaseStoreBackend",
@@ -1788,10 +1749,6 @@ class DataContextConfig(BaseYamlConfig):
     Args:
         config_version (Optional[float]): config version of this DataContext.
         fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
-        expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
-        validation_results_store_name (Optional[str]): name of ValidationResultsStore to be used by DataContext.
-        suite_parameter_store_name (Optional[str]): name of SuiteParamterStore to be used by DataContext.
-        checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
         plugins_directory (Optional[str]): the directory in which custom plugin modules should be placed.
         stores (Optional[dict]): single holder for all Stores associated with this DataContext.
         data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
@@ -1806,14 +1763,10 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally or for metrics calculations.
     """  # noqa: E501
 
-    def __init__(  # noqa: C901, PLR0913
+    def __init__(  # noqa: PLR0913
         self,
         config_version: Optional[float] = None,
         fluent_datasources: Optional[dict] = None,
-        expectations_store_name: Optional[str] = None,
-        validation_results_store_name: Optional[str] = None,
-        suite_parameter_store_name: Optional[str] = None,
-        checkpoint_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
         data_docs_sites: Optional[Dict] = None,
@@ -1833,23 +1786,11 @@ class DataContextConfig(BaseYamlConfig):
         if store_backend_defaults is not None:
             if stores is None:
                 stores = store_backend_defaults.stores
-            if expectations_store_name is None:
-                expectations_store_name = store_backend_defaults.expectations_store_name
-            if validation_results_store_name is None:
-                validation_results_store_name = store_backend_defaults.validation_results_store_name
-            if suite_parameter_store_name is None:
-                suite_parameter_store_name = store_backend_defaults.suite_parameter_store_name
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
-            if checkpoint_store_name is None:
-                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
 
         self._config_version = config_version
         self.fluent_datasources = fluent_datasources or {}
-        self.expectations_store_name = expectations_store_name
-        self.validation_results_store_name = validation_results_store_name
-        self.suite_parameter_store_name = suite_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
         self.plugins_directory = plugins_directory
         self.stores = self._init_stores(stores)
         self.data_docs_sites = data_docs_sites

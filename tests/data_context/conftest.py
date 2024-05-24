@@ -130,10 +130,6 @@ def basic_data_context_config():
             "commented_map": {},
             "config_version": 2,
             "plugins_directory": "plugins/",
-            "suite_parameter_store_name": "suite_parameter_store",
-            "validation_results_store_name": "does_not_have_to_be_real",
-            "expectations_store_name": "expectations_store",
-            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "stores": {
                 "expectations_store": {
@@ -189,10 +185,6 @@ def data_context_config_with_datasources(conn_string_password):
             "commented_map": {},
             "config_version": 2,
             "plugins_directory": "plugins/",
-            "suite_parameter_store_name": "suite_parameter_store",
-            "validation_results_store_name": "does_not_have_to_be_real",
-            "expectations_store_name": "expectations_store",
-            "checkpoint_store_name": "checkpoint_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "fluent_datasources": {
                 "Datasource 2: Postgres": {
@@ -241,9 +233,6 @@ def data_context_config_with_cloud_backed_stores(ge_cloud_access_token):
             "commented_map": {},
             "config_version": 2,
             "plugins_directory": "plugins/",
-            "suite_parameter_store_name": "suite_parameter_store",
-            "validation_results_store_name": "does_not_have_to_be_real",
-            "expectations_store_name": "expectations_store",
             "config_variables_file_path": "uncommitted/config_variables.yml",
             "stores": {
                 "default_checkpoint_store": {

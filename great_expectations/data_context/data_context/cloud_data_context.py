@@ -36,7 +36,6 @@ from great_expectations.data_context.data_context.serializable_data_context impo
 )
 from great_expectations.data_context.data_context_variables import (
     CloudDataContextVariables,
-    DataContextVariableSchema,
 )
 from great_expectations.data_context.store import DataAssetStore
 from great_expectations.data_context.store.datasource_store import (
@@ -256,27 +255,22 @@ class CloudDataContext(SerializableDataContext):
 
         # Various context variables are no longer top-level keys in V1
         for var in (
-            "datasources",
-            "notebooks",
-            "concurrency",
-            "include_rendered_content",
-            "profiler_store_name",
             "anonymous_usage_statistics",
+            "checkpoint_store_name",
+            "concurrency",
+            "datasources",
+            "evaluation_parameter_store_name",
+            "expectations_store_name",
+            "include_rendered_content",
+            "notebooks",
+            "profiler_store_name",
+            "suite_parameter_store_name",
+            "validation_results_store_name",
+            "validations_store_name",
         ):
             val = config.pop(var, None)
             if val:
                 logger.info(f"Removed {var} from DataContextConfig while preparing V1 config")
-
-        # V1 renamed EvaluationParameters to SuiteParameters, and Validations to ValidationResults
-        # so this is a temporary patch until Cloud implements a V1 endpoint for DataContextConfig
-        cls._change_key_from_v0_to_v1(
-            config,
-            "evaluation_parameter_store_name",
-            DataContextVariableSchema.SUITE_PARAMETER_STORE_NAME,
-        )
-        cls._change_key_from_v0_to_v1(
-            config, "validations_store_name", DataContextVariableSchema.VALIDATIONS_STORE_NAME
-        )
 
         config = cls._prepare_stores_config(config=config)
 
@@ -309,17 +303,6 @@ class CloudDataContext(SerializableDataContext):
             config["stores"].pop(name)
 
         return config
-
-    @staticmethod
-    def _change_key_from_v0_to_v1(config: dict, v0_key: str, v1_key: str) -> Optional[dict]:
-        """Update the key if we have a V0 key and no V1 key in the config.
-
-        Mutates the config object and returns the value that was renamed
-        """
-        value = config.pop(v0_key, None)
-        if value and v1_key not in config:
-            config[v1_key] = value
-        return config.get(v1_key)
 
     @staticmethod
     def _change_value_from_v0_to_v1(config: dict, key: str, v0_value: str, v1_value: str) -> dict:

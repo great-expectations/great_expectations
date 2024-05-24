@@ -1340,18 +1340,14 @@ def test_InlineStoreBackend(empty_data_context) -> None:
     )
     assert sorted(inline_store_backend.list_keys()) == [
         ("analytics_enabled",),
-        ("checkpoint_store_name",),
         ("config_variables_file_path",),
         ("config_version",),
         ("data_context_id",),
         ("data_docs_sites",),
-        ("expectations_store_name",),
         ("fluent_datasources",),
         ("plugins_directory",),
         ("progress_bars",),
         ("stores",),
-        ("suite_parameter_store_name",),
-        ("validation_results_store_name",),
     ]
 
     # test .move
