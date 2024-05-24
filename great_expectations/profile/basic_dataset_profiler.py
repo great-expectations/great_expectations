@@ -89,7 +89,7 @@ class BasicDatasetProfilerBase(DatasetProfiler):
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = ProfilerCardinality.NONE
-        elif pct_unique == 1.0:  # noqa: PLR2004
+        elif pct_unique == 1.0:
             cardinality = ProfilerCardinality.UNIQUE
         elif pct_unique > 0.1:  # noqa: PLR2004
             cardinality = ProfilerCardinality.VERY_MANY

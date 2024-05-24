@@ -209,7 +209,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
 
     @classmethod
-    def _render_other(  # noqa: PLR0912, PLR0913
+    def _render_other(  # noqa: PLR0913
         cls,
         render_object: Any,
         exception_list_content_block: bool,

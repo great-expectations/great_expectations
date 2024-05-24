@@ -1018,7 +1018,7 @@ Notes:
         return res
 
     @MetaPandasDataset.expectation(["column", "type_list", "mostly"])
-    def _expect_column_values_to_be_in_type_list__aggregate(  # noqa: PLR0913, PLR0912
+    def _expect_column_values_to_be_in_type_list__aggregate(  # noqa: PLR0913
         self,
         column,
         type_list,

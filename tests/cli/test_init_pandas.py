@@ -226,9 +226,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         )
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/"
         in mock_webbrowser.call_args[0][0]
     )
     stdout = result.stdout
@@ -310,9 +308,7 @@ def initialized_project(mock_webbrowser, monkeypatch, tmp_path_factory):
     )
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/"
         in mock_webbrowser.call_args[0][0]
     )
 
