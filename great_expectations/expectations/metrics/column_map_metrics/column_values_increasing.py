@@ -61,11 +61,11 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         strictly: bool = kwargs.get("strictly") or False
         if strictly:
             if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() > 0.0  # noqa: PLR2004
+                return series_diff.dt.total_seconds() > 0.0
             return series_diff > 0
         else:
             if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() >= 0.0  # noqa: PLR2004
+                return series_diff.dt.total_seconds() >= 0.0
             return series_diff >= 0
 
     @metric_partial(

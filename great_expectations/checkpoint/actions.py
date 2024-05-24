@@ -928,9 +928,7 @@ class StoreValidationResultAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
-                    type(validation_result_suite_identifier)
-                )
+                f"validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {type(validation_result_suite_identifier)}."
             )
 
         checkpoint_ge_cloud_id = None
@@ -1023,9 +1021,7 @@ class StoreEvaluationParametersAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
-                    type(validation_result_suite_identifier)
-                )
+                f"validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {type(validation_result_suite_identifier)}."
             )
 
         self.data_context.store_evaluation_parameters(validation_result_suite)
@@ -1078,9 +1074,7 @@ class StoreMetricsAction(ValidationAction):
             store = data_context.stores[target_store_name]
         except KeyError:
             raise DataContextError(
-                "Unable to find store {} in your DataContext configuration.".format(
-                    target_store_name
-                )
+                f"Unable to find store {target_store_name} in your DataContext configuration."
             )
         if not isinstance(store, MetricStore):
             raise DataContextError(
@@ -1112,9 +1106,7 @@ class StoreMetricsAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
-                    type(validation_result_suite_identifier)
-                )
+                f"validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {type(validation_result_suite_identifier)}."
             )
 
         self.data_context.store_validation_result_metrics(
@@ -1190,9 +1182,7 @@ class UpdateDataDocsAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
-                    type(validation_result_suite_identifier)
-                )
+                f"validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {type(validation_result_suite_identifier)}"
             )
 
         # TODO Update for RenderedDataDocs

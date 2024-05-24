@@ -197,9 +197,7 @@ great_expectations/
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/validations/warning/"
         in mock_webbrowser.call_args[0][0]
     )
 
@@ -300,9 +298,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/validations/warning/"
         in mock_webbrowser.call_args[0][0]
     )
 
@@ -360,9 +356,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/validations/my_suite/"
         in mock_webbrowser.call_args[0][0]
     )
 
@@ -634,9 +628,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/sink_me/".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/validations/sink_me/"
         in mock_webbrowser.call_args[0][0]
     )
 

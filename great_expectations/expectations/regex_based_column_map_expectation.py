@@ -252,7 +252,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         else:
             template_str = "values must match this regular expression: $regex"
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )

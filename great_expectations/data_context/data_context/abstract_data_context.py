@@ -470,10 +470,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
             raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
+                f"expectation_suite with name {expectation_suite_name} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
             )
         self._evaluation_parameter_dependencies_compiled = False
         include_rendered_content = (
@@ -3584,15 +3582,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
             except gx_exceptions.BatchKwargsError:
                 raise gx_exceptions.ProfilerError(
-                    "Unable to build batch_kwargs for datasource {}, using batch kwargs generator {} for name {}".format(
-                        datasource_name, batch_kwargs_generator_name, data_asset_name
-                    )
+                    f"Unable to build batch_kwargs for datasource {datasource_name}, using batch kwargs generator {batch_kwargs_generator_name} for name {data_asset_name}"
                 )
             except ValueError:
                 raise gx_exceptions.ProfilerError(
-                    "Unable to find datasource {} or batch kwargs generator {}.".format(
-                        datasource_name, batch_kwargs_generator_name
-                    )
+                    f"Unable to find datasource {datasource_name} or batch kwargs generator {batch_kwargs_generator_name}."
                 )
         else:
             batch_kwargs.update(additional_batch_kwargs)
@@ -4228,10 +4222,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
             logger.warning(
-                "The following globally-defined config variables failed validation:\n{}\n\n"
-                "Please fix the variables if you would like to apply global values to project_config.".format(
-                    json.dumps(validation_errors, indent=2)
-                )
+                f"The following globally-defined config variables failed validation:\n{json.dumps(validation_errors, indent=2)}\n\n"
+                "Please fix the variables if you would like to apply global values to project_config."
             )
 
         return config_with_global_config_overrides
@@ -4264,9 +4256,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 usage_statistics_enabled = False
             else:
                 logger.warning(
-                    "GE_USAGE_STATS environment variable must be one of: {}".format(
-                        AbstractDataContext.FALSEY_STRINGS
-                    )
+                    f"GE_USAGE_STATS environment variable must be one of: {AbstractDataContext.FALSEY_STRINGS}"
                 )
         for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
             config = configparser.ConfigParser()
@@ -4961,8 +4951,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     except gx_exceptions.UnavailableMetricError:
                         # This will happen frequently in larger pipelines
                         logger.debug(
-                            "metric {} was requested by another expectation suite but is not available in "
-                            "this validation result.".format(metric_name)
+                            f"metric {metric_name} was requested by another expectation suite but is not available in "
+                            "this validation result."
                         )
 
     def send_usage_message(
@@ -5163,9 +5153,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 ]["names"]
             except KeyError:
                 raise gx_exceptions.ProfilerError(
-                    "batch kwargs Generator {} not found. Specify the name of a generator configured in this datasource".format(
-                        batch_kwargs_generator_name
-                    )
+                    f"batch kwargs Generator {batch_kwargs_generator_name} not found. Specify the name of a generator configured in this datasource"
                 )
 
         available_data_asset_name_list = sorted(
@@ -5174,9 +5162,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         if len(available_data_asset_name_list) == 0:
             raise gx_exceptions.ProfilerError(
-                "No Data Assets found in Datasource {}. Used batch kwargs generator: {}.".format(
-                    datasource_name, batch_kwargs_generator_name
-                )
+                f"No Data Assets found in Datasource {datasource_name}. Used batch kwargs generator: {batch_kwargs_generator_name}."
             )
         total_data_assets = len(available_data_asset_name_list)
 

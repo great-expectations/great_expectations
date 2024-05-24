@@ -41,20 +41,16 @@ def assert_exception_info(
                 assert ("exception_traceback" not in v) or not v["exception_traceback"]
                 assert ("exception_traceback" not in v) or not v["exception_traceback"]
     elif "raised_exception" in result["exception_info"]:
-        assert (
-            "exception_traceback" in result.exception_info
-        ) and result.exception_info["exception_traceback"]
-        assert ("exception_message" in result.exception_info) and result.exception_info[
-            "exception_message"
-        ]
+        assert result.exception_info.get("exception_traceback")
+        assert result.exception_info.get("exception_message")
         if expected_exception_message:
             assert result["exception_message"] == expected_exception_message
     else:
         # TODO JT: This accounts for a dictionary of type {"metric_id": ExceptionInfo} path defined in
         #  validator._resolve_suite_level_graph_and_process_metric_evaluation_errors
         for k, v in result["exception_info"].items():
-            assert ("exception_traceback" in v) and v["exception_traceback"]
-            assert ("exception_message" in v) and v["exception_message"]
+            assert v.get("exception_traceback")
+            assert v.get("exception_message")
             if expected_exception_message:
                 assert v["exception_message"] == expected_exception_message
 
