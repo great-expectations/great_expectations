@@ -209,6 +209,8 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
                 },
             },
         },
+        "VALIDATION_DEFINITION_NAMES": set(),
+        "validation_definitions": {},
     }
 
 
@@ -785,6 +787,44 @@ def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
     return result
 
 
+def post_validation_definitions_cb(request: PreparedRequest) -> CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    if not request.body:
+        raise NotImplementedError("Handling missing body")
+
+    payload: dict = json.loads(request.body)
+    name = payload["data"]["attributes"]["validation_definition"]["name"]
+
+    validation_definitions: dict[str, dict] = _CLOUD_API_FAKE_DB["validation_definitions"]
+    validation_definition_names: set[str] = _CLOUD_API_FAKE_DB["VALIDATION_DEFINITION_NAMES"]
+
+    if name in validation_definitions:
+        result = CallbackResult(
+            409,  # not really a 409 in prod but it's a more informative status code
+            headers=DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "mock 400/409",
+                        "detail": f"'{name}' already defined",
+                        "source": None,
+                    }
+                ]
+            ).json(),
+        )
+    else:
+        id_ = str(uuid.uuid4())
+        payload["data"]["id"] = id_
+        validation_definitions[id_] = payload["data"]
+        validation_definition_names.add(name)
+        result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
+
+    LOGGER.debug(f"Response {result.status}")
+    return result
+
+
 # #######################
 # RequestMocks
 # #######################
@@ -896,6 +936,11 @@ def gx_cloud_api_fake_ctx(
             responses.POST,
             f"{org_url_base_V0}/validation-results",
             post_validation_results_cb,
+        )
+        resp_mocker.add_callback(
+            responses.POST,
+            f"{org_url_base_V0}/validation-definitions",
+            post_validation_definitions_cb,
         )
 
         yield resp_mocker

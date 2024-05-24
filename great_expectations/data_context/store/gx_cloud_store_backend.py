@@ -231,6 +231,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendError(  # noqa: TRY003
                 f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"  # noqa: E501
             )
+        except requests.ConnectionError as conn_err:
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to get object in GX Cloud Store Backend: {conn_err}"
+            )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)  # noqa: TRY401
             raise StoreBackendTransientError(  # noqa: TRY003
