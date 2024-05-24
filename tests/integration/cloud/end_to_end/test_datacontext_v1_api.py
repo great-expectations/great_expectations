@@ -1,7 +1,8 @@
-import great_expectations as gx
-import pytest
 import os
 
+import pytest
+
+import great_expectations as gx
 from great_expectations.data_context import CloudDataContext
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import GXCloudStoreBackend
@@ -16,8 +17,12 @@ class V1GetContextError(Exception):
 def set_v1_get_context_endpoint():
     previous = GXCloudStoreBackend._ENDPOINT_VERSION_LOOKUP[GXCloudRESTResource.DATA_CONTEXT]
     if previous == EndpointVersion.V1:
-        raise V1GetContextError("We no longer need the set_v1_get_context_endpoint fixture, please remove.")
-    GXCloudStoreBackend._ENDPOINT_VERSION_LOOKUP[GXCloudRESTResource.DATA_CONTEXT] = EndpointVersion.V1
+        raise V1GetContextError(
+            "We no longer need the set_v1_get_context_endpoint fixture, please remove."
+        )
+    GXCloudStoreBackend._ENDPOINT_VERSION_LOOKUP[GXCloudRESTResource.DATA_CONTEXT] = (
+        EndpointVersion.V1
+    )
     yield
     GXCloudStoreBackend._ENDPOINT_VERSION_LOOKUP[GXCloudRESTResource.DATA_CONTEXT] = previous
 

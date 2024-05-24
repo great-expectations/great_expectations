@@ -146,7 +146,9 @@ class CloudDataContext(SerializableDataContext):
         if not ENV_CONFIG.gx_analytics_enabled:
             return None
 
-        response = self._request_cloud_backend(cloud_config=self.ge_cloud_config, resource="accounts/me")
+        response = self._request_cloud_backend(
+            cloud_config=self.ge_cloud_config, resource="accounts/me"
+        )
         data = response.json()
         user_id = data["user_id"]
         return uuid.UUID(user_id)
