@@ -44,6 +44,8 @@ class StoreManager(BaseModel):
         DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value
     )
 
+    # NOTE: Subscriptable access is only kept around for legacy purposes
+    #       We should not allow for dictionary-like behavior here
     def __getitem__(self, item: str) -> Store:
         try:
             return getattr(self, item)
