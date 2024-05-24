@@ -179,6 +179,8 @@ class TestValidationRun:
 
         output = validation_definition.run()
 
+        # Ignore meta for purposes of this test
+        output["meta"] = {}
         assert output == ExpectationSuiteValidationResult(
             results=graph_validate_results,
             success=True,
@@ -189,10 +191,23 @@ class TestValidationRun:
                 "unsuccessful_expectations": 0,
                 "success_percent": 100.0,
             },
-            meta={
-                "validation_id": None,
-            },
+            meta={},
         )
+
+    @pytest.mark.unit
+    def test_adds_requisite_ids(
+        self,
+        mock_validator: MagicMock,
+        validation_definition: ValidationDefinition,
+    ):
+        mock_validator.graph_validate.return_value = []
+
+        assert validation_definition.id is None
+
+        output = validation_definition.run()
+
+        assert validation_definition.id is not None
+        assert output.meta == {"validation_id": validation_definition.id}
 
     @mock.patch.object(ValidationResultsStore, "set")
     @pytest.mark.unit
