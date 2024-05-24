@@ -68,6 +68,14 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class OrganizationIdNotSpecifiedError(Exception):
+    def __init__(self, number):
+        super().__init__(
+            "A request to GX Cloud is being attempted without an organization id configured. "
+            "Maybe you need to set the environment variable GX_CLOUD_ORGANIZATION_ID?"
+        )
+
+
 def _extract_fluent_datasources(config_dict: dict) -> dict:
     """
     When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
@@ -335,11 +343,7 @@ class CloudDataContext(SerializableDataContext):
         base_url = cloud_config.base_url
         organization_id = cloud_config.organization_id
         if not organization_id:
-            raise ValueError(
-                "A request to GX Cloud is being attempted without an organization id "
-                "configured. Maybe you need to set the environment variable "
-                "GX_CLOUD_ORGANIZATION_ID."
-            )
+            raise OrganizationIdNotSpecifiedError()
 
         session = create_session(access_token=access_token)
         url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
