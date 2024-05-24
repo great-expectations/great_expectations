@@ -302,6 +302,16 @@ class CloudDataContext(SerializableDataContext):
         for name in to_delete:
             config["stores"].pop(name)
 
+        # Rename stores to remove "default_" prefix
+        updated_stores: dict[str, dict] = {}
+        for name, store in stores.items():
+            if name.startswith("default_"):
+                updated_name = name.replace("default_", "", 1)
+                updated_stores[updated_name] = store
+            else:
+                updated_stores[name] = store
+        config["stores"] = updated_stores
+
         return config
 
     @staticmethod
