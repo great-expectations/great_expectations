@@ -1992,7 +1992,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation  # noqa: E501
             # if there was an invalid store config
-            return uuid.UUID(expectations_store.store_backend_id_warnings_suppressed)
+            return expectations_store.store_backend_id_warnings_suppressed
 
         # Otherwise choose the id stored in the project_config
         else:

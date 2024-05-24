@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -174,7 +175,7 @@ class Store:
         return self._key_class
 
     @property
-    def store_backend_id_warnings_suppressed(self) -> str:
+    def store_backend_id_warnings_suppressed(self) -> uuid.UUID:
         """
         Report the store_backend_id of the currently-configured StoreBackend, suppressing warnings for invalid configurations.
         Returns:
