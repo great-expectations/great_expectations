@@ -626,7 +626,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         # urljoin strips the last component of the path in base_url if it doesn't end
         # with a / which we don't want so we add a / to the end if one isn't present
-        b = base_url if base_url[-1] == '/' else base_url + '/'
+        b = base_url if base_url[-1] == "/" else base_url + "/"
 
         if version == EndpointVersion.V1:
             url = urljoin(
