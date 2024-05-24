@@ -1987,7 +1987,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _construct_data_context_id(self) -> uuid.UUID | None:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
-        expectations_store = self.stores[self.expectations_store_name]
+        expectations_store = self.stores.expectations_store
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation  # noqa: E501
             # if there was an invalid store config

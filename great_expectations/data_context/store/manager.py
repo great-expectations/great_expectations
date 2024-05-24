@@ -26,6 +26,8 @@ class StoreManager(BaseModel):
     validation_definition_store: ValidationDefinitionStore
     suite_parameter_store: SuiteParameterStore
 
+    # NOTE: These are only kept around for legacy purposes
+    #       We should no longer refer to stores by name
     expectations_store_name: ClassVar[str] = (
         DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value
     )
@@ -46,7 +48,8 @@ class StoreManager(BaseModel):
         try:
             return getattr(self, item)
         except AttributeError as e:
-            raise KeyError(  # noqa: TRY003
+            msg = (
                 f"Store with name {item} not found;"
-                f"only supports the following keys: {self.__fields__.keys()}"
-            ) from e
+                f"{self.__class__.__name__} only supports the following: {self.__fields__.keys()}"
+            )
+            raise KeyError(msg) from e
