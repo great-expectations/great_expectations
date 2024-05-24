@@ -17,6 +17,14 @@ if TYPE_CHECKING:
 
 
 class StoreManager(BaseModel):
+    """
+    A simple abstraction for managing multiple stores within a DataContext.
+
+    We use this to ensure that all stores are properly initialized and accessible.
+    Note that this class is not intended to be used directly by users.
+    A user can only have a single store of each type within a DataContext.
+    """
+
     class Config:
         arbitrary_types_allowed = True
 

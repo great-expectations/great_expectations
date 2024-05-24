@@ -1860,9 +1860,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def data_context_id(self) -> uuid.UUID | None:
         return self.variables.data_context_id
 
-    def _init_primary_stores(
-        self, store_configs: Dict[str, StoreConfigTypedDict]
-    ) -> dict[str, Store]:
+    def _init_primary_stores(self, store_configs: Dict[str, StoreConfigTypedDict]) -> StoreManager:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
@@ -1876,7 +1874,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             store = self._build_store_from_config(store_name, store_config)
             stores[store_name] = store
 
-        print("STORES", stores.keys())
         return StoreManager(**stores)
 
     @abstractmethod

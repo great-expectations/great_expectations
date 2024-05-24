@@ -11,12 +11,8 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 from great_expectations.data_context.data_context_variables import (
     EphemeralDataContextVariables,
 )
-from great_expectations.data_context.migrator.file_migrator import FileMigrator
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.file_data_context import (
-        FileDataContext,
-    )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.base import (
         DataContextConfig,
@@ -74,21 +70,3 @@ class EphemeralDataContext(AbstractDataContext):
         )
 
         return datasource_store
-
-    @public_api
-    def convert_to_file_context(self) -> FileDataContext:
-        """Convert existing EphemeralDataContext into a FileDataContext.
-
-        Scaffolds a file-backed project structure in the current working directory.
-
-        Returns:
-            A FileDataContext with an updated config to reflect the state of the current context.
-        """
-        self._synchronize_fluent_datasources()
-        migrator = FileMigrator(
-            primary_stores=self.stores,
-            datasource_store=self._datasource_store,
-            variables=self.variables,
-            fluent_config=self.fluent_config,
-        )
-        return migrator.migrate()
