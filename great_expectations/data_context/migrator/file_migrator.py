@@ -60,9 +60,9 @@ class FileMigrator:
             A FileDataContext with an updated config to reflect the state of the current context.
         """
         target_context = self._scaffold_filesystem()
-        self._migrate_primary_stores(
-            target_stores=target_context._stores,
-        )
+        # self._migrate_primary_stores(
+        #     target_stores=target_context.stores,
+        # )
         self._migrate_datasource_store(target_store=target_context._datasource_store)
         self._migrate_data_docs_sites(
             target_context=target_context,
