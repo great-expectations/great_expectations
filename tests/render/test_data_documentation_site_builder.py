@@ -148,7 +148,9 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
         data_asset_name=data_asset_name,
     )
 
-    expectation_suite_name = f"{datasource_name}.{generator_name}.{data_asset_name}.{profiler_name}"
+    expectation_suite_name = (
+        f"{datasource_name}.{generator_name}.{data_asset_name}.{profiler_name}"
+    )
 
     batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
@@ -417,7 +419,9 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
         data_asset_name=data_asset_name,
     )
 
-    expectation_suite_name = f"{datasource_name}.{generator_name}.{data_asset_name}.{profiler_name}"
+    expectation_suite_name = (
+        f"{datasource_name}.{generator_name}.{data_asset_name}.{profiler_name}"
+    )
 
     batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,
@@ -553,7 +557,9 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
         data_asset_name=data_asset_name,
     )
 
-    expectation_suite_name = f"{datasource_name}.{generator_name}.{data_asset_name}.{profiler_name}"
+    expectation_suite_name = (
+        f"{datasource_name}.{generator_name}.{data_asset_name}.{profiler_name}"
+    )
 
     batch = context._get_batch_v2(
         batch_kwargs=batch_kwargs,

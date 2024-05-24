@@ -45,7 +45,9 @@ class OpsgenieRenderer(Renderer):
             batch_id = BatchKwargs(
                 validation_result.meta.get("batch_kwargs", {})
             ).to_id()
-            check_details_text = f"{n_checks_succeeded} of {n_checks} expectations were met"
+            check_details_text = (
+                f"{n_checks_succeeded} of {n_checks} expectations were met"
+            )
 
             if validation_result.success:
                 status = "Success 🎉"
