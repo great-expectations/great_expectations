@@ -116,7 +116,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(construct_data_context_co
     # Create desired config
     desired_stores_config = {
         "suite_parameter_store": {"class_name": "SuiteParameterStore"},
-        "expectations_S3_store": {
+        "expectations_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -124,7 +124,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(construct_data_context_co
                 "prefix": "expectations",
             },
         },
-        "validation_results_S3_store": {
+        "validation_results_store": {
             "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -140,7 +140,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(construct_data_context_co
                 "prefix": "validation_definitions",
             },
         },
-        "checkpoint_S3_store": {
+        "checkpoint_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -213,8 +213,8 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
 
     # Create desired config
     desired_stores_config = {
-        "custom_suite_parameter_store_name": {"class_name": "SuiteParameterStore"},
-        "custom_expectations_S3_store_name": {
+        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
+        "expectations_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "bucket": "custom_expectations_store_bucket_name",
@@ -222,7 +222,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_expectations_store_prefix",
             },
         },
-        "custom_validation_results_S3_store_name": {
+        "validation_results_store": {
             "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "custom_validation_results_store_bucket_name",
@@ -238,7 +238,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
                 "prefix": "validation_definitions",
             },
         },
-        "custom_checkpoint_S3_store_name": {
+        "checkpoint_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
                 "bucket": "custom_checkpoint_store_bucket_name",
@@ -305,15 +305,15 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     data_context_id = data_context_config.data_context_id
     desired_config = construct_data_context_config(data_context_id=data_context_id)
     # Add root_directory to stores and data_docs
-    desired_config["stores"][desired_config["expectations_store_name"]]["store_backend"][
-        "root_directory"
-    ] = test_root_directory
-    desired_config["stores"][desired_config["validation_results_store_name"]]["store_backend"][
-        "root_directory"
-    ] = test_root_directory
-    desired_config["stores"][desired_config["checkpoint_store_name"]]["store_backend"][
-        "root_directory"
-    ] = test_root_directory
+    desired_config["stores"]["expectations_store"]["store_backend"]["root_directory"] = (
+        test_root_directory
+    )
+    desired_config["stores"]["validation_results_store"]["store_backend"]["root_directory"] = (
+        test_root_directory
+    )
+    desired_config["stores"]["checkpoint_store"]["store_backend"]["root_directory"] = (
+        test_root_directory
+    )
     desired_config["data_docs_sites"]["local_site"]["store_backend"]["root_directory"] = (
         test_root_directory
     )
@@ -351,7 +351,6 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     store_backend_defaults = FilesystemStoreBackendDefaults()
     data_context_config = DataContextConfig(
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -395,7 +394,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(construct_data_context_c
     data_context_id = data_context_config.data_context_id
     desired_stores_config = {
         "suite_parameter_store": {"class_name": "SuiteParameterStore"},
-        "expectations_GCS_store": {
+        "expectations_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -404,7 +403,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(construct_data_context_c
                 "prefix": "expectations",
             },
         },
-        "validation_results_GCS_store": {
+        "validation_results_store": {
             "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -422,7 +421,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(construct_data_context_c
                 "prefix": "validation_definitions",
             },
         },
-        "checkpoint_GCS_store": {
+        "checkpoint_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -450,10 +449,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(construct_data_context_c
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_id,
-        expectations_store_name="expectations_GCS_store",
-        validation_results_store_name="validation_results_GCS_store",
-        checkpoint_store_name="checkpoint_GCS_store",
-        suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -499,10 +494,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         validation_results_store_prefix="custom_validation_results_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
         checkpoint_store_prefix="custom_checkpoint_store_prefix",
-        expectations_store_name="custom_expectations_GCS_store_name",
-        validation_results_store_name="custom_validation_results_GCS_store_name",
-        suite_parameter_store_name="custom_suite_parameter_store_name",
-        checkpoint_store_name="custom_checkpoint_GCS_store_name",
     )
     data_context_config = DataContextConfig(
         store_backend_defaults=store_backend_defaults,
@@ -510,8 +501,8 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
 
     # Create desired config
     desired_stores_config = {
-        "custom_suite_parameter_store_name": {"class_name": "SuiteParameterStore"},
-        "custom_expectations_GCS_store_name": {
+        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
+        "expectations_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "bucket": "custom_expectations_store_bucket_name",
@@ -520,7 +511,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_expectations_store_prefix",
             },
         },
-        "custom_validation_results_GCS_store_name": {
+        "validation_results_store": {
             "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "custom_validation_results_store_bucket_name",
@@ -538,7 +529,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
                 "project": "custom_default_project_name",
             },
         },
-        "custom_checkpoint_GCS_store_name": {
+        "checkpoint_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
                 "bucket": "custom_checkpoint_store_bucket_name",
@@ -565,10 +556,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
     }
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        expectations_store_name="custom_expectations_GCS_store_name",
-        validation_results_store_name="custom_validation_results_GCS_store_name",
-        suite_parameter_store_name="custom_suite_parameter_store_name",
-        checkpoint_store_name="custom_checkpoint_GCS_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -614,7 +601,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(construct_data_cont
     # Create desired config
     desired_stores_config = {
         "suite_parameter_store": {"class_name": "SuiteParameterStore"},
-        "expectations_database_store": {
+        "expectations_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
@@ -628,7 +615,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(construct_data_cont
                 },
             },
         },
-        "validation_results_database_store": {
+        "validation_results_store": {
             "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
@@ -656,7 +643,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(construct_data_cont
                 },
             },
         },
-        "checkpoint_database_store": {
+        "checkpoint_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
@@ -687,10 +674,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(construct_data_cont
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        expectations_store_name="expectations_database_store",
-        validation_results_store_name="validation_results_database_store",
-        checkpoint_store_name="checkpoint_database_store",
-        suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -754,10 +737,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             "password": "custom_checkpoint_store_password",
             "database": "custom_checkpoint_store_database",
         },
-        expectations_store_name="custom_expectations_database_store_name",
-        validation_results_store_name="custom_validation_results_database_store_name",
-        suite_parameter_store_name="custom_suite_parameter_store_name",
-        checkpoint_store_name="custom_checkpoint_database_store_name",
     )
     data_context_config = DataContextConfig(
         store_backend_defaults=store_backend_defaults,
@@ -765,8 +744,8 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
 
     # Create desired config
     desired_stores_config = {
-        "custom_suite_parameter_store_name": {"class_name": "SuiteParameterStore"},
-        "custom_expectations_database_store_name": {
+        "suite_parameter_store": {"class_name": "SuiteParameterStore"},
+        "expectations_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
@@ -780,7 +759,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
                 },
             },
         },
-        "custom_validation_results_database_store_name": {
+        "validation_results_store": {
             "class_name": "ValidationResultsStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
@@ -808,7 +787,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
                 },
             },
         },
-        "custom_checkpoint_database_store_name": {
+        "checkpoint_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
                 "class_name": "DatabaseStoreBackend",
@@ -839,10 +818,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        expectations_store_name="custom_expectations_database_store_name",
-        validation_results_store_name="custom_validation_results_database_store_name",
-        suite_parameter_store_name="custom_suite_parameter_store_name",
-        checkpoint_store_name="custom_checkpoint_database_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -910,7 +885,7 @@ def test_override_general_defaults(
                 },
             },
             "custom_suite_parameter_store": {"class_name": "SuiteParameterStore"},
-            "checkpoint_S3_store": {
+            "checkpoint_store": {
                 "class_name": "CheckpointStore",
                 "store_backend": {
                     "class_name": "TupleS3StoreBackend",
@@ -919,10 +894,6 @@ def test_override_general_defaults(
                 },
             },
         },
-        expectations_store_name="custom_expectations_store_name",
-        validation_results_store_name="custom_validation_results_store_name",
-        suite_parameter_store_name="custom_suite_parameter_store_name",
-        checkpoint_store_name="checkpoint_S3_store",
         data_docs_sites={
             "s3_site": {
                 "class_name": "SiteBuilder",
@@ -985,7 +956,7 @@ def test_override_general_defaults(
         "validation_definition_store": {
             "class_name": "ValidationDefinitionStore",
         },
-        "checkpoint_S3_store": {
+        "checkpoint_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
                 "bucket": "REPLACE_ME",
@@ -1022,10 +993,6 @@ def test_override_general_defaults(
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
         config_version=999.0,
-        expectations_store_name="custom_expectations_store_name",
-        validation_results_store_name="custom_validation_results_store_name",
-        suite_parameter_store_name="custom_suite_parameter_store_name",
-        checkpoint_store_name="checkpoint_S3_store",
         stores=desired_stores,
         data_docs_sites=desired_data_docs_sites_config,
         plugins_directory="custom_plugins_directory",
@@ -1069,7 +1036,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
     # Create desired config
     desired_stores_config = {
         "suite_parameter_store": {"class_name": "SuiteParameterStore"},
-        "expectations_S3_store": {
+        "expectations_store": {
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -1077,7 +1044,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
                 "prefix": "expectations",
             },
         },
-        "validation_results_S3_store": {
+        "validation_results_store": {
             "class_name": "ValidationResultsStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -1093,7 +1060,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
                 "prefix": "validation_definitions",
             },
         },
-        "checkpoint_S3_store": {
+        "checkpoint_store": {
             "class_name": "CheckpointStore",
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -1119,10 +1086,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     desired_config = construct_data_context_config(
         data_context_id=data_context_config.data_context_id,
-        expectations_store_name="expectations_S3_store",
-        validation_results_store_name="validation_results_S3_store",
-        checkpoint_store_name="checkpoint_S3_store",
-        suite_parameter_store_name=DataContextConfigDefaults.DEFAULT_SUITE_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
