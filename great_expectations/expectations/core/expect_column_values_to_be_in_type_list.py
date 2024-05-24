@@ -59,12 +59,7 @@ EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values from a specif
 COLUMN_ARG = "The column name."
 TYPE_LIST_ARG = """
     A list of strings representing the data type that each column should have as entries. \
-    Valid types are defined by the current backend implementation and are dynamically loaded. \
-    For example, valid types for Pandas Datasources include any numpy dtype values \
-    (such as 'int64') or native python types (such as 'int'), whereas valid types for a \
-    SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
-    in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for \
-    Spark Datasources include 'StringType', 'BooleanType' and other pyspark-defined type names.
+    Valid types are defined by the current backend implementation and are dynamically loaded.
     """
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Schema"]
@@ -90,6 +85,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             {COLUMN_ARG}
         type_list (list[str] or None): \
             {TYPE_LIST_ARG}
+            For example, valid types for Pandas Datasources include any numpy dtype values \
+            (such as 'int64') or native python types (such as 'int'), whereas valid types for a \
+            SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for \
+            Spark Datasources include 'StringType', 'BooleanType' and other pyspark-defined type names.
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \

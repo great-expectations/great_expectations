@@ -78,15 +78,7 @@ EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values of a specifie
 COLUMN_ARG = "The column name."
 TYPE__ARG = """
     A string representing the data type that each column should have as entries. \
-    Valid types are defined by the current backend implementation and are dynamically loaded. \
-    For example, valid types for Pandas Datasources include any numpy dtype values \
-    (such as 'int64') or native python types (such as 'int'), whereas valid types \
-    for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
-    in most SQL dialects and 'TEXT' in dialects such as postgresql. \
-    Valid types for Spark Datasources include 'StringType', 'BooleanType' and other \
-    pyspark-defined type names. Note that the strings representing these \
-    types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` \
-    will be unrecognized and fail the expectation, while `Timestamp` would pass with valid data.
+    Valid types are defined by the current backend implementation and are dynamically loaded.
     """
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Schema"]
@@ -113,6 +105,14 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             {COLUMN_ARG}
         type\\_ (str): \
             {TYPE__ARG}
+            For example, valid types for Pandas Datasources include any numpy dtype values \
+            (such as 'int64') or native python types (such as 'int'), whereas valid types \
+            for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. \
+            Valid types for Spark Datasources include 'StringType', 'BooleanType' and other \
+            pyspark-defined type names. Note that the strings representing these \
+            types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` \
+            will be unrecognized and fail the expectation, while `Timestamp` would pass with valid data.
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
