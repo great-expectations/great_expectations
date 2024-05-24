@@ -69,7 +69,7 @@ logger = logging.getLogger(__name__)
 
 
 class OrganizationIdNotSpecifiedError(Exception):
-    def __init__(self, number):
+    def __init__(self):
         super().__init__(
             "A request to GX Cloud is being attempted without an organization id configured. "
             "Maybe you need to set the environment variable GX_CLOUD_ORGANIZATION_ID?"
