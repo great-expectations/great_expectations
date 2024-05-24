@@ -6,6 +6,12 @@ description: Create and manage Expectations in GX Cloud.
 
 An Expectation is a verifiable assertion about your data. They make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality. An Expectation Suite contains multiple Expectations.
 
+:::info Custom SQL Query Expectations
+
+To create custom SQL query Expectations, you'll need to use the GX API. See [Create a Custom Query Expectation](/oss/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations.md).
+
+:::
+
 To learn more about Expectations, see [Expectation](/reference/learn/terms/expectation.md).
 
 ## Prerequisites
