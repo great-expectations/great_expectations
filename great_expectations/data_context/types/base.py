@@ -64,7 +64,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-CURRENT_GX_CONFIG_VERSION = 3
+CURRENT_GX_CONFIG_VERSION = 4
 FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
