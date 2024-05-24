@@ -2140,6 +2140,17 @@ stores:
         access_token: {ge_cloud_access_token}
         organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
+
+  validation_definition_store:
+    class_name: ValidationDefinitionStore
+    store_backend:
+      class_name: {GXCloudStoreBackend.__name__}
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: checkpoint
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        organization_id: {ge_cloud_organization_id}
+      suppress_store_backend_id: True
 """
     data_context_config_dict = yaml.load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)

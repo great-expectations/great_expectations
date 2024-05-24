@@ -169,21 +169,18 @@ def test_cloud_context_with_in_memory_config_overrides(
             cloud_access_token="i_am_a_token",
         )
         assert isinstance(context, CloudDataContext)
-        assert context.expectations_store_name == "default_expectations_store"
+        assert context.expectations_store_name == "expectations_store"
 
         config: DataContextConfig = DataContextConfig(
             config_version=3.0,
             plugins_directory=None,
-            suite_parameter_store_name="new_suite_parameter_store",
-            expectations_store_name="new_expectations_store",
-            checkpoint_store_name="new_checkpoint_store",
             stores={
                 "expectations_store": {"class_name": "ExpectationsStore"},
                 "checkpoint_store": {"class_name": "CheckpointStore"},
                 "suite_parameter_store": {"class_name": "SuiteParameterStore"},
                 "validation_results_store": {"class_name": "ValidationResultsStore"},
+                "validation_definition_store": {"class_name": "ValidationDefinitionStore"},
             },
-            validation_results_store_name="new_validation_result_store",
             data_docs_sites={},
         )
         context = gx.get_context(
