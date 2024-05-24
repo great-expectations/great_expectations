@@ -9,6 +9,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.expectations as gxe
+from great_expectations import set_context
 from great_expectations.core.batch_definition import BatchDefinition
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
@@ -18,6 +19,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.result_format import ResultFormat
 from great_expectations.core.serdes import _IdentifierBundle
 from great_expectations.core.validation_definition import ValidationDefinition
+from great_expectations.data_context.data_context.abstract_data_context import AbstractDataContext
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -654,3 +656,16 @@ def test_identifier_bundle_no_id(validation_definition: ValidationDefinition):
 
     assert actual.dict() == expected
     assert actual.id is not None
+
+
+@pytest.mark.unit
+def test_save_success(mocker: MockerFixture, validation_definition: ValidationDefinition):
+    context = mocker.Mock(spec=AbstractDataContext)
+    set_context(project=context)
+
+    store_key = context.validation_definition_store.get_key.return_value
+    validation_definition.save()
+
+    context.validation_definition_store.add.assert_called_once_with(
+        key=store_key, value=validation_definition
+    )
