@@ -4,7 +4,7 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import TYPE_CHECKING, Final, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Final, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load
 
@@ -15,6 +15,7 @@ from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility.pydantic import fields as pydantic_fields
     from great_expectations.render.renderer_configuration import (
         MetaNotes,
         RendererTableValue,
@@ -917,6 +918,23 @@ class RenderedAtomicContent(RenderedContent):
     @override
     def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not isinstance(v, RenderedAtomicContent):
+            invalid_type_msg = f"Invalid type {type(v)} for RenderedAtomicContent"
+            raise TypeError(invalid_type_msg)
+        return v
+
+    @classmethod
+    def __modify_schema__(
+        cls, field_schema: dict[str, Any], field: pydantic_fields.ModelField | None
+    ):
+        field_schema.update(type="object")
 
     @public_api
     @override
