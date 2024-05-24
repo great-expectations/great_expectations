@@ -334,6 +334,10 @@ class CloudDataContext(SerializableDataContext):
         access_token = cloud_config.access_token
         base_url = cloud_config.base_url
         organization_id = cloud_config.organization_id
+        if not organization_id:
+            raise ValueError("A request to GX Cloud is being attempted without an organization id "
+                             "configured. Maybe you need to set the environment variable "
+                             "GX_CLOUD_ORGANIZATION_ID.")
 
         session = create_session(access_token=access_token)
         url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
