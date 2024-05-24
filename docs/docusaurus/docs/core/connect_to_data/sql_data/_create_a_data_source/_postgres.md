@@ -54,58 +54,6 @@ import TabItem from '@theme/TabItem'
    
    A list of Data Sources is printed.  You can verify your Data Source was created and added to the Data Context by checking for its name in the printed list.
 
-5. Create a Data Asset:
-
-   <Tabs queryString="asset_type" groupId="asset_type" defaultValue='table' values={[{label: 'Table Asset', value:'table'}, {label: 'Query Asset', value:'query'}]}>
-   
-   <TabItem value="table" label="Table Asset">
-   ```python
-   data_asset = data_source.add_table_asset()
-   ```
-   </TabItem>
-
-   <TabItem value="query" label="Query Asset">
-   ```python
-   data_asset = data_source.add_table_asset()
-   ```
-   </TabItem>
-
-   </Tabs>
-   
-   
-6. Optional. Create additional Data Assets.
-
-
-7. Create a Batch Definition.
-
-   <Tabs queryString="batch_definition" groupId="batch_definition" defaultValue='whole_table' values={[{label: 'Whole table', value:'whole_table'}, {label: 'Partitioned', value:'partitioned'}]}>
-   
-   <TabItem value="whole_table" label="Whole table">
-   ```python
-   batch_definition = data_source.add_batch_definition_whole_table()
-   ```
-   </TabItem>
-
-   <TabItem value="partitioned" label="Partitioned">
-   ```python
-   daily_batch_definition = data_source.add_batch_definition_daily()
-   monthly_batch_definition = data_source.add_batch_definition_monthly()
-   yearly_batch_definition = data_source.add_batch_definition_yearly()
-   ```
-   </TabItem>
-
-   </Tabs>
-
-8. Optional. Verify the Batch Definition is valid.
-
-   ```python
-   batch = batch_definition.get_batch()
-   batch.head()
-   ```
-
-9. Optional. Create additional Batch Definitions.
-
-
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
