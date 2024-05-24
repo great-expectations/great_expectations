@@ -10,6 +10,7 @@ import Tabs from '@theme/Tabs';
 
 import GxDataSourceApi from './_create_a_data_source/_add_datasource_api.md';
 import PostgreSqlDataSource from './_create_a_data_source/_postgres.md';
+import CreateAsset from './_create_a_data_asset/_asset_type_tabs.md';
 
 To connect to your SQL data, you first create a Data Source telling GX where your database resides and how to connect to it.  You configure Data Assets for your Data Source to tell GX which sets of records you want to be able to access.  Finally, Batch Definitions allow you to further partition the records in your Data Assets.
 
@@ -46,5 +47,6 @@ SQLite is packaged with Python.  SQLite databases can be created as local files,
 
 ## Create a Data Asset
 
+<CreateAsset/>
 
 ## Create a Batch Definition

@@ -16,6 +16,7 @@ connecting_to_a_datasource = [
                 "tests/integration/fixtures/partition_and_sample_data/postgres_connection_string.yml",
                 "connection_string.yml",
             ),
+            ("uncomitted/config_variables.yml", "uncomitted/config_variables.yml"),
         ),
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
