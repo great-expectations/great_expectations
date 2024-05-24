@@ -2,10 +2,6 @@ config_version: 9999
 
 config_variables_file_path: uncommitted/config_variables.yml
 
-expectations_store_name: expectations_store
-validation_results_store_name: "foo"
-suite_parameter_store_name: suite_parameter_store
-
 plugins_directory: plugins/
 
 data_docs_sites: not_a_real_site

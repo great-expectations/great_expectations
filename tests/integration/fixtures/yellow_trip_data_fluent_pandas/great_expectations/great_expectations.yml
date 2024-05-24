@@ -20,10 +20,6 @@ stores:
       class_name: TupleFilesystemStoreBackend
       suppress_store_backend_id: true
       base_directory: checkpoints/
-expectations_store_name: expectations_store
-validation_results_store_name: validation_results_store
-suite_parameter_store_name: suite_parameter_store
-checkpoint_store_name: checkpoint_store
 data_docs_sites:
   local_site:
     class_name: SiteBuilder

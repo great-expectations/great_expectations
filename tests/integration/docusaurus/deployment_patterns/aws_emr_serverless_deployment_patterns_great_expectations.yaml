@@ -4,14 +4,14 @@ config_variables_file_path: great_expectations/uncommitted/config_variables.yml
 plugins_directory: great_expectations/plugins/
 
 stores:
-  expectations_S3_store:
+  expectations_store:
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleS3StoreBackend
       bucket: "bucket_name"
       prefix: "great_expectations/expectations/"
 
-  validation_results_S3_store:
+  validation_results_store:
     class_name: ValidationResultsStore
     store_backend:
       class_name: TupleS3StoreBackend
@@ -21,17 +21,12 @@ stores:
   suite_parameter_store:
     class_name: SuiteParameterStore
 
-  checkpoint_S3_store:
+  checkpoint_store:
     class_name: CheckpointStore
     store_backend:
       class_name: TupleS3StoreBackend
       bucket: "bucket_name"
       prefix: "great_expectations/checkpoints/"
-
-expectations_store_name: expectations_S3_store
-validation_results_store_name: validation_results_S3_store
-suite_parameter_store_name: suite_parameter_store
-checkpoint_store_name: checkpoint_S3_store
 
 data_docs_sites:
   s3_site:

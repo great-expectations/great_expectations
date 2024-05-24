@@ -32,9 +32,6 @@ if __name__ == "__main__":
     config = DataContextConfig(
         config_version=config_file["config_version"],
         datasources=config_file["datasources"],
-        expectations_store_name=config_file["expectations_store_name"],
-        validation_results_store_name=config_file["validation_results_store_name"],
-        suite_parameter_store_name=config_file["suite_parameter_store_name"],
         plugins_directory="/great_expectations/plugins",
         stores=config_file["stores"],
         data_docs_sites=config_file["data_docs_sites"],

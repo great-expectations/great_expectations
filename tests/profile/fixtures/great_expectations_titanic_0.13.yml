@@ -47,11 +47,6 @@ stores:
     # https://docs.greatexpectations.io/en/latest/reference/core_concepts/suite_parameters.html
     class_name: SuiteParameterStore
 
-expectations_store_name: expectations_store
-checkpoint_store_name: checkpoint_store
-validation_results_store_name: validation_results_store
-suite_parameter_store_name: suite_parameter_store
-
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
   # include Expectations, Validations & Profiles. The are built for all
