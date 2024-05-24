@@ -145,6 +145,9 @@ class Checkpoint(BaseModel):
         expectation_parameters: Dict[str, Any] | None = None,
         run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
+        if not self.id:
+            self.save()
+
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
             batch_parameters=batch_parameters,
@@ -247,7 +250,10 @@ class Checkpoint(BaseModel):
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)
 
-        store.update(key=key, value=self)
+        if self.id:
+            store.update(key=key, value=self)
+        else:
+            store.add(key=key, value=self)
 
 
 class CheckpointResult(BaseModel):
