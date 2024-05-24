@@ -111,6 +111,36 @@ class SnowflakeDatasource(SQLDatasource):
 
     # TODO: add props for account, user, password, etc?
 
+    @property
+    def schema_(self) -> str | None:
+        """
+        Convenience property to get the `schema` regardless of the connection string format.
+
+        `schema_` to avoid conflict with Pydantic models schema property.
+        """
+        if isinstance(self.connection_string, ConnectionDetails):
+            return self.connection_string.schema_
+        elif isinstance(self.connection_string, SnowflakeDsn):
+            # extra database and schema query parameters for the url
+            for key, value in self.connection_string.query_params():
+                if key.lower() == "schema":
+                    return value
+        # TODO: attempt to parse schema from a ConfigStr
+        return None
+
+    @property
+    def database(self) -> str | None:
+        """Convenience property to get the `database` regardless of the connection string format."""
+        if isinstance(self.connection_string, ConnectionDetails):
+            return self.connection_string.database
+        elif isinstance(self.connection_string, SnowflakeDsn):
+            # extra database and schema query parameters for the url
+            for key, value in self.connection_string.query_params():
+                if key.lower() == "database":
+                    return value
+        # TODO: attempt to parse database from a ConfigStr
+        return None
+
     @pydantic.root_validator(pre=True)
     def _convert_root_connection_detail_fields(cls, values: dict) -> dict:
         """
