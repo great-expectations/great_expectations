@@ -642,7 +642,7 @@ class TestCheckpointResult:
         }
         assert actual == expected
 
-    def _build_file_backed_checkpoint(self, tmp_path: pathlib.Path):
+    def _build_file_backed_checkpoint(self, tmp_path: pathlib.Path) -> Checkpoint:
         with working_directory(tmp_path):
             context = gx.get_context(mode="file")
 
@@ -745,7 +745,8 @@ class TestCheckpointResult:
     def test_checkpoint_run_adds_requisite_ids(self, tmp_path: pathlib.Path):
         checkpoint = self._build_file_backed_checkpoint(tmp_path)
 
-        # A checkpoint that has not been persisted before running should obtain one during the run
+        # A checkpoint that has not been persisted before running
+        # should be saved during the run
         # This is also true for its nested validation definitions
         assert checkpoint.id is None
         assert checkpoint.validation_definitions[0].id is None
