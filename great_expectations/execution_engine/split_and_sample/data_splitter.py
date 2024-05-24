@@ -73,7 +73,7 @@ class SplitterMethod(enum.Enum):
         return hash(self.value)
 
 
-class DataSplitter(abc.ABC):
+class DataSplitter(abc.ABC):  # noqa: B024
     """Abstract base class containing methods for splitting data accessible via Execution Engines.
 
     Note, for convenience, you can also access DatePart via the instance variable
