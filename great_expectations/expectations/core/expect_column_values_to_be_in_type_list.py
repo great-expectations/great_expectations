@@ -55,9 +55,23 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values from a specified type list."
+COLUMN_ARG = "The column name."
+TYPE_LIST_ARG = """
+    A list of strings representing the data type that each column should have as entries. \
+    Valid types are defined by the current backend implementation and are dynamically loaded. \
+    For example, valid types for Pandas Datasources include any numpy dtype values \
+    (such as 'int64') or native python types (such as 'int'), whereas valid types for a \
+    SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
+    in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for \
+    Spark Datasources include 'StringType', 'BooleanType' and other pyspark-defined type names.
+    """
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Schema"]
+
 
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
-    """Expect a column to contain values from a specified type list.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_be_in_type_list is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
@@ -73,14 +87,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_ARG}
         type_list (list[str] or None): \
-            A list of strings representing the data type that each column should have as entries. Valid types are \
-            defined by the current backend implementation and are dynamically loaded. For example, valid types for \
-            Pandas Datasources include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
-            whereas valid types for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for Spark Datasources include \
-            'StringType', 'BooleanType' and other pyspark-defined type names.
+            {TYPE_LIST_ARG}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
@@ -105,11 +114,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Schema
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -126,13 +135,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -141,10 +150,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -154,13 +163,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 3,
                     "unexpected_percent": 100.0,
@@ -173,10 +182,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 100.0,
                     "unexpected_percent_nonmissing": 100.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     condition_parser: Union[str, None] = "pandas"
