@@ -74,9 +74,26 @@ except (ImportError, KeyError):
     clickhouse_sqlalchemy = None
     ch_types = None
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values of a specified data type."
+COLUMN_ARG = "The column name."
+TYPE__ARG = """
+    A string representing the data type that each column should have as entries. \
+    Valid types are defined by the current backend implementation and are dynamically loaded. \
+    For example, valid types for Pandas Datasources include any numpy dtype values \
+    (such as 'int64') or native python types (such as 'int'), whereas valid types \
+    for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
+    in most SQL dialects and 'TEXT' in dialects such as postgresql. \
+    Valid types for Spark Datasources include 'StringType', 'BooleanType' and other \
+    pyspark-defined type names. Note that the strings representing these \
+    types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` \
+    will be unrecognized and fail the expectation, while `Timestamp` would pass with valid data.
+    """
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Schema"]
+
 
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
-    """Expect a column to contain values of a specified data type.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_be_of_type is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
@@ -93,16 +110,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_ARG}
         type\\_ (str): \
-            A string representing the data type that each column should have as entries. Valid types are defined \
-            by the current backend implementation and are dynamically loaded. For example, valid types for \
-            Pandas Datasources include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
-            whereas valid types for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for Spark Datasources include \
-            'StringType', 'BooleanType' and other pyspark-defined type names. Note that the strings representing these \
-            types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` will be unrecognized and
-            fail the expectation, while `Timestamp` would pass with valid data.
+            {TYPE__ARG}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
@@ -127,11 +137,11 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Schema
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -148,13 +158,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -163,10 +173,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -176,13 +186,13 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 3,
                     "unexpected_percent": 100.0,
@@ -195,10 +205,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 100.0,
                     "unexpected_percent_nonmissing": 100.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     type_: str
