@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Final, Literal, Optional, Type, Union
+from typing import TYPE_CHECKING, Final, Literal, Optional, Sequence, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, errors
@@ -55,6 +55,22 @@ class SnowflakeDsn(AnyUrl):
     }
 
     @classmethod
+    def _ensure_required_query_params(cls, query_str: str, keys: Sequence[str]) -> None:
+        """
+        Ensure that required query parameters are present in the URL.
+        """
+        missing_keys: set = set()
+        for key in keys:
+            if key not in query_str:  # TODO: parse the query string
+                missing_keys.add(key)
+        if missing_keys:
+            raise errors.UrlQueryError(
+                query=query_str,
+                key=key,
+                msg=f"Required URL query parameters {', '.join(missing_keys)} missing",
+            )
+
+    @classmethod
     @override
     def validate_parts(cls, parts: Parts, validate_port: bool = True) -> Parts:
         """
@@ -72,7 +88,11 @@ class SnowflakeDsn(AnyUrl):
         if domain is None:
             raise _UrlDomainError()
 
-        return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
+        validated = AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
+
+        cls._ensure_required_query_params(parts["query"], ["database", "schema"])
+
+        return validated
 
 
 class ConnectionDetails(FluentBaseModel):
