@@ -228,7 +228,7 @@ class InlineStoreBackend(StoreBackend):
         # In environments where wrting to disk is not allowed, it is impossible to
         # save changes. As such, we log a warning but do not raise.
         except (PermissionError, OSError) as e:
-            logger.warning(f"Could not save project config to disk: {e}")
+            logger.warning(f"Could not save project config to disk: {e!r}")
 
     @staticmethod
     def _determine_resource_name(key: tuple[str, ...]) -> str | None:
