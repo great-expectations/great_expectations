@@ -115,6 +115,8 @@ FakeDBTypedDict = TypedDict(
         "expectation_suites": Dict[str, dict],
         "CHECKPOINT_NAMES": Set[str],
         "checkpoints": Dict[str, dict],
+        "VALIDATION_DEFINITION_NAMES": Set[str],
+        "validation_definitions": Dict[str, dict],
     },
 )
 
