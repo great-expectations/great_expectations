@@ -802,13 +802,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint_store_name
         """  # noqa: E501
         active_store_names: List[str] = [
-            self.expectations_store_name,  # type: ignore[list-item]
-            self.validation_results_store_name,  # type: ignore[list-item]
-            self.suite_parameter_store_name,  # type: ignore[list-item]
+            self.expectations_store_name,
+            self.validation_results_store_name,
+            self.suite_parameter_store_name,
         ]
 
         try:
-            active_store_names.append(self.checkpoint_store_name)  # type: ignore[arg-type]
+            active_store_names.append(self.checkpoint_store_name)
         except (AttributeError, gx_exceptions.InvalidTopLevelConfigKeyError):
             logger.info("Checkpoint store is not configured; omitting it from active stores")
 
