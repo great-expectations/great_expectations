@@ -1811,9 +1811,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         # the expectations_store does not yet exist by:
         # adding the data_context_id from the project_config
         # to the store_config under the key manually_initialize_store_backend_id
-        if (store_name == StoreManager.expectations_store_name) and store_config.get(
-            "store_backend"
-        ):
+        if (store_name == self.expectations_store_name) and store_config.get("store_backend"):
             store_config["store_backend"].update(
                 {"manually_initialize_store_backend_id": self.variables.data_context_id}
             )
@@ -1874,7 +1872,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             store = self._build_store_from_config(store_name, store_config)
             stores[store_name] = store
 
-        return StoreManager(**stores)
+        try:
+            return StoreManager(**stores)  # type: ignore[arg-type]
+        except ValidationError as e:
+            raise DataContextError(  # noqa: TRY003
+                f"Improper store configuration;"
+                f"please check that you've configured all stores with the appropriate names: {e}"
+            ) from e
 
     @abstractmethod
     def _init_datasource_store(self) -> DatasourceStore:
@@ -1988,7 +1992,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation  # noqa: E501
             # if there was an invalid store config
-            return expectations_store.store_backend_id_warnings_suppressed
+            return uuid.UUID(expectations_store.store_backend_id_warnings_suppressed)
 
         # Otherwise choose the id stored in the project_config
         else:
