@@ -518,6 +518,7 @@ class BaseCheckpoint(ConfigPeer):
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
                     id=self.ge_cloud_id,
+                    resource_name=self.name,
                 )
 
             operator_run_kwargs = {}

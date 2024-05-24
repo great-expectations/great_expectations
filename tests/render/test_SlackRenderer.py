@@ -108,7 +108,10 @@ def test_SlackRenderer_validation_results_with_datadocs(
                 "type": "header",
             },
             {
-                "text": {"text": "Runtime: 2019/09/25 06:05 AM", "type": "plain_text"},
+                "text": {
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
+                },
                 "type": "section",
             },
             {
@@ -145,7 +148,10 @@ def test_SlackRenderer_validation_results_with_datadocs(
                 "type": "header",
             },
             {
-                "text": {"text": "Runtime: 2019/09/25 06:05 AM", "type": "plain_text"},
+                "text": {
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
+                },
                 "type": "section",
             },
             {
@@ -190,7 +196,10 @@ def test_SlackRenderer_validation_results_with_datadocs(
                 "type": "header",
             },
             {
-                "text": {"text": "Runtime: 2019/09/25 06:05 AM", "type": "plain_text"},
+                "text": {
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
+                },
                 "type": "section",
             },
             {
@@ -259,7 +268,10 @@ def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
                 "type": "header",
             },
             {
-                "text": {"text": "Runtime: 2019/09/25 06:05 AM", "type": "plain_text"},
+                "text": {
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
+                },
                 "type": "section",
             },
             {
@@ -296,7 +308,10 @@ def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
                 "type": "header",
             },
             {
-                "text": {"text": "Runtime: 2019/09/25 06:05 AM", "type": "plain_text"},
+                "text": {
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
+                },
                 "type": "section",
             },
             {
@@ -341,7 +356,10 @@ def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
                 "type": "header",
             },
             {
-                "text": {"text": "Runtime: 2019/09/25 06:05 AM", "type": "plain_text"},
+                "text": {
+                    "text": "Runtime: 2019/09/25 06:05 AM UTC",
+                    "type": "plain_text",
+                },
                 "type": "section",
             },
             {
