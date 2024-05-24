@@ -666,6 +666,6 @@ def test_save_success(mocker: MockerFixture, validation_definition: ValidationDe
     store_key = context.validation_definition_store.get_key.return_value
     validation_definition.save()
 
-    context.validation_definition_store.add.assert_called_once_with(
+    context.validation_definition_store.update.assert_called_once_with(
         key=store_key, value=validation_definition
     )
