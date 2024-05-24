@@ -39,7 +39,7 @@ If you've used GX Cloud previously, you have your access token and organization 
 
 3. Copy and then paste the **Access token** and **Organization ID** values into a temporary file. You'll need them to deploy the GX Agent.
 
-4. Click **Deploy the GX Agent** and [deploy the GX Agent](#deploy-the-gx-agent).
+4. Click **Deploy the GX Agent** and complete [Deploy the GX Agent](#deploy-the-gx-agent).
 
 </TabItem>
 <TabItem value="existing">
