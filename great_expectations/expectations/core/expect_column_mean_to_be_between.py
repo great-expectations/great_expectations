@@ -103,7 +103,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Numerical Data
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2

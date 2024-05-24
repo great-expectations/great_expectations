@@ -33,9 +33,20 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column median to be between a minimum value and a maximum value."
+)
+COLUMN_ARG = "The column name."
+MIN_VALUE_ARG = "The minimum value for the column median."
+MAX_VALUE_ARG = "The maximum value for the column median."
+STRICT_MIN_ARG = "If True, the column median must be strictly larger than min_value, default=False"
+STRICT_MAX_ARG = "If True, the column median must be strictly smaller than max_value, default=False"
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Numerical Data"]
+
 
 class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
-    """Expect the column median to be between a minimum value and a maximum value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_median_to_be_between is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
@@ -46,15 +57,15 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_ARG}
         min_value (int or None): \
-            The minimum value for the column median.
+            {MIN_VALUE_ARG}
         max_value (int or None): \
-            The maximum value for the column median.
+            {MAX_VALUE_ARG}
         strict_min (boolean): \
-            If True, the column median must be strictly larger than min_value, default=False
+            {STRICT_MIN_ARG}
         strict_max (boolean): \
-            If True, the column median must be strictly smaller than max_value, default=False
+            {STRICT_MAX_ARG}
 
     Other Parameters:
         result_format (str or None): \
@@ -84,11 +95,11 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
         [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Numerical Data
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -107,18 +118,18 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 1.15
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -129,18 +140,18 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 2.75
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     min_value: Union[float, SuiteParameterDict, datetime, None] = None
