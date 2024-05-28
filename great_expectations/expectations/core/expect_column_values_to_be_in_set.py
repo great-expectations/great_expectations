@@ -7,6 +7,7 @@ from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
 )
 from great_expectations.render import (
@@ -46,7 +47,6 @@ if TYPE_CHECKING:
 
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect each column value to be in a given set."
-COLUMN_ARG = "The column name."
 VALUE_SET_ARG = "A set of objects used for comparison."
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Sets"]
@@ -64,7 +64,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_ARG}
+            {COLUMN_FIELD_DESCRIPTION}
         value_set (set-like): \
             {VALUE_SET_ARG}
 

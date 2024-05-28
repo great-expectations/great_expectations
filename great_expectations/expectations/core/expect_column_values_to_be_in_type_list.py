@@ -18,6 +18,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
     _native_type_type_map,
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
@@ -56,7 +57,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values from a specified type list."
-COLUMN_ARG = "The column name."
 TYPE_LIST_ARG = """
     A list of strings representing the data type that each column should have as entries. \
     Valid types are defined by the current backend implementation and are dynamically loaded.
@@ -82,7 +82,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_ARG}
+            {COLUMN_FIELD_DESCRIPTION}
         type_list (list[str] or None): \
             {TYPE_LIST_ARG}
             For example, valid types for Pandas Datasources include any numpy dtype values \

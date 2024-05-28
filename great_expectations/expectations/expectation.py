@@ -105,6 +105,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+COLUMN_FIELD_DESCRIPTION = "The column name."
 
 P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
@@ -1771,7 +1772,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """  # noqa: E501
 
-    column: str
+    column: str = Field(description=COLUMN_FIELD_DESCRIPTION)
 
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
@@ -1800,7 +1801,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column: str
+    column: str = Field(description=COLUMN_FIELD_DESCRIPTION)
 
     catch_exceptions: bool = True
 

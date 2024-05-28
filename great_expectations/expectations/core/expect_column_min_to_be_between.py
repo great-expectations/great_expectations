@@ -8,6 +8,7 @@ from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -41,7 +42,6 @@ if TYPE_CHECKING:
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column minimum to be between a minimum value and a maximum value."
 )
-COLUMN_ARG = "The column name."
 MIN_VALUE_ARG = "The minimal column minimum allowed."
 MAX_VALUE_ARG = "The maximal column minimum allowed."
 STRICT_MIN_ARG = (
@@ -66,7 +66,7 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            {COLUMN_ARG}
+            {COLUMN_FIELD_DESCRIPTION}
         min_value (comparable type or None): \
             {MIN_VALUE_ARG}
         max_value (comparable type or None): \

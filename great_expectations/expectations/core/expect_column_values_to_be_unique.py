@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
@@ -34,7 +35,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect each column value to be unique."
-COLUMN_ARG = "The column name."
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Cardinality"]
 
@@ -56,7 +56,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_ARG}
+            {COLUMN_FIELD_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \

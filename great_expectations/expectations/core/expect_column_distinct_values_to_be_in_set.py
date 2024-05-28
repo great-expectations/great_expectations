@@ -9,6 +9,7 @@ from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -41,7 +42,6 @@ if TYPE_CHECKING:
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the set of distinct column values to be contained by a given set."
 )
-COLUMN_ARG = "The column name."
 VALUE_SET_ARG = "A set of objects used for comparison."
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Sets"]
@@ -59,7 +59,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            {COLUMN_ARG}
+            {COLUMN_FIELD_DESCRIPTION}
         value_set (set-like): \
             {VALUE_SET_ARG}
 

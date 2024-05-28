@@ -8,6 +8,7 @@ from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -36,7 +37,6 @@ if TYPE_CHECKING:
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column median to be between a minimum value and a maximum value."
 )
-COLUMN_ARG = "The column name."
 MIN_VALUE_ARG = "The minimum value for the column median."
 MAX_VALUE_ARG = "The maximum value for the column median."
 STRICT_MIN_ARG = "If True, the column median must be strictly larger than min_value, default=False"
@@ -57,7 +57,7 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            {COLUMN_ARG}
+            {COLUMN_FIELD_DESCRIPTION}
         min_value (int or None): \
             {MIN_VALUE_ARG}
         max_value (int or None): \

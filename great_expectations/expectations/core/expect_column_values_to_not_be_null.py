@@ -7,6 +7,7 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
     _format_map_output,
     render_suite_parameter_string,
@@ -42,7 +43,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the column values to not be null."
-COLUMN_ARG = "The column name."
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Missingness"]
 
@@ -62,7 +62,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_ARG}
+            {COLUMN_FIELD_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \

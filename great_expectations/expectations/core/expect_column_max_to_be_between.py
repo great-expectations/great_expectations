@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     render_suite_parameter_string,
 )
 from great_expectations.render import (
@@ -46,7 +47,6 @@ if TYPE_CHECKING:
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column maximum to be between a minimum value and a maximum value."
 )
-COLUMN_ARG = "The column name."
 MIN_VALUE_ARG = "The minimum value of the acceptable range for the column maximum."
 MAX_VALUE_ARG = "The maximum value of the acceptable range for the column maximum."
 STRICT_MIN_ARG = (
@@ -73,7 +73,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            {COLUMN_ARG}
+            {COLUMN_FIELD_DESCRIPTION}
         min_value (comparable type or None): \
             {MIN_VALUE_ARG}
         max_value (comparable type or None): \

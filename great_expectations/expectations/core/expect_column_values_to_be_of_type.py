@@ -12,6 +12,7 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
@@ -75,7 +76,6 @@ except (ImportError, KeyError):
     ch_types = None
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values of a specified data type."
-COLUMN_ARG = "The column name."
 TYPE__ARG = """
     A string representing the data type that each column should have as entries. \
     Valid types are defined by the current backend implementation and are dynamically loaded.
@@ -102,7 +102,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_ARG}
+            {COLUMN_FIELD_DESCRIPTION}
         type\\_ (str): \
             {TYPE__ARG}
             For example, valid types for Pandas Datasources include any numpy dtype values \
