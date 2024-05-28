@@ -1,3 +1,4 @@
+import urllib.parse
 from typing import Dict
 from unittest import mock
 
@@ -47,8 +48,10 @@ def test_datasource_store_get_by_id(
 
         mock_get.assert_called_once_with(
             mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/datasources/{id}",
-            params=None,
+            urllib.parse.urljoin(
+                ge_cloud_base_url,
+                f"organizations/{ge_cloud_organization_id}/datasources/{id}"
+            )
         )
 
 
