@@ -11,9 +11,9 @@ title: Changelog
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
 ### 0.18.15
-* [BUGFIX] fix checkpoint name in slack notif ([#9964](GxURL.PULL_REQUESTS/9964))
-* [BUGFIX] 0.18.x -  Prevent Error on Read Only Filesystem ([#9977](GxURL.PULL_REQUESTS/9977))
-* [MAINTENANCE] 0.18.x - ruff update `0.1.11` -> `0.4.5` ([#9975](GxURL.PULL_REQUESTS/9975))
+* [BUGFIX] fix checkpoint name in slack notif ([#9964](https://github.com/great-expectations/great_expectations/pull/9964))
+* [BUGFIX] 0.18.x -  Prevent Error on Read Only Filesystem ([#9977](https://github.com/great-expectations/great_expectations/pull/9977))
+* [MAINTENANCE] 0.18.x - ruff update `0.1.11` -> `0.4.5` ([#9975](https://github.com/great-expectations/great_expectations/pull/9975))
 
 ### 0.18.14
 * [FEATURE] update slack notifications design ([#9952](https://github.com/great-expectations/great_expectations/pull/9952))
