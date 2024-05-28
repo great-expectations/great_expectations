@@ -413,7 +413,9 @@ def test_data_context_variables_save_config(
     }
 
     assert mock_put.call_count == 1
-    url = urllib.parse.urljoin(ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/data-context-variables")
+    url = urllib.parse.urljoin(
+        ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/data-context-variables"
+    )
     mock_put.assert_called_with(
         MOCK_ANY,  # requests.Session object
         url,
