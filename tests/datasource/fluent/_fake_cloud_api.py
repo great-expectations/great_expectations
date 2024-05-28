@@ -883,7 +883,7 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, "checkpoints/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
             delete_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
@@ -893,7 +893,7 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(urllib.parse.urljoin(org_url_base_V0, "checkpoints/{UUID_REGEX}")),
+            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
             get_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
