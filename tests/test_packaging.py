@@ -76,7 +76,6 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-lite.txt"]
         | req_set_dict["requirements-dev-api-docs-test.txt"]
-        | req_set_dict["requirements-dev-snowflake.txt"]
         == req_set_dict["requirements-dev-test.txt"]
     )
 
@@ -185,7 +184,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 79
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 78
     assert set(sorted_packages_with_pins_or_upper_bounds) == {
         (
             "requirements-dev-api-docs-test.txt",
@@ -247,7 +246,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-test.txt", "ipykernel", (("<=", "6.17.1"),)),
         ("requirements-dev-test.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
         ("requirements-dev-test.txt", "mypy", (("==", "1.7.1"),)),
-        ("requirements-dev-test.txt", "pandas", (("<", "2.2.0"),)),
         ("requirements-dev-test.txt", "ruff", (("==", "0.4.5"),)),
         ("requirements-dev-test.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
