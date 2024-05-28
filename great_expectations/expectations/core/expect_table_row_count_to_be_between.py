@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
@@ -33,8 +34,8 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the number of rows to be between two values."
-MIN_VALUE_ARG = "The minimum number of rows, inclusive."
-MAX_VALUE_ARG = "The maximum number of rows, inclusive."
+MIN_VALUE_DESCRIPTION = "The minimum number of rows, inclusive."
+MAX_VALUE_DESCRIPTION = "The maximum number of rows, inclusive."
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Volume"]
 
@@ -50,9 +51,9 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
 
     Args:
         min_value (int or None): \
-            {MIN_VALUE_ARG}
+            {MIN_VALUE_DESCRIPTION}
         max_value (int or None): \
-            {MAX_VALUE_ARG}
+            {MAX_VALUE_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -136,19 +137,12 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    min_value: Union[int, SuiteParameterDict, datetime, None] = None
-    max_value: Union[int, SuiteParameterDict, datetime, None] = None
-
-    library_metadata = {
-        "maturity": "production",
-        "tags": ["core expectation", "table expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
-        "requirements": [],
-        "has_full_test_suite": True,
-        "manually_reviewed_code": True,
-    }
+    min_value: Union[int, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[int, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MAX_VALUE_DESCRIPTION
+    )
 
     metric_dependencies = ("table.row_count",)
     domain_keys: ClassVar[Tuple[str, ...]] = tuple()
@@ -160,6 +154,33 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         "min_value",
         "max_value",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: dict[str, Any]) -> None:
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": {
+                    "maturity": "production",
+                    "tags": ["core expectation", "table expectation"],
+                    "contributors": ["@great_expectations"],
+                    "requirements": [],
+                    "has_full_test_suite": True,
+                    "manually_reviewed_code": True,
+                },
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     @override

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from itertools import zip_longest
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
 
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to exactly match a specified list."
-COLUMN_LIST_ARG = "The column names, in the correct order."
+COLUMN_LIST_DESCRIPTION = "The column names, in the correct order."
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Schema"]
 
@@ -45,7 +46,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
 
     Args:
         column_list (list of str): \
-            {COLUMN_LIST_ARG}
+            {COLUMN_LIST_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -144,18 +145,9 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    column_list: Union[list, set, SuiteParameterDict, None]
-
-    library_metadata = {
-        "maturity": "production",
-        "tags": ["core expectation", "table expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
-        "requirements": [],
-        "has_full_test_suite": True,
-        "manually_reviewed_code": True,
-    }
+    column_list: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
+        description=COLUMN_LIST_DESCRIPTION
+    )
 
     metric_dependencies = ("table.columns",)
     success_keys = ("column_list",)
@@ -166,6 +158,33 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         "condition_parser",
     )
     args_keys = ("column_list",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: dict[str, Any]) -> None:
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": {
+                    "maturity": "production",
+                    "tags": ["core expectation", "table expectation"],
+                    "contributors": ["@great_expectations"],
+                    "requirements": [],
+                    "has_full_test_suite": True,
+                    "manually_reviewed_code": True,
+                },
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     def _prescriptive_template(

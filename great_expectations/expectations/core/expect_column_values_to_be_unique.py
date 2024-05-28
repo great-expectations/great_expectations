@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
@@ -149,19 +149,36 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
-        "maturity": "production",
-        "tags": ["core expectation", "column map expectation"],
-        "contributors": ["@great_expectations"],
-        "requirements": [],
-        "has_full_test_suite": True,
-        "manually_reviewed_code": True,
-    }
-
     map_metric = "column_values.unique"
     success_keys = ("mostly",)
     args_keys = ("column",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: dict[str, Any]) -> None:
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": {
+                    "maturity": "production",
+                    "tags": ["core expectation", "column map expectation"],
+                    "contributors": ["@great_expectations"],
+                    "requirements": [],
+                    "has_full_test_suite": True,
+                    "manually_reviewed_code": True,
+                },
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     @override
