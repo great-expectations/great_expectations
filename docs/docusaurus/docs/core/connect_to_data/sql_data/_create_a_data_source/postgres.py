@@ -2,38 +2,36 @@
 To run this test locally, run:
 1. Activate docker.
 2. From the repo root dir, activate the postgresql database docker container:
+cd assets
+cd docker
+cd postgresql
+docker compose up
 
+3. Run the following command from the repo root dir in a second terminal:
 pytest  --postgresql --docs-tests -k "create_a_datasource_postgres" tests/integration/test_script_runner.py
 """
 
-from tests.integration.db.taxi_data_utils import load_data_into_test_database
-
-# add test_data to database for testing
-load_data_into_test_database(
-    table_name="postgres_taxi_data",
-    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
-    connection_string="postgresql+psycopg2://postgres:@localhost/test_ci",
-)
-
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py full sample code">
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py imports">
 import great_expectations as gx
 
 context = gx.get_context()
+# </snippet>
 
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py name and connection string">
 datasource_name = "my_new_datasource"
-# You only need to define one of these:
-my_connection_string = (
-    "postgresql+psycopg2://${USERNAME}:${PASSWORD}@<host>:<port>/<database>"
-)
 my_connection_string = "${POSTGRESQL_CONNECTION_STRING}"
+# </snippet>
 
+# highlight-start
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py create data source">
 data_source = context.data_sources.add_postgres(
     name=datasource_name, connection_string=my_connection_string
 )
+# </snippet>
+# highlight-end
 
-data_asset = data_source.add_table_asset(
-    table_name="postgres_taxi_data", name="taxi_asset"
-)
-
-batch_definition = data_asset.add_batch_definition_whole_table(
-    name="taxi_data_full_table"
-)
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py verify data source">
+print(context.get_datasource(datasource_name))
+# </snippet>
+# </snippet>

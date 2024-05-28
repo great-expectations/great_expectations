@@ -10,10 +10,15 @@ import Tabs from '@theme/Tabs';
 
 import ConfigureCredentials from '../configure_credentials/_configure_credentials.md';
 import PostgreSqlDataSource from './_create_a_data_source/_postgres.md';
+import SqliteDataSource from './_create_a_data_source/_sqlite.md';
+import SnowflakeSqlDataSource from './_create_a_data_source/_snowflake.md';
+import BigQuerySqlDataSource from './_create_a_data_source/_big_query.md';
+import DatabricksSqlDataSource from './_create_a_data_source/_databricks.md';
+import OtherSqlDataSource from './_create_a_data_source/_other_sql.md';
 import CreateAsset from './_create_a_data_asset/_create_a_data_asset.md';
 import CreateBatchDefinition from './_create_a_batch_definition/_create_a_batch_definition.md'
 
-To connect to your SQL data, you first create a Data Source telling GX where your database resides and how to connect to it.  You configure Data Assets for your Data Source to tell GX which sets of records you want to be able to access.  Finally, Batch Definitions allow you to further partition the records in your Data Assets.
+To connect to your SQL data, you first create a Data Source telling GX where your database resides and how to connect to it.  You configure Data Assets for your Data Source to tell GX which sets of records you want to be able to access from your Data Source.  Finally, Batch Definitions allow you to request all the records retrieved from a Data Asset or further partition the returned records based on the contents of a date and time field.
 
 GX supports the following SQL dialects:
 
@@ -40,7 +45,23 @@ Data Sources tell GX where your data is located and how to connect to it.  With 
 </TabItem>
 
 <TabItem value="sqlite" label="SQLite">
-<PostgreSqlDataSource/>
+<SqliteDataSource/>
+</TabItem>
+
+<TabItem value="snowflake" label="Snowflake">
+<SnowflakeSqlDataSource/>
+</TabItem>
+
+<TabItem value="databricks" label="Databricks SQL">
+<DatabricksSqlDataSource/>
+</TabItem>
+
+<TabItem value="bigquery" label="BigQuery SQL">
+<BigQuerySqlDataSource/>
+</TabItem>
+
+<TabItem value="other_sql" label="Other SQL">
+<OtherSqlDataSource/>
 </TabItem>
 
 </Tabs>

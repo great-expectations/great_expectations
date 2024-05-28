@@ -18,7 +18,9 @@ import PreReqCredentials from '../../../_core_components/prerequisites/_securely
 
 1. Import GX and instantiate a Data Context:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py imports"
+   ```python
+   import great_expectations as gx
+   context = gx.get_context()
    ```
 
 2. Define a name and connection string for your Data Source.
@@ -29,26 +31,42 @@ import PreReqCredentials from '../../../_core_components/prerequisites/_securely
 
    The following code defines a Data Source name and references a connection string that has been securely stored in its entirety:
 
-    ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py name and connection string"
+    ```python title="Python"
+   datasource_name = "nyc_taxi_data"
+   my_connection_string = "${DATABRICKS_CONNECTION_STRING}"
    ```
 
-3. Create a PostgreSQL Data Source:
+3. Create a Databricks SQL Data Source:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py create data source"
+   ```python title="Python"
+   datasource = context.sources.add_databricks_sql(name=datasource_name, connection_string=my_connection_string)
    ```
 
 4. Optional. Verify the Data Source is connected:
 
-   ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py verify data source"
+   ```python
+   print(context.data_sources)
    ```
    
-   The details of your Data Source are retrieved from the Data Context and displayed.
+   A list of Data Sources is printed.  You can verify your Data Source was created and added to the Data Context by checking for its name in the printed list.
 
 </TabItem>
 
 <TabItem value="sample_code" label="Sample code">
 
-```python title="Sample code" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py full sample code"
+```python title="Sample code"
+import great_expectations as gx
+context = gx.get_context()
+
+datasource_name = "my_sql_data_source"
+my_connection_string = "${DATABRICKS_CONNECTION_STRING}"
+
+datasource = context.data_sources.add_databricks_sql(
+      name=datasource_name,
+      connection_string=my_connection_string
+   )
+
+print(context.get_datasource(datasource_name))
 ```
 
 </TabItem>
