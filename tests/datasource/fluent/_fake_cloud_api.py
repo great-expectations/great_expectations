@@ -797,8 +797,12 @@ def gx_cloud_api_fake_ctx(
     assert_all_requests_are_fired: bool = False,
 ) -> Generator[responses.RequestsMock, None, None]:
     """Mock the GX Cloud API for the lifetime of the context manager."""
-    org_url_base_V0 = urllib.parse.urljoin(cloud_details.base_url, f"organizations/{cloud_details.org_id}/")
-    org_url_base_V1 = urllib.parse.urljoin(cloud_details.base_url, f"api/v1/organizations/{cloud_details.org_id}/")
+    org_url_base_V0 = urllib.parse.urljoin(
+        cloud_details.base_url, f"organizations/{cloud_details.org_id}/"
+    )
+    org_url_base_V1 = urllib.parse.urljoin(
+        cloud_details.base_url, f"api/v1/organizations/{cloud_details.org_id}/"
+    )
     dc_config_url = urllib.parse.urljoin(org_url_base_V0, "data-context-configuration")
     me_url = urllib.parse.urljoin(org_url_base_V0, "accounts/me")
 
@@ -854,7 +858,7 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.POST,
-            urllib.parse.urljoin(org_url_base_V1, f"expectation-suites"),
+            urllib.parse.urljoin(org_url_base_V1, "expectation-suites"),
             post_expectation_suites_cb,
         )
         resp_mocker.add_callback(
