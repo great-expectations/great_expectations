@@ -191,7 +191,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 53
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 50
     assert set(sorted_packages_with_pins_or_upper_bounds) == {
         (
             "requirements-dev-api-docs-test.txt",
@@ -199,7 +199,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
             (("==", "0.15"),),
         ),
         ("requirements-dev-athena.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
-        ("requirements-dev-clickhouse.txt", "pandas", (("<", "2.2.0"),)),
         ("requirements-dev-contrib.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev-dremio.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-dev-excel.txt", "xlrd", (("<", "2.0.0"), (">=", "1.1.0"))),
@@ -221,7 +220,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
             "pyathena",
             (("<", "3"), (">=", "2.0.0")),
         ),
-        ("requirements-dev-sqlalchemy.txt", "pandas", (("<", "2.2.0"),)),
         ("requirements-dev-sqlalchemy.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev-sqlalchemy.txt", "sqlalchemy", (("<", "2.0.0"),)),
         (
@@ -254,7 +252,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements-dev.txt", "moto", (("<", "5.0"), (">=", "4.2.13"))),
         ("requirements-dev.txt", "numpy", (("<", "2.0.0"), (">=", "1.26.0"))),
-        ("requirements-dev.txt", "pandas", (("<", "2.2.0"),)),
         ("requirements-dev.txt", "posthog", (("<", "3"), (">=", "2.1.0"))),
         ("requirements-dev.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-dev.txt", "pypd", (("==", "1.1.0"),)),
