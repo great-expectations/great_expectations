@@ -1,6 +1,3 @@
----
-title: Configure credentials
----
 import GxData from '../../_core_components/_data.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
