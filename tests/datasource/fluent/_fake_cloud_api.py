@@ -42,7 +42,7 @@ LOGGER = logging.getLogger(__name__)
 
 MISSING: Final = object()
 
-GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
+GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io/"
 
 DUMMY_JWT_TOKEN: Final[str] = (
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
