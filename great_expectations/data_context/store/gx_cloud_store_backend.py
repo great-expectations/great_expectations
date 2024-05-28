@@ -100,12 +100,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     )
 
     _ENDPOINT_VERSION_LOOKUP: dict[str, EndpointVersion] = {
-        GXCloudRESTResource.CHECKPOINT: EndpointVersion.V0,
+        GXCloudRESTResource.CHECKPOINT: EndpointVersion.V1,
         GXCloudRESTResource.DATASOURCE: EndpointVersion.V0,
         GXCloudRESTResource.DATA_CONTEXT: EndpointVersion.V0,
         GXCloudRESTResource.DATA_CONTEXT_VARIABLES: EndpointVersion.V0,
         GXCloudRESTResource.EXPECTATION_SUITE: EndpointVersion.V1,
-        GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V0,
+        GXCloudRESTResource.VALIDATION_DEFINITION: EndpointVersion.V1,
         GXCloudRESTResource.VALIDATION_RESULT: EndpointVersion.V0,
     }
     # we want to support looking up EndpointVersion from either GXCloudRESTResource
@@ -183,7 +183,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # if name is included in the key, add as a param
         params: dict | None
         if len(key) > 2 and key[2]:  # noqa: PLR2004
-            params = {"name": key[2]}
+            # params = {"name": key[2]}
+            params = None
             url = url.rstrip("/")
         else:
             params = None
@@ -625,6 +626,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         version = cls._ENDPOINT_VERSION_LOOKUP.get(resource_name, EndpointVersion.V0)
 
         if version == EndpointVersion.V1:
+            # XXX Don't commit this lol!
+            base_url = base_url.replace(":5000", ":7000")
             url = urljoin(
                 base_url,
                 f"api/v1/organizations/{organization_id}/{hyphen(resource_name)}",

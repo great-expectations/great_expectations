@@ -1,18 +1,30 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import DataContextKey, StringKey
+from great_expectations.core.validation_definition import ValidationDefinition  # noqa: TCH001
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.store.models import IdentifierBundleDTO  # noqa: TCH001
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
 
-if TYPE_CHECKING:
-    from great_expectations.core.validation_definition import ValidationDefinition
+
+class _DataBundleDTO(pydantic.BaseModel):
+    datasource: IdentifierBundleDTO
+    asset: IdentifierBundleDTO
+    batch_definition: IdentifierBundleDTO
+
+
+class _ValidationDefinitionDTO(pydantic.BaseModel):
+    id: str
+    name: str
+    suite: IdentifierBundleDTO
+    data: _DataBundleDTO
 
 
 class ValidationDefinitionStore(Store):
@@ -45,11 +57,8 @@ class ValidationDefinitionStore(Store):
         else:
             validation_data = response_data
 
-        id: str = validation_data["id"]
-        validation_definition_dict: dict = validation_data["attributes"]["validation_definition"]
-        validation_definition_dict["id"] = id
-
-        return validation_definition_dict
+        validation_definition_dto = _ValidationDefinitionDTO.parse_obj(validation_data)
+        return validation_definition_dto.dict()
 
     @override
     def serialize(self, value):

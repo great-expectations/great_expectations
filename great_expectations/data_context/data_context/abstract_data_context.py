@@ -237,7 +237,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         # Init stores
         self._stores: dict = {}
-        self._init_primary_stores(self.project_config_with_variables_substituted.stores)
+
+        # yikes! override the validation definition store setup
+        stores = self.project_config_with_variables_substituted.stores
+        stores["validation_definition_store"] = copy.deepcopy(stores["default_checkpoint_store"])
+        stores["validation_definition_store"]["class_name"] = "ValidationDefinitionStore"
+        stores["validation_definition_store"]["store_backend"]["ge_cloud_resource_type"] = (
+            "validation_definition"
+        )
+
+        self._init_primary_stores(stores)
 
         # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.  # noqa: E501
         # As such, it must be instantiated separately.

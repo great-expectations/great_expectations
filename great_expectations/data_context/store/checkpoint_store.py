@@ -7,8 +7,10 @@ import uuid
 from typing import TYPE_CHECKING
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.data_context_key import DataContextKey, StringKey
+from great_expectations.core.result_format import ResultFormat  # noqa: TCH001
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import DataContextConfigDefaults
@@ -20,6 +22,19 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
 
 logger = logging.getLogger(__name__)
+
+
+class ValidationDefinitionData(pydantic.BaseModel):
+    name: str
+    id: str
+
+
+class CheckpointDTO(pydantic.BaseModel):
+    id: str
+    name: str
+    result_format: ResultFormat
+    validation_definitions: list[ValidationDefinitionData]
+    actions: list[dict]
 
 
 class CheckpointStore(Store):
@@ -57,11 +72,8 @@ class CheckpointStore(Store):
     @override
     @staticmethod
     def _convert_raw_json_to_object_dict(data: dict) -> dict:
-        id: str = data["id"]
-        checkpoint_config_dict: dict = data["attributes"]["checkpoint_config"]
-        checkpoint_config_dict["id"] = id
-
-        return checkpoint_config_dict
+        checkpoint_dto = CheckpointDTO.parse_obj(data)
+        return checkpoint_dto.dict()
 
     @override
     def serialize(self, value):
