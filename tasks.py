@@ -611,7 +611,7 @@ def type_schema(  # noqa: C901, PLR0912 - too complex
         ExpectTableRowCountToEqual,
     ]:
         schema_path = expectation_dir.joinpath(f"{x.__name__}.json")
-        json_str: str = x.schema_json(indent=indent)
+        json_str: str = x.schema_json(indent=indent) + "\n"
         if sync:
             schema_path.write_text(json_str)
             print(f"🔃  {x.__name__}.json updated")

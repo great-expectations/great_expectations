@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Tuple, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
@@ -170,16 +170,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     value_set: Union[list, set, SuiteParameterDict] = pydantic.Field([])
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
-        "maturity": "production",
-        "tags": ["core expectation", "column map expectation"],
-        "contributors": ["@great_expectations"],
-        "requirements": [],
-        "has_full_test_suite": True,
-        "manually_reviewed_code": True,
-    }
-
     map_metric = "column_values.in_set"
 
     args_keys = (
@@ -196,6 +186,33 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "value_set",
         "mostly",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: dict[str, Any]) -> None:
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": {
+                    "maturity": "production",
+                    "tags": ["core expectation", "column map expectation"],
+                    "contributors": ["@great_expectations"],
+                    "requirements": [],
+                    "has_full_test_suite": True,
+                    "manually_reviewed_code": True,
+                },
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     def _prescriptive_template(
