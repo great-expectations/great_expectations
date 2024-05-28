@@ -1116,7 +1116,7 @@ def service(
                 cmds.extend(
                     [
                         "FORCE_NO_ALIAS=true",
-                        "assumego",
+                        "assume",
                         "dev",
                         "--exec",
                         "'aws ecr get-login-password --region us-east-1'",

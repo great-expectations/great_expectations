@@ -27,9 +27,14 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the number of rows to equal a value."
+VALUE_ARG = "The expected number of rows."
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Volume"]
+
 
 class ExpectTableRowCountToEqual(BatchExpectation):
-    """Expect the number of rows to equal a value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_table_row_count_to_equal is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
@@ -39,7 +44,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
 
     Args:
         value (int): \
-            The expected number of rows.
+            {VALUE_ARG}
 
     Other Parameters:
         result_format (str or None): \
@@ -61,11 +66,11 @@ class ExpectTableRowCountToEqual(BatchExpectation):
         [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Volume
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -81,18 +86,18 @@ class ExpectTableRowCountToEqual(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 3
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -101,18 +106,18 @@ class ExpectTableRowCountToEqual(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 3
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     value: Union[int, SuiteParameterDict]
