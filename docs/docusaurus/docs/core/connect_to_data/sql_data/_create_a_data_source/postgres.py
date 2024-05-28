@@ -11,6 +11,13 @@ docker compose up
 pytest  --postgresql --docs-tests -k "create_a_datasource_postgres" tests/integration/test_script_runner.py
 """
 
+# This is set up to emulate having the connection string saved in an environment variable.
+import os
+
+os.environ["POSTGRES_CONNECTION_STRING"] = (
+    "postgresql+psycopg2://postgres:@localhost/test_ci"
+)
+
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py full sample code">
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py imports">
 import great_expectations as gx
