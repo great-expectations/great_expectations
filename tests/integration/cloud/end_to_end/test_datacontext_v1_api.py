@@ -37,4 +37,4 @@ def test_get_context(set_v1_get_context_endpoint: None):
     )
     assert isinstance(context, CloudDataContext)
     # This assert is to ensure we are hitting the v1 and not the v0 endpoint.
-    assert context.config_version >= 4.0
+    assert context.config.config_version >= 4.0
