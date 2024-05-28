@@ -49,9 +49,8 @@ def test_datasource_store_get_by_id(
         mock_get.assert_called_once_with(
             mock.ANY,  # requests.Session object
             urllib.parse.urljoin(
-                ge_cloud_base_url,
-                f"organizations/{ge_cloud_organization_id}/datasources/{id}"
-            )
+                ge_cloud_base_url, f"organizations/{ge_cloud_organization_id}/datasources/{id}"
+            ),
         )
 
 
