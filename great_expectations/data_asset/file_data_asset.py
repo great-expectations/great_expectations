@@ -55,7 +55,7 @@ class MetaFileDataAsset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(  # noqa: PLR0912
+        def inner_wrapper(
             self,
             skip=None,
             mostly=None,
@@ -172,7 +172,7 @@ class FileDataAsset(MetaFileDataAsset):
         self._path = file_path
 
     @MetaFileDataAsset.file_lines_map_expectation
-    def expect_file_line_regex_match_count_to_be_between(  # noqa: PLR0913, PLR0912
+    def expect_file_line_regex_match_count_to_be_between(  # noqa: PLR0913
         self,
         regex,
         expected_min_count=0,
@@ -431,7 +431,7 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success}
 
     @DataAsset.expectation(["minsize", "maxsize"])
-    def expect_file_size_to_be_between(  # noqa: PLR0913, PLR0912
+    def expect_file_size_to_be_between(  # noqa: PLR0913
         self,
         minsize=0,
         maxsize=None,

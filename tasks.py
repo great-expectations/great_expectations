@@ -138,7 +138,7 @@ def lint(  # noqa: PLR0913
         fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
-    cmds = ["ruff", path]
+    cmds = ["ruff", "check", path]
     if fix:
         cmds.append("--fix")
     if watch:
@@ -156,7 +156,7 @@ def fix(ctx: Context, path: str = "."):
 @invoke.task(help={"path": _PATH_HELP_DESC})
 def upgrade(ctx: Context, path: str = "."):
     """Run code syntax upgrades."""
-    cmds = ["ruff", path, "--select", "UP", "--fix"]
+    cmds = ["ruff", "check", path, "--select", "UP", "--fix"]
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 

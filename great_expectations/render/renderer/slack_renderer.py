@@ -138,6 +138,7 @@ class SlackRenderer(Renderer):
         if run_id is not None:
             run_time = datetime.fromisoformat(str(run_id.run_time))
             formatted_run_time = run_time.strftime("%Y/%m/%d %I:%M %p")
+            formatted_run_time += " UTC"
         return {
             "type": "section",
             "text": {"type": "plain_text", "text": f"Runtime: {formatted_run_time}"},

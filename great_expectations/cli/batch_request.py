@@ -458,9 +458,7 @@ def _get_batch_spec_passthrough(
         _: SqlAlchemyExecutionEngine = datasource.execution_engine
     else:
         raise gx_exceptions.DataContextError(
-            "Datasource {:s} of unsupported type {:s} was encountered.".format(
-                datasource.name, str(type(datasource))
-            )
+            f"Datasource {datasource.name:s} of unsupported type {type(datasource)!s:s} was encountered."
         )
 
     return batch_spec_passthrough

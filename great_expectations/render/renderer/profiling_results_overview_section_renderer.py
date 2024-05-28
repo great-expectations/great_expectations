@@ -349,9 +349,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 column_types[column] = "bool"
             else:
                 warnings.warn(
-                    "The expected type list is not a subset of any of the profiler type sets: {:s}".format(
-                        str(expected_types)
-                    )
+                    f"The expected type list is not a subset of any of the profiler type sets: {expected_types!s:s}"
                 )
                 column_types[column] = "unknown"
 

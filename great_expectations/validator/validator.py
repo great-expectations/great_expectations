@@ -1869,9 +1869,7 @@ class Validator:
         # Check for expectation_suite_name is already done by ExpectationSuiteIdentifier
         if expectation_suite and not isinstance(expectation_suite, ExpectationSuite):
             raise TypeError(
-                "expectation_suite must be of type ExpectationSuite, not {}".format(
-                    type(expectation_suite)
-                )
+                f"expectation_suite must be of type ExpectationSuite, not {type(expectation_suite)}"
             )
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
@@ -1891,10 +1889,7 @@ class Validator:
                     != expectation_suite_name
                 ):
                     logger.warning(
-                        "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
-                            n1=self._expectation_suite.expectation_suite_name,
-                            n2=expectation_suite_name,
-                        )
+                        f"Overriding existing expectation_suite_name {self._expectation_suite.expectation_suite_name} with new name {expectation_suite_name}"
                     )
                 self._expectation_suite.expectation_suite_name = expectation_suite_name
 

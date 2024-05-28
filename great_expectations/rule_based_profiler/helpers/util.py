@@ -570,7 +570,7 @@ def get_false_positive_rate_from_rule_state(
         variables=variables,
         parameters=parameters,
     )
-    if not (0.0 <= false_positive_rate <= 1.0):  # noqa: PLR2004
+    if not (0.0 <= false_positive_rate <= 1.0):
         raise gx_exceptions.ProfilerExecutionError(
             f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
 {false_positive_rate} was provided.
@@ -923,7 +923,7 @@ def _determine_quantile_bias_corrected_point_estimate(  # noqa: PLR0913
 
     if (
         not quantile_bias_correction
-        and bootstrap_quantile_standard_error > 0.0  # noqa: PLR2004
+        and bootstrap_quantile_standard_error > 0.0
         and bootstrap_quantile_bias / bootstrap_quantile_standard_error
         <= quantile_bias_std_error_ratio_threshold
     ):

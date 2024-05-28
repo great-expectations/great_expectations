@@ -155,8 +155,8 @@ class MicrosoftTeamsRenderer(Renderer):
 
             n_checks_succeeded = validation_result.statistics["successful_expectations"]
             n_checks = validation_result.statistics["evaluated_expectations"]
-            check_details_text = "*{}* of *{}* expectations were met".format(
-                n_checks_succeeded, n_checks
+            check_details_text = (
+                f"*{n_checks_succeeded}* of *{n_checks}* expectations were met"
             )
             check_details_text_element = self._render_validation_result_element(
                 key="Summary", value=check_details_text

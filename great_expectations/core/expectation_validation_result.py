@@ -607,9 +607,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
                     return metric_value
 
         raise gx_exceptions.UnavailableMetricError(
-            "Metric {} with metric_kwargs_id {} is not available.".format(
-                metric_name, metric_kwargs_id
-            )
+            f"Metric {metric_name} with metric_kwargs_id {metric_kwargs_id} is not available."
         )
 
     def get_failed_validation_results(

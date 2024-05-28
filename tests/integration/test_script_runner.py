@@ -556,7 +556,7 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(  # noqa: PLR0912, PLR0915
+def _execute_integration_test(  # noqa: PLR0915
     integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
 ):
     """

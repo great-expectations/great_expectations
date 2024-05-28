@@ -242,7 +242,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                     renderer_configuration=renderer_configuration
                 )
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -301,7 +301,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
         else:  # noqa: PLR5501
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, no_scientific=True
                 )

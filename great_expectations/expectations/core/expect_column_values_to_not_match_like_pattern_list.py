@@ -171,7 +171,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
             "Values must not match the following like patterns: " + values_string
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+        if params["mostly"] is not None and params["mostly"] < 1.0:
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, no_scientific=True
             )

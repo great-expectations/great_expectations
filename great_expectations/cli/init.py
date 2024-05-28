@@ -43,7 +43,7 @@ if not SQLAlchemyError:
     default=True,
 )
 @click.pass_context
-def init(ctx: click.Context, usage_stats: bool) -> None:  # noqa: PLR0912
+def init(ctx: click.Context, usage_stats: bool) -> None:
     """
     Initialize a new Great Expectations project.
 

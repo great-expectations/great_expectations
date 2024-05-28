@@ -206,7 +206,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 renderer_configuration=renderer_configuration,
             )
 
-            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            if params.mostly and params.mostly.value < 1.0:
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -256,7 +256,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 [f"$v__{i!s}" for i, v in enumerate(params["type_list"])]
             )
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+            if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, no_scientific=True
                 )
@@ -382,7 +382,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             "result": {"observed_value": actual_column_type.type.__name__},
         }
 
-    def _validate_sqlalchemy(  # noqa: PLR0912 # necessary branching to handle many SQL dialects until schema introspection is reworked as an abstraction
+    def _validate_sqlalchemy(  # necessary branching to handle many SQL dialects until schema introspection is reworked as an abstraction
         self, actual_column_type, expected_types_list, execution_engine
     ):
         # Our goal is to be as explicit as possible. We will match the dialect

@@ -444,7 +444,7 @@ def get_sqlalchemy_column_metadata(
         return None
 
 
-def column_reflection_fallback(  # noqa: PLR0915
+def column_reflection_fallback(  # noqa: PLR0912, PLR0915
     selectable: sqlalchemy.Select,
     dialect: sqlalchemy.Dialect,
     sqlalchemy_engine: sqlalchemy.Engine,
