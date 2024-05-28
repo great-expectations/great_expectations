@@ -10,6 +10,11 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.15
+* [BUGFIX] fix checkpoint name in slack notif ([#9964](GxURL.PULL_REQUESTS/9964))
+* [BUGFIX] 0.18.x -  Prevent Error on Read Only Filesystem ([#9977](GxURL.PULL_REQUESTS/9977))
+* [MAINTENANCE] 0.18.x - ruff update `0.1.11` -> `0.4.5` ([#9975](GxURL.PULL_REQUESTS/9975))
+
 ### 0.18.14
 * [FEATURE] update slack notifications design ([#9952](https://github.com/great-expectations/great_expectations/pull/9952))
 * [BUGFIX] Set application query param for SnowflakeDatasource ([#9863](https://github.com/great-expectations/great_expectations/pull/9863))
