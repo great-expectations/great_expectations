@@ -8,7 +8,7 @@ DOCSTRING_PARSER_NOT_IMPORTED = NotImported(
     "docstring_parser is not installed, please 'pip install docstring-parser'"
 )
 with warnings.catch_warnings():
-    # Hide deprecation warnings emitted by compatibility dependencies, as users have no control over these.
+    # Hide deprecation warnings emitted by compatibility dependencies, users have no control here.
     warnings.simplefilter("ignore", category=DeprecationWarning)
     try:
         import docstring_parser
