@@ -8,6 +8,7 @@ hide_title: false
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
+import ConfigureCredentials from '../configure_credentials/_configure_credentials.md';
 import PostgreSqlDataSource from './_create_a_data_source/_postgres.md';
 import CreateAsset from './_create_a_data_asset/_create_a_data_asset.md';
 import CreateBatchDefinition from './_create_a_batch_definition/_create_a_batch_definition.md'
@@ -23,6 +24,10 @@ GX supports the following SQL dialects:
 - BigQuery SQL
 
 All other SQL dialects are handled through the python module `SQLAlchemy`.  You can find more information on the dialects supported by `SQLAlchemy` on their [dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html) page.
+
+## Configure credentials
+
+<ConfigureCredentials/>
 
 ## Create a SQL Data Source
 
