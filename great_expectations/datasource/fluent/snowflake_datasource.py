@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Final, Literal, Optional, Sequence, Type, Union
+from typing import TYPE_CHECKING, Any, Final, Literal, Optional, Sequence, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, errors
@@ -49,6 +49,18 @@ class _UrlDomainError(pydantic.UrlError):
     msg_template = "URL domain invalid"
 
 
+class _UrlMissingQueryError(pydantic.UrlError):
+    """
+    Custom Pydantic error for missing query parameters in SnowflakeDsn.
+    """
+
+    def __init__(self, **ctx: Any) -> None:
+        super().__init__(**ctx)
+
+    code = "url.query"
+    msg_template = "URL query param missing"
+
+
 class SnowflakeDsn(AnyUrl):
     allowed_schemes = {
         "snowflake",
@@ -64,9 +76,7 @@ class SnowflakeDsn(AnyUrl):
             if key not in query_str:  # TODO: parse the query string
                 missing_keys.add(key)
         if missing_keys:
-            raise errors.UrlQueryError(
-                query=query_str,
-                key=key,
+            raise errors._UrlMissingQueryError(
                 msg=f"Required URL query parameters {', '.join(missing_keys)} missing",
             )
 
