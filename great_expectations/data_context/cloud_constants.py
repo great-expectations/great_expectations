@@ -18,7 +18,7 @@ class GXCloudRESTResource(str, Enum):
     CHECKPOINT = "checkpoint"
     DATASOURCE = "datasource"
     DATA_ASSET = "data_asset"
-    DATA_CONTEXT = "data_context"
+    DATA_CONTEXT = "data_context_configuration"
     DATA_CONTEXT_VARIABLES = "data_context_variables"
     EXPECTATION_SUITE = "expectation_suite"
     RENDERED_DATA_DOC = "rendered_data_doc"

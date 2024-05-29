@@ -32,9 +32,15 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the number of rows to be between two values."
+MIN_VALUE_ARG = "The minimum number of rows, inclusive."
+MAX_VALUE_ARG = "The maximum number of rows, inclusive."
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Volume"]
+
 
 class ExpectTableRowCountToBeBetween(BatchExpectation):
-    """Expect the number of rows to be between two values.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_table_row_count_to_be_between is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
@@ -44,9 +50,9 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
 
     Args:
         min_value (int or None): \
-            The minimum number of rows, inclusive.
+            {MIN_VALUE_ARG}
         max_value (int or None): \
-            The maximum number of rows, inclusive.
+            {MAX_VALUE_ARG}
 
     Other Parameters:
         result_format (str or None): \
@@ -75,11 +81,11 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Volume
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -96,18 +102,18 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 3
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -116,18 +122,18 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 3
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     min_value: Union[int, SuiteParameterDict, datetime, None] = None
