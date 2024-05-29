@@ -612,7 +612,7 @@ def type_schema(  # noqa: C901, PLR0912 - too complex
     ]
     for x in supported_expectations:
         schema_path = expectation_dir.joinpath(f"{x.__name__}.json")
-        json_str = x.schema_json(indent=indent) + "\n"  # type: ignore # ignoring as this is only a dev tool
+        json_str = x.schema_json(indent=indent) + "\n"  # type: ignore[attr-defined] # FIXME low priority
         if sync:
             schema_path.write_text(json_str)
             print(f"🔃  {x.__name__}.json updated")
