@@ -1510,7 +1510,7 @@ class BatchExpectation(Expectation, ABC):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[BatchExpectation]) -> None:
             Expectation.Config.schema_extra(schema, model)
             schema["properties"]["domain_type"] = {
                 "type": "string",
@@ -1789,7 +1789,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnAggregateExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
             schema["properties"]["domain_type"] = {
                 "type": "string",
@@ -1838,7 +1838,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnMapExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
             schema["properties"]["domain_type"] = {
                 "type": "string",
@@ -2099,7 +2099,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnPairMapExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
             schema["properties"]["domain_type"] = {
                 "type": "string",
@@ -2350,7 +2350,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[MulticolumnMapExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
             schema["properties"]["domain_type"] = {
                 "type": "string",

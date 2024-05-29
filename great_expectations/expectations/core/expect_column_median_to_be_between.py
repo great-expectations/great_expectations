@@ -198,7 +198,7 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnMedianToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",

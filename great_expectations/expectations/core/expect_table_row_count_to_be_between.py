@@ -168,7 +168,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableRowCountToBeBetween]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",
