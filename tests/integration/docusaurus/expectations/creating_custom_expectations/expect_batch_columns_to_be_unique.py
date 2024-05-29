@@ -3,6 +3,7 @@ This is a template for creating custom BatchExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations
 """
+
 from __future__ import annotations
 
 from typing import Dict, Optional
@@ -91,6 +92,7 @@ class ExpectBatchColumnsToBeUnique(BatchExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py docstring">
     """Expect batch to contain columns with unique contents."""
+
     # </snippet>
 
     # These examples will be shown in the public gallery.

@@ -96,15 +96,15 @@ class CheckpointAnonymizer(BaseAnonymizer):
             expectation_suite_name
         )
 
-        batch_request: Optional[
-            Union[BatchRequest, RuntimeBatchRequest, dict]
-        ] = kwargs.get("batch_request")
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = (
+            kwargs.get("batch_request")
+        )
         if batch_request is None:
             batch_request = {}
 
-        anonymized_batch_request: Optional[
-            Dict[str, List[str]]
-        ] = self._aggregate_anonymizer.anonymize(*(), **batch_request)
+        anonymized_batch_request: Optional[Dict[str, List[str]]] = (
+            self._aggregate_anonymizer.anonymize(*(), **batch_request)
+        )
 
         action_list: Optional[List[dict]] = kwargs.get("action_list")
         anonymized_action_list: Optional[List[dict]] = None
@@ -146,9 +146,9 @@ class CheckpointAnonymizer(BaseAnonymizer):
                 validation_expectation_suite_name: Optional[str] = validation_obj.get(
                     "expectation_suite_name"
                 )
-                anonymized_validation_expectation_suite_name: Optional[
-                    str
-                ] = self._anonymize_string(validation_expectation_suite_name)
+                anonymized_validation_expectation_suite_name: Optional[str] = (
+                    self._anonymize_string(validation_expectation_suite_name)
+                )
 
                 validation_action_list: Optional[List[dict]] = validation_obj.get(
                     "action_list"
@@ -174,19 +174,19 @@ class CheckpointAnonymizer(BaseAnonymizer):
                 ] = {}
 
                 if anonymized_validation_batch_request:
-                    anonymized_validation[
-                        "anonymized_batch_request"
-                    ] = anonymized_validation_batch_request
+                    anonymized_validation["anonymized_batch_request"] = (
+                        anonymized_validation_batch_request
+                    )
 
                 if anonymized_validation_expectation_suite_name:
-                    anonymized_validation[
-                        "anonymized_expectation_suite_name"
-                    ] = anonymized_validation_expectation_suite_name
+                    anonymized_validation["anonymized_expectation_suite_name"] = (
+                        anonymized_validation_expectation_suite_name
+                    )
 
                 if anonymized_validation_action_list:
-                    anonymized_validation[
-                        "anonymized_action_list"
-                    ] = anonymized_validation_action_list
+                    anonymized_validation["anonymized_action_list"] = (
+                        anonymized_validation_action_list
+                    )
 
                 anonymized_validation: Dict[str, Dict[str, Any]] = {
                     "anonymized_batch_request": anonymized_validation_batch_request,

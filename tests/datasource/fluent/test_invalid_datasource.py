@@ -99,8 +99,7 @@ class InvalidDSFactory(Protocol):
 
     def __call__(
         self, config: dict[Literal["name", "type", "assets"] | Any, Any]
-    ) -> InvalidDatasource:
-        ...
+    ) -> InvalidDatasource: ...
 
 
 @pytest.fixture

@@ -1081,9 +1081,9 @@ class Expectation(metaclass=MetaExpectation):
         )
         runtime_configuration["result_format"] = validation_dependencies.result_format
 
-        validation_dependencies_metric_configurations: List[
-            MetricConfiguration
-        ] = validation_dependencies.get_metric_configurations()
+        validation_dependencies_metric_configurations: List[MetricConfiguration] = (
+            validation_dependencies.get_metric_configurations()
+        )
 
         _validate_dependencies_against_available_metrics(
             validation_dependencies=validation_dependencies_metric_configurations,
@@ -1098,13 +1098,13 @@ class Expectation(metaclass=MetaExpectation):
             for metric_name, metric_configuration in validation_dependencies.metric_configurations.items()
         }
 
-        expectation_validation_result: Union[
-            ExpectationValidationResult, dict
-        ] = self._validate(
-            configuration=configuration,
-            metrics=provided_metrics,
-            runtime_configuration=runtime_configuration,
-            execution_engine=execution_engine,
+        expectation_validation_result: Union[ExpectationValidationResult, dict] = (
+            self._validate(
+                configuration=configuration,
+                metrics=provided_metrics,
+                runtime_configuration=runtime_configuration,
+                execution_engine=execution_engine,
+            )
         )
 
         result_format = parse_result_format(
@@ -1309,11 +1309,11 @@ class Expectation(metaclass=MetaExpectation):
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
-        expectation_validation_result_list: list[
-            ExpectationValidationResult
-        ] = validator.graph_validate(
-            configurations=[configuration],
-            runtime_configuration=runtime_configuration,
+        expectation_validation_result_list: list[ExpectationValidationResult] = (
+            validator.graph_validate(
+                configurations=[configuration],
+                runtime_configuration=runtime_configuration,
+            )
         )
         return expectation_validation_result_list[0]
 
@@ -1400,18 +1400,18 @@ class Expectation(metaclass=MetaExpectation):
             self._get_description_diagnostics()
         )
 
-        _expectation_config: Optional[
-            ExpectationConfiguration
-        ] = self._get_expectation_configuration_from_examples(examples)
+        _expectation_config: Optional[ExpectationConfiguration] = (
+            self._get_expectation_configuration_from_examples(examples)
+        )
         if not _expectation_config:
             _error(
                 f"Was NOT able to get Expectation configuration for {self.expectation_type}. "
                 "Is there at least one sample test where 'success' is True?"
             )
-        metric_diagnostics_list: List[
-            ExpectationMetricDiagnostics
-        ] = self._get_metric_diagnostics_list(
-            expectation_config=_expectation_config,
+        metric_diagnostics_list: List[ExpectationMetricDiagnostics] = (
+            self._get_metric_diagnostics_list(
+                expectation_config=_expectation_config,
+            )
         )
 
         introspected_execution_engines: ExpectationExecutionEngineDiagnostics = (
@@ -1442,16 +1442,16 @@ class Expectation(metaclass=MetaExpectation):
             context=context,
         )
 
-        backend_test_result_counts: List[
-            ExpectationBackendTestResultCounts
-        ] = ExpectationDiagnostics._get_backends_from_test_results(test_results)
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts] = (
+            ExpectationDiagnostics._get_backends_from_test_results(test_results)
+        )
 
-        renderers: List[
-            ExpectationRendererDiagnostics
-        ] = self._get_renderer_diagnostics(
-            expectation_type=description_diagnostics.snake_name,
-            test_diagnostics=test_results,
-            registered_renderers=_registered_renderers,  # type: ignore[arg-type]
+        renderers: List[ExpectationRendererDiagnostics] = (
+            self._get_renderer_diagnostics(
+                expectation_type=description_diagnostics.snake_name,
+                test_diagnostics=test_results,
+                registered_renderers=_registered_renderers,  # type: ignore[arg-type]
+            )
         )
 
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
@@ -1627,9 +1627,9 @@ class Expectation(metaclass=MetaExpectation):
                             copied_test["only_for"].extend(top_level_only_for)
                     if top_level_suppress_test_for:
                         if "suppress_test_for" not in copied_test:
-                            copied_test[
-                                "suppress_test_for"
-                            ] = top_level_suppress_test_for
+                            copied_test["suppress_test_for"] = (
+                                top_level_suppress_test_for
+                            )
                         else:
                             copied_test["suppress_test_for"].extend(
                                 top_level_suppress_test_for
@@ -2884,9 +2884,9 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         result_format_str: Optional[str] = validation_dependencies.result_format.get(
             "result_format"
         )
-        include_unexpected_rows: Optional[
-            bool
-        ] = validation_dependencies.result_format.get("include_unexpected_rows")
+        include_unexpected_rows: Optional[bool] = (
+            validation_dependencies.result_format.get("include_unexpected_rows")
+        )
 
         if result_format_str == "BOOLEAN_ONLY":
             return validation_dependencies
@@ -3168,9 +3168,9 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         result_format_str: Optional[str] = validation_dependencies.result_format.get(
             "result_format"
         )
-        include_unexpected_rows: Optional[
-            bool
-        ] = validation_dependencies.result_format.get("include_unexpected_rows")
+        include_unexpected_rows: Optional[bool] = (
+            validation_dependencies.result_format.get("include_unexpected_rows")
+        )
 
         if result_format_str == "BOOLEAN_ONLY":
             return validation_dependencies
@@ -3243,10 +3243,10 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: Union[
-            Dict[str, Union[int, str, bool, List[str], None]], str
-        ] = self.get_result_format(
-            configuration=configuration, runtime_configuration=runtime_configuration
+        result_format: Union[Dict[str, Union[int, str, bool, List[str], None]], str] = (
+            self.get_result_format(
+                configuration=configuration, runtime_configuration=runtime_configuration
+            )
         )
 
         unexpected_index_column_names = None
@@ -3440,9 +3440,9 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         result_format_str: Optional[str] = validation_dependencies.result_format.get(
             "result_format"
         )
-        include_unexpected_rows: Optional[
-            bool
-        ] = validation_dependencies.result_format.get("include_unexpected_rows")
+        include_unexpected_rows: Optional[bool] = (
+            validation_dependencies.result_format.get("include_unexpected_rows")
+        )
 
         if result_format_str == "BOOLEAN_ONLY":
             return validation_dependencies
@@ -3654,9 +3654,9 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
         return_obj["result"]["missing_count"] = missing_count
         return_obj["result"]["missing_percent"] = missing_percent
         return_obj["result"]["unexpected_percent_total"] = unexpected_percent_total
-        return_obj["result"][
-            "unexpected_percent_nonmissing"
-        ] = unexpected_percent_nonmissing
+        return_obj["result"]["unexpected_percent_nonmissing"] = (
+            unexpected_percent_nonmissing
+        )
 
     if result_format["include_unexpected_rows"]:
         return_obj["result"].update(

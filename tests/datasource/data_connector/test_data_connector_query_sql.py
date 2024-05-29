@@ -131,26 +131,26 @@ def test_data_connector_query_limit(create_db_and_instantiate_simple_sql_datasou
     )
 
     # no limit
-    batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={"limit": None},
+    batch_definition_list: List[BatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={"limit": None},
+            )
         )
     )
     assert len(batch_definition_list) == 3
     # proper limit
-    batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={"limit": 2},
+    batch_definition_list: List[BatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={"limit": 2},
+            )
         )
     )
     assert len(batch_definition_list) == 2
@@ -158,14 +158,14 @@ def test_data_connector_query_limit(create_db_and_instantiate_simple_sql_datasou
     # illegal limit
     with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
-            BatchDefinition
-        ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="taxi_multi_batch_sql_datasource",
-                data_connector_name="by_vendor_id",
-                data_asset_name="yellow_tripdata_sample_2020_01",
-                data_connector_query={"limit": "apples"},
+        batch_definition_list: List[BatchDefinition] = (
+            my_sql_datasource.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    datasource_name="taxi_multi_batch_sql_datasource",
+                    data_connector_name="by_vendor_id",
+                    data_asset_name="yellow_tripdata_sample_2020_01",
+                    data_connector_query={"limit": "apples"},
+                )
             )
         )
 
@@ -206,14 +206,16 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
             == datetime.datetime(2020, 1, 1).date()
         )
 
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_pickup_date_time",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={"custom_filter_function": my_custom_batch_selector},
+    returned_batch_definition_list: List[BatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_pickup_date_time",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 24
@@ -242,17 +244,17 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
             == datetime.datetime(2020, 1, 1).date()
         )
 
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_pickup_date_time",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={
-                "custom_filter_function": my_custom_batch_selector,
-                "index": "-1",
-            },
+    returned_batch_definition_list: List[BatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_pickup_date_time",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "-1",
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -282,17 +284,17 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             == datetime.datetime(2020, 1, 1).date()
         )
 
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_pickup_date_time",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={
-                "custom_filter_function": my_custom_batch_selector,
-                "index": "0:4:3",
-            },
+    returned_batch_definition_list: List[BatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_pickup_date_time",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "0:4:3",
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 2
@@ -320,16 +322,16 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
         create_db_and_instantiate_simple_sql_datasource
     )
     # no limit
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={
-                "batch_filter_parameters": {"vendor_id": 1},
-            },
+    returned_batch_definition_list: List[BatchDefinition] = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "batch_filter_parameters": {"vendor_id": 1},
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -351,17 +353,17 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key_and_i
         create_db_and_instantiate_simple_sql_datasource
     )
     # no limit
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
-            data_connector_query={
-                "batch_filter_parameters": {"vendor_id": 2},
-                "index": 0,
-            },
+    returned_batch_definition_list: List[BatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+                data_connector_query={
+                    "batch_filter_parameters": {"vendor_id": 2},
+                    "index": 0,
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -384,13 +386,13 @@ def test_data_connector_query_for_data_asset_name(
         create_db_and_instantiate_simple_sql_datasource
     )
     # no limit
-    returned_batch_definition_list: List[
-        BatchDefinition
-    ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="taxi_multi_batch_sql_datasource",
-            data_connector_name="by_vendor_id",
-            data_asset_name="yellow_tripdata_sample_2020_01",
+    returned_batch_definition_list: List[BatchDefinition] = (
+        my_sql_datasource.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="taxi_multi_batch_sql_datasource",
+                data_connector_name="by_vendor_id",
+                data_asset_name="yellow_tripdata_sample_2020_01",
+            )
         )
     )
     assert len(returned_batch_definition_list) == 3

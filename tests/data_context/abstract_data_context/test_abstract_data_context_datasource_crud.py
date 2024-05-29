@@ -89,9 +89,9 @@ def test_add_datasource_sanitizes_instantiated_objs_config(
     # Ensure that config references the above env var
     data_connector_name = tuple(datasource_config_with_names.data_connectors.keys())[0]
     datasource_config_dict = datasource_config_with_names.to_json_dict()
-    datasource_config_dict["data_connectors"][data_connector_name][
-        "base_directory"
-    ] = f"${variable}"
+    datasource_config_dict["data_connectors"][data_connector_name]["base_directory"] = (
+        f"${variable}"
+    )
 
     instantiated_datasource = context.add_datasource(**datasource_config_dict)
 

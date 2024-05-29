@@ -73,9 +73,9 @@ def test_spark_config_execution_engine_block_config(spark_session):
 
     assert not sc_stopped
 
-    current_spark_config: List[
-        tuple
-    ] = execution_engine.spark.sparkContext.getConf().getAll()
+    current_spark_config: List[tuple] = (
+        execution_engine.spark.sparkContext.getConf().getAll()
+    )
     assert ("spark.sql.catalogImplementation", "hive") in current_spark_config
     assert (
         "spark.app.name",

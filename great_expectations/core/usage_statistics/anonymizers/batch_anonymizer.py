@@ -40,15 +40,15 @@ class BatchAnonymizer(BaseAnonymizer):
         anonymized_info_dict = {}
 
         if batch_kwargs:
-            anonymized_info_dict[
-                "anonymized_batch_kwarg_keys"
-            ] = self._anonymize_batch_kwargs(batch_kwargs)
+            anonymized_info_dict["anonymized_batch_kwarg_keys"] = (
+                self._anonymize_batch_kwargs(batch_kwargs)
+            )
         else:
             anonymized_info_dict["anonymized_batch_kwarg_keys"] = []
         if expectation_suite_name:
-            anonymized_info_dict[
-                "anonymized_expectation_suite_name"
-            ] = self._anonymize_string(expectation_suite_name)
+            anonymized_info_dict["anonymized_expectation_suite_name"] = (
+                self._anonymize_string(expectation_suite_name)
+            )
         else:
             anonymized_info_dict["anonymized_expectation_suite_name"] = "__not_found__"
         if datasource_name:

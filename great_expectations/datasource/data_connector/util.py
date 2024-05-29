@@ -93,12 +93,12 @@ def map_data_reference_string_to_batch_definition_list_using_regex(  # noqa: PLR
     group_names: List[str],
     data_asset_name: Optional[str] = None,
 ) -> Optional[List[BatchDefinition]]:
-    processed_data_reference: Optional[
-        Tuple[str, IDDict]
-    ] = convert_data_reference_string_to_batch_identifiers_using_regex(
-        data_reference=data_reference,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    processed_data_reference: Optional[Tuple[str, IDDict]] = (
+        convert_data_reference_string_to_batch_identifiers_using_regex(
+            data_reference=data_reference,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
 
     if processed_data_reference is None:

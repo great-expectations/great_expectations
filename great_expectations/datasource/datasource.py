@@ -375,9 +375,9 @@ class LegacyDatasource:
 
         for generator_name in batch_kwargs_generator_names:
             generator = self.get_batch_kwargs_generator(generator_name)
-            available_data_asset_names[
-                generator_name
-            ] = generator.get_available_data_asset_names()
+            available_data_asset_names[generator_name] = (
+                generator.get_available_data_asset_names()
+            )
         return available_data_asset_names
 
     # TODO: move to dataconnector

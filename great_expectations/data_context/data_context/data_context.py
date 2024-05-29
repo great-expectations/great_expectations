@@ -46,8 +46,7 @@ def DataContext(
     cloud_base_url: str | None = ...,
     cloud_access_token: str | None = ...,
     cloud_organization_id: str | None = ...,
-) -> AbstractDataContext:
-    ...
+) -> AbstractDataContext: ...
 
 
 # TODO: add additional overloads

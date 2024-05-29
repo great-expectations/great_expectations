@@ -117,9 +117,9 @@ def test_statistics_data_assistant_metrics_count(
 def test_statistics_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_statistics_data_assistant_result: StatisticsDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_statistics_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_statistics_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode

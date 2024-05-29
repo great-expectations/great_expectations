@@ -736,8 +736,7 @@ def get_dbms_compatible_column_names(
     column_names: str,
     batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
-) -> str | sqlalchemy.quoted_name:
-    ...
+) -> str | sqlalchemy.quoted_name: ...
 
 
 @overload
@@ -745,8 +744,7 @@ def get_dbms_compatible_column_names(
     column_names: List[str],
     batch_columns_list: Sequence[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
-) -> List[str | sqlalchemy.quoted_name]:
-    ...
+) -> List[str | sqlalchemy.quoted_name]: ...
 
 
 def get_dbms_compatible_column_names(

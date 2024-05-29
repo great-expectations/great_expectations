@@ -83,7 +83,8 @@ def titanic_multibatch_data_context(
     project_path = str(project_path)
     context_path = os.path.join(project_path, FileDataContext.GX_DIR)  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
@@ -1328,10 +1329,12 @@ def test_load_config_variables_property(
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(  # noqa: PTH103
-        os.path.join(base_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+        os.path.join(base_path, "uncommitted"),
+        exist_ok=True,  # noqa: PTH118
     )
     with open(
-        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"  # noqa: PTH118
+        os.path.join(base_path, "uncommitted", "dev_variables.yml"),
+        "w",  # noqa: PTH118
     ) as outfile:
         yaml.dump({"env": "dev"}, outfile)
     with open(
@@ -1339,9 +1342,9 @@ def test_load_config_variables_property(
         "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
-    basic_data_context_config[
-        "config_variables_file_path"
-    ] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    basic_data_context_config["config_variables_file_path"] = (
+        "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+    )
 
     try:
         # We should be able to load different files based on an environment variable
@@ -1426,7 +1429,8 @@ def test_list_checkpoints_on_context_with_two_checkpoints(
     shutil.copy(
         checkpoints_file,
         os.path.join(  # noqa: PTH118
-            os.path.dirname(checkpoints_file), "another.yml"  # noqa: PTH120
+            os.path.dirname(checkpoints_file),
+            "another.yml",  # noqa: PTH120
         ),
     )
     assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}

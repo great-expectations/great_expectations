@@ -21,6 +21,7 @@ To validate the snippets in this file, use the following console command:
 yarn snippet-check ./tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.py
 ```
 """
+
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
 from tests.integration.docusaurus.connecting_to_your_data.datasource_configuration.datasource_configuration_test_utilities import (

@@ -707,17 +707,17 @@ def test_inline_renderer_expectation_configuration_serialization(
         render_object=expectation_configuration
     )
 
-    expectation_configuration_rendered_atomic_content: List[
-        RenderedAtomicContent
-    ] = inline_renderer.get_rendered_content()
+    expectation_configuration_rendered_atomic_content: List[RenderedAtomicContent] = (
+        inline_renderer.get_rendered_content()
+    )
 
-    actual_serialized_expectation_configuration_rendered_atomic_content: List[
-        dict
-    ] = clean_serialized_rendered_atomic_content_graphs(
-        serialized_rendered_atomic_content=[
-            rendered_atomic_content.to_json_dict()
-            for rendered_atomic_content in expectation_configuration_rendered_atomic_content
-        ]
+    actual_serialized_expectation_configuration_rendered_atomic_content: List[dict] = (
+        clean_serialized_rendered_atomic_content_graphs(
+            serialized_rendered_atomic_content=[
+                rendered_atomic_content.to_json_dict()
+                for rendered_atomic_content in expectation_configuration_rendered_atomic_content
+            ]
+        )
     )
 
     assert (

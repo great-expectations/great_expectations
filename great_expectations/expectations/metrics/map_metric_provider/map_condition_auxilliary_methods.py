@@ -127,14 +127,14 @@ def _pandas_map_condition_index(
     result_format = metric_value_kwargs["result_format"]
     domain_records_df = domain_records_df[boolean_mapped_unexpected_values]
 
-    unexpected_index_list: Union[
-        List[int], List[Dict[str, Any]]
-    ] = compute_unexpected_pandas_indices(
-        domain_records_df=domain_records_df,
-        result_format=result_format,
-        execution_engine=execution_engine,
-        metrics=metrics,
-        expectation_domain_column_list=domain_column_name_list,
+    unexpected_index_list: Union[List[int], List[Dict[str, Any]]] = (
+        compute_unexpected_pandas_indices(
+            domain_records_df=domain_records_df,
+            result_format=result_format,
+            execution_engine=execution_engine,
+            metrics=metrics,
+            expectation_domain_column_list=domain_column_name_list,
+        )
     )
     if result_format["result_format"] == "COMPLETE":
         return unexpected_index_list
@@ -489,9 +489,9 @@ def _sqlalchemy_map_condition_query(
         execution_engine
     )
 
-    source_table_and_schema_as_selectable: Union[
-        sa.Table, sa.Select
-    ] = get_sqlalchemy_selectable(source_table_and_schema)
+    source_table_and_schema_as_selectable: Union[sa.Table, sa.Select] = (
+        get_sqlalchemy_selectable(source_table_and_schema)
+    )
     final_select_statement: sa.select = (
         unexpected_condition_query_with_selected_columns.select_from(
             source_table_and_schema_as_selectable

@@ -138,14 +138,14 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             )
 
         # Obtain unexpected_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        unexpected_count_parameter_builder_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.unexpected_count_parameter_builder_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
+        unexpected_count_parameter_builder_name: Optional[str] = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.unexpected_count_parameter_builder_name,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
         )
 
         fully_qualified_unexpected_count_parameter_builder_name: str = (

@@ -304,11 +304,11 @@ def get_expectation_instances(expectations_info):
                 continue
 
         try:
-            expectation_instances[
-                expectation_name
-            ] = great_expectations.expectations.registry.get_expectation_impl(
-                expectation_name
-            )()
+            expectation_instances[expectation_name] = (
+                great_expectations.expectations.registry.get_expectation_impl(
+                    expectation_name
+                )()
+            )
         except ExpectationNotFoundError:
             logger.error(
                 f"Failed to get Expectation implementation from registry: {expectation_name}"
@@ -378,19 +378,19 @@ def combine_backend_results(
                 tests=diagnostic_object.tests,
                 backend_test_result_counts=backend_test_result_counts_object,
             )
-            expectations_info[expectation_name][
-                "maturity_checklist"
-            ] = maturity_checklist_object.to_dict()
-            expectations_info[expectation_name][
-                "coverage_score"
-            ] = Expectation._get_coverage_score(
-                backend_test_result_counts=backend_test_result_counts_object,
-                execution_engines=diagnostic_object.execution_engines,
+            expectations_info[expectation_name]["maturity_checklist"] = (
+                maturity_checklist_object.to_dict()
             )
-            expectations_info[expectation_name]["library_metadata"][
-                "maturity"
-            ] = Expectation._get_final_maturity_level(
-                maturity_checklist=maturity_checklist_object
+            expectations_info[expectation_name]["coverage_score"] = (
+                Expectation._get_coverage_score(
+                    backend_test_result_counts=backend_test_result_counts_object,
+                    execution_engines=diagnostic_object.execution_engines,
+                )
+            )
+            expectations_info[expectation_name]["library_metadata"]["maturity"] = (
+                Expectation._get_final_maturity_level(
+                    maturity_checklist=maturity_checklist_object
+                )
             )
 
         for bad_key_name in bad_key_names:

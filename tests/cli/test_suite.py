@@ -3180,9 +3180,9 @@ def test_suite_new_profile_runs_notebook_no_jupyter(  # noqa: PLR0915
     context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
-    expected_expectation_configurations: List[
-        ExpectationConfiguration
-    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
+    expected_expectation_configurations: List[ExpectationConfiguration] = (
+        EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
+    )
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -3406,9 +3406,9 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(  # noqa: PLR0915
     context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
-    expected_expectation_configurations: List[
-        ExpectationConfiguration
-    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
+    expected_expectation_configurations: List[ExpectationConfiguration] = (
+        EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
+    )
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -4072,15 +4072,15 @@ def test__process_suite_new_flags_and_prompt(
     if not error_expected:
         if prompt_input is not None:
             mock_prompt.side_effect = [prompt_input]
-        processed_flags: Tuple[
-            CLISuiteInteractiveFlagCombinations, bool
-        ] = _process_suite_new_flags_and_prompt(
-            context=context,
-            usage_event_end=usage_event_end,
-            interactive_flag=interactive_flag,
-            manual_flag=manual_flag,
-            profile=profile_flag,
-            batch_request=batch_request_flag,
+        processed_flags: Tuple[CLISuiteInteractiveFlagCombinations, bool] = (
+            _process_suite_new_flags_and_prompt(
+                context=context,
+                usage_event_end=usage_event_end,
+                interactive_flag=interactive_flag,
+                manual_flag=manual_flag,
+                profile=profile_flag,
+                batch_request=batch_request_flag,
+            )
         )
         assert processed_flags == (
             return_interactive,

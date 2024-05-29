@@ -1,14 +1,15 @@
 """A script for generating API documents through introspection of class objects and docstring parsing.
 
-    Usage:
-    1. Run the script.
-        1a. The files will be generated automatically.
-    2. A series of print statements at the end of the script execution will alert you to documentation that needs to be
-     updated with cross-linking (or have cross-linking removed).  Manually update these files as needed.
-    3. Among the print statements will be a snippet for sidebar.js -- paste this snippet into the `items` list for the
-     API documentation category under Reference, replacing the existing content of this list.
-        3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
+Usage:
+1. Run the script.
+    1a. The files will be generated automatically.
+2. A series of print statements at the end of the script execution will alert you to documentation that needs to be
+ updated with cross-linking (or have cross-linking removed).  Manually update these files as needed.
+3. Among the print statements will be a snippet for sidebar.js -- paste this snippet into the `items` list for the
+ API documentation category under Reference, replacing the existing content of this list.
+    3a. Correct the format of sidebars.js as needed (running pyCharm's 'format file' context will do).
 """
+
 import importlib
 import inspect
 import pydoc
@@ -168,9 +169,9 @@ def _get_dictionary_from_block_in_docstring(
                 key, value = line.strip().split(":", 1)
                 block_dict[key] = _escape_markdown_special_characters(value.strip())
             elif _get_indentation(line) > base_indent:
-                block_dict[
-                    key
-                ] = f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
+                block_dict[key] = (
+                    f"{block_dict[key]} {_escape_markdown_special_characters(line.strip())}"
+                )
             elif key is None:
                 raise BlockFormatError(block_heading_text, block_contents, line)
             else:

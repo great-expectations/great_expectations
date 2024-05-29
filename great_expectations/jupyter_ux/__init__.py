@@ -1,5 +1,4 @@
-"""Utility functions for working with great_expectations within jupyter notebooks or jupyter lab.
-"""
+"""Utility functions for working with great_expectations within jupyter notebooks or jupyter lab."""
 
 import logging
 import sys
@@ -115,9 +114,7 @@ Found more than one {:s} data source in the great_expectations.yml of your proje
 <p>
 Uncomment the next cell and set data_source_name to one of these names.
 </p>
-""".format(
-                        data_source_type, ",".join(configured_datasources)
-                    )
+""".format(data_source_type, ",".join(configured_datasources))
                 )
             )
         else:

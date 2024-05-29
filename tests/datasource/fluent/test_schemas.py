@@ -156,9 +156,7 @@ def test_no_orphaned_schemas():
         if schema.stem not in all_schemas:
             orphans.append(schema)
 
-    assert (
-        not orphans
-    ), f"The following schemas appear to be orphaned and should be removed. Run `invoke schema --sync --clean`\n{pf(orphans)}"
+    assert not orphans, f"The following schemas appear to be orphaned and should be removed. Run `invoke schema --sync --clean`\n{pf(orphans)}"
 
 
 if __name__ == "__main__":

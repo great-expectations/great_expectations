@@ -89,6 +89,7 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
             A numeric value that is included in the calculation to equal the nth column. \
             The calculation becomes col_a + col_b + ... + col_n-1 + additional_value == col_n
     """
+
     # </snippet>
 
     # These examples will be shown in the public gallery.

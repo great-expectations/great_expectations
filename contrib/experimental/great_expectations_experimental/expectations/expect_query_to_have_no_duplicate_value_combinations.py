@@ -4,7 +4,6 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration

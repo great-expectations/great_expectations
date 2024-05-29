@@ -58,6 +58,7 @@ class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/examples/column_pair_map_expectation_template.py docstring">
     """TODO: Add a docstring here"""
+
     # </snippet>
 
     # These examples will be shown in the public gallery.

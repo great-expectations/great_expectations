@@ -20,6 +20,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py docstring">
     """TODO: Add a docstring here"""
+
     # </snippet>
 
     # This is the id string of the Metric(s) used by this Expectation.

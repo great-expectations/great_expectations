@@ -47,9 +47,9 @@ class BatchRequestAnonymizer(BaseAnonymizer):
             )
             batch_request_dict: dict = batch_request.to_json_dict()
 
-            anonymized_batch_request_dict: Optional[
-                Union[str, dict]
-            ] = self._anonymize_batch_request_properties(source=batch_request_dict)
+            anonymized_batch_request_dict: Optional[Union[str, dict]] = (
+                self._anonymize_batch_request_properties(source=batch_request_dict)
+            )
             anonymized_batch_request_dict = standardize_batch_request_display_ordering(
                 batch_request=anonymized_batch_request_dict
             )
@@ -120,9 +120,9 @@ class BatchRequestAnonymizer(BaseAnonymizer):
                         )
                 else:
                     anonymized_key: str = self._anonymize_string(key)
-                    source_copy[
-                        anonymized_key
-                    ] = self._anonymize_batch_request_properties(source=value)
+                    source_copy[anonymized_key] = (
+                        self._anonymize_batch_request_properties(source=value)
+                    )
                     anonymized_keys.add(key)
 
             for key in anonymized_keys:

@@ -4,6 +4,7 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_connect_to_one_or_more_files_using_spark" tests/integration/test_script_runner.py
 ```
 """
+
 import pathlib
 
 import great_expectations as gx

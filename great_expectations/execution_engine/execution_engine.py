@@ -558,10 +558,10 @@ class ExecutionEngine(ABC):
 
         try:
             # an engine-specific way of computing metrics together
-            resolved_metric_bundle: Dict[
-                Tuple[str, str, str], MetricValue
-            ] = self.resolve_metric_bundle(
-                metric_fn_bundle=metric_fn_bundle_configurations
+            resolved_metric_bundle: Dict[Tuple[str, str, str], MetricValue] = (
+                self.resolve_metric_bundle(
+                    metric_fn_bundle=metric_fn_bundle_configurations
+                )
             )
             resolved_metrics.update(resolved_metric_bundle)
         except Exception as e:

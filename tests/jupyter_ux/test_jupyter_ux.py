@@ -66,9 +66,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 </div>
     </div>
 </div>
-""".replace(
-            " ", ""
-        )
+""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -164,9 +162,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 </div>
     </div>
 </div>
-""".replace(
-            " ", ""
-        )
+""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )

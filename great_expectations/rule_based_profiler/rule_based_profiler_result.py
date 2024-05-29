@@ -78,7 +78,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
         expectation_configuration: ExpectationConfiguration
         parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[
             Domain, Dict[str, ParameterNode]
-        ] = (self.parameter_values_for_fully_qualified_parameter_names_by_domain or {})
+        ] = self.parameter_values_for_fully_qualified_parameter_names_by_domain or {}
         return {
             "fully_qualified_parameter_names_by_domain": [
                 {

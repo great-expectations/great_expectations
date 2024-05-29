@@ -368,10 +368,10 @@ class _FilePathDataAsset(DataAsset):
         if self.splitter:
             batch_spec_options["splitter_method"] = self.splitter.method_name
             splitter_kwargs = self.splitter.splitter_method_kwargs()
-            splitter_kwargs[
-                "batch_identifiers"
-            ] = self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
-                batch_request.options
+            splitter_kwargs["batch_identifiers"] = (
+                self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
+                    batch_request.options
+                )
             )
             batch_spec_options["splitter_kwargs"] = splitter_kwargs
 

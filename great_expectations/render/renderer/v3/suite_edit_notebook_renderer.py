@@ -215,9 +215,9 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         expectations: List[ExpectationConfiguration],
         batch_request: Optional[Union[str, Dict[str, Any]]] = None,
     ) -> None:
-        expectations_by_column: Dict[
-            str, List[ExpectationConfiguration]
-        ] = self._get_expectations_by_column(expectations=expectations)
+        expectations_by_column: Dict[str, List[ExpectationConfiguration]] = (
+            self._get_expectations_by_column(expectations=expectations)
+        )
 
         markdown: str
 

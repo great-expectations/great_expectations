@@ -172,9 +172,9 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
                 metric_name="table.row_count"
             )
         )
-        table_row_count_metric_config_other.metric_domain_kwargs[
-            "table"
-        ] = other_table_name
+        table_row_count_metric_config_other.metric_domain_kwargs["table"] = (
+            other_table_name
+        )
         # rename original "table.row_count" metric to "table.row_count.self"
         validation_dependencies.set_metric_configuration(
             metric_name="table.row_count.self",

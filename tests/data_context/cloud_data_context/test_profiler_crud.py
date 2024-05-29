@@ -133,7 +133,7 @@ def profiler_names_and_ids() -> Tuple[Tuple[str, str], Tuple[str, str]]:
 
 @pytest.fixture
 def mock_get_all_profilers_json(
-    profiler_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]]
+    profiler_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
 ) -> dict:
     profiler_1, profiler_2 = profiler_names_and_ids
     profiler_name_1, profiler_id_1 = profiler_1

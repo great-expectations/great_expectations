@@ -88,7 +88,7 @@ def section_5_add_the_spark_execution_engine_to_your_datasource_configuration():
         "execution_engine": {
             "class_name": "SparkDFExecutionEngine",
             "module_name": "great_expectations.execution_engine",
-        }
+        },
         # </snippet>
     }
 
@@ -349,7 +349,7 @@ def section_8_configure_the_values_for_batch_spec_passthrough__universal():
             "reader_method": "csv",
             # </snippet>
             # <snippet name = "populate reader_options with empty header and inferSchema keys">
-            "reader_options": {"header": "", "inferSchema": ""}
+            "reader_options": {"header": "", "inferSchema": ""},
             # </snippet>
         }
     }
@@ -361,7 +361,7 @@ def section_8_configure_the_values_for_batch_spec_passthrough__universal():
                 "header": True,
                 # </snippet>
                 # <snippet name="define inferSchema as True for reader_options">
-                "inferSchema": True
+                "inferSchema": True,
                 # </snippet>
             },
         }
@@ -535,7 +535,7 @@ def section_9_configure_your_data_connectors_data_assets__inferred__single_batch
                     "pattern": "(.*)\\.csv",
                     # </snippet>
                     # <snippet name="inferred spark single batch group_names">
-                    "group_names": ["data_asset_name"]
+                    "group_names": ["data_asset_name"],
                     # </snippet>
                 },
             },

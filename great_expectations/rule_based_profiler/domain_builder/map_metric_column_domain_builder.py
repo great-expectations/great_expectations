@@ -169,14 +169,14 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         # Obtain max_unexpected_ratio from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        max_unexpected_ratio: Optional[
-            float
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.max_unexpected_ratio,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
+        max_unexpected_ratio: Optional[float] = (
+            get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=self.max_unexpected_ratio,
+                expected_return_type=None,
+                variables=variables,
+                parameters=None,
+            )
         )
 
         # Obtain min_max_unexpected_values_proportion from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -215,23 +215,23 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         if max_unexpected_ratio is None:
             max_unexpected_ratio = max_unexpected_values / mean_table_row_count_as_float
 
-        metric_configurations_by_column_name: Dict[
-            str, List[MetricConfiguration]
-        ] = self._generate_metric_configurations(
-            map_metric_name=map_metric_name,
-            batch_ids=batch_ids,
-            column_names=table_column_names,
+        metric_configurations_by_column_name: Dict[str, List[MetricConfiguration]] = (
+            self._generate_metric_configurations(
+                map_metric_name=map_metric_name,
+                batch_ids=batch_ids,
+                column_names=table_column_names,
+            )
         )
 
-        candidate_column_names: List[
-            str
-        ] = self._get_column_names_satisfying_tolerance_limits(
-            validator=validator,
-            num_batch_ids=num_batch_ids,
-            metric_configurations_by_column_name=metric_configurations_by_column_name,
-            mean_table_row_count_as_float=mean_table_row_count_as_float,
-            max_unexpected_ratio=max_unexpected_ratio,
-            min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
+        candidate_column_names: List[str] = (
+            self._get_column_names_satisfying_tolerance_limits(
+                validator=validator,
+                num_batch_ids=num_batch_ids,
+                metric_configurations_by_column_name=metric_configurations_by_column_name,
+                mean_table_row_count_as_float=mean_table_row_count_as_float,
+                max_unexpected_ratio=max_unexpected_ratio,
+                min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
+            )
         )
 
         column_name: str

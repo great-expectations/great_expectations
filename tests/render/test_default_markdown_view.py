@@ -40,10 +40,8 @@ def validation_operator_result():
         validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
         run_results = validation_operator_result["run_results"]
         for k, validation_result in run_results.items():
-            validation_result[
-                "validation_result"
-            ] = ExpectationSuiteValidationResultSchema().load(
-                validation_result["validation_result"]
+            validation_result["validation_result"] = (
+                ExpectationSuiteValidationResultSchema().load(validation_result["validation_result"])
             )
         return validation_operator_result
 
@@ -133,9 +131,7 @@ def test_render_section_page():
         ||||------------|------------|Numberofvariables|12Numberofobservations|891
         -----------------------------------------------------------
         Poweredby[GreatExpectations](https://greatexpectations.io/)
-        """.replace(
-            " ", ""
-        )
+        """.replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -303,9 +299,7 @@ Run Time  | 2020-07-27T17:19:32Z
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-""".replace(
-            " ", ""
-        )
+""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -475,9 +469,7 @@ Run Time  | 2020-07-27T17:19:32Z
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-""".replace(
-            " ", ""
-        )
+""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -524,9 +516,7 @@ Great Expectations Version  | 0.13.0-test
   * ***
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
-    """.replace(
-            " ", ""
-        )
+    """.replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )

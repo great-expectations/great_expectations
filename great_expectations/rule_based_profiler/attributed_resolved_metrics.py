@@ -91,7 +91,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @staticmethod
     def get_conditioned_attributed_metric_values_from_attributed_metric_values(
-        attributed_metric_values: Dict[str, MetricValues]
+        attributed_metric_values: Dict[str, MetricValues],
     ) -> Dict[str, MetricValues]:
         """
         Converts "attributed_metric_values" to Numpy array for each "batch_id" key (recursively, wherever possible).
@@ -108,7 +108,7 @@ class AttributedResolvedMetrics(SerializableDictDot):
 
     @staticmethod
     def get_conditioned_metric_values_from_attributed_metric_values(
-        attributed_metric_values: Dict[str, MetricValue]
+        attributed_metric_values: Dict[str, MetricValue],
     ) -> Optional[MetricValues]:
         """
         Converts all "attributed_metric_values" as list (together) to Numpy array (recursively, wherever possible).

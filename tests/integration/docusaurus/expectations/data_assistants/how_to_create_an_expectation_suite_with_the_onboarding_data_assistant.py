@@ -13,6 +13,7 @@ the snippets that are specified for use in documentation are maintained.  These 
 --documentation--
     https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant
 """
+
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler

@@ -1937,15 +1937,15 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 elif _engine == "spark" and "spark" in engines_implemented:
                     engines_to_include[_engine] = True
     else:
-        engines_to_include[
-            "pandas"
-        ] = execution_engine_diagnostics.PandasExecutionEngine
-        engines_to_include[
-            "spark"
-        ] = execution_engine_diagnostics.SparkDFExecutionEngine
-        engines_to_include[
-            "sqlalchemy"
-        ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        engines_to_include["pandas"] = (
+            execution_engine_diagnostics.PandasExecutionEngine
+        )
+        engines_to_include["spark"] = (
+            execution_engine_diagnostics.SparkDFExecutionEngine
+        )
+        engines_to_include["sqlalchemy"] = (
+            execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        )
         if (
             engines_to_include.get("sqlalchemy") is True
             and raise_exceptions_for_backends is False
@@ -2558,8 +2558,8 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                     atol=ATOL,
                 ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {expectationValidationResultSchema.load(test['output'])['result']['observed_value']}"
             else:
-                assert result == expectationValidationResultSchema.load(
-                    test["output"]
+                assert (
+                    result == expectationValidationResultSchema.load(test["output"])
                 ), f"{result} != {expectationValidationResultSchema.load(test['output'])}"
         else:
             assert result == expectationValidationResultSchema.load(
@@ -2590,8 +2590,9 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
             elif key == "observed_value":
                 if "tolerance" in test:
                     if isinstance(value, dict):
-                        assert set(result["result"]["observed_value"].keys()) == set(
-                            value.keys()
+                        assert (
+                            set(result["result"]["observed_value"].keys())
+                            == set(value.keys())
                         ), f"{set(result['result']['observed_value'].keys())} != {set(value.keys())}"
                         for k, v in value.items():
                             assert np.allclose(

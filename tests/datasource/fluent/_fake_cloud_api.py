@@ -44,9 +44,9 @@ MISSING: Final = object()
 
 GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
 
-DUMMY_JWT_TOKEN: Final[
-    str
-] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+DUMMY_JWT_TOKEN: Final[str] = (
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+)
 # Can replace hardcoded ids with dynamic ones if using a regex url with responses.add_callback()
 # https://github.com/getsentry/responses/tree/master#dynamic-responses
 FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
@@ -626,12 +626,12 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
     else:
         payload["data"]["id"] = FAKE_CHECKPOINT_ID
         payload["data"]["attributes"]["checkpoint_config"]["id"] = FAKE_CHECKPOINT_ID
-        payload["data"]["attributes"]["checkpoint_config"][
-            "ge_cloud_id"
-        ] = FAKE_CHECKPOINT_ID
-        payload["data"]["attributes"]["checkpoint_config"]["validations"][0][
-            "id"
-        ] = FAKE_VALIDATION_ID
+        payload["data"]["attributes"]["checkpoint_config"]["ge_cloud_id"] = (
+            FAKE_CHECKPOINT_ID
+        )
+        payload["data"]["attributes"]["checkpoint_config"]["validations"][0]["id"] = (
+            FAKE_VALIDATION_ID
+        )
         checkpoints[FAKE_CHECKPOINT_ID] = payload
         checkpoint_names.add(name)
         result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))

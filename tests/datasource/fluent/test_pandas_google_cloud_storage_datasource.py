@@ -59,7 +59,7 @@ class MockGCSClient:
 
 
 def _build_pandas_gcs_datasource(
-    gcs_options: Dict[str, Any] | None = None
+    gcs_options: Dict[str, Any] | None = None,
 ) -> PandasGoogleCloudStorageDatasource:
     gcs_client: google.Client = cast(google.Client, MockGCSClient())
     pandas_gcs_datasource = PandasGoogleCloudStorageDatasource(

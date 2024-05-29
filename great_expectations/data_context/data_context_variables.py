@@ -379,9 +379,9 @@ class FileDataContextVariables(DataContextVariables):
         NOTE: This could be generalized into a stand-alone context manager function,
         but it would need to take in the data_context containing the fluent objects.
         """
-        config_fluent_datasources_stash: Dict[
-            str, FluentDatasource
-        ] = self.data_context._synchronize_fluent_datasources()
+        config_fluent_datasources_stash: Dict[str, FluentDatasource] = (
+            self.data_context._synchronize_fluent_datasources()
+        )
         try:
             if config_fluent_datasources_stash:
                 logger.info(

@@ -83,8 +83,8 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
         conn_str: Optional[str] = azure_options.get("conn_str")
         account_url: Optional[str] = azure_options.get("account_url")
-        assert bool(conn_str) ^ bool(
-            account_url
+        assert (
+            bool(conn_str) ^ bool(account_url)
         ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
 
         try:

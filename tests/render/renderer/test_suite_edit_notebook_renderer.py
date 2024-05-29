@@ -55,7 +55,8 @@ def data_context_with_bad_notebooks(tmp_path_factory):
     )
 
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),
+        exist_ok=True,  # noqa: PTH118
     )
     shutil.copytree(
         os.path.join(fixture_dir, custom_notebook_assets_dir),  # noqa: PTH118
@@ -89,7 +90,8 @@ def _create_custom_notebooks_context(path, ge_yml_name):
         os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "plugins"),
+        exist_ok=True,  # noqa: PTH118
     )
     return context_path
 

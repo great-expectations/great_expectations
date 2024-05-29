@@ -207,9 +207,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             batch_request.data_asset_name
         ]
         data_asset_splitter_method: Optional[str] = data_asset.get("splitter_method")
-        data_asset_splitter_kwargs: Optional[
-            Dict[str, Union[str, list]]
-        ] = data_asset.get("splitter_kwargs")
+        data_asset_splitter_kwargs: Optional[Dict[str, Union[str, list]]] = (
+            data_asset.get("splitter_kwargs")
+        )
         data_asset_sorters: Optional[dict] = data_asset.get("sorters")
 
         # if sorters have been explicitly passed to the data connector use them for sorting,
@@ -324,9 +324,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             an ordered list of sorters required to sort splitter batches.
         """
-        splitter_method_to_sorter_method_mapping: Dict[
-            str, Optional[Sorter]
-        ] = self.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING
+        splitter_method_to_sorter_method_mapping: Dict[str, Optional[Sorter]] = (
+            self.SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING
+        )
         splitter_method_name: str = self._get_splitter_method_name(
             splitter_method_name=splitter_method_name,
         )
@@ -555,9 +555,9 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             data_asset_splitter_method: Optional[str] = data_asset_config.get(
                 "splitter_method"
             )
-            data_asset_splitter_kwargs: Optional[
-                Dict[str, Union[str, list]]
-            ] = data_asset_config.get("splitter_kwargs")
+            data_asset_splitter_kwargs: Optional[Dict[str, Union[str, list]]] = (
+                data_asset_config.get("splitter_kwargs")
+            )
             data_asset_sorters: Optional[dict] = data_asset_config.get("sorters")
 
             # if sorters have been explicitly passed to the data connector use them for sorting,
@@ -661,7 +661,9 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
         return table_name
 
     def _map_data_reference_to_batch_definition_list(
-        self, data_reference, data_asset_name: Optional[str] = None  #: Any,
+        self,
+        data_reference,
+        data_asset_name: Optional[str] = None,  #: Any,
     ) -> Optional[List[BatchDefinition]]:
         # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
         # allowing us to invoke `IDDict(data_reference)`

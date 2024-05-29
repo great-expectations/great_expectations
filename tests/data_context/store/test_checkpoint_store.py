@@ -444,7 +444,7 @@ def test_default_checkpoints_exist(path: str, exists: bool) -> None:
 
 @pytest.mark.unit
 def test_list_checkpoints(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.list_keys.return_value = [("a", "b", "c"), ("d", "e", "f")]
@@ -455,7 +455,7 @@ def test_list_checkpoints(
 
 @pytest.mark.cloud
 def test_list_checkpoints_cloud_mode(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
     mock_backend.list_keys.return_value = [("a", "b", "c"), ("d", "e", "f")]
@@ -469,7 +469,7 @@ def test_list_checkpoints_cloud_mode(
 
 @pytest.mark.unit
 def test_delete_checkpoint(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
@@ -482,7 +482,7 @@ def test_delete_checkpoint(
 
 @pytest.mark.cloud
 def test_delete_checkpoint_with_cloud_id(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 
@@ -495,7 +495,7 @@ def test_delete_checkpoint_with_cloud_id(
 
 @pytest.mark.unit
 def test_delete_checkpoint_with_invalid_key_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
 ) -> None:
     def _raise_key_error(_: Any) -> None:
         raise gx_exceptions.InvalidKeyError(message="invalid key")
@@ -528,7 +528,7 @@ def test_get_checkpoint(
 
 @pytest.mark.unit
 def test_get_checkpoint_with_nonexistent_checkpoint_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
 ) -> None:
     def _raise_key_error(_: Any) -> None:
         raise gx_exceptions.InvalidKeyError(message="invalid key")
@@ -546,7 +546,7 @@ def test_get_checkpoint_with_nonexistent_checkpoint_raises_error(
 
 @pytest.mark.unit
 def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
 ) -> None:
     def _raise_validation_error(_: Any) -> None:
         raise ValidationError(message="invalid config")
@@ -565,7 +565,7 @@ def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
 
 @pytest.mark.unit
 def test_add_checkpoint(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
+    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock],
 ) -> None:
     store, mock_backend = checkpoint_store_with_mock_backend
 

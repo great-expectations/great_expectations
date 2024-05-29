@@ -360,7 +360,5 @@ class ExpectProfileNumericColumnsPercentDiffBetweenExclusiveThresholdRange(
 
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectProfileNumericColumnsPercentDiffBetweenExclusiveThresholdRange().run_diagnostics()
-    )
+    diagnostics_report = ExpectProfileNumericColumnsPercentDiffBetweenExclusiveThresholdRange().run_diagnostics()
     print(diagnostics_report.generate_checklist())

@@ -398,7 +398,8 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_g
     assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)  # noqa: PTH100
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
+        ge_dir,
+        os.path.join("..", "..", "data", "pipeline1"),  # noqa: PTH118
     )
     assert obs == os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
 
@@ -448,7 +449,8 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent
     assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)  # noqa: PTH100
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, os.path.join("..", "data", "pipeline1")  # noqa: PTH118
+        ge_dir,
+        os.path.join("..", "data", "pipeline1"),  # noqa: PTH118
     )
     assert obs == os.path.join("..", "..", "data", "pipeline1")  # noqa: PTH118
 

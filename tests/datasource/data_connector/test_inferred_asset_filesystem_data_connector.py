@@ -167,13 +167,13 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
     # Test for an unknown execution environment
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
-            BatchDefinition
-        ] = my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="non_existent_datasource",
-                data_connector_name="my_data_connector",
-                data_asset_name="my_data_asset",
+        batch_definition_list: List[BatchDefinition] = (
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=BatchRequest(
+                    datasource_name="non_existent_datasource",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="my_data_asset",
+                )
             )
         )
 

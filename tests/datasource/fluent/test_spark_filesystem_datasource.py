@@ -1065,7 +1065,7 @@ def datasource_test_connection_error_messages(
 def test_test_connection_failures(
     datasource_test_connection_error_messages: tuple[
         SparkFilesystemDatasource, TestConnectionError
-    ]
+    ],
 ):
     (
         spark_filesystem_datasource,
@@ -1211,8 +1211,16 @@ class TestSplitterDirectoryAsset:
         )
         post_splitter_batch_data = post_splitter_batch_list[0].data
 
-        assert post_splitter_batch_data.dataframe.count() == expected_num_records_directory_asset_no_splitter_2020_passenger_count_2  # type: ignore[attr-defined]
-        assert post_splitter_batch_data.dataframe.filter(F.col("passenger_count") != 2).count() == 0  # type: ignore[attr-defined]
+        assert (
+            post_splitter_batch_data.dataframe.count()
+            == expected_num_records_directory_asset_no_splitter_2020_passenger_count_2
+        )  # type: ignore[attr-defined]
+        assert (
+            post_splitter_batch_data.dataframe.filter(
+                F.col("passenger_count") != 2
+            ).count()
+            == 0
+        )  # type: ignore[attr-defined]
 
 
 @pytest.fixture
@@ -1240,7 +1248,9 @@ def expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2(
     )
     assert len(single_batch_list) == 1
     pre_splitter_batch_data = single_batch_list[0].data
-    expected_num_records = pre_splitter_batch_data.dataframe.filter(F.col("passenger_count") == 2).count()  # type: ignore[attr-defined]
+    expected_num_records = pre_splitter_batch_data.dataframe.filter(
+        F.col("passenger_count") == 2
+    ).count()  # type: ignore[attr-defined]
     assert expected_num_records == 2, "Check that the referenced data hasn't changed"
     return expected_num_records
 
@@ -1338,11 +1348,15 @@ class TestSplitterFileAsset:
         post_splitter_batch_data = post_splitter_batch_list[0].data
 
         assert (
-            post_splitter_batch_data.dataframe.filter(F.col("passenger_count") == 2).count()  # type: ignore[attr-defined]
+            post_splitter_batch_data.dataframe.filter(
+                F.col("passenger_count") == 2
+            ).count()  # type: ignore[attr-defined]
             == expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2
         )
         assert (
-            post_splitter_batch_data.dataframe.filter(F.col("passenger_count") != 2).count()  # type: ignore[attr-defined]
+            post_splitter_batch_data.dataframe.filter(
+                F.col("passenger_count") != 2
+            ).count()  # type: ignore[attr-defined]
             == 0
         )
 
@@ -1408,4 +1422,7 @@ class TestSplitterFileAsset:
         )
         post_splitter_batch_data = post_splitter_batches[0].data
 
-        assert post_splitter_batch_data.dataframe.count() == expected_num_records_file_asset_no_splitter_2020_10  # type: ignore[attr-defined]
+        assert (
+            post_splitter_batch_data.dataframe.count()
+            == expected_num_records_file_asset_no_splitter_2020_10
+        )  # type: ignore[attr-defined]

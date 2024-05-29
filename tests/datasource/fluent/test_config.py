@@ -858,7 +858,9 @@ def test_config_substitution_retains_original_value_on_save(
 
     print(context.fluent_config)
 
-    ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(datasource_name="my_sqlite_ds_w_subs")  # type: ignore[assignment]
+    ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(
+        datasource_name="my_sqlite_ds_w_subs"
+    )  # type: ignore[assignment]
 
     assert str(ds_w_subs.connection_string) == r"${MY_CONN_STR}"
     assert (

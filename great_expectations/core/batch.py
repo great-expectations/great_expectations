@@ -911,7 +911,7 @@ def materialize_batch_request(
     batch_request: BatchRequestBase | dict | None = None,
 ) -> FluentBatchRequest | BatchRequestBase | None:
     def _is_fluent_batch_request(
-        args: dict[str, Any] | BlockConfigBatchRequestTypedDict
+        args: dict[str, Any] | BlockConfigBatchRequestTypedDict,
     ) -> bool:
         from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 
@@ -975,15 +975,13 @@ def get_batch_request_as_dict(  # type: ignore[overload-overlap] # Overload with
     | FluentBatchRequest
     | dict
     | BlockConfigBatchRequestTypedDict = ...,
-) -> dict:
-    ...
+) -> dict: ...
 
 
 @overload
 def get_batch_request_as_dict(
     batch_request: None = ...,
-) -> None:
-    ...
+) -> None: ...
 
 
 def get_batch_request_as_dict(

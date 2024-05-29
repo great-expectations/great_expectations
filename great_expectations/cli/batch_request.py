@@ -57,9 +57,9 @@ def get_batch_request(
     # :param additional_batch_request_args:
     # :return: batch_request
     """
-    available_data_asset_names_by_data_connector_dict: Dict[
-        str, List[str]
-    ] = datasource.get_available_data_asset_names()
+    available_data_asset_names_by_data_connector_dict: Dict[str, List[str]] = (
+        datasource.get_available_data_asset_names()
+    )
     data_connector_name: Optional[str] = select_data_connector_name(
         available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
     )
@@ -107,10 +107,10 @@ def get_batch_request(
     ):
         batch_request.update(additional_batch_request_args)
 
-    batch_spec_passthrough: Optional[
-        Dict[str, Union[str, Dict[str, Any]]]
-    ] = batch_request.get(  # type: ignore[assignment] # can't guarantee shape of 'batch_spec_passthrough'
-        "batch_spec_passthrough"
+    batch_spec_passthrough: Optional[Dict[str, Union[str, Dict[str, Any]]]] = (
+        batch_request.get(  # type: ignore[assignment] # can't guarantee shape of 'batch_spec_passthrough'
+            "batch_spec_passthrough"
+        )
     )
     if batch_spec_passthrough is None:
         batch_spec_passthrough = {}
@@ -227,10 +227,10 @@ def _get_data_asset_name_from_data_connector(
 
     """
 
-    available_data_asset_names_by_data_connector_dict: Dict[
-        str, List[str]
-    ] = datasource.get_available_data_asset_names(
-        data_connector_names=data_connector_name
+    available_data_asset_names_by_data_connector_dict: Dict[str, List[str]] = (
+        datasource.get_available_data_asset_names(
+            data_connector_names=data_connector_name
+        )
     )
     available_data_asset_names: List[str] = sorted(
         available_data_asset_names_by_data_connector_dict[data_connector_name],
@@ -434,7 +434,7 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
 
 
 def _check_default_data_connectors(
-    available_data_asset_names_by_data_connector_dict: Dict[str, List[str]]
+    available_data_asset_names_by_data_connector_dict: Dict[str, List[str]],
 ) -> Optional[str]:
     if all(
         data_connector_name in available_data_asset_names_by_data_connector_dict

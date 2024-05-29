@@ -106,9 +106,7 @@ class DataConnectorStorageDataReferenceResolver:
         ]
         return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
             (storage_name, execution_engine_name)
-        ](
-            template_arguments
-        )
+        ](template_arguments)
 
 
 @public_api

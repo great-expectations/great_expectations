@@ -23,6 +23,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py docstring">
     """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
+
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies">
     metric_dependencies = ("query.column",)
@@ -66,11 +67,14 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
         try:
             assert value is not None, "'value' must be specified"
-            assert (isinstance(threshold, (int, float)) and 0 < threshold <= 1) or (
-                isinstance(threshold, list)
-                and all(isinstance(x, (int, float)) for x in threshold)
-                and all(0 < x <= 1 for x in threshold)
-                and 0 < sum(threshold) <= 1
+            assert (
+                (isinstance(threshold, (int, float)) and 0 < threshold <= 1)
+                or (
+                    isinstance(threshold, list)
+                    and all(isinstance(x, (int, float)) for x in threshold)
+                    and all(0 < x <= 1 for x in threshold)
+                    and 0 < sum(threshold) <= 1
+                )
             ), "'threshold' must be 1, a float between 0 and 1, or a list of floats whose sum is between 0 and 1"
             if isinstance(threshold, list):
                 assert isinstance(value, list) and len(value) == len(

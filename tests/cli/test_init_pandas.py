@@ -78,7 +78,7 @@ def test_cli_init_on_new_project(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "Done generating example Expectation Suite\x1B" in stdout
+    assert "Done generating example Expectation Suite\x1b" in stdout
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(  # noqa: PTH112

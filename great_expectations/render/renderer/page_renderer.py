@@ -191,9 +191,9 @@ class ValidationResultsPageRenderer(Renderer):
         meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
         for evr in validation_results.results:
             if meta_properties_to_render is not None:
-                evr.expectation_config.kwargs[
-                    "meta_properties_to_render"
-                ] = meta_properties_to_render
+                evr.expectation_config.kwargs["meta_properties_to_render"] = (
+                    meta_properties_to_render
+                )
             if "column" in evr.expectation_config.kwargs:
                 column = evr.expectation_config.kwargs["column"]
             else:

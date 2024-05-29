@@ -524,9 +524,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                     else "",
                     rule_name=rule.name,
                 )
-            ] = (
-                rule.parameter_builders or []
-            )
+            ] = rule.parameter_builders or []
 
     @public_api
     def run(
@@ -843,24 +841,18 @@ def build_map_metric_rule(  # noqa: PLR0913
     ] = None
 
     if map_metric_name == "column_values.unique":
-        column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder()
-        )
+        column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_unique_unexpected_count_metric_multi_batch_parameter_builder()
         parameter_builders.append(
             column_values_unique_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
         )
     elif map_metric_name == "column_values.null":
-        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
-        )
+        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations = column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
         parameter_builders.append(
             column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
         )
     elif map_metric_name == "column_values.nonnull":
-        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
-        )
+        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
         parameter_builders.append(
             column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
         )
@@ -872,17 +864,13 @@ def build_map_metric_rule(  # noqa: PLR0913
     # Step-3: Set up "MeanUnexpectedMapMetricMultiBatchParameterBuilder" to compute "condition" for emitting "ExpectationConfiguration" (based on "Domain" data).
 
     if total_count_metric_multi_batch_parameter_builder_for_evaluations is None:
-        total_count_metric_multi_batch_parameter_builder_for_evaluations = (
-            DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
-        )
+        total_count_metric_multi_batch_parameter_builder_for_evaluations = DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
 
     if (
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations
         is None
     ):
-        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations = (
-            DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
-        )
+        column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations = DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
         ParameterBuilderConfig(

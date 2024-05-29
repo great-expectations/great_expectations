@@ -61,8 +61,8 @@ class ExpectColumnValuesToBeValidIpv4(ColumnMapExpectation):
                     4294967295,
                     # integer packed into a bytes object of length 4
                     b"\x00\x00\x00\x00",
-                    b"\xC0\xA8\x00\x01",
-                    b"\xFF\xFF\xFF\xFF",
+                    b"\xc0\xa8\x00\x01",
+                    b"\xff\xff\xff\xff",
                 ],
                 "malformed_ipv4": [
                     # has non-decimal value

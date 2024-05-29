@@ -195,7 +195,9 @@ class PandasExecutionEngine(ExecutionEngine):
 
     @override
     def load_batch_data(
-        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]  # type: ignore[override]
+        self,
+        batch_id: str,
+        batch_data: Union[PandasBatchData, pd.DataFrame],  # type: ignore[override]
     ) -> None:
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
@@ -341,9 +343,9 @@ Bucket: {error}"""
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
             reader_fn = self._get_reader_fn(reader_method)
-            reader_fn_result: pd.DataFrame | list[
-                pd.DataFrame
-            ] = execute_pandas_reader_fn(reader_fn, reader_options)
+            reader_fn_result: pd.DataFrame | list[pd.DataFrame] = (
+                execute_pandas_reader_fn(reader_fn, reader_options)
+            )
             if isinstance(reader_fn_result, list):
                 if len(reader_fn_result) > 1:
                     raise gx_exceptions.ExecutionEngineError(
@@ -453,14 +455,12 @@ not {batch_spec.__class__.__name__}"""
     @overload
     def _get_reader_fn(
         self, reader_method: str = ..., path: Optional[str] = ...
-    ) -> DataFrameFactoryFn:
-        ...
+    ) -> DataFrameFactoryFn: ...
 
     @overload
     def _get_reader_fn(
         self, reader_method: None = ..., path: str = ...
-    ) -> DataFrameFactoryFn:
-        ...
+    ) -> DataFrameFactoryFn: ...
 
     def _get_reader_fn(
         self, reader_method: Optional[str] = None, path: Optional[str] = None
@@ -504,9 +504,7 @@ not {batch_spec.__class__.__name__}"""
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], Any]:
         """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""
-        return (
-            {}
-        )  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
+        return {}  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
 
     @public_api
     @override

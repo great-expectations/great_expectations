@@ -36,7 +36,7 @@ class IDDict(dict):
 
 
 def deep_convert_properties_iterable_to_id_dict(
-    source: Union[T, dict]
+    source: Union[T, dict],
 ) -> Union[T, IDDict]:
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_id_dict(source=IDDict(source))

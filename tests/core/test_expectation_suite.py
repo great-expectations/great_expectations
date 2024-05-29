@@ -332,8 +332,12 @@ class TestIsEquivalentTo:
             def isEquivalentTo(self, *args, **kwargs):
                 return True
 
-        suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
+        suite1 = ExpectationSuite(
+            "suite_1", expectations=[StubExpectationConfiguration()]
+        )  # type: ignore[arg-type]
+        suite2 = ExpectationSuite(
+            "suite_2", expectations=[StubExpectationConfiguration()]
+        )  # type: ignore[arg-type]
         assert suite1.isEquivalentTo(suite2)
         assert suite2.isEquivalentTo(suite1)
 
@@ -345,8 +349,16 @@ class TestIsEquivalentTo:
             def isEquivalentTo(self, *args, **kwargs):
                 return True
 
-        suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()], data_asset_type="different", meta={"notes": "different"}, ge_cloud_id="different")  # type: ignore[arg-type]
+        suite1 = ExpectationSuite(
+            "suite_1", expectations=[StubExpectationConfiguration()]
+        )  # type: ignore[arg-type]
+        suite2 = ExpectationSuite(
+            "suite_2",
+            expectations=[StubExpectationConfiguration()],
+            data_asset_type="different",
+            meta={"notes": "different"},
+            ge_cloud_id="different",
+        )  # type: ignore[arg-type]
         assert suite1.isEquivalentTo(suite2)
         assert suite2.isEquivalentTo(suite1)
 
@@ -356,8 +368,12 @@ class TestIsEquivalentTo:
             def isEquivalentTo(self, *args, **kwargs):
                 return False
 
-        suite1 = ExpectationSuite("suite_1", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
-        suite2 = ExpectationSuite("suite_2", expectations=[StubExpectationConfiguration()])  # type: ignore[arg-type]
+        suite1 = ExpectationSuite(
+            "suite_1", expectations=[StubExpectationConfiguration()]
+        )  # type: ignore[arg-type]
+        suite2 = ExpectationSuite(
+            "suite_2", expectations=[StubExpectationConfiguration()]
+        )  # type: ignore[arg-type]
         assert not suite1.isEquivalentTo(suite2)
         assert not suite2.isEquivalentTo(suite1)
 
@@ -952,9 +968,7 @@ def test_get_expectations_by_expectation_type(
     table_exp2,
     table_exp3,
 ):
-    obs = (
-        suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_expectation_type()
-    )
+    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_expectation_type()
     assert obs == [
         table_exp1,
         table_exp2,
@@ -979,9 +993,7 @@ def test_get_expectations_by_domain_type(
     table_exp2,
     table_exp3,
 ):
-    obs = (
-        suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_domain_type()
-    )
+    obs = suite_with_table_and_column_expectations.get_grouped_and_ordered_expectations_by_domain_type()
     assert list(itertools.chain.from_iterable(obs.values())) == [
         table_exp1,
         table_exp2,

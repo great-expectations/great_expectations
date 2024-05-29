@@ -151,13 +151,13 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         my_data_connector.get_batch_definition_list()
 
     # with empty options
-    unsorted_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list(
-        BatchRequest(
-            datasource_name="my_file_path_datasource",
-            data_asset_name="my_google_cloud_storage_data_asset",
-            options={},
+    unsorted_batch_definition_list: List[BatchDefinition] = (
+        my_data_connector.get_batch_definition_list(
+            BatchRequest(
+                datasource_name="my_file_path_datasource",
+                data_asset_name="my_google_cloud_storage_data_asset",
+                options={},
+            )
         )
     )
     expected: List[BatchDefinition] = [
@@ -517,13 +517,13 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
         file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
     )
 
-    unsorted_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list(
-        BatchRequest(
-            datasource_name="my_file_path_datasource",
-            data_asset_name="my_google_cloud_storage_data_asset",
-            options={},
+    unsorted_batch_definition_list: List[BatchDefinition] = (
+        my_data_connector.get_batch_definition_list(
+            BatchRequest(
+                datasource_name="my_file_path_datasource",
+                data_asset_name="my_google_cloud_storage_data_asset",
+                options={},
+            )
         )
     )
     assert expected == unsorted_batch_definition_list
@@ -722,9 +722,9 @@ def test_foxtrot(mock_list_keys):
         data_asset_name="my_google_cloud_storage_data_asset",
         options={},
     )
-    my_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
+    my_batch_definition_list: List[BatchDefinition] = (
+        my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
+    )
     assert len(my_batch_definition_list) == 3
 
 

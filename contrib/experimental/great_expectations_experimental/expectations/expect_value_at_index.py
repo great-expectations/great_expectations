@@ -188,7 +188,7 @@ class ExpectValueAtIndex(ColumnMapExpectation):
         ],
         "contributors": [
             "@prem1835213",
-            "@YaosenLin"
+            "@YaosenLin",
             # Github handles for all contributors to this Expectation.
             #         "@your_name_here", # Don't forget to add your github handle here!
         ],

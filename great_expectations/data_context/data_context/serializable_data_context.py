@@ -127,12 +127,12 @@ class SerializableDataContext(AbstractDataContext):
             A boolean signifying whether or not the current DataContext's config needs
             to be persisted in order to recognize changes made to usage statistics.
         """
-        project_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = project_config.anonymous_usage_statistics
-        context_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = self.config.anonymous_usage_statistics
+        project_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
+            project_config.anonymous_usage_statistics
+        )
+        context_config_usage_stats: Optional[AnonymizedUsageStatisticsConfig] = (
+            self.config.anonymous_usage_statistics
+        )
 
         if (
             project_config_usage_stats.enabled is False  # type: ignore[union-attr]

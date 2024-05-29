@@ -167,7 +167,5 @@ class ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold(
 
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold().run_diagnostics()
-    )
+    diagnostics_report = ExpectColumnValuesToBeProbabilisticallyGreaterThanOrEqualToThreshold().run_diagnostics()
     print(diagnostics_report.generate_checklist())

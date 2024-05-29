@@ -38,9 +38,9 @@ class PandasAzureBlobStorageDatasourceError(PandasDatasourceError):
 @public_api
 class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[AzureBlobStorageDataConnector]
-    ] = AzureBlobStorageDataConnector
+    data_connector_type: ClassVar[Type[AzureBlobStorageDataConnector]] = (
+        AzureBlobStorageDataConnector
+    )
 
     # instance attributes
     type: Literal["pandas_abs"] = "pandas_abs"

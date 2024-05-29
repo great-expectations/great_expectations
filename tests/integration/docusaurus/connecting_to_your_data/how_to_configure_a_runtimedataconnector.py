@@ -73,9 +73,9 @@ batch_request = RuntimeBatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
-batch_request.runtime_parameters[
-    "path"
-] = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
+batch_request.runtime_parameters["path"] = (
+    "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
+)
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py get_validator 1">
 validator = context.get_validator(

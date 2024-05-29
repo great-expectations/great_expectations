@@ -301,7 +301,7 @@ def stub_serialized_configuration_bundle(
 ) -> dict:
     """Configuration bundle based on StubBaseDataContext."""
     assert "data_context_id" in serialized_configuration_bundle
-    serialized_configuration_bundle[
-        "data_context_id"
-    ] = StubBaseDataContext.DATA_CONTEXT_ID
+    serialized_configuration_bundle["data_context_id"] = (
+        StubBaseDataContext.DATA_CONTEXT_ID
+    )
     return serialized_configuration_bundle

@@ -24,9 +24,7 @@ def docs(ctx: click.Context) -> None:
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
     invoked_subcommand = ctx.invoked_subcommand
-    assert (
-        invoked_subcommand
-    ), "Proper registration of subcommand has not occurred; please review parent Click context"
+    assert invoked_subcommand, "Proper registration of subcommand has not occurred; please review parent Click context"
 
     cli_event_noun: str = "docs"
     (

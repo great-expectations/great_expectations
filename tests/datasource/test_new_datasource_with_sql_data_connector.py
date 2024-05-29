@@ -496,40 +496,43 @@ introspection:
         ]
     }
 
-    assert datasource_with_minimum_config.get_available_data_asset_names_and_types() == {
-        "whole_table": [
-            ("table_containing_id_spacers_for_D", "table"),
-            ("table_full__I", "table"),
-            ("table_partitioned_by_date_column__A", "table"),
-            ("table_partitioned_by_foreign_key__F", "table"),
-            ("table_partitioned_by_incrementing_batch_id__E", "table"),
-            (
-                "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-                "table",
-            ),
-            ("table_partitioned_by_multiple_columns__G", "table"),
-            (
-                "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
-                "table",
-            ),
-            ("table_partitioned_by_timestamp_column__B", "table"),
-            ("table_that_should_be_partitioned_by_random_hash__H", "table"),
-            ("table_with_fk_reference_from_F", "table"),
-            ("view_by_date_column__A", "view"),
-            ("view_by_incrementing_batch_id__E", "view"),
-            (
-                "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
-                "view",
-            ),
-            ("view_by_multiple_columns__G", "view"),
-            ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
-            ("view_by_timestamp_column__B", "view"),
-            ("view_containing_id_spacers_for_D", "view"),
-            ("view_partitioned_by_foreign_key__F", "view"),
-            ("view_that_should_be_partitioned_by_random_hash__H", "view"),
-            ("view_with_fk_reference_from_F", "view"),
-        ]
-    }
+    assert (
+        datasource_with_minimum_config.get_available_data_asset_names_and_types()
+        == {
+            "whole_table": [
+                ("table_containing_id_spacers_for_D", "table"),
+                ("table_full__I", "table"),
+                ("table_partitioned_by_date_column__A", "table"),
+                ("table_partitioned_by_foreign_key__F", "table"),
+                ("table_partitioned_by_incrementing_batch_id__E", "table"),
+                (
+                    "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                    "table",
+                ),
+                ("table_partitioned_by_multiple_columns__G", "table"),
+                (
+                    "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                    "table",
+                ),
+                ("table_partitioned_by_timestamp_column__B", "table"),
+                ("table_that_should_be_partitioned_by_random_hash__H", "table"),
+                ("table_with_fk_reference_from_F", "table"),
+                ("view_by_date_column__A", "view"),
+                ("view_by_incrementing_batch_id__E", "view"),
+                (
+                    "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                    "view",
+                ),
+                ("view_by_multiple_columns__G", "view"),
+                ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
+                ("view_by_timestamp_column__B", "view"),
+                ("view_containing_id_spacers_for_D", "view"),
+                ("view_partitioned_by_foreign_key__F", "view"),
+                ("view_that_should_be_partitioned_by_random_hash__H", "view"),
+                ("view_with_fk_reference_from_F", "view"),
+            ]
+        }
+    )
 
     # Here we should test getting a batch
 

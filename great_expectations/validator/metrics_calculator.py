@@ -67,9 +67,9 @@ class MetricsCalculator:
             domain_kwargs = {}
 
         if domain_kwargs.get("batch_id") is None:
-            domain_kwargs[
-                "batch_id"
-            ] = self._execution_engine.batch_manager.active_batch_id
+            domain_kwargs["batch_id"] = (
+                self._execution_engine.batch_manager.active_batch_id
+            )
 
         columns: List[str] = self.get_metric(
             metric=MetricConfiguration(
@@ -101,9 +101,9 @@ class MetricsCalculator:
             domain_kwargs = {}
 
         if domain_kwargs.get("batch_id") is None:
-            domain_kwargs[
-                "batch_id"
-            ] = self._execution_engine.batch_manager.active_batch_id
+            domain_kwargs["batch_id"] = (
+                self._execution_engine.batch_manager.active_batch_id
+            )
 
         df: pd.DataFrame = self.get_metric(
             metric=MetricConfiguration(

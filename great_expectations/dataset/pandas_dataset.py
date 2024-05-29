@@ -684,7 +684,7 @@ Notes:
         self,
         column,
         type_,
-        **kwargs
+        **kwargs,
         # Since we've now received the default arguments *before* the expectation decorator, we need to
         # ensure we only pass what we actually received. Hence, we'll use kwargs
         # mostly=None,
@@ -911,7 +911,7 @@ Notes:
         self,
         column,
         type_list,
-        **kwargs
+        **kwargs,
         # Since we've now received the default arguments *before* the expectation decorator, we need to
         # ensure we only pass what we actually received. Hence, we'll use kwargs
         # mostly=None,

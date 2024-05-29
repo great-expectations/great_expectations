@@ -1065,9 +1065,9 @@ class DataAsset:
                 partial_unexpected_counts = []
                 if "details" not in return_obj["result"]:
                     return_obj["result"]["details"] = {}
-                return_obj["result"]["details"][
-                    "partial_unexpected_counts_error"
-                ] = "partial_unexpected_counts requested, but requires a hashable type"
+                return_obj["result"]["details"]["partial_unexpected_counts_error"] = (
+                    "partial_unexpected_counts requested, but requires a hashable type"
+                )
             finally:
                 return_obj["result"].update(
                     {

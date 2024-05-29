@@ -17,6 +17,7 @@ migrator = gx.CloudMigrator.migrate(context=context, test_migrate=True)
 migrator.retry_migrate_validation_results()
 ```
 """
+
 from __future__ import annotations
 
 import logging

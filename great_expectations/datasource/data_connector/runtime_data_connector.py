@@ -76,7 +76,8 @@ class RuntimeDataConnector(DataConnector):
 
         # add batch_identifiers defined at the DataConnector level.
         self._add_batch_identifiers(
-            batch_identifiers=batch_identifiers, data_asset_name=None  # type: ignore[arg-type]
+            batch_identifiers=batch_identifiers,
+            data_asset_name=None,  # type: ignore[arg-type]
         )
         self._refresh_data_references_cache()
 
@@ -298,9 +299,9 @@ class RuntimeDataConnector(DataConnector):
             }
             # or replace
         else:
-            self._data_references_cache[data_asset_name][
-                data_reference
-            ] = batch_definition_list
+            self._data_references_cache[data_asset_name][data_reference] = (
+                batch_definition_list
+            )
 
     def _self_check_fetch_batch(
         self,

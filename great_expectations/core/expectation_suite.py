@@ -457,7 +457,8 @@ class ExpectationSuite(SerializableDictDot):
                     match_indexes.append(idx)
             else:  # noqa: PLR5501
                 if expectation.isEquivalentTo(
-                    other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
+                    other=expectation_configuration,
+                    match_type=match_type,  # type: ignore[arg-type]
                 ):
                     match_indexes.append(idx)
 
@@ -643,9 +644,9 @@ class ExpectationSuite(SerializableDictDot):
                         existing_expectation_ge_cloud_id
                     )
 
-                self.expectations[
-                    found_expectation_indexes[0]
-                ] = expectation_configuration
+                self.expectations[found_expectation_indexes[0]] = (
+                    expectation_configuration
+                )
             else:
                 if send_usage_event:
                     self.send_usage_event(success=False)
@@ -1027,9 +1028,9 @@ class ExpectationSuite(SerializableDictDot):
             )
             if expectation_configurations is None:
                 expectation_configurations = []
-                expectation_configurations_by_domain[
-                    domain_type
-                ] = expectation_configurations
+                expectation_configurations_by_domain[domain_type] = (
+                    expectation_configurations
+                )
 
             expectation_configurations.append(expectation_configuration)
 
@@ -1058,9 +1059,9 @@ class ExpectationSuite(SerializableDictDot):
                     class_name=inline_renderer_config["class_name"],
                 )
 
-            rendered_content: List[
-                RenderedAtomicContent
-            ] = inline_renderer.get_rendered_content()
+            rendered_content: List[RenderedAtomicContent] = (
+                inline_renderer.get_rendered_content()
+            )
 
             expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
                 existing_rendered_content=expectation_configuration.rendered_content,

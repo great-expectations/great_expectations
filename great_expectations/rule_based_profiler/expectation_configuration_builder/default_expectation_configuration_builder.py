@@ -69,11 +69,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ExpectationConfigurations can be optionally filtered if a supplied condition is met.
     """
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = ExpectationConfigurationBuilder.exclude_field_names | {
-        "kwargs",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        ExpectationConfigurationBuilder.exclude_field_names
+        | {
+            "kwargs",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,
@@ -221,14 +222,14 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         token: Union[str, ParseResults]
         for idx, token in enumerate(term_list):
             if isinstance(token, str) and token.startswith("$"):
-                term_list[idx]: Dict[
-                    str, Any
-                ] = get_parameter_value_and_validate_return_type(
-                    domain=domain,
-                    parameter_reference=token,
-                    expected_return_type=None,
-                    variables=variables,
-                    parameters=parameters,
+                term_list[idx]: Dict[str, Any] = (
+                    get_parameter_value_and_validate_return_type(
+                        domain=domain,
+                        parameter_reference=token,
+                        expected_return_type=None,
+                        variables=variables,
+                        parameters=parameters,
+                    )
                 )
             elif isinstance(token, ParseResults):
                 self._substitute_parameters_and_variables(

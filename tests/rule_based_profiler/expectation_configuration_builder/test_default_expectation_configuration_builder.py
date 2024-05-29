@@ -212,11 +212,11 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
         max_value=max_user_id,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -272,12 +272,12 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
         data_context=data_context,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        parameters=parameters,
-        batch_request=batch_request,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            parameters=parameters,
+            batch_request=batch_request,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -340,11 +340,11 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         max_value=max_user_id,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -407,11 +407,11 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         max_value=max_user_id,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
@@ -477,12 +477,12 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -548,12 +548,12 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
@@ -619,12 +619,12 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -690,12 +690,12 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
@@ -761,12 +761,12 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -832,12 +832,12 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
@@ -903,12 +903,12 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -974,12 +974,12 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None
@@ -1045,12 +1045,12 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration.kwargs["min_value"] == 397433
@@ -1116,12 +1116,12 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         max_value=max_value,
     )
 
-    expectation_configuration: Optional[
-        ExpectationConfiguration
-    ] = default_expectation_configuration_builder.build_expectation_configuration(
-        domain=domain,
-        variables=variables,
-        parameters=parameters,
+    expectation_configuration: Optional[ExpectationConfiguration] = (
+        default_expectation_configuration_builder.build_expectation_configuration(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
     )
 
     assert expectation_configuration is None

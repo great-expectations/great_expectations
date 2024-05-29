@@ -185,9 +185,9 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         if not params.get("json_schema"):
             template_str = "values must match a JSON Schema but none was specified."
         else:
-            params[
-                "formatted_json"
-            ] = f"<pre>{json.dumps(params.get('json_schema'), indent=4)}</pre>"
+            params["formatted_json"] = (
+                f"<pre>{json.dumps(params.get('json_schema'), indent=4)}</pre>"
+            )
             if params["mostly"] is not None and params["mostly"] < 1.0:
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, no_scientific=True

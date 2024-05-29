@@ -361,9 +361,7 @@ def _suite_convert_flags_to_interactive_mode(
             CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
         )
     elif interactive_flag is False and manual_flag is False:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
-        )
+        interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
     elif interactive_flag is True and manual_flag is False:
         interactive_mode = (
             CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
@@ -391,20 +389,14 @@ def _suite_new_process_profile_and_batch_request_flags(
             cli_message(
                 "<green>Entering interactive mode since you passed the --profile flag</green>"
             )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
-            )
+            interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
         elif interactive_flag is True:
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
-            )
+            interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
         elif interactive_flag is False:
             cli_message(
                 "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
             )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
-            )
+            interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
 
     # Assume batch needed if user passes --profile
     elif batch_request is not None:
@@ -412,16 +404,12 @@ def _suite_new_process_profile_and_batch_request_flags(
             cli_message(
                 "<green>Entering interactive mode since you passed the --batch-request flag</green>"
             )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
-            )
+            interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
         elif interactive_flag is False:
             cli_message(
                 "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
             )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
-            )
+            interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
 
     return interactive_mode
 
@@ -646,9 +634,7 @@ def _process_suite_edit_flags_and_prompt(  # noqa: PLR0913, PLR0912
         error_message = """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
 options can be used.
 """
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED
-        )
+        interactive_mode = CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
@@ -675,35 +661,25 @@ options can be used.
                 cli_message(
                     "<green>Entering interactive mode since you passed the --datasource-name flag</green>"
                 )
-                interactive_mode = (
-                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED
-                )
+                interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED
             elif interactive_mode.value["interactive_flag"] is True:
-                interactive_mode = (
-                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_DATASOURCE_SPECIFIED
-                )
+                interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_DATASOURCE_SPECIFIED
             elif interactive_mode.value["interactive_flag"] is False:
                 cli_message(
                     "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --datasource-name flag</yellow>"
                 )
-                interactive_mode = (
-                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED
-                )
+                interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED
         elif batch_request is not None:
             if interactive_mode.value["interactive_flag"] is None:
                 cli_message(
                     "<green>Entering interactive mode since you passed the --batch-request flag</green>"
                 )
-                interactive_mode = (
-                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
-                )
+                interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
             elif interactive_mode.value["interactive_flag"] is False:
                 cli_message(
                     "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
                 )
-                interactive_mode = (
-                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
-                )
+                interactive_mode = CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
     else:
         suite_edit_method: str = click.prompt(
             """

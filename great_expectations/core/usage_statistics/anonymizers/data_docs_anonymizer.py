@@ -18,9 +18,9 @@ class DataDocsAnonymizer(BaseAnonymizer):
     ) -> dict:
         site_config_module_name = site_config.get("module_name")
         if site_config_module_name is None:
-            site_config[
-                "module_name"
-            ] = "great_expectations.render.renderer.site_builder"
+            site_config["module_name"] = (
+                "great_expectations.render.renderer.site_builder"
+            )
 
         anonymized_info_dict = self._anonymize_site_builder_info(
             site_builder_config=site_config,
@@ -28,18 +28,18 @@ class DataDocsAnonymizer(BaseAnonymizer):
         anonymized_info_dict["anonymized_name"] = self._anonymize_string(site_name)
 
         store_backend_config = site_config.get("store_backend")
-        anonymized_info_dict[
-            "anonymized_store_backend"
-        ] = self._aggregate_anonymizer.anonymize(
-            store_backend_object_config=store_backend_config
+        anonymized_info_dict["anonymized_store_backend"] = (
+            self._aggregate_anonymizer.anonymize(
+                store_backend_object_config=store_backend_config
+            )
         )
         site_index_builder_config = site_config.get("site_index_builder")
         anonymized_site_index_builder = self._anonymize_site_builder_info(
             site_builder_config=site_index_builder_config
         )
-        anonymized_info_dict[
-            "anonymized_site_index_builder"
-        ] = anonymized_site_index_builder
+        anonymized_info_dict["anonymized_site_index_builder"] = (
+            anonymized_site_index_builder
+        )
 
         return anonymized_info_dict
 

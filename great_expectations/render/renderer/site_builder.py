@@ -239,20 +239,23 @@ class SiteBuilder:
                 site_section_config.get("module_name")
                 or "great_expectations.render.renderer.site_builder"
             )
-            self.site_section_builders[
-                site_section_name
-            ] = instantiate_class_from_config(
-                config=site_section_config,
-                runtime_environment={
-                    "data_context": data_context,
-                    "target_store": self.target_store,
-                    "custom_styles_directory": custom_styles_directory,
-                    "custom_views_directory": custom_views_directory,
-                    "data_context_id": self.data_context_id,
-                    "show_how_to_buttons": self.show_how_to_buttons,
-                    "cloud_mode": self.cloud_mode,
-                },
-                config_defaults={"name": site_section_name, "module_name": module_name},
+            self.site_section_builders[site_section_name] = (
+                instantiate_class_from_config(
+                    config=site_section_config,
+                    runtime_environment={
+                        "data_context": data_context,
+                        "target_store": self.target_store,
+                        "custom_styles_directory": custom_styles_directory,
+                        "custom_views_directory": custom_views_directory,
+                        "data_context_id": self.data_context_id,
+                        "show_how_to_buttons": self.show_how_to_buttons,
+                        "cloud_mode": self.cloud_mode,
+                    },
+                    config_defaults={
+                        "name": site_section_name,
+                        "module_name": module_name,
+                    },
+                )
             )
             if not self.site_section_builders[site_section_name]:
                 raise exceptions.ClassInstantiationError(

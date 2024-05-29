@@ -329,9 +329,9 @@ def test_data_context_variables_get_with_substitutions(
     env_var_name: str = "MY_CONFIG_VERSION"
     value_associated_with_env_var: float = 7.0
 
-    data_context_config_dict[
-        DataContextVariableSchema.CONFIG_VERSION
-    ] = f"${env_var_name}"
+    data_context_config_dict[DataContextVariableSchema.CONFIG_VERSION] = (
+        f"${env_var_name}"
+    )
     config: DataContextConfig = DataContextConfig(**data_context_config_dict)
     config_values: dict = {
         env_var_name: value_associated_with_env_var,

@@ -331,9 +331,9 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
 class ClassInstantiationError(GreatExpectationsError):
     def __init__(self, module_name, package_name, class_name) -> None:
         # noinspection PyUnresolvedReferences
-        module_spec: Optional[
-            importlib.machinery.ModuleSpec
-        ] = importlib.util.find_spec(module_name, package=package_name)
+        module_spec: Optional[importlib.machinery.ModuleSpec] = (
+            importlib.util.find_spec(module_name, package=package_name)
+        )
         if not module_spec:
             if not package_name:
                 package_name = ""

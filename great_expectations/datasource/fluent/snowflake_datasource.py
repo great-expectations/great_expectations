@@ -194,9 +194,9 @@ class SnowflakeDatasource(SQLDatasource):
 
         For Snowflake specifically we may represent the connection_string as a dict, which is not supported by SQLAlchemy.
         """
-        gx_execution_engine_type: Type[
-            SqlAlchemyExecutionEngine
-        ] = self.execution_engine_type
+        gx_execution_engine_type: Type[SqlAlchemyExecutionEngine] = (
+            self.execution_engine_type
+        )
 
         connection_string: str | None = (
             self.connection_string if isinstance(self.connection_string, str) else None

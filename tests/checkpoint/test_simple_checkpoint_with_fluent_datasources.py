@@ -39,7 +39,7 @@ def simple_checkpoint_defaults(
 
 @pytest.fixture
 def one_validation(
-    batch_request_as_dict: Dict[str, str]
+    batch_request_as_dict: Dict[str, str],
 ) -> Dict[str, Union[str, Dict[str, str]]]:
     return {
         "batch_request": batch_request_as_dict,
@@ -49,7 +49,7 @@ def one_validation(
 
 @pytest.fixture
 def two_validations(
-    one_validation: Dict[str, Union[str, Dict[str, str]]]
+    one_validation: Dict[str, Union[str, Dict[str, str]]],
 ) -> List[Dict[str, Union[str, Dict[str, str]]]]:
     second_validation: Dict[str, Union[str, Dict[str, str]]] = copy.deepcopy(
         one_validation

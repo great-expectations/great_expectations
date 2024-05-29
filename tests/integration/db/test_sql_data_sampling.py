@@ -88,10 +88,10 @@ if __name__ == "test_script_module":
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
             )
-            batch_definition_list: List[
-                BatchDefinition
-            ] = data_connector.get_batch_definition_list_from_batch_request(
-                batch_request
+            batch_definition_list: List[BatchDefinition] = (
+                data_connector.get_batch_definition_list_from_batch_request(
+                    batch_request
+                )
             )
 
             assert (

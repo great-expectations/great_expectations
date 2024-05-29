@@ -4,6 +4,7 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -k "how_to_connect_to_postgresql_data" tests/integration/test_script_runner.py --postgresql
 ```
 """
+
 import pathlib
 
 import pandas as pd

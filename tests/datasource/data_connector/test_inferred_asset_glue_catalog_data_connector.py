@@ -215,7 +215,9 @@ def test_get_batch_data_and_metadata_with_partitions(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+    in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ]._execution_engine = execution_engine  # type: ignore[union-attr]
 
     my_data_connector = in_memory_runtime_context.datasources[
         "FAKE_Datasource_NAME"

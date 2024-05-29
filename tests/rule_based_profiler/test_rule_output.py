@@ -34,9 +34,9 @@ def test_rule_output_get_get_expectation_configurations(
     ]
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters
-    expectation_configurations: List[
-        ExpectationConfiguration
-    ] = rule_output.get_expectation_configurations()
+    expectation_configurations: List[ExpectationConfiguration] = (
+        rule_output.get_expectation_configurations()
+    )
 
     assert expectation_configurations == expected_expectation_configurations
 
@@ -80,9 +80,9 @@ def test_rule_output_get_fully_qualified_parameter_names_by_domain(
     }
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters
-    fully_qualified_parameter_names_by_domain: Dict[
-        Domain, List[str]
-    ] = rule_output.get_fully_qualified_parameter_names_by_domain()
+    fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]] = (
+        rule_output.get_fully_qualified_parameter_names_by_domain()
+    )
 
     assert (
         fully_qualified_parameter_names_by_domain
@@ -101,10 +101,10 @@ def test_rule_output_get_fully_qualified_parameter_names_for_domain_id(
     ]
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters
-    fully_qualified_parameter_names: List[
-        str
-    ] = rule_output.get_fully_qualified_parameter_names_for_domain_id(
-        domain_id=column_Age_domain.id
+    fully_qualified_parameter_names: List[str] = (
+        rule_output.get_fully_qualified_parameter_names_for_domain_id(
+            domain_id=column_Age_domain.id
+        )
     )
 
     assert fully_qualified_parameter_names == expected_fully_qualified_parameter_names
@@ -507,10 +507,10 @@ def test_rule_output_get_parameter_values_for_fully_qualified_parameter_names_fo
     )
 
     rule_output: RuleOutput = rule_output_for_rule_state_with_domains_and_parameters
-    parameter_values_for_fully_qualified_parameter_names: Dict[
-        str, ParameterNode
-    ] = rule_output.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
-        domain_id=column_Age_domain.id
+    parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode] = (
+        rule_output.get_parameter_values_for_fully_qualified_parameter_names_for_domain_id(
+            domain_id=column_Age_domain.id
+        )
     )
 
     assert (

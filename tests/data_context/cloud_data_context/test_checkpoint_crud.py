@@ -702,7 +702,7 @@ def checkpoint_names_and_ids() -> Tuple[Tuple[str, str], Tuple[str, str]]:
 
 @pytest.fixture
 def mock_get_all_checkpoints_json(
-    checkpoint_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]]
+    checkpoint_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
 ) -> dict:
     checkpoint_1, checkpoint_2 = checkpoint_names_and_ids
     checkpoint_name_1, checkpoint_id_1 = checkpoint_1

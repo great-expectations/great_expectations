@@ -114,9 +114,9 @@ batch_request: dict = {
 
 result: RuleBasedProfilerResult = rule_based_profiler.run(batch_request=batch_request)
 
-expectation_configurations: List[
-    ExpectationConfiguration
-] = result.expectation_configurations
+expectation_configurations: List[ExpectationConfiguration] = (
+    result.expectation_configurations
+)
 
 print(expectation_configurations)
 

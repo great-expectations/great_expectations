@@ -15,6 +15,7 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/examples/set_based_column_map_expectation_template.py docstring">
     """TODO: Add a docstring here"""
+
     # </snippet>
 
     # These values will be used to configure the metric created by your expectation

@@ -353,7 +353,5 @@ class ExpectProfileNumericColumnsPercentDiffLessThanOrEqualToThreshold(
 
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectProfileNumericColumnsPercentDiffLessThanOrEqualToThreshold().run_diagnostics()
-    )
+    diagnostics_report = ExpectProfileNumericColumnsPercentDiffLessThanOrEqualToThreshold().run_diagnostics()
     print(diagnostics_report.generate_checklist())

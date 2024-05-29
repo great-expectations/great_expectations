@@ -14,7 +14,9 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
         self._aggregate_anonymizer = aggregate_anonymizer
 
     def anonymize(
-        self, obj: Optional["ExpectationSuite"] = None, **kwargs  # noqa: F821
+        self,
+        obj: Optional["ExpectationSuite"] = None,
+        **kwargs,  # noqa: F821
     ) -> dict:
         # Exit early if null
         expectation_suite = obj
@@ -41,9 +43,9 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
             expectation_suite.expectation_suite_name
         )
         anonymized_info_dict["expectation_count"] = len(expectations)
-        anonymized_info_dict[
-            "anonymized_expectation_counts"
-        ] = anonymized_expectation_counts
+        anonymized_info_dict["anonymized_expectation_counts"] = (
+            anonymized_expectation_counts
+        )
 
         return anonymized_info_dict
 

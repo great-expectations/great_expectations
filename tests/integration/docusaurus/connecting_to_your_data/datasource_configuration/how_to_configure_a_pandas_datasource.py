@@ -273,7 +273,7 @@ def validate_pandas_datasource_configuration_snippets():
         "name": "my_datasource_name",  # Preferably name it something relevant
         # <snippet name="datasource_configuration_class_and_module_keys">
         "class_name": "Datasource",
-        "module_name": "great_expectations.datasource"
+        "module_name": "great_expectations.datasource",
         # </snippet>
     }
     is_subset(prev_snippet, datasource_config)

@@ -138,9 +138,7 @@ def test_render_section_page():
 </table>
 </div>
     </div>
-</div>""".replace(
-            " ", ""
-        )
+</div>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -171,9 +169,7 @@ def test_rendering_components_without_section_loop_index():
             Overview
         </h5>
     </div>
-</div>""".replace(
-            " ", ""
-        )
+</div>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -194,9 +190,7 @@ def test_rendering_components_without_section_loop_index():
             Overview
         </h5>
     </div>
-</div>""".replace(
-            " ", ""
-        )
+</div>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -218,9 +212,7 @@ def test_rendering_components_without_section_loop_index():
             Overview
         </h5>
     </div>
-</div>""".replace(
-            " ", ""
-        )
+</div>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -337,9 +329,7 @@ def test_rendering_components_with_styling():
           <td id="section-1-content-block-2-cell-1-1" ><div class="show-scrollbars">Mean</div></td><td id="section-1-content-block-2-cell-1-2" ><div class="show-scrollbars">446</div></td></tr><tr>
           <td id="section-1-content-block-2-cell-2-1" ><div class="show-scrollbars">Minimum</div></td><td id="section-1-content-block-2-cell-2-2" ><div class="show-scrollbars">1</div></td></tr></tbody>
 </table>
-</div>""".replace(
-            " ", ""
-        )
+</div>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -372,9 +362,7 @@ def test_render_header_component():
             Overview
         </h5>
     </div>
-</div>""".replace(
-            " ", ""
-        )
+</div>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -430,9 +418,7 @@ def test_render_table_component():
           <td id="section-1-content-block-2-cell-2-1" ><div class="show-scrollbars">Minimum</div></td><td id="section-1-content-block-2-cell-2-2" ><div class="show-scrollbars">1</div></td></tr></tbody>
 </table>
 
-</div>""".replace(
-            " ", ""
-        )
+</div>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -491,9 +477,7 @@ def test_render_value_list():
                     <span class="badge badge-info" >1</span>
                 </span>
     </p>
-</div>""".replace(
-            " ", ""
-        )
+</div>""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -539,9 +523,7 @@ def test_render_graph():
     }).then(result=>console.log(result)).catch(console.warn);
 </script>
 </div>
-""".replace(
-            " ", ""
-        )
+""".replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -579,9 +561,7 @@ def test_render_text():
         <p >hello</p>
     </div>
 </div>
-    """.replace(
-            " ", ""
-        )
+    """.replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )
@@ -618,9 +598,7 @@ def test_render_text():
         <p >goodbye</p>
     </div>
 </div>
-    """.replace(
-            " ", ""
-        )
+    """.replace(" ", "")
         .replace("\t", "")
         .replace("\n", "")
     )

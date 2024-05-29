@@ -188,50 +188,43 @@ JSONConvertable: TypeAlias = Union[
 @overload
 def convert_to_json_serializable(
     data: ToDict,
-) -> dict:
-    ...
+) -> dict: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: ToList,
-) -> list:
-    ...
+) -> list: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: ToBool,
-) -> bool:
-    ...
+) -> bool: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: ToFloat,
-) -> float:
-    ...
+) -> float: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: ToInt,
-) -> int:
-    ...
+) -> int: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: ToStr,
-) -> str:
-    ...
+) -> str: ...
 
 
 @overload
 def convert_to_json_serializable(
     data: None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @public_api  # - complexity 32

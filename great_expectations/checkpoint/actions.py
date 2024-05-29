@@ -3,6 +3,7 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 """
+
 from __future__ import annotations
 
 import json

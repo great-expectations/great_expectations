@@ -37,6 +37,7 @@ from great_expectations.render.util import (
 class ColumnCustomMax(ColumnAggregateMetricProvider):
     # </snippet>
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
+
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py metric_name">
     metric_name = "column.custom_max"
 
@@ -94,6 +95,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py docstring">
     """Expect column max to be between a given range."""
+
     # </snippet>
 
     # Defining test cases

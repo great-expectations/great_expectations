@@ -618,7 +618,7 @@ class Datasource(
 
     @staticmethod
     def parse_order_by_sorters(
-        order_by: Optional[List[Union[Sorter, str, dict]]] = None
+        order_by: Optional[List[Union[Sorter, str, dict]]] = None,
     ) -> List[Sorter]:
         order_by_sorters: list[Sorter] = []
         if order_by:

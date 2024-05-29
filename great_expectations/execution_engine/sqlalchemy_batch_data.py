@@ -36,8 +36,7 @@ class SqlAlchemyBatchData(BatchData):
         use_quoted_name: bool = ...,
         source_schema_name: None = ...,
         source_table_name: None = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -55,8 +54,7 @@ class SqlAlchemyBatchData(BatchData):
         use_quoted_name: bool = ...,
         source_schema_name: None = ...,
         source_table_name: None = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -74,8 +72,7 @@ class SqlAlchemyBatchData(BatchData):
         use_quoted_name: bool = ...,
         source_schema_name: Optional[str] = ...,
         source_table_name: str = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(  # noqa: PLR0913
         self,
@@ -350,8 +347,7 @@ class SqlAlchemyBatchData(BatchData):
         dialect: GXSqlDialect,
         create_temp_table: Literal[True],
         temp_table_schema_name: Optional[str] = ...,
-    ) -> sqlalchemy.Table:
-        ...
+    ) -> sqlalchemy.Table: ...
 
     @overload
     def _generate_selectable_from_query(
@@ -360,8 +356,7 @@ class SqlAlchemyBatchData(BatchData):
         dialect: GXSqlDialect,
         create_temp_table: Literal[False],
         temp_table_schema_name: Optional[str] = ...,
-    ) -> sqlalchemy.TextClause:
-        ...
+    ) -> sqlalchemy.TextClause: ...
 
     def _generate_selectable_from_query(
         self,

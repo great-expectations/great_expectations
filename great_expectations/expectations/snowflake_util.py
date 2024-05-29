@@ -1,6 +1,7 @@
 """
 Utilities to account for Expectation behavior that is specific to Snowflake.
 """
+
 from typing import Dict, Literal, Union
 
 SNOWFLAKE_SCHEMA_COLUMN_TYPE_NAMES = Union[

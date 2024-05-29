@@ -639,9 +639,7 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
         return_value=True,
     ), mock.patch(
         "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
-    ) as mock_get, mock.patch(
-        "requests.Session.put", autospec=True
-    ) as mock_put:
+    ) as mock_get, mock.patch("requests.Session.put", autospec=True) as mock_put:
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
     assert mock_get.call_count == 2  # check if resource exists, get updated resource

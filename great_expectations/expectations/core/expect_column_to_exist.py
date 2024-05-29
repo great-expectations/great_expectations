@@ -120,8 +120,8 @@ class ExpectColumnToExist(BatchExpectation):
                 or configuration.kwargs.get("column_index") is None
             ), "column_index must be an integer, dict, or None"
             if isinstance(configuration.kwargs.get("column_index"), dict):
-                assert "$PARAMETER" in configuration.kwargs.get(
-                    "column_index", tuple()
+                assert (
+                    "$PARAMETER" in configuration.kwargs.get("column_index", tuple())
                 ), 'Evaluation Parameter dict for column_index kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

@@ -338,36 +338,36 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
         ),
     )
 
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_datasource",
-            data_connector_name="my_filesystem_data_connector",
-            data_asset_name="B1",
-            data_connector_query={
-                "batch_filter_parameters": {
-                    "letter": "B",
-                    "number": "1",
-                }
-            },
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_filesystem_data_connector",
+                data_asset_name="B1",
+                data_connector_query={
+                    "batch_filter_parameters": {
+                        "letter": "B",
+                        "number": "1",
+                    }
+                },
+            )
         )
     )
     assert len(batch_list) == 0
 
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="my_datasource",
-            data_connector_name="my_filesystem_data_connector",
-            data_asset_name="Titanic",
-            data_connector_query={
-                "batch_filter_parameters": {
-                    "letter": "B",
-                    "number": "1",
-                }
-            },
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_filesystem_data_connector",
+                data_asset_name="Titanic",
+                data_connector_query={
+                    "batch_filter_parameters": {
+                        "letter": "B",
+                        "number": "1",
+                    }
+                },
+            )
         )
     )
     assert len(batch_list) == 1
@@ -418,10 +418,10 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
         # }
     }
     batch_request = BatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
 
     assert len(batch_list) == 1
@@ -456,10 +456,10 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
         },
     }
     batch_request = RuntimeBatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
-        batch_request=batch_request
+    batch_list: List[Batch] = (
+        basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
 
     assert len(batch_list) == 1

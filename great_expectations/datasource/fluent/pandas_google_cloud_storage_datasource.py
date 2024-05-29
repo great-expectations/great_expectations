@@ -34,9 +34,9 @@ class PandasGoogleCloudStorageDatasourceError(PandasDatasourceError):
 @public_api
 class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[GoogleCloudStorageDataConnector]
-    ] = GoogleCloudStorageDataConnector
+    data_connector_type: ClassVar[Type[GoogleCloudStorageDataConnector]] = (
+        GoogleCloudStorageDataConnector
+    )
     # these fields should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "bucket_or_name",
@@ -60,9 +60,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
             if google.service_account and google.storage:
                 try:
-                    credentials: Union[
-                        google.Credentials, None
-                    ] = None  # If configured with gcloud CLI / env vars
+                    credentials: Union[google.Credentials, None] = (
+                        None  # If configured with gcloud CLI / env vars
+                    )
                     _check_config_substitutions_needed(
                         self,
                         self.gcs_options,

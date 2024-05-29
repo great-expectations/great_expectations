@@ -52,9 +52,7 @@ condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsN
     "condition_value"
 ) + Suppress('"') ^ Suppress("'") + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
-) + Suppress(
-    "'"
-)
+) + Suppress("'")
 date = (
     Literal("date").setResultsName("date")
     + Suppress(Literal("("))

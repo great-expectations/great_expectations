@@ -25,9 +25,9 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     """Pandas based Datasource for filesystem based data assets."""
 
     # class attributes
-    data_connector_type: ClassVar[
-        Type[FilesystemDataConnector]
-    ] = FilesystemDataConnector
+    data_connector_type: ClassVar[Type[FilesystemDataConnector]] = (
+        FilesystemDataConnector
+    )
     # these fields should not be passed to the execution engine
     _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
         "base_directory",

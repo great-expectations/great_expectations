@@ -209,9 +209,7 @@ Would you like to proceed with the project upgrade?\
         else:
             upgrade_overview += """\
 Your project needs to be upgraded in order to be compatible with Great Expectations V3 API.
-""" + self._upgrade_overview_common_content(
-                manual_steps_required=manual_steps_required
-            )
+""" + self._upgrade_overview_common_content(manual_steps_required=manual_steps_required)
 
         return upgrade_overview, confirmation_required
 

@@ -37,9 +37,7 @@ class CLIState:
     def get_data_context_from_config_file(self) -> FileDataContext:
         directory: str = toolkit.parse_cli_config_file_location(  # type: ignore[assignment] # could be None
             config_file_location=self.config_file_location  # type: ignore[arg-type] # could be None
-        ).get(
-            "directory"
-        )
+        ).get("directory")
         context: FileDataContext = toolkit.load_data_context_with_error_handling(  # type: ignore[assignment] # will exit if error
             directory=directory,
             from_cli_upgrade_command=False,

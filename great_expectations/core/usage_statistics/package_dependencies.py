@@ -13,6 +13,7 @@ checking and updating these static lists.
     files against the static lists returned via the methods above in the
     usage example and raise exceptions if there are discrepancies.
 """
+
 import pathlib
 import re
 from typing import Dict, List, Set
@@ -276,10 +277,10 @@ class GXDependencies:
             if name.startswith(self.DEV_REQUIREMENTS_PREFIX)
         ]
         for dev_dependency_path in dev_dependency_paths:
-            dependency_names: List[
-                str
-            ] = self._get_dependency_names_from_requirements_file(
-                dev_dependency_path.absolute()
+            dependency_names: List[str] = (
+                self._get_dependency_names_from_requirements_file(
+                    dev_dependency_path.absolute()
+                )
             )
             dev_dependency_names.update(dependency_names)
         return sorted(name.lower() for name in dev_dependency_names)

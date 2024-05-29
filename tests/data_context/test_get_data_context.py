@@ -178,7 +178,7 @@ def test_cloud_missing_env_throws_exception(
     clear_env_vars, empty_ge_cloud_data_context_config
 ):
     with pytest.raises(GXCloudConfigurationError):
-        gx.get_context(cloud_mode=True),
+        (gx.get_context(cloud_mode=True),)
 
 
 @pytest.mark.parametrize("params", [GX_CLOUD_PARAMS_REQUIRED, GX_CLOUD_PARAMS_ALL])

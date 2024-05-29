@@ -52,6 +52,7 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnAggregateExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/examples/column_aggregate_expectation_template.py docstring">
     """TODO: add a docstring here"""
+
     # </snippet>
 
     # These examples will be shown in the public gallery.

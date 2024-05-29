@@ -189,9 +189,9 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
-        batch_definition_list: List[
-            BatchDefinition
-        ] = self._get_unfiltered_batch_definition_list_fn(self, batch_request)
+        batch_definition_list: List[BatchDefinition] = (
+            self._get_unfiltered_batch_definition_list_fn(self, batch_request)
+        )
 
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -308,7 +308,7 @@ class FilePathDataConnector(DataConnector):
         """
 
         def _matching_criterion(
-            batch_definition_list: Union[List[BatchDefinition], None]
+            batch_definition_list: Union[List[BatchDefinition], None],
         ) -> bool:
             return (
                 (batch_definition_list is not None)
@@ -399,14 +399,14 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         if len(self._data_references_cache) == 0:
             # Map data_references to batch_definitions.
             for data_reference in self.get_data_references():
-                mapped_batch_definition_list: List[
-                    BatchDefinition
-                ] | None = self._map_data_reference_string_to_batch_definition_list_using_regex(
-                    data_reference=data_reference
+                mapped_batch_definition_list: List[BatchDefinition] | None = (
+                    self._map_data_reference_string_to_batch_definition_list_using_regex(
+                        data_reference=data_reference
+                    )
                 )
-                self._data_references_cache[
-                    data_reference
-                ] = mapped_batch_definition_list
+                self._data_references_cache[data_reference] = (
+                    mapped_batch_definition_list
+                )
 
         return self._data_references_cache
 
@@ -447,10 +447,10 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     def _map_data_reference_string_to_batch_definition_list_using_regex(
         self, data_reference: str
     ) -> List[BatchDefinition] | None:
-        batch_identifiers: Optional[
-            IDDict
-        ] = self._convert_data_reference_string_to_batch_identifiers_using_regex(
-            data_reference=data_reference
+        batch_identifiers: Optional[IDDict] = (
+            self._convert_data_reference_string_to_batch_identifiers_using_regex(
+                data_reference=data_reference
+            )
         )
         if batch_identifiers is None:
             return None
@@ -482,9 +482,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         )
 
         # Check for `(?P<name>)` named group syntax
-        defined_group_name_to_group_index_mapping: Dict[
-            str, int
-        ] = self._regex_parser.get_named_group_name_to_group_index_mapping()
+        defined_group_name_to_group_index_mapping: Dict[str, int] = (
+            self._regex_parser.get_named_group_name_to_group_index_mapping()
+        )
         defined_group_name_indexes: Set[int] = set(
             defined_group_name_to_group_index_mapping.values()
         )

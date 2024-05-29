@@ -90,7 +90,7 @@ def build_batch_filter(
                 ]
             ],
         ]
-    ] = None
+    ] = None,
 ):
     if not data_connector_query_dict:
         return BatchFilter(
@@ -115,10 +115,10 @@ def build_batch_filter(
 "{type(custom_filter_function)!s}", which is illegal.
             """
         )
-    batch_filter_parameters: Optional[
-        Union[dict, IDDict]
-    ] = data_connector_query_dict.get(  # type: ignore[assignment]
-        "batch_filter_parameters"
+    batch_filter_parameters: Optional[Union[dict, IDDict]] = (
+        data_connector_query_dict.get(  # type: ignore[assignment]
+            "batch_filter_parameters"
+        )
     )
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):

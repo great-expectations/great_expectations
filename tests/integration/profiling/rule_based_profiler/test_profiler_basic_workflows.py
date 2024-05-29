@@ -189,9 +189,9 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     )
     my_rbp.add_rule(rule=simple_rule)
     result: RuleBasedProfilerResult = my_rbp.run(batch_request=batch_request)
-    expectation_configurations: List[
-        ExpectationConfiguration
-    ] = result.expectation_configurations
+    expectation_configurations: List[ExpectationConfiguration] = (
+        result.expectation_configurations
+    )
     assert len(expectation_configurations) == 4
 
 
@@ -245,9 +245,9 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     )
     my_rbp.add_rule(rule=simple_rule)
     result: RuleBasedProfilerResult = my_rbp.run(batch_request=batch_request)
-    expectation_configurations: List[
-        ExpectationConfiguration
-    ] = result.expectation_configurations
+    expectation_configurations: List[ExpectationConfiguration] = (
+        result.expectation_configurations
+    )
     assert len(expectation_configurations) == 4
 
 

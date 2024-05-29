@@ -325,10 +325,10 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         for data_asset_name in self.assets:
             data_asset_config: dict = self.assets[data_asset_name]
-            batch_identifiers_list: List[
-                dict
-            ] = self._get_batch_identifiers_list_from_data_asset_config(
-                data_asset_config=data_asset_config
+            batch_identifiers_list: List[dict] = (
+                self._get_batch_identifiers_list_from_data_asset_config(
+                    data_asset_config=data_asset_config
+                )
             )
             self._data_references_cache[data_asset_name] = batch_identifiers_list
 

@@ -4,6 +4,7 @@ To run this code as a local test, use the following console command:
 pytest -vv --docs-tests -k "how_to_connect_to_in_memory_data_using_spark" tests/integration/test_script_runner.py
 ```
 """
+
 import os
 
 import pandas as pd

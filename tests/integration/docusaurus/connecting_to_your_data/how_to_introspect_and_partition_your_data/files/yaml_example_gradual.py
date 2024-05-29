@@ -144,9 +144,7 @@ available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(
     data_connector_names="default_inferred_data_connector_name"
-)[
-    "default_inferred_data_connector_name"
-]
+)["default_inferred_data_connector_name"]
 assert len(available_data_asset_names) == 36
 # </snippet>
 

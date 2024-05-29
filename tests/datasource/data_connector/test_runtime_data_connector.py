@@ -320,15 +320,15 @@ def test_asset_is_name_batch_identifier_correctly_used(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    res: List[
-        BatchDefinition
-    ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=RuntimeBatchRequest(
-            datasource_name=basic_datasource_with_assets.name,
-            data_connector_name="runtime",
-            data_asset_name="asset_a",
-            batch_identifiers={"month": 4, "day": 1},
-            runtime_parameters={"batch_data": test_df_pandas},
+    res: List[BatchDefinition] = (
+        runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=RuntimeBatchRequest(
+                datasource_name=basic_datasource_with_assets.name,
+                data_connector_name="runtime",
+                data_asset_name="asset_a",
+                batch_identifiers={"month": 4, "day": 1},
+                runtime_parameters={"batch_data": test_df_pandas},
+            )
         )
     )
     assert len(res) == 1
@@ -512,10 +512,10 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present(
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
-    batch_definition_list: List[
-        BatchDefinition
-    ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
+    batch_definition_list: List[BatchDefinition] = (
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
 
     assert len(batch_definition_list) == 1
@@ -553,10 +553,10 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
 
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
-            BatchDefinition
-        ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
+        batch_definition_list: List[BatchDefinition] = (
+            test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=batch_request
+            )
         )
     expected_error_message: str = """
         RuntimeDataConnector test_runtime_data_connector was invoked with one or more batch identifiers that do not
@@ -606,9 +606,9 @@ def test_get_available_data_asset_names(basic_datasource):
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
     expected_available_data_asset_names: List[str] = []
-    available_data_asset_names: List[
-        str
-    ] = test_runtime_data_connector.get_available_data_asset_names()
+    available_data_asset_names: List[str] = (
+        test_runtime_data_connector.get_available_data_asset_names()
+    )
     assert available_data_asset_names == expected_available_data_asset_names
 
 
@@ -877,10 +877,10 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     # run with my_data_asset_1
-    batch_definitions: List[
-        BatchDefinition
-    ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
+    batch_definitions: List[BatchDefinition] = (
+        runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert batch_definitions == [
         BatchDefinition(
@@ -915,10 +915,10 @@ def test_data_references_cache_updating_after_batch_request_named_assets(
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     # run with another batch under asset_a
-    batch_definitions: List[
-        BatchDefinition
-    ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
+    batch_definitions: List[BatchDefinition] = (
+        runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert batch_definitions == [
         BatchDefinition(
@@ -982,10 +982,10 @@ def test_get_batch_definition_list_from_batch_request_length_one(
         )
     ]
 
-    batch_definition_list: List[
-        BatchDefinition
-    ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
+    batch_definition_list: List[BatchDefinition] = (
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
 
     assert batch_definition_list == expected_batch_definition_list
@@ -1029,10 +1029,10 @@ def test_get_batch_definition_list_from_batch_request_with_and_without_data_asse
         "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
-    batch_definition_list: List[
-        BatchDefinition
-    ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
+    batch_definition_list: List[BatchDefinition] = (
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
     )
     assert len(batch_definition_list) == 1
     # check that default value has been set
@@ -1048,9 +1048,9 @@ def test__get_data_reference_list(basic_datasource):
     expected_data_reference_list: List[str] = []
 
     # noinspection PyProtectedMember
-    data_reference_list: List[
-        str
-    ] = test_runtime_data_connector._get_data_reference_list()
+    data_reference_list: List[str] = (
+        test_runtime_data_connector._get_data_reference_list()
+    )
 
     assert data_reference_list == expected_data_reference_list
 

@@ -50,7 +50,6 @@ class MulticolumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectMulticolumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
-
     """Expect the difference of 2 datetime columns is equal to another column in month.
 
     This means that for each row, we expect end_datetime - start_datetime = gap (in months)

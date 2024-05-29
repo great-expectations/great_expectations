@@ -31,7 +31,6 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigurationStore(Store):
-
     """
     Configuration Store provides a way to store any Marshmallow Schema compatible Configuration (using the YAML format).
     """
@@ -133,7 +132,8 @@ class ConfigurationStore(Store):
             print("Checking for existing keys...")
 
         report_object["keys"] = sorted(
-            key.configuration_key for key in self.list_keys()  # type: ignore[attr-defined]
+            key.configuration_key
+            for key in self.list_keys()  # type: ignore[attr-defined]
         )
 
         report_object["len_keys"] = len(report_object["keys"])

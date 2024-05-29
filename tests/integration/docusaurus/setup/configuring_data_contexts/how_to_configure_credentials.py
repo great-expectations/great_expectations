@@ -40,9 +40,9 @@ env_vars = []
 
 # set environment variables using os.environ()
 os.environ["MY_DB_PW"] = "password"
-os.environ[
-    "POSTGRES_CONNECTION_STRING"
-] = "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres"
+os.environ["POSTGRES_CONNECTION_STRING"] = (
+    "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres"
+)
 
 # get context and set config variables in config_variables.yml
 context = gx.get_context()

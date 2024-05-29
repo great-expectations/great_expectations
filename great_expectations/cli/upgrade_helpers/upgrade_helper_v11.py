@@ -136,9 +136,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             site_validations_store_backend,
             tuple(list(self.run_time_setters_by_backend_type.keys())),
         ):
-            self.upgrade_checklist["docs_validations_store_backends"][
-                site_name
-            ] = site_validations_store_backend
+            self.upgrade_checklist["docs_validations_store_backends"][site_name] = (
+                site_validations_store_backend
+            )
         else:
             self.upgrade_log["skipped_docs_validations_stores"]["unsupported"].append(
                 {
@@ -165,9 +165,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         elif isinstance(
             store_backend, tuple(list(self.run_time_setters_by_backend_type.keys()))
         ):
-            self.upgrade_checklist["validations_store_backends"][
-                store_name
-            ] = store_backend
+            self.upgrade_checklist["validations_store_backends"][store_name] = (
+                store_backend
+            )
         else:
             self.upgrade_log["skipped_validations_stores"]["unsupported"].append(
                 {

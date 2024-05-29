@@ -1925,9 +1925,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list = action_list or self._determine_default_action_list()
 
         if not checkpoint:
-            assert (
-                name
-            ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
+            assert name, "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
             checkpoint = Checkpoint.construct_from_config_args(
                 data_context=self,
                 checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
@@ -2194,7 +2192,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             A list of suite names (sorted in alphabetic order).
         """
         sorted_expectation_suite_names = [
-            i.expectation_suite_name for i in self.list_expectation_suites()  # type: ignore[union-attr]
+            i.expectation_suite_name
+            for i in self.list_expectation_suites()  # type: ignore[union-attr]
         ]
         sorted_expectation_suite_names.sort()
         return sorted_expectation_suite_names
@@ -3381,9 +3380,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             validation_operator (ValidationOperator)
         """
 
-        self.config.validation_operators[
-            validation_operator_name
-        ] = validation_operator_config
+        self.config.validation_operators[validation_operator_name] = (
+            validation_operator_config
+        )
         config = self.variables.validation_operators[validation_operator_name]  # type: ignore[index]
         module_name = "great_expectations.validation_operators"
         new_validation_operator = instantiate_class_from_config(
@@ -3743,10 +3742,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                             datasource.get_asset_names()
                         )
                     else:
-                        data_asset_names[
-                            datasource_name
-                        ] = datasource.get_available_data_asset_names(
-                            batch_kwargs_generator_names[idx]
+                        data_asset_names[datasource_name] = (
+                            datasource.get_available_data_asset_names(
+                                batch_kwargs_generator_names[idx]
+                            )
                         )
 
             elif len(batch_kwargs_generator_names) == 1:
@@ -3757,10 +3756,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     )
 
                 else:
-                    data_asset_names[
-                        datasource_names[0]
-                    ] = datasource.get_available_data_asset_names(
-                        batch_kwargs_generator_names
+                    data_asset_names[datasource_names[0]] = (
+                        datasource.get_available_data_asset_names(
+                            batch_kwargs_generator_names
+                        )
                     )
 
             else:
@@ -3778,9 +3777,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                         )
 
                     else:
-                        data_asset_names[
-                            datasource_name
-                        ] = datasource.get_available_data_asset_names()
+                        data_asset_names[datasource_name] = (
+                            datasource.get_available_data_asset_names()
+                        )
 
                 except ValueError:
                     # handle the edge case of a non-existent datasource
@@ -4142,12 +4141,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             raise
 
     @overload
-    def _normalize_absolute_or_relative_path(self, path: str) -> str:
-        ...
+    def _normalize_absolute_or_relative_path(self, path: str) -> str: ...
 
     @overload
-    def _normalize_absolute_or_relative_path(self, path: None) -> None:
-        ...
+    def _normalize_absolute_or_relative_path(self, path: None) -> None: ...
 
     def _normalize_absolute_or_relative_path(
         self, path: Optional[str]
@@ -4197,16 +4194,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
-                config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = (
-                    global_data_context_id
-                )
+                config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = global_data_context_id
             else:
                 validation_errors.update(data_context_id_errors)
 
         # usage statistics url
-        global_usage_statistics_url: Optional[
-            str
-        ] = self._get_usage_stats_url_override()
+        global_usage_statistics_url: Optional[str] = (
+            self._get_usage_stats_url_override()
+        )
         if global_usage_statistics_url:
             usage_statistics_url_errors = anonymizedUsageStatisticsSchema.validate(
                 {"usage_statistics_url": global_usage_statistics_url}
@@ -4215,9 +4210,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 logger.debug(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
-                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
-                    global_usage_statistics_url
-                )
+                config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = global_usage_statistics_url
             else:
                 validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
@@ -4855,9 +4848,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 batch_identifier = filtered_key_list[-1].batch_identifier
 
         if include_rendered_content is None:
-            include_rendered_content = (
-                self._determine_if_expectation_validation_result_include_rendered_content()
-            )
+            include_rendered_content = self._determine_if_expectation_validation_result_include_rendered_content()
 
         key = ValidationResultIdentifier(
             expectation_suite_identifier=ExpectationSuiteIdentifier(
@@ -5357,18 +5348,18 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                             class_name=complete_site_config["class_name"],
                         )
                     if dry_run:
-                        index_page_locator_infos[
-                            site_name
-                        ] = site_builder.get_resource_url(only_if_exists=False)
+                        index_page_locator_infos[site_name] = (
+                            site_builder.get_resource_url(only_if_exists=False)
+                        )
                     else:
                         index_page_resource_identifier_tuple = site_builder.build(
                             resource_identifiers,
                             build_index=build_index,
                         )
                         if index_page_resource_identifier_tuple:
-                            index_page_locator_infos[
-                                site_name
-                            ] = index_page_resource_identifier_tuple[0]
+                            index_page_locator_infos[site_name] = (
+                                index_page_resource_identifier_tuple[0]
+                            )
 
         else:
             logger.debug("No data_docs_config found. No site(s) built.")
@@ -5483,11 +5474,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             )
 
         config_variables_filepath = os.path.join(  # noqa: PTH118
-            self.root_directory, config_variables_filepath  # type: ignore[arg-type]
+            self.root_directory,
+            config_variables_filepath,  # type: ignore[arg-type]
         )
 
         os.makedirs(  # noqa: PTH103
-            os.path.dirname(config_variables_filepath), exist_ok=True  # noqa: PTH120
+            os.path.dirname(config_variables_filepath),
+            exist_ok=True,  # noqa: PTH120
         )
         if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
             logger.info(

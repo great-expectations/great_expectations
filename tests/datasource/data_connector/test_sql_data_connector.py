@@ -107,7 +107,9 @@ def get_data_context_for_datasource_and_execution_engine(
         },
     )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
-    context.datasources["my_test_datasource"]._execution_engine = sql_alchemy_execution_engine  # type: ignore[union-attr]
+    context.datasources[
+        "my_test_datasource"
+    ]._execution_engine = sql_alchemy_execution_engine  # type: ignore[union-attr]
     return context
 
 

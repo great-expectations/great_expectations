@@ -311,9 +311,9 @@ def test_onboarding_data_assistant_metrics_count(
 def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
 ):
-    metrics_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ] = bobby_onboarding_data_assistant_result.metrics_by_domain
+    metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = (
+        bobby_onboarding_data_assistant_result.metrics_by_domain
+    )
 
     parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
     parameter_node: ParameterNode
@@ -1024,9 +1024,7 @@ def test_onboarding_data_assistant_result_empty_suite_plot_metrics_and_expectati
     try:
         data_assistant_result.plot_expectations_and_metrics()
     except Exception as exc:
-        assert (
-            False
-        ), f"DataAssistantResult.plot_expectations_and_metrics raised an exception '{exc}'"
+        assert False, f"DataAssistantResult.plot_expectations_and_metrics raised an exception '{exc}'"
 
 
 @pytest.mark.big

@@ -191,7 +191,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
@@ -208,7 +209,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -218,7 +220,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -228,7 +231,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118
@@ -238,7 +242,8 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         str(
             os.path.join(  # noqa: PTH118

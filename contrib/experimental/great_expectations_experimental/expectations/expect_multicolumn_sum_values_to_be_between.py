@@ -3,6 +3,7 @@ This is a template for creating custom MulticolumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations
 """
+
 import functools
 import operator
 from typing import Optional

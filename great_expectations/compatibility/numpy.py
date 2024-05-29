@@ -1,5 +1,6 @@
 """Utilities and imports for ensuring compatibility with different versions
 of numpy that are supported by great expectations."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

@@ -9,6 +9,7 @@ access to features of new package versions.
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
 """
+
 from __future__ import annotations
 
 import enum

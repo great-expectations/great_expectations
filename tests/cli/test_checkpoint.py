@@ -60,7 +60,8 @@ def titanic_data_context_with_sql_datasource(
     conn: sa.engine.base.Connection = sqlite_engine.connect()
     try:
         csv_path: str = file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
         add_dataframe_to_db(df=df, name="titanic", con=conn)
@@ -104,7 +105,8 @@ def titanic_data_context_with_spark_datasource(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
@@ -121,7 +123,8 @@ def titanic_data_context_with_spark_datasource(
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         os.path.join(  # noqa: PTH118
             context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
@@ -129,7 +132,8 @@ def titanic_data_context_with_spark_datasource(
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         os.path.join(  # noqa: PTH118
             context_path, "..", "data", "titanic", "Titanic_1911.csv"
@@ -137,7 +141,8 @@ def titanic_data_context_with_spark_datasource(
     )
     shutil.copy(
         file_relative_path(
-            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+            __file__,
+            os.path.join("..", "test_sets", "Titanic.csv"),  # noqa: PTH118
         ),
         os.path.join(  # noqa: PTH118
             context_path, "..", "data", "titanic", "Titanic_1912.csv"

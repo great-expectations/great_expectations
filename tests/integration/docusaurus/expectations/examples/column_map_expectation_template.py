@@ -53,6 +53,7 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py docstring">
     """TODO: Add a docstring here"""
+
     # </snippet>
 
     # These examples will be shown in the public gallery.

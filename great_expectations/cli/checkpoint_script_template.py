@@ -16,6 +16,7 @@ Usage:
 - This can be run manually or via a scheduler such, as cron.
 - If your pipeline runner supports python snippets, then you can paste this into your pipeline.
 """
+
 import sys
 
 from great_expectations.checkpoint.types.checkpoint_result import (

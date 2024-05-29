@@ -74,13 +74,13 @@ def test__get_full_file_path_pandas(fs: FakeFilesystem):
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
-    my_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="FAKE_DATASOURCE_NAME",
-            data_connector_name="my_data_connector",
-            data_asset_name="path",
+    my_batch_definition_list: List[BatchDefinition] = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="FAKE_DATASOURCE_NAME",
+                data_connector_name="my_data_connector",
+                data_asset_name="path",
+            )
         )
     )
     assert len(my_batch_definition_list) == 2
@@ -137,13 +137,13 @@ def test__get_full_file_path_spark(basic_spark_df_execution_engine, fs):
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
-    my_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="FAKE_DATASOURCE_NAME",
-            data_connector_name="my_data_connector",
-            data_asset_name="path",
+    my_batch_definition_list: List[BatchDefinition] = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="FAKE_DATASOURCE_NAME",
+                data_connector_name="my_data_connector",
+                data_asset_name="path",
+            )
         )
     )
     assert len(my_batch_definition_list) == 2

@@ -40,9 +40,9 @@ datasource_config = {
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_config["execution_engine"]["azure_options"][
-    "account_url"
-] = "superconductivetesting.blob.core.windows.net"
+datasource_config["execution_engine"]["azure_options"]["account_url"] = (
+    "superconductivetesting.blob.core.windows.net"
+)
 datasource_config["execution_engine"]["azure_options"]["credential"] = CREDENTIAL
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "account_url"
@@ -50,9 +50,9 @@ datasource_config["data_connectors"]["configured_data_connector_name"]["azure_op
 datasource_config["data_connectors"]["configured_data_connector_name"]["azure_options"][
     "credential"
 ] = CREDENTIAL
-datasource_config["data_connectors"]["configured_data_connector_name"][
-    "container"
-] = "superconductive-public"
+datasource_config["data_connectors"]["configured_data_connector_name"]["container"] = (
+    "superconductive-public"
+)
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "name_starts_with"
 ] = "data/taxi_yellow_tripdata_samples/"

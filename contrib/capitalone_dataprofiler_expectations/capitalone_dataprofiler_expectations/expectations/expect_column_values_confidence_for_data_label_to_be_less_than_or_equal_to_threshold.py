@@ -188,7 +188,5 @@ class ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold(
 
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold().run_diagnostics()
-    )
+    diagnostics_report = ExpectColumnValuesConfidenceForDataLabelToBeLessThanOrEqualToThreshold().run_diagnostics()
     print(diagnostics_report.generate_checklist())

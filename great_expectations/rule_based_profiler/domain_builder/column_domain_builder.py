@@ -316,27 +316,27 @@ class ColumnDomainBuilder(DomainBuilder):
             )
 
         # Obtain semantic_type_filter_module_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        semantic_type_filter_module_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.semantic_type_filter_module_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
+        semantic_type_filter_module_name: Optional[str] = (
+            get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=self.semantic_type_filter_module_name,
+                expected_return_type=None,
+                variables=variables,
+                parameters=None,
+            )
         )
         if semantic_type_filter_module_name is None:
             semantic_type_filter_module_name = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter"
 
         # Obtain semantic_type_filter_class_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        semantic_type_filter_class_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.semantic_type_filter_class_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=None,
+        semantic_type_filter_class_name: Optional[str] = (
+            get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=self.semantic_type_filter_class_name,
+                expected_return_type=None,
+                variables=variables,
+                parameters=None,
+            )
         )
         if semantic_type_filter_class_name is None:
             semantic_type_filter_class_name = "SimpleSemanticTypeFilter"
@@ -363,8 +363,10 @@ class ColumnDomainBuilder(DomainBuilder):
                 variables=variables,
             ),
         )
-        include_semantic_types = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
-            semantic_types=include_semantic_types
+        include_semantic_types = (
+            self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
+                semantic_types=include_semantic_types
+            )
         )
 
         if include_semantic_types:
@@ -386,8 +388,10 @@ class ColumnDomainBuilder(DomainBuilder):
                 variables=variables,
             ),
         )
-        exclude_semantic_types = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
-            semantic_types=exclude_semantic_types
+        exclude_semantic_types = (
+            self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
+                semantic_types=exclude_semantic_types
+            )
         )
 
         if exclude_semantic_types:

@@ -749,7 +749,7 @@ def datasource_test_connection_error_messages(
 def test_test_connection_failures(
     datasource_test_connection_error_messages: tuple[
         PandasFilesystemDatasource, TestConnectionError
-    ]
+    ],
 ):
     (
         pandas_filesystem_datasource,

@@ -116,11 +116,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "column.unique_proportion",
     }
 
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
-        "single_batch_mode",
-    }
+    exclude_field_names: ClassVar[Set[str]] = (
+        MetricMultiBatchParameterBuilder.exclude_field_names
+        | {
+            "single_batch_mode",
+        }
+    )
 
     def __init__(  # noqa: PLR0913
         self,
@@ -426,9 +427,9 @@ detected.
         )
 
         if include_estimator_samples_histogram_in_details:
-            details[
-                "estimation_histogram"
-            ] = numeric_range_estimation_result.estimation_histogram
+            details["estimation_histogram"] = (
+                numeric_range_estimation_result.estimation_histogram
+            )
 
         return Attributes(
             {
@@ -682,9 +683,9 @@ detected.
                     )
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
-            estimation_histogram[
-                metric_value_estimation_histogram_idx
-            ] = numeric_range_estimation_result.estimation_histogram
+            estimation_histogram[metric_value_estimation_histogram_idx] = (
+                numeric_range_estimation_result.estimation_histogram
+            )
 
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
         if metric_value_range.shape[0] == 1:
@@ -738,14 +739,14 @@ detected.
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Dict[str, Union[Optional[int], Optional[float]]]:
         # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        truncate_values: Dict[
-            str, Optional[Number]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.truncate_values,
-            expected_return_type=dict,
-            variables=variables,
-            parameters=parameters,
+        truncate_values: Dict[str, Optional[Number]] = (
+            get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.truncate_values,
+                expected_return_type=dict,
+                variables=variables,
+                parameters=parameters,
+            )
         )
 
         distribution_boundary: Optional[Union[int, float]]

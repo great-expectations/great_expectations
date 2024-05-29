@@ -12,6 +12,7 @@ the snippets that are specified for use in documentation are maintained.  These 
 --documentation--
     https://docs.greatexpectations.io/docs/
 """
+
 # <snippet name="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py is_expectation_auto_initializing False">
 from great_expectations.expectations.expectation import Expectation
 

@@ -618,10 +618,10 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         Returns:
             An instance of RuleBasedProfilerConfig that represents the reconciled profiler.
         """
-        effective_variables: Optional[
-            ParameterContainer
-        ] = profiler.reconcile_profiler_variables(
-            variables=variables,
+        effective_variables: Optional[ParameterContainer] = (
+            profiler.reconcile_profiler_variables(
+                variables=variables,
+            )
         )
         runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(
             variables=effective_variables

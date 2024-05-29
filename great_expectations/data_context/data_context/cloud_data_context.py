@@ -451,7 +451,11 @@ class CloudDataContext(SerializableDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GX Cloud ids is returned instead.
         """
-        return [suite_key.resource_name for suite_key in self.list_expectation_suites() if suite_key.resource_name]  # type: ignore[union-attr]
+        return [
+            suite_key.resource_name
+            for suite_key in self.list_expectation_suites()
+            if suite_key.resource_name
+        ]  # type: ignore[union-attr]
 
     @property
     def ge_cloud_config(self) -> Optional[GXCloudConfig]:
@@ -561,9 +565,9 @@ class CloudDataContext(SerializableDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
-            identifiers: Optional[
-                Union[List[str], List[GXCloudIdentifier]]
-            ] = self.list_expectation_suites()
+            identifiers: Optional[Union[List[str], List[GXCloudIdentifier]]] = (
+                self.list_expectation_suites()
+            )
             if identifiers:
                 for cloud_identifier in identifiers:
                     if isinstance(cloud_identifier, GXCloudIdentifier):
@@ -579,7 +583,9 @@ class CloudDataContext(SerializableDataContext):
             resource_name=expectation_suite_name,
         )
 
-        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(
+            key, expectation_suite, **kwargs
+        )  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
             expectation_suite.ge_cloud_id = response.id
 
@@ -591,8 +597,7 @@ class CloudDataContext(SerializableDataContext):
         expectation_suite_name: str = ...,
         ge_cloud_id: None = ...,
         id: None = ...,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def delete_expectation_suite(
@@ -600,8 +605,7 @@ class CloudDataContext(SerializableDataContext):
         expectation_suite_name: None = ...,
         ge_cloud_id: str = ...,
         id: None = ...,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @overload
     def delete_expectation_suite(
@@ -609,8 +613,7 @@ class CloudDataContext(SerializableDataContext):
         expectation_suite_name: None = ...,
         ge_cloud_id: None = ...,
         id: str = ...,
-    ) -> bool:
-        ...
+    ) -> bool: ...
 
     @public_api
     @override
@@ -949,9 +952,7 @@ class CloudDataContext(SerializableDataContext):
     @override
     def _view_validation_result(self, result: CheckpointResult) -> None:
         url = result.validation_result_url
-        assert (
-            url
-        ), "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
+        assert url, "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
         self._open_url_in_browser(url)
 
     @override

@@ -105,9 +105,9 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[
-                    Union[str, sqlalchemy.quoted_name]
-                ] = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, sqlalchemy.quoted_name]] = (
+                    accessor_domain_kwargs["column_list"]
+                )
 
                 meets_expectation_series = metric_fn(
                     cls,
@@ -173,9 +173,9 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[
-                    Union[str, sqlalchemy.quoted_name]
-                ] = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, sqlalchemy.quoted_name]] = (
+                    accessor_domain_kwargs["column_list"]
+                )
 
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
@@ -248,9 +248,9 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[
-                    Union[str, sqlalchemy.quoted_name]
-                ] = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, sqlalchemy.quoted_name]] = (
+                    accessor_domain_kwargs["column_list"]
+                )
 
                 expected_condition = metric_fn(
                     cls,

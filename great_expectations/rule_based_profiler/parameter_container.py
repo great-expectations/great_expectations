@@ -25,30 +25,30 @@ FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER: Final[str] = "$"
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: Final[str] = "."
 
 DOMAIN_KWARGS_PARAMETER_NAME: Final[str] = "domain_kwargs"
-DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: Final[
-    str
-] = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}domain{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{DOMAIN_KWARGS_PARAMETER_NAME}"
+DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: Final[str] = (
+    f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}domain{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{DOMAIN_KWARGS_PARAMETER_NAME}"
+)
 
 PARAMETER_NAME_ROOT_FOR_VARIABLES: Final[str] = "variables"
-VARIABLES_PREFIX: Final[
-    str
-] = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_VARIABLES}"
-VARIABLES_KEY: Final[
-    str
-] = f"{VARIABLES_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
+VARIABLES_PREFIX: Final[str] = (
+    f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_VARIABLES}"
+)
+VARIABLES_KEY: Final[str] = (
+    f"{VARIABLES_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
+)
 
 PARAMETER_NAME_ROOT_FOR_PARAMETERS: Final[str] = "parameter"
-PARAMETER_PREFIX: Final[
-    str
-] = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_PARAMETERS}"
-PARAMETER_KEY: Final[
-    str
-] = f"{PARAMETER_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
+PARAMETER_PREFIX: Final[str] = (
+    f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_PARAMETERS}"
+)
+PARAMETER_KEY: Final[str] = (
+    f"{PARAMETER_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
+)
 
 RAW_SUFFIX: Final[str] = "raw"
-RAW_PARAMETER_KEY: Final[
-    str
-] = f"{PARAMETER_KEY}{RAW_SUFFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
+RAW_PARAMETER_KEY: Final[str] = (
+    f"{PARAMETER_KEY}{RAW_SUFFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
+)
 
 FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: Final[str] = "attributed_value"
 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: Final[str] = "details"
@@ -252,7 +252,7 @@ class ParameterContainer(SerializableDictDot):
 
 
 def deep_convert_properties_iterable_to_parameter_node(
-    source: Union[T, dict]
+    source: Union[T, dict],
 ) -> Union[T, ParameterNode]:
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_parameter_node(
@@ -314,7 +314,7 @@ def convert_parameter_node_to_dictionary(
 
 
 def build_parameter_container_for_variables(
-    variables_configs: Dict[str, Any]
+    variables_configs: Dict[str, Any],
 ) -> ParameterContainer:
     """
     Build a ParameterContainer for all of the profiler config variables passed as key value pairs
@@ -439,9 +439,9 @@ def _build_parameter_node_tree_for_one_parameter(
             node[parameter_name] = ParameterNode({})
             node = node[parameter_name]
 
-    node[
-        parameter_name_as_list[-1]
-    ] = deep_convert_properties_iterable_to_parameter_node(parameter_value)
+    node[parameter_name_as_list[-1]] = (
+        deep_convert_properties_iterable_to_parameter_node(parameter_value)
+    )
 
 
 def get_parameter_value_by_fully_qualified_parameter_name(
@@ -501,10 +501,10 @@ def get_parameter_value_by_fully_qualified_parameter_name(
 
     fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
-    fully_qualified_parameter_name_as_list: List[
-        str
-    ] = fully_qualified_parameter_name.split(
-        FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
+    fully_qualified_parameter_name_as_list: List[str] = (
+        fully_qualified_parameter_name.split(
+            FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER
+        )
     )
 
     if len(fully_qualified_parameter_name_as_list) == 0:

@@ -98,9 +98,9 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[
-                    Union[str, sqlalchemy.quoted_name]
-                ] = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, sqlalchemy.quoted_name]] = (
+                    accessor_domain_kwargs["column_list"]
+                )
 
                 values = metric_fn(
                     cls,
@@ -158,9 +158,9 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[
-                    Union[str, sqlalchemy.quoted_name]
-                ] = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, sqlalchemy.quoted_name]] = (
+                    accessor_domain_kwargs["column_list"]
+                )
 
                 table_columns = metrics["table.columns"]
 
@@ -231,9 +231,9 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[
-                    Union[str, sqlalchemy.quoted_name]
-                ] = accessor_domain_kwargs["column_list"]
+                column_list: List[Union[str, sqlalchemy.quoted_name]] = (
+                    accessor_domain_kwargs["column_list"]
+                )
 
                 multicolumn_function = metric_fn(
                     cls,

@@ -58,7 +58,8 @@ def yellow_trip_pandas_data_context(
         project_path, FileDataContext.GX_DIR
     )
     os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+        os.path.join(context_path, "expectations"),
+        exist_ok=True,  # noqa: PTH118
     )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
@@ -469,10 +470,10 @@ def test_validator_batch_filter(
         data_connector_query_dict={"batch_filter_parameters": {"month": "01"}}
     )
 
-    jan_batch_definition_list: List[
-        BatchDefinition
-    ] = jan_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
+    jan_batch_definition_list: List[BatchDefinition] = (
+        jan_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
     )
 
     assert len(jan_batch_definition_list) == 1
@@ -483,10 +484,10 @@ def test_validator_batch_filter(
         data_connector_query_dict={"index": slice(-1, 0, -1)}
     )
 
-    feb_march_batch_definition_list: List[
-        BatchDefinition
-    ] = feb_march_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
+    feb_march_batch_definition_list: List[BatchDefinition] = (
+        feb_march_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
     )
 
     for i in feb_march_batch_definition_list:
@@ -508,10 +509,10 @@ def test_validator_batch_filter(
         }
     )
 
-    jan_march_batch_definition_list: List[
-        BatchDefinition
-    ] = jan_march_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
+    jan_march_batch_definition_list: List[BatchDefinition] = (
+        jan_march_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
     )
 
     for i in jan_march_batch_definition_list:
@@ -528,10 +529,10 @@ def test_validator_batch_filter(
         data_connector_query_dict={"limit": 2}
     )
 
-    limit_batch_filter_definition_list: List[
-        BatchDefinition
-    ] = limit_batch_filter.select_from_data_connector_query(
-        batch_definition_list=total_batch_definition_list
+    limit_batch_filter_definition_list: List[BatchDefinition] = (
+        limit_batch_filter.select_from_data_connector_query(
+            batch_definition_list=total_batch_definition_list
+        )
     )
 
     assert len(limit_batch_filter_definition_list) == 2

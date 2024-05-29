@@ -171,7 +171,7 @@ def run_checkpoint_and_data_doc(
 def run_data_assistant_and_checkpoint(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
-    ]
+    ],
 ):
     context, ds, _, batch_request = datasource_test_data
     data_assistant_result, checkpoint_result = _configure_and_run_data_assistant(

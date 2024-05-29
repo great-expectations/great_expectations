@@ -9,6 +9,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
  context = gx.get_context()
  context.test_yaml_config(my_config)
 """
+
 from __future__ import annotations
 
 import traceback
@@ -274,13 +275,12 @@ class _YamlConfigValidator:
 
         except Exception as e:
             if class_name is None:
-                usage_stats_event_payload[
-                    "diagnostic_info"
-                ] = usage_stats_event_payload.get(
-                    "diagnostic_info", []
-                ) + [  # type: ignore[operator]
-                    "__class_name_not_provided__"
-                ]
+                usage_stats_event_payload["diagnostic_info"] = (
+                    usage_stats_event_payload.get("diagnostic_info", [])
+                    + [  # type: ignore[operator]
+                        "__class_name_not_provided__"
+                    ]
+                )
             elif (
                 usage_stats_event_payload.get("parent_class") is None
                 and class_name in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
@@ -390,7 +390,8 @@ class _YamlConfigValidator:
 
         anonymizer = Anonymizer(self._data_context.data_context_id)
         usage_stats_event_payload = anonymizer.anonymize(
-            store_name=store_name, store_obj=instantiated_class  # type: ignore[arg-type]
+            store_name=store_name,
+            store_obj=instantiated_class,  # type: ignore[arg-type]
         )
         return instantiated_class, usage_stats_event_payload
 
@@ -416,7 +417,9 @@ class _YamlConfigValidator:
         if class_name == "SimpleSqlalchemyDatasource":
             # Use the raw config here, defaults will be added in the anonymizer
             usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class, name=datasource_name, config=config  # type: ignore[arg-type]
+                obj=instantiated_class,
+                name=datasource_name,
+                config=config,  # type: ignore[arg-type]
             )
         else:
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
@@ -466,7 +469,9 @@ class _YamlConfigValidator:
         anonymizer = Anonymizer(self._data_context.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config_dict  # type: ignore[arg-type]
+            obj=instantiated_class,
+            name=checkpoint_name,
+            config=checkpoint_config_dict,  # type: ignore[arg-type]
         )
 
         return instantiated_class, usage_stats_event_payload
@@ -500,7 +505,9 @@ class _YamlConfigValidator:
         anonymizer = Anonymizer(self._data_context.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=data_connector_name, config=config  # type: ignore[arg-type]
+            obj=instantiated_class,
+            name=data_connector_name,
+            config=config,  # type: ignore[arg-type]
         )
         return instantiated_class, usage_stats_event_payload
 
@@ -515,9 +522,9 @@ class _YamlConfigValidator:
 
         profiler_name: str = name or config.get("name") or "my_temp_profiler"
 
-        profiler_config: Union[
-            RuleBasedProfilerConfig, dict
-        ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
+        profiler_config: Union[RuleBasedProfilerConfig, dict] = (
+            RuleBasedProfilerConfig.from_commented_map(commented_map=config)
+        )
         profiler_config = profiler_config.to_json_dict()  # type: ignore[union-attr]
         profiler_config.update({"name": profiler_name})
 
@@ -533,7 +540,9 @@ class _YamlConfigValidator:
         anonymizer = Anonymizer(self._data_context.data_context_id)
 
         usage_stats_event_payload: dict = anonymizer.anonymize(
-            obj=instantiated_class, name=profiler_name, config=profiler_config  # type: ignore[arg-type]
+            obj=instantiated_class,
+            name=profiler_name,
+            config=profiler_config,  # type: ignore[arg-type]
         )
 
         return instantiated_class, usage_stats_event_payload
@@ -578,7 +587,8 @@ class _YamlConfigValidator:
             store_name: str = name or config.get("name") or "my_temp_store"
             store_name = instantiated_class.store_name or store_name
             usage_stats_event_payload = anonymizer.anonymize(
-                store_name=store_name, store_obj=instantiated_class  # type: ignore[arg-type]
+                store_name=store_name,
+                store_obj=instantiated_class,  # type: ignore[arg-type]
             )
         elif parent_class_from_config is not None and parent_class_from_config.endswith(
             "Datasource"
@@ -596,7 +606,9 @@ class _YamlConfigValidator:
             if parent_class_from_config == "SimpleSqlalchemyDatasource":
                 # Use the raw config here, defaults will be added in the anonymizer
                 usage_stats_event_payload = anonymizer.anonymize(
-                    obj=instantiated_class, name=datasource_name, config=config  # type: ignore[arg-type]
+                    obj=instantiated_class,
+                    name=datasource_name,
+                    config=config,  # type: ignore[arg-type]
                 )
             else:
                 usage_stats_event_payload = anonymizer.anonymize(
@@ -614,12 +626,14 @@ class _YamlConfigValidator:
             checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config
             )
-            checkpoint_config_dict: dict[
-                str, JSONValues
-            ] = checkpoint_config.to_json_dict()
+            checkpoint_config_dict: dict[str, JSONValues] = (
+                checkpoint_config.to_json_dict()
+            )
             checkpoint_config_dict.update({"name": checkpoint_name})
             usage_stats_event_payload = anonymizer.anonymize(
-                obj=checkpoint_config_dict, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
+                obj=checkpoint_config_dict,
+                name=checkpoint_name,
+                config=checkpoint_config,  # type: ignore[arg-type]
             )
 
         elif parent_class_from_config is not None and parent_class_from_config.endswith(
@@ -629,16 +643,17 @@ class _YamlConfigValidator:
                 name or config.get("name") or "my_temp_data_connector"
             )
             usage_stats_event_payload = anonymizer.anonymize(
-                obj=instantiated_class, name=data_connector_name, config=config  # type: ignore[arg-type]
+                obj=instantiated_class,
+                name=data_connector_name,
+                config=config,  # type: ignore[arg-type]
             )
 
         else:
             # If class_name is not a supported type or subclass of a supported type,
             # mark it as custom with no additional information since we can't anonymize
-            usage_stats_event_payload[
-                "diagnostic_info"
-            ] = usage_stats_event_payload.get("diagnostic_info", []) + [
-                "__custom_subclass_not_core_ge__"
-            ]
+            usage_stats_event_payload["diagnostic_info"] = (
+                usage_stats_event_payload.get("diagnostic_info", [])
+                + ["__custom_subclass_not_core_ge__"]
+            )
 
         return instantiated_class, usage_stats_event_payload

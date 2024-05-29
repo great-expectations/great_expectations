@@ -127,6 +127,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py docstring">
     """Expect values in this column to equal 3."""
+
     # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
