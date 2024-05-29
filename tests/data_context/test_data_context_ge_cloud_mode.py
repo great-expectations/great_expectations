@@ -87,7 +87,7 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     ge_cloud_runtime_organization_id,
     ge_cloud_access_token,
 ):
-    custom_base_url: str = "https://some_url.org"
+    custom_base_url: str = "https://some_url.org/"
     # Ensure that the request goes through
     mock_request.return_value.status_code = 200
 
