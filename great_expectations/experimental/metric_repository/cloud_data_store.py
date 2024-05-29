@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import urllib.parse
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, TypeVar
 
@@ -90,7 +91,9 @@ class CloudDataStore(DataStore[StorableTypes]):
     def _build_url(self, value: StorableTypes) -> str:
         assert self._context.ge_cloud_config is not None
         config = self._context.ge_cloud_config
-        return f"{config.base_url}/organizations/{config.organization_id}{self._map_to_url(value)}"
+        return urllib.parse.urljoin(
+            config.base_url, f"organizations/{config.organization_id}{self._map_to_url(value)}"
+        )
 
     @override
     def add(self, value: T) -> uuid.UUID:

@@ -130,7 +130,6 @@ def expectation_suite(
     return expectation_suite
 
 
-@pytest.mark.xfail(reason="Test setup failure; will resolve separately", strict=True)
 @pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,

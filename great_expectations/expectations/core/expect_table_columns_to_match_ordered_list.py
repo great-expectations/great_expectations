@@ -28,8 +28,14 @@ if TYPE_CHECKING:
     )
 
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to exactly match a specified list."
+COLUMN_LIST_ARG = "The column names, in the correct order."
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Schema"]
+
+
 class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
-    """Expect the columns to exactly match a specified list.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_table_columns_to_match_ordered_list is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
@@ -39,7 +45,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
 
     Args:
         column_list (list of str): \
-            The column names, in the correct order.
+            {COLUMN_LIST_ARG}
 
     Other Parameters:
         result_format (str or None): \
@@ -58,11 +64,11 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Schema
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -78,21 +84,21 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       "test",
                       "test2"
                     ]
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -101,41 +107,41 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       "Unnamed: 0",
                       "test",
                       "test2"
                     ],
-                    "details": {
+                    "details": {{
                       "mismatched": [
-                        {
+                        {{
                           "Expected Column Position": 1,
                           "Expected": "test2",
                           "Found": "test"
-                        },
-                        {
+                        }},
+                        {{
                           "Expected Column Position": 2,
                           "Expected": "test",
                           "Found": "test2"
-                        },
-                        {
+                        }},
+                        {{
                           "Expected Column Position": 3,
                           "Expected": "test3",
                           "Found": null
-                        }
+                        }}
                       ]
-                    }
-                  },
-                  "meta": {},
+                    }}
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     column_list: Union[list, set, SuiteParameterDict, None]

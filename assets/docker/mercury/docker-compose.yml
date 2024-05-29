@@ -1,5 +1,3 @@
-version: "3.4"
-
 services:
   db:
     image: postgres:13.7
@@ -46,7 +44,7 @@ services:
     platform: linux/amd64
     restart: always
     ports:
-      - 5000:5000
+      - 5001:5000
     environment:
       LOGGING_LEVEL: ${LOGGING_LEVEL}
       ENVIRONMENT: ${ENVIRONMENT}
@@ -81,3 +79,48 @@ services:
     depends_on:
       db-provisioner:
         condition: service_completed_successfully
+  mercury-service-api-v1:
+    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/mercury/api:v1api-latest
+    platform: linux/amd64
+    restart: always
+    ports:
+      - 7000:7000
+    environment:
+      LOGGING_LEVEL: ${LOGGING_LEVEL}
+      ENVIRONMENT: ${ENVIRONMENT}
+      MERCURY_DIALECT: postgresql
+      MERCURY_USER: gx_mercury_user
+      MERCURY_PASSWORD: postgres
+      MERCURY_HOST: db
+      MERCURY_DATABASE: mercury
+      AMQP_CONNECTION_STRING: amqp://gx_prod:password@mq:5672
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_API_AUDIENCE: ${AUTH0_API_AUDIENCE}
+      AUTH0_MERCURY_API_CLIENT_ID: ${AUTH0_MERCURY_API_CLIENT_ID}
+      AUTH0_MERCURY_API_CLIENT_SECRET: ${AUTH0_MERCURY_API_CLIENT_SECRET}
+      SENDGRID_API_KEY: fake_key
+      LD_SDK_KEY: ${LD_SDK_KEY}
+    depends_on:
+      mercury-service-api:
+        condition: service_started
+      db-provisioner:
+        condition: service_completed_successfully
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        sed -i 's/localhost/db/g' /app/services/ge_cloud/mercury/alembic.ini
+        cd /app/services/ge_cloud/mercury
+        alembic upgrade head
+        cd /app/services/ge_cloud
+        gunicorn "mercury.api_v1:get_app()" -c ./fastapi-gunicorn.conf.py
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - mercury-service-api
+      - mercury-service-api-v1
