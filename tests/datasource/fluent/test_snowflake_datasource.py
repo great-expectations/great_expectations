@@ -106,7 +106,9 @@ def test_valid_config(
                     "type": "value_error",
                 },
                 {
-                    "ctx": {"msg": "Required URL query parameters schema missing"},
+                    "ctx": {
+                        "msg": "Required URL query parameters schema, database missing"
+                    },
                     "loc": ("connection_string",),
                     "msg": "URL query param missing",
                     "type": "value_error.url.query",
@@ -117,7 +119,7 @@ def test_valid_config(
                     "type": "value_error",
                 },
             ],
-            id="missing schema",
+            id="missing database + schema",
         ),
         pytest.param(
             "snowflake://my_user:password@my_account?database=my_db",

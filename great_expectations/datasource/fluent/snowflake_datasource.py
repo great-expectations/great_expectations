@@ -67,14 +67,17 @@ class SnowflakeDsn(AnyUrl):
     }
 
     @classmethod
-    def _ensure_required_query_params(cls, query_str: str, keys: Sequence[str]) -> None:
+    def _ensure_required_query_params(
+        cls, query_str: str | None, keys: Sequence[str]
+    ) -> None:
         """
         Ensure that required query parameters are present in the URL.
         """
-        missing_keys: set = set()
-        for key in keys:
-            if key not in query_str:  # TODO: parse the query string
-                missing_keys.add(key)
+        missing_keys: set = set(keys)
+        if query_str:
+            for key in keys:
+                if key in query_str:  # TODO: parse the query string
+                    missing_keys.remove(key)
         if missing_keys:
             raise _UrlMissingQueryError(
                 msg=f"Required URL query parameters {', '.join(missing_keys)} missing",
@@ -254,9 +257,9 @@ class SnowflakeDatasource(SQLDatasource):
 
         For Snowflake specifically we may represent the connection_string as a dict, which is not supported by SQLAlchemy.
         """
-        gx_execution_engine_type: Type[
-            SqlAlchemyExecutionEngine
-        ] = self.execution_engine_type
+        gx_execution_engine_type: Type[SqlAlchemyExecutionEngine] = (
+            self.execution_engine_type
+        )
 
         connection_string: str | None = (
             self.connection_string if isinstance(self.connection_string, str) else None
