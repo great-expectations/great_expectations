@@ -96,9 +96,7 @@ def test_valid_config(
             "snowflake://my_user:password@my_account",
             [
                 {
-                    "ctx": {
-                        "msg": "Required URL query parameters database, schema missing"
-                    },
+                    "ctx": {"msg": "missing database, schema"},
                     "loc": ("connection_string",),
                     "msg": "URL query param missing",
                     "type": "value_error.url.query",
@@ -115,7 +113,7 @@ def test_valid_config(
             "snowflake://my_user:password@my_account?database=my_db",
             [
                 {
-                    "ctx": {"msg": "Required URL query parameters schema missing"},
+                    "ctx": {"msg": "missing schema"},
                     "loc": ("connection_string",),
                     "msg": "URL query param missing",
                     "type": "value_error.url.query",
@@ -132,7 +130,7 @@ def test_valid_config(
             "snowflake://my_user:password@my_account?schema=my_schema",
             [
                 {
-                    "ctx": {"msg": "Required URL query parameters database missing"},
+                    "ctx": {"msg": "missing database"},
                     "loc": ("connection_string",),
                     "msg": "URL query param missing",
                     "type": "value_error.url.query",

@@ -243,7 +243,7 @@ class SnowflakeDatasource(SQLDatasource):
 
             if missing_keys:
                 raise _UrlMissingQueryError(
-                    msg=f"Required URL query parameters {', '.join(sorted(missing_keys))} missing",
+                    msg=f"missing {', '.join(sorted(missing_keys))}",
                 )
         return connection_string
 
