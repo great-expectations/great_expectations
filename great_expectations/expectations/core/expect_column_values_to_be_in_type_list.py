@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Union, Type
 
 import numpy as np
 import pandas as pd
@@ -20,7 +20,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
-    render_suite_parameter_string,
+    render_suite_parameter_string, Expectation,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -211,7 +211,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: dict[str, Any]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+            Expectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",
                 "const": DATA_QUALITY_ISSUES,

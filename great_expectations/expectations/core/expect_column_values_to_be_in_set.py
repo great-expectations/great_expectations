@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Tuple, Union, Dict, Type
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
@@ -8,7 +8,7 @@ from great_expectations.core.suite_parameters import (
 )
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
-    ColumnMapExpectation,
+    ColumnMapExpectation, Expectation,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -189,7 +189,8 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: dict[str, Any]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+            Expectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",
                 "const": DATA_QUALITY_ISSUES,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Union, Type
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -10,7 +10,7 @@ from great_expectations.core.suite_parameters import (
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    render_suite_parameter_string,
+    render_suite_parameter_string, Expectation,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -157,7 +157,8 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: dict[str, Any]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+            Expectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",
                 "const": DATA_QUALITY_ISSUES,
