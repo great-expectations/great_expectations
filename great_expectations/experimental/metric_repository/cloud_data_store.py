@@ -92,8 +92,7 @@ class CloudDataStore(DataStore[StorableTypes]):
         assert self._context.ge_cloud_config is not None
         config = self._context.ge_cloud_config
         return urllib.parse.urljoin(
-            config.base_url,
-            f"organizations/{config.organization_id}{self._map_to_url(value)}"
+            config.base_url, f"organizations/{config.organization_id}{self._map_to_url(value)}"
         )
 
     @override
