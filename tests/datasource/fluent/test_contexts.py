@@ -475,7 +475,7 @@ class TestPandasDefaultWithCloud:
         assert pandas_default_id
 
         assert verify_asset_names_mock.assert_call_count(
-            f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
+            urllib.parse.urljoin(cloud_details.base_url, f"organizations/{cloud_details.org_id}/datasources/{pandas_default_id}"),
             1,
         )
 
