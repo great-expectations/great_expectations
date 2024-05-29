@@ -23,6 +23,7 @@ repos:
       - id: ruff
         files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests) # TODO: add docs/ etc.
         args: ["--fix"]
+      - id: ruff-format
   # Github Actions Linter
   # Need to be able to inline ignore errors
   # https://github.com/rhysd/actionlint/issues/237
