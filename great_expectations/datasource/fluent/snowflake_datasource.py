@@ -80,7 +80,7 @@ class SnowflakeDsn(AnyUrl):
                     missing_keys.remove(key)
         if missing_keys:
             raise _UrlMissingQueryError(
-                msg=f"Required URL query parameters {', '.join(missing_keys)} missing",
+                msg=f"Required URL query parameters {', '.join(sorted(missing_keys))} missing",
             )
 
     @classmethod
@@ -102,9 +102,6 @@ class SnowflakeDsn(AnyUrl):
             raise _UrlDomainError()
 
         validated = AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
-
-        cls._ensure_required_query_params(parts["query"], ["database", "schema"])
-
         return validated
 
 
@@ -223,6 +220,16 @@ class SnowflakeDatasource(SQLDatasource):
         raise ValueError(
             "Must provide either a connection string or a combination of account, user, and password."
         )
+
+    @pydantic.validator("connection_string")
+    def _check_for_required_query_params(
+        cls, connection_string: ConnectionDetails | SnowflakeDsn | ConfigStr
+    ) -> ConnectionDetails | SnowflakeDsn | ConfigStr:
+        if isinstance(connection_string, SnowflakeDsn):
+            SnowflakeDsn._ensure_required_query_params(
+                connection_string.query, ["database", "schema"]
+            )
+        return connection_string
 
     class Config:
         @staticmethod

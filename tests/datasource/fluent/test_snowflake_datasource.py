@@ -96,18 +96,8 @@ def test_valid_config(
             "snowflake://my_user:password@my_account",
             [
                 {
-                    "loc": ("connection_string",),
-                    "msg": "value is not a valid dict",
-                    "type": "type_error.dict",
-                },
-                {
-                    "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
-                    "type": "value_error",
-                },
-                {
                     "ctx": {
-                        "msg": "Required URL query parameters schema, database missing"
+                        "msg": "Required URL query parameters database, schema missing"
                     },
                     "loc": ("connection_string",),
                     "msg": "URL query param missing",
@@ -125,16 +115,6 @@ def test_valid_config(
             "snowflake://my_user:password@my_account?database=my_db",
             [
                 {
-                    "loc": ("connection_string",),
-                    "msg": "value is not a valid dict",
-                    "type": "type_error.dict",
-                },
-                {
-                    "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
-                    "type": "value_error",
-                },
-                {
                     "ctx": {"msg": "Required URL query parameters schema missing"},
                     "loc": ("connection_string",),
                     "msg": "URL query param missing",
@@ -151,16 +131,6 @@ def test_valid_config(
         pytest.param(
             "snowflake://my_user:password@my_account?schema=my_schema",
             [
-                {
-                    "loc": ("connection_string",),
-                    "msg": "value is not a valid dict",
-                    "type": "type_error.dict",
-                },
-                {
-                    "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
-                    "type": "value_error",
-                },
                 {
                     "ctx": {"msg": "Required URL query parameters database missing"},
                     "loc": ("connection_string",),
