@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, Dict, Type
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
-    render_suite_parameter_string, Expectation,
+    Expectation,
+    render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer

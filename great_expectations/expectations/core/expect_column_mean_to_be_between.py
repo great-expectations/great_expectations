@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, Type
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -11,7 +11,8 @@ from great_expectations.core.suite_parameters import (
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnAggregateExpectation,
-    render_suite_parameter_string, Expectation,
+    Expectation,
+    render_suite_parameter_string,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,

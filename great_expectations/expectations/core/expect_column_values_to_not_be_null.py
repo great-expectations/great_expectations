@@ -9,8 +9,9 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
+    Expectation,
     _format_map_output,
-    render_suite_parameter_string, Expectation,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.expectation_configuration import (
     parse_result_format,

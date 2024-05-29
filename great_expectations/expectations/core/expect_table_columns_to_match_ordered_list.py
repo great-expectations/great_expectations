@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import zip_longest
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, Type
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
@@ -9,7 +9,8 @@ from great_expectations.core.suite_parameters import (
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    render_suite_parameter_string, Expectation,
+    Expectation,
+    render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer

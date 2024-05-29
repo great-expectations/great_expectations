@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Union, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -20,7 +20,8 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
-    render_suite_parameter_string, Expectation,
+    Expectation,
+    render_suite_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent

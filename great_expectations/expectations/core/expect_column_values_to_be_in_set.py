@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Tuple, Union, Dict, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
@@ -8,7 +8,8 @@ from great_expectations.core.suite_parameters import (
 )
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
-    ColumnMapExpectation, Expectation,
+    ColumnMapExpectation,
+    Expectation,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
