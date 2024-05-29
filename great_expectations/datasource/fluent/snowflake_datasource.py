@@ -39,7 +39,12 @@ if TYPE_CHECKING:
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
-_REQUIRED_QUERY_PARAMS: Final[Iterable[str]] = {"database", "schema"}
+REQUIRED_QUERY_PARAMS: Final[
+    Iterable[str]
+] = {  # errors will be thrown if any of these are missing
+    "database",
+    "schema",
+}
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -219,10 +224,14 @@ class SnowflakeDatasource(SQLDatasource):
     def _check_for_required_query_params(
         cls, connection_string: ConnectionDetails | SnowflakeDsn | ConfigStr
     ) -> ConnectionDetails | SnowflakeDsn | ConfigStr:
+        """
+        If connection_string is a SnowflakeDsn,
+        check for required query parameters according to `REQUIRED_QUERY_PARAMS`.
+        """
         if isinstance(connection_string, SnowflakeDsn):
-            missing_keys: set[str] = set(_REQUIRED_QUERY_PARAMS)
+            missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
             if connection_string.query:
-                for key in _REQUIRED_QUERY_PARAMS:
+                for key in REQUIRED_QUERY_PARAMS:
                     if key in connection_string.query:  # TODO: parse the query string
                         missing_keys.remove(key)
             if missing_keys:
