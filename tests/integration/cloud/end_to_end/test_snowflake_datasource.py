@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Final, Iterator
 
 import pytest
 
@@ -17,15 +17,20 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
+RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
+
 
 @pytest.fixture(scope="module")
 def connection_string() -> str:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
-        return "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?database=ci&warehouse=ci&role=ci"
+        return (
+            "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public"
+            f"?database=ci&schema={RANDOM_SCHEMA}&warehouse=ci&role=ci"
+        )
     elif os.getenv("SNOWFLAKE_USER") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return (
             "snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB"
-            "?database=ci&warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
+            f"?database=ci&schema={RANDOM_SCHEMA}&warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
         )
     else:
         pytest.skip("no snowflake credentials")
@@ -89,16 +94,15 @@ def data_asset(
     table_factory: TableFactory,
     get_missing_data_asset_error_type: type[Exception],
 ) -> Iterator[TableAsset]:
-    schema_name = f"i{uuid.uuid4().hex}"
     table_name = f"i{uuid.uuid4().hex}"
     table_factory(
         gx_engine=datasource.get_execution_engine(),
         table_names={table_name},
-        schema_name=schema_name,
+        schema_name=RANDOM_SCHEMA,
     )
     asset_name = f"i{uuid.uuid4().hex}"
     _ = datasource.add_table_asset(
-        name=asset_name, table_name=table_name, schema_name=schema_name
+        name=asset_name, table_name=table_name, schema_name=RANDOM_SCHEMA
     )
     table_asset = datasource.get_asset(asset_name=asset_name)
     yield table_asset
