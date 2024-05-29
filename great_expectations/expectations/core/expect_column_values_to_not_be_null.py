@@ -9,7 +9,6 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
-    Expectation,
     _format_map_output,
     render_suite_parameter_string,
 )
@@ -169,7 +168,9 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotBeNull]) -> None:
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotBeNull]
+        ) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",

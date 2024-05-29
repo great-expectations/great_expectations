@@ -10,7 +10,6 @@ from great_expectations.core.suite_parameters import (
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    Expectation,
     render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -168,7 +167,9 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableRowCountToBeBetween]) -> None:
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectTableRowCountToBeBetween]
+        ) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",

@@ -12,7 +12,6 @@ from great_expectations.core.suite_parameters import (
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnAggregateExpectation,
-    Expectation,
     render_suite_parameter_string,
 )
 from great_expectations.render import (
@@ -201,7 +200,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnDistinctValuesToBeInSet]) -> None:
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnDistinctValuesToBeInSet]
+        ) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",

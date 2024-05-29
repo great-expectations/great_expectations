@@ -7,7 +7,6 @@ from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
-    Expectation,
     render_suite_parameter_string,
 )
 from great_expectations.render import (

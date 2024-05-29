@@ -11,7 +11,6 @@ from great_expectations.core.suite_parameters import (
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnAggregateExpectation,
-    Expectation,
     render_suite_parameter_string,
 )
 from great_expectations.render import (

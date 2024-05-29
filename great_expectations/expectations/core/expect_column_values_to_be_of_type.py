@@ -14,7 +14,6 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
-    Expectation,
     render_suite_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs

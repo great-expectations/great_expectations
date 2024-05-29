@@ -20,7 +20,6 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
-    Expectation,
     render_suite_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
@@ -222,7 +221,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInTypeList]) -> None:
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInTypeList]
+        ) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",

@@ -9,7 +9,6 @@ from great_expectations.core.suite_parameters import (
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    Expectation,
     render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent

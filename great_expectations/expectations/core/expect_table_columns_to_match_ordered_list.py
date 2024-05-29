@@ -9,7 +9,6 @@ from great_expectations.core.suite_parameters import (
 )
 from great_expectations.expectations.expectation import (
     BatchExpectation,
-    Expectation,
     render_suite_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -172,7 +171,9 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchOrderedList]) -> None:
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchOrderedList]
+        ) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",
