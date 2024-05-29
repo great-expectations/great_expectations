@@ -32,6 +32,12 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
             id="connection_string str",
         ),
         param(
+            {
+                "connection_string": "snowflake://my_user@my_account?authenticator=externalbrowser"
+            },
+            id="connection_string str authenticator inplace of password",
+        ),
+        param(
             {"connection_string": "${MY_CONN_STR}"}, id="connection_string ConfigStr"
         ),
         param(
