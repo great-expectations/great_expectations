@@ -65,12 +65,6 @@ from great_expectations.exceptions import (
     PluginModuleNotFoundError,
 )
 
-try:
-    import black
-except ImportError:
-    black = None  # type: ignore[assignment]
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -1092,28 +1086,6 @@ def gen_directory_tree_str(startpath: PathStr):
             output_str += f"{subindent}{f}\n"
 
     return output_str
-
-
-def lint_code(code: str) -> str:
-    """Lint strings of code passed in.  Optional dependency "black" must be installed."""
-
-    # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
-    # While this seems to resolve the issue, the root cause is yet to be determined.
-
-    if black is None:
-        logger.warning(
-            "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
-        )
-        return code
-
-    black_file_mode = black.FileMode()
-    if not isinstance(code, str):
-        raise TypeError
-    try:
-        linted_code = black.format_file_contents(code, fast=True, mode=black_file_mode)
-        return linted_code
-    except (black.NothingChanged, RuntimeError):
-        return code
 
 
 def convert_json_string_to_be_python_compliant(code: str) -> str:
