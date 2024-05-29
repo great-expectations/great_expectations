@@ -4,26 +4,6 @@ requires = ["setuptools", "wheel"]
 # https://github.com/python-versioneer/python-versioneer/issues/193
 # build-backend = "setuptools.build_meta"
 
-[tool.black]
-target-version = ["py38", "py39", "py310"]
-extend_excludes = '''
-(
-     docs/.*
-    | tests/.*.fixture
-    | .*.ge_store_backend_id
-)
-'''
-# exclude unparseable notebooks
-# https://stackoverflow.com/a/73296261/6304433
-force-exclude = '''
-(tests/data_context/fixtures/post_init_project_v0.8.0_A/great_expectations/notebooks/.*\.ipynb)
-'''
-
-[tool.isort]
-profile = "black"
-skip_gitignore = true
-extend_skip_glob = ['venv/*', 'docs/*']
-
 [tool.mypy]
 python_version = "3.8"
 plugins = [
@@ -221,10 +201,20 @@ lint.select = [
     "RUF", # custom ruff rules
 ]
 lint.ignore = [
+    # formatting related ignores
+    # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "W191", # tab-identation
+    "E111", # indentation-with-invalid-multiple
+    "E114", # indentation-with-invalid-multiple-comment
+    "E117", # over-idented
+    "E501", # line-too-long
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
     "F842", # variable annotated but unused # TODO enable
     # https://beta.ruff.rs/docs/rules/#pycodestyle-e-w
-    "E501", # line-length # TODO: too many violations
+    "E402", # module level import not at top of file
+    # https://beta.ruff.rs/docs/rules/#pyflakes-f
+    "F842", # variable annotated but unused # TODO enable
+    # https://beta.ruff.rs/docs/rules/#pycodestyle-e-w
     "E402", # module level import not at top of file
     # https://beta.ruff.rs/docs/rules/#flake8-comprehensions-c4
     "C400", # TODO enable
