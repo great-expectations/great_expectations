@@ -176,13 +176,13 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
     strict_max: bool = pydantic.Field(default=False, description=STRICT_MIN_DESCRIPTION)
 
     library_metadata = {
-                    "maturity": "production",
-                    "tags": ["core expectation", "column aggregate expectation"],
-                    "contributors": ["@great_expectations"],
-                    "requirements": [],
-                    "has_full_test_suite": True,
-                    "manually_reviewed_code": True,
-                }
+        "maturity": "production",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
     _library_metadata = library_metadata
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
@@ -212,7 +212,7 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
             }
             schema["properties"]["library_metadata"] = {
                 "type": "object",
-                "const": model._library_metadata
+                "const": model._library_metadata,
             }
             schema["properties"]["short_description"] = {
                 "type": "string",

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 import altair as alt
 import pandas as pd
@@ -12,7 +12,8 @@ from great_expectations.core.suite_parameters import (
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnAggregateExpectation,
-    render_suite_parameter_string, Expectation,
+    Expectation,
+    render_suite_parameter_string,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -208,7 +209,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             }
             schema["properties"]["library_metadata"] = {
                 "type": "object",
-                "const": model._library_metadata
+                "const": model._library_metadata,
             }
             schema["properties"]["short_description"] = {
                 "type": "string",

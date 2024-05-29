@@ -282,30 +282,25 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     def _format_title(schema_title: str):
         # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
         split_between_caps_and_nums = (
-            "".join(
-                [
-                    " " + c if (c.isdigit() or c == c.upper()) else c
-                    for c in schema_title
-                ]
-            )
-                .lstrip()
-                .split(" ")
+            "".join([" " + c if (c.isdigit() or c == c.upper()) else c for c in schema_title])
+            .lstrip()
+            .split(" ")
         )
         join_multi_caps_and_nums: list[str] = []
         for idx, token in enumerate(split_between_caps_and_nums):
             if idx > 0:
                 consecutive_caps = (
-                        token.upper() == token
-                        and split_between_caps_and_nums[idx - 1].upper()
-                        == split_between_caps_and_nums[idx - 1]
+                    token.upper() == token
+                    and split_between_caps_and_nums[idx - 1].upper()
+                    == split_between_caps_and_nums[idx - 1]
                 )
                 consecutive_digits = (
-                        token.isdigit() and split_between_caps_and_nums[idx - 1].isdigit()
+                    token.isdigit() and split_between_caps_and_nums[idx - 1].isdigit()
                 )
                 if (
-                        len(token) == 1
-                        and len(split_between_caps_and_nums[idx - 1]) == 1
-                        and (consecutive_caps or consecutive_digits)
+                    len(token) == 1
+                    and len(split_between_caps_and_nums[idx - 1]) == 1
+                    and (consecutive_caps or consecutive_digits)
                 ):
                     join_multi_caps_and_nums[-1] = join_multi_caps_and_nums[-1] + token
                 else:

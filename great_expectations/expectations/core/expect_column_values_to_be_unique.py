@@ -151,13 +151,13 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     """  # noqa: E501
 
     library_metadata = {
-                    "maturity": "production",
-                    "tags": ["core expectation", "column map expectation"],
-                    "contributors": ["@great_expectations"],
-                    "requirements": [],
-                    "has_full_test_suite": True,
-                    "manually_reviewed_code": True,
-                }
+        "maturity": "production",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
     _library_metadata = library_metadata
 
     map_metric = "column_values.unique"

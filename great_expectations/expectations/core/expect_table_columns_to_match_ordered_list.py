@@ -151,13 +151,13 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
     )
 
     library_metadata = {
-                    "maturity": "production",
-                    "tags": ["core expectation", "table expectation"],
-                    "contributors": ["@great_expectations"],
-                    "requirements": [],
-                    "has_full_test_suite": True,
-                    "manually_reviewed_code": True,
-                }
+        "maturity": "production",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
     _library_metadata = library_metadata
 
     metric_dependencies = ("table.columns",)

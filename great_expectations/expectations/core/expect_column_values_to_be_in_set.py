@@ -208,7 +208,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             }
             schema["properties"]["library_metadata"] = {
                 "type": "object",
-                "const": model._library_metadata
+                "const": model._library_metadata,
             }
             schema["properties"]["short_description"] = {
                 "type": "string",
