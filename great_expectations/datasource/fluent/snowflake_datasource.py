@@ -76,7 +76,7 @@ class SnowflakeDsn(AnyUrl):
             if key not in query_str:  # TODO: parse the query string
                 missing_keys.add(key)
         if missing_keys:
-            raise errors._UrlMissingQueryError(
+            raise _UrlMissingQueryError(
                 msg=f"Required URL query parameters {', '.join(missing_keys)} missing",
             )
 
