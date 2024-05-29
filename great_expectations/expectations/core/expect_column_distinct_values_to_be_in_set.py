@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Type
 
 import altair as alt
 import pandas as pd
@@ -12,7 +12,7 @@ from great_expectations.core.suite_parameters import (
 from great_expectations.expectations.expectation import (
     COLUMN_FIELD_DESCRIPTION,
     ColumnAggregateExpectation,
-    render_suite_parameter_string,
+    render_suite_parameter_string, Expectation,
 )
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
@@ -190,7 +190,8 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
 
     class Config:
         @staticmethod
-        def schema_extra(schema: dict[str, Any]) -> None:
+        def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",
                 "const": DATA_QUALITY_ISSUES,

@@ -276,6 +276,11 @@
             },
             "type": "object"
         },
+        "domain_type": {
+            "type": "string",
+            "const": "column",
+            "description": "Column Aggregate"
+        },
         "data_quality_issues": {
             "type": "array",
             "const": [

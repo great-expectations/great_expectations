@@ -74,6 +74,11 @@
             "description": "The column name.",
             "type": "string"
         },
+        "domain_type": {
+            "type": "string",
+            "const": "column",
+            "description": "Column Map"
+        },
         "data_quality_issues": {
             "type": "array",
             "const": [

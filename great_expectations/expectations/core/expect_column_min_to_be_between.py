@@ -195,7 +195,7 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
     class Config:
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
-            Expectation.Config.schema_extra(schema, model)
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
             schema["properties"]["data_quality_issues"] = {
                 "type": "array",
                 "const": DATA_QUALITY_ISSUES,
