@@ -226,9 +226,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 str(response.text),
                 str(jsonError),
             )
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 f"Unable to get object in GX Cloud Store Backend: {jsonError}"
-            ) from jsonError  # noqa: TRY003
+            ) from jsonError
         except requests.HTTPError as http_err:
             raise StoreBackendError(  # noqa: TRY003
                 f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"  # noqa: E501
@@ -512,9 +512,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             ) from timeout_exc
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(
+            raise StoreBackendError(  # noqa: TRY003
                 f"Unable to delete object in GX Cloud Store Backend: {e!r}"
-            ) from e  # noqa: TRY003
+            ) from e
 
     def _get_one_or_none_from_response_data(
         self,
