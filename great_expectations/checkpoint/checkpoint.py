@@ -146,7 +146,7 @@ class Checkpoint(BaseModel):
         run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
         if not self.id:
-            self._save_before_run()
+            self._add_to_store()
 
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
@@ -252,7 +252,12 @@ class Checkpoint(BaseModel):
 
         store.update(key=key, value=self)
 
-    def _save_before_run(self) -> None:
+    def _add_to_store(self) -> None:
+        """This is used to persist a checkpoint before we run it.
+
+        We need to persist a checkpoint before it can be run. If user calls runs but hasn't
+        persisted it we add it for them.
+        """
         from great_expectations import project_manager
 
         store = project_manager.get_checkpoints_store()

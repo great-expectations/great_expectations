@@ -945,7 +945,7 @@ def gx_cloud_api_fake_ctx(
         )
         resp_mocker.add_callback(
             responses.POST,
-            f"{org_url_base_V0}/validation-definitions",
+            urllib.parse.urljoin(org_url_base_V0,"validation-definitions"),
             post_validation_definitions_cb,
         )
 
