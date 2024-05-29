@@ -28,7 +28,9 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     "config_kwargs",
     [
         param(
-            {"connection_string": "snowflake://my_user:password@my_account?numpy=True"},
+            {
+                "connection_string": "snowflake://my_user:password@my_account?numpy=True&schema=s_public&database=d_public"
+            },
             id="connection_string str",
         ),
         param(
@@ -40,6 +42,8 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
                     "user": "my_user",
                     "password": "password",
                     "account": "my_account",
+                    "schema": "s_public",
+                    "database": "d_public",
                 }
             },
             id="connection_string dict",
@@ -50,12 +54,20 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
                     "user": "my_user",
                     "password": "${MY_PASSWORD}",
                     "account": "my_account",
+                    "schema": "s_public",
+                    "database": "d_public",
                 }
             },
             id="connection_string dict with password ConfigStr",
         ),
         param(
-            {"user": "my_user", "password": "password", "account": "my_account"},
+            {
+                "user": "my_user",
+                "password": "password",
+                "account": "my_account",
+                "schema": "s_public",
+                "database": "d_public",
+            },
             id="old config format - top level keys",
         ),
     ],
@@ -81,8 +93,14 @@ def test_valid_config(
     "connection_string, connect_args, expected_errors",
     [
         pytest.param(
-            "snowflake://my_user:password@my_account?numpy=True",
-            {"account": "my_account", "user": "my_user", "password": "123456"},
+            "snowflake://my_user:password@my_account?numpy=True&schema=foo&database=bar",
+            {
+                "account": "my_account",
+                "user": "my_user",
+                "password": "123456",
+                "schema": "foo",
+                "database": "bar",
+            },
             [
                 {
                     "loc": ("__root__",),
@@ -111,7 +129,12 @@ def test_valid_config(
         ),
         pytest.param(
             None,
-            {"account": "my_account", "user": "my_user"},
+            {
+                "account": "my_account",
+                "user": "my_user",
+                "schema": "foo",
+                "database": "bar",
+            },
             [
                 {
                     "loc": ("connection_string", "password"),
@@ -137,7 +160,12 @@ def test_valid_config(
             id="incomplete connect_args",
         ),
         pytest.param(
-            {"account": "my_account", "user": "my_user"},
+            {
+                "account": "my_account",
+                "user": "my_user",
+                "schema": "foo",
+                "database": "bar",
+            },
             {},
             [
                 {
@@ -279,7 +307,9 @@ def test_invalid_connection_string_raises_dsn_error(
 )
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
-    connection_string = "snowflake://my_user:password@my_account"
+    connection_string = (
+        "snowflake://my_user:password@my_account?database=foo&schema=bar"
+    )
     datasource = SnowflakeDatasource(
         name="my_snowflake", connection_string=connection_string
     )
@@ -292,7 +322,7 @@ def test_get_execution_engine_succeeds():
     "connection_string",
     [
         param(
-            "snowflake://my_user:password@my_account?numpy=True",
+            "snowflake://my_user:password@my_account?numpy=True&database=foo&schema=bar",
             id="connection_string str",
         ),
         param(
@@ -300,6 +330,8 @@ def test_get_execution_engine_succeeds():
                 "user": "my_user",
                 "password": "password",
                 "account": "my_account",
+                "database": "foo",
+                "schema": "bar",
             },
             id="connection_string dict",
         ),
