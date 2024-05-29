@@ -90,6 +90,105 @@ def test_valid_config(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    ["connection_string", "expected_errors"],
+    [
+        pytest.param(
+            "snowflake://my_user:password@my_account",
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "ctx": {"msg": "Required URL query parameters schema missing"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="missing schema",
+        ),
+        pytest.param(
+            "snowflake://my_user:password@my_account?database=my_db",
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "ctx": {"msg": "Required URL query parameters schema missing"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="missing schema",
+        ),
+        pytest.param(
+            "snowflake://my_user:password@my_account?schema=my_schema",
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "ctx": {"msg": "Required URL query parameters database missing"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="missing database",
+        ),
+    ],
+)
+def test_missing_required_query_params(
+    connection_string: str,
+    expected_errors: list[dict],  # TODO: use pydantic error dict
+):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        _ = SnowflakeDatasource(
+            name="my_sf_ds",
+            connection_string=connection_string,
+        )
+    assert exc_info.value.errors() == expected_errors
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     "connection_string, connect_args, expected_errors",
     [
         pytest.param(
