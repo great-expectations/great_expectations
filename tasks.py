@@ -486,13 +486,13 @@ def docker(
 @invoke.task(
     aliases=("schema", "schemas"),
     help={
-        "sync": "Update the json schemas at `great_expectations/datasource/fluent/schemas`",
+        "sync": "Update the json schemas",
         "indent": "Indent size for nested json objects. Default: 4",
         "clean": "Delete all schema files and sub directories."
         " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
-def type_schema(  # noqa: C901 - too complex
+def type_schema(  # noqa: C901, PLR0912 - too complex
     ctx: Context,
     sync: bool = False,
     clean: bool = False,
@@ -514,16 +514,37 @@ def type_schema(  # noqa: C901 - too complex
     from great_expectations.datasource.fluent.sources import (
         _iter_all_registered_types,
     )
+    from great_expectations.expectations import (
+        ExpectColumnMaxToBeBetween,
+        ExpectColumnMeanToBeBetween,
+        ExpectColumnMedianToBeBetween,
+        ExpectColumnMinToBeBetween,
+        ExpectColumnValuesToBeInSet,
+        ExpectColumnValuesToBeInTypeList,
+        ExpectColumnValuesToBeNull,
+        ExpectColumnValuesToBeOfType,
+        ExpectColumnValuesToBeUnique,
+        ExpectColumnValuesToNotBeNull,
+        ExpectTableColumnsToMatchOrderedList,
+        ExpectTableRowCountToBeBetween,
+        ExpectTableRowCountToEqual,
+    )
 
-    schema_dir_root: Final[pathlib.Path] = GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
+    data_source_schema_dir_root: Final[pathlib.Path] = (
+        GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
+    )
+    expectation_schema_dir_root: Final[pathlib.Path] = (
+        GX_PACKAGE_DIR / "expectations" / "core" / "schemas"
+    )
     if clean:
-        file_count = len(list(schema_dir_root.glob("**/*.json")))
-        print(f"🗑️ removing schema directory and contents - {file_count} .json files")
-        shutil.rmtree(schema_dir_root)
+        shutil.rmtree(data_source_schema_dir_root)
+        shutil.rmtree(expectation_schema_dir_root)
 
-    schema_dir_root.mkdir(exist_ok=True)
+    data_source_schema_dir_root.mkdir(exist_ok=True)
+    expectation_schema_dir_root.mkdir(exist_ok=True)
 
-    datasource_dir: pathlib.Path = schema_dir_root
+    datasource_dir: pathlib.Path = data_source_schema_dir_root
+    expectation_dir: pathlib.Path = expectation_schema_dir_root
 
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
@@ -534,11 +555,12 @@ def type_schema(  # noqa: C901 - too complex
         *_iter_all_registered_types(),
     ]
 
+    # handle data sources
     for name, model in name_model:
         if issubclass(model, Datasource):
-            datasource_dir = schema_dir_root.joinpath(model.__name__)
+            datasource_dir = data_source_schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)
-            schema_dir = schema_dir_root
+            schema_dir = data_source_schema_dir_root
             print("-" * shutil.get_terminal_size()[0])
         else:
             schema_dir = datasource_dir
@@ -571,6 +593,30 @@ def type_schema(  # noqa: C901 - too complex
             print(f"🔃  {name} - {schema_path.name} schema updated")
         except TypeError as err:
             print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
+
+    # handle expectations
+    supported_expectations = [
+        ExpectColumnValuesToBeNull,
+        ExpectColumnValuesToNotBeNull,
+        ExpectColumnValuesToBeUnique,
+        ExpectColumnValuesToBeInSet,
+        ExpectColumnMaxToBeBetween,
+        ExpectColumnMeanToBeBetween,
+        ExpectColumnMedianToBeBetween,
+        ExpectColumnMinToBeBetween,
+        ExpectColumnValuesToBeInTypeList,
+        ExpectColumnValuesToBeOfType,
+        ExpectTableColumnsToMatchOrderedList,
+        ExpectTableRowCountToBeBetween,
+        ExpectTableRowCountToEqual,
+    ]
+    for x in supported_expectations:
+        schema_path = expectation_dir.joinpath(f"{x.__name__}.json")
+        json_str = x.schema_json(indent=indent) + "\n"  # type: ignore[attr-defined] # FIXME low priority
+        if sync:
+            schema_path.write_text(json_str)
+            print(f"🔃  {x.__name__}.json updated")
+
     raise invoke.Exit(code=0)
 
 
