@@ -101,8 +101,7 @@ class SnowflakeDsn(AnyUrl):
         if domain is None:
             raise _UrlDomainError()
 
-        validated = AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
-        return validated
+        return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
 
 
 class ConnectionDetails(FluentBaseModel):
