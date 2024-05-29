@@ -168,7 +168,9 @@ def test_delete_asset_with_cloud_data_context(
     datasource.delete_asset(asset_name=asset_name)
 
     cloud_api_fake.assert_call_count(
-        urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/data-assets/{asset.id}"),
+        urllib.parse.urljoin(
+            GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/data-assets/{asset.id}"
+        ),
         1,
     )
     assert remove_key_spy.call_count == 1
@@ -202,7 +204,9 @@ def test_context_add_or_update_datasource(
     # TODO: spy the store.delete calls instead of ctx specific tests
     if isinstance(empty_contexts, CloudDataContext):
         # TODO: adjust call counts as needed
-        datasources_url = urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources")
+        datasources_url = urllib.parse.urljoin(
+            GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources"
+        )
         cloud_api_fake.assert_call_count(
             datasources_url,
             2,
@@ -212,9 +216,7 @@ def test_context_add_or_update_datasource(
             2,
         )
 
-        response = requests.get(
-            f"{datasources_url}/{datasource.id}"
-        )
+        response = requests.get(f"{datasources_url}/{datasource.id}")
         response.raise_for_status()
         print(pf(response.json(), depth=4))
         assert response.json()["data"]["attributes"]["datasource_config"].get("assets")
@@ -304,7 +306,9 @@ def test_cloud_context_delete_datasource(
     datasource = context.data_sources.add_pandas_filesystem(
         name="delete_ds_test", base_directory=taxi_data_samples_dir
     )
-    datasources_url = urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources")
+    datasources_url = urllib.parse.urljoin(
+        GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources"
+    )
 
     # check cloud_api_fake items
     response1 = requests.get(
