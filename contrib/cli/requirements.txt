@@ -1,4 +1,3 @@
-black[jupyter]==23.10.1 # Linting / code style
 Click>=7.1.2         # CLI tooling
 cookiecutter==2.1.1  # Project templating
 mypy==1.7.1            # Type checker
