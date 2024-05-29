@@ -73,7 +73,7 @@ def test_add_fluent_datasource_are_persisted(
     assert datasource.id
     assert set_spy.call_count == 1
     cloud_api_fake.assert_call_count(
-        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
+        urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources"),
         2,
     )
 
@@ -168,7 +168,7 @@ def test_delete_asset_with_cloud_data_context(
     datasource.delete_asset(asset_name=asset_name)
 
     cloud_api_fake.assert_call_count(
-        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/data-assets/{asset.id}",
+        urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/data-assets/{asset.id}"),
         1,
     )
     assert remove_key_spy.call_count == 1
@@ -202,17 +202,18 @@ def test_context_add_or_update_datasource(
     # TODO: spy the store.delete calls instead of ctx specific tests
     if isinstance(empty_contexts, CloudDataContext):
         # TODO: adjust call counts as needed
+        datasources_url = urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources")
         cloud_api_fake.assert_call_count(
-            f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
+            datasources_url,
             2,
         )
         cloud_api_fake.assert_call_count(
-            f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}?name={datasource.name}",
+            f"{datasources_url}/{datasource.id}?name={datasource.name}",
             2,
         )
 
         response = requests.get(
-            f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}"
+            f"{datasources_url}/{datasource.id}"
         )
         response.raise_for_status()
         print(pf(response.json(), depth=4))
@@ -303,10 +304,11 @@ def test_cloud_context_delete_datasource(
     datasource = context.data_sources.add_pandas_filesystem(
         name="delete_ds_test", base_directory=taxi_data_samples_dir
     )
+    datasources_url = urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}/datasources")
 
     # check cloud_api_fake items
     response1 = requests.get(
-        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
+        f"{datasources_url}/{datasource.id}",
     )
     print(f"Before Delete -> {response1}\n{pf(response1.json())}\n")
     assert response1.status_code == 200
@@ -315,16 +317,16 @@ def test_cloud_context_delete_datasource(
     assert datasource.name not in context.fluent_datasources
 
     cloud_api_fake.assert_call_count(
-        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
+        datasources_url,
         3,
     )
     cloud_api_fake.assert_call_count(
-        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
+        f"{datasources_url}/{datasource.id}",
         2,
     )
 
     response2 = requests.get(
-        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
+        f"{datasources_url}/{datasource.id}",
     )
     print(f"After Delete -> {response2}\n{pf(response2.json())}")
     assert response2.status_code == 404
