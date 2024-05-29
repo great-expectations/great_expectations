@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import urllib.parse
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -230,10 +231,16 @@ class SnowflakeDatasource(SQLDatasource):
         """
         if isinstance(connection_string, SnowflakeDsn):
             missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
+
             if connection_string.query:
+                query_params: dict[str, list[str]] = urllib.parse.parse_qs(
+                    connection_string.query
+                )
+
                 for key in REQUIRED_QUERY_PARAMS:
-                    if key in connection_string.query:  # TODO: parse the query string
+                    if key in query_params:
                         missing_keys.remove(key)
+
             if missing_keys:
                 raise _UrlMissingQueryError(
                     msg=f"Required URL query parameters {', '.join(sorted(missing_keys))} missing",
