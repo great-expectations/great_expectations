@@ -80,17 +80,6 @@
                 }
             ]
         },
-        "domain_type": {
-            "type": "string",
-            "const": "table",
-            "description": "Batch"
-        },
-        "data_quality_issues": {
-            "type": "array",
-            "const": [
-                "Volume"
-            ]
-        },
         "library_metadata": {
             "type": "object",
             "const": {
@@ -106,6 +95,17 @@
                 "has_full_test_suite": true,
                 "manually_reviewed_code": true
             }
+        },
+        "domain_type": {
+            "type": "string",
+            "const": "table",
+            "description": "Batch"
+        },
+        "data_quality_issues": {
+            "type": "array",
+            "const": [
+                "Volume"
+            ]
         },
         "short_description": {
             "type": "string",

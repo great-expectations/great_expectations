@@ -73,17 +73,6 @@
             "description": "The column name.",
             "type": "string"
         },
-        "domain_type": {
-            "type": "string",
-            "const": "column",
-            "description": "Column Map"
-        },
-        "data_quality_issues": {
-            "type": "array",
-            "const": [
-                "Missingness"
-            ]
-        },
         "library_metadata": {
             "type": "object",
             "const": {
@@ -99,6 +88,17 @@
                 "has_full_test_suite": true,
                 "manually_reviewed_code": true
             }
+        },
+        "domain_type": {
+            "type": "string",
+            "const": "column",
+            "description": "Column Map"
+        },
+        "data_quality_issues": {
+            "type": "array",
+            "const": [
+                "Missingness"
+            ]
         },
         "short_description": {
             "type": "string",

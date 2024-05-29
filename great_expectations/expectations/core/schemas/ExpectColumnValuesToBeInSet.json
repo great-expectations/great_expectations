@@ -91,17 +91,6 @@
                 }
             ]
         },
-        "domain_type": {
-            "type": "string",
-            "const": "column",
-            "description": "Column Map"
-        },
-        "data_quality_issues": {
-            "type": "array",
-            "const": [
-                "Sets"
-            ]
-        },
         "library_metadata": {
             "type": "object",
             "const": {
@@ -117,6 +106,17 @@
                 "has_full_test_suite": true,
                 "manually_reviewed_code": true
             }
+        },
+        "domain_type": {
+            "type": "string",
+            "const": "column",
+            "description": "Column Map"
+        },
+        "data_quality_issues": {
+            "type": "array",
+            "const": [
+                "Sets"
+            ]
         },
         "short_description": {
             "type": "string",

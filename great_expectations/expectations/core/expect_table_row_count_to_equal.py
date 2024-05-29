@@ -124,6 +124,16 @@ class ExpectTableRowCountToEqual(BatchExpectation):
 
     value: Union[int, SuiteParameterDict] = pydantic.Field(description=VALUE_DESCRIPTION)
 
+    library_metadata = {
+                    "maturity": "production",
+                    "tags": ["core expectation", "table expectation"],
+                    "contributors": ["@great_expectations"],
+                    "requirements": [],
+                    "has_full_test_suite": True,
+                    "manually_reviewed_code": True,
+                }
+    _library_metadata = library_metadata
+
     metric_dependencies = ("table.row_count",)
     success_keys = ("value",)
     args_keys = ("value",)
@@ -138,14 +148,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
             }
             schema["properties"]["library_metadata"] = {
                 "type": "object",
-                "const": {
-                    "maturity": "production",
-                    "tags": ["core expectation", "table expectation"],
-                    "contributors": ["@great_expectations"],
-                    "requirements": [],
-                    "has_full_test_suite": True,
-                    "manually_reviewed_code": True,
-                },
+                "const": model._library_metadata,
             }
             schema["properties"]["short_description"] = {
                 "type": "string",

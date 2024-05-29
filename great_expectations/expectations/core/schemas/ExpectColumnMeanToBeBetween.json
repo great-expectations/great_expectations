@@ -117,6 +117,25 @@
             "default": false,
             "type": "boolean"
         },
+        "library_metadata": {
+            "type": "object",
+            "const": {
+                "type": "object",
+                "const": {
+                    "maturity": "production",
+                    "tags": [
+                        "core expectation",
+                        "column aggregate expectation"
+                    ],
+                    "contributors": [
+                        "@great_expectations"
+                    ],
+                    "requirements": [],
+                    "has_full_test_suite": true,
+                    "manually_reviewed_code": true
+                }
+            }
+        },
         "kwargs_json_schema_base_properties": {
             "title": "Kwargs Json Schema Base Properties",
             "default": {
@@ -286,22 +305,6 @@
             "const": [
                 "Numerical Data"
             ]
-        },
-        "library_metadata": {
-            "type": "object",
-            "const": {
-                "maturity": "production",
-                "tags": [
-                    "core expectation",
-                    "column aggregate expectation"
-                ],
-                "contributors": [
-                    "@great_expectations"
-                ],
-                "requirements": [],
-                "has_full_test_suite": true,
-                "manually_reviewed_code": true
-            }
         },
         "short_description": {
             "type": "string",

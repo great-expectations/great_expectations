@@ -117,17 +117,6 @@
             "default": false,
             "type": "boolean"
         },
-        "domain_type": {
-            "type": "string",
-            "const": "column",
-            "description": "Column Aggregate"
-        },
-        "data_quality_issues": {
-            "type": "array",
-            "const": [
-                "Numerical Data"
-            ]
-        },
         "library_metadata": {
             "type": "object",
             "const": {
@@ -143,6 +132,17 @@
                 "has_full_test_suite": true,
                 "manually_reviewed_code": true
             }
+        },
+        "domain_type": {
+            "type": "string",
+            "const": "column",
+            "description": "Column Aggregate"
+        },
+        "data_quality_issues": {
+            "type": "array",
+            "const": [
+                "Numerical Data"
+            ]
         },
         "short_description": {
             "type": "string",

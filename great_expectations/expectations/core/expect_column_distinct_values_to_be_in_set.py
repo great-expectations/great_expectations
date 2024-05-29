@@ -179,6 +179,16 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         default=[], description=VALUE_SET_DESCRIPTION
     )
 
+    library_metadata = {
+        "maturity": "production",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+        "has_full_test_suite": True,
+        "manually_reviewed_code": True,
+    }
+    _library_metadata = library_metadata
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.value_counts",)
     success_keys = ("value_set",)
@@ -198,14 +208,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             }
             schema["properties"]["library_metadata"] = {
                 "type": "object",
-                "const": {
-                    "maturity": "production",
-                    "tags": ["core expectation", "column aggregate expectation"],
-                    "contributors": ["@great_expectations"],
-                    "requirements": [],
-                    "has_full_test_suite": True,
-                    "manually_reviewed_code": True,
-                },
+                "const": model._library_metadata
             }
             schema["properties"]["short_description"] = {
                 "type": "string",
