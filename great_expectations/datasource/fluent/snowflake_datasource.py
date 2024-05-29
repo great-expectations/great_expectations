@@ -1,7 +1,16 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final, Literal, Optional, Sequence, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Final,
+    Iterable,
+    Literal,
+    Optional,
+    Type,
+    Union,
+)
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, errors
@@ -29,6 +38,8 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
+
+_REQUIRED_QUERY_PARAMS: Final[Iterable[str]] = {"database", "schema"}
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -65,23 +76,6 @@ class SnowflakeDsn(AnyUrl):
     allowed_schemes = {
         "snowflake",
     }
-
-    @classmethod
-    def _ensure_required_query_params(
-        cls, query_str: str | None, keys: Sequence[str]
-    ) -> None:
-        """
-        Ensure that required query parameters are present in the URL.
-        """
-        missing_keys: set = set(keys)
-        if query_str:
-            for key in keys:
-                if key in query_str:  # TODO: parse the query string
-                    missing_keys.remove(key)
-        if missing_keys:
-            raise _UrlMissingQueryError(
-                msg=f"Required URL query parameters {', '.join(sorted(missing_keys))} missing",
-            )
 
     @classmethod
     @override
@@ -226,9 +220,15 @@ class SnowflakeDatasource(SQLDatasource):
         cls, connection_string: ConnectionDetails | SnowflakeDsn | ConfigStr
     ) -> ConnectionDetails | SnowflakeDsn | ConfigStr:
         if isinstance(connection_string, SnowflakeDsn):
-            SnowflakeDsn._ensure_required_query_params(
-                connection_string.query, ["database", "schema"]
-            )
+            missing_keys: set[str] = set(_REQUIRED_QUERY_PARAMS)
+            if connection_string.query:
+                for key in _REQUIRED_QUERY_PARAMS:
+                    if key in connection_string.query:  # TODO: parse the query string
+                        missing_keys.remove(key)
+            if missing_keys:
+                raise _UrlMissingQueryError(
+                    msg=f"Required URL query parameters {', '.join(sorted(missing_keys))} missing",
+                )
         return connection_string
 
     class Config:
