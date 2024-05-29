@@ -104,9 +104,9 @@ def write_results_to_disk(path: str, package_manifests: List[dict]) -> None:
 if __name__ == "__main__":
     pwd = os.path.abspath(os.getcwd())  # noqa: PTH100, PTH109
     root = os.path.join(  # noqa: PTH118
-        os.path.dirname(os.path.abspath(__file__)),
+        os.path.dirname(os.path.abspath(__file__)),  # noqa: PTH100, PTH120
         "..",
-        "..",  # noqa: PTH100, PTH120
+        "..",
     )
     try:
         os.chdir(root)

@@ -173,12 +173,12 @@ def test_load_config_variables_file(
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(  # noqa: PTH103
-        os.path.join(base_path, "uncommitted"),
-        exist_ok=True,  # noqa: PTH118
+        os.path.join(base_path, "uncommitted"),  # noqa: PTH118
+        exist_ok=True,
     )
     with open(
-        os.path.join(base_path, "uncommitted", "dev_variables.yml"),
-        "w",  # noqa: PTH118
+        os.path.join(base_path, "uncommitted", "dev_variables.yml"),  # noqa: PTH118
+        "w",
     ) as outfile:
         yaml.dump({"env": "dev"}, outfile)
     with open(

@@ -15,8 +15,8 @@ class ExpectationSuiteAnonymizer(BaseAnonymizer):
 
     def anonymize(
         self,
-        obj: Optional["ExpectationSuite"] = None,
-        **kwargs,  # noqa: F821
+        obj: Optional["ExpectationSuite"] = None,  # noqa: F821
+        **kwargs,
     ) -> dict:
         # Exit early if null
         expectation_suite = obj

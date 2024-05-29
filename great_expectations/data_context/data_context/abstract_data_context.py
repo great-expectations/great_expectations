@@ -5479,8 +5479,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
 
         os.makedirs(  # noqa: PTH103
-            os.path.dirname(config_variables_filepath),
-            exist_ok=True,  # noqa: PTH120
+            os.path.dirname(config_variables_filepath),  # noqa: PTH120
+            exist_ok=True,
         )
         if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
             logger.info(
