@@ -8,7 +8,7 @@ connecting_to_a_datasource = [
     IntegrationTestFixture(
         name="create_a_datasource_postgres",
         user_flow_script="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_source/postgres.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_context_dir="docs/docusaurus/docs/components/_testing/create_datasource/great_expectations/",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
         util_script="tests/test_utils.py",
         other_files=(
