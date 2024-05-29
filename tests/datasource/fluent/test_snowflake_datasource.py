@@ -34,7 +34,12 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
             id="connection_string str",
         ),
         param(
-            {"connection_string": "${MY_CONN_STR}"}, id="connection_string ConfigStr"
+            {"connection_string": "${MY_CONN_STR}"},
+            id="connection_string ConfigStr missing query params",
+        ),
+        param(
+            {"connection_string": "${MY_CONN_STR}?database=my_db&schema=my_schema"},
+            id="connection_string ConfigStr with required query params",
         ),
         param(
             {
@@ -110,6 +115,23 @@ def test_valid_config(
             id="missing database + schema",
         ),
         pytest.param(
+            "snowflake://${my_user}:${password}@my_account?numpy=True",
+            [
+                {
+                    "ctx": {"msg": "missing database, schema"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="ConfigStr missing database + schema",
+        ),
+        pytest.param(
             "snowflake://my_user:password@my_account?database=my_db",
             [
                 {
@@ -127,6 +149,23 @@ def test_valid_config(
             id="missing schema",
         ),
         pytest.param(
+            "snowflake://${my_user}:${password}@my_account?database=my_db",
+            [
+                {
+                    "ctx": {"msg": "missing schema"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="ConfigStr missing schema",
+        ),
+        pytest.param(
             "snowflake://my_user:password@my_account?schema=my_schema",
             [
                 {
@@ -142,6 +181,23 @@ def test_valid_config(
                 },
             ],
             id="missing database",
+        ),
+        pytest.param(
+            "snowflake://my_user:${password}@my_account?schema=my_schema",
+            [
+                {
+                    "ctx": {"msg": "missing database"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="ConfigStr missing database",
         ),
     ],
 )

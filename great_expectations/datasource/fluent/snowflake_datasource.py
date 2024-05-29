@@ -229,22 +229,32 @@ class SnowflakeDatasource(SQLDatasource):
         If connection_string is a SnowflakeDsn,
         check for required query parameters according to `REQUIRED_QUERY_PARAMS`.
         """
-        if isinstance(connection_string, SnowflakeDsn):
-            missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
+        if not isinstance(connection_string, (SnowflakeDsn, ConfigStr)):
+            return connection_string
 
-            if connection_string.query:
-                query_params: dict[str, list[str]] = urllib.parse.parse_qs(
-                    connection_string.query
+        missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
+        if isinstance(connection_string, ConfigStr):
+            query_str = connection_string.template_str.partition("?")[2]
+            # best effort: query could be part of the config substitution. Have to check this when adding assets.
+            if not query_str:
+                LOGGER.info(
+                    f"Unable to validate query parameters for {connection_string}"
                 )
+                return connection_string
+        else:
+            query_str = connection_string.query
 
-                for key in REQUIRED_QUERY_PARAMS:
-                    if key in query_params:
-                        missing_keys.remove(key)
+        if query_str:
+            query_params: dict[str, list[str]] = urllib.parse.parse_qs(query_str)
 
-            if missing_keys:
-                raise _UrlMissingQueryError(
-                    msg=f"missing {', '.join(sorted(missing_keys))}",
-                )
+            for key in REQUIRED_QUERY_PARAMS:
+                if key in query_params:
+                    missing_keys.remove(key)
+
+        if missing_keys:
+            raise _UrlMissingQueryError(
+                msg=f"missing {', '.join(sorted(missing_keys))}",
+            )
         return connection_string
 
     class Config:
