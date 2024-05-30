@@ -31,11 +31,17 @@ from great_expectations.datasource.fluent.sql_datasource import (
     FluentBaseModel,
     SQLDatasource,
     SQLDatasourceError,
+    TableAsset,
 )
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
     from great_expectations.compatibility.pydantic.networks import Parts
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+        Sorter,
+        SortersDefinition,
+    )
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
@@ -373,3 +379,36 @@ class SnowflakeDatasource(SQLDatasource):
         connect_args.update(kwargs)
         url = URL(**connect_args)
         return sa.create_engine(url)
+
+    @public_api
+    @override
+    def add_table_asset(  # noqa: PLR0913
+        self,
+        name: str,
+        table_name: str = "",
+        schema_name: Optional[str] = None,  # TODO: remove this as an arg
+        order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
+    ) -> TableAsset:
+        """Adds a table asset to this datasource.
+
+        Args:
+            name: The name of this table asset.
+            table_name: The table where the data resides.
+            schema_name: The schema that holds the table. Will use the datasource schema if not provided.
+            order_by: A list of Sorters or Sorter strings.
+            batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
+
+        Returns:
+            The table asset that is added to the datasource.
+            The type of this object will match the necessary type for this datasource.
+        """
+        schema_name = schema_name or self.schema_
+        # TODO: ensure schema is set, even if using `ConfigStr`
+        return super().add_table_asset(
+            name=name,
+            table_name=table_name,
+            schema_name=schema_name,
+            order_by=order_by,
+            batch_metadata=batch_metadata,
+        )
