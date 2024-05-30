@@ -494,10 +494,12 @@
                 },
                 "database": {
                     "title": "Database",
+                    "description": "`database` that the Datasource is mapped to.",
                     "type": "string"
                 },
                 "schema": {
                     "title": "Schema",
+                    "description": "`schema` that the Datasource is mapped to.",
                     "type": "string"
                 },
                 "warehouse": {

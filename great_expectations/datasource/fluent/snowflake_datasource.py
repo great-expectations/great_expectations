@@ -113,9 +113,12 @@ class ConnectionDetails(FluentBaseModel):
     account: str
     user: str
     password: Union[ConfigStr, str]
-    database: str
+    database: str = pydantic.Field(
+        ...,
+        description="`database` that the Datasource is mapped to.",
+    )
     schema_: str = pydantic.Field(
-        ..., alias="schema"
+        ..., alias="schema", description="`schema` that the Datasource is mapped to."
     )  # schema is a reserved attr in BaseModel
     warehouse: Optional[str] = None
     role: Optional[str] = None
