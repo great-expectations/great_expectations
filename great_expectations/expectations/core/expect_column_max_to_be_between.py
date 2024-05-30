@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
-    COLUMN_FIELD_DESCRIPTION,
+    COLUMN_DESCRIPTION,
     render_suite_parameter_string,
 )
 from great_expectations.render import (
@@ -74,7 +74,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            {COLUMN_FIELD_DESCRIPTION}
+            {COLUMN_DESCRIPTION}
         min_value (comparable type or None): \
             {MAX_VALUE_DESCRIPTION}
         max_value (comparable type or None): \

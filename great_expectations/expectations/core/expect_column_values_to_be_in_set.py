@@ -7,7 +7,7 @@ from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
-    COLUMN_FIELD_DESCRIPTION,
+    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
 )
 from great_expectations.render import (
@@ -64,7 +64,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_FIELD_DESCRIPTION}
+            {COLUMN_DESCRIPTION}
         value_set (set-like): \
             {VALUE_SET_ARG}
 
