@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.expectations.expectation import (
+    MOSTLY_DESCRIPTION,
     MulticolumnMapExpectation,
     render_suite_parameter_string,
 )
@@ -27,9 +28,17 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the values for each record to be unique across the columns listed. "
+    "Note that records can be duplicated."
+)
+COLUMN_LIST_DESCRIPTION = "The column names to evaluate."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Cardinality"]
+
 
 class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
-    """Expect the values for each record to be unique across the columns listed. Note that records can be duplicated.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_select_column_values_to_be_unique_within_record is a \
     [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
@@ -39,14 +48,14 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     If the percentage is high enough, the Expectation considers that data valid.
 
     Args:
-        column_list (tuple or list): The column names to evaluate
+        column_list (tuple or list): {COLUMN_LIST_DESCRIPTION}
 
     Other Parameters:
         ignore_row_if (str): \
             "all_values_are_missing", "any_value_is_missing", "never" \
             If specified, sets the condition on which a given row is to be ignored. Default "never".
         mostly (None or a float between 0 and 1): \
-            Successful if at least `mostly` fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -63,12 +72,12 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
-    Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+    Supported Data Sources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
-    Data Quality Category:
-        Cardinality
+    Data Quality Issues:
+        {DATA_QUALITY_ISSUES[0]}
 
     For example:
     ::
@@ -93,13 +102,13 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -108,10 +117,10 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -120,31 +129,31 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
                     "partial_unexpected_list": [
-                        {
+                        {{
                             "test": 1,
                             "test2": 1,
                             "test3": 2
-                        }
+                        }}
                     ],
                     "missing_count": 0,
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     column_list: Union[tuple, list]
