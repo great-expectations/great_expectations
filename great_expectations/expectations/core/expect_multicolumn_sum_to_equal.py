@@ -25,7 +25,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-EXPECTATION_SHORT_DESCRIPTION = "Expect that the sum of row values in a specified column list is the same for each row, and equal to a specified sum total."
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect that the sum of row values in a specified column list "
+    "is the same for each row, and equal to a specified sum total."
+)
 COLUMN_LIST_DESCRIPTION = "Set of columns to be checked"
 SUM_TOTAL_DESCRIPTION = "Expected sum of columns"
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
