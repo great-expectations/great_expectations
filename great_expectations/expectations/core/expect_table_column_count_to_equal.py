@@ -26,9 +26,14 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the number of columns in a table to equal a value."
+VALUE_DESCRIPTION = "The expected number of columns."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Schema"]
+
 
 class ExpectTableColumnCountToEqual(BatchExpectation):
-    """Expect the number of columns in a table to equal a value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_table_column_count_to_equal is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
@@ -37,8 +42,7 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
     They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
 
     Args:
-        value (int): \
-            The expected number of columns.
+        value (int): {VALUE_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -59,12 +63,12 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
     See Also:
         [expect_table_column_count_to_be_between](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between)
 
-    Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+    Supported Data Sources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
-    Data Quality Category:
-        Schema
+    Data Quality Issues:
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -80,18 +84,18 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true,
-                  "result": {
+                  "result": {{
                     "observed_value": 2
-                  }
-                }
+                  }}
+                }}
 
         Failing Case:
             Input:
@@ -100,18 +104,18 @@ class ExpectTableColumnCountToEqual(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false,
-                  "result": {
+                  "result": {{
                     "observed_value": 2
-                  }
-                }
+                  }}
+                }}
     """  # noqa: E501
 
     value: Union[int, SuiteParameterDict]
