@@ -3,7 +3,7 @@ To run this test locally, run:
 1. Activate docker.
 2. From the repo root dir, activate the postgresql database docker container:
 
-pytest  --postgresql --docs-tests -k "create_a_datasource_postgres" tests/integration/test_script_runner.py
+pytest  --postgresql --docs-tests -k "create_a_data_asset_postgres" tests/integration/test_script_runner.py
 """
 
 # This section is setup for the environment used in the example script.
@@ -17,10 +17,12 @@ load_data_into_test_database(
 )
 
 # The example starts here
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py full code">
 import great_expectations as gx
 
 context = gx.get_context()
 
+# Set up: Create a Data Source
 datasource_name = "my_new_datasource"
 my_connection_string = "${POSTGRESQL_CONNECTION_STRING}"
 
@@ -30,20 +32,31 @@ data_source = context.data_sources.add_postgres(
 
 print(context.get_datasource(datasource_name))
 
+# Alternatively, fetch a Data Source from the Data Context.
+data_source = context.get_datasource(datasource_name)
+
+# Example of creating a Table Asset
+# highlight-start
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py table asset">
 asset_name = "MY_TABLE_ASSET"
 database_table_name = "postgres_taxi_data"
 table_data_asset = data_source.add_table_asset(
     table_name=database_table_name, name=asset_name
 )
+# </snippet>
+# highlight-end
 
+# Example of creating a Query Asset
+# highlight-start
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py query asset">
 asset_name = "MY_QUERY_ASSET"
 asset_query = "SELECT * from postgres_taxi_data"
 query_data_asset = data_source.add_query_asset(query=asset_query, name=asset_name)
+# </snippet>
+# highlight-end
 
-bd_name = "FULL_TABLE"
-batch_definition = table_data_asset.add_batch_definition_whole_table(name=bd_name)
-batch_definition = query_data_asset.add_batch_definition_whole_table(name=bd_name)
-
-
-batch = batch_definition.get_batch()
-batch.head()
+# Verify that the Data Assets were created
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py verify asset">
+print(data_source.assets)
+# </snippet>
+# </snippet>

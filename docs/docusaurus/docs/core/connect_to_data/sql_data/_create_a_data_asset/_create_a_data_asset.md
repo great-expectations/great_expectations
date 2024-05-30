@@ -45,7 +45,8 @@ Data Assets are collections of records within a Data Source.  With SQL Data Sour
 
 <TabItem value="sample_code" label="Sample code">
 
-
+```python title="Full sample code" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py full code"
+```
 
 </TabItem>
 

@@ -4,8 +4,5 @@ A Query Data Asset consists of the records returned by a SQL query.  It takes tw
 
 Replace the values of `asset_name` and `asset_query` in the following code, then execute it to add a Query Data Asset to your Data Source:
 
-```python title="Python"
-asset_name = "MY QUERY ASSET"
-asset_query = "SELECT * from postgres_taxi_data"
-data_source.add_query_asset(query=asset_query, name=asset_name)
+```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py query asset"
 ```
