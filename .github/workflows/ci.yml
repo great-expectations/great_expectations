@@ -508,7 +508,7 @@ jobs:
   numpy-2:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
         uses: actions/checkout@v4
