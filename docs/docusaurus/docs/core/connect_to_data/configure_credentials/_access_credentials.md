@@ -6,7 +6,7 @@ Securely stored credentials are accessed via string substitution.  You can refer
 connection_string="postgresql+psycopg2://${MY_POSTGRES_USERNAME}:${MY_POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}",
 ```
 
-Or you could reference a configured variable that contains the full connection string by providing a python string that contains just a reference to that variable:
+Or you could reference a configured variable that contains the full connection string by providing a Python string that contains just a reference to that variable:
 
 ```python title="Python"
 connection_string="${POSTGRES_CONNECTION_STRING}"

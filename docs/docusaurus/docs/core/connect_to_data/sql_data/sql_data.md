@@ -9,11 +9,12 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
 import ConfigureCredentials from '../configure_credentials/_configure_credentials.md';
+import SecretsManagers from '../configure_credentials/_secrets_managers.md'
 import CreateSqlDataSource from './_create_a_data_source/_create_a_data_source.md';
 import CreateAsset from './_create_a_data_asset/_create_a_data_asset.md';
 import CreateBatchDefinition from './_create_a_batch_definition/_create_a_batch_definition.md'
 
-To connect to your SQL data, you first create a Data Source telling GX where your database resides and how to connect to it.  You configure Data Assets for your Data Source to tell GX which sets of records you want to be able to access from your Data Source.  Finally, Batch Definitions allow you to request all the records retrieved from a Data Asset or further partition the returned records based on the contents of a date and time field.
+To connect to your SQL data, you first create a Data Source which tells GX where your database resides and how to connect to it.  You then configure Data Assets for your Data Source to tell GX which sets of records you want to be able to access from your Data Source.  Finally, you will define Batch Definitions which allow you to request all the records retrieved from a Data Asset or further partition the returned records based on the contents of a date and time field.
 
 GX supports the following SQL dialects:
 
@@ -28,6 +29,10 @@ All other SQL dialects are handled through the python module `SQLAlchemy`.  You 
 ## Configure credentials
 
 <ConfigureCredentials/>
+
+## Reference a Secrets Manager
+
+<SecretsManagers/>
 
 ## Create a SQL Data Source
 

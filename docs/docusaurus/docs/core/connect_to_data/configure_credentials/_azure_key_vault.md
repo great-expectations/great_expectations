@@ -1,28 +1,39 @@
-Configure your Great Expectations project to substitute variables from the Azure Key Vault. Secrets store substitution uses the configurations from your ``config_variables.yml`` file after all other types of substitution are applied with environment variables.
+import GxData from '../../_core_components/_data.jsx'
+import PreReqFileDataContext from '../../_core_components/prerequisites/_file_data_context.md'
 
-Secrets store substitution uses keywords and retrieves secrets from the secrets store for values matching the following regex ``^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net``. If the values you provide don't match the keywords, the values aren't substituted.
+### Prerequisites
 
-1. Run the following code to install the ``great_expectations`` package with the ``azure_secrets`` requirement:
+- An [Azure Key Vault instance with configured secrets](https://docs.microsoft.com/en-us/azure/key-vault/general/overview).
+- The ability to install Python packages with `pip`.
+- <PreReqFileDataContext/>.
 
-    ```bash
-    pip install 'great_expectations[azure_secrets]'
-    ```
+### Procedure
 
-2. Provide the name of the secret you want to substitute in Azure Key Vault. For example, ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret``. 
+1. Set up Azure Key Vault support.
 
-    The latest version of the secret is returned by default.
+   To use Azure Key Vault with {GxData.product_name} you will first need to install the `great_expectations` Python package with the `azure_secrets` requirement.  To do this, run the following command:
 
-3. Optional. To get a specific version of the secret, specify its version id (32 lowercase alphanumeric characters). For example, ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab``.
+   ```bash title="Terminal"
+   pip install 'great_expectations[azure_secrets]'
+   ```
 
-4. Optional. To retrieve a specific secret value for a JSON string, use ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret|key`` or ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab|key``.
+2. Reference Azure Key Vault variables in `config_variables.yml`.
 
-5. Save your access credentials or the database connection string to ``great_expectations/uncommitted/config_variables.yml``. For example:
+   By default, `config_variables.yml` is located at: 'great_expectations/uncomitted/config_variables.yml' in your File Data Context.
 
-    ```yaml
-    # We can configure a single connection string
+   Values in `config_variables.yml` that match the regex `^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net` will be substituted with corresponding values from Azure Key Vault.  However, if the keywords in the matching regex do not correspond to keywords in Azure Key Vault no substitution will occur.
+
+   You can reference other stored credentials within the regex by wrapping their corresponding variable in `${` and `}`.  When multiple references are present in a value, the secrets manager substitution takes palce after all other substitutions have occurred.
+
+   An entire connection string can be referenced from the secrets manager:
+
+   ```yaml title="config_variables.yml"
     my_abs_creds: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|connection_string
+   ```
 
-    # Or each component of the connection string separately
+   Or each component of the connection string can be referenced separately:
+   
+   ```yaml title="config_variables.yml"
     drivername: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
     host: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
     port: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|port
@@ -30,17 +41,22 @@ Secrets store substitution uses keywords and retrieves secrets from the secrets 
     password: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|password
     database: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|database
     ```
+   
+3. Optional. Reference versioned secrets.
 
-6. Run the following code to use the `connection_string` parameter values when you add a `datasource` to a Data Context:
+   Unless otherwise specified, the latest version of the secret is returned by default. To get a specific version of the secret you want to retrieve, specify its version id (32 alphanumeric characters). For example:
 
-    ```python 
-    # We can use a single connection string
-    pg_datasource = context.data_sources.add_or_update_sql(
-        name="my_postgres_db", connection_string="${my_azure_creds}"
-    )
+   ```yaml title="config_variables.yml"
+   versioned_secret: secret|https://${VAULT_NAME}.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab
+   ```
 
-    # Or each component of the connection string separately
-    pg_datasource = context.data_sources.add_or_update_sql(
-        name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
-    )
-    ```
+4. Optional. Retrieve specific secrets for a JSON string.
+ 
+   To retrieve a specific secret for a JSON string, include the JSON key after a pipe character `|` at the end of the secrets regex.  For example:
+
+   ```yaml title="config_variables.yml"
+   json_secret: secret|https://${VAULT_NAME}.vault.azure.net/secrets/my-secret|<KEY>
+   versioned_json_secret: secret|https://${VAULT_NAME}.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab|<KEY>
+   ``` 
+
+

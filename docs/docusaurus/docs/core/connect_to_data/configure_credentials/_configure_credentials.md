@@ -5,9 +5,6 @@ import TabItem from '@theme/TabItem';
 import ConnectionString from './_connection_string.md';
 import EnvironmentVariables from './_environment_variables.md';
 import ConfigYml from './_config_yml.md';
-import AwsSecretsManager from './_aws_secrets_manager.md';
-import GcpSecretManager from './_gcp_secret_manager.md';
-import AzureKeyVault from './_azure_key_vault.md';
 import AccessCredentials from './_access_credentials.md'
 
 
@@ -32,7 +29,7 @@ To connect GX to your SQL data, you will first need your connection string and c
 
    GX supports the following methods of securely storing credentials.  Chose one to implement for your connection string:
 
-   <Tabs queryString="storage_type" groupId="storage_type" defaultValue='environment_variables' values={[{label: 'Environment Variables', value:'environment_variables'}, {label: 'config.yml', value:'config_yml'}, {label: 'Secret Manager', value:'secret_manager'}]}>
+   <Tabs queryString="storage_type" groupId="storage_type" defaultValue='environment_variables' values={[{label: 'Environment Variables', value:'environment_variables'}, {label: 'config.yml', value:'config_yml'}]}>
 
    <TabItem value="environment_variables">
       <EnvironmentVariables/>
@@ -40,28 +37,6 @@ To connect GX to your SQL data, you will first need your connection string and c
 
    <TabItem value="config_yml">
       <ConfigYml/>
-   </TabItem>
-
-   <TabItem value="secret_manager">
-
-      {GxData.product_name} supports the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers.
-
-      <Tabs queryString="manager_type" groupId="manager_type" defaultValue='aws' values={[{label: 'AWS Secrets Manager', value:'aws'}, {label: 'GCP Secret Manager', value:'gcp'}, {label: 'Azure Key Vault', value:'azure'}]}>
-      
-         <TabItem value="aws">
-            <AwsSecretsManager/>
-         </TabItem>
-
-         <TabItem value="gcp">
-            <GcpSecretManager/>
-         </TabItem>
-
-         <TabItem value="azure">
-            <AzureKeyVault/>
-         </TabItem>
-
-      </Tabs>
-
    </TabItem>
 
    </Tabs>
