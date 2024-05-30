@@ -73,11 +73,11 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
-    Supported Data Sources:
+    Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
-    Data Quality Issues:
+    Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
