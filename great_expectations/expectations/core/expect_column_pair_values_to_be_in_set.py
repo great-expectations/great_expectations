@@ -3,12 +3,22 @@ from __future__ import annotations
 from typing import Any, ClassVar, List, Literal, Tuple
 
 from great_expectations.expectations.expectation import (
+    COLUMN_A_DESCRIPTION,
+    COLUMN_B_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
     ColumnPairMapExpectation,
 )
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the paired values from columns A and B to belong to a set of valid pairs."
+)
+VALUE_PAIRS_SET_DESCRIPTION = "All the valid pairs to be matched."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Sets"]
+
 
 class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
-    """Expect the paired values from columns A and B to belong to a set of valid pairs.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_pair_values_to_be_in_set is a \
     [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
@@ -18,16 +28,16 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
     If the percentage is high enough, the Expectation considers that data valid.
 
     Args:
-        column_A (str): The first column name
-        column_B (str): The second column name
-        value_pairs_set (list of tuples): All the valid pairs to be matched
+        column_A (str): {COLUMN_A_DESCRIPTION}
+        column_B (str): {COLUMN_B_DESCRIPTION}
+        value_pairs_set (list of tuples): {VALUE_PAIRS_SET_DESCRIPTION}
 
     Other Parameters:
         ignore_row_if (str): \
             "both_values_are_missing", "either_value_is_missing", "neither" \
             If specified, sets the condition on which a given row is to be ignored. Default "neither".
         mostly (None or a float between 0 and 1): \
-            Successful if at least `mostly` fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -44,12 +54,12 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
 
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
-    Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+    Supported Data Sources:
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Sets
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -68,13 +78,13 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
@@ -88,10 +98,10 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -102,13 +112,13 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 2,
                     "unexpected_percent": 66.66666666666666,
@@ -126,10 +136,10 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 66.66666666666666,
                     "unexpected_percent_nonmissing": 66.66666666666666
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     value_pairs_set: List[Tuple[Any, Any]]
