@@ -514,21 +514,7 @@ def type_schema(  # noqa: C901, PLR0912 - too complex
     from great_expectations.datasource.fluent.sources import (
         _iter_all_registered_types,
     )
-    from great_expectations.expectations import (
-        ExpectColumnMaxToBeBetween,
-        ExpectColumnMeanToBeBetween,
-        ExpectColumnMedianToBeBetween,
-        ExpectColumnMinToBeBetween,
-        ExpectColumnValuesToBeInSet,
-        ExpectColumnValuesToBeInTypeList,
-        ExpectColumnValuesToBeNull,
-        ExpectColumnValuesToBeOfType,
-        ExpectColumnValuesToBeUnique,
-        ExpectColumnValuesToNotBeNull,
-        ExpectTableColumnsToMatchOrderedList,
-        ExpectTableRowCountToBeBetween,
-        ExpectTableRowCountToEqual,
-    )
+    from great_expectations.expectations import core
 
     data_source_schema_dir_root: Final[pathlib.Path] = (
         GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
@@ -596,19 +582,30 @@ def type_schema(  # noqa: C901, PLR0912 - too complex
 
     # handle expectations
     supported_expectations = [
-        ExpectColumnValuesToBeNull,
-        ExpectColumnValuesToNotBeNull,
-        ExpectColumnValuesToBeUnique,
-        ExpectColumnValuesToBeInSet,
-        ExpectColumnMaxToBeBetween,
-        ExpectColumnMeanToBeBetween,
-        ExpectColumnMedianToBeBetween,
-        ExpectColumnMinToBeBetween,
-        ExpectColumnValuesToBeInTypeList,
-        ExpectColumnValuesToBeOfType,
-        ExpectTableColumnsToMatchOrderedList,
-        ExpectTableRowCountToBeBetween,
-        ExpectTableRowCountToEqual,
+        core.ExpectColumnValuesToBeNull,
+        core.ExpectColumnValuesToNotBeNull,
+        core.ExpectColumnValuesToBeUnique,
+        core.ExpectColumnValuesToBeInSet,
+        core.ExpectColumnMaxToBeBetween,
+        core.ExpectColumnMeanToBeBetween,
+        core.ExpectColumnMedianToBeBetween,
+        core.ExpectColumnMinToBeBetween,
+        core.ExpectColumnValuesToBeInTypeList,
+        core.ExpectColumnValuesToBeOfType,
+        core.ExpectTableColumnsToMatchOrderedList,
+        core.ExpectTableRowCountToBeBetween,
+        core.ExpectTableRowCountToEqual,
+        core.ExpectColumnPairValuesToBeEqual,
+        core.ExpectMulticolumnSumToEqual,
+        core.ExpectCompoundColumnsToBeUnique,
+        core.ExpectSelectColumnValuesToBeUniqueWithinRecord,
+        core.ExpectColumnPairValuesAToBeGreaterThanB,
+        core.ExpectColumnToExist,
+        core.ExpectTableColumnCountToEqual,
+        core.ExpectTableColumnsToMatchSet,
+        core.ExpectTableColumnCountToBeBetween,
+        core.ExpectTableRowCountToEqualOtherTable,
+        core.ExpectColumnPairValuesToBeInSet,
     ]
     for x in supported_expectations:
         schema_path = expectation_dir.joinpath(f"{x.__name__}.json")
