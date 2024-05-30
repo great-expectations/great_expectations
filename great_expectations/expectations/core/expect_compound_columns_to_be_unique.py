@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Union
 
 from great_expectations.expectations.expectation import (
+    MOSTLY_DESCRIPTION,
     MulticolumnMapExpectation,
     render_suite_parameter_string,
-    MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
