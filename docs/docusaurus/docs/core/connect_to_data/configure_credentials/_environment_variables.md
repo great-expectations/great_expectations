@@ -4,9 +4,9 @@ You can set environment variables by replacing the values in `<>` with your info
 
 You can export individual credentials or an entire connection string.  For example:
 
-```bash title="Terminal" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
-export MY_POSTGRES_PASSWORD=<PASSWORD>
+```bash title="Terminal"
 export MY_POSTGRES_USERNAME=<USERNAME>
+export MY_POSTGRES_PASSWORD=<PASSWORD>
 ```
 
 or:
@@ -15,14 +15,16 @@ or:
 export POSTGRES_CONNECTION_STRING=postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 ```
 
-These can then be loaded into the `connection_string` parameter when you are adding a Data Source to the Data Context by wrapping the variable name in `${` and `}`.  Using individual credentials would look like:
+You can also reference your stored credentials within a stored connection string by wrapping their corresponding variable in `${` and `}`. For example:
 
-```python title="Python"
-connection_string="postgresql+psycopg2://${MY_POSTGRES_USERNAME}:${MY_POSTGRES_PASSWORD}@<HOST>:<PORT>/<DATABASE>",
+```bash title="Terminal"
+export MY_POSTGRES_USERNAME=<USERNAME>
+export MY_POSTGRES_PASSWORD=<PASSWORD>
+export POSTGRES_CONNECTION_STRING=postgresql+psycopg2://${MY_POSTGRES_USERNAME}:${MY_POSTGRES_PASSWORD}@<HOST>:<PORT>/<DATABASE>
 ```
 
-Or you could reference the full connection sting with:
+Because the dollar sign character `$` is used to indicate the start of a string substitution they should be escaped using a backslash `\` if they are part of your credentials. For example, if your password is `pa$$word` then in the previous examples you would use the command:
 
-```python title="Python"
-connection_string="${POSTGRES_CONNECTION_STRING}"
+```bash title="Terminal"
+export MY_POSTGRES_PASSWORD=pa\$\$word
 ```

@@ -9,12 +9,7 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
 import ConfigureCredentials from '../configure_credentials/_configure_credentials.md';
-import PostgreSqlDataSource from './_create_a_data_source/_postgres.md';
-import SqliteDataSource from './_create_a_data_source/_sqlite.md';
-import SnowflakeSqlDataSource from './_create_a_data_source/_snowflake.md';
-import BigQuerySqlDataSource from './_create_a_data_source/_big_query.md';
-import DatabricksSqlDataSource from './_create_a_data_source/_databricks.md';
-import OtherSqlDataSource from './_create_a_data_source/_other_sql.md';
+import CreateSqlDataSource from './_create_a_data_source/_create_a_data_source.md';
 import CreateAsset from './_create_a_data_asset/_create_a_data_asset.md';
 import CreateBatchDefinition from './_create_a_batch_definition/_create_a_batch_definition.md'
 
@@ -38,33 +33,7 @@ All other SQL dialects are handled through the python module `SQLAlchemy`.  You 
 
 Data Sources tell GX where your data is located and how to connect to it.  With SQL databases this is done through a connection string you will provide.
 
-<Tabs>
-
-<TabItem value="postgresql" label="PostgreSql">
-<PostgreSqlDataSource/>
-</TabItem>
-
-<TabItem value="sqlite" label="SQLite">
-<SqliteDataSource/>
-</TabItem>
-
-<TabItem value="snowflake" label="Snowflake">
-<SnowflakeSqlDataSource/>
-</TabItem>
-
-<TabItem value="databricks" label="Databricks SQL">
-<DatabricksSqlDataSource/>
-</TabItem>
-
-<TabItem value="bigquery" label="BigQuery SQL">
-<BigQuerySqlDataSource/>
-</TabItem>
-
-<TabItem value="other_sql" label="Other SQL">
-<OtherSqlDataSource/>
-</TabItem>
-
-</Tabs>
+<CreateSqlDataSource/>
 
 ## Create a Data Asset
 

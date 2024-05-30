@@ -8,11 +8,21 @@ import ConfigYml from './_config_yml.md';
 import AwsSecretsManager from './_aws_secrets_manager.md';
 import GcpSecretManager from './_gcp_secret_manager.md';
 import AzureKeyVault from './_azure_key_vault.md';
+import AccessCredentials from './_access_credentials.md'
 
 
 
+To connect GX to your SQL data, you will first need your connection string and corresponding credentials. Because your connection string and credentials provide access to your data they should be stored securely outside of version control.  {GxData.product_name} allows you to securely store credentials and connection strings as environment variables or in an uncommitted config file.  These variables are then accessed through string substitution in your version controlled code.
 
-To connect GX to your SQL data, you will first need your connection string and corresponding credentials. Because your connection string and credentials provide access to your data they should be stored securely outside of version control.  Follow this procedure to securely store your connection string and credentials.
+### Prerequisites
+
+- The ability to set environment variables or a File Data Context.
+
+{GxData.product_name} also supports referencing credentials that have been stored in the AWS Secrets Manager, Google Cloud Secret Manager, and Azure Key Vault secrets managers.  To set up {GxData.product_name} to access one of these secrets managers you will additionally require:
+
+- The ability to install Python modules with `pip`.
+
+### Procedure
 
 1. Determine your connection string format.
 
@@ -55,3 +65,7 @@ To connect GX to your SQL data, you will first need your connection string and c
    </TabItem>
 
    </Tabs>
+
+3. Access your credentials in Python strings.
+
+   <AccessCredentials/>

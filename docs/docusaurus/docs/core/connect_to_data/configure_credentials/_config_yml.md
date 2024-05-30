@@ -2,14 +2,29 @@ YAML files make variables more visible, are easier to edit, and allow for modula
 
 A File Data Context is required before you can configure credentials in a YAML file.  By default, the credentials file in a File Data Context is located at `/great_expectations/uncommitted/config_variables.yml`
 
-1. Save your access credentials or the database connection string to ``great_expectations/uncommitted/config_variables.yml``. For example:
+Save your access credentials or the database connection string to ``great_expectations/uncommitted/config_variables.yml``. For example:
 
-    ```yaml title="YAML" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
-    ```
-    To store values that include the dollar sign character ``$``, escape them using a backslash ``\`` to avoid substitution issues. For example, in the previous example for Postgres credentials you'd set ``password: pa\$sword`` if your password is ``pa$sword``. You can also have multiple substitutions for the same item. For example ``database_string: ${USER}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}``.
+```bash title="config_variables.yml"
+MY_POSTGRES_USERNAME: <USERNAME>
+MY_POSTGRES_PASSWORD: <PASSWORD>
+```
 
+or:
 
-2. Run the following code to use the `connection_string` parameter values when you add a `datasource` to a Data Context:
+```bash title="config_variables.yml"
+POSTGRES_CONNECTION_STRING: postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
+```
 
-    ```python title="Python" name="docs/docusaurus/docs/oss/guides/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml"
-    ```
+You can also reference your stored credentials within a stored connection string by wrapping their corresponding variable in `${` and `}`. For example:
+
+```bash title="config_variables.yml"
+MY_POSTGRES_USERNAME: <USERNAME>
+MY_POSTGRES_PASSWORD: <PASSWORD>
+POSTGRES_CONNECTION_STRING: postgresql+psycopg2://${MY_POSTGRES_USERNAME}:${MY_POSTGRES_PASSWORD}@<HOST>:<PORT>/<DATABASE>
+```
+
+Because the dollar sign character `$` is used to indicate the start of a string substitution they should be escaped using a backslash `\` if they are part of your credentials. For example, if your password is `pa$$word` then in the previous examples you would use the command:
+
+```bash title="Terminal"
+export MY_POSTGRES_PASSWORD=pa\$\$word
+```
