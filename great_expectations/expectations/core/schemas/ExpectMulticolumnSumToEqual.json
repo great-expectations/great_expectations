@@ -89,23 +89,6 @@
             "title": "Sum Total",
             "type": "number"
         },
-        "library_metadata": {
-            "title": "Library Metadata",
-            "default": {
-                "maturity": "production",
-                "tags": [
-                    "core expectation",
-                    "multi-column expectation"
-                ],
-                "contributors": [
-                    "@great_expectations"
-                ],
-                "requirements": [],
-                "has_full_test_suite": true,
-                "manually_reviewed_code": true
-            },
-            "type": "object"
-        },
         "metadata": {
             "type": "object",
             "properties": {
@@ -114,6 +97,43 @@
                     "type": "string",
                     "const": "multicolumn",
                     "description": "Multicolumn Map"
+                },
+                "data_quality_issues": {
+                    "title": "Data Quality Issues",
+                    "type": "array",
+                    "const": [
+                        "Data Integrity"
+                    ]
+                },
+                "library_metadata": {
+                    "title": "Library Metadata",
+                    "type": "object",
+                    "const": {
+                        "maturity": "production",
+                        "tags": [
+                            "core expectation",
+                            "multi-column expectation"
+                        ],
+                        "contributors": [
+                            "@great_expectations"
+                        ],
+                        "requirements": [],
+                        "has_full_test_suite": true,
+                        "manually_reviewed_code": true
+                    }
+                },
+                "short_description": {
+                    "title": "Short Description",
+                    "type": "string",
+                    "const": "Expect that the sum of row values in a specified column list is the same for each row, and equal to a specified sum total."
+                },
+                "supported_data_sources": {
+                    "title": "Supported Data Sources",
+                    "type": "array",
+                    "const": [
+                        "Snowflake",
+                        "PostgreSQL"
+                    ]
                 }
             }
         }

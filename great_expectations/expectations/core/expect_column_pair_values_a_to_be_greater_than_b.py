@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Optional, Type, Union
 
 from great_expectations.expectations.expectation import (
     COLUMN_A_DESCRIPTION,
@@ -164,7 +164,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     )
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": [
             "core expectation",
@@ -175,6 +175,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_pair_values.a_greater_than_b"
     success_keys = (
@@ -189,6 +190,37 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "column_B",
         "or_equal",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnPairValuesAToBeGreaterThanB]
+        ) -> None:
+            ColumnPairMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.expectations.expectation import (
     MOSTLY_DESCRIPTION,
@@ -159,7 +159,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     column_list: Union[tuple, list]
     ignore_row_if: str = "all_values_are_missing"
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": [
             "core expectation",
@@ -172,9 +172,41 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "select_column_values.unique.within_record"
     args_keys = ("column_list",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectSelectColumnValuesToBeUniqueWithinRecord]
+        ) -> None:
+            MulticolumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(

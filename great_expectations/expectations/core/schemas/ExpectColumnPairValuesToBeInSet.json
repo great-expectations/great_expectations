@@ -99,23 +99,6 @@
             ],
             "type": "string"
         },
-        "library_metadata": {
-            "title": "Library Metadata",
-            "default": {
-                "maturity": "production",
-                "tags": [
-                    "core expectation",
-                    "column pair map expectation"
-                ],
-                "contributors": [
-                    "@great_expectations"
-                ],
-                "requirements": [],
-                "has_full_test_suite": true,
-                "manually_reviewed_code": true
-            },
-            "type": "object"
-        },
         "metadata": {
             "type": "object",
             "properties": {
@@ -124,6 +107,43 @@
                     "type": "string",
                     "const": "column_pair",
                     "description": "Column Pair Map"
+                },
+                "data_quality_issues": {
+                    "title": "Data Quality Issues",
+                    "type": "array",
+                    "const": [
+                        "Sets"
+                    ]
+                },
+                "library_metadata": {
+                    "title": "Library Metadata",
+                    "type": "object",
+                    "const": {
+                        "maturity": "production",
+                        "tags": [
+                            "core expectation",
+                            "column pair map expectation"
+                        ],
+                        "contributors": [
+                            "@great_expectations"
+                        ],
+                        "requirements": [],
+                        "has_full_test_suite": true,
+                        "manually_reviewed_code": true
+                    }
+                },
+                "short_description": {
+                    "title": "Short Description",
+                    "type": "string",
+                    "const": "Expect the paired values from columns A and B to belong to a set of valid pairs."
+                },
+                "supported_data_sources": {
+                    "title": "Supported Data Sources",
+                    "type": "array",
+                    "const": [
+                        "Snowflake",
+                        "PostgreSQL"
+                    ]
                 }
             }
         }
