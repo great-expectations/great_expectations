@@ -123,7 +123,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
 
     value: Union[int, SuiteParameterDict] = pydantic.Field(description=VALUE_DESCRIPTION)
 
-    library_metadata: ClassVar[dict[str, Union[str, list, bool]]] = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
         "contributors": ["@great_expectations"],

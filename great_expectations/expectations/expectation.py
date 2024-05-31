@@ -322,6 +322,10 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
             schema["title"] = model._format_title(schema_title=schema.get("title", ""))
+            schema["properties"]["metadata"] = {
+                "type": "object",
+                "properties": {},
+            }
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
@@ -1515,16 +1519,16 @@ class BatchExpectation(Expectation, ABC):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[BatchExpectation]) -> None:
             Expectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Batch",
                     }
-                },
-            }
+                }
+            )
 
     @override
     def get_validation_dependencies(
@@ -1805,16 +1809,16 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ColumnAggregateExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Column Aggregate",
                     }
-                },
-            }
+                }
+            )
 
 
 class ColumnMapExpectation(BatchExpectation, ABC):
@@ -1859,16 +1863,16 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ColumnMapExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Column Map",
                     }
-                },
-            }
+                }
+            )
 
     @classmethod
     @override
@@ -2125,16 +2129,16 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ColumnPairMapExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Column Pair Map",
                     }
-                },
-            }
+                }
+            )
 
     @classmethod
     @override
@@ -2381,16 +2385,16 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[MulticolumnMapExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Multicolumn Map",
                     }
-                },
-            }
+                }
+            )
 
     @classmethod
     @override

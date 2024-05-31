@@ -181,7 +181,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     strict_min: bool = pydantic.Field(default=False, description=STRICT_MAX_DESCRIPTION)
     strict_max: bool = pydantic.Field(default=False, description=STRICT_MIN_DESCRIPTION)
 
-    library_metadata: ClassVar[dict[str, str | list | bool]] = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
@@ -206,9 +206,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnMaxToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "data_quality_issues": {
                         "title": "Data Quality Issues",
                         "type": "array",
@@ -229,8 +228,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                         "type": "array",
                         "const": SUPPORTED_DATASOURCES,
                     },
-                },
-            }
+                }
+            )
 
     @classmethod
     @override
