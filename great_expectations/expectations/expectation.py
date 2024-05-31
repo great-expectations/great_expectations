@@ -58,7 +58,7 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
 )
-from great_expectations.expectations.model_field_types import Mostly
+from great_expectations.expectations.model_field_types import Column, ColumnList, Mostly
 from great_expectations.expectations.registry import (
     get_metric_kwargs,
     register_expectation,
@@ -1798,7 +1798,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """  # noqa: E501
 
-    column: str = Field(description=COLUMN_DESCRIPTION)
+    column: Column = Field(description=COLUMN_DESCRIPTION)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1848,7 +1848,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column: str = Field(description=COLUMN_DESCRIPTION)
+    column: Column = Field(description=COLUMN_DESCRIPTION)
 
     catch_exceptions: bool = True
 
@@ -2112,8 +2112,8 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_A: str
-    column_B: str
+    column_A: Column
+    column_B: Column
 
     catch_exceptions: bool = True
 
@@ -2366,7 +2366,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_list: List[str]
+    column_list: ColumnList
 
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"

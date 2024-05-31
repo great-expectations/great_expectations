@@ -71,10 +71,12 @@
         },
         "column_A": {
             "title": "Column A",
+            "minLength": 1,
             "type": "string"
         },
         "column_B": {
             "title": "Column B",
+            "minLength": 1,
             "type": "string"
         },
         "or_equal": {

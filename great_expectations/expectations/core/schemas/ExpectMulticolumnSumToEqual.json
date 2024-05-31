@@ -71,9 +71,11 @@
         },
         "column_list": {
             "title": "Column List",
+            "minItems": 1,
             "type": "array",
             "items": {
-                "type": "string"
+                "type": "string",
+                "minLength": 1
             }
         },
         "ignore_row_if": {
