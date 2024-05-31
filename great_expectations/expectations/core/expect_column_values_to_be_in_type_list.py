@@ -193,7 +193,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         description=TYPE_LIST_DESCRIPTION
     )
 
-    library_metadata: ClassVar[dict[str, str | list | bool]] = {
+    library_metadata: ClassVar[dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],

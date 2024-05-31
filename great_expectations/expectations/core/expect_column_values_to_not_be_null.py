@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_function_types import (
@@ -153,7 +153,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    library_metadata: ClassVar[dict[str, str | list | bool]] = {
+    library_metadata: ClassVar[dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
