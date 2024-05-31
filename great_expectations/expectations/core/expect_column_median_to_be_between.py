@@ -168,7 +168,7 @@ class ExpectColumnMedianToBeBetween(ColumnAggregateExpectation):
     strict_min: bool = pydantic.Field(default=False, description=STRICT_MAX_DESCRIPTION)
     strict_max: bool = pydantic.Field(default=False, description=STRICT_MIN_DESCRIPTION)
 
-    library_metadata: ClassVar[Dict[str, str | list | bool]] = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
