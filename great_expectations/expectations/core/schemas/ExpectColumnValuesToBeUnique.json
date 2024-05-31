@@ -77,6 +77,7 @@
             "type": "object",
             "properties": {
                 "domain_type": {
+                    "title": "Domain Type",
                     "type": "string",
                     "const": "column",
                     "description": "Column Map"
