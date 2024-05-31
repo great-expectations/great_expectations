@@ -1515,10 +1515,15 @@ class BatchExpectation(Expectation, ABC):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[BatchExpectation]) -> None:
             Expectation.Config.schema_extra(schema, model)
-            schema["properties"]["domain_type"] = {
-                "type": "string",
-                "const": model.domain_type,
-                "description": "Batch",
+            schema["properties"]["metadata"] = {
+                "type": "object",
+                "properties": {
+                    "domain_type": {
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Batch",
+                    }
+                },
             }
 
     @override
@@ -1787,17 +1792,28 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
 
     column: str = Field(description=COLUMN_DESCRIPTION)
 
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
-    domain_type = MetricDomainTypes.COLUMN
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
 
     class Config:
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ColumnAggregateExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["domain_type"] = {
-                "type": "string",
-                "const": model.domain_type,
-                "description": "Column Aggregate",
+            schema["properties"]["metadata"] = {
+                "type": "object",
+                "properties": {
+                    "domain_type": {
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Column Aggregate",
+                    }
+                },
             }
 
 
@@ -1843,10 +1859,15 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ColumnMapExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["domain_type"] = {
-                "type": "string",
-                "const": model.domain_type,
-                "description": "Column Map",
+            schema["properties"]["metadata"] = {
+                "type": "object",
+                "properties": {
+                    "domain_type": {
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Column Map",
+                    }
+                },
             }
 
     @classmethod
@@ -2097,17 +2118,22 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         "row_condition",
         "condition_parser",
     )
-    domain_type = MetricDomainTypes.COLUMN_PAIR
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN_PAIR
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
 
     class Config:
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ColumnPairMapExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["domain_type"] = {
-                "type": "string",
-                "const": model.domain_type,
-                "description": "Column Pair Map",
+            schema["properties"]["metadata"] = {
+                "type": "object",
+                "properties": {
+                    "domain_type": {
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Column Pair Map",
+                    }
+                },
             }
 
     @classmethod
@@ -2348,17 +2374,22 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         "condition_parser",
         "ignore_row_if",
     )
-    domain_type = MetricDomainTypes.MULTICOLUMN
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.MULTICOLUMN
     success_keys = ("mostly",)
 
     class Config:
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[MulticolumnMapExpectation]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["domain_type"] = {
-                "type": "string",
-                "const": model.domain_type,
-                "description": "Multicolumn Map",
+            schema["properties"]["metadata"] = {
+                "type": "object",
+                "properties": {
+                    "domain_type": {
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Multicolumn Map",
+                    }
+                },
             }
 
     @classmethod
