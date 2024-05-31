@@ -117,11 +117,6 @@
             "default": false,
             "type": "boolean"
         },
-        "domain_type": {
-            "type": "string",
-            "const": "column",
-            "description": "Column Aggregate"
-        },
         "metadata": {
             "type": "object",
             "properties": {

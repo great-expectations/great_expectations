@@ -100,14 +100,14 @@
                 }
             ]
         },
-        "domain_type": {
-            "type": "string",
-            "const": "table",
-            "description": "Batch"
-        },
         "metadata": {
             "type": "object",
             "properties": {
+                "domain_type": {
+                    "type": "string",
+                    "const": "table",
+                    "description": "Batch"
+                },
                 "data_quality_issues": {
                     "title": "Data Quality Issues",
                     "type": "array",

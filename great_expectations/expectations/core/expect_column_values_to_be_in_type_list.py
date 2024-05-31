@@ -225,9 +225,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInTypeList]
         ) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "data_quality_issues": {
                         "title": "Data Quality Issues",
                         "type": "array",
@@ -248,8 +247,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         "type": "array",
                         "const": SUPPORTED_DATASOURCES,
                     },
-                },
-            }
+                }
+            )
 
     @classmethod
     @override

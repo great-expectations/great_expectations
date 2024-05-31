@@ -89,14 +89,14 @@
                 }
             ]
         },
-        "domain_type": {
-            "type": "string",
-            "const": "column",
-            "description": "Column Map"
-        },
         "metadata": {
             "type": "object",
             "properties": {
+                "domain_type": {
+                    "type": "string",
+                    "const": "column",
+                    "description": "Column Map"
+                },
                 "data_quality_issues": {
                     "title": "Data Quality Issues",
                     "type": "array",

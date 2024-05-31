@@ -242,9 +242,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeOfType]) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "data_quality_issues": {
                         "title": "Data Quality Issues",
                         "type": "array",
@@ -265,8 +264,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                         "type": "array",
                         "const": SUPPORTED_DATASOURCES,
                     },
-                },
-            }
+                }
+            )
 
     @override
     @classmethod

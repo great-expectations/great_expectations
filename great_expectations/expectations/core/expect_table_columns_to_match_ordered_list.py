@@ -175,9 +175,8 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
             schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchOrderedList]
         ) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "data_quality_issues": {
                         "title": "Data Quality Issues",
                         "type": "array",
@@ -198,8 +197,8 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
                         "type": "array",
                         "const": SUPPORTED_DATASOURCES,
                     },
-                },
-            }
+                }
+            )
 
     @classmethod
     def _prescriptive_template(

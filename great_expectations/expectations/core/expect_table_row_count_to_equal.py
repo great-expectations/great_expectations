@@ -141,9 +141,8 @@ class ExpectTableRowCountToEqual(BatchExpectation):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableRowCountToEqual]) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "data_quality_issues": {
                         "title": "Data Quality Issues",
                         "type": "array",
@@ -164,8 +163,8 @@ class ExpectTableRowCountToEqual(BatchExpectation):
                         "type": "array",
                         "const": SUPPORTED_DATASOURCES,
                     },
-                },
-            }
+                }
+            )
 
     @classmethod
     @override

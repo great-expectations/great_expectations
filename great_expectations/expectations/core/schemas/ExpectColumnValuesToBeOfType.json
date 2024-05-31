@@ -78,14 +78,14 @@
             "description": "\n    A string representing the data type that each column should have as entries.     Valid types are defined by the current backend implementation and are dynamically loaded.\n    ",
             "type": "string"
         },
-        "domain_type": {
-            "type": "string",
-            "const": "column",
-            "description": "Column Map"
-        },
         "metadata": {
             "type": "object",
             "properties": {
+                "domain_type": {
+                    "type": "string",
+                    "const": "column",
+                    "description": "Column Map"
+                },
                 "data_quality_issues": {
                     "title": "Data Quality Issues",
                     "type": "array",

@@ -117,14 +117,14 @@
             "default": false,
             "type": "boolean"
         },
-        "domain_type": {
-            "type": "string",
-            "const": "column",
-            "description": "Column Aggregate"
-        },
         "metadata": {
             "type": "object",
             "properties": {
+                "domain_type": {
+                    "type": "string",
+                    "const": "column",
+                    "description": "Column Aggregate"
+                },
                 "data_quality_issues": {
                     "title": "Data Quality Issues",
                     "type": "array",
