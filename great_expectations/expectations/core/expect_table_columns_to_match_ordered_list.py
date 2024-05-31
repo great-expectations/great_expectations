@@ -175,21 +175,30 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
             schema: Dict[str, Any], model: Type[ExpectTableColumnsToMatchOrderedList]
         ) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["data_quality_issues"] = {
-                "type": "array",
-                "const": DATA_QUALITY_ISSUES,
-            }
-            schema["properties"]["library_metadata"] = {
+            schema["properties"]["metadata"] = {
                 "type": "object",
-                "const": model._library_metadata,
-            }
-            schema["properties"]["short_description"] = {
-                "type": "string",
-                "const": EXPECTATION_SHORT_DESCRIPTION,
-            }
-            schema["properties"]["supported_data_sources"] = {
-                "type": "array",
-                "const": SUPPORTED_DATASOURCES,
+                "properties": {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATASOURCES,
+                    },
+                },
             }
 
     @classmethod
