@@ -58,6 +58,7 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
 )
+from great_expectations.expectations.model_field_types import Mostly
 from great_expectations.expectations.registry import (
     get_metric_kwargs,
     register_expectation,
@@ -1506,7 +1507,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: Required[float] = Field(default=1.0, ge=0.0, le=1.0)
+    mostly: Required[Mostly] = Field(default=Mostly(1.0), description=MOSTLY_DESCRIPTION)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",

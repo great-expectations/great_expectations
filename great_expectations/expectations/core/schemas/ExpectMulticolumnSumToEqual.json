@@ -63,10 +63,11 @@
         },
         "mostly": {
             "title": "Mostly",
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
             "default": 1.0,
+            "type": "number",
             "minimum": 0.0,
-            "maximum": 1.0,
-            "type": "number"
+            "maximum": 1.0
         },
         "column_list": {
             "title": "Column List",
@@ -139,6 +140,7 @@
         }
     },
     "required": [
+        "mostly",
         "column_list",
         "sum_total"
     ],

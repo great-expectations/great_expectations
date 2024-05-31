@@ -8,7 +8,6 @@ from great_expectations.compatibility import pydantic
 class Mostly(pydantic.ConstrainedFloat):
     ge = 0.0
     le = 1.0
-    multiple_of = 0.01
 
 
 class Column(pydantic.ConstrainedStr):
