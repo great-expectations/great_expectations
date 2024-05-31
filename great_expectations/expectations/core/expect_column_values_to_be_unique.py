@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
@@ -149,7 +149,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    library_metadata = {
+    library_metadata: ClassVar[dict[str, str | list | bool]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],

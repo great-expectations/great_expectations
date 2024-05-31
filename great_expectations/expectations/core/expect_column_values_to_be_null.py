@@ -157,7 +157,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         "condition_parser",
     )
 
-    library_metadata = {
+    library_metadata: ClassVar[dict[str, str | list | bool]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],

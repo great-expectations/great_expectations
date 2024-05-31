@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from itertools import zip_longest
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
@@ -149,7 +149,7 @@ class ExpectTableColumnsToMatchOrderedList(BatchExpectation):
         description=COLUMN_LIST_DESCRIPTION
     )
 
-    library_metadata = {
+    library_metadata: ClassVar[dict[str, str | list | bool]] = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
         "contributors": ["@great_expectations"],

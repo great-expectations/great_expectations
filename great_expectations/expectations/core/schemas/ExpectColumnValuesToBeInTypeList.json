@@ -89,23 +89,6 @@
                 }
             ]
         },
-        "library_metadata": {
-            "title": "Library Metadata",
-            "default": {
-                "maturity": "production",
-                "tags": [
-                    "core expectation",
-                    "column map expectation"
-                ],
-                "contributors": [
-                    "@great_expectations"
-                ],
-                "requirements": [],
-                "has_full_test_suite": true,
-                "manually_reviewed_code": true
-            },
-            "type": "object"
-        },
         "domain_type": {
             "type": "string",
             "const": "column",

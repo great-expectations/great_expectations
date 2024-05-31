@@ -170,7 +170,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     value_set: Union[list, set, SuiteParameterDict] = pydantic.Field([])
 
-    library_metadata = {
+    library_metadata: ClassVar[dict[str, str | list | bool]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],

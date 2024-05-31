@@ -78,23 +78,6 @@
             "description": "\n    A string representing the data type that each column should have as entries.     Valid types are defined by the current backend implementation and are dynamically loaded.\n    ",
             "type": "string"
         },
-        "library_metadata": {
-            "title": "Library Metadata",
-            "default": {
-                "maturity": "production",
-                "tags": [
-                    "core expectation",
-                    "column map expectation"
-                ],
-                "contributors": [
-                    "@great_expectations"
-                ],
-                "requirements": [],
-                "has_full_test_suite": true,
-                "manually_reviewed_code": true
-            },
-            "type": "object"
-        },
         "domain_type": {
             "type": "string",
             "const": "column",

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
@@ -181,7 +181,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     strict_min: bool = pydantic.Field(default=False, description=STRICT_MAX_DESCRIPTION)
     strict_max: bool = pydantic.Field(default=False, description=STRICT_MIN_DESCRIPTION)
 
-    library_metadata = {
+    library_metadata: ClassVar[dict[str, str | list | bool]] = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
