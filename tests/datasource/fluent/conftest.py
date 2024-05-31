@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import logging
 import pathlib
+import urllib.parse
 import warnings
 from contextlib import contextmanager
 from pprint import pformat as pf
@@ -383,7 +384,7 @@ def seed_cloud(
     In order to load the seeded cloud config, this fixture must be called before any
     `get_context()` calls.
     """
-    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
+    org_url_base = urllib.parse.urljoin(GX_CLOUD_MOCK_BASE_URL, f"organizations/{FAKE_ORG_ID}")
 
     fake_db_data = create_fake_db_seed_data(fds_config=fluent_only_config)
     _CLOUD_API_FAKE_DB.update(fake_db_data)

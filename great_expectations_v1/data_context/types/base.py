@@ -45,7 +45,7 @@ from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations_v1.types import DictDot, SerializableDictDot
 from great_expectations_v1.util import (
-    convert_to_json_serializable,
+    convert_to_json_serializable,  # noqa: TID251
     deep_filter_properties_iterable,
 )
 
@@ -1072,7 +1072,12 @@ class GXCloudConfig(DictDot):
         if access_token is None:
             raise ValueError("Access token cannot be None.")  # noqa: TRY003
 
-        self.base_url = base_url
+        # The base url doesn't point to a specific resource but is the prefix for constructing GX
+        # cloud urls. We want it to end in a '/' so we can manipulate it using tools such as
+        # urllib.parse.urljoin. `urljoin` will strip the last part of the path if it thinks it is
+        # a specific resource  (ie not trailing /). So we append a '/' to the base_url if it
+        # doesn't exist.
+        self.base_url = base_url if base_url[-1] == "/" else base_url + "/"
         self.organization_id = organization_id
         self.access_token = access_token
 

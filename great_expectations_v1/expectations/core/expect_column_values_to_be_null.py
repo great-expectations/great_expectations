@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type, Union
 
 from great_expectations_v1.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations_v1.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
     _format_map_output,
     render_suite_parameter_string,
@@ -42,9 +43,13 @@ if TYPE_CHECKING:
         ValidationDependencies,
     )
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the column values to be null."
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Missingness"]
+
 
 class ExpectColumnValuesToBeNull(ColumnMapExpectation):
-    """Expect the column values to be null.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_be_null is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
@@ -55,7 +60,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
@@ -79,11 +84,11 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         [expect_column_values_to_not_be_null](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Missingness
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -100,23 +105,23 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
                     "partial_unexpected_list": [
                       "A"
                     ]
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -125,13 +130,13 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 2,
                     "unexpected_percent": 66.66666666666666,
@@ -139,10 +144,10 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
                       true,
                       false
                     ]
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     condition_parser: Union[None, str] = "pandas"
@@ -152,8 +157,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         "condition_parser",
     )
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -161,9 +165,39 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.null"
     args_keys = ("column",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeNull]) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATASOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(

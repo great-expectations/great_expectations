@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations_v1.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
 )
 from great_expectations_v1.render import (
@@ -45,8 +46,14 @@ if TYPE_CHECKING:
     from great_expectations_v1.render.renderer_configuration import AddParamArgs
 
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect each column value to be in a given set."
+VALUE_SET_ARG = "A set of objects used for comparison."
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Sets"]
+
+
 class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
-    """Expect each column value to be in a given set.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_be_in_set is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
@@ -57,9 +64,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         value_set (set-like): \
-            A set of objects used for comparison.
+            {VALUE_SET_ARG}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
@@ -84,11 +91,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Sets
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -106,13 +113,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
@@ -123,10 +130,10 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -136,13 +143,13 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 3,
                     "unexpected_percent": 100.0,
@@ -155,16 +162,15 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 100.0,
                     "unexpected_percent_nonmissing": 100.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     value_set: Union[list, set, SuiteParameterDict] = pydantic.Field([])
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -172,6 +178,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.in_set"
 
@@ -189,6 +196,35 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "value_set",
         "mostly",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInSet]) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATASOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(

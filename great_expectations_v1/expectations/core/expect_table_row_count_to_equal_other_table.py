@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.expectations.expectation import (
@@ -33,9 +33,18 @@ if TYPE_CHECKING:
     )
     from great_expectations_v1.validator.validator import ValidationDependencies
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the number of rows to equal the number in another table within the same database."
+)
+OTHER_TABLE_NAME_DESCRIPTION = (
+    "The name of the other table. Other table must be located within the same database."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Volume"]
+
 
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
-    """Expect the number of rows to equal the number in another table within the same database.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_table_row_count_to_equal_other_table is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
@@ -44,8 +53,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
 
     Args:
-        other_table_name (str): \
-            The name of the other table. Other table must be located within the same database.
+        other_table_name (str): {OTHER_TABLE_NAME_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -68,11 +76,11 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Volume
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
             test_table
@@ -100,18 +108,18 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 3
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -120,23 +128,23 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 2
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     other_table_name: str
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation", "multi-table expectation"],
         "contributors": [
@@ -146,10 +154,42 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     metric_dependencies = ("table.row_count",)
     success_keys = ("other_table_name",)
     args_keys = ("other_table_name",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectTableRowCountToEqualOtherTable]
+        ) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @override
     @classmethod

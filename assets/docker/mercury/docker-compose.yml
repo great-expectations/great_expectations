@@ -1,5 +1,3 @@
-version: "3.4"
-
 services:
   db:
     image: postgres:13.7

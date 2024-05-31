@@ -2297,7 +2297,7 @@ def empty_base_data_context_in_cloud_mode_custom_base_url(
     project_path.mkdir()
     project_path = str(project_path)  # type: ignore[assignment]
 
-    custom_base_url: str = "https://some_url.org"
+    custom_base_url: str = "https://some_url.org/"
     custom_ge_cloud_config = copy.deepcopy(ge_cloud_config)
     custom_ge_cloud_config.base_url = custom_base_url
 
