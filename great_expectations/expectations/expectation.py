@@ -1789,7 +1789,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
 
     column: str = Field(description=COLUMN_FIELD_DESCRIPTION)
 
-    domain_keys: ClassVar[tuple[str, ...]] = (
+    domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
         "table",
         "column",
