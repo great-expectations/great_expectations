@@ -33,9 +33,18 @@ if TYPE_CHECKING:
     )
     from great_expectations.validator.validator import ValidationDependencies
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the number of rows to equal the number in another table within the same database."
+)
+OTHER_TABLE_NAME_DESCRIPTION = (
+    "The name of the other table. Other table must be located within the same database."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Volume"]
+
 
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
-    """Expect the number of rows to equal the number in another table within the same database.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_table_row_count_to_equal_other_table is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
@@ -44,8 +53,7 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
 
     Args:
-        other_table_name (str): \
-            The name of the other table. Other table must be located within the same database.
+        other_table_name (str): {OTHER_TABLE_NAME_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -68,11 +76,11 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Volume
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
             test_table
@@ -100,18 +108,18 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 3
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -120,18 +128,18 @@ class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 2
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     other_table_name: str

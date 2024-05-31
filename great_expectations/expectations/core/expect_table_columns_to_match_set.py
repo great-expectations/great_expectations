@@ -28,8 +28,18 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to match an unordered set."
+COLUMN_SET_DESCRIPTION = "The column names, in any order."
+EXACT_MATCH_DESCRIPTION = (
+    "If True, the list of columns must exactly match the observed columns. "
+    "If False, observed columns must include column_set but additional columns will pass."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Schema"]
+
+
 class ExpectTableColumnsToMatchSet(BatchExpectation):
-    """Expect the columns to match an unordered set.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_table_columns_to_match_set is a \
     [Batch Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations).
@@ -38,11 +48,9 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
     They are evaluated for an entire Batch, and answer a semantic question about the Batch itself.
 
     Args:
-        column_set (list of str): \
-            The column names, in any order.
+        column_set (list of str): {COLUMN_SET_DESCRIPTION}
         exact_match (boolean): \
-            If True, the list of columns must exactly match the observed columns. \
-            If False, observed columns must include column_set but additional columns will pass. Default True.
+            {EXACT_MATCH_DESCRIPTION} Default True.
 
     Other Parameters:
         result_format (str or None): \
@@ -61,11 +69,11 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
         Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Schema
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -82,28 +90,28 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       "test",
                       "test2"
                     ],
-                    "details": {
-                      "mismatched": {
+                    "details": {{
+                      "mismatched": {{
                         "unexpected": [
                           "test2"
                         ]
-                      }
-                    }
-                  },
-                  "meta": {},
+                      }}
+                    }}
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -113,31 +121,31 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       "test",
                       "test2"
                     ],
-                    "details": {
-                      "mismatched": {
+                    "details": {{
+                      "mismatched": {{
                         "unexpected": [
                           "test"
                         ],
                         "missing": [
                           "test3"
                         ]
-                      }
-                    }
-                  },
-                  "meta": {},
+                      }}
+                    }}
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     column_set: Union[list, set, SuiteParameterDict, None]

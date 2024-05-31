@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.expectations.expectation import (
-    COLUMN_FIELD_DESCRIPTION,
+    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
@@ -56,7 +56,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_FIELD_DESCRIPTION}
+            {COLUMN_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \

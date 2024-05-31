@@ -18,7 +18,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
     _native_type_type_map,
 )
 from great_expectations.expectations.expectation import (
-    COLUMN_FIELD_DESCRIPTION,
+    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
@@ -82,7 +82,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_FIELD_DESCRIPTION}
+            {COLUMN_DESCRIPTION}
         type_list (list[str] or None): \
             {TYPE_LIST_DESCRIPTION}
             For example, valid types for Pandas Datasources include any numpy dtype values \

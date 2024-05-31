@@ -105,7 +105,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-COLUMN_FIELD_DESCRIPTION = "The column name."
+COLUMN_DESCRIPTION = "The column name."
+COLUMN_A_DESCRIPTION = "The first column name."
+COLUMN_B_DESCRIPTION = "The second column name."
+MOSTLY_DESCRIPTION = "Successful if at least `mostly` fraction of values match the expectation."
 
 P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
@@ -1791,7 +1794,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """  # noqa: E501
 
-    column: str = Field(description=COLUMN_FIELD_DESCRIPTION)
+    column: str = Field(description=COLUMN_DESCRIPTION)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1841,7 +1844,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column: str = Field(description=COLUMN_FIELD_DESCRIPTION)
+    column: str = Field(description=COLUMN_DESCRIPTION)
 
     catch_exceptions: bool = True
 
