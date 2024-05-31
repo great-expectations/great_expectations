@@ -66,6 +66,9 @@ from great_expectations.expectations.registry import (
 from great_expectations.expectations.sql_tokens_and_types import (
     valid_sql_tokens_and_types,
 )
+from great_expectations.expectations.validation_models import (
+    Required,  # noqa: TCH001  # annotation used by pydantic
+)
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -1503,7 +1506,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: float = Field(default=1.0, ge=0.0, le=1.0)
+    mostly: Required[float] = Field(default=1.0, ge=0.0, le=1.0)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
