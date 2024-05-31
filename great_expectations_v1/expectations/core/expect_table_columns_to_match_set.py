@@ -38,6 +38,16 @@ SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Schema"]
 
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the columns to match an unordered set."
+COLUMN_SET_DESCRIPTION = "The column names, in any order."
+EXACT_MATCH_DESCRIPTION = (
+    "If True, the list of columns must exactly match the observed columns. "
+    "If False, observed columns must include column_set but additional columns will pass."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Schema"]
+
+
 class ExpectTableColumnsToMatchSet(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 

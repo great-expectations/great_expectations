@@ -42,6 +42,15 @@ OTHER_TABLE_NAME_DESCRIPTION = (
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Volume"]
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the number of rows to equal the number in another table within the same database."
+)
+OTHER_TABLE_NAME_DESCRIPTION = (
+    "The name of the other table. Other table must be located within the same database."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Volume"]
+
 
 class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}

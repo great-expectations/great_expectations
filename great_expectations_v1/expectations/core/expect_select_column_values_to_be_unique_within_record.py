@@ -36,6 +36,14 @@ COLUMN_LIST_DESCRIPTION = "The column names to evaluate."
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Cardinality"]
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the values for each record to be unique across the columns listed. "
+    "Note that records can be duplicated."
+)
+COLUMN_LIST_DESCRIPTION = "The column names to evaluate."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Cardinality"]
+
 
 class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}

@@ -37,6 +37,14 @@ COLUMN_INDEX_DESCRIPTION = (
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Schema"]
 
+EXPECTATION_SHORT_DESCRIPTION = "Checks for the existence of a specified column within a table."
+COLUMN_INDEX_DESCRIPTION = (
+    "If not None, checks the order of the columns. "
+    "The expectation will fail if the column is not in location column_index (zero-indexed)."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Schema"]
+
 
 class ExpectColumnToExist(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}

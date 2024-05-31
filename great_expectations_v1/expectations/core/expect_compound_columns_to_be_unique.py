@@ -33,6 +33,11 @@ COLUMN_LIST_DESCRIPTION = "Set of columns to be checked."
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Cardinality"]
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the compound columns to be unique."
+COLUMN_LIST_DESCRIPTION = "Set of columns to be checked."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Cardinality"]
+
 
 class ExpectCompoundColumnsToBeUnique(MulticolumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}

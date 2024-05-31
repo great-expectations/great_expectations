@@ -34,6 +34,10 @@ EXPECTATION_SHORT_DESCRIPTION = "Expect the values in column A to be the same as
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Data Integrity"]
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the values in column A to be the same as column B."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Data Integrity"]
+
 
 class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}

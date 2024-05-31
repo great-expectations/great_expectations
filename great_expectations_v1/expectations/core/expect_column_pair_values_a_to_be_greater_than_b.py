@@ -35,6 +35,11 @@ OR_EQUAL_DESCRIPTION = "If True, then values can be equal, not strictly greater.
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Distribution"]
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the values in column A to be greater than column B."
+OR_EQUAL_DESCRIPTION = "If True, then values can be equal, not strictly greater."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Distribution"]
+
 
 class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
