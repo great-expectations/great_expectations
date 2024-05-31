@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
 from packaging import version
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import pydantic, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (  # noqa: TCH001
     SuiteParameterDict,
@@ -18,6 +18,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
     _native_type_type_map,
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
@@ -55,9 +56,17 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values from a specified type list."
+TYPE_LIST_DESCRIPTION = """
+    A list of strings representing the data type that each column should have as entries. \
+    Valid types are defined by the current backend implementation and are dynamically loaded.
+    """
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Schema"]
+
 
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
-    """Expect a column to contain values from a specified type list.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_be_in_type_list is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
@@ -73,14 +82,14 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_FIELD_DESCRIPTION}
         type_list (list[str] or None): \
-            A list of strings representing the data type that each column should have as entries. Valid types are \
-            defined by the current backend implementation and are dynamically loaded. For example, valid types for \
-            Pandas Datasources include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
-            whereas valid types for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for Spark Datasources include \
-            'StringType', 'BooleanType' and other pyspark-defined type names.
+            {TYPE_LIST_DESCRIPTION}
+            For example, valid types for Pandas Datasources include any numpy dtype values \
+            (such as 'int64') or native python types (such as 'int'), whereas valid types for a \
+            SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for \
+            Spark Datasources include 'StringType', 'BooleanType' and other pyspark-defined type names.
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
@@ -105,11 +114,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Schema
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -126,13 +135,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -141,10 +150,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -154,13 +163,13 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 3,
                     "unexpected_percent": 100.0,
@@ -173,16 +182,17 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 100.0,
                     "unexpected_percent_nonmissing": 100.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     condition_parser: Union[str, None] = "pandas"
-    type_list: Union[List[str], SuiteParameterDict, None]
+    type_list: Union[List[str], SuiteParameterDict, None] = pydantic.Field(
+        description=TYPE_LIST_DESCRIPTION
+    )
 
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -191,6 +201,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.in_type_list"
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -207,6 +218,29 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "column",
         "type_list",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInTypeList]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": model._library_metadata,
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     @override

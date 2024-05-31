@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_FIELD_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -37,9 +39,23 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column mean to be between a minimum value and a maximum value (inclusive)."
+)
+MIN_VALUE_DESCRIPTION = "The minimum value for the column mean."
+MAX_VALUE_DESCRIPTION = "The maximum value for the column mean."
+STRICT_MIN_DESCRIPTION = (
+    "If True, the column mean must be strictly larger than min_value, default=False"
+)
+STRICT_MAX_DESCRIPTION = (
+    "If True, the column mean must be strictly smaller than max_value, default=False"
+)
+SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Numerical Data"]
+
 
 class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
-    """Expect the column mean to be between a minimum value and a maximum value (inclusive).
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_mean_to_be_between is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
@@ -50,15 +66,15 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_FIELD_DESCRIPTION}
         min_value (float or None): \
-            The minimum value for the column mean.
+            {MIN_VALUE_DESCRIPTION}
         max_value (float or None): \
-            The maximum value for the column mean.
+            {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            If True, the column mean must be strictly larger than min_value, default=False
+            {STRICT_MIN_DESCRIPTION}
         strict_max (boolean): \
-            If True, the column mean must be strictly smaller than max_value, default=False
+            {STRICT_MAX_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -88,11 +104,11 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Numerical Data
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -111,18 +127,18 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 1.275
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -133,26 +149,29 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 3.375
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
-    strict_min: bool = False
-    strict_max: bool = False
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MAX_VALUE_DESCRIPTION
+    )
+    strict_min: bool = pydantic.Field(default=False, description=STRICT_MAX_DESCRIPTION)
+    strict_max: bool = pydantic.Field(default=False, description=STRICT_MIN_DESCRIPTION)
 
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
@@ -161,6 +180,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.mean",)
@@ -225,6 +245,27 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         },
         "required": ["column"],
     }
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnMeanToBeBetween]) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": model._library_metadata,
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     @override
