@@ -266,7 +266,7 @@ templates, and assets is supported in your execution environment.  This error is
 
 def import_library_module(module_name: str) -> Optional[ModuleType]:
     """
-    :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
+    :param module_name: a fully-qualified name of a module (e.g., "great_expectations_v1.dataset.sqlalchemy_dataset")
     :return: raw source code of the module (if can be retrieved)
     """  # noqa: E501
     module_obj: Optional[ModuleType]

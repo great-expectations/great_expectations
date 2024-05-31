@@ -258,7 +258,7 @@ class Checkpoint(BaseModel):
         We need to persist a checkpoint before it can be run. If user calls runs but hasn't
         persisted it we add it for them.
         """
-        from great_expectations import project_manager
+        from great_expectations_v1 import project_manager
 
         store = project_manager.get_checkpoints_store()
         key = store.get_key(name=self.name, id=self.id)

@@ -14,11 +14,11 @@ from typing import Final, Pattern
 
 MIRROR_PACKAGE_NAME: Final[str] = "great_expectations_v1"
 
-IMPORT_PATTERN: Final[Pattern] = re.compile(r"import great_expectations")
-FROM_PATTERN: Final[Pattern] = re.compile(r"from great_expectations")
+IMPORT_PATTERN: Final[Pattern] = re.compile(r"import great_expectations\b")
+FROM_PATTERN: Final[Pattern] = re.compile(r"from great_expectations\b")
 MODULE_STRING: Final[Pattern] = re.compile(r"\"great_expectations\.")
 
-CORE_DIRECTORY: Final[pathlib.Path] = pathlib.Path("great_expectations").resolve(strict=True)
+CORE_DIRECTORY: Final[pathlib.Path] = pathlib.Path("..", "great_expectations").resolve(strict=True)
 NEW_PACKAGE_DIR: Final[pathlib.Path] = CORE_DIRECTORY.with_name(MIRROR_PACKAGE_NAME)
 
 DIST_DIR: Final[pathlib.Path] = pathlib.Path("dist")
