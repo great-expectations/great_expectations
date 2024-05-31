@@ -170,7 +170,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     value_set: Union[list, set, SuiteParameterDict] = pydantic.Field([])
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -201,22 +201,30 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInSet]) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["data_quality_issues"] = {
-                "type": "array",
-                "const": DATA_QUALITY_ISSUES,
-            }
-            schema["properties"]["library_metadata"] = {
-                "type": "object",
-                "const": model._library_metadata,
-            }
-            schema["properties"]["short_description"] = {
-                "type": "string",
-                "const": EXPECTATION_SHORT_DESCRIPTION,
-            }
-            schema["properties"]["supported_data_sources"] = {
-                "type": "array",
-                "const": SUPPORTED_DATASOURCES,
-            }
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATASOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(
