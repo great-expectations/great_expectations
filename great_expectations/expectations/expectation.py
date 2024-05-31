@@ -1519,6 +1519,7 @@ class BatchExpectation(Expectation, ABC):
             schema["properties"]["metadata"]["properties"].update(
                 {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Batch",
@@ -1808,6 +1809,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
             schema["properties"]["metadata"]["properties"].update(
                 {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Column Aggregate",
@@ -1861,6 +1863,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             schema["properties"]["metadata"]["properties"].update(
                 {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Column Map",
@@ -2126,6 +2129,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             schema["properties"]["metadata"]["properties"].update(
                 {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Column Pair Map",
@@ -2381,6 +2385,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             schema["properties"]["metadata"]["properties"].update(
                 {
                     "domain_type": {
+                        "title": "Domain Type",
                         "type": "string",
                         "const": model.domain_type,
                         "description": "Multicolumn Map",
