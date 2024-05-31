@@ -115,10 +115,16 @@
             },
             "type": "object"
         },
-        "domain_type": {
-            "type": "string",
-            "const": "table",
-            "description": "Batch"
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "domain_type": {
+                    "title": "Domain Type",
+                    "type": "string",
+                    "const": "table",
+                    "description": "Batch"
+                }
+            }
         }
     },
     "additionalProperties": false,
