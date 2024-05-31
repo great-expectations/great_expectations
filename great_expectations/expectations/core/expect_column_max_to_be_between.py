@@ -206,9 +206,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnMaxToBeBetween]) -> None:
             ColumnAggregateExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["metadata"] = {
-                "type": "object",
-                "properties": {
+            schema["properties"]["metadata"]["properties"].update(
+                {
                     "data_quality_issues": {
                         "title": "Data Quality Issues",
                         "type": "array",
@@ -229,8 +228,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                         "type": "array",
                         "const": SUPPORTED_DATASOURCES,
                     },
-                },
-            }
+                }
+            )
 
     @classmethod
     @override
