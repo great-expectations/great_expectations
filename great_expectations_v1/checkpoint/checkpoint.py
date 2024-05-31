@@ -145,6 +145,9 @@ class Checkpoint(BaseModel):
         expectation_parameters: Dict[str, Any] | None = None,
         run_id: RunIdentifier | None = None,
     ) -> CheckpointResult:
+        if not self.id:
+            self._add_to_store()
+
         run_id = run_id or RunIdentifier(run_time=dt.datetime.now(dt.timezone.utc))
         run_results = self._run_validation_definitions(
             batch_parameters=batch_parameters,
@@ -153,11 +156,7 @@ class Checkpoint(BaseModel):
             run_id=run_id,
         )
 
-        checkpoint_result = CheckpointResult(
-            run_id=run_id,
-            run_results=run_results,
-            checkpoint_config=self,
-        )
+        checkpoint_result = self._construct_result(run_id=run_id, run_results=run_results)
         self._run_actions(checkpoint_result=checkpoint_result)
 
         return checkpoint_result
@@ -200,6 +199,20 @@ class Checkpoint(BaseModel):
             batch_identifier=batch_identifier,
         )
 
+    def _construct_result(
+        self,
+        run_id: RunIdentifier,
+        run_results: Dict[ValidationResultIdentifier, ExpectationSuiteValidationResult],
+    ) -> CheckpointResult:
+        for result in run_results.values():
+            result.meta["checkpoint_id"] = self.id
+
+        return CheckpointResult(
+            run_id=run_id,
+            run_results=run_results,
+            checkpoint_config=self,
+        )
+
     def _run_actions(
         self,
         checkpoint_result: CheckpointResult,
@@ -238,6 +251,19 @@ class Checkpoint(BaseModel):
         key = store.get_key(name=self.name, id=self.id)
 
         store.update(key=key, value=self)
+
+    def _add_to_store(self) -> None:
+        """This is used to persist a checkpoint before we run it.
+
+        We need to persist a checkpoint before it can be run. If user calls runs but hasn't
+        persisted it we add it for them.
+        """
+        from great_expectations import project_manager
+
+        store = project_manager.get_checkpoints_store()
+        key = store.get_key(name=self.name, id=self.id)
+
+        store.add(key=key, value=self)
 
 
 class CheckpointResult(BaseModel):
