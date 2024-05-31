@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
@@ -42,12 +43,12 @@ if TYPE_CHECKING:
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column minimum to be between a minimum value and a maximum value."
 )
-MIN_VALUE_ARG = "The minimal column minimum allowed."
-MAX_VALUE_ARG = "The maximal column minimum allowed."
-STRICT_MIN_ARG = (
+MIN_VALUE_DESCRIPTION = "The minimal column minimum allowed."
+MAX_VALUE_DESCRIPTION = "The maximal column minimum allowed."
+STRICT_MIN_DESCRIPTION = (
     "If True, the minimal column minimum must be strictly larger than min_value, default=False"
 )
-STRICT_MAX_ARG = (
+STRICT_MAX_DESCRIPTION = (
     "If True, the maximal column minimum must be strictly smaller than max_value, default=False"
 )
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
@@ -68,13 +69,13 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
         column (str): \
             {COLUMN_FIELD_DESCRIPTION}
         min_value (comparable type or None): \
-            {MIN_VALUE_ARG}
+            {MIN_VALUE_DESCRIPTION}
         max_value (comparable type or None): \
-            {MAX_VALUE_ARG}
+            {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            {STRICT_MIN_ARG}
+            {STRICT_MIN_DESCRIPTION}
         strict_max (boolean): \
-            {STRICT_MAX_ARG}
+            {STRICT_MAX_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -164,12 +165,15 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
-    strict_min: bool = False
-    strict_max: bool = False
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        default=None, description=MAX_VALUE_DESCRIPTION
+    )
+    strict_min: bool = pydantic.Field(default=False, description=STRICT_MAX_DESCRIPTION)
+    strict_max: bool = pydantic.Field(default=False, description=STRICT_MIN_DESCRIPTION)
 
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column aggregate expectation"],
@@ -178,6 +182,7 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.min",)
@@ -195,6 +200,27 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
         "strict_min",
         "strict_max",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnMinToBeBetween]) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": model._library_metadata,
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     @override

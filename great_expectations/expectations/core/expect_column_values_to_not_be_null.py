@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.metric_function_types import (
@@ -153,19 +153,41 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    library_metadata: ClassVar[dict] = {
+    library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
+        "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric: ClassVar[str] = "column_values.nonnull"
     args_keys: ClassVar[Tuple[str, ...]] = ("column",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotBeNull]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": model._library_metadata,
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     @override

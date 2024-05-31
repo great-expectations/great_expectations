@@ -278,6 +278,38 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
+    @staticmethod
+    def _format_title(schema_title: str):
+        # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
+        split_between_caps_and_nums = (
+            "".join([" " + c if (c.isdigit() or c == c.upper()) else c for c in schema_title])
+            .lstrip()
+            .split(" ")
+        )
+        join_multi_caps_and_nums: list[str] = []
+        for idx, token in enumerate(split_between_caps_and_nums):
+            if idx > 0:
+                consecutive_caps = (
+                    token.upper() == token
+                    and split_between_caps_and_nums[idx - 1].upper()
+                    == split_between_caps_and_nums[idx - 1]
+                )
+                consecutive_digits = (
+                    token.isdigit() and split_between_caps_and_nums[idx - 1].isdigit()
+                )
+                if (
+                    len(token) == 1
+                    and len(split_between_caps_and_nums[idx - 1]) == 1
+                    and (consecutive_caps or consecutive_digits)
+                ):
+                    join_multi_caps_and_nums[-1] = join_multi_caps_and_nums[-1] + token
+                else:
+                    join_multi_caps_and_nums.append(token)
+            else:
+                join_multi_caps_and_nums.append(token)
+
+        return " ".join(join_multi_caps_and_nums)
+
     class Config:
         arbitrary_types_allowed = True
         smart_union = True
@@ -286,39 +318,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
-            # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
-            split_between_caps_and_nums = (
-                "".join(
-                    [
-                        " " + c if (c.isdigit() or c == c.upper()) else c
-                        for c in schema.get("title", "")
-                    ]
-                )
-                .lstrip()
-                .split(" ")
-            )
-            join_multi_caps_and_nums: list[str] = []
-            for idx, token in enumerate(split_between_caps_and_nums):
-                if idx > 0:
-                    consecutive_caps = (
-                        token.upper() == token
-                        and split_between_caps_and_nums[idx - 1].upper()
-                        == split_between_caps_and_nums[idx - 1]
-                    )
-                    consecutive_digits = (
-                        token.isdigit() and split_between_caps_and_nums[idx - 1].isdigit()
-                    )
-                    if (
-                        len(token) == 1
-                        and len(split_between_caps_and_nums[idx - 1]) == 1
-                        and (consecutive_caps or consecutive_digits)
-                    ):
-                        join_multi_caps_and_nums[-1] = join_multi_caps_and_nums[-1] + token
-                    else:
-                        join_multi_caps_and_nums.append(token)
-                else:
-                    join_multi_caps_and_nums.append(token)
-            schema["title"] = " ".join(join_multi_caps_and_nums)
+            schema["title"] = model._format_title(schema_title=schema.get("title", ""))
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
@@ -1508,6 +1508,16 @@ class BatchExpectation(Expectation, ABC):
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.TABLE
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[BatchExpectation]) -> None:
+            Expectation.Config.schema_extra(schema, model)
+            schema["properties"]["domain_type"] = {
+                "type": "string",
+                "const": model.domain_type,
+                "description": "Batch",
+            }
+
     @override
     def get_validation_dependencies(
         self,
@@ -1777,6 +1787,16 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnAggregateExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["domain_type"] = {
+                "type": "string",
+                "const": model.domain_type,
+                "description": "Column Aggregate",
+            }
+
 
 class ColumnMapExpectation(BatchExpectation, ABC):
     """Base class for ColumnMapExpectations.
@@ -1815,6 +1835,16 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     )
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnMapExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["domain_type"] = {
+                "type": "string",
+                "const": model.domain_type,
+                "description": "Column Map",
+            }
 
     @classmethod
     @override
@@ -2067,6 +2097,16 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     domain_type = MetricDomainTypes.COLUMN_PAIR
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
 
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnPairMapExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["domain_type"] = {
+                "type": "string",
+                "const": model.domain_type,
+                "description": "Column Pair Map",
+            }
+
     @classmethod
     @override
     def is_abstract(cls) -> bool:
@@ -2307,6 +2347,16 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     )
     domain_type = MetricDomainTypes.MULTICOLUMN
     success_keys = ("mostly",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[MulticolumnMapExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["domain_type"] = {
+                "type": "string",
+                "const": model.domain_type,
+                "description": "Multicolumn Map",
+            }
 
     @classmethod
     @override

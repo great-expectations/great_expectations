@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
     )
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the number of rows to equal a value."
-VALUE_ARG = "The expected number of rows."
+VALUE_DESCRIPTION = "The expected number of rows."
 SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Volume"]
 
@@ -44,7 +45,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
 
     Args:
         value (int): \
-            {VALUE_ARG}
+            {VALUE_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -120,22 +121,42 @@ class ExpectTableRowCountToEqual(BatchExpectation):
                 }}
     """  # noqa: E501
 
-    value: Union[int, SuiteParameterDict]
+    value: Union[int, SuiteParameterDict] = pydantic.Field(description=VALUE_DESCRIPTION)
 
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
-        "contributors": [
-            "@great_expectations",
-        ],
+        "contributors": ["@great_expectations"],
         "requirements": [],
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     metric_dependencies = ("table.row_count",)
     success_keys = ("value",)
     args_keys = ("value",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectTableRowCountToEqual]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": model._library_metadata,
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     @override

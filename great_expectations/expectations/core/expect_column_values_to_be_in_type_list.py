@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
 from packaging import version
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import pydantic, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (  # noqa: TCH001
     SuiteParameterDict,
@@ -57,7 +57,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values from a specified type list."
-TYPE_LIST_ARG = """
+TYPE_LIST_DESCRIPTION = """
     A list of strings representing the data type that each column should have as entries. \
     Valid types are defined by the current backend implementation and are dynamically loaded.
     """
@@ -84,7 +84,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         column (str): \
             {COLUMN_FIELD_DESCRIPTION}
         type_list (list[str] or None): \
-            {TYPE_LIST_ARG}
+            {TYPE_LIST_DESCRIPTION}
             For example, valid types for Pandas Datasources include any numpy dtype values \
             (such as 'int64') or native python types (such as 'int'), whereas valid types for a \
             SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
@@ -189,9 +189,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """  # noqa: E501
 
     condition_parser: Union[str, None] = "pandas"
-    type_list: Union[List[str], SuiteParameterDict, None]
+    type_list: Union[List[str], SuiteParameterDict, None] = pydantic.Field(
+        description=TYPE_LIST_DESCRIPTION
+    )
 
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -200,6 +201,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.in_type_list"
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -216,6 +218,29 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "column",
         "type_list",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInTypeList]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": model._library_metadata,
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     @override

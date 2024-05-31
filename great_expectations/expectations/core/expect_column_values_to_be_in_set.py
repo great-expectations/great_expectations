@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
@@ -170,7 +170,6 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     value_set: Union[list, set, SuiteParameterDict] = pydantic.Field([])
 
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
@@ -179,6 +178,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.in_set"
 
@@ -196,6 +196,27 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "value_set",
         "mostly",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInSet]) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": model._library_metadata,
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATASOURCES,
+            }
 
     @classmethod
     def _prescriptive_template(
