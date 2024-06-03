@@ -10,6 +10,7 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
+from great_expectations.expectations.validation_models import MinMaxAnyOfValidatorMixin
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -33,7 +34,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
+class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation, MinMaxAnyOfValidatorMixin):
     """Expect the column standard deviation to be between a minimum value and a maximum value.
 
     Uses sample standard deviation (normalized by N-1).
