@@ -8415,3 +8415,20 @@ def filter_gx_datasource_warnings() -> Generator[None, None, None]:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=GxDatasourceWarning)
         yield
+
+
+@pytest.fixture(scope="function")
+def param_id(request: pytest.FixtureRequest) -> str:
+    """Return the parameter id of the current test.
+
+    Example:
+
+    ```python
+    @pytest.mark.parametrize("my_param", ["a", "b", "c"], ids=lambda x: x.upper())
+    def test_something(param_id: str, my_param: str):
+        assert my_param != param_id
+        assert my_param.upper() == param_id
+    ```
+    """
+    raw_name: str = request.node.name
+    return raw_name.split("[")[1].split("]")[0]
