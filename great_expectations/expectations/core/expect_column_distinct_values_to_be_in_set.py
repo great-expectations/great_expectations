@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 
 import altair as alt
 import pandas as pd
 
 from great_expectations.compatibility import pydantic
-from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
-)
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
 from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
+from great_expectations.expectations.model_field_types import (
+    ValueSet,  # noqa: TCH001  # type needed in pydantic validation
+)
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
@@ -175,9 +175,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
-        default=[], description=VALUE_SET_DESCRIPTION
-    )
+    value_set: ValueSet = pydantic.Field(default=[], description=VALUE_SET_DESCRIPTION)
 
     library_metadata = {
         "maturity": "production",

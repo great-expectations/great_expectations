@@ -1,9 +1,9 @@
-from enum import Enum
 from typing import Any, Callable, Dict, Generator, List, Union
 
 from typing_extensions import Annotated
 
 from great_expectations.compatibility.pydantic import Field, conlist, fields
+from great_expectations.core.suite_parameters import SuiteParameterDict
 from great_expectations.expectations.model_field_descriptions import (
     COLUMN_DESCRIPTION,
     MOSTLY_DESCRIPTION,
@@ -24,7 +24,7 @@ ColumnList = Annotated[List[str], conlist(item_type=Column, min_items=1)]
 ColumnType = Annotated[str, Field(min_length=1)]
 
 
-class ValueSet:
+class ValueSetSchema:
     # A custom type to modify the schema for FE JSON form limitations
     # https://docs.pydantic.dev/1.10/usage/types/#custom-data-types
     @classmethod
@@ -86,6 +86,4 @@ class ValueSet:
             )
 
 
-class ConditionParser(str, Enum):
-    PANDAS = "pandas"
-    EXPERIMENTAL = "great_expectations__experimental__"
+ValueSet = Annotated[ValueSetSchema, list, set, SuiteParameterDict]
