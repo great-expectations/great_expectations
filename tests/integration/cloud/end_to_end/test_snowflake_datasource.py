@@ -24,13 +24,13 @@ RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
 def connection_string() -> str:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return (
-            "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public"
-            f"?database=ci&schema={RANDOM_SCHEMA}&warehouse=ci&role=ci"
+            "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci"
+            f"/{RANDOM_SCHEMA}?warehouse=ci&role=ci"
         )
     elif os.getenv("SNOWFLAKE_USER") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return (
             "snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB"
-            f"?database=ci&schema={RANDOM_SCHEMA}&warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
+            f"/{RANDOM_SCHEMA}?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
         )
     else:
         pytest.skip("no snowflake credentials")
@@ -101,9 +101,7 @@ def data_asset(
         schema_name=RANDOM_SCHEMA,
     )
     asset_name = f"i{uuid.uuid4().hex}"
-    _ = datasource.add_table_asset(
-        name=asset_name, table_name=table_name, schema_name=RANDOM_SCHEMA
-    )
+    _ = datasource.add_table_asset(name=asset_name, table_name=table_name)
     table_asset = datasource.get_asset(asset_name=asset_name)
     yield table_asset
     datasource.delete_asset(asset_name=asset_name)
