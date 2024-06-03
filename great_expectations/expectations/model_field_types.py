@@ -1,23 +1,27 @@
 from enum import Enum
 from typing import Any, Callable, Dict, Generator, List, Union
 
-from great_expectations.compatibility import pydantic
+from typing_extensions import Annotated
+
+from great_expectations.compatibility.pydantic import Field, conlist, fields
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
+)
+
+Mostly = Annotated[
+    float,
+    Field(ge=0.0, le=1.0, description=MOSTLY_DESCRIPTION),
+]
 
 
-class Mostly(pydantic.ConstrainedFloat):
-    ge = 0.0
-    le = 1.0
+Column = Annotated[str, Field(min_length=1, description=COLUMN_DESCRIPTION)]
 
 
-class Column(pydantic.ConstrainedStr):
-    min_length = 1
+ColumnList = Annotated[List[str], conlist(item_type=Column, min_items=1)]
 
 
-ColumnList = pydantic.conlist(item_type=Column, min_items=1)  # type: ignore[valid-type]  # mypy and pydantic conflict
-
-
-class ColumnType(pydantic.ConstrainedStr):
-    min_length = 1
+ColumnType = Annotated[str, Field(min_length=1)]
 
 
 class ValueSet:
@@ -38,7 +42,7 @@ class ValueSet:
 
     @classmethod
     def __modify_schema__(
-        cls, field_schema: Dict[str, Any], field: Union[pydantic.fields.ModelField, None]
+        cls, field_schema: Dict[str, Any], field: Union[fields.ModelField, None]
     ) -> None:
         # We need to override the schema, because the JSON form for Expectation input requires
         # that the input be either all strings or numbers. We do not validate that this is

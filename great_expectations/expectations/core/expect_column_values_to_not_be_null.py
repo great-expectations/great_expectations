@@ -7,7 +7,6 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.expectations.expectation import (
-    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
     _format_map_output,
     render_suite_parameter_string,
@@ -15,6 +14,7 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.expectation_configuration import (
     parse_result_format,
 )
+from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyDiagnosticRendererType,

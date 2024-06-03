@@ -58,7 +58,11 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
 )
-from great_expectations.expectations.model_field_types import Column, ColumnList, Mostly
+from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
+    Column,
+    ColumnList,
+    Mostly,
+)
 from great_expectations.expectations.registry import (
     get_metric_kwargs,
     register_expectation,
@@ -66,9 +70,6 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.expectations.sql_tokens_and_types import (
     valid_sql_tokens_and_types,
-)
-from great_expectations.expectations.validation_models import (
-    Required,  # noqa: TCH001  # annotation used by pydantic
 )
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
@@ -108,11 +109,6 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import ValidationDependencies, Validator
 
 logger = logging.getLogger(__name__)
-
-COLUMN_DESCRIPTION = "The column name."
-COLUMN_A_DESCRIPTION = "The first column name."
-COLUMN_B_DESCRIPTION = "The second column name."
-MOSTLY_DESCRIPTION = "Successful if at least `mostly` fraction of values match the expectation."
 
 P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
@@ -1507,7 +1503,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: Required[Mostly] = Field(default=Mostly(1.0), description=MOSTLY_DESCRIPTION)
+    mostly: Mostly
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1798,7 +1794,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """  # noqa: E501
 
-    column: Column = Field(description=COLUMN_DESCRIPTION)
+    column: Column
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1848,7 +1844,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column: Column = Field(description=COLUMN_DESCRIPTION)
+    column: Column
 
     catch_exceptions: bool = True
 

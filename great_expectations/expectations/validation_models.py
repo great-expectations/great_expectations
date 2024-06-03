@@ -1,62 +1,83 @@
-from dataclasses import dataclass
-from typing import Any, Callable, Dict, Generator, Generic, TypeVar, Union
+from typing import Any, Dict
 
 from great_expectations.compatibility.pydantic import (
     BaseModel,
-    ValidationError,
-    fields,
     root_validator,
 )
 
-RequiredType = TypeVar("RequiredType")
-T = TypeVar("T")
+# from great_expectations.compatibility.pydantic_core import CoreSchema, core_schema
 
+# RequiredType = TypeVar("RequiredType")
+# T = TypeVar("T")
+#
+#
+# @dataclass
+# class Required(Generic[RequiredType]):
+#     """Use this Generic whenever you have a field that should be marked as required
+#     in the JSON schema, but also has a default value to be populated on the form control.
+#
+#     For more on how pydantic can handle Generic classes:
+#     https://docs.pydantic.dev/latest/concepts/types/#handling-custom-generic-classes
+#     """
+#
+#     required_value: RequiredType
+#
+#     @classmethod
+#     def __get_pydantic_core_schema__(
+#         cls, source_type: Any, handler: "GetCoreSchemaHandler"
+#     ) -> CoreSchema:
+#         origin = get_origin(source_type)
+#         if origin is None:  # used as `x: Owner` without params
+#             origin = source_type
+#             item_tp = Any
+#         else:
+#             item_tp = get_args(source_type)[0]
+#         # both calling handler(...) and handler.generate_schema(...)
+#         # would work, but prefer the latter for conceptual and consistency reasons
+#         item_schema = handler.generate_schema(item_tp)
+#
+#         def val_item(v: Required[Any], handler: "ValidatorFunctionWrapHandler") -> Required[Any]:
+#             v.item = handler(v.item)
+#             return v
+#
+#         python_schema = core_schema.chain_schema(
+#             # `chain_schema` means do the following steps in order:
+#             [
+#                 # Ensure the value is an instance of Required
+#                 core_schema.is_instance_schema(cls),
+#                 # Use the item_schema to validate `items`
+#                 core_schema.no_info_wrap_validator_function(val_item, item_schema),
+#             ]
+#         )
+#
+#         return core_schema.json_or_python_schema(
+#             # for JSON accept an object with name and item keys
+#             json_schema=core_schema.chain_schema(
+#                 [
+#                     core_schema.typed_dict_schema(
+#                         {
+#                             "required_value": core_schema.typed_dict_field(item_schema),
+#                         }
+#                     ),
+#                     # after validating the json data convert it to python
+#                     core_schema.no_info_before_validator_function(
+#                         lambda data: Required(required_value=data["required_value"]),
+#                         # note that we re-use the same schema here as below
+#                         python_schema,
+#                     ),
+#                 ]
+#             ),
+#             python_schema=python_schema,
+#         )
 
-@dataclass
-class Required(Generic[RequiredType]):
-    """Use this Generic whenever you have a field that should be marked as required
-    in the JSON schema, but also has a default value to be populated on the form control.
-
-    For more on how pydantic 1.0 can handle Generic classes:
-    https://docs.pydantic.dev/1.10/usage/types/#__tabbed_32_1
-    """
-
-    required_value: RequiredType
-
-    @classmethod
-    def __get_validators__(cls) -> Generator[Callable[[T, fields.ModelField], T], None, None]:
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v: T, field: fields.ModelField) -> T:
-        if v is None or not field.sub_fields:
-            raise ValueError("Required fields cannot be None.")  # noqa: TRY003  # this message isn't long
-        if len(field.sub_fields) != 1:
-            raise TypeError("Only one type can be passed to `Required`. Try `typing.Union` or `|`.")  # noqa: TRY003  # this message isn't long
-        else:
-            inner_type = field.sub_fields[0]
-            _, error = inner_type.validate(v, {}, loc="required_field")
-            if error:
-                raise ValidationError([error], cls)  # type: ignore[arg-type]  # seems to be a pydantic bug that this isn't recognized as dataclass
-        return v
-
-    @classmethod
-    def __modify_schema__(
-        cls, field_schema: Dict[str, Any], field: Union[fields.ModelField, None]
-    ) -> None:
-        if field:
-            field.required = True
-
-            # we only allow one type to be passed to Required, so allOf is superfluous
-            all_of = field_schema.pop("allOf")
-            if len(all_of) != 1:
-                raise TypeError(  # noqa: TRY003  # this message isn't long
-                    "Only one type can be passed to `Required`. Try `typing.Union` or `|`"
-                )
-            field_schema.update(all_of[0])
-
-            if field.default:
-                field_schema["default"] = field.default
+#     @classmethod
+#     def __get_pydantic_json_schema__(
+#         cls, core_schema: CoreSchema, handler: "GetJsonSchemaHandler"
+#     ) -> "JsonSchemaValue":
+#         json_schema = handler(core_schema)
+#         json_schema = handler.resolve_ref_schema(json_schema)
+#         json_schema["required"] = True
+#         return json_schema
 
 
 class MinMaxAnyOfValidatorMixin(BaseModel):
