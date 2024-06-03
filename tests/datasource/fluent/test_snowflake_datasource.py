@@ -83,6 +83,21 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MY_PASSWORD", "my_password")
 
 
+@pytest.mark.unit
+def test_snowflake_dsn():
+    dsn = pydantic.parse_obj_as(
+        SnowflakeDsn,
+        "snowflake://my_user:password@my_account/my_db/my_schema?role=my_role&warehouse=my_wh",
+    )
+    assert dsn.user == "my_user"
+    assert dsn.password == "password"
+    assert dsn.account_identifier == "my_account"
+    assert dsn.database == "my_db"
+    assert dsn.schema == "my_schema"
+    assert dsn.role == "my_role"
+    assert dsn.warehouse == "my_wh"
+
+
 @pytest.mark.snowflake  # TODO: make this a unit test
 @pytest.mark.parametrize(
     "config_kwargs",

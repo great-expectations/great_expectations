@@ -61,7 +61,7 @@ class ConfigStr(SecretStr):
         return TEMPLATE_STR_REGEX.search(v) is not None
 
     @classmethod
-    def _validate_template_str_format(cls, v: STR) -> STR | None:
+    def _validate_template_str_format(cls, v: str) -> str | None:
         if cls.str_contains_config_template(v):
             return v
         raise ValueError(

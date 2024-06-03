@@ -195,12 +195,20 @@ class SnowflakeDsn(AnyUrl):
     @property
     def database(self) -> str:
         assert self.path
-        return self.path.split("/")[0]
+        return self.path.split("/")[1]
 
     @property
     def schema(self) -> str:
         assert self.path
-        return self.path.split("/")[1]
+        return self.path.split("/")[2]
+
+    @property
+    def warehouse(self) -> str | None:
+        return self.params.get("warehouse", [None])[0]
+
+    @property
+    def role(self) -> str | None:
+        return self.params.get("role", [None])[0]
 
 
 class ConnectionDetails(FluentBaseModel):
