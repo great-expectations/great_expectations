@@ -363,8 +363,8 @@ def snowflake_ds(
         pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
-        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public"
-        f"?warehouse=ci&role=ci&database=ci&schema={RAND_SCHEMA}",
+        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci"
+        f"/{RAND_SCHEMA}?warehouse=ci&role=ci",
         # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
         # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
@@ -768,9 +768,9 @@ def _raw_query_check_column_exists(
         return True
 
 
-@pytest.mark.filterwarnings(  # snowflake `add_table_asset` raises warning on passing a schema
-    "once::great_expectations.datasource.fluent.GxDatasourceWarning"
-)
+@pytest.mark.filterwarnings(
+    "once::DeprecationWarning"
+)  # snowflake `add_table_asset` raises warning on passing a schema
 @pytest.mark.parametrize(
     "column_name",
     [
