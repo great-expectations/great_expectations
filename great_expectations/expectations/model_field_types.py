@@ -26,9 +26,9 @@ ColumnType = Annotated[str, Field(min_length=1)]
 
 
 ValueSet = Annotated[
+    SuiteParameterDict,
     list,
     set,
-    SuiteParameterDict,
     Field(
         title="Value Set",
         description=VALUE_SET_DESCRIPTION,

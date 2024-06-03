@@ -136,8 +136,7 @@
                     ]
                 }
             ],
-            "type": "array",
-            "items": {}
+            "type": "object"
         },
         "metadata": {
             "type": "object",
