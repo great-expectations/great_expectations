@@ -136,7 +136,20 @@
                     ]
                 }
             ],
-            "type": "object"
+            "anyOf": [
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "array",
+                    "items": {}
+                },
+                {
+                    "type": "array",
+                    "items": {},
+                    "uniqueItems": true
+                }
+            ]
         },
         "metadata": {
             "type": "object",

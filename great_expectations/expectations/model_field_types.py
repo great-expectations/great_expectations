@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from typing_extensions import Annotated
 
@@ -26,9 +26,7 @@ ColumnType = Annotated[str, Field(min_length=1)]
 
 
 ValueSet = Annotated[
-    SuiteParameterDict,
-    list,
-    set,
+    Union[SuiteParameterDict, list, set],
     Field(
         title="Value Set",
         description=VALUE_SET_DESCRIPTION,
