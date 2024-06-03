@@ -6,6 +6,7 @@ import pathlib
 import shutil
 import sys
 import uuid
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -486,7 +487,7 @@ class TestTableIdentifiers:
         if not snowflake_ds:
             pytest.skip("no snowflake datasource")
         # create table
-        schema = get_random_identifier_name()
+        schema = RAND_SCHEMA
         table_factory(
             gx_engine=snowflake_ds.get_execution_engine(),
             table_names={table_name},
@@ -558,9 +559,12 @@ class TestTableIdentifiers:
             schema=schema,
         )
 
-        asset = datasource.add_table_asset(
-            asset_name, table_name=table_name, schema_name=schema
-        )
+        with warnings.catch_warnings():
+            # passing a schema to snowflake tables is deprecated
+            warnings.simplefilter("once", DeprecationWarning)
+            asset = datasource.add_table_asset(
+                asset_name, table_name=table_name, schema_name=schema
+            )
 
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
