@@ -20,7 +20,10 @@ from great_expectations.compatibility.pydantic import AnyUrl, errors
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import (
+    deprecated_method_or_class,
+    public_api,
+)
 from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
@@ -292,13 +295,18 @@ class SnowflakeDatasource(SQLDatasource):
 
         return _extract_path_sections(url_path)["database"]
 
+    @deprecated_method_or_class(
+        version="0.18.16",
+        message="`schema_name` is deprecated."
+        " The schema now comes from the datasource.",
+    )
     @public_api
     @override
     def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
         table_name: str = "",
-        schema_name: Optional[str] = None,  # TODO: remove this as an arg
+        schema_name: Optional[str] = None,  # TODO: remove in V1
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> TableAsset:
