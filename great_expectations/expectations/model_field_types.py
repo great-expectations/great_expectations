@@ -4,6 +4,11 @@ from typing import Any, Callable, Dict, Generator, List, Union
 from great_expectations.compatibility import pydantic
 
 
+class Mostly(pydantic.ConstrainedFloat):
+    ge = 0.0
+    le = 1.0
+
+
 class ValueSet:
     # A custom type to modify the schema for FE JSON form limitations
     # https://docs.pydantic.dev/1.10/usage/types/#custom-data-types
