@@ -468,7 +468,7 @@
         },
         "ConnectionDetails": {
             "title": "ConnectionDetails",
-            "description": "Information needed to connect to a Snowflake database.\nAlternative to a connection string.",
+            "description": "Information needed to connect to a Snowflake database.\nAlternative to a connection string.\n\nhttps://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#additional-connection-parameters",
             "type": "object",
             "properties": {
                 "account": {
