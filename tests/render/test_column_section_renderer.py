@@ -1299,7 +1299,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             expectation_type="expect_column_min_to_be_between",
             kwargs={
                 "column": "live",
-                "min_value": None,
+                "min_value": 0,
                 "max_value": None,
                 "result_format": "SUMMARY",
             },
@@ -1347,10 +1347,12 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                 {
                     "content_block_type": "string_template",
                     "string_template": {
-                        "template": "$column minimum value may have any numerical value.",
+                        "template": "$column minimum value must be "
+                        "greater than or equal to "
+                        "$min_value.",
                         "params": {
                             "column": "live",
-                            "min_value": None,
+                            "min_value": 0,
                             "max_value": None,
                             "result_format": "SUMMARY",
                             "row_condition": None,
