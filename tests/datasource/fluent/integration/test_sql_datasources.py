@@ -498,9 +498,7 @@ class TestTableIdentifiers:
         )
         print(f"snowflake tables:\n{pf(table_names)}))")
 
-        snowflake_ds.add_table_asset(
-            asset_name, table_name=table_name, schema_name=schema
-        )
+        snowflake_ds.add_table_asset(asset_name, table_name=table_name)
 
     @pytest.mark.sqlite
     def test_sqlite(
@@ -521,6 +519,9 @@ class TestTableIdentifiers:
 
         sqlite_ds.add_table_asset(asset_name, table_name=table_name)
 
+    @pytest.mark.filterwarnings(  # snowflake `add_table_asset` raises warning on passing a schema
+        "once::great_expectations.datasource.fluent.GxDatasourceWarning"
+    )
     @pytest.mark.parametrize(
         "datasource_type,schema",
         [
@@ -767,6 +768,9 @@ def _raw_query_check_column_exists(
         return True
 
 
+@pytest.mark.filterwarnings(  # snowflake `add_table_asset` raises warning on passing a schema
+    "once::great_expectations.datasource.fluent.GxDatasourceWarning"
+)
 @pytest.mark.parametrize(
     "column_name",
     [
