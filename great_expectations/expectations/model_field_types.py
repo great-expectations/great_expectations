@@ -32,41 +32,39 @@ ValueSet = Annotated[
     Field(
         title="Value Set",
         description=VALUE_SET_DESCRIPTION,
-        json_schema_extra={
-            "oneOf": [
-                {
-                    "title": "Text",
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "minLength": 1,
-                    },
-                    "minItems": 1,
-                    "examples": [
-                        ["a", "b", "c", "d", "e"],
-                        [
-                            "2024-01-01",
-                            "2024-01-02",
-                            "2024-01-03",
-                            "2024-01-04",
-                            "2024-01-05",
-                        ],
-                    ],
+        oneOf=[
+            {
+                "title": "Text",
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "minLength": 1,
                 },
-                {
-                    "title": "Numbers",
-                    "type": "array",
-                    "items": {
-                        "type": "number",
-                    },
-                    "minItems": 1,
-                    "examples": [
-                        [1, 2, 3, 4, 5],
-                        [1.1, 2.2, 3.3, 4.4, 5.5],
-                        [1, 2.2, 3, 4.4, 5],
+                "minItems": 1,
+                "examples": [
+                    ["a", "b", "c", "d", "e"],
+                    [
+                        "2024-01-01",
+                        "2024-01-02",
+                        "2024-01-03",
+                        "2024-01-04",
+                        "2024-01-05",
                     ],
+                ],
+            },
+            {
+                "title": "Numbers",
+                "type": "array",
+                "items": {
+                    "type": "number",
                 },
-            ]
-        },
+                "minItems": 1,
+                "examples": [
+                    [1, 2, 3, 4, 5],
+                    [1.1, 2.2, 3.3, 4.4, 5.5],
+                    [1, 2.2, 3, 4.4, 5],
+                ],
+            },
+        ],
     ),
 ]
