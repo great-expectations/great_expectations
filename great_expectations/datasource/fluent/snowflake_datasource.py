@@ -264,35 +264,29 @@ class SnowflakeDatasource(SQLDatasource):
         """
         if isinstance(self.connection_string, ConnectionDetails):
             return self.connection_string.schema_
-        elif isinstance(self.connection_string, ConfigStr):
-            subbed_str: str | None = _get_config_substituted_connection_string(
-                self, warning_msg="Unable to determine schema"
-            )
-            if not subbed_str:
-                return None
-            url_path: str = urllib.parse.urlparse(subbed_str).path
-        else:
-            assert self.connection_string.path
-            url_path = self.connection_string.path
+        elif isinstance(self.connection_string, SnowflakeDsn):
+            return self.connection_string.schema
 
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine schema"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
         return _extract_path_sections(url_path)["schema"]
 
     @property
     def database(self) -> str | None:
         """Convenience property to get the `database` regardless of the connection string format."""
-        if isinstance(self.connection_string, ConnectionDetails):
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
-        elif isinstance(self.connection_string, ConfigStr):
-            subbed_str: str | None = _get_config_substituted_connection_string(
-                self, warning_msg="Unable to determine database"
-            )
-            if not subbed_str:
-                return None
-            url_path: str = urllib.parse.urlparse(subbed_str).path
-        else:
-            assert self.connection_string.path
-            url_path = self.connection_string.path
 
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine database"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
         return _extract_path_sections(url_path)["database"]
 
     @deprecated_method_or_class(
