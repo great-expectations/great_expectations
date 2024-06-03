@@ -106,7 +106,7 @@
         "expectation_type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {
           "column": "Unnamed: 0",
-          "min_value": 42,
+          "min_value": null,
           "max_value": null,
           "result_format": "SUMMARY"
         }
@@ -132,7 +132,7 @@
         "kwargs": {
           "column": "Unnamed: 0",
           "min_value": null,
-          "max_value": 0.5,
+          "max_value": null,
           "result_format": "SUMMARY"
         }
       },
