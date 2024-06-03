@@ -321,6 +321,7 @@ class SnowflakeDatasource(SQLDatasource):
             # using MISSING to indicate that the user did not provide a value
             schema_name = self.schema_
         else:
+            # deprecated-v0.18.16
             warnings.warn(
                 "The `schema_name argument` is deprecated and will be removed in a future release."
                 " The schema now comes from the datasource.",
