@@ -120,9 +120,12 @@ def test_snowflake_dsn():
     ],
 )
 def test_valid_config(
-    empty_file_context: AbstractDataContext, seed_env_vars: None, config_kwargs: dict
+    empty_file_context: AbstractDataContext,
+    seed_env_vars: None,
+    config_kwargs: dict,
+    param_id: str,
 ):
-    my_sf_ds_1 = SnowflakeDatasource(name="my_sf_ds_1", **config_kwargs)
+    my_sf_ds_1 = SnowflakeDatasource(name=f"my_sf {param_id}", **config_kwargs)
     assert my_sf_ds_1
 
     my_sf_ds_1._data_context = (
@@ -584,10 +587,9 @@ class TestConvenienceProperties:
         self,
         ds_config: dict,
         seed_env_vars: None,
-        request: pytest.FixtureRequest,
+        param_id: str,
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
-        param_id = request.node.name
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
         if isinstance(datasource.connection_string, ConfigStr):
             # expect a warning if connection string is a ConfigStr
@@ -604,10 +606,9 @@ class TestConvenienceProperties:
         self,
         ds_config: dict,
         seed_env_vars: None,
-        request: pytest.FixtureRequest,
+        param_id: str,
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
-        param_id = request.node.name
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
         if isinstance(datasource.connection_string, ConfigStr):
             # expect a warning if connection string is a ConfigStr
