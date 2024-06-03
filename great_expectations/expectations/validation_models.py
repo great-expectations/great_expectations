@@ -19,7 +19,7 @@ if model_validator is not None:
             return v
 else:
 
-    class MinMaxAnyOfValidatorMixin(BaseModel):
+    class MinMaxAnyOfValidatorMixin(BaseModel):  # type: ignore[no-redef]
         @root_validator(pre=True)
         def any_of(cls, v: Dict[str, Any]) -> Dict[str, Any]:
             error_msg = "At least one of min_value or max_value must be specified"
