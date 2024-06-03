@@ -26,7 +26,7 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
     from pydantic.v1.generics import GenericModel
     from pydantic.v1.main import ModelMetaclass
 
-    model_validator = None  # type: ignore[assignment]  # only exists in pydantic v1
+    model_validator = None  # only exists in pydantic v1
 
 else:
     # TODO: don't use star imports

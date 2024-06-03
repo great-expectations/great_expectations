@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 import altair as alt
 import pandas as pd
 
-from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
@@ -175,7 +174,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: ValueSet = pydantic.Field(default=[], description=VALUE_SET_DESCRIPTION)
+    value_set: ValueSet
 
     library_metadata = {
         "maturity": "production",

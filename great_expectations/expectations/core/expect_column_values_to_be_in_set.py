@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
-from great_expectations.compatibility import pydantic
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
 )
@@ -168,7 +167,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: ValueSet = pydantic.Field([])
+    value_set: ValueSet
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
