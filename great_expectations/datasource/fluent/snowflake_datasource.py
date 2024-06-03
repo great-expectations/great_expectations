@@ -50,7 +50,11 @@ LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 REQUIRED_QUERY_PARAMS: Final[
     Iterable[str]
-] = {}  # errors will be thrown if any of these are missing
+] = {  # errors will be thrown if any of these are missing
+    # TODO: require warehouse and role
+    # "warehouse",
+    # "role",
+}
 
 
 def _extract_query_section(url: str) -> str | None:
