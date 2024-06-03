@@ -1,6 +1,5 @@
-from collections.abc import Callable, Generator
 from dataclasses import dataclass
-from typing import Any, Dict, Generic, TypeVar, Union
+from typing import Any, Callable, Dict, Generator, Generic, TypeVar, Union
 
 from great_expectations.compatibility.pydantic import (
     BaseModel,
