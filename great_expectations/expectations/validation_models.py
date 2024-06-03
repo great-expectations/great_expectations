@@ -1,6 +1,6 @@
 from collections.abc import Callable, Generator
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Any, Dict, Generic, TypeVar, Union
 
 from great_expectations.compatibility.pydantic import (
     BaseModel,
@@ -43,7 +43,7 @@ class Required(Generic[RequiredType]):
 
     @classmethod
     def __modify_schema__(
-        cls, field_schema: dict[str, Any], field: fields.ModelField | None
+        cls, field_schema: Dict[str, Any], field: Union[fields.ModelField, None]
     ) -> None:
         if field:
             field.required = True
@@ -62,7 +62,7 @@ class Required(Generic[RequiredType]):
 
 class MinMaxAnyOfValidatorMixin(BaseModel):
     @root_validator(pre=True)
-    def any_of(cls, v: dict[str, Any]) -> dict[str, Any]:
+    def any_of(cls, v: Dict[str, Any]) -> Dict[str, Any]:
         error_msg = "At least one of min_value or max_value must be specified"
         if v and v.get("min_value") is None and v.get("max_value") is None:
             raise ValueError(error_msg)

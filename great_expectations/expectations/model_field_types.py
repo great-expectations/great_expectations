@@ -1,6 +1,6 @@
 from collections.abc import Callable, Generator
 from enum import Enum
-from typing import Any
+from typing import Any, Dict, List, Union
 
 from great_expectations.compatibility import pydantic
 
@@ -14,7 +14,7 @@ class Column(pydantic.ConstrainedStr):
     min_length = 1
 
 
-ColumnList = pydantic.conlist(item_type=Column, min_items=1)
+ColumnList = pydantic.conlist(item_type=Column, min_items=1)  # type: ignore[valid-type]  # mypy and pydantic conflict
 
 
 class ColumnType(pydantic.ConstrainedStr):
@@ -29,7 +29,7 @@ class ValueSet:
         yield cls.validate
 
     @classmethod
-    def validate(cls, v: list[Any]) -> list[Any]:
+    def validate(cls, v: List[Any]) -> List[Any]:
         # Ensure list has at least one item
         if not v:
             raise TypeError("Value Set must contain at least one item.")  # noqa: TRY003  # this is not a long message
@@ -39,7 +39,7 @@ class ValueSet:
 
     @classmethod
     def __modify_schema__(
-        cls, field_schema: dict[str, Any], field: pydantic.fields.ModelField | None
+        cls, field_schema: Dict[str, Any], field: Union[pydantic.fields.ModelField, None]
     ) -> None:
         # We need to override the schema, because the JSON form for Expectation input requires
         # that the input be either all strings or numbers. We do not validate that this is
