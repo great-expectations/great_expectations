@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from pprint import pformat as pf
 from sys import version_info as python_version
+from typing import TYPE_CHECKING, Final, Sequence
 
 import pytest
 import sqlalchemy as sa
@@ -9,6 +11,7 @@ from pytest import param
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.datasource.fluent import GxContextWarning
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
@@ -16,10 +19,67 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
+if TYPE_CHECKING:
+    from pytest.mark.structures import ParameterSet
+
+VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
+    param(
+        {
+            "connection_string": "snowflake://my_user:password@my_account/d_public/s_public?numpy=True"
+        },
+        id="connection_string str",
+    ),
+    param(
+        {"connection_string": "${MY_CONN_STR_PARTIAL}@${MY_PATH}?${MY_QUERY_PARAMS}"},
+        id="connection_string ConfigStr with required query params",
+    ),
+    param(
+        {"connection_string": "${MY_CONN_STR_FULL}"},
+        id="connection_string ConfigStr - required params part of sub",
+    ),
+    param(
+        {"connection_string": "${MY_CONN_STR_MIN}?${MY_QUERY_PARAMS}"},
+        id="connection_string ConfigStr - dedicated query params sub",
+    ),
+    param(
+        {
+            "connection_string": {
+                "user": "my_user",
+                "password": "password",
+                "account": "my_account",
+                "schema": "s_public",
+                "database": "d_public",
+            }
+        },
+        id="connection_string dict",
+    ),
+    param(
+        {
+            "connection_string": {
+                "user": "my_user",
+                "password": "${MY_PASSWORD}",
+                "account": "my_account",
+                "schema": "s_public",
+                "database": "d_public",
+            }
+        },
+        id="connection_string dict with password ConfigStr",
+    ),
+]
+
 
 @pytest.fixture
 def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("MY_CONN_STR", "snowflake://my_user:password@my_account")
+    monkeypatch.setenv("MY_CONN_STR_PARTIAL", "snowflake://my_user:password")
+    monkeypatch.setenv(
+        "MY_CONN_STR_MIN", "snowflake://my_user:password@my_account/my_db/my_schema"
+    )
+    monkeypatch.setenv(
+        "MY_CONN_STR_FULL",
+        "snowflake://my_user:password@my_account/my_db/my_schema?warehouse=my_wh&role=my_role",
+    )
+    monkeypatch.setenv("MY_PATH", "my_account/my_db/my_schema")
+    monkeypatch.setenv("MY_QUERY_PARAMS", "warehouse=my_wh&role=my_role")
     monkeypatch.setenv("MY_PASSWORD", "my_password")
 
 
@@ -27,44 +87,7 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.parametrize(
     "config_kwargs",
     [
-        param(
-            {
-                "connection_string": "snowflake://my_user:password@my_account?numpy=True&schema=s_public&database=d_public"
-            },
-            id="connection_string str",
-        ),
-        param(
-            {"connection_string": "${MY_CONN_STR}"},
-            id="connection_string ConfigStr missing query params",
-        ),
-        param(
-            {"connection_string": "${MY_CONN_STR}?database=my_db&schema=my_schema"},
-            id="connection_string ConfigStr with required query params",
-        ),
-        param(
-            {
-                "connection_string": {
-                    "user": "my_user",
-                    "password": "password",
-                    "account": "my_account",
-                    "schema": "s_public",
-                    "database": "d_public",
-                }
-            },
-            id="connection_string dict",
-        ),
-        param(
-            {
-                "connection_string": {
-                    "user": "my_user",
-                    "password": "${MY_PASSWORD}",
-                    "account": "my_account",
-                    "schema": "s_public",
-                    "database": "d_public",
-                }
-            },
-            id="connection_string dict with password ConfigStr",
-        ),
+        *VALID_DS_CONFIG_PARAMS,
         param(
             {
                 "user": "my_user",
@@ -74,6 +97,10 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
                 "database": "d_public",
             },
             id="old config format - top level keys",
+        ),
+        param(
+            {"connection_string": "${MY_CONN_STR_MIN}"},
+            id="connection_string ConfigStr missing query params",
         ),
     ],
 )
@@ -101,115 +128,159 @@ def test_valid_config(
             "snowflake://my_user:password@my_account",
             [
                 {
-                    "ctx": {"msg": "missing database, schema"},
                     "loc": ("connection_string",),
-                    "msg": "URL query param missing",
-                    "type": "value_error.url.query",
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format "
+                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "URL path missing database/schema",
+                    "type": "value_error.url.path",
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="missing path",
+        ),
+        pytest.param(
+            "snowflake://my_user:password@my_account//",
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format "
+                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "ctx": {"msg": "missing database"},
+                    "loc": ("connection_string",),
+                    "msg": "URL path missing database/schema",
+                    "type": "value_error.url.path",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
                     "type": "value_error",
                 },
             ],
             id="missing database + schema",
         ),
         pytest.param(
-            "snowflake://${my_user}:${password}@my_account?numpy=True",
+            "snowflake://my_user:password@my_account/my_db",
             [
                 {
-                    "ctx": {"msg": "missing database, schema"},
                     "loc": ("connection_string",),
-                    "msg": "URL query param missing",
-                    "type": "value_error.url.query",
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
                 },
                 {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format "
+                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
                     "type": "value_error",
                 },
-            ],
-            id="ConfigStr missing database + schema",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@my_account?database=my_db",
-            [
                 {
-                    "ctx": {"msg": "missing schema"},
                     "loc": ("connection_string",),
-                    "msg": "URL query param missing",
-                    "type": "value_error.url.query",
+                    "msg": "URL path missing database/schema",
+                    "type": "value_error.url.path",
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
                     "type": "value_error",
                 },
             ],
             id="missing schema",
         ),
         pytest.param(
-            "snowflake://${my_user}:${password}@my_account?database=my_db",
+            "snowflake://my_user:password@my_account/my_db/",
             [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format "
+                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
                 {
                     "ctx": {"msg": "missing schema"},
                     "loc": ("connection_string",),
-                    "msg": "URL query param missing",
-                    "type": "value_error.url.query",
+                    "msg": "URL path missing database/schema",
+                    "type": "value_error.url.path",
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
                     "type": "value_error",
                 },
             ],
-            id="ConfigStr missing schema",
+            id="missing schema 2",
         ),
         pytest.param(
-            "snowflake://my_user:password@my_account?schema=my_schema",
+            "snowflake://my_user:password@my_account//my_schema",
             [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "value is not a valid dict",
+                    "type": "type_error.dict",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format "
+                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
                 {
                     "ctx": {"msg": "missing database"},
                     "loc": ("connection_string",),
-                    "msg": "URL query param missing",
-                    "type": "value_error.url.query",
+                    "msg": "URL path missing database/schema",
+                    "type": "value_error.url.path",
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
                     "type": "value_error",
                 },
             ],
             id="missing database",
         ),
-        pytest.param(
-            "snowflake://my_user:${password}@my_account?schema=my_schema",
-            [
-                {
-                    "ctx": {"msg": "missing database"},
-                    "loc": ("connection_string",),
-                    "msg": "URL query param missing",
-                    "type": "value_error.url.query",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="ConfigStr missing database",
-        ),
     ],
 )
-def test_missing_required_query_params(
+def test_missing_required_params(
     connection_string: str,
     expected_errors: list[dict],  # TODO: use pydantic error dict
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        _ = SnowflakeDatasource(
+        ds = SnowflakeDatasource(
             name="my_sf_ds",
             connection_string=connection_string,
         )
+        print(f"{ds!r}")
+
+    print(f"\n\tErrors:\n{pf(exc_info.value.errors())}")
     assert exc_info.value.errors() == expected_errors
 
 
@@ -218,7 +289,7 @@ def test_missing_required_query_params(
     "connection_string, connect_args, expected_errors",
     [
         pytest.param(
-            "snowflake://my_user:password@my_account?numpy=True&schema=foo&database=bar",
+            "snowflake://my_user:password@my_account/foo/bar?numpy=True",
             {
                 "account": "my_account",
                 "user": "my_user",
@@ -432,9 +503,7 @@ def test_invalid_connection_string_raises_dsn_error(
 )
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
-    connection_string = (
-        "snowflake://my_user:password@my_account?database=foo&schema=bar"
-    )
+    connection_string = "snowflake://my_user:password@my_account/my_db/my_schema"
     datasource = SnowflakeDatasource(
         name="my_snowflake", connection_string=connection_string
     )
@@ -447,7 +516,7 @@ def test_get_execution_engine_succeeds():
     "connection_string",
     [
         param(
-            "snowflake://my_user:password@my_account?numpy=True&database=foo&schema=bar",
+            "snowflake://my_user:password@my_account/my_db/my_schema?numpy=True",
             id="connection_string str",
         ),
         param(
@@ -483,13 +552,58 @@ def test_get_engine_correctly_sets_application_query_param(
     expected_query_param: str,
     connection_string: str | dict,
 ):
-    context = request.getfixturevalue(context_fixture_name)
+    context = request.getfixturevalue(  # TODO: fix this and make it a fixture in the root conftest
+        context_fixture_name
+    )
     my_sf_ds = SnowflakeDatasource(name="my_sf_ds", connection_string=connection_string)
     my_sf_ds._data_context = context
 
     sql_engine = my_sf_ds.get_engine()
     application_query_param = sql_engine.url.query.get("application")
     assert application_query_param == expected_query_param
+
+
+@pytest.mark.parametrize("ds_config", VALID_DS_CONFIG_PARAMS)
+class TestConvenienceProperties:
+    def test_schema(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        request: pytest.FixtureRequest,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        param_id = request.node.name
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.schema_
+                ), "Don't expect schema to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+
+        assert datasource.schema_
+
+    def test_database(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        request: pytest.FixtureRequest,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        param_id = request.node.name
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.database
+                ), "Don't expect schema to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+
+        assert datasource.database
 
 
 if __name__ == "__main__":
