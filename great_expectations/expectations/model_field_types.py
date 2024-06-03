@@ -1,6 +1,5 @@
-from collections.abc import Callable, Generator
 from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any, Callable, Dict, Generator, List, Union
 
 from great_expectations.compatibility import pydantic
 
