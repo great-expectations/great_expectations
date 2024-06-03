@@ -21,7 +21,7 @@ from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.datasource.fluent import GxContextWarning
+from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
@@ -307,8 +307,22 @@ class SnowflakeDatasource(SQLDatasource):
             The table asset that is added to the datasource.
             The type of this object will match the necessary type for this datasource.
         """
+        if schema_name is not None:
+            warnings.warn(
+                "The `schema_name argument` is deprecated and will be removed in a future release."
+                " The schema now comes from the datasource.",
+                category=DeprecationWarning,
+            )
+            if schema_name != self.schema_:
+                warnings.warn(
+                    f"schema_name {schema_name} does not match datasource schema {self.schema_}",
+                    category=GxDatasourceWarning,
+                )
+
         schema_name = schema_name or self.schema_
-        # TODO: ensure schema is set, even if using `ConfigStr`
+        if not schema_name:
+            raise ValueError(f"Unable to determine schema for {table_name}")
+
         return super().add_table_asset(
             name=name,
             table_name=table_name,
