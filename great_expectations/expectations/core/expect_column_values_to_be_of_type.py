@@ -2,17 +2,17 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility import aws, pyspark, trino
+from great_expectations.compatibility import aws, pydantic, pyspark, trino
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.expectation import (
-    COLUMN_FIELD_DESCRIPTION,
+    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
@@ -76,7 +76,7 @@ except (ImportError, KeyError):
     ch_types = None
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values of a specified data type."
-TYPE__ARG = """
+TYPE__DESCRIPTION = """
     A string representing the data type that each column should have as entries. \
     Valid types are defined by the current backend implementation and are dynamically loaded.
     """
@@ -102,9 +102,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_FIELD_DESCRIPTION}
+            {COLUMN_DESCRIPTION}
         type\\_ (str): \
-            {TYPE__ARG}
+            {TYPE__DESCRIPTION}
             For example, valid types for Pandas Datasources include any numpy dtype values \
             (such as 'int64') or native python types (such as 'int'), whereas valid types \
             for a SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
@@ -211,10 +211,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    type_: str
+    type_: str = pydantic.Field(description=TYPE__DESCRIPTION)
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -222,6 +221,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.of_type"
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -237,6 +237,35 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "column",
         "type_",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeOfType]) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATASOURCES,
+                    },
+                }
+            )
 
     @override
     @classmethod

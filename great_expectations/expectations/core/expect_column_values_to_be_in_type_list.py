@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
 from packaging import version
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import pydantic, pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (  # noqa: TCH001
     SuiteParameterDict,
@@ -18,7 +18,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
     _native_type_type_map,
 )
 from great_expectations.expectations.expectation import (
-    COLUMN_FIELD_DESCRIPTION,
+    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
@@ -57,7 +57,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect a column to contain values from a specified type list."
-TYPE_LIST_ARG = """
+TYPE_LIST_DESCRIPTION = """
     A list of strings representing the data type that each column should have as entries. \
     Valid types are defined by the current backend implementation and are dynamically loaded.
     """
@@ -82,9 +82,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_FIELD_DESCRIPTION}
+            {COLUMN_DESCRIPTION}
         type_list (list[str] or None): \
-            {TYPE_LIST_ARG}
+            {TYPE_LIST_DESCRIPTION}
             For example, valid types for Pandas Datasources include any numpy dtype values \
             (such as 'int64') or native python types (such as 'int'), whereas valid types for a \
             SqlAlchemy Datasource include types named by the current driver such as 'INTEGER' \
@@ -189,10 +189,11 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """  # noqa: E501
 
     condition_parser: Union[str, None] = "pandas"
-    type_list: Union[List[str], SuiteParameterDict, None]
+    type_list: Union[List[str], SuiteParameterDict, None] = pydantic.Field(
+        description=TYPE_LIST_DESCRIPTION
+    )
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -200,6 +201,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.in_type_list"
     domain_keys: ClassVar[Tuple[str, ...]] = (
@@ -216,6 +218,37 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "column",
         "type_list",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInTypeList]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATASOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @override

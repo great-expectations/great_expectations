@@ -486,6 +486,7 @@ class TestCheckpointResult:
         checkpoint = Checkpoint(
             name=self.checkpoint_name, validation_definitions=[validation_definition]
         )
+
         result = checkpoint.run()
 
         run_results = result.run_results
@@ -641,8 +642,7 @@ class TestCheckpointResult:
         }
         assert actual == expected
 
-    @pytest.mark.filesystem
-    def test_checkpoint_run_filesytem_e2e(self, tmp_path: pathlib.Path):
+    def _build_file_backed_checkpoint(self, tmp_path: pathlib.Path) -> Checkpoint:
         with working_directory(tmp_path):
             context = gx.get_context(mode="file")
 
@@ -675,9 +675,12 @@ class TestCheckpointResult:
             name=self.validation_definition_name, data=batch_definition, suite=suite
         )
 
-        checkpoint = Checkpoint(
-            name=self.checkpoint_name, validation_definitions=[validation_definition]
-        )
+        return Checkpoint(name=self.checkpoint_name, validation_definitions=[validation_definition])
+
+    @pytest.mark.filesystem
+    def test_checkpoint_run_result_shape(self, tmp_path: pathlib.Path):
+        checkpoint = self._build_file_backed_checkpoint(tmp_path)
+
         result = checkpoint.run()
 
         assert result.success is False
@@ -737,3 +740,25 @@ class TestCheckpointResult:
                 },
             ],
         }
+
+    @pytest.mark.filesystem
+    def test_checkpoint_run_adds_requisite_ids(self, tmp_path: pathlib.Path):
+        checkpoint = self._build_file_backed_checkpoint(tmp_path)
+
+        # A checkpoint that has not been persisted before running
+        # should be saved during the run
+        # This is also true for its nested validation definitions
+        assert checkpoint.id is None
+        assert checkpoint.validation_definitions[0].id is None
+
+        result = checkpoint.run()
+
+        assert checkpoint.id is not None
+        assert checkpoint.validation_definitions[0].id is not None
+
+        # The meta attribute of each run result should contain the requisite IDs
+        run_results = tuple(result.run_results.values())
+        meta = run_results[0].meta
+        assert sorted(meta.keys()) == ["checkpoint_id", "run_id", "validation_id"]
+        assert meta["checkpoint_id"] == checkpoint.id
+        assert meta["validation_id"] == checkpoint.validation_definitions[0].id

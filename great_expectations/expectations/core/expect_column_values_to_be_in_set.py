@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
-    COLUMN_FIELD_DESCRIPTION,
+    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
 )
 from great_expectations.render import (
@@ -64,7 +64,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_FIELD_DESCRIPTION}
+            {COLUMN_DESCRIPTION}
         value_set (set-like): \
             {VALUE_SET_ARG}
 
@@ -170,8 +170,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
     value_set: Union[list, set, SuiteParameterDict] = pydantic.Field([])
 
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -179,6 +178,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.in_set"
 
@@ -196,6 +196,35 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "value_set",
         "mostly",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeInSet]) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATASOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(
