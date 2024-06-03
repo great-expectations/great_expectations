@@ -7,6 +7,7 @@ from great_expectations.core.suite_parameters import SuiteParameterDict
 from great_expectations.expectations.model_field_descriptions import (
     COLUMN_DESCRIPTION,
     MOSTLY_DESCRIPTION,
+    VALUE_SET_DESCRIPTION,
 )
 
 Mostly = Annotated[
@@ -30,6 +31,7 @@ ValueSet = Annotated[
     SuiteParameterDict,
     Field(
         title="Value Set",
+        description=VALUE_SET_DESCRIPTION,
         json_schema_extra={
             "oneOf": [
                 {

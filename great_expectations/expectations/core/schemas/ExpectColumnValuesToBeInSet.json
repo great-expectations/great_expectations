@@ -77,6 +77,7 @@
         },
         "value_set": {
             "title": "Value Set",
+            "description": "A set of objects used for comparison.",
             "json_schema_extra": {
                 "oneOf": [
                     {

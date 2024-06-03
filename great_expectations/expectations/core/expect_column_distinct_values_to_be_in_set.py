@@ -9,7 +9,10 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    VALUE_SET_DESCRIPTION,
+)
 from great_expectations.expectations.model_field_types import (
     ValueSet,  # noqa: TCH001  # type needed in pydantic validation
 )
@@ -42,7 +45,6 @@ if TYPE_CHECKING:
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the set of distinct column values to be contained by a given set."
 )
-VALUE_SET_DESCRIPTION = "A set of objects used for comparison."
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Sets"]
 
