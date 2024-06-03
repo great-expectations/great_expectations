@@ -9,6 +9,17 @@ class Mostly(pydantic.ConstrainedFloat):
     le = 1.0
 
 
+class Column(pydantic.ConstrainedStr):
+    min_length = 1
+
+
+ColumnList = pydantic.conlist(item_type=Column, min_items=1)  # type: ignore[valid-type]  # mypy and pydantic conflict
+
+
+class ColumnType(pydantic.ConstrainedStr):
+    min_length = 1
+
+
 class ValueSet:
     # A custom type to modify the schema for FE JSON form limitations
     # https://docs.pydantic.dev/1.10/usage/types/#custom-data-types
