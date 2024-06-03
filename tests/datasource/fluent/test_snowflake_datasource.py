@@ -93,7 +93,7 @@ def test_snowflake_dsn():
     assert dsn.password == "password"
     assert dsn.account_identifier == "my_account"
     assert dsn.database == "my_db"
-    assert dsn.schema == "my_schema"
+    assert dsn.schema_ == "my_schema"
     assert dsn.role == "my_role"
     assert dsn.warehouse == "my_wh"
 

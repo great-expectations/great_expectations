@@ -203,7 +203,7 @@ class SnowflakeDsn(AnyUrl):
         return self.path.split("/")[1]
 
     @property
-    def schema(self) -> str:
+    def schema_(self) -> str:
         assert self.path
         return self.path.split("/")[2]
 
@@ -264,10 +264,8 @@ class SnowflakeDatasource(SQLDatasource):
 
         `schema_` to avoid conflict with Pydantic models schema property.
         """
-        if isinstance(self.connection_string, ConnectionDetails):
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.schema_
-        elif isinstance(self.connection_string, SnowflakeDsn):
-            return self.connection_string.schema
 
         subbed_str: str | None = _get_config_substituted_connection_string(
             self, warning_msg="Unable to determine schema"
