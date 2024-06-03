@@ -59,6 +59,8 @@ REQUIRED_QUERY_PARAMS: Final[
     # "role",
 }
 
+MISSING: Final = object()  # sentinel value to indicate missing values
+
 
 def _extract_query_section(url: str) -> str | None:
     """
@@ -300,7 +302,7 @@ class SnowflakeDatasource(SQLDatasource):
         self,
         name: str,
         table_name: str = "",
-        schema_name: Optional[str] = None,  # TODO: remove in V1
+        schema_name: Optional[str] = MISSING,  # type: ignore[assignment] # sentinel value
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> TableAsset:
@@ -317,7 +319,10 @@ class SnowflakeDatasource(SQLDatasource):
             The table asset that is added to the datasource.
             The type of this object will match the necessary type for this datasource.
         """
-        if schema_name is not None:
+        if schema_name is MISSING:
+            # using MISSING to indicate that the user did not provide a value
+            schema_name = self.schema_
+        else:
             warnings.warn(
                 "The `schema_name argument` is deprecated and will be removed in a future release."
                 " The schema now comes from the datasource.",
@@ -328,10 +333,6 @@ class SnowflakeDatasource(SQLDatasource):
                     f"schema_name {schema_name} does not match datasource schema {self.schema_}",
                     category=GxDatasourceWarning,
                 )
-
-        schema_name = schema_name or self.schema_
-        if not schema_name:
-            raise ValueError(f"Unable to determine schema for {table_name}")
 
         return super().add_table_asset(
             name=name,
