@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Generator, List, Union
+from typing import Any, Callable, Dict, Generator, Generic, List, TypeVar, Union
 
 from typing_extensions import Annotated
 
@@ -9,8 +9,10 @@ from great_expectations.expectations.model_field_descriptions import (
     VALUE_SET_DESCRIPTION,
 )
 
+T = TypeVar("T", bound=float)
 
-class Mostly(float):
+
+class Mostly(Generic[T]):
     """Mostly is a custom float type that constrains the input between 0.0 and 1.0.
     The multipleOf field should be set in the schemas for GX Cloud component control,
     but multipleOf should not be validated on input."""
@@ -20,7 +22,7 @@ class Mostly(float):
         yield cls.validate
 
     @classmethod
-    def validate(cls, v: float) -> float:
+    def validate(cls, v: T) -> T:
         if v is None:
             msg = "Mostly cannot be None"
             raise TypeError(msg)
@@ -39,6 +41,7 @@ class Mostly(float):
     def __modify_schema__(cls, field_schema: Dict[str, Any], field: Union[fields.ModelField, None]):
         if field:
             field_schema["description"] = MOSTLY_DESCRIPTION
+            field_schema["type"] = "number"
             field_schema["minimum"] = 0.0
             field_schema["maximum"] = 1.0
             field_schema["multipleOf"] = 0.01
