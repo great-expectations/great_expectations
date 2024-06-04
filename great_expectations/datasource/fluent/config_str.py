@@ -200,9 +200,7 @@ class ConfigUri(AnyUrl, ConfigStr):  # type: ignore[misc] # Mixin "validate" sig
         Parse the resolved URI string into an `AnyUrl` object.
         """
         LOGGER.info(f"Substituting '{self}'")
-        print(self.template_str)
         raw_value = config_provider.substitute_config(self.template_str)
-        print(raw_value)
         return parse_obj_as(AnyUrl, raw_value)
 
     @classmethod
