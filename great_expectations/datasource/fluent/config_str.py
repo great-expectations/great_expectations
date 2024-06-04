@@ -208,7 +208,7 @@ class ConfigUri(AnyUrl, ConfigStr):  # type: ignore[misc] # Mixin "validate" sig
         # one or more validators may be yielded which will be called in the
         # order to validate the input, each validator will receive as an input
         # the value returned from the previous validator
-        yield AnyUrl.validate
+        yield ConfigStr._validate_template_str_format
         yield cls.validate  # equivalent to AnyUrl.validate
 
 
