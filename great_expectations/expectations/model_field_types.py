@@ -1,8 +1,8 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Callable, Dict, Generator, List, Union
 
 from typing_extensions import Annotated
 
-from great_expectations.compatibility.pydantic import Field, StrictStr, confloat, conlist, fields
+from great_expectations.compatibility.pydantic import Field, StrictStr, conlist, fields
 from great_expectations.core.suite_parameters import SuiteParameterDict
 from great_expectations.expectations.model_field_descriptions import (
     MOSTLY_DESCRIPTION,
@@ -10,10 +10,30 @@ from great_expectations.expectations.model_field_descriptions import (
 )
 
 
-class Mostly(confloat(ge=0.0, le=1.0), float):
+class Mostly(float):
     """Mostly is a custom float type that constrains the input between 0.0 and 1.0.
     The multipleOf field should be set in the schemas for GX Cloud component control,
     but multipleOf should not be validated on input."""
+
+    @classmethod
+    def __get_validators__(cls) -> Generator[Callable, None, None]:
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v: float) -> float:
+        if v is None:
+            msg = "Mostly cannot be None"
+            raise TypeError(msg)
+        if not isinstance(v, float):
+            msg = "Mostly is not a valid float."
+            raise TypeError(msg)
+        if v < 0.0:
+            msg = "Mostly must be greater than or equal to 0."
+            raise TypeError(msg)
+        if v > 1.0:
+            msg = "Mostly must be less than or equal to 1."
+            raise TypeError(msg)
+        return v
 
     @classmethod
     def __modify_schema__(cls, field_schema: Dict[str, Any], field: Union[fields.ModelField, None]):
