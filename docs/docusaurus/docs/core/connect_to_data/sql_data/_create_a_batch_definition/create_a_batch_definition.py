@@ -13,7 +13,7 @@ from tests.integration.db.taxi_data_utils import load_data_into_test_database
 # add test_data to database for testing
 load_data_into_test_database(
     table_name="postgres_taxi_data",
-    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
+    csv_path="./data/yellow_tripdata_sample_2020-01.csv",
     connection_string="postgresql+psycopg2://postgres:@localhost/test_ci",
 )
 
