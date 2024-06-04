@@ -182,7 +182,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Annotated[ValueSet, Optional[Union[list, set, SuiteParameterDict]]]
+    value_set: Optional[Union[Annotated[ValueSet, Union[list, set]], SuiteParameterDict]]
 
     library_metadata = {
         "maturity": "production",
