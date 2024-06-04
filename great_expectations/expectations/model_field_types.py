@@ -1,3 +1,4 @@
+from numbers import Number
 from typing import Any, Callable, Dict, Generator, Generic, List, TypeVar, Union
 
 from typing_extensions import Annotated
@@ -26,8 +27,8 @@ class Mostly(Generic[T]):
         if v is None:
             msg = "Mostly cannot be None"
             raise TypeError(msg)
-        if not isinstance(v, float):
-            msg = "Mostly is not a valid float."
+        if not isinstance(v, Number):
+            msg = "Mostly is not a valid number."
             raise TypeError(msg)
         if v < 0.0:
             msg = "Mostly must be greater than or equal to 0."
