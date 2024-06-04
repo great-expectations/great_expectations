@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Mapping
+from typing import TYPE_CHECKING, Generic, Mapping, TypeVar
 
-from great_expectations.compatibility.pydantic import SecretStr
+from great_expectations.compatibility.pydantic import SecretStr, parse_obj_as
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.config_substitutor import TEMPLATE_STR_REGEX
 
@@ -14,8 +14,13 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
+T = TypeVar("T")
 
-class ConfigStr(SecretStr):
+
+class ConfigStr(
+    SecretStr,
+    Generic[T],
+):
     """
     Special type that enables great_expectation config variable substitution.
 
@@ -41,6 +46,17 @@ class ConfigStr(SecretStr):
         """
         LOGGER.info(f"Substituting '{self}'")
         return config_provider.substitute_config(self.template_str)
+
+    def get_config_value_as_type(self, config_provider: _ConfigurationProvider) -> T:
+        """
+        Resolve the config template string to its value according to the passed
+        _ConfigurationProvider and cast it to the type of the `ConfigStr`.
+        """
+        substituted_value = self.get_config_value(config_provider)
+        bases = self.__class__.__bases__
+        print(bases)
+        parsed_value: T = parse_obj_as(bases[0], substituted_value)
+        return parsed_value
 
     def _display(self) -> str:
         return str(self)

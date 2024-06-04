@@ -252,3 +252,35 @@ class TestSecretMasking:
             assert "my_secret" not in dumped_str
             assert "dont_serialize_me" not in dumped_str
             assert r"${MY_SECRET}" in dumped_str
+
+
+class TestGeneric:
+    def test_simple_types(
+        self, env_config_provider: _ConfigurationProvider, monkeypatch: MonkeyPatch
+    ):
+        env_vars: dict[str, str] = {"MY_INT": "123", "MY_FLOAT": "123.456"}
+
+        for k, v in env_vars.items():
+            monkeypatch.setenv(k, v)
+
+        class MyGeneric(FluentBaseModel):
+            my_int: ConfigStr[int]
+            my_float: ConfigStr[float]
+            my_float_2: ConfigStr[float]
+
+        m = MyGeneric(
+            my_int="${MY_INT}", my_float="${MY_FLOAT}", my_float_2="${MY_INT}.05"
+        )
+        assert m.my_int.get_config_value_as_type(env_config_provider) == int(
+            env_vars["MY_INT"]
+        )
+        assert m.my_float.get_config_value_as_type(env_config_provider) == float(
+            env_vars["MY_FLOAT"]
+        )
+        assert m.my_float_2.get_config_value_as_type(env_config_provider) == float(
+            f"{env_vars['MY_INT']}.05"
+        )
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-vv"])
