@@ -64,7 +64,6 @@ from great_expectations.expectations.model_field_descriptions import (
     COLUMN_DESCRIPTION,
 )
 from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
-    ColumnList,
     Mostly,
 )
 from great_expectations.expectations.registry import (
@@ -2366,7 +2365,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_list: ColumnList
+    column_list: List[StrictStr] = Field(min_items=1)
 
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"

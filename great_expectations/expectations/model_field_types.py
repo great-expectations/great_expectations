@@ -1,8 +1,8 @@
 from numbers import Number
-from typing import Any, Callable, Dict, Generator, List, Union
+from typing import Any, Callable, Dict, Generator, Iterable, Union
 
-from great_expectations.compatibility.pydantic import Field, StrictStr, conlist, fields
-from great_expectations.compatibility.typing_extensions import Annotated, override
+from great_expectations.compatibility.pydantic import fields
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import SuiteParameterDict
 from great_expectations.expectations.model_field_descriptions import (
     MOSTLY_DESCRIPTION,
@@ -49,47 +49,62 @@ class Mostly(Number):
             field_schema["multipleOf"] = 0.01
 
 
-ColumnList = Annotated[List[StrictStr], conlist(item_type=StrictStr, min_items=1)]
+class ValueSet(Iterable):
+    """ValueSet is a custom Iterable type."""
 
+    @override
+    def __iter__(self):
+        return self
 
-ValueSet = Annotated[
-    Union[SuiteParameterDict, list, set, None],
-    Field(
-        title="Value Set",
-        description=VALUE_SET_DESCRIPTION,
-        oneOf=[
-            {
-                "title": "Text",
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "minLength": 1,
-                },
-                "minItems": 1,
-                "examples": [
-                    ["a", "b", "c", "d", "e"],
-                    [
-                        "2024-01-01",
-                        "2024-01-02",
-                        "2024-01-03",
-                        "2024-01-04",
-                        "2024-01-05",
+    @classmethod
+    def __get_validators__(cls) -> Generator[Callable, None, None]:
+        yield cls.validate
+
+    @classmethod
+    def validate(
+        cls, v: Union[SuiteParameterDict, list, set]
+    ) -> Union[SuiteParameterDict, list, set]:
+        if not isinstance(v, (SuiteParameterDict, list, set)):
+            msg = "ValueSet is not a valid type."
+            raise TypeError(msg)
+        return v
+
+    @classmethod
+    def __modify_schema__(cls, field_schema: Dict[str, Any], field: Union[fields.ModelField, None]):
+        if field:
+            field_schema["title"] = "Value Set"
+            field_schema["description"] = VALUE_SET_DESCRIPTION
+            field_schema["oneOf"] = [
+                {
+                    "title": "Text",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1,
+                    },
+                    "minItems": 1,
+                    "examples": [
+                        ["a", "b", "c", "d", "e"],
+                        [
+                            "2024-01-01",
+                            "2024-01-02",
+                            "2024-01-03",
+                            "2024-01-04",
+                            "2024-01-05",
+                        ],
                     ],
-                ],
-            },
-            {
-                "title": "Numbers",
-                "type": "array",
-                "items": {
-                    "type": "number",
                 },
-                "minItems": 1,
-                "examples": [
-                    [1, 2, 3, 4, 5],
-                    [1.1, 2.2, 3.3, 4.4, 5.5],
-                    [1, 2.2, 3, 4.4, 5],
-                ],
-            },
-        ],
-    ),
-]
+                {
+                    "title": "Numbers",
+                    "type": "array",
+                    "items": {
+                        "type": "number",
+                    },
+                    "minItems": 1,
+                    "examples": [
+                        [1, 2, 3, 4, 5],
+                        [1.1, 2.2, 3.3, 4.4, 5.5],
+                        [1, 2.2, 3, 4.4, 5],
+                    ],
+                },
+            ]

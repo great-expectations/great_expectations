@@ -176,7 +176,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: ValueSet
+    value_set: Optional[ValueSet]
 
     library_metadata = {
         "maturity": "production",

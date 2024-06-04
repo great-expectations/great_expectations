@@ -136,20 +136,6 @@
                         ]
                     ]
                 }
-            ],
-            "anyOf": [
-                {
-                    "type": "object"
-                },
-                {
-                    "type": "array",
-                    "items": {}
-                },
-                {
-                    "type": "array",
-                    "items": {},
-                    "uniqueItems": true
-                }
             ]
         },
         "metadata": {
@@ -202,7 +188,8 @@
         }
     },
     "required": [
-        "column"
+        "column",
+        "value_set"
     ],
     "additionalProperties": false,
     "definitions": {
