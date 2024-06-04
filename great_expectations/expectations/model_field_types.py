@@ -2,7 +2,7 @@ from numbers import Number
 from typing import Any, Callable, Dict, Generator, Iterable, Union
 
 from great_expectations.compatibility.pydantic import fields
-from great_expectations.compatibility.typing_extensions import override
+from great_expectations.compatibility.typing_extensions import Annotated, override
 from great_expectations.expectations.model_field_descriptions import (
     MOSTLY_DESCRIPTION,
     VALUE_SET_DESCRIPTION,
@@ -48,7 +48,7 @@ class Mostly(Number):
             field_schema["multipleOf"] = 0.01
 
 
-class ValueSet(Iterable):
+class _ValueSet(Iterable):
     """ValueSet is a custom Iterable type."""
 
     @override
@@ -105,3 +105,6 @@ class ValueSet(Iterable):
                     ],
                 },
             ]
+
+
+ValueSet = Union[Annotated[_ValueSet, list], Annotated[_ValueSet, set]]
