@@ -115,7 +115,7 @@ services:
         cd /app/services/ge_cloud
         gunicorn "mercury.api_v1:get_app()" -c ./fastapi-gunicorn.conf.py
   nginx:
-    image: nginx:latest
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}nginx:latest
     container_name: nginx
     ports:
       - "5000:5000"
