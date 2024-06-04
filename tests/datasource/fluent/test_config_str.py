@@ -10,7 +10,12 @@ from great_expectations.core.config_provider import (
     _ConfigurationProvider,
     _EnvironmentConfigurationProvider,
 )
-from great_expectations.datasource.fluent.config_str import ConfigStr, SecretStr
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,
+    ConfigUri,
+    SecretStr,
+    UriPartsDict,
+)
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.exceptions import MissingConfigVariableError
 
@@ -254,32 +259,65 @@ class TestSecretMasking:
             assert r"${MY_SECRET}" in dumped_str
 
 
-class TestGeneric:
-    def test_simple_types(
-        self, env_config_provider: _ConfigurationProvider, monkeypatch: MonkeyPatch
+@pytest.mark.parametrize(
+    "uri",
+    [
+        "http://me:${MY_PW}@example.com:8000/the/path/?query=here#fragment=is;this=bit",
+        "http://${MY_USER}:${MY_PW}@example.com:8000/the/path/?query=here#fragment=is;this=bit",
+        "snowflake://me:${MY_PW}@account/db",
+        "snowflake://${MY_USER}:${MY_PW}@account/db",
+        "postgresql+psycopg2://me:${MY_PW}@host/db",
+        "postgresql+psycopg2://${MY_USER}:${MY_PW}@host/db",
+    ],
+)
+class TestConfigUri:
+    def test_parts(
+        self,
+        env_config_provider: _ConfigurationProvider,
+        monkeypatch: MonkeyPatch,
+        uri: str,
     ):
-        env_vars: dict[str, str] = {"MY_INT": "123", "MY_FLOAT": "123.456"}
+        monkeypatch.setenv("MY_USER", "me")
+        monkeypatch.setenv("MY_PW", "super_secret")
 
-        for k, v in env_vars.items():
-            monkeypatch.setenv(k, v)
+        parsed = pydantic.parse_obj_as(ConfigUri, uri)
 
-        class MyGeneric(FluentBaseModel):
-            my_int: ConfigStr[int]
-            my_float: ConfigStr[float]
-            my_float_2: ConfigStr[float]
+        # ensure attributes are set
+        assert parsed.scheme
+        assert parsed.host
+        assert parsed.path
+        # ensure no attribute errors
+        _ = parsed.query
+        _ = parsed.fragment
 
-        m = MyGeneric(
-            my_int="${MY_INT}", my_float="${MY_FLOAT}", my_float_2="${MY_INT}.05"
-        )
-        assert m.my_int.get_config_value_as_type(env_config_provider) == int(
-            env_vars["MY_INT"]
-        )
-        assert m.my_float.get_config_value_as_type(env_config_provider) == float(
-            env_vars["MY_FLOAT"]
-        )
-        assert m.my_float_2.get_config_value_as_type(env_config_provider) == float(
-            f"{env_vars['MY_INT']}.05"
-        )
+        # ensure that the password (and user) are not substituted
+        assert parsed.password == "${MY_PW}"
+        assert parsed.user in ["${MY_USER}", "me"]
+
+    def test_substitution(
+        self,
+        env_config_provider: _ConfigurationProvider,
+        monkeypatch: MonkeyPatch,
+        uri: str,
+    ):
+        monkeypatch.setenv("MY_USER", "me")
+        monkeypatch.setenv("MY_PW", "super_secret")
+
+        parsed = pydantic.parse_obj_as(ConfigUri, uri)
+
+        substituted = parsed.get_config_value(env_config_provider)
+
+        # ensure attributes are set
+        assert substituted.scheme
+        assert substituted.host
+        assert substituted.path
+        # ensure no attribute errors
+        _ = substituted.query
+        _ = substituted.fragment
+
+        # ensure that the password (and user) are not substituted
+        assert substituted.password == "super_secret"
+        assert substituted.user == "me"
 
 
 if __name__ == "__main__":
