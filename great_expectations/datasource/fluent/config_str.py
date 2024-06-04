@@ -110,7 +110,7 @@ class UriPartsDict(TypedDict, total=False):
     fragment: str | None
 
 
-class ConfigUri(AnyUrl, ConfigStr):
+class ConfigUri(AnyUrl, ConfigStr):  # type: ignore[misc] # Mixin "validate" signature mismatch
     """
     Special type that enables great_expectation config variable substitution for the
     `user` and `password` section of a URI.
@@ -208,19 +208,11 @@ class ConfigUri(AnyUrl, ConfigStr):
         return parse_obj_as(AnyUrl, raw_value)
 
     @classmethod
-    @override  # type: ignore[override] # incompatible with SecretStr validate
-    def validate(
-        cls, value: Any, field: fields.ModelField, config: BaseConfig
-    ) -> AnyUrl:
-        # override AnyUrl.validate to prevent mypy multiple inheritance error
-        return AnyUrl.validate(value, field, config)
-
-    @classmethod
     def __get_validators__(cls):
         # one or more validators may be yielded which will be called in the
         # order to validate the input, each validator will receive as an input
         # the value returned from the previous validator
-        yield ConfigStr._validate_template_str_format
+        yield AnyUrl.validate
         yield cls.validate  # equivalent to AnyUrl.validate
 
 
