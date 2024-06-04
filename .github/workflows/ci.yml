@@ -7,7 +7,7 @@ name: ci
 #   3. When we push a tag with a semver pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
 
 env:
-  ECR_PULL_THROUGH_REPOSITORY_URL: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/library/
+  ECR_PULL_THROUGH_REPOSITORY_URL: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/
 
 on:
   merge_group:

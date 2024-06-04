@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:13.7
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}library/postgres:13.7
     # Turn off db logs by default
     # https://postgresqlco.nf/doc/en/param/log_statement/
     command: ["postgres", "-c", "log_statement=none"]
@@ -16,7 +16,7 @@ services:
       timeout: 2s
       retries: 5
   mq:
-    image: rabbitmq:3.10.20-management
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}library/rabbitmq:3.10.20-management
     hostname: gx-bunny
     environment:
       RABBITMQ_DEFAULT_USER: gx_prod
@@ -115,7 +115,7 @@ services:
         cd /app/services/ge_cloud
         gunicorn "mercury.api_v1:get_app()" -c ./fastapi-gunicorn.conf.py
   nginx:
-    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}nginx:latest
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}library/nginx:latest
     container_name: nginx
     ports:
       - "5000:5000"

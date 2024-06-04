@@ -1,6 +1,6 @@
 services:
   postgres_db:
-    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}postgres:15.1
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}library/postgres:15.1
     command:
       - postgres
       - "-c"
