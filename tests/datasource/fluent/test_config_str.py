@@ -262,11 +262,11 @@ class TestSecretMasking:
 @pytest.mark.parametrize(
     "uri",
     [
-        "http://me:${MY_PW}@example.com:8000/the/path/?query=here#fragment=is;this=bit",
+        "http://my_user:${MY_PW}@example.com:8000/the/path/?query=here#fragment=is;this=bit",
         "http://${MY_USER}:${MY_PW}@example.com:8000/the/path/?query=here#fragment=is;this=bit",
-        "snowflake://me:${MY_PW}@account/db",
+        "snowflake://my_user:${MY_PW}@account/db",
         "snowflake://${MY_USER}:${MY_PW}@account/db",
-        "postgresql+psycopg2://me:${MY_PW}@host/db",
+        "postgresql+psycopg2://my_user:${MY_PW}@host/db",
         "postgresql+psycopg2://${MY_USER}:${MY_PW}@host/db",
     ],
 )
@@ -277,7 +277,7 @@ class TestConfigUri:
         monkeypatch: MonkeyPatch,
         uri: str,
     ):
-        monkeypatch.setenv("MY_USER", "me")
+        monkeypatch.setenv("MY_USER", "my_user")
         monkeypatch.setenv("MY_PW", "super_secret")
 
         parsed = pydantic.parse_obj_as(ConfigUri, uri)
@@ -292,7 +292,7 @@ class TestConfigUri:
 
         # ensure that the password (and user) are not substituted
         assert parsed.password == "${MY_PW}"
-        assert parsed.user in ["${MY_USER}", "me"]
+        assert parsed.user in ["${MY_USER}", "my_user"]
 
     def test_substitution(
         self,
@@ -300,7 +300,7 @@ class TestConfigUri:
         monkeypatch: MonkeyPatch,
         uri: str,
     ):
-        monkeypatch.setenv("MY_USER", "me")
+        monkeypatch.setenv("MY_USER", "my_user")
         monkeypatch.setenv("MY_PW", "super_secret")
 
         parsed = pydantic.parse_obj_as(ConfigUri, uri)
@@ -317,7 +317,29 @@ class TestConfigUri:
 
         # ensure that the password (and user) are not substituted
         assert substituted.password == "super_secret"
-        assert substituted.user == "me"
+        assert substituted.user == "my_user"
+
+    def test_leakage(
+        self,
+        env_config_provider: _ConfigurationProvider,
+        monkeypatch: MonkeyPatch,
+        uri: str,
+    ):
+        """Ensure the config values are not leaked in the repr or str of the object or the component parts."""
+        monkeypatch.setenv("MY_USER", "my_user")
+        monkeypatch.setenv("MY_PW", "super_secret")
+
+        parsed = pydantic.parse_obj_as(ConfigUri, uri)
+        assert "super_secret" not in str(parsed)
+        assert "super_secret" not in repr(parsed)
+        assert parsed.password
+        assert "super_secret" not in parsed.password
+
+        if "my_user" not in uri:
+            assert "my_user" not in str(parsed)
+            assert "my_user" not in repr(parsed)
+            assert parsed.user
+            assert "my_user" not in parsed.user
 
 
 class TestConfigUriInvalid:
