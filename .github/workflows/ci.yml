@@ -272,7 +272,7 @@ jobs:
         run: cd docs/docusaurus && yarn install && bash ../build_docs
 
   cloud-tests:
-    needs: [unit-tests, static-analysis, ci-is-on-main-repo]
+    # needs: [unit-tests, static-analysis, ci-is-on-main-repo]
     if: github.event.pull_request.draft == false
     permissions:
       id-token: write
@@ -295,6 +295,9 @@ jobs:
       ENVIRONMENT: local
 
     steps:
+      - name: print-env-var
+        run: echo ECR_PULL_THROUGH_REPOSITORY_URL=$ECR_PULL_THROUGH_REPOSITORY_URL
+
       - name: Checkout
         uses: actions/checkout@v4
 
