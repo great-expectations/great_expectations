@@ -11,6 +11,10 @@ from great_expectations.expectations.model_field_descriptions import (
 
 
 class Mostly(confloat(ge=0.0, le=1.0)):
+    """Mostly is a custom float type that constrains the input between 0.0 and 1.0.
+    The multipleOf field should be set in the schemas for GX Cloud component control,
+    but multipleOf should not be validated on input."""
+
     @classmethod
     def __modify_schema__(cls, field_schema: Dict[str, Any], field: Union[fields.ModelField, None]):
         if field:
