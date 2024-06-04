@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from great_expectations.compatibility.typing_extensions import override
+from great_expectations.compatibility.typing_extensions import Annotated, override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001  # used in pydantic validation
 )
@@ -158,7 +158,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Optional[Union[ValueSet, SuiteParameterDict]]
+    value_set: Annotated[ValueSet, Optional[Union[list, set, SuiteParameterDict]]]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
