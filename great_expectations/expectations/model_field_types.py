@@ -10,7 +10,7 @@ from great_expectations.expectations.model_field_descriptions import (
     VALUE_SET_DESCRIPTION,
 )
 
-T = TypeVar("T", bound=float)
+T = TypeVar("T", bound=Number)
 
 
 class Mostly(Generic[T]):
@@ -23,12 +23,12 @@ class Mostly(Generic[T]):
         yield cls.validate
 
     @classmethod
-    def validate(cls, v: T) -> T:
+    def validate(cls, v: Number) -> Number:
         if v is None:
             msg = "Mostly cannot be None"
             raise TypeError(msg)
         if not isinstance(v, Number):
-            msg = "Mostly is not a valid number."
+            msg = "Mostly is not a valid float."
             raise TypeError(msg)
         if v < 0.0:
             msg = "Mostly must be greater than or equal to 0."
