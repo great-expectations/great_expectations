@@ -320,5 +320,31 @@ class TestConfigUri:
         assert substituted.user == "me"
 
 
+class TestConfigUriInvalid:
+    @pytest.mark.parametrize("uri", ["invalid_uri", "http:/example.com"])
+    def test_invalid_uri(self, uri: str):
+        with pytest.raises(pydantic.ValidationError):
+            _ = pydantic.parse_obj_as(ConfigUri, uri)
+
+    @pytest.mark.parametrize(
+        "uri",
+        [
+            "${MY_SCHEME}://me:secret@account/db/schema",
+            "snowflake://me:secret@${MY_ACCOUNT}/db/schema",
+            "snowflake://me:secret@account/${MY_DB}/schema",
+            "snowflake://me:secret@account/db/${MY_SCHEMA}",
+            "snowflake://me:secret@account/db/my_schema?${MY_QUERY_PARAMS}",
+            "snowflake://me:secret@account/db/my_schema?role=${MY_ROLE}",
+        ],
+    )
+    def test_disallowed_substitution(self, uri: str):
+        with pytest.raises(pydantic.ValidationError):
+            _ = pydantic.parse_obj_as(ConfigUri, uri)
+
+    def test_no_template_str(self):
+        with pytest.raises(pydantic.ValidationError):
+            _ = pydantic.parse_obj_as(ConfigUri, "snowflake://me:password@account/db")
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])
