@@ -364,10 +364,10 @@ def snowflake_ds(
         pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
-        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci"
+        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci"
         f"/{RAND_SCHEMA}?warehouse=ci&role=ci",
         # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
-        # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
+        # connection_string="snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
     return ds
 
