@@ -130,7 +130,7 @@ class ConfigUri(AnyUrl, ConfigStr):
     min_length: int = 1
     max_length: int = 2**16
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 # for compatibility with AnyUrl
         self,
         template_str: str,
         *,
