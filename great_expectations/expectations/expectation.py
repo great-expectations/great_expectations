@@ -13,7 +13,6 @@ from numbers import Number
 from string import Formatter
 from typing import (
     TYPE_CHECKING,
-    Annotated,
     Any,
     Callable,
     ClassVar,
@@ -31,7 +30,7 @@ from typing import (
 
 import pandas as pd
 from dateutil.parser import parse
-from typing_extensions import ParamSpec, dataclass_transform
+from typing_extensions import Annotated, ParamSpec, dataclass_transform
 
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
