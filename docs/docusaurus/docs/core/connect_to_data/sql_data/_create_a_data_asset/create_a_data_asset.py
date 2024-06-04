@@ -33,7 +33,10 @@ data_source = context.data_sources.add_postgres(
 print(context.get_datasource(datasource_name))
 
 # Alternatively, fetch a Data Source from the Data Context.
-data_source = context.get_datasource(datasource_name)
+# <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py retrieve data source">
+data_source_name = "my_new_datasource"
+data_source = context.get_datasource(data_source_name)
+# </snippet>
 
 # Example of creating a Table Asset
 # highlight-start

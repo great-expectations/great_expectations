@@ -1,20 +1,28 @@
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
+import GxData from '../../../_core_components/_data.jsx'
+import PreReqDataContext from '../../../_core_components/prerequisites/_preconfigured_data_context.md'
+
+### Prerequisites
+- <PreReqDataContext/>.  The variable `context` is used for your Data Context in the following example code.
+- [A Data Asset on a SQL Data Source](#create-a-data-asset).
 
 <Tabs>
 
 <TabItem value="procedure" label="Procedure">
 
-1. Retrieve your Data Asset
+1. Retrieve your Data Asset.
+
+   Replace the value of `datasource_name` with the name of your Data Source and the value of `asset_name` with the name of your Data Asset in the following code.  Then execute it to retrieve an existing Data Source and Data Asset from your Data Context:
 
    ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_data_asset/create_a_data_asset.py retrieve a Data Asset"
    ```
 
-2. Add a Batch Definition to the Data Asset
+2. Add a Batch Definition to the Data Asset.
 
-   <Tabs queryString="batch_definition" groupId="batch_definition" defaultValue='whole_table' values={[{label: 'Whole table', value:'whole_table'}, {label: 'Partitioned', value:'partitioned'}]}>
+   <Tabs queryString="batch_definition" groupId="batch_definition" defaultValue='full_table' values={[{label: 'Full table', value:'full_table'}, {label: 'Partitioned', value:'partitioned'}]}>
 
-   <TabItem value="whole_table" label="Whole table">
+   <TabItem value="full_table" label="Full table">
    
    A full table Batch Definition returns all of the records in your Data Asset as a single Batch.  Therefore, to define a full table Batch Definition you only need to provide a name for the Batch Definition to be referenced by.
  
@@ -26,7 +34,7 @@ import Tabs from '@theme/Tabs';
 
    <TabItem value="partitioned" label="Partitioned">
    
-   A partitioned Batch Definition subdivides the records in a Data Asset based on the values in a specified field.  {Gx.product_name} currently supports partitioning Data Assets based on date fields.  The records can be grouped by year, month, or day.
+   A partitioned Batch Definition subdivides the records in a Data Asset based on the values in a specified field.  {GxData.product_name} currently supports partitioning Data Assets based on date fields.  The records can be grouped by year, month, or day.
 
    Update the `date_column` variable and `name` parameters in the following snippet, then execute it to create partitioned Batch Definitions:
 
@@ -40,9 +48,9 @@ import Tabs from '@theme/Tabs';
 
    When retrieving a Batch from a partitioned Batch Definition, you can specify the date of the data to retrieve as shown in the following examples.  If you do not specify a date, the most recent date in the data is returned by default.
 
-   <Tabs queryString="batch_definition" groupId="batch_definition" defaultValue='whole_table' values={[{label: 'Whole table', value:'whole_table'}, {label: 'Partitioned', value:'partitioned'}]}>
+   <Tabs queryString="batch_definition" groupId="batch_definition" defaultValue='full_table' values={[{label: 'Full table', value:'full_table'}, {label: 'Partitioned', value:'partitioned'}]}>
 
-   <TabItem value="whole_table" label="Whole table">
+   <TabItem value="full_table" label="Full table">
    ```python title="Python" name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_batch_definition/_create_a_batch_definition.md verify full table"
    ```
    </TabItem>
