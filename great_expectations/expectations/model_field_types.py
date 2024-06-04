@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Callable, Dict, Generator, Generic, List, TypeVar, Union
+from typing import Any, Callable, Dict, Generator, List, Union
 
 from typing_extensions import Annotated
 
@@ -10,20 +10,21 @@ from great_expectations.expectations.model_field_descriptions import (
     VALUE_SET_DESCRIPTION,
 )
 
-T = TypeVar("T", bound=Number)
 
-
-class Mostly(Generic[T]):
+class Mostly(Number):
     """Mostly is a custom float type that constrains the input between 0.0 and 1.0.
     The multipleOf field should be set in the schemas for GX Cloud component control,
     but multipleOf should not be validated on input."""
+
+    def __hash__(self: Number):
+        return hash(self)
 
     @classmethod
     def __get_validators__(cls) -> Generator[Callable, None, None]:
         yield cls.validate
 
     @classmethod
-    def validate(cls, v: Number) -> Number:
+    def validate(cls, v: float) -> float:
         if v is None:
             msg = "Mostly cannot be None"
             raise TypeError(msg)

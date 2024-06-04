@@ -13,6 +13,7 @@ from numbers import Number
 from string import Formatter
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Any,
     Callable,
     ClassVar,
@@ -1507,7 +1508,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: Mostly = 1.0
+    mostly: Annotated[Mostly, float] = 1.0
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
