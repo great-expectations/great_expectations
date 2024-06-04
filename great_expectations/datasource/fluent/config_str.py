@@ -4,7 +4,6 @@ import logging
 import warnings
 from typing import (
     TYPE_CHECKING,
-    Any,
     ClassVar,
     Literal,
     Mapping,
@@ -19,7 +18,6 @@ from great_expectations.core.config_substitutor import TEMPLATE_STR_REGEX
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
-    from great_expectations.compatibility.pydantic import BaseConfig, fields
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.datasource.fluent import Datasource
 
