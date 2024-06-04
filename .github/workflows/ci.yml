@@ -36,13 +36,13 @@ concurrency:
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     if: github.event.pull_request.draft == true
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
   ci-is-on-main-repo:
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     # job only runs on main repo where we have access to credentials, or as part of the release
     if: |
       github.event.pull_request.head.repo.full_name == github.repository ||
@@ -52,12 +52,12 @@ jobs:
       - run: echo "This CI step only runs on the main repo, where we have access to credentials."
 
   static-analysis:
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -83,7 +83,7 @@ jobs:
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
       github.event_name == 'merge_group'
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     strategy:
       matrix:
         doc-step:
@@ -120,13 +120,17 @@ jobs:
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
       - name: Run docs_snippet_checker
         run: |
           yarn install
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
@@ -149,7 +153,7 @@ jobs:
           ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -173,17 +177,17 @@ jobs:
   unit-tests:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [enterprise-arc]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache-dependency-path: |
@@ -207,12 +211,12 @@ jobs:
   doc-checks:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -246,12 +250,12 @@ jobs:
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
       github.event_name == 'merge_group'
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -270,7 +274,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     env:
       GX_CLOUD_BASE_URL: ${{vars.MERCURY_BASE_URL}}
       PACT_BROKER_READ_WRITE_TOKEN: ${{secrets.PACT_BROKER_READ_WRITE_TOKEN}}
@@ -289,10 +293,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache-dependency-path: |
@@ -356,7 +360,7 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
       SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     strategy:
       fail-fast: false
       matrix:
@@ -384,10 +388,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -414,12 +418,12 @@ jobs:
   py38-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -432,12 +436,12 @@ jobs:
   py39-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.9"
           cache: "pip"
@@ -450,12 +454,12 @@ jobs:
   py310-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
@@ -468,12 +472,12 @@ jobs:
   py311-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
@@ -486,12 +490,12 @@ jobs:
   pydantic-v1:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -504,12 +508,12 @@ jobs:
   numpy-2:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.9"
           cache: "pip"
@@ -523,12 +527,12 @@ jobs:
 
   airflow-min-versions:
     needs: [unit-tests, static-analysis]
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -542,7 +546,7 @@ jobs:
   import_gx:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
@@ -551,9 +555,9 @@ jobs:
           - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -583,7 +587,7 @@ jobs:
       ]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     name: Build and publish Python distributions to PyPI
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     environment:
       name: pypi
       url: https://pypi.org/p/great-expectations
@@ -592,7 +596,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Set up Python 3.8
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
       - name: Update pip
@@ -631,7 +635,7 @@ jobs:
         build-n-publish,
       ]
     if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request' && github.event_name != 'merge_group'
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Scheduled CI job failure
         id: slack
@@ -647,7 +651,7 @@ jobs:
 
   notify_on_release:
     needs: [build-n-publish]
-    runs-on: ubuntu-latest
+    runs-on: enterprise-arc
     steps:
       - name: Announce Release
         id: slack
