@@ -1,25 +1,30 @@
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 from typing_extensions import Annotated
 
-from great_expectations.compatibility.pydantic import Field, StrictStr, conlist
+from great_expectations.compatibility.pydantic import Field, StrictStr, confloat, conlist, fields
 from great_expectations.core.suite_parameters import SuiteParameterDict
 from great_expectations.expectations.model_field_descriptions import (
     MOSTLY_DESCRIPTION,
     VALUE_SET_DESCRIPTION,
 )
 
-Mostly = Annotated[
-    float,
-    Field(ge=0.0, le=1.0, description=MOSTLY_DESCRIPTION),
-]
+
+class Mostly(confloat(ge=0.0, le=1.0)):
+    @classmethod
+    def __modify_schema__(cls, field_schema: Dict[str, Any], field: fields.ModelField | None):
+        if field:
+            field_schema["description"] = MOSTLY_DESCRIPTION
+            field_schema["minimum"] = 0.0
+            field_schema["maximum"] = 1.0
+            field_schema["multipleOf"] = 0.01
 
 
 ColumnList = Annotated[List[StrictStr], conlist(item_type=StrictStr, min_items=1)]
 
 
 ValueSet = Annotated[
-    Union[None, SuiteParameterDict, list, set],
+    Union[SuiteParameterDict, list, set, None],
     Field(
         title="Value Set",
         description=VALUE_SET_DESCRIPTION,

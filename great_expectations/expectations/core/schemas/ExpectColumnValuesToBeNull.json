@@ -64,10 +64,11 @@
         },
         "mostly": {
             "title": "Mostly",
-            "description": "Successful if at least `mostly` fraction of values match the expectation.",
             "default": 1.0,
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
             "minimum": 0.0,
             "maximum": 1.0,
+            "multipleOf": 0.01,
             "type": "number"
         },
         "column": {
