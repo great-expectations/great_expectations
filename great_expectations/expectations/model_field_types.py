@@ -19,7 +19,7 @@ ColumnList = Annotated[List[StrictStr], conlist(item_type=StrictStr, min_items=1
 
 
 ValueSet = Annotated[
-    Union[SuiteParameterDict, list, set],
+    Union[None, SuiteParameterDict, list, set],
     Field(
         title="Value Set",
         description=VALUE_SET_DESCRIPTION,
