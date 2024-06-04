@@ -1,6 +1,6 @@
 version: "3.2"
 services:
   trino_db:
-    image: trinodb/trino:latest
+    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/library/trinodb/trino:latest
     ports:
       - "8088:8080"
