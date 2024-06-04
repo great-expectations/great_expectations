@@ -1,9 +1,8 @@
 from numbers import Number
 from typing import Any, Callable, Dict, Generator, List, Union
 
-from typing_extensions import Annotated
-
 from great_expectations.compatibility.pydantic import Field, StrictStr, conlist, fields
+from great_expectations.compatibility.typing_extensions import Annotated, override
 from great_expectations.core.suite_parameters import SuiteParameterDict
 from great_expectations.expectations.model_field_descriptions import (
     MOSTLY_DESCRIPTION,
@@ -16,6 +15,7 @@ class Mostly(Number):
     The multipleOf field should be set in the schemas for GX Cloud component control,
     but multipleOf should not be validated on input."""
 
+    @override
     def __hash__(self: Number):
         return hash(self)
 
