@@ -2365,7 +2365,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_list: List[StrictStr] = Field(min_items=1)
+    column_list: List[StrictStr]
 
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"

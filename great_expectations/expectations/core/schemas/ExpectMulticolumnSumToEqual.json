@@ -72,7 +72,6 @@
         },
         "column_list": {
             "title": "Column List",
-            "minItems": 1,
             "type": "array",
             "items": {
                 "type": "string"
