@@ -10,7 +10,11 @@ from great_expectations.core.config_provider import (
     _ConfigurationProvider,
     _EnvironmentConfigurationProvider,
 )
-from great_expectations.datasource.fluent.config_str import ConfigStr, SecretStr
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,
+    ConfigUri,
+    SecretStr,
+)
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.exceptions import MissingConfigVariableError
 
@@ -252,3 +256,116 @@ class TestSecretMasking:
             assert "my_secret" not in dumped_str
             assert "dont_serialize_me" not in dumped_str
             assert r"${MY_SECRET}" in dumped_str
+
+
+@pytest.mark.parametrize(
+    "uri",
+    [
+        "http://my_user:${MY_PW}@example.com:8000/the/path/?query=here#fragment=is;this=bit",
+        "http://${MY_USER}:${MY_PW}@example.com:8000/the/path/?query=here#fragment=is;this=bit",
+        "snowflake://my_user:${MY_PW}@account/db",
+        "snowflake://${MY_USER}:${MY_PW}@account/db",
+        "postgresql+psycopg2://my_user:${MY_PW}@host/db",
+        "postgresql+psycopg2://${MY_USER}:${MY_PW}@host/db",
+    ],
+)
+class TestConfigUri:
+    def test_parts(
+        self,
+        env_config_provider: _ConfigurationProvider,
+        monkeypatch: MonkeyPatch,
+        uri: str,
+    ):
+        monkeypatch.setenv("MY_USER", "my_user")
+        monkeypatch.setenv("MY_PW", "super_secret")
+
+        parsed = pydantic.parse_obj_as(ConfigUri, uri)
+
+        # ensure attributes are set
+        assert parsed.scheme
+        assert parsed.host
+        assert parsed.path
+        # ensure no attribute errors
+        _ = parsed.query
+        _ = parsed.fragment
+
+        # ensure that the password (and user) are not substituted
+        assert parsed.password == "${MY_PW}"
+        assert parsed.user in ["${MY_USER}", "my_user"]
+
+    def test_substitution(
+        self,
+        env_config_provider: _ConfigurationProvider,
+        monkeypatch: MonkeyPatch,
+        uri: str,
+    ):
+        monkeypatch.setenv("MY_USER", "my_user")
+        monkeypatch.setenv("MY_PW", "super_secret")
+
+        parsed = pydantic.parse_obj_as(ConfigUri, uri)
+
+        substituted = parsed.get_config_value(env_config_provider)
+
+        # ensure attributes are set
+        assert substituted.scheme
+        assert substituted.host
+        assert substituted.path
+        # ensure no attribute errors
+        _ = substituted.query
+        _ = substituted.fragment
+
+        # ensure that the password (and user) are not substituted
+        assert substituted.password == "super_secret"
+        assert substituted.user == "my_user"
+
+    def test_leakage(
+        self,
+        env_config_provider: _ConfigurationProvider,
+        monkeypatch: MonkeyPatch,
+        uri: str,
+    ):
+        """Ensure the config values are not leaked in the repr or str of the object or the component parts."""
+        monkeypatch.setenv("MY_USER", "my_user")
+        monkeypatch.setenv("MY_PW", "super_secret")
+
+        parsed = pydantic.parse_obj_as(ConfigUri, uri)
+        assert "super_secret" not in str(parsed)
+        assert "super_secret" not in repr(parsed)
+        assert parsed.password
+        assert "super_secret" not in parsed.password
+
+        if "my_user" not in uri:
+            assert "my_user" not in str(parsed)
+            assert "my_user" not in repr(parsed)
+            assert parsed.user
+            assert "my_user" not in parsed.user
+
+
+class TestConfigUriInvalid:
+    @pytest.mark.parametrize("uri", ["invalid_uri", "http:/example.com"])
+    def test_invalid_uri(self, uri: str):
+        with pytest.raises(pydantic.ValidationError):
+            _ = pydantic.parse_obj_as(ConfigUri, uri)
+
+    @pytest.mark.parametrize(
+        "uri",
+        [
+            "${MY_SCHEME}://me:secret@account/db/schema",
+            "snowflake://me:secret@${MY_ACCOUNT}/db/schema",
+            "snowflake://me:secret@account/${MY_DB}/schema",
+            "snowflake://me:secret@account/db/${MY_SCHEMA}",
+            "snowflake://me:secret@account/db/my_schema?${MY_QUERY_PARAMS}",
+            "snowflake://me:secret@account/db/my_schema?role=${MY_ROLE}",
+        ],
+    )
+    def test_disallowed_substitution(self, uri: str):
+        with pytest.raises(pydantic.ValidationError):
+            _ = pydantic.parse_obj_as(ConfigUri, uri)
+
+    def test_no_template_str(self):
+        with pytest.raises(pydantic.ValidationError):
+            _ = pydantic.parse_obj_as(ConfigUri, "snowflake://me:password@account/db")
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-vv"])
