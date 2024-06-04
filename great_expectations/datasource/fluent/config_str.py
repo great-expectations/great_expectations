@@ -10,7 +10,6 @@ from typing import (
     Mapping,
     Optional,
     TypedDict,
-    TypeVar,
 )
 
 from great_expectations.compatibility.pydantic import AnyUrl, SecretStr, parse_obj_as

@@ -14,7 +14,6 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     ConfigUri,
     SecretStr,
-    UriPartsDict,
 )
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.exceptions import MissingConfigVariableError
