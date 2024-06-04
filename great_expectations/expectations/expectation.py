@@ -36,7 +36,7 @@ from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import Field, ModelMetaclass, StrictStr
-from great_expectations.compatibility.typing_extensions import Annotated, override
+from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -1506,7 +1506,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: Annotated[Mostly, float] = 1.0
+    mostly: Mostly = 1.0
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
