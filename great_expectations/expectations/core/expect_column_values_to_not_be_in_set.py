@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
 
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001  # used in pydantic validation
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
@@ -146,7 +149,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Optional[ValueSet]
+    value_set: Optional[Union[ValueSet, SuiteParameterDict]]
 
     library_metadata = {
         "maturity": "production",

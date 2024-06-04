@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
+from great_expectations.core.suite_parameters import (
+    SuiteParameterDict,  # noqa: TCH001  # used in pydantic validation
+)
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
@@ -136,7 +139,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Optional[ValueSet]
+    value_set: Optional[Union[ValueSet, SuiteParameterDict]]
     ties_okay: Union[bool, None] = None
 
     # This dictionary contains metadata for display in the public gallery

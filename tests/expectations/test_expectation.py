@@ -88,7 +88,7 @@ def fake_expectation_config(
     [
         (
             FakeMulticolumnExpectation,
-            fake_expectation_config("fake_multicolumn_expectation", {"column_list": []}),
+            fake_expectation_config("fake_multicolumn_expectation", {"column_list": ["column_2"]}),
         ),
         (
             FakeColumnMapExpectation,
@@ -122,7 +122,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
                 (
                     FakeMulticolumnExpectation,
                     fake_expectation_config(
-                        "fake_multicolumn_expectation", {"column_list": [], "mostly": x}
+                        "fake_multicolumn_expectation", {"column_list": ["column_2"], "mostly": x}
                     ),
                 )
                 for x in [0, 0.5, 1]

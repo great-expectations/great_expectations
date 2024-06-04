@@ -3,7 +3,6 @@ from typing import Any, Callable, Dict, Generator, Iterable, Union
 
 from great_expectations.compatibility.pydantic import fields
 from great_expectations.compatibility.typing_extensions import override
-from great_expectations.core.suite_parameters import SuiteParameterDict
 from great_expectations.expectations.model_field_descriptions import (
     MOSTLY_DESCRIPTION,
     VALUE_SET_DESCRIPTION,
@@ -61,10 +60,8 @@ class ValueSet(Iterable):
         yield cls.validate
 
     @classmethod
-    def validate(
-        cls, v: Union[SuiteParameterDict, list, set]
-    ) -> Union[SuiteParameterDict, list, set]:
-        if not isinstance(v, (SuiteParameterDict, list, set)):
+    def validate(cls, v: Union[list, set]) -> Union[list, set]:
+        if not isinstance(v, (list, set)):
             msg = "ValueSet is not a valid type."
             raise TypeError(msg)
         return v
