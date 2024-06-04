@@ -158,7 +158,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Optional[Union[ValueSet, SuiteParameterDict]]
+    value_set: Optional[Union[SuiteParameterDict, ValueSet]]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

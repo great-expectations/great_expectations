@@ -80,6 +80,9 @@
             "title": "Value Set",
             "anyOf": [
                 {
+                    "type": "object"
+                },
+                {
                     "title": "Value Set",
                     "description": "A set of objects used for comparison.",
                     "oneOf": [
@@ -255,8 +258,7 @@
         }
     },
     "required": [
-        "column",
-        "value_set"
+        "column"
     ],
     "additionalProperties": false,
     "definitions": {

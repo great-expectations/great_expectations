@@ -139,7 +139,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Optional[Union[ValueSet, SuiteParameterDict]]
+    value_set: Optional[Union[SuiteParameterDict, ValueSet]]
     ties_okay: Union[bool, None] = None
 
     # This dictionary contains metadata for display in the public gallery
