@@ -4,6 +4,7 @@ import logging
 import warnings
 from typing import (
     TYPE_CHECKING,
+    Any,
     ClassVar,
     Literal,
     Mapping,
@@ -17,8 +18,9 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.config_substitutor import TEMPLATE_STR_REGEX
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing_extensions import Self, TypeAlias
 
+    from great_expectations.compatibility.pydantic import BaseConfig, fields
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.datasource.fluent import Datasource
 
@@ -126,6 +128,9 @@ class ConfigUri(AnyUrl, ConfigStr):
 
     ALLOWED_SUBSTITUTIONS: ClassVar[set[UriParts]] = {"user", "password"}
 
+    min_length: int = 1
+    max_length: int = 2**16
+
     def __init__(
         self,
         template_str: str,
@@ -158,7 +163,7 @@ class ConfigUri(AnyUrl, ConfigStr):
             fragment=fragment,
         )
 
-    def __new__(cls, template_str: Optional[str], **kwargs) -> object:
+    def __new__(cls: type[Self], template_str: Optional[str], **kwargs) -> Self:
         """custom __new__ for compatibility with pydantic.parse_obj_as()"""
         built_url = cls.build(**kwargs) if template_str is None else template_str
         instance = str.__new__(cls, built_url)
@@ -166,6 +171,7 @@ class ConfigUri(AnyUrl, ConfigStr):
         return instance
 
     @classmethod
+    @override
     def validate_parts(
         cls, parts: UriPartsDict, validate_port: bool = True
     ) -> UriPartsDict:
@@ -201,6 +207,22 @@ class ConfigUri(AnyUrl, ConfigStr):
         raw_value = config_provider.substitute_config(self.template_str)
         print(raw_value)
         return parse_obj_as(AnyUrl, raw_value)
+
+    @classmethod
+    @override  # type: ignore[override] # incompatible with SecretStr validate
+    def validate(
+        cls, value: Any, field: fields.ModelField, config: BaseConfig
+    ) -> AnyUrl:
+        # override AnyUrl.validate to prevent mypy multiple inheritance error
+        return AnyUrl.validate(value, field, config)
+
+    @classmethod
+    def __get_validators__(cls):
+        # one or more validators may be yielded which will be called in the
+        # order to validate the input, each validator will receive as an input
+        # the value returned from the previous validator
+        yield ConfigStr._validate_template_str_format
+        yield cls.validate  # equivalent to AnyUrl.validate
 
 
 def _check_config_substitutions_needed(
