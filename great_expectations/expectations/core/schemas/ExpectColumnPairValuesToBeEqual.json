@@ -71,13 +71,13 @@
         },
         "column_A": {
             "title": "Column A",
-            "description": "The column name.",
+            "description": "The first column name.",
             "minLength": 1,
             "type": "string"
         },
         "column_B": {
             "title": "Column B",
-            "description": "The column name.",
+            "description": "The second column name.",
             "minLength": 1,
             "type": "string"
         },

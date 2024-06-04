@@ -2,10 +2,9 @@ from typing import List, Union
 
 from typing_extensions import Annotated
 
-from great_expectations.compatibility.pydantic import Field, conlist
+from great_expectations.compatibility.pydantic import Field, conlist, constr
 from great_expectations.core.suite_parameters import SuiteParameterDict
 from great_expectations.expectations.model_field_descriptions import (
-    COLUMN_DESCRIPTION,
     MOSTLY_DESCRIPTION,
     VALUE_SET_DESCRIPTION,
 )
@@ -16,7 +15,7 @@ Mostly = Annotated[
 ]
 
 
-Column = Annotated[str, Field(min_length=1, description=COLUMN_DESCRIPTION)]
+Column = constr(min_length=1, strict=True)
 
 
 ColumnList = Annotated[List[str], conlist(item_type=Column, min_items=1)]

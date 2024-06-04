@@ -58,6 +58,11 @@ from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
 )
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_A_DESCRIPTION,
+    COLUMN_B_DESCRIPTION,
+    COLUMN_DESCRIPTION,
+)
 from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
     Column,
     ColumnList,
@@ -1794,7 +1799,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """  # noqa: E501
 
-    column: Column
+    column: Column = Field(description=COLUMN_DESCRIPTION)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1844,7 +1849,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column: Column
+    column: Column = Field(description=COLUMN_DESCRIPTION)
 
     catch_exceptions: bool = True
 
@@ -2108,8 +2113,8 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_A: Column
-    column_B: Column
+    column_A: Column = Field(description=COLUMN_A_DESCRIPTION)
+    column_B: Column = Field(description=COLUMN_B_DESCRIPTION)
 
     catch_exceptions: bool = True
 
