@@ -13,7 +13,6 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.validation_models import MinMaxAnyOfValidatorMixin
 from great_expectations.render import (
     LegacyRendererType,
     RenderedBulletListContent,
@@ -48,7 +47,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation, MinMaxAnyOfValidatorMixin):
+class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     """Expect the column entries to be strings with length between a minimum value and a maximum value (inclusive).
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.

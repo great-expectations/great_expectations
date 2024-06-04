@@ -11,7 +11,6 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.validation_models import MinMaxAnyOfValidatorMixin
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -55,7 +54,7 @@ class QuantileRange(pydantic.BaseModel):
     value_ranges: List[List[Union[float, int, None]]]
 
 
-class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation, MinMaxAnyOfValidatorMixin):
+class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     # noinspection PyUnresolvedReferences
     """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
 

@@ -10,7 +10,6 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.validation_models import MinMaxAnyOfValidatorMixin
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
@@ -39,9 +38,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnUniqueValueCountToBeBetween(
-    ColumnAggregateExpectation, MinMaxAnyOfValidatorMixin
-):
+class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
     """Expect the number of unique values to be between a minimum value and a maximum value.
 
     expect_column_unique_value_count_to_be_between is a \

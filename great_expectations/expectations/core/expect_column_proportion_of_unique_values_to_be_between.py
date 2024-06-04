@@ -10,7 +10,6 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.validation_models import MinMaxAnyOfValidatorMixin
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
@@ -38,9 +37,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnProportionOfUniqueValuesToBeBetween(
-    ColumnAggregateExpectation, MinMaxAnyOfValidatorMixin
-):
+class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation):
     """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
     For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \

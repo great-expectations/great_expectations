@@ -12,7 +12,6 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.validation_models import MinMaxAnyOfValidatorMixin
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -36,7 +35,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnValuesToBeBetween(ColumnMapExpectation, MinMaxAnyOfValidatorMixin):
+class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     """Expect the column entries to be between a minimum value and a maximum value (inclusive).
 
     expect_column_values_to_be_between is a \

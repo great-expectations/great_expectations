@@ -26,8 +26,6 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
     from pydantic.v1.generics import GenericModel
     from pydantic.v1.main import ModelMetaclass
 
-    model_validator = None  # only exists in pydantic v1
-
 else:
     # TODO: don't use star imports
     from pydantic import *  # type: ignore[assignment,no-redef] # noqa: F403
@@ -41,7 +39,6 @@ else:
         fields,
         generics,
         json,
-        model_validator,
         networks,
         schema,
         typing,
@@ -60,7 +57,6 @@ __all__ = [
     "HttpUrl",
     "json",
     "ModelMetaclass",
-    "model_validator",
     "networks",
     "schema",
     "typing",

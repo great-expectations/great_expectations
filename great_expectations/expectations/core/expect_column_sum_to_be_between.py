@@ -11,7 +11,6 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.validation_models import MinMaxAnyOfValidatorMixin
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -35,7 +34,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnSumToBeBetween(ColumnAggregateExpectation, MinMaxAnyOfValidatorMixin):
+class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
     """Expect the column to sum to be between a minimum value and a maximum value.
 
     expect_column_sum_to_be_between is a \

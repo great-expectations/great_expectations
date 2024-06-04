@@ -9,7 +9,6 @@ from great_expectations.expectations.expectation import (
     render_suite_parameter_string,
 )
 from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
-from great_expectations.expectations.validation_models import MinMaxAnyOfValidatorMixin
 from great_expectations.render import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
@@ -63,7 +62,7 @@ SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Numerical Data"]
 
 
-class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation, MinMaxAnyOfValidatorMixin):
+class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_max_to_be_between is a \
