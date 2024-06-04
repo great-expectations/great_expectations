@@ -152,7 +152,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Optional[Union[Annotated[ValueSet, Union[list, set]], SuiteParameterDict]]
+    value_set: Optional[Union[Annotated[ValueSet, list, set], SuiteParameterDict]]
 
     library_metadata = {
         "maturity": "production",
