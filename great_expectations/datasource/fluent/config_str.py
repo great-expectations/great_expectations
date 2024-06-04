@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Generic, Mapping, TypeVar
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Generic, Mapping, TypeVar, get_args
 
 from great_expectations.compatibility.pydantic import SecretStr, parse_obj_as
 from great_expectations.compatibility.typing_extensions import override
@@ -15,6 +16,8 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+# https://github.com/pydantic/pydantic/blob/main/pydantic/v1/generics.py
 
 
 class ConfigStr(
@@ -53,9 +56,24 @@ class ConfigStr(
         _ConfigurationProvider and cast it to the type of the `ConfigStr`.
         """
         substituted_value = self.get_config_value(config_provider)
-        bases = self.__class__.__bases__
+        bases = self.__orig_bases__
         print(bases)
-        parsed_value: T = parse_obj_as(bases[0], substituted_value)
+        generic_base = bases[1]
+        print(generic_base)
+        generic_args = get_args(generic_base)
+        print(generic_args)
+        t = generic_args[0]
+        print(dir(t))
+        print(f"{pf(t.__dict__)}")
+        print(f"{pf(t.__slots__)}")
+        print(f"{t.__bound__}")
+        print(get_args(t))
+        print(f"{pf(self.__dict__)}")
+        print(f"{pf(dir(self))}")
+        print("\n")
+        print(f"{self.__parameters__!r}")
+        print(self.__class_getitem__())
+        parsed_value: T = parse_obj_as(t, substituted_value)
         return parsed_value
 
     def _display(self) -> str:
