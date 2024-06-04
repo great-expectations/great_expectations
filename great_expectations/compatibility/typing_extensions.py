@@ -7,8 +7,9 @@ try:
 
     from typing_extensions import override
 except ImportError:
-    F = TypeVar("F", bound=Callable[..., Any])
     from typing_extensions import Annotated
+
+    F = TypeVar("F", bound=Callable[..., Any])
 
     def override(__arg: F, /) -> F:
         return __arg
