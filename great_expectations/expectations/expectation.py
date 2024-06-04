@@ -35,7 +35,7 @@ from typing_extensions import ParamSpec, dataclass_transform
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import Field, ModelMetaclass
+from great_expectations.compatibility.pydantic import Field, ModelMetaclass, StrictStr
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -64,7 +64,6 @@ from great_expectations.expectations.model_field_descriptions import (
     COLUMN_DESCRIPTION,
 )
 from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
-    Column,
     ColumnList,
     Mostly,
 )
@@ -1799,7 +1798,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """  # noqa: E501
 
-    column: Column = Field(description=COLUMN_DESCRIPTION)
+    column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1849,7 +1848,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column: Column = Field(description=COLUMN_DESCRIPTION)
+    column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
 
     catch_exceptions: bool = True
 
@@ -2113,8 +2112,8 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_A: Column = Field(description=COLUMN_A_DESCRIPTION)
-    column_B: Column = Field(description=COLUMN_B_DESCRIPTION)
+    column_A: StrictStr = Field(min_length=1, description=COLUMN_A_DESCRIPTION)
+    column_B: StrictStr = Field(min_length=1, description=COLUMN_B_DESCRIPTION)
 
     catch_exceptions: bool = True
 
