@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import Any, Callable, TypeVar
 
 try:
-    from typing_extensions import Annotated
-except ImportError:
     from typing import Annotated
+except ImportError:
+    from typing_extensions import Annotated
 
 try:
     from typing_extensions import override
