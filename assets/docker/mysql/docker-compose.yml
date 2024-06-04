@@ -1,8 +1,7 @@
-version: "3.2"
 services:
   mysql_db:
     platform: linux/amd64
-    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/library/mysql:8.0.20
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}mysql:8.0.20
     volumes:
       - ./conf.d:/etc/mysql/conf.d
     environment:

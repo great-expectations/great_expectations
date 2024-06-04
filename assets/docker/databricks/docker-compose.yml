@@ -1,3 +1,3 @@
 services:
   databricks:
-    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/library/databricksruntime/python
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}databricksruntime/python

@@ -1,7 +1,6 @@
-version: "3.2"
 services:
   server:
-    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/library/yandex/clickhouse-server
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}library/yandex/clickhouse-server
     ports:
       - "9000:9000"
 

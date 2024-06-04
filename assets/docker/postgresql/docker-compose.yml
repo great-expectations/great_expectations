@@ -1,7 +1,6 @@
-version: "3.2"
 services:
   postgres_db:
-    image: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/library/postgres:15.1
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}postgres:15.1
     command:
       - postgres
       - "-c"
