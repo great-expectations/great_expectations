@@ -27,6 +27,7 @@ from great_expectations.core._docs_decorators import (
 from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
+    ConfigUri,
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.constants import (
@@ -95,9 +96,9 @@ def _extract_path_sections(url_path: str) -> dict[str, str]:
 def _get_config_substituted_connection_string(
     datasource: SnowflakeDatasource,
     warning_msg: str = "Unable to perform config substitution",
-) -> str | None:
-    if not isinstance(datasource.connection_string, ConfigStr):
-        raise TypeError("Config substitution is only supported for `ConfigStr`")
+) -> AnyUrl | None:
+    if not isinstance(datasource.connection_string, ConfigUri):
+        raise TypeError("Config substitution is only supported for `ConfigUri`")
     if not datasource._data_context:
         warnings.warn(
             f"{warning_msg} for {datasource.connection_string.template_str}. Likely missing a context.",
@@ -253,7 +254,7 @@ class SnowflakeDatasource(SQLDatasource):
 
     type: Literal["snowflake"] = "snowflake"  # type: ignore[assignment]
     # TODO: rename this to `connection` for v1?
-    connection_string: Union[ConnectionDetails, ConfigStr, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
+    connection_string: Union[ConnectionDetails, ConfigUri, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
 
     # TODO: add props for account, user, password, etc?
 
