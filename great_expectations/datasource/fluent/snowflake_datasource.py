@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import functools
 import logging
 import urllib.parse
+import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -13,12 +15,13 @@ from typing import (
     Union,
 )
 
-from great_expectations._docs_decorators import public_api
+from great_expectations._docs_decorators import deprecated_method_or_class, public_api
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.pydantic import AnyUrl, errors
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
@@ -27,19 +30,73 @@ from great_expectations.datasource.fluent.sql_datasource import (
     FluentBaseModel,
     SQLDatasource,
     SQLDatasourceError,
+    TableAsset,
 )
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
     from great_expectations.compatibility.pydantic.networks import Parts
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+        SortersDefinition,
+    )
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 REQUIRED_QUERY_PARAMS: Final[Iterable[str]] = {  # errors will be thrown if any of these are missing
-    "database",
-    "schema",
+    # TODO: require warehouse and role
+    # "warehouse",
+    # "role",
 }
+
+MISSING: Final = object()  # sentinel value to indicate missing values
+
+
+def _extract_query_section(url: str) -> str | None:
+    """
+    Extracts the query section of a URL if it exists.
+
+    snowflake://user:password@account?warehouse=warehouse&role=role
+    """
+    return url.partition("?")[2]
+
+
+@functools.lru_cache(maxsize=4)
+def _extract_path_sections(url_path: str) -> dict[str, str]:
+    """
+    Extracts the database and schema from the path of a URL.
+
+    Raises UrlPathError if the path is missing database/schema.
+
+    snowflake://user:password@account/database/schema
+    """
+    try:
+        _, database, schema, *_ = url_path.split("/")
+    except (ValueError, AttributeError) as e:
+        LOGGER.info(f"Unable to split path - {e!r}")
+        raise UrlPathError() from e
+    if not database:
+        raise UrlPathError(msg="missing database")
+    if not schema:
+        raise UrlPathError(msg="missing schema")
+    return {"database": database, "schema": schema}
+
+
+def _get_config_substituted_connection_string(
+    datasource: SnowflakeDatasource,
+    warning_msg: str = "Unable to perform config substitution",
+) -> str | None:
+    if not isinstance(datasource.connection_string, ConfigStr):
+        raise TypeError("Config substitution is only supported for `ConfigStr`")
+    if not datasource._data_context:
+        warnings.warn(
+            f"{warning_msg} for {datasource.connection_string.template_str}."
+            " Likely missing a context.",
+            category=GxContextWarning,
+        )
+        return None
+    return datasource.connection_string.get_config_value(datasource._data_context.config_provider)
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -58,6 +115,18 @@ class _UrlDomainError(pydantic.UrlError):
 
     code = "url.domain"
     msg_template = "URL domain invalid"
+
+
+class UrlPathError(pydantic.UrlError):
+    """
+    Custom Pydantic error for missing path in SnowflakeDsn.
+    """
+
+    code = "url.path"
+    msg_template = "URL path missing database/schema"
+
+    def __init__(self, **ctx: Any) -> None:
+        super().__init__(**ctx)
 
 
 class _UrlMissingQueryError(pydantic.UrlError):
@@ -95,20 +164,64 @@ class SnowflakeDsn(AnyUrl):
         if domain is None:
             raise _UrlDomainError()
 
-        return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
+        validated_parts = AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
+
+        path: str = parts["path"]
+        # raises UrlPathError if path is missing database/schema
+        _extract_path_sections(path)
+
+        return validated_parts
+
+    @property
+    def params(self) -> dict[str, list[str]]:
+        """The query parameters as a dictionary."""
+        if not self.query:
+            return {}
+        return urllib.parse.parse_qs(self.query)
+
+    @property
+    def account_identifier(self) -> str:
+        """Alias for host."""
+        assert self.host
+        return self.host
+
+    @property
+    def database(self) -> str:
+        assert self.path
+        return self.path.split("/")[1]
+
+    @property
+    def schema_(self) -> str:
+        assert self.path
+        return self.path.split("/")[2]
+
+    @property
+    def warehouse(self) -> str | None:
+        return self.params.get("warehouse", [None])[0]
+
+    @property
+    def role(self) -> str | None:
+        return self.params.get("role", [None])[0]
 
 
 class ConnectionDetails(FluentBaseModel):
     """
     Information needed to connect to a Snowflake database.
     Alternative to a connection string.
+
+    https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#additional-connection-parameters
     """
 
     account: str
     user: str
     password: Union[ConfigStr, str]
-    database: str
-    schema_: str = pydantic.Field(..., alias="schema")  # schema is a reserved attr in BaseModel
+    database: str = pydantic.Field(
+        ...,
+        description="`database` that the Datasource is mapped to.",
+    )
+    schema_: str = pydantic.Field(
+        ..., alias="schema", description="`schema` that the Datasource is mapped to."
+    )  # schema is a reserved attr in BaseModel
     warehouse: Optional[str] = None
     role: Optional[str] = None
     numpy: bool = False
@@ -139,28 +252,83 @@ class SnowflakeDatasource(SQLDatasource):
 
         `schema_` to avoid conflict with Pydantic models schema property.
         """
-        if isinstance(self.connection_string, ConnectionDetails):
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.schema_
-        elif isinstance(self.connection_string, SnowflakeDsn):
-            # extra database and schema query parameters for the url
-            for key, value in self.connection_string.query_params():
-                if key.lower() == "schema":
-                    return value
-        # TODO: attempt to parse schema from a ConfigStr
-        return None
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine schema"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
+        return _extract_path_sections(url_path)["schema"]
 
     @property
     def database(self) -> str | None:
         """Convenience property to get the `database` regardless of the connection string format."""
-        if isinstance(self.connection_string, ConnectionDetails):
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
-        elif isinstance(self.connection_string, SnowflakeDsn):
-            # extra database and schema query parameters for the url
-            for key, value in self.connection_string.query_params():
-                if key.lower() == "database":
-                    return value
-        # TODO: attempt to parse database from a ConfigStr
-        return None
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine database"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
+        return _extract_path_sections(url_path)["database"]
+
+    @deprecated_method_or_class(
+        version="0.18.16",
+        message="`schema_name` is deprecated." " The schema now comes from the datasource.",
+    )
+    @public_api
+    @override
+    def add_table_asset(  # noqa: PLR0913
+        self,
+        name: str,
+        table_name: str = "",
+        schema_name: Optional[str] = MISSING,  # type: ignore[assignment] # sentinel value
+        order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
+    ) -> TableAsset:
+        """Adds a table asset to this datasource.
+
+        Args:
+            name: The name of this table asset.
+            table_name: The table where the data resides.
+            schema_name: The schema that holds the table. Will use the datasource schema if not
+                provided.
+            order_by: A list of Sorters or Sorter strings.
+            batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches
+                derived from it.
+
+        Returns:
+            The table asset that is added to the datasource.
+            The type of this object will match the necessary type for this datasource.
+        """
+        if schema_name is MISSING:
+            # using MISSING to indicate that the user did not provide a value
+            schema_name = self.schema_
+        else:
+            # deprecated-v0.18.16
+            warnings.warn(
+                "The `schema_name argument` is deprecated and will be removed in a future release."
+                " The schema now comes from the datasource.",
+                category=DeprecationWarning,
+            )
+            if schema_name != self.schema_:
+                warnings.warn(
+                    f"schema_name {schema_name} does not match datasource schema {self.schema_}",
+                    category=GxDatasourceWarning,
+                )
+
+        return super().add_table_asset(
+            name=name,
+            table_name=table_name,
+            schema_name=schema_name,
+            order_by=order_by,
+            batch_metadata=batch_metadata,
+        )
 
     @pydantic.root_validator(pre=True)
     def _convert_root_connection_detail_fields(cls, values: dict) -> dict:
@@ -219,10 +387,10 @@ class SnowflakeDatasource(SQLDatasource):
 
         missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
         if isinstance(connection_string, ConfigStr):
-            query_str = connection_string.template_str.partition("?")[2]
-            # best effort: query could be part of the config substitution.
-            # Have to check this when adding assets.
-            if not query_str:
+            query_str = _extract_query_section(connection_string.template_str)
+            # best effort: query could be part of the config substitution. Have to check this when
+            # adding assets.
+            if not query_str or ConfigStr.str_contains_config_template(query_str):
                 LOGGER.info(f"Unable to validate query parameters for {connection_string}")
                 return connection_string
         else:
