@@ -41,7 +41,7 @@ Creating a Checkpoint is part of the initial setup for data validation.  Checkpo
 
 After you create a Checkpoint, you can use it to Validate data by running it against a Batch or Batches of data.  The Batch Requests used by a Checkpoint during this process may be pre-defined and saved as part of the Checkpoint's configuration, or the Checkpoint can be configured to accept one or more Batch Request at run time. For more information about data validation, see [How to validate data by running a Checkpoint](/oss/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md).
 
-In its most basic form, a Checkpoint accepts an `expectation_suite_name` identfying the test suite to run, and a `batch_request` identifying the data to test. Checkpoint can be directly directly in Python as follows:
+In its most basic form, a Checkpoint accepts an `expectation_suite_name` identfying the test suite to run, and a `batch_request` identifying the data to test. Checkpoint can be directly in Python as follows:
 
 ```python title="Python" name="docs/docusaurus/docs/snippets/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
