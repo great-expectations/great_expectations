@@ -529,6 +529,7 @@ class TestTableIdentifiers:
             asset = datasource.add_table_asset(
                 asset_name, table_name=table_name, schema_name=schema
             )
+            batch_definition = asset.add_batch_definition_whole_table("whole table!")
 
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="name", mostly=1))

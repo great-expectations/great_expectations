@@ -270,7 +270,7 @@ class SnowflakeDatasource(SQLDatasource):
         return _extract_path_sections(url_path)["database"]
 
     @deprecated_method_or_class(
-        version="0.18.16",
+        version="1.0.0a4",
         message="`schema_name` is deprecated." " The schema now comes from the datasource.",
     )
     @public_api
