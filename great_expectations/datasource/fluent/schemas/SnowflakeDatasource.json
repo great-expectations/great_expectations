@@ -587,7 +587,9 @@
             "required": [
                 "account",
                 "user",
-                "password"
+                "password",
+                "database",
+                "schema"
             ],
             "additionalProperties": false
         }
