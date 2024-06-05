@@ -130,6 +130,78 @@ def test_valid_config(
     ["connection_string", "expected_errors"],
     [
         pytest.param(
+            "${MY_CONFIG_VAR}",
+            [
+                {
+                    "loc": ("connection_string", "__root__"),
+                    "msg": "Only password, user may use config substitution;"
+                    " 'domain' substitution not allowed",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="illegal config substitution - full connection string",
+        ),
+        pytest.param(
+            "snowflake://my_user:password@${MY_CONFIG_VAR}/db/schema",
+            [
+                {
+                    "loc": ("connection_string", "__root__"),
+                    "msg": "Only password, user may use config substitution;"
+                    " 'domain' substitution not allowed",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="illegal config substitution - account (domain)",
+        ),
+        pytest.param(
+            "snowflake://my_user:password@account/${MY_CONFIG_VAR}/schema",
+            [
+                {
+                    "loc": ("connection_string", "__root__"),
+                    "msg": "Only password, user may use config substitution;"
+                    " 'path' substitution not allowed",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="illegal config substitution - database (path)",
+        ),
+        pytest.param(
+            "snowflake://my_user:password@account/db/${MY_CONFIG_VAR}",
+            [
+                {
+                    "loc": ("connection_string", "__root__"),
+                    "msg": "Only password, user may use config substitution;"
+                    " 'path' substitution not allowed",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="illegal config substitution - schema (path)",
+        ),
+        pytest.param(
             "snowflake://my_user:password@my_account",
             [
                 {
