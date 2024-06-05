@@ -1,6 +1,6 @@
 services:
   spark:
-    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}bitnami/spark:3.3.2
+    image: bitnami/spark:3.3.2
     ports:
       - "9090:8080"
       - "7077:7077"

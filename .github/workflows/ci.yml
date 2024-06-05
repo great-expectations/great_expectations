@@ -171,6 +171,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: "258143015559"
 
       - name: Run the tests
         run: invoke docs-snippet-tests '${{ matrix.doc-step }}' --up-services --verbose  --reports
@@ -220,6 +222,9 @@ jobs:
   doc-checks:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
+    permissions:
+      id-token: write
+      contents: read
     runs-on: enterprise-arc
     steps:
       - name: Checkout
