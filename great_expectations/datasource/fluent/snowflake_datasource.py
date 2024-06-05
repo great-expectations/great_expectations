@@ -371,15 +371,26 @@ class SnowflakeDatasource(SQLDatasource):
             values["connection_string"] = connection_details
         return values
 
+    @pydantic.validator("connection_string", pre=True)
+    def _check_config_template(cls, connection_string: Any) -> Any:
+        """
+        If connection_string has a config template, parse it as a ConfigUri, ignore other errors.
+        """
+        if isinstance(connection_string, str):
+            if ConfigUri.str_contains_config_template(connection_string):
+                LOGGER.debug("Connection string contains config template")
+                return pydantic.parse_obj_as(ConfigUri, connection_string)
+        return connection_string
+
     @pydantic.root_validator
     def _check_connection_string(cls, values: dict) -> dict:
         # keeping this validator isn't strictly necessary, but it provides a better error message
-        connection_string: str | ConfigStr | ConnectionDetails | None = values.get(
+        connection_string: str | ConfigUri | ConnectionDetails | None = values.get(
             "connection_string"
         )
         if connection_string:
             # Method 1 - connection string
-            if isinstance(connection_string, (str, ConfigStr)):
+            if isinstance(connection_string, (str, ConfigUri)):
                 return values
             # Method 2 - individual args (account, user, and password are bare minimum)
             elif isinstance(connection_string, ConnectionDetails) and bool(
@@ -404,7 +415,7 @@ class SnowflakeDatasource(SQLDatasource):
             return connection_string
 
         missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
-        if isinstance(connection_string, ConfigStr):
+        if isinstance(connection_string, ConfigStr):  # TODO: simplify
             query_str = _extract_query_section(connection_string.template_str)
             # best effort: query could be part of the config substitution. Have to check this when adding assets.
             if not query_str or ConfigStr.str_contains_config_template(query_str):
