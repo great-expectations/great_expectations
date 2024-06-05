@@ -411,7 +411,8 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": f"""expected string or bytes-like object{"" if python_version < (3, 11) else ", got 'dict'"}""",
+                    "msg": "expected string or bytes-like object"
+                    f"""{"" if python_version < (3, 11) else ", got 'dict'"}""",
                     "type": "type_error",
                 },
                 {
@@ -421,7 +422,8 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of"
+                    " account, user, and password.",
                     "type": "value_error",
                 },
             ],
@@ -443,7 +445,8 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": f"""expected string or bytes-like object{"" if python_version < (3, 11) else ", got 'dict'"}""",
+                    "msg": "expected string or bytes-like object"
+                    f"""{"" if python_version < (3, 11) else ", got 'dict'"}""",
                     "type": "type_error",
                 },
                 {
