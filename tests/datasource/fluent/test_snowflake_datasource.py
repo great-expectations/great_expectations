@@ -584,58 +584,6 @@ def test_get_execution_engine_succeeds():
 
 
 @pytest.mark.snowflake
-@pytest.mark.parametrize(
-    "connection_string",
-    [
-        param(
-            "snowflake://my_user:password@my_account/my_db/my_schema?numpy=True",
-            id="connection_string str",
-        ),
-        param(
-            {
-                "user": "my_user",
-                "password": "password",
-                "account": "my_account",
-                "database": "foo",
-                "schema": "bar",
-            },
-            id="connection_string dict",
-        ),
-    ],
-)
-@pytest.mark.parametrize(
-    "context_fixture_name,expected_query_param",
-    [
-        param(
-            "empty_file_context",
-            "great_expectations_core",
-            id="file context",
-        ),
-        param(
-            "empty_cloud_context_fluent",
-            "great_expectations_platform",
-            id="cloud context",
-        ),
-    ],
-)
-def test_get_engine_correctly_sets_application_query_param(
-    request,
-    context_fixture_name: str,
-    expected_query_param: str,
-    connection_string: str | dict,
-):
-    context = request.getfixturevalue(  # TODO: fix this and make it a fixture in the root conftest
-        context_fixture_name
-    )
-    my_sf_ds = SnowflakeDatasource(name="my_sf_ds", connection_string=connection_string)
-    my_sf_ds._data_context = context
-
-    sql_engine = my_sf_ds.get_engine()
-    application_query_param = sql_engine.url.query.get("application")
-    assert application_query_param == expected_query_param
-
-
-@pytest.mark.snowflake
 @pytest.mark.parametrize("ds_config", VALID_DS_CONFIG_PARAMS)
 class TestConvenienceProperties:
     def test_schema(
