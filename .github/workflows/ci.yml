@@ -86,9 +86,6 @@ jobs:
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
       github.event_name == 'merge_group'
-    permissions:
-      id-token: write
-      contents: read
     runs-on: enterprise-arc
     strategy:
       matrix:
@@ -169,12 +166,6 @@ jobs:
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m '${{ matrix.doc-step }}'
-
-      - name: Configure ECR AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-east-1
-          role-to-assume: arn:aws:iam::258143015559:role/github-amazonec2containerregistryreadonly
 
       - name: Login to Amazon ECR
         id: login-ecr
