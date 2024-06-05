@@ -63,15 +63,6 @@ REQUIRED_QUERY_PARAMS: Final[
 MISSING: Final = object()  # sentinel value to indicate missing values
 
 
-def _extract_query_section(url: str) -> str | None:
-    """
-    Extracts the query section of a URL if it exists.
-
-    snowflake://user:password@account?warehouse=warehouse&role=role
-    """
-    return url.partition("?")[2]
-
-
 @functools.lru_cache(maxsize=4)
 def _extract_path_sections(url_path: str) -> dict[str, str]:
     """
@@ -378,7 +369,7 @@ class SnowflakeDatasource(SQLDatasource):
         """
         if isinstance(connection_string, str):
             if ConfigUri.str_contains_config_template(connection_string):
-                LOGGER.debug("Connection string contains config template")
+                LOGGER.debug("`connection_string` contains config template")
                 return pydantic.parse_obj_as(ConfigUri, connection_string)
         return connection_string
 
@@ -405,29 +396,21 @@ class SnowflakeDatasource(SQLDatasource):
 
     @pydantic.validator("connection_string")
     def _check_for_required_query_params(
-        cls, connection_string: ConnectionDetails | SnowflakeDsn | ConfigStr
-    ) -> ConnectionDetails | SnowflakeDsn | ConfigStr:
+        cls, connection_string: ConnectionDetails | SnowflakeDsn | ConfigUri
+    ) -> ConnectionDetails | SnowflakeDsn | ConfigUri:
         """
         If connection_string is a SnowflakeDsn,
         check for required query parameters according to `REQUIRED_QUERY_PARAMS`.
         """
-        if not isinstance(connection_string, (SnowflakeDsn, ConfigStr)):
+        if not isinstance(connection_string, (SnowflakeDsn, ConfigUri)):
             return connection_string
 
         missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
-        if isinstance(connection_string, ConfigStr):  # TODO: simplify
-            query_str = _extract_query_section(connection_string.template_str)
-            # best effort: query could be part of the config substitution. Have to check this when adding assets.
-            if not query_str or ConfigStr.str_contains_config_template(query_str):
-                LOGGER.info(
-                    f"Unable to validate query parameters for {connection_string}"
-                )
-                return connection_string
-        else:
-            query_str = connection_string.query
 
-        if query_str:
-            query_params: dict[str, list[str]] = urllib.parse.parse_qs(query_str)
+        if connection_string.query:
+            query_params: dict[str, list[str]] = urllib.parse.parse_qs(
+                connection_string.query
+            )
 
             for key in REQUIRED_QUERY_PARAMS:
                 if key in query_params:
