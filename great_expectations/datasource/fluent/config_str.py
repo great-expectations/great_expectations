@@ -181,7 +181,7 @@ class ConfigUri(AnyUrl, ConfigStr):  # type: ignore[misc] # Mixin "validate" sig
                 cls.str_contains_config_template(part)  # type: ignore[arg-type] # is str
                 and name not in cls.ALLOWED_SUBSTITUTIONS
             ):
-                raise ValueError(
+                raise ValueError(  # noqa: TRY003
                     f"Only {', '.join(allowed_substitutions)} may use config substitution; '{name}'"
                     " substitution not allowed"
                 )

@@ -317,7 +317,10 @@ class TestConfigUri:
         monkeypatch: MonkeyPatch,
         uri: str,
     ):
-        """Ensure the config values are not leaked in the repr or str of the object or the component parts."""
+        """
+        Ensure the config values are not leaked in the repr or str of the object
+        or the component parts.
+        """
         monkeypatch.setenv("MY_USER", "my_user")
         monkeypatch.setenv("MY_PW", "super_secret")
 
