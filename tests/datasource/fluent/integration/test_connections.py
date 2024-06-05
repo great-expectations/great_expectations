@@ -76,11 +76,11 @@ class TestSnowflake:
         "connection_string",
         [
             param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/public?warehouse=ci&role=ci&database=ci&schema=public",
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/public?warehouse=ci&role=ci",
                 id="full connection string",
             ),
             param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/public?role=ci&database=ci&schema=public",
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/public?role=ci",
                 id="missing warehouse",
             ),
         ],
