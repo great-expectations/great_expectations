@@ -371,7 +371,7 @@ def test_missing_required_params(
             [
                 {
                     "loc": ("__root__",),
-                    "msg": "Cannot provide both a connection string and a combination of account, user, and password.",
+                    "msg": "Provided both connection detail keyword args and `connection_string`.",
                     "type": "value_error",
                 }
             ],
@@ -388,7 +388,8 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of"
+                    " account, user, and password.",
                     "type": "value_error",
                 },
             ],

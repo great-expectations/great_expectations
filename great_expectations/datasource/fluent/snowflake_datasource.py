@@ -337,9 +337,16 @@ class SnowflakeDatasource(SQLDatasource):
             *ConnectionDetails.__fields__.keys(),
         }
 
+        connection_string: Any | None = values.get("connection_string")
+        provided_fields = tuple(values.keys())
+
         connection_details = {}
-        for field_name in tuple(values.keys()):
+        for field_name in provided_fields:
             if field_name in connection_detail_fields:
+                if connection_string:
+                    raise ValueError(  # noqa: TRY003
+                        "Provided both connection detail keyword args and `connection_string`."
+                    )
                 connection_details[field_name] = values.pop(field_name)
         if connection_details:
             values["connection_string"] = connection_details
