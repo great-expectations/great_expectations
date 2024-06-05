@@ -80,7 +80,7 @@ def _get_config_substituted_connection_string(
     warning_msg: str = "Unable to perform config substitution",
 ) -> AnyUrl | None:
     if not isinstance(datasource.connection_string, ConfigUri):
-        raise TypeError("Config substitution is only supported for `ConfigUri`")
+        raise TypeError("Config substitution is only supported for `ConfigUri`")  # noqa: TRY003
     if not datasource._data_context:
         warnings.warn(
             f"{warning_msg} for {datasource.connection_string.template_str}."
@@ -366,6 +366,7 @@ class SnowflakeDatasource(SQLDatasource):
             # Method 1 - connection string
             is_connection_string: bool = isinstance(
                 connection_string, (str, ConfigStr, SnowflakeDsn)
+            )
             # Method 2 - individual args (account, user, and password are bare minimum)
             has_min_connection_detail_values: bool = isinstance(
                 connection_string, ConnectionDetails
