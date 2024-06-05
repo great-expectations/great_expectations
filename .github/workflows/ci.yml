@@ -86,6 +86,9 @@ jobs:
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
       github.event_name == 'merge_group'
+    permissions:
+      id-token: write
+      contents: read
     runs-on: enterprise-arc
     strategy:
       matrix:
@@ -374,6 +377,9 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
       SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
+    permissions:
+      id-token: write
+      contents: read
     runs-on: enterprise-arc
     strategy:
       fail-fast: false
