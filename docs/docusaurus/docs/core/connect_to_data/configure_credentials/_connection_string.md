@@ -4,3 +4,4 @@ Different types of SQL database have different formats for their connection stri
 
 <ConnectionStringTable/>
 
+Other connection string formats are valid provided they are for a SQL database that is supported by SQLAlchemy.  You can find more information on the dialects supported by `SQLAlchemy` on their [dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html) page.
