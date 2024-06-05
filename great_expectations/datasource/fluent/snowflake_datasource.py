@@ -364,8 +364,8 @@ class SnowflakeDatasource(SQLDatasource):
         )
         if connection_string:
             # Method 1 - connection string
-            if isinstance(connection_string, (str, ConfigUri)):
-                return values
+            is_connection_string: bool = isinstance(
+                connection_string, (str, ConfigStr, SnowflakeDsn)
             # Method 2 - individual args (account, user, and password are bare minimum)
             has_min_connection_detail_values: bool = isinstance(
                 connection_string, ConnectionDetails
