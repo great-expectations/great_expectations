@@ -20,7 +20,7 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
-    from pytest.mark.structures import ParameterSet
+    from pytest.mark.structures import ParameterSet  # type: ignore[import-not-found]
 
 VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
     param(
