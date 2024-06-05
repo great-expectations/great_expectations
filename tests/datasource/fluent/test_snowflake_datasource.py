@@ -371,14 +371,12 @@ def test_missing_required_params(
             [
                 {
                     "loc": ("__root__",),
-                    "msg": "Cannot provide both a connection string and a combination of"
-                    " account, user, and password.",
+                    "msg": "Cannot provide both a connection string and a combination of account, user, and password.",
                     "type": "value_error",
                 }
             ],
             id="both connection_string and connect_args",
         ),
-        pytest.param(None, {}, id="neither connection_string nor connect_args"),
         pytest.param(
             None,
             {},
@@ -390,8 +388,7 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
                     "type": "value_error",
                 },
             ],
@@ -423,8 +420,7 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
                     "type": "value_error",
                 },
             ],
@@ -438,15 +434,43 @@ def test_missing_required_params(
                 "database": "bar",
             },
             {},
+            [
+                {
+                    "loc": ("connection_string", "password"),
+                    "msg": "field required",
+                    "type": "value_error.missing",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": f"""expected string or bytes-like object{"" if python_version < (3, 11) else ", got 'dict'"}""",
+                    "type": "type_error",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "str type expected",
+                    "type": "type_error.str",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, and password.",
+                    "type": "value_error",
+                },
+            ],
             id="incomplete connection_string dict connect_args",
         ),
     ],
 )
 def test_conflicting_connection_string_and_args_raises_error(
-    connection_string: ConfigStr | SnowflakeDsn | None | dict, connect_args: dict
+    connection_string: ConfigStr | SnowflakeDsn | None | dict,
+    connect_args: dict,
+    expected_errors: list[dict],
 ):
-    with pytest.raises(ValueError):
-        _ = SnowflakeDatasource(connection_string=connection_string, **connect_args)
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        _ = SnowflakeDatasource(
+            name="my_sf_ds", connection_string=connection_string, **connect_args
+        )
+    assert exc_info.value.errors() == expected_errors
 
 
 @pytest.mark.unit
@@ -463,7 +487,8 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
+                    "msg": "ConfigStr - contains no config template strings in the format"
+                    " '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
                     "type": "value_error",
                 },
                 {
@@ -473,7 +498,8 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",  # noqa: E501
+                    "msg": "Must provide either a connection string or a combination of"
+                    " account, user, and password.",
                     "type": "value_error",
                 },
             ],
@@ -489,7 +515,8 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
+                    "msg": "ConfigStr - contains no config template strings in the format"
+                    " '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
                     "type": "value_error",
                 },
                 {
@@ -499,7 +526,8 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",  # noqa: E501
+                    "msg": "Must provide either a connection string or a combination of"
+                    " account, user, and password.",
                     "type": "value_error",
                 },
             ],
@@ -515,7 +543,8 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",  # noqa: E501
+                    "msg": "ConfigStr - contains no config template strings in the format"
+                    " '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
                     "type": "value_error",
                 },
                 {
@@ -525,7 +554,8 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, user, and password.",  # noqa: E501
+                    "msg": "Must provide either a connection string or a combination of"
+                    " account, user, and password.",
                     "type": "value_error",
                 },
             ],
