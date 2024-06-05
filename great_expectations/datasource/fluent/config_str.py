@@ -88,11 +88,9 @@ class ConfigStr(SecretStr):
         yield cls.validate
 
 
-UriParts: TypeAlias = (
-    Literal[  # https://docs.pydantic.dev/1.10/usage/types/#url-properties
-        "scheme", "host", "user", "password", "port", "path", "query", "fragment", "tld"
-    ]
-)
+UriParts: TypeAlias = Literal[  # https://docs.pydantic.dev/1.10/usage/types/#url-properties
+    "scheme", "host", "user", "password", "port", "path", "query", "fragment", "tld"
+]
 
 
 class UriPartsDict(TypedDict, total=False):
@@ -169,28 +167,25 @@ class ConfigUri(AnyUrl, ConfigStr):  # type: ignore[misc] # Mixin "validate" sig
 
     @classmethod
     @override
-    def validate_parts(
-        cls, parts: UriPartsDict, validate_port: bool = True
-    ) -> UriPartsDict:
+    def validate_parts(cls, parts: UriPartsDict, validate_port: bool = True) -> UriPartsDict:
         """
         Ensure that only the `user` and `password` parts have config template strings.
         Also validate that all parts of the URI are valid.
         """
-        validated_parts = AnyUrl.validate_parts(parts, validate_port)
+        allowed_substitutions = sorted(cls.ALLOWED_SUBSTITUTIONS)
 
-        name: UriParts
-        for name, part in validated_parts.items():
+        for name, part in parts.items():
             if not part:
                 continue
             if (
-                cls.str_contains_config_template(part)
+                cls.str_contains_config_template(part)  # type: ignore[arg-type] # is str
                 and name not in cls.ALLOWED_SUBSTITUTIONS
             ):
                 raise ValueError(
-                    f"ConfigUri - '{name}' part of URI is not allowed to be substituted"
+                    f"Only {', '.join(allowed_substitutions)} may use config substitution; '{name}'"
+                    " substitution not allowed"
                 )
-
-        return validated_parts
+        return AnyUrl.validate_parts(parts, validate_port)
 
     @override
     def get_config_value(self, config_provider: _ConfigurationProvider) -> AnyUrl:
