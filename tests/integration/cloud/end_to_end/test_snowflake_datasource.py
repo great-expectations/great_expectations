@@ -96,17 +96,17 @@ def table_asset(
     datasource: SnowflakeDatasource,
     asset_name: str,
     table_factory: TableFactory,
-    get_missing_data_asset_error_type: type[Exception],
-) -> Iterator[TableAsset]:
+) -> TableAsset:
     table_name = f"i{uuid.uuid4().hex}"
     table_factory(
         gx_engine=datasource.get_execution_engine(),
         table_names={table_name},
         schema_name=RANDOM_SCHEMA,
     )
-    asset_name = f"i{uuid.uuid4().hex}"
-    _ = datasource.add_table_asset(
-        name=asset_name, table_name=table_name, schema_name=RANDOM_SCHEMA
+    return datasource.add_table_asset(
+        name=asset_name,
+        schema_name=RANDOM_SCHEMA,
+        table_name=table_name,
     )
 
 
