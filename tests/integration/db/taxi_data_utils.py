@@ -114,7 +114,7 @@ def _execute_taxi_partitioning_test_cases(
         datasource = add_datasource(
             context, name=datasource_name, connection_string=connection_string
         )
-        asset = datasource.add_table_asset(data_asset_name, table_name=table_name)
+        asset = datasource.add_table_asset(data_asset_name, table_name=table_name, schema_name=None)
         add_batch_definition_method = getattr(
             asset, test_case.add_batch_definition_method_name or "MAKE THIS REQUIRED"
         )
