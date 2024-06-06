@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations_v1.expectations.expectation import (
-    MOSTLY_DESCRIPTION,
     MulticolumnMapExpectation,
     render_suite_parameter_string,
 )
+from great_expectations_v1.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
 from great_expectations_v1.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations_v1.render.renderer.renderer import renderer
 from great_expectations_v1.render.renderer_configuration import (
@@ -27,11 +27,6 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
     from great_expectations_v1.render.renderer_configuration import AddParamArgs
-
-EXPECTATION_SHORT_DESCRIPTION = "Expect the compound columns to be unique."
-COLUMN_LIST_DESCRIPTION = "Set of columns to be checked."
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
-DATA_QUALITY_ISSUES = ["Cardinality"]
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the compound columns to be unique."
 COLUMN_LIST_DESCRIPTION = "Set of columns to be checked."

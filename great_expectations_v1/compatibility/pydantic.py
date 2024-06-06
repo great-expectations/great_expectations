@@ -13,6 +13,7 @@ if is_version_greater_or_equal(version=pydantic.VERSION, compare_version="2.0.0"
         AnyUrl,
         BaseSettings,
         HttpUrl,
+        StrictStr,
         UrlError,
         error_wrappers,
         errors,
@@ -33,6 +34,7 @@ else:
         AnyUrl,
         BaseSettings,
         HttpUrl,
+        StrictStr,
         UrlError,
         error_wrappers,
         errors,
@@ -59,6 +61,7 @@ __all__ = [
     "ModelMetaclass",
     "networks",
     "schema",
+    "StrictStr",
     "typing",
     "UrlError",
 ]

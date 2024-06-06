@@ -7,10 +7,10 @@ from great_expectations_v1.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations_v1.expectations.expectation import (
-    COLUMN_DESCRIPTION,
     BatchExpectation,
     render_suite_parameter_string,
 )
+from great_expectations_v1.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations_v1.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations_v1.render.renderer.renderer import renderer
 from great_expectations_v1.render.renderer_configuration import (
@@ -28,14 +28,6 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
     from great_expectations_v1.render.renderer_configuration import AddParamArgs
-
-EXPECTATION_SHORT_DESCRIPTION = "Checks for the existence of a specified column within a table."
-COLUMN_INDEX_DESCRIPTION = (
-    "If not None, checks the order of the columns. "
-    "The expectation will fail if the column is not in location column_index (zero-indexed)."
-)
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
-DATA_QUALITY_ISSUES = ["Schema"]
 
 EXPECTATION_SHORT_DESCRIPTION = "Checks for the existence of a specified column within a table."
 COLUMN_INDEX_DESCRIPTION = (

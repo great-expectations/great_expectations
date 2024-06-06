@@ -3,11 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Optional, Type, Union
 
 from great_expectations_v1.expectations.expectation import (
+    ColumnPairMapExpectation,
+    render_suite_parameter_string,
+)
+from great_expectations_v1.expectations.model_field_descriptions import (
     COLUMN_A_DESCRIPTION,
     COLUMN_B_DESCRIPTION,
     MOSTLY_DESCRIPTION,
-    ColumnPairMapExpectation,
-    render_suite_parameter_string,
 )
 from great_expectations_v1.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations_v1.render.renderer.renderer import renderer
@@ -29,10 +31,6 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
     from great_expectations_v1.render.renderer_configuration import AddParamArgs
-
-EXPECTATION_SHORT_DESCRIPTION = "Expect the values in column A to be the same as column B."
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
-DATA_QUALITY_ISSUES = ["Data Integrity"]
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect the values in column A to be the same as column B."
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]

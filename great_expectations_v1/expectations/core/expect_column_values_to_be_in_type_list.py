@@ -18,10 +18,10 @@ from great_expectations_v1.expectations.core.expect_column_values_to_be_of_type 
     _native_type_type_map,
 )
 from great_expectations_v1.expectations.expectation import (
-    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
+from great_expectations_v1.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations_v1.expectations.registry import get_metric_kwargs
 from great_expectations_v1.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations_v1.render.renderer.renderer import renderer
@@ -61,7 +61,7 @@ TYPE_LIST_DESCRIPTION = """
     A list of strings representing the data type that each column should have as entries. \
     Valid types are defined by the current backend implementation and are dynamically loaded.
     """
-SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Schema"]
 
 
@@ -114,8 +114,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         [expect_column_values_to_be_of_type](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type)
 
     Supported Datasources:
-        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -245,7 +245,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     "supported_data_sources": {
                         "title": "Supported Data Sources",
                         "type": "array",
-                        "const": SUPPORTED_DATASOURCES,
+                        "const": SUPPORTED_DATA_SOURCES,
                     },
                 }
             )
