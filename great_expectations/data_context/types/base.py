@@ -64,12 +64,9 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-CURRENT_GX_CONFIG_VERSION = 3
+CURRENT_GX_CONFIG_VERSION = 4
 FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
-MINIMUM_SUPPORTED_CONFIG_VERSION = 2
-DEFAULT_USAGE_STATISTICS_URL = (
-    "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-)
+MINIMUM_SUPPORTED_CONFIG_VERSION = 3
 
 
 # NOTE 121822: (kilo59) likely won't moving to marshmallow v4 so we don't care about this
@@ -1194,7 +1191,7 @@ class DataContextConfigSchema(Schema):
                 validation_error=ValidationError(message="config version too high"),
             )
 
-        if data["config_version"] < CURRENT_GX_CONFIG_VERSION and (
+        if data["config_version"] < FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE and (
             "checkpoint_store_name" in data
             or any(
                 store_config["class_name"] == "CheckpointStore"
