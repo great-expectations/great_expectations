@@ -12,12 +12,12 @@ pyfakefs>=4.5.1
 pytest>=8.2.1
 pytest-benchmark>=3.4.1
 pytest-cov>=5.0.0
-pytest-icdiff>=0.6
+pytest-icdiff >= 0.9.0
 pytest-mock>=3.14.0
-pytest-order>=0.9.5
-pytest-random-order>=1.0.4
-pytest-timeout>=2.1.0
-pytest-xdist>=3.3.1
+pytest-order>=1.2.1
+pytest-random-order>=1.1.1
+pytest-timeout>=2.3.1
+pytest-xdist>=3.6.1
 requirements-parser>=0.2.0
 responses>=0.23.1 # requests mocking
 snapshottest==0.6.0 # GX Cloud atomic renderer tests
