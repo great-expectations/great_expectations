@@ -72,6 +72,7 @@ class NoUserIdError(Exception):
     def __init__(self):
         super().__init__("No user id in /account/me response")
 
+
 class OrganizationIdNotSpecifiedError(Exception):
     def __init__(self):
         super().__init__(
