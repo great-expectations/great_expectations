@@ -8,7 +8,6 @@ from great_expectations.datasource.fluent.interfaces import (
     Sorter,
     BatchMetadata,
     GxDatasourceWarning,
-    GxContextWarning,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.invalid_datasource import (
