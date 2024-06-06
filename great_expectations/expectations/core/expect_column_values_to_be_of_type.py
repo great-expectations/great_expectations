@@ -605,7 +605,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(  # noqa: C901, PLR0911, PLR0912
+def _get_dialect_type_module(  # noqa: C901, PLR0911
     execution_engine,
 ):
     if execution_engine.dialect_module is None:
