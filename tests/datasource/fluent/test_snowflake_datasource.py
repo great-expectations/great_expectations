@@ -30,16 +30,16 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         id="connection_string str",
     ),
     param(
-        {
-            "connection_string": "snowflake://my_user:${MY_PASSWORD}@my_account/d_public/s_public"
-        },
-        id="connection_string ConfigStr - password sub",
+        {"connection_string": "${MY_CONN_STR_PARTIAL}@${MY_PATH}?${MY_QUERY_PARAMS}"},
+        id="connection_string ConfigStr with required query params",
     ),
     param(
-        {
-            "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@my_account/d_public/s_public"
-        },
-        id="connection_string ConfigStr - user + password sub",
+        {"connection_string": "${MY_CONN_STR_FULL}"},
+        id="connection_string ConfigStr - required params part of sub",
+    ),
+    param(
+        {"connection_string": "${MY_CONN_STR_MIN}?${MY_QUERY_PARAMS}"},
+        id="connection_string ConfigStr - dedicated query params sub",
     ),
     param(
         {
@@ -70,7 +70,16 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
 
 @pytest.fixture
 def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("MY_USER", "my_user")
+    monkeypatch.setenv("MY_CONN_STR_PARTIAL", "snowflake://my_user:password")
+    monkeypatch.setenv(
+        "MY_CONN_STR_MIN", "snowflake://my_user:password@my_account/my_db/my_schema"
+    )
+    monkeypatch.setenv(
+        "MY_CONN_STR_FULL",
+        "snowflake://my_user:password@my_account/my_db/my_schema?warehouse=my_wh&role=my_role",
+    )
+    monkeypatch.setenv("MY_PATH", "my_account/my_db/my_schema")
+    monkeypatch.setenv("MY_QUERY_PARAMS", "warehouse=my_wh&role=my_role")
     monkeypatch.setenv("MY_PASSWORD", "my_password")
 
 
@@ -104,6 +113,10 @@ def test_snowflake_dsn():
             },
             id="old config format - top level keys",
         ),
+        param(
+            {"connection_string": "${MY_CONN_STR_MIN}"},
+            id="connection_string ConfigStr missing query params",
+        ),
     ],
 )
 def test_valid_config(
@@ -129,78 +142,6 @@ def test_valid_config(
 @pytest.mark.parametrize(
     ["connection_string", "expected_errors"],
     [
-        pytest.param(
-            "${MY_CONFIG_VAR}",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'domain' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - full connection string",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@${MY_CONFIG_VAR}/db/schema",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'domain' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - account (domain)",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@account/${MY_CONFIG_VAR}/schema",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'path' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - database (path)",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@account/db/${MY_CONFIG_VAR}",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'path' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - schema (path)",
-        ),
         pytest.param(
             "snowflake://my_user:password@my_account",
             [

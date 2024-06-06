@@ -27,7 +27,6 @@ from great_expectations.core._docs_decorators import (
 from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
-    ConfigUri,
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.constants import (
@@ -63,6 +62,15 @@ REQUIRED_QUERY_PARAMS: Final[
 MISSING: Final = object()  # sentinel value to indicate missing values
 
 
+def _extract_query_section(url: str) -> str | None:
+    """
+    Extracts the query section of a URL if it exists.
+
+    snowflake://user:password@account?warehouse=warehouse&role=role
+    """
+    return url.partition("?")[2]
+
+
 @functools.lru_cache(maxsize=4)
 def _extract_path_sections(url_path: str) -> dict[str, str]:
     """
@@ -87,9 +95,9 @@ def _extract_path_sections(url_path: str) -> dict[str, str]:
 def _get_config_substituted_connection_string(
     datasource: SnowflakeDatasource,
     warning_msg: str = "Unable to perform config substitution",
-) -> AnyUrl | None:
-    if not isinstance(datasource.connection_string, ConfigUri):
-        raise TypeError("Config substitution is only supported for `ConfigUri`")
+) -> str | None:
+    if not isinstance(datasource.connection_string, ConfigStr):
+        raise TypeError("Config substitution is only supported for `ConfigStr`")
     if not datasource._data_context:
         warnings.warn(
             f"{warning_msg} for {datasource.connection_string.template_str}. Likely missing a context.",
@@ -245,7 +253,7 @@ class SnowflakeDatasource(SQLDatasource):
 
     type: Literal["snowflake"] = "snowflake"  # type: ignore[assignment]
     # TODO: rename this to `connection` for v1?
-    connection_string: Union[ConnectionDetails, ConfigUri, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
+    connection_string: Union[ConnectionDetails, ConfigStr, SnowflakeDsn]  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
 
     # TODO: add props for account, user, password, etc?
 
@@ -362,26 +370,15 @@ class SnowflakeDatasource(SQLDatasource):
             values["connection_string"] = connection_details
         return values
 
-    @pydantic.validator("connection_string", pre=True)
-    def _check_config_template(cls, connection_string: Any) -> Any:
-        """
-        If connection_string has a config template, parse it as a ConfigUri, ignore other errors.
-        """
-        if isinstance(connection_string, str):
-            if ConfigUri.str_contains_config_template(connection_string):
-                LOGGER.debug("`connection_string` contains config template")
-                return pydantic.parse_obj_as(ConfigUri, connection_string)
-        return connection_string
-
     @pydantic.root_validator
     def _check_connection_string(cls, values: dict) -> dict:
         # keeping this validator isn't strictly necessary, but it provides a better error message
-        connection_string: str | ConfigUri | ConnectionDetails | None = values.get(
+        connection_string: str | ConfigStr | ConnectionDetails | None = values.get(
             "connection_string"
         )
         if connection_string:
             # Method 1 - connection string
-            if isinstance(connection_string, (str, ConfigUri)):
+            if isinstance(connection_string, (str, ConfigStr)):
                 return values
             # Method 2 - individual args (account, user, and password are bare minimum)
             elif isinstance(connection_string, ConnectionDetails) and bool(
@@ -396,21 +393,29 @@ class SnowflakeDatasource(SQLDatasource):
 
     @pydantic.validator("connection_string")
     def _check_for_required_query_params(
-        cls, connection_string: ConnectionDetails | SnowflakeDsn | ConfigUri
-    ) -> ConnectionDetails | SnowflakeDsn | ConfigUri:
+        cls, connection_string: ConnectionDetails | SnowflakeDsn | ConfigStr
+    ) -> ConnectionDetails | SnowflakeDsn | ConfigStr:
         """
         If connection_string is a SnowflakeDsn,
         check for required query parameters according to `REQUIRED_QUERY_PARAMS`.
         """
-        if not isinstance(connection_string, (SnowflakeDsn, ConfigUri)):
+        if not isinstance(connection_string, (SnowflakeDsn, ConfigStr)):
             return connection_string
 
         missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
+        if isinstance(connection_string, ConfigStr):
+            query_str = _extract_query_section(connection_string.template_str)
+            # best effort: query could be part of the config substitution. Have to check this when adding assets.
+            if not query_str or ConfigStr.str_contains_config_template(query_str):
+                LOGGER.info(
+                    f"Unable to validate query parameters for {connection_string}"
+                )
+                return connection_string
+        else:
+            query_str = connection_string.query
 
-        if connection_string.query:
-            query_params: dict[str, list[str]] = urllib.parse.parse_qs(
-                connection_string.query
-            )
+        if query_str:
+            query_params: dict[str, list[str]] = urllib.parse.parse_qs(query_str)
 
             for key in REQUIRED_QUERY_PARAMS:
                 if key in query_params:

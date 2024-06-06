@@ -24,12 +24,12 @@ RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
 def connection_string() -> str:
     if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return (
-            "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci"
+            "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci"
             f"/{RANDOM_SCHEMA}?warehouse=ci&role=ci"
         )
     elif os.getenv("SNOWFLAKE_USER") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
         return (
-            "snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB"
+            "snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB"
             f"/{RANDOM_SCHEMA}?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser"
         )
     else:

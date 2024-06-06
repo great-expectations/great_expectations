@@ -51,9 +51,8 @@
                 },
                 {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 65536,
-                    "format": "uri"
+                    "writeOnly": true,
+                    "format": "password"
                 },
                 {
                     "type": "string",
