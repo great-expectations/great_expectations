@@ -68,6 +68,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class NoUserIdError(Exception):
+    def __init__(self):
+        super().__init__("No user id in /account/me response")
+
+
 class OrganizationIdNotSpecifiedError(Exception):
     def __init__(self):
         super().__init__(
@@ -158,7 +163,9 @@ class CloudDataContext(SerializableDataContext):
             cloud_config=self.ge_cloud_config, resource="accounts/me"
         )
         data = response.json()
-        user_id = data["user_id"]
+        user_id = data.get("user_id") or data.get("id")
+        if not user_id:
+            raise NoUserIdError()
         return uuid.UUID(user_id)
 
     @override
