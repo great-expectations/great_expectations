@@ -158,7 +158,7 @@ class CloudDataContext(SerializableDataContext):
             cloud_config=self.ge_cloud_config, resource="accounts/me"
         )
         data = response.json()
-        user_id = data["user_id"]
+        user_id = data["id"]
         return uuid.UUID(user_id)
 
     @override
