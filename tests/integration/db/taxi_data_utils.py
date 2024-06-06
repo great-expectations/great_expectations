@@ -127,7 +127,7 @@ def _execute_taxi_partitioning_test_cases(
             )
             warnings.filterwarnings(
                 "once",
-                message="schema_name None does not match datasource schema ***",
+                message="schema_name None does not match datasource schema",
                 category=GxDatasourceWarning,
             )
 
