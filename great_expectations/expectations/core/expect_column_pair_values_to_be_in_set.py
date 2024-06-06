@@ -3,10 +3,12 @@ from __future__ import annotations
 from typing import Any, ClassVar, Dict, List, Literal, Tuple, Type, Union
 
 from great_expectations.expectations.expectation import (
+    ColumnPairMapExpectation,
+)
+from great_expectations.expectations.model_field_descriptions import (
     COLUMN_A_DESCRIPTION,
     COLUMN_B_DESCRIPTION,
     MOSTLY_DESCRIPTION,
-    ColumnPairMapExpectation,
 )
 
 EXPECTATION_SHORT_DESCRIPTION = (

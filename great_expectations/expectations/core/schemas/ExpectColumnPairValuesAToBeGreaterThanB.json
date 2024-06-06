@@ -64,16 +64,22 @@
         "mostly": {
             "title": "Mostly",
             "default": 1.0,
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "type": "number",
             "minimum": 0.0,
             "maximum": 1.0,
-            "type": "number"
+            "multipleOf": 0.01
         },
         "column_A": {
             "title": "Column A",
+            "description": "The first column name.",
+            "minLength": 1,
             "type": "string"
         },
         "column_B": {
             "title": "Column B",
+            "description": "The second column name.",
+            "minLength": 1,
             "type": "string"
         },
         "or_equal": {

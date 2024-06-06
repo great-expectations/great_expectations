@@ -4,11 +4,14 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001  # type needed in pydantic validation
 )
 from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
+)
+from great_expectations.expectations.model_field_types import (
+    ValueSet,  # noqa: TCH001  # type needed in pydantic validation
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -155,7 +158,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Union[list, set, SuiteParameterDict, None]
+    value_set: Optional[Union[SuiteParameterDict, ValueSet]]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {

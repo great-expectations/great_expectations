@@ -450,7 +450,7 @@
             "column": "x",
             "max_value": 20,
             "min_value": 0,
-            "mostly": 0.9
+            "mostly": 0.8999
           }
         },
         {
