@@ -64,30 +64,85 @@
         "mostly": {
             "title": "Mostly",
             "default": 1.0,
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "type": "number",
             "minimum": 0.0,
             "maximum": 1.0,
-            "type": "number"
+            "multipleOf": 0.01
         },
         "column": {
             "title": "Column",
             "description": "The column name.",
+            "minLength": 1,
             "type": "string"
         },
         "value_set": {
             "title": "Value Set",
-            "default": [],
             "anyOf": [
                 {
-                    "type": "array",
-                    "items": {}
-                },
-                {
-                    "type": "array",
-                    "items": {},
-                    "uniqueItems": true
-                },
-                {
                     "type": "object"
+                },
+                {
+                    "title": "Value Set",
+                    "description": "A set of objects used for comparison.",
+                    "oneOf": [
+                        {
+                            "title": "Text",
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "minLength": 1
+                            },
+                            "minItems": 1,
+                            "examples": [
+                                [
+                                    "a",
+                                    "b",
+                                    "c",
+                                    "d",
+                                    "e"
+                                ],
+                                [
+                                    "2024-01-01",
+                                    "2024-01-02",
+                                    "2024-01-03",
+                                    "2024-01-04",
+                                    "2024-01-05"
+                                ]
+                            ]
+                        },
+                        {
+                            "title": "Numbers",
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            },
+                            "minItems": 1,
+                            "examples": [
+                                [
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    5
+                                ],
+                                [
+                                    1.1,
+                                    2.2,
+                                    3.3,
+                                    4.4,
+                                    5.5
+                                ],
+                                [
+                                    1,
+                                    2.2,
+                                    3,
+                                    4.4,
+                                    5
+                                ]
+                            ]
+                        }
+                    ]
                 }
             ]
         },

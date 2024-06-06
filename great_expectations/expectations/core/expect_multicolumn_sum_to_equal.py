@@ -4,9 +4,9 @@ import logging
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Literal, Optional, Type, Union
 
 from great_expectations.expectations.expectation import (
-    MOSTLY_DESCRIPTION,
     MulticolumnMapExpectation,
 )
+from great_expectations.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.components import LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
