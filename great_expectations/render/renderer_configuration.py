@@ -206,7 +206,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             allow_mutation = False
 
         @root_validator(pre=True)
-        def _validate_param_type_matches_value(  # noqa: C901, PLR0912
+        def _validate_param_type_matches_value(  # noqa: C901
             cls, values: dict
         ) -> dict:
             """
