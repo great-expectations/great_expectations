@@ -8,6 +8,7 @@ import sqlalchemy as sa
 
 import great_expectations as gx
 from great_expectations.core.batch_definition import BatchDefinition
+from great_expectations.datasource.fluent import GxDatasourceWarning
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -124,6 +125,12 @@ def _execute_taxi_partitioning_test_cases(
                 message="The `schema_name argument` is deprecated",
                 category=DeprecationWarning,
             )
+            warnings.filterwarnings(
+                "once",
+                message="schema_name None does not match datasource schema ***",
+                category=GxDatasourceWarning,
+            )
+
             asset = datasource.add_table_asset(
                 data_asset_name, table_name=table_name, schema_name=None
             )
