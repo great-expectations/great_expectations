@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import logging
 import urllib.parse
 from typing import (
@@ -43,9 +44,30 @@ LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 REQUIRED_QUERY_PARAMS: Final[
     Iterable[str]
 ] = {  # errors will be thrown if any of these are missing
-    "database",
-    "schema",
+    # TODO: require warehouse and role
+    # "warehouse",
+    # "role",
 }
+
+MISSING: Final = object()  # sentinel value to indicate missing values
+
+
+@functools.lru_cache(maxsize=4)
+def _extract_path_sections(
+    url_path: str,
+) -> dict[Literal["schema", "database"], str | None]:
+    """
+    Extracts the database and schema from the path of a URL.
+
+    snowflake://user:password@account/database/schema
+    """
+    try:
+        _, database, schema, *_ = url_path.split("/")
+    except (ValueError, AttributeError) as e:
+        LOGGER.info(f"Unable to split path - {e!r}")
+        database = None
+        schema = None
+    return {"database": database, "schema": schema}
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -101,7 +123,44 @@ class SnowflakeDsn(AnyUrl):
         if domain is None:
             raise _UrlDomainError()
 
-        return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
+        validated_parts = AnyUrl.validate_parts(
+            parts=parts, validate_port=validate_port
+        )
+
+        return validated_parts
+
+    @property
+    def params(self) -> dict[str, list[str]]:
+        """The query parameters as a dictionary."""
+        if not self.query:
+            return {}
+        return urllib.parse.parse_qs(self.query)
+
+    @property
+    def account_identifier(self) -> str:
+        """Alias for host."""
+        assert self.host
+        return self.host
+
+    @property
+    def database(self) -> str | None:
+        if self.path:
+            return _extract_path_sections(self.path)["database"]
+        return None
+
+    @property
+    def schema_(self) -> str | None:
+        if self.path:
+            return _extract_path_sections(self.path)["schema"]
+        return None
+
+    @property
+    def warehouse(self) -> str | None:
+        return self.params.get("warehouse", [None])[0]
+
+    @property
+    def role(self) -> str | None:
+        return self.params.get("role", [None])[0]
 
 
 class ConnectionDetails(FluentBaseModel):
@@ -289,9 +348,9 @@ class SnowflakeDatasource(SQLDatasource):
 
         For Snowflake specifically we may represent the connection_string as a dict, which is not supported by SQLAlchemy.
         """
-        gx_execution_engine_type: Type[
-            SqlAlchemyExecutionEngine
-        ] = self.execution_engine_type
+        gx_execution_engine_type: Type[SqlAlchemyExecutionEngine] = (
+            self.execution_engine_type
+        )
 
         connection_string: str | None = (
             self.connection_string if isinstance(self.connection_string, str) else None
