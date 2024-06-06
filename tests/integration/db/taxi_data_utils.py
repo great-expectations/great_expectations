@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import warnings
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, List
 
@@ -114,7 +117,17 @@ def _execute_taxi_partitioning_test_cases(
         datasource = add_datasource(
             context, name=datasource_name, connection_string=connection_string
         )
-        asset = datasource.add_table_asset(data_asset_name, table_name=table_name, schema_name=None)
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "once",
+                message="The `schema_name argument` is deprecated",
+                category=DeprecationWarning,
+            )
+            asset = datasource.add_table_asset(
+                data_asset_name, table_name=table_name, schema_name=None
+            )
+
         add_batch_definition_method = getattr(
             asset, test_case.add_batch_definition_method_name or "MAKE THIS REQUIRED"
         )
