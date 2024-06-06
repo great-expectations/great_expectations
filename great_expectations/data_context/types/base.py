@@ -45,7 +45,6 @@ from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.data_context.constants import (
     CURRENT_GX_CONFIG_VERSION,
-    FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
 )
 from great_expectations.types import DictDot, SerializableDictDot
@@ -1190,21 +1189,6 @@ class DataContextConfigSchema(Schema):
                     data["config_version"], CURRENT_GX_CONFIG_VERSION
                 ),
                 validation_error=ValidationError(message="config version too high"),
-            )
-
-        if (
-            data["config_version"] >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE
-            and "validation_operators" in data
-            and data["validation_operators"] is not None
-        ):
-            logger.warning(
-                f"""You appear to be using a legacy capability with the latest config version \
-({data["config_version"]}).\n    Your data context with this configuration version uses validation_operators, which \
-are being deprecated.  Please consult the V3 API migration guide \
-https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and \
-update your configuration to be compatible with the version number {CURRENT_GX_CONFIG_VERSION}.\n    (This message \
-will appear repeatedly until your configuration is updated.)
-"""  # noqa: E501
             )
 
 
