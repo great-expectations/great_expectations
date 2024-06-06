@@ -198,7 +198,8 @@ jobs:
         run: pip install . -c constraints-dev.txt -r reqs/requirements-dev-test.txt
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5 --reports
+        # TODO: revert the timeout back to 1.5 or lower after resolving arc issues 
+        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=2.0 --reports
 
       # upload coverage report to codecov
       - name: Upload coverage reports to Codecov

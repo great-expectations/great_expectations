@@ -336,7 +336,9 @@ def type_check(  # noqa: C901, PLR0912
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
-UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
+UNIT_TEST_DEFAULT_TIMEOUT: float = (
+    2.0  # TODO: revert the timeout back to 1.5 or lower after resolving arc issues
+)
 
 
 @invoke.task(
