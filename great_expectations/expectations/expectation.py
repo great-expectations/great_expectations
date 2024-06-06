@@ -105,6 +105,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+COLUMN_DESCRIPTION = "The column name."
+COLUMN_A_DESCRIPTION = "The first column name."
+COLUMN_B_DESCRIPTION = "The second column name."
+MOSTLY_DESCRIPTION = "Successful if at least `mostly` fraction of values match the expectation."
 
 P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
@@ -277,6 +281,38 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         2. Data Docs rendering methods decorated with the @renderer decorator. See the
     """
 
+    @staticmethod
+    def _format_title(schema_title: str):
+        # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
+        split_between_caps_and_nums = (
+            "".join([" " + c if (c.isdigit() or c == c.upper()) else c for c in schema_title])
+            .lstrip()
+            .split(" ")
+        )
+        join_multi_caps_and_nums: list[str] = []
+        for idx, token in enumerate(split_between_caps_and_nums):
+            if idx > 0:
+                consecutive_caps = (
+                    token.upper() == token
+                    and split_between_caps_and_nums[idx - 1].upper()
+                    == split_between_caps_and_nums[idx - 1]
+                )
+                consecutive_digits = (
+                    token.isdigit() and split_between_caps_and_nums[idx - 1].isdigit()
+                )
+                if (
+                    len(token) == 1
+                    and len(split_between_caps_and_nums[idx - 1]) == 1
+                    and (consecutive_caps or consecutive_digits)
+                ):
+                    join_multi_caps_and_nums[-1] = join_multi_caps_and_nums[-1] + token
+                else:
+                    join_multi_caps_and_nums.append(token)
+            else:
+                join_multi_caps_and_nums.append(token)
+
+        return " ".join(join_multi_caps_and_nums)
+
     class Config:
         arbitrary_types_allowed = True
         smart_union = True
@@ -285,39 +321,11 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
 
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[Expectation]) -> None:
-            # transforms model titles (e.g. "ExpectColumnToExist" -> "Expect Column To Exist")
-            split_between_caps_and_nums = (
-                "".join(
-                    [
-                        " " + c if (c.isdigit() or c == c.upper()) else c
-                        for c in schema.get("title", "")
-                    ]
-                )
-                .lstrip()
-                .split(" ")
-            )
-            join_multi_caps_and_nums: list[str] = []
-            for idx, token in enumerate(split_between_caps_and_nums):
-                if idx > 0:
-                    consecutive_caps = (
-                        token.upper() == token
-                        and split_between_caps_and_nums[idx - 1].upper()
-                        == split_between_caps_and_nums[idx - 1]
-                    )
-                    consecutive_digits = (
-                        token.isdigit() and split_between_caps_and_nums[idx - 1].isdigit()
-                    )
-                    if (
-                        len(token) == 1
-                        and len(split_between_caps_and_nums[idx - 1]) == 1
-                        and (consecutive_caps or consecutive_digits)
-                    ):
-                        join_multi_caps_and_nums[-1] = join_multi_caps_and_nums[-1] + token
-                    else:
-                        join_multi_caps_and_nums.append(token)
-                else:
-                    join_multi_caps_and_nums.append(token)
-            schema["title"] = " ".join(join_multi_caps_and_nums)
+            schema["title"] = model._format_title(schema_title=schema.get("title", ""))
+            schema["properties"]["metadata"] = {
+                "type": "object",
+                "properties": {},
+            }
 
     id: Union[str, None] = None
     meta: Union[dict, None] = None
@@ -1507,6 +1515,21 @@ class BatchExpectation(Expectation, ABC):
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.TABLE
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[BatchExpectation]) -> None:
+            Expectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Batch",
+                    }
+                }
+            )
+
     @override
     def get_validation_dependencies(
         self,
@@ -1771,10 +1794,31 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """  # noqa: E501
 
-    column: str
+    column: str = Field(description=COLUMN_DESCRIPTION)
 
-    domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
-    domain_type = MetricDomainTypes.COLUMN
+    domain_keys: ClassVar[Tuple[str, ...]] = (
+        "batch_id",
+        "table",
+        "column",
+        "row_condition",
+        "condition_parser",
+    )
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnAggregateExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Column Aggregate",
+                    }
+                }
+            )
 
 
 class ColumnMapExpectation(BatchExpectation, ABC):
@@ -1800,7 +1844,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column: str
+    column: str = Field(description=COLUMN_DESCRIPTION)
 
     catch_exceptions: bool = True
 
@@ -1814,6 +1858,21 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     )
     domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnMapExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Column Map",
+                    }
+                }
+            )
 
     @classmethod
     @override
@@ -2063,8 +2122,23 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
         "row_condition",
         "condition_parser",
     )
-    domain_type = MetricDomainTypes.COLUMN_PAIR
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.COLUMN_PAIR
     success_keys: ClassVar[Tuple[str, ...]] = ("mostly",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ColumnPairMapExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Column Pair Map",
+                    }
+                }
+            )
 
     @classmethod
     @override
@@ -2304,8 +2378,23 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         "condition_parser",
         "ignore_row_if",
     )
-    domain_type = MetricDomainTypes.MULTICOLUMN
+    domain_type: ClassVar[MetricDomainTypes] = MetricDomainTypes.MULTICOLUMN
     success_keys = ("mostly",)
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[MulticolumnMapExpectation]) -> None:
+            BatchExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "domain_type": {
+                        "title": "Domain Type",
+                        "type": "string",
+                        "const": model.domain_type,
+                        "description": "Multicolumn Map",
+                    }
+                }
+            )
 
     @classmethod
     @override

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import random
 import string
+import urllib.parse
 
 import pytest
 
@@ -33,8 +34,8 @@ def test_cloud_context_add_datasource_with_fds(
     context = empty_cloud_data_context
     name = "my_pandas_ds"
 
-    post_url = (
-        f"{ge_cloud_config.base_url}/organizations/{ge_cloud_config.organization_id}/datasources"
+    post_url = urllib.parse.urljoin(
+        ge_cloud_config.base_url, f"organizations/{ge_cloud_config.organization_id}/datasources"
     )
 
     fds = PandasDatasource(name=name)
