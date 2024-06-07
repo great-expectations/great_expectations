@@ -68,21 +68,17 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column "
     "with respect to the partition object to be lower than the provided threshold."
 )
-PARTITION_OBJECT_DESCRIPTION = (
-    "The expected partition object (see "
-    "[partition_object](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations"
-    "/#partition-objects))."
-)
+PARTITION_OBJECT_DESCRIPTION = "The expected partition object."
+
 THRESHOLD_DESCRIPTION = (
     "The maximum KL divergence to for which to return success=True. If KL divergence is larger"
     "than the provided threshold, the test will return success=False."
 )
 INTERNAL_WEIGHT_HOLDOUT_DESCRIPTION = (
     "The amount of weight to split uniformly among zero-weighted partition bins. "
-    "internal_weight_holdout "
-    "provides a mechanisms to make the test less strict by assigning positive weights to values "
-    "observed in "
-    "the data for which the partition explicitly expected zero weight."
+    "internal_weight_holdout provides a mechanisms to make the test less strict by "
+    "assigning positive weights to values observed in the data for which "
+    "the partition explicitly expected zero weight."
 )
 TAIL_WEIGHT_HOLDOUT_DESCRIPTION = (
     "The amount of weight to add to the tails of the histogram."
@@ -124,7 +120,7 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         column (str): \
             {COLUMN_DESCRIPTION}
         partition_object (dict or None): \
-            {PARTITION_OBJECT_DESCRIPTION}
+            {PARTITION_OBJECT_DESCRIPTION} See [partition_object](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects).
         threshold (float or None): \
             {THRESHOLD_DESCRIPTION}
         internal_weight_holdout (float between 0 and 1 or None): \
