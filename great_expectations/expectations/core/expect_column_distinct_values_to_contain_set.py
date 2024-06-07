@@ -36,7 +36,6 @@ if TYPE_CHECKING:
 EXPECTATION_SHORT_DESCRIPTION = "Expect the set of distinct column values to contain a given set."
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Sets"]
-META_DESCRIPTION = "{}"
 
 
 class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
@@ -94,40 +93,40 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
                 ExpectColumnDistinctValuesToContainSet(
                     column="test",
                     value_set=[1, 4]
-            )
+                )
 
             Output:
                 {{
-                  "exception_info": {{
+                "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  }},
-                  "result": {{
+                }},
+                "result": {{
                     "observed_value": [
-                      1,
-                      2,
-                      4
+                    1,
+                    2,
+                    4
                     ],
                     "details": {{
-                        "value_counts": [
-                            {{
-                                "value": 1,
-                                "count": 1
-                            }},
-                            {{
-                                "value": 2,
-                                "count": 1
-                            }},
-                            {{
-                                "value": 4,
-                                "count": 1
-                            }}
-                        ]
+                    "value_counts": [
+                        {{
+                        "value": 1,
+                        "count": 1
+                        }},
+                        {{
+                        "value": 2,
+                        "count": 1
+                        }},
+                        {{
+                        "value": 4,
+                        "count": 1
+                        }}
+                    ]
                     }}
-                  }},
-                  "meta": {META_DESCRIPTION},
-                  "success": true
+                }},
+                "meta": {{}},
+                "success": true
                 }}
 
         Failing Case:
@@ -135,30 +134,30 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
                 ExpectColumnDistinctValuesToContainSet(
                     column="test2",
                     value_set=[3, 2, 4]
-            )
+                )
 
             Output:
                 {{
-                  "exception_info": {{
-                        "raised_exception": false,
-                        "exception_traceback": null,
-                        "exception_message": null
-                  }},
-                  "result": {{
-                        "observed_value": [
-                              1
-                        ],
-                        "details": {{
-                        "value_counts": [
-                            {{
-                                "value": 1,
-                                "count": 3
-                            }}
-                        ]
+                "exception_info": {{
+                    "raised_exception": false,
+                    "exception_traceback": null,
+                    "exception_message": null
+                }},
+                "result": {{
+                    "observed_value": [
+                    1
+                    ],
+                    "details": {{
+                    "value_counts": [
+                        {{
+                        "value": 1,
+                        "count": 3
+                        }}
+                    ]
                     }}
-                  }},
-                  "meta": {{}},
-                  "success": false
+                }},
+                "meta": {{}},
+                "success": false
                 }}
     """  # noqa: E501
 
