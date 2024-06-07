@@ -24,7 +24,7 @@ except (ImportError, AttributeError):
 try:
     from google.auth.exceptions import DefaultCredentialsError
 except (ImportError, AttributeError):
-    DefaultCredentialsError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    DefaultCredentialsError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
     from google.cloud.exceptions import NotFound
@@ -48,9 +48,9 @@ except (ImportError, AttributeError):
 try:
     from google.oauth2 import service_account
 except (ImportError, AttributeError):
-    service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from google.oauth2.service_account import Credentials
 except (ImportError, AttributeError):
-    Credentials = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    Credentials = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
