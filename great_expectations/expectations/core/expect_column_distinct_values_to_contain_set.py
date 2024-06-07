@@ -10,6 +10,10 @@ from great_expectations.expectations.expectation import (
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    VALUE_SET_DESCRIPTION,
+)
 from great_expectations.expectations.model_field_types import (
     ValueSet,  # noqa: TCH001  # type needed in pydantic validation
 )
@@ -34,9 +38,13 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the set of distinct column values to contain a given set."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Sets"]
+
 
 class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
-    """Expect the set of distinct column values to contain a given set.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_distinct_values_to_contain_set is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
@@ -47,9 +55,9 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         value_set (set-like): \
-            A set of objects used for comparison.
+            {VALUE_SET_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -72,11 +80,11 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
         [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Sets
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -90,72 +98,72 @@ class ExpectColumnDistinctValuesToContainSet(ColumnAggregateExpectation):
                 ExpectColumnDistinctValuesToContainSet(
                     column="test",
                     value_set=[1, 4]
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                }},
+                "result": {{
                     "observed_value": [
-                      1,
-                      2,
-                      4
+                    1,
+                    2,
+                    4
                     ],
-                    "details": {
-                      "value_counts": [
-                        {
-                          "value": 1,
-                          "count": 1
-                        },
-                        {
-                          "value": 2,
-                          "count": 1
-                        },
-                        {
-                          "value": 4,
-                          "count": 1
-                        }
-                      ]
-                    }
-                  },
-                  "meta": {},
-                  "success": true
-                }
+                    "details": {{
+                    "value_counts": [
+                        {{
+                        "value": 1,
+                        "count": 1
+                        }},
+                        {{
+                        "value": 2,
+                        "count": 1
+                        }},
+                        {{
+                        "value": 4,
+                        "count": 1
+                        }}
+                    ]
+                    }}
+                }},
+                "meta": {{}},
+                "success": true
+                }}
 
         Failing Case:
             Input:
                 ExpectColumnDistinctValuesToContainSet(
                     column="test2",
                     value_set=[3, 2, 4]
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                }},
+                "result": {{
                     "observed_value": [
-                      1
+                    1
                     ],
-                    "details": {
-                      "value_counts": [
-                        {
-                          "value": 1,
-                          "count": 3
-                        }
-                      ]
-                    }
-                  },
-                  "meta": {},
-                  "success": false
-                }
+                    "details": {{
+                    "value_counts": [
+                        {{
+                        "value": 1,
+                        "count": 3
+                        }}
+                    ]
+                    }}
+                }},
+                "meta": {{}},
+                "success": false
+                }}
     """  # noqa: E501
 
     value_set: Optional[Union[SuiteParameterDict, ValueSet]]
