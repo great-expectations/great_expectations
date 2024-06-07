@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001  # used in pydantic validation
 )
@@ -152,8 +153,13 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Optional[Union[SuiteParameterDict, ValueSet]]
-    ties_okay: Union[bool, None] = None
+    value_set: Optional[Union[SuiteParameterDict, ValueSet]] = pydantic.Field(
+        description=VALUE_SET_DESCRIPTION,
+    )
+    ties_okay: Union[bool, None] = pydantic.Field(
+        None,
+        description=TIES_OKAY_DESCRIPTION,
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -165,6 +171,8 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
+    _library_metadata = library_metadata
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.most_common_value",)
     success_keys = (
@@ -175,6 +183,29 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         "column",
         "value_set",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnMostCommonValueToBeInSet]
+        ) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": model._library_metadata,
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATA_SOURCES,
+            }
 
     @classmethod
     def _prescriptive_template(

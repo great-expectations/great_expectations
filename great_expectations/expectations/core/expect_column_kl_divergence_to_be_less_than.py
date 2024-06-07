@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
 import altair as alt
 import numpy as np
 import pandas as pd
 from scipy import stats
 
-from great_expectations.compatibility.pydantic import Field
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -299,13 +299,21 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    partition_object: Union[dict, None]
-    threshold: Union[float, None]
-    internal_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
-    tail_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
-    bucketize_data: bool = True
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
+    partition_object: Union[dict, None] = pydantic.Field(description=PARTITION_OBJECT_DESCRIPTION)
+    threshold: Union[float, None] = pydantic.Field(description=THRESHOLD_DESCRIPTION)
+    internal_weight_holdout: Union[float, None] = pydantic.Field(
+        default=0, ge=0, le=1, description=INTERNAL_WEIGHT_HOLDOUT_DESCRIPTION
+    )
+    tail_weight_holdout: Union[float, None] = pydantic.Field(
+        default=0, ge=0, le=1, description=TAIL_WEIGHT_HOLDOUT_DESCRIPTION
+    )
+    bucketize_data: bool = pydantic.Field(True, description=BUCKETIZE_DATA_DESCRIPTION)
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description="The minimum value for the column."
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description="The maximum value for the column."
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -321,6 +329,8 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
+    _library_metadata = library_metadata
+
     success_keys = (
         "partition_object",
         "threshold",
@@ -333,6 +343,29 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         "partition_object",
         "threshold",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnKLDivergenceToBeLessThan]
+        ) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["data_quality_issues"] = {
+                "type": "array",
+                "const": DATA_QUALITY_ISSUES,
+            }
+            schema["properties"]["library_metadata"] = {
+                "type": "object",
+                "const": model._library_metadata,
+            }
+            schema["properties"]["short_description"] = {
+                "type": "string",
+                "const": EXPECTATION_SHORT_DESCRIPTION,
+            }
+            schema["properties"]["supported_data_sources"] = {
+                "type": "array",
+                "const": SUPPORTED_DATA_SOURCES,
+            }
 
     def get_validation_dependencies(
         self,
