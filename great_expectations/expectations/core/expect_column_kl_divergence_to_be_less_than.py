@@ -836,7 +836,9 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         return return_obj
 
     @classmethod
-    def _get_kl_divergence_chart(cls, partition_object, header=None):  # noqa: PLR0912,C901 - 13
+    def _get_kl_divergence_chart(  # noqa: PLR0912,C901 - 13
+        cls, partition_object, header=None
+    ):
         weights = partition_object["weights"]
 
         if len(weights) > 60:  # noqa: PLR2004
