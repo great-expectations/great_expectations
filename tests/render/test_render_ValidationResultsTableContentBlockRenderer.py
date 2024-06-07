@@ -1104,7 +1104,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
 ):
     # test for failed evr with exception
     output_1 = get_renderer_impl(
-        object_name=evr_failed_with_exception.expectation_config.expectation_type,
+        object_name=evr_failed_with_exception.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
     )[1](result=evr_failed_with_exception)
     assert output_1.to_json_dict() == {
@@ -1125,7 +1125,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
 
     # test for succeeded evr
     output_2 = get_renderer_impl(
-        object_name=evr_success.expectation_config.expectation_type,
+        object_name=evr_success.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
     )[1](result=evr_success)
     assert output_2.to_json_dict() == {
@@ -1147,7 +1147,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
 
     # test for failed evr
     output_3 = get_renderer_impl(
-        object_name=evr_failed.expectation_config.expectation_type,
+        object_name=evr_failed.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
     )[1](result=evr_failed)
     assert output_3.to_json_dict() == {
@@ -1214,7 +1214,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
     evr_id_pk_basic_pandas,
 ):
     rendered_value = get_renderer_impl(
-        object_name=evr_id_pk_basic_pandas.expectation_config.expectation_type,
+        object_name=evr_id_pk_basic_pandas.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_id_pk_basic_pandas)
     assert rendered_value[0].to_json_dict() == {
@@ -1263,7 +1263,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
     evr_id_pk_pandas.result["unexpected_list"] = new_unexpected_list
 
     rendered_value = get_renderer_impl(
-        object_name=evr_id_pk_pandas.expectation_config.expectation_type,
+        object_name=evr_id_pk_pandas.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_id_pk_pandas)
     assert rendered_value[0].to_json_dict() == {
@@ -1282,7 +1282,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
     evr_id_pk_basic_sql,
 ):
     rendered_value = get_renderer_impl(
-        object_name=evr_id_pk_basic_sql.expectation_config.expectation_type,
+        object_name=evr_id_pk_basic_sql.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_id_pk_basic_sql)
     assert rendered_value[0].to_json_dict() == {
