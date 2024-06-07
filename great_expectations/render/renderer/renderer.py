@@ -48,11 +48,11 @@ class Renderer:
     @classmethod
     def _get_expectation_type(cls, ge_object):
         if isinstance(ge_object, ExpectationConfiguration):
-            return ge_object.expectation_type
+            return ge_object.type
 
         elif isinstance(ge_object, ExpectationValidationResult):
             # This is a validation
-            return ge_object.expectation_config.expectation_type
+            return ge_object.expectation_config.type
 
     # TODO: When we implement a ValidationResultSuite class, this method will move there.
     @classmethod

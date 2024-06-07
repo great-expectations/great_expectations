@@ -293,7 +293,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
             expectation_configuration: ExpectationConfiguration = values[
                 "result"
             ].expectation_config
-            values["expectation_type"] = expectation_configuration.expectation_type
+            values["expectation_type"] = expectation_configuration.type
             values["kwargs"] = expectation_configuration.kwargs
             raw_configuration: ExpectationConfiguration = (
                 expectation_configuration.get_raw_configuration()

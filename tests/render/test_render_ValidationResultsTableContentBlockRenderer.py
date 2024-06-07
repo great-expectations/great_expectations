@@ -32,7 +32,7 @@ def evr_failed_with_exception():
             "exception_traceback": 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',  # noqa: E501
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_kl_divergence_to_be_less_than",
+            type="expect_column_kl_divergence_to_be_less_than",
             kwargs={
                 "column": "live",
                 "partition_object": None,
@@ -49,7 +49,7 @@ def evr_id_pk_basic_sql() -> ExpectationValidationResult:
     return ExpectationValidationResult(
         success=False,
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
+            type="expect_column_values_to_be_in_set",
             kwargs={
                 "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
                 "column": "animals",
@@ -98,7 +98,7 @@ def evr_id_pk_basic_pandas() -> ExpectationValidationResult:
     return ExpectationValidationResult(
         success=False,
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
+            type="expect_column_values_to_be_in_set",
             kwargs={
                 "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
                 "column": "animals",
@@ -523,7 +523,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn_with_v2
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_custom_expectation",
+            type="expect_custom_expectation",
             kwargs={"column": "a_column_name", "result_format": "SUMMARY"},
         ),
     )
@@ -585,7 +585,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_be_between",
+            type="expect_table_row_count_to_be_between",
             kwargs={"min_value": 0, "max_value": None, "result_format": "SUMMARY"},
         ),
     )
@@ -604,7 +604,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_be_null",
+            type="expect_column_values_to_not_be_null",
             kwargs={"column": "Unnamed: 0", "mostly": 0.5, "result_format": "SUMMARY"},
         ),
     )
@@ -623,7 +623,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_null",
+            type="expect_column_values_to_be_null",
             kwargs={"column": "Unnamed: 0", "mostly": 0.5, "result_format": "SUMMARY"},
         ),
     )
@@ -637,7 +637,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_be_between",
+            type="expect_table_row_count_to_be_between",
             kwargs={"min_value": 0, "max_value": None, "result_format": "SUMMARY"},
         ),
     )
@@ -650,25 +650,25 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     assert output_1 == "1,313"
     # test _get_observed_value when evr.result does not exist
     output_2 = get_renderer_impl(
-        object_name=evr_no_result_key.expectation_config.expectation_type,
+        object_name=evr_no_result_key.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_no_result_key)
     assert output_2 == "--"
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = get_renderer_impl(
-        object_name=evr_expect_column_values_to_not_be_null.expectation_config.expectation_type,
+        object_name=evr_expect_column_values_to_not_be_null.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_expect_column_values_to_not_be_null)
     assert output_3 == "≈20.03% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = get_renderer_impl(
-        object_name=evr_expect_column_values_to_be_null.expectation_config.expectation_type,
+        object_name=evr_expect_column_values_to_be_null.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_expect_column_values_to_be_null)
     assert output_4 == "100% null"
     # test _get_observed_value to be 0
     output_5 = get_renderer_impl(
-        object_name=evr_success_zero.expectation_config.expectation_type,
+        object_name=evr_success_zero.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_success_zero)
     assert output_5 == "0"
@@ -685,7 +685,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_be_between",
+            type="expect_table_row_count_to_be_between",
             kwargs={"min_value": 0, "max_value": None, "result_format": "SUMMARY"},
         ),
     )
@@ -715,7 +715,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_match_regex",
+            type="expect_column_values_to_not_match_regex",
             kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
@@ -756,7 +756,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
 
     # test for evr with no "result" key
     output_3 = get_renderer_impl(
-        object_name=evr_no_result.expectation_config.expectation_type,
+        object_name=evr_no_result.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_no_result)
     print(json.dumps(output_3, indent=2))
@@ -764,7 +764,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
 
     # test for evr with no unexpected count
     output_4 = get_renderer_impl(
-        object_name=evr_failed_no_unexpected_count.expectation_config.expectation_type,
+        object_name=evr_failed_no_unexpected_count.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_failed_no_unexpected_count)
     print(output_4)
@@ -779,7 +779,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
             "exception_traceback": "Traceback (most recent call last):\n...more_traceback...",
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_match_regex",
+            type="expect_column_values_to_not_match_regex",
             kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
@@ -789,7 +789,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     )
 
     output_5 = get_renderer_impl(
-        object_name=evr_failed_exception.expectation_config.expectation_type,
+        object_name=evr_failed_exception.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_failed_exception)
     output_5 = [content.to_json_dict() for content in output_5]
@@ -839,7 +839,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
+            type="expect_column_values_to_be_in_set",
             kwargs={
                 "column": "Unnamed: 0",
                 "value_set": [],
@@ -864,7 +864,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
+            type="expect_column_values_to_be_in_set",
             kwargs={
                 "column": "Unnamed: 0",
                 "value_set": [],
@@ -911,7 +911,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
+            type="expect_column_values_to_be_in_set",
             kwargs={
                 "column": "Unnamed: 0",
                 "value_set": [],
@@ -1002,7 +1002,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
+            type="expect_column_values_to_be_in_set",
             kwargs={
                 "column": "Unnamed: 0",
                 "value_set": [],
@@ -1020,21 +1020,21 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
 
     # test for failed evr with no "result" key
     output_2 = get_renderer_impl(
-        object_name=evr_failed_no_result.expectation_config.expectation_type,
+        object_name=evr_failed_no_result.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_no_result)
     assert output_2 is None
 
     # test for failed evr with no unexpected list or unexpected counts
     output_3 = get_renderer_impl(
-        object_name=evr_failed_no_unexpected_list_or_counts.expectation_config.expectation_type,
+        object_name=evr_failed_no_unexpected_list_or_counts.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_no_unexpected_list_or_counts)
     assert output_3 is None
 
     # test for failed evr with partial unexpected list
     output_4 = get_renderer_impl(
-        object_name=evr_failed_partial_unexpected_list.expectation_config.expectation_type,
+        object_name=evr_failed_partial_unexpected_list.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_list)
     assert output_4[0].to_json_dict() == {
@@ -1067,7 +1067,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
 
     # test for failed evr with partial unexpected counts
     output_5 = get_renderer_impl(
-        object_name=evr_failed_partial_unexpected_counts.expectation_config.expectation_type,
+        object_name=evr_failed_partial_unexpected_counts.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_counts)
     assert output_5[0].to_json_dict() == {
@@ -1166,7 +1166,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_no_id_p
     evr_no_id_pk_pandas = ExpectationValidationResult(
         success=False,
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
+            type="expect_column_values_to_be_in_set",
             kwargs={
                 "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
                 "column": "animals",
@@ -1199,7 +1199,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_no_id_p
         },
     )
     rendered_value = get_renderer_impl(
-        object_name=evr_no_id_pk_pandas.expectation_config.expectation_type,
+        object_name=evr_no_id_pk_pandas.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_no_id_pk_pandas)
     assert rendered_value[0].to_json_dict() == {

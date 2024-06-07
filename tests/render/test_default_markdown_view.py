@@ -52,21 +52,17 @@ def expectation_suite_to_render_with_notes():
         meta={"great_expectations_version": "0.13.0-test"},
         expectations=[
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist",
+                type="expect_column_to_exist",
                 kwargs={"column": "infinities"},
             ),
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "nulls"}),
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "naturals"}),
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_distinct_values_to_be_in_set",
+                type="expect_column_distinct_values_to_be_in_set",
                 kwargs={"column": "irrationals", "value_set": ["*", "1st", "2nd"]},
             ),
             ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_unique",
+                type="expect_column_values_to_be_unique",
                 kwargs={"column": "testings"},
                 notes=[
                     "Example notes about this expectation. **Markdown** `Supported`.",

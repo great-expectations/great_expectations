@@ -805,7 +805,7 @@ class TestColumnIdentifiers:
         suite = context.suites.add(ExpectationSuite(name=f"{datasource.name}-{asset.name}"))
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
-                expectation_type=expectation_type,
+                type=expectation_type,
                 kwargs={
                     "column": column_name,
                     "mostly": 1,
