@@ -1013,7 +1013,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
 
     # test for succeeded evr
     output_1 = get_renderer_impl(
-        object_name=evr_success.expectation_config.expectation_type,
+        object_name=evr_success.expectation_config.type,
         renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_success)
     assert output_1 is None

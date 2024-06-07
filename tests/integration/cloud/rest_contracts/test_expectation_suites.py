@@ -64,7 +64,7 @@ GET_EXPECTATION_SUITE_MIN_RESPONSE_BODY: Final[PactBody] = {
         "name": pact.Like("no_checkpoint_suite"),
         "expectations": [
             {
-                "expectation_type": "expect_column_values_to_be_between",
+                "type": "expect_column_values_to_be_between",
                 "id": pact.Format().uuid,
                 "kwargs": {
                     "column": "passenger_count",
