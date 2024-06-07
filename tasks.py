@@ -610,6 +610,7 @@ def type_schema(  # noqa: C901 - too complex
         core.ExpectColumnPairValuesToBeInSet,
         core.ExpectColumnProportionOfUniqueValuesToBeBetween,
         core.ExpectColumnUniqueValueCountToBeBetween,
+        core.ExpectColumnDistinctValuesToBeInSet,
         core.ExpectColumnDistinctValuesToContainSet,
         core.ExpectColumnDistinctValuesToEqualSet,
         core.ExpectColumnMostCommonValueToBeInSet,
