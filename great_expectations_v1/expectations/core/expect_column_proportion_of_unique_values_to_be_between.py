@@ -7,6 +7,7 @@ from great_expectations_v1.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations_v1.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -36,9 +37,27 @@ if TYPE_CHECKING:
     )
     from great_expectations_v1.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the proportion of unique values to be between a minimum value and a maximum value."
+)
+MIN_VALUE_DESCRIPTION = (
+    "The minimum proportion of unique values (Proportions are on the range 0 to 1)."
+)
+MAX_VALUE_DESCRIPTION = (
+    "The maximum proportion of unique values (Proportions are on the range 0 to 1)."
+)
+STRICT_MIN_DESCRIPTION = (
+    "If True, the minimum proportion of unique values" " must be strictly larger than min_value."
+)
+STRICT_MAX_DESCRIPTION = (
+    "If True, the maximum proportion of unique values" " must be strictly smaller than max_value."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Cardinality"]
+
 
 class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation):
-    """Expect the proportion of unique values to be between a minimum value and a maximum value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
     values for a proportion of 0.4.
@@ -52,15 +71,15 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         min_value (float or None): \
-            The minimum proportion of unique values. (Proportions are on the range 0 to 1)
+           {MIN_VALUE_DESCRIPTION}
         max_value (float or None): \
-            The maximum proportion of unique values. (Proportions are on the range 0 to 1)
+            {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            If True, the minimum proportion of unique values must be strictly larger than min_value, default=False
+            {STRICT_MIN_DESCRIPTION} default=False
         strict_max (boolean): \
-            If True, the maximum proportion of unique values must be strictly smaller than max_value, default=False
+            {STRICT_MAX_DESCRIPTION} default=False
 
     Other Parameters:
         result_format (str or None): \
@@ -89,11 +108,11 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         [expect_column_unique_value_count_to_be_between](https://greatexpectations.io/expectations/expect_column_unique_value_count_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Cardinality
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -109,21 +128,21 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
                     column="test",
                     min_value=0,
                     max_value=0.8
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": .75
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -133,21 +152,21 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
                     max_value=0.5,
                     strict_min=False,
                     strict_max=True
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": .5
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     min_value: Union[float, SuiteParameterDict, datetime, None] = None

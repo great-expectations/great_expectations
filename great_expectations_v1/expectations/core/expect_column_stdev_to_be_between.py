@@ -7,6 +7,7 @@ from great_expectations_v1.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations_v1.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -33,8 +34,23 @@ if TYPE_CHECKING:
     from great_expectations_v1.render.renderer_configuration import AddParamArgs
 
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column standard deviation to be between a minimum value and a maximum value."
+)
+MIN_VALUE_DESCRIPTION = "The minimum value for the column standard deviation."
+MAX_VALUE_DESCRIPTION = "The maximum value for the column standard deviation."
+STRICT_MIN_DESCRIPTION = (
+    "If True, the column standard deviation must be strictly larger than min_value."
+)
+STRICT_MAX_DESCRIPTION = (
+    "If True, the column standard deviation must be strictly smaller than max_value."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Distribution"]
+
+
 class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
-    """Expect the column standard deviation to be between a minimum value and a maximum value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     Uses sample standard deviation (normalized by N-1).
 
@@ -47,15 +63,15 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         min_value (float or None): \
-            The minimum value for the column standard deviation.
+            {MIN_VALUE_DESCRIPTION}
         max_value (float or None): \
-            The maximum value for the column standard deviation.
+            {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            If True, the column standard deviation must be strictly larger than min_value, default=False
+            {STRICT_MIN_DESCRIPTION} default=False.
         strict_max (boolean): \
-            If True, the column standard deviation must be strictly smaller than max_value, default=False
+            {STRICT_MAX_DESCRIPTION} default=False.
 
     Other Parameters:
         result_format (str or None): \
@@ -85,11 +101,11 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Distribution
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -105,21 +121,21 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
                     column="test",
                     min_value=.5,
                     max_value=.6
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 0.5251983752196243
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -127,21 +143,21 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
                     column="test2",
                     min_value=.5,
                     max_value=.6
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 2.5617376914898995
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     min_value: Union[float, SuiteParameterDict, datetime, None] = None

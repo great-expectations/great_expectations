@@ -6,6 +6,7 @@ from great_expectations_v1.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001  # used in pydantic validation
 )
 from great_expectations_v1.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -34,8 +35,21 @@ if TYPE_CHECKING:
     from great_expectations_v1.render.renderer_configuration import AddParamArgs
 
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the most common value to be within the designated value set."
+)
+VALUE_SET_DESCRIPTION = "A list of potential values to match."
+TIES_OKAY_DESCRIPTION = (
+    "If True, then the expectation will still succeed if values outside "
+    "the designated set are as common (but not more common) "
+    "than designated values."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Sets"]
+
+
 class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
-    """Expect the most common value to be within the designated value set.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_most_common_value_to_be_in_set is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
@@ -46,12 +60,11 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name
+            {COLUMN_DESCRIPTION}
         value_set (set-like): \
-            A list of potential values to match
+            {VALUE_SET_DESCRIPTION}
         ties_okay (boolean or None): \
-            If True, then the expectation will still succeed if values outside the designated set are as common \
-            (but not more common) than designated values. Default False.
+            {TIES_OKAY_DESCRIPTION} Default False.
 
     Other Parameters:
         result_format (str or None): \
@@ -76,11 +89,11 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
           most common value
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Sets
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -95,48 +108,48 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
                     column="test2",
                     value_set=[1, 2, 4],
                     ties_okay=True
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       1
                     ]
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
                 ExpectColumnMostCommonValueToBeInSet(
                     column="test",
                     value_set=[1, 2, 4]
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       1,
                       2,
                       4
                     ]
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     value_set: Optional[Union[SuiteParameterDict, ValueSet]]
