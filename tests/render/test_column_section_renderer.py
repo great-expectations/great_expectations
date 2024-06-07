@@ -247,27 +247,6 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
     }
 
 
-# def test_ProfilingResultsColumnSectionRenderer_render_overview_table():
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_overview_table(evrs, content_blocks)
-
-# def test_ProfilingResultsColumnSectionRenderer_render_quantile_table():
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_quantile_table(evrs, content_blocks)
-
-# def test_ProfilingResultsColumnSectionRenderer_render_stats_table():
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_stats_table(evrs, content_blocks)
-
-# def test_ProfilingResultsColumnSectionRenderer_render_histogram(titanic_profiled_evrs_1):
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_histogram(evrs, content_blocks)
-
-# def test_ProfilingResultsColumnSectionRenderer_render_values_set():
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_values_set(evrs, content_blocks)
-
-
 @pytest.mark.unit
 def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     titanic_profiled_evrs_1,
@@ -276,7 +255,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     distinct_values_evrs = [
         evr
         for evr in titanic_profiled_evrs_1.results
-        if evr.expectation_config.expectation_type == "expect_column_distinct_values_to_be_in_set"
+        if evr.expectation_config.type == "expect_column_distinct_values_to_be_in_set"
     ]
 
     assert len(distinct_values_evrs) == 4
@@ -1687,7 +1666,7 @@ def test_ProfilingColumnPropertiesTableContentBlockRenderer():
                 "success": True,
                 "expectation_config": ExpectationConfiguration(
                     **{
-                        "expectation_type": "expect_column_values_to_not_match_regex",
+                        "type": "expect_column_values_to_not_match_regex",
                         "kwargs": {
                             "column": "race",
                             "regex": "^\\s+|\\s+$",
@@ -1715,7 +1694,7 @@ def test_ProfilingColumnPropertiesTableContentBlockRenderer():
                 "success": True,
                 "expectation_config": ExpectationConfiguration(
                     **{
-                        "expectation_type": "expect_column_unique_value_count_to_be_between",
+                        "type": "expect_column_unique_value_count_to_be_between",
                         "kwargs": {
                             "column": "gender",
                             "min_value": None,
@@ -1744,7 +1723,7 @@ def test_ProfilingColumnPropertiesTableContentBlockRenderer():
                 "success": True,
                 "expectation_config": ExpectationConfiguration(
                     **{
-                        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",  # noqa: E501
+                        "type": "expect_column_proportion_of_unique_values_to_be_between",
                         "kwargs": {
                             "column": "gender",
                             "min_value": None,
@@ -1774,7 +1753,7 @@ def test_ProfilingColumnPropertiesTableContentBlockRenderer():
                 "success": True,
                 "expectation_config": ExpectationConfiguration(
                     **{
-                        "expectation_type": "expect_column_values_to_not_be_null",
+                        "type": "expect_column_values_to_not_be_null",
                         "kwargs": {
                             "column": "gender",
                             "mostly": 0.5,
