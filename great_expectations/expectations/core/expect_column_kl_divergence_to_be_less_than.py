@@ -94,6 +94,8 @@ BUCKETIZE_DATA_DESCRIPTION = (
     "this parameter to false allows evaluation of KL divergence with a None partition object for "
     "profiling against discrete data."
 )
+MIN_VALUE_DESCRIPTION = "The minimum value for the column."
+MAX_VALUE_DESCRIPTION = "The maximum value for the column."
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Distribution"]
 
@@ -130,6 +132,10 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
            {TAIL_WEIGHT_HOLDOUT_DESCRIPTION}
         bucketize_data (boolean): \
             {BUCKETIZE_DATA_DESCRIPTION}
+        min_value (float or None): \
+            {MIN_VALUE_DESCRIPTION}
+        max_value (float or None): \
+            {MAX_VALUE_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -309,10 +315,10 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
     )
     bucketize_data: bool = pydantic.Field(True, description=BUCKETIZE_DATA_DESCRIPTION)
     min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        None, description="The minimum value for the column."
+        None, description=MIN_VALUE_DESCRIPTION
     )
     max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
-        None, description="The maximum value for the column."
+        None, description=MAX_VALUE_DESCRIPTION
     )
 
     # This dictionary contains metadata for display in the public gallery
