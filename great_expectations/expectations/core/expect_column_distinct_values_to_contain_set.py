@@ -7,10 +7,12 @@ from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001  # type needed in pydantic validation
 )
 from great_expectations.expectations.expectation import (
-    COLUMN_DESCRIPTION,
-    VALUE_SET_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    VALUE_SET_DESCRIPTION,
 )
 from great_expectations.expectations.model_field_types import (
     ValueSet,  # noqa: TCH001  # type needed in pydantic validation
