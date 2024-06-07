@@ -7,6 +7,7 @@ from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -37,9 +38,17 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the number of unique values to be between a minimum value and a maximum value."
+)
+MIN_VALUE_DESCRIPTION = "The minimum number of unique values allowed."
+MAX_VALUE_DESCRIPTION = "The maximum number of unique values allowed."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Cardinality"]
+
 
 class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
-    """Expect the number of unique values to be between a minimum value and a maximum value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_unique_value_count_to_be_between is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
@@ -50,11 +59,11 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         min_value (int or None): \
-            The minimum number of unique values allowed.
+            {MIN_VALUE_DESCRIPTION}
         max_value (int or None): \
-            The maximum number of unique values allowed.
+            {MAX_VALUE_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -83,11 +92,11 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
         [expect_column_proportion_of_unique_values_to_be_between](https://greatexpectations.io/expectations/expect_column_proportion_of_unique_values_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Cardinality
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -103,21 +112,21 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                     column="test",
                     min_value=2,
                     max_value=4
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 3
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -125,21 +134,21 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                     column="test2",
                     min_value=3,
                     max_value=5
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 2
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     min_value: Union[float, SuiteParameterDict, datetime, None] = None
