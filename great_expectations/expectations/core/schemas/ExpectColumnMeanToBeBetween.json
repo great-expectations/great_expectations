@@ -64,13 +64,16 @@
         "mostly": {
             "title": "Mostly",
             "default": 1.0,
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "type": "number",
             "minimum": 0.0,
             "maximum": 1.0,
-            "type": "number"
+            "multipleOf": 0.01
         },
         "column": {
             "title": "Column",
             "description": "The column name.",
+            "minLength": 1,
             "type": "string"
         },
         "min_value": {
@@ -116,165 +119,6 @@
             "description": "If True, the column mean must be strictly larger than min_value, default=False",
             "default": false,
             "type": "boolean"
-        },
-        "kwargs_json_schema_base_properties": {
-            "title": "Kwargs Json Schema Base Properties",
-            "default": {
-                "result_format": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string",
-                            "enum": [
-                                "BOOLEAN_ONLY",
-                                "BASIC",
-                                "SUMMARY",
-                                "COMPLETE"
-                            ]
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "result_format": {
-                                    "type": "string",
-                                    "enum": [
-                                        "BOOLEAN_ONLY",
-                                        "BASIC",
-                                        "SUMMARY",
-                                        "COMPLETE"
-                                    ]
-                                },
-                                "partial_unexpected_count": {
-                                    "type": "number"
-                                }
-                            }
-                        }
-                    ],
-                    "default": "BASIC"
-                },
-                "catch_exceptions": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "boolean"
-                        }
-                    ],
-                    "default": "false"
-                },
-                "meta": {
-                    "type": "object"
-                }
-            },
-            "type": "object"
-        },
-        "kwargs_json_schema": {
-            "title": "Kwargs Json Schema",
-            "default": {
-                "type": "object",
-                "properties": {
-                    "result_format": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "string",
-                                "enum": [
-                                    "BOOLEAN_ONLY",
-                                    "BASIC",
-                                    "SUMMARY",
-                                    "COMPLETE"
-                                ]
-                            },
-                            {
-                                "type": "object",
-                                "properties": {
-                                    "result_format": {
-                                        "type": "string",
-                                        "enum": [
-                                            "BOOLEAN_ONLY",
-                                            "BASIC",
-                                            "SUMMARY",
-                                            "COMPLETE"
-                                        ]
-                                    },
-                                    "partial_unexpected_count": {
-                                        "type": "number"
-                                    }
-                                }
-                            }
-                        ],
-                        "default": "BASIC"
-                    },
-                    "catch_exceptions": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "boolean"
-                            }
-                        ],
-                        "default": "false"
-                    },
-                    "meta": {
-                        "type": "object"
-                    },
-                    "column": {
-                        "type": "string"
-                    },
-                    "min_value": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "number"
-                            }
-                        ]
-                    },
-                    "max_value": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "number"
-                            }
-                        ]
-                    },
-                    "strict_min": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "boolean"
-                            }
-                        ],
-                        "default": "false"
-                    },
-                    "strict_max": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "boolean"
-                            }
-                        ],
-                        "default": "false"
-                    }
-                },
-                "required": [
-                    "column"
-                ]
-            },
-            "type": "object"
         },
         "metadata": {
             "type": "object",

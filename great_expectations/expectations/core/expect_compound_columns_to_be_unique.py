@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.expectations.expectation import (
-    MOSTLY_DESCRIPTION,
     MulticolumnMapExpectation,
     render_suite_parameter_string,
 )
+from great_expectations.expectations.model_field_descriptions import MOSTLY_DESCRIPTION
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (

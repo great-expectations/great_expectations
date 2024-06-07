@@ -35,7 +35,7 @@ from typing_extensions import ParamSpec, dataclass_transform
 from great_expectations import __version__ as ge_version
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.pydantic import Field, ModelMetaclass
+from great_expectations.compatibility.pydantic import Field, ModelMetaclass, StrictStr
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -57,6 +57,14 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_A_DESCRIPTION,
+    COLUMN_B_DESCRIPTION,
+    COLUMN_DESCRIPTION,
+)
+from great_expectations.expectations.model_field_types import (  # noqa: TCH001  # types needed for pydantic deser
+    Mostly,
 )
 from great_expectations.expectations.registry import (
     get_metric_kwargs,
@@ -104,12 +112,6 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import ValidationDependencies, Validator
 
 logger = logging.getLogger(__name__)
-
-COLUMN_DESCRIPTION = "The column name."
-COLUMN_A_DESCRIPTION = "The first column name."
-COLUMN_B_DESCRIPTION = "The second column name."
-MOSTLY_DESCRIPTION = "Successful if at least `mostly` fraction of values match the expectation."
-VALUE_SET_DESCRIPTION = "A set of objects used for comparison."
 
 P = ParamSpec("P")
 T = TypeVar("T", List[RenderedStringTemplateContent], RenderedAtomicContent)
@@ -1504,7 +1506,7 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: float = Field(default=1.0, ge=0.0, le=1.0)
+    mostly: Mostly = 1.0
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1795,7 +1797,7 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
         InvalidExpectationConfigurationError: If no `column` is specified
     """  # noqa: E501
 
-    column: str = Field(description=COLUMN_DESCRIPTION)
+    column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1845,7 +1847,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column: str = Field(description=COLUMN_DESCRIPTION)
+    column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
 
     catch_exceptions: bool = True
 
@@ -2109,8 +2111,8 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_A: str
-    column_B: str
+    column_A: StrictStr = Field(min_length=1, description=COLUMN_A_DESCRIPTION)
+    column_B: StrictStr = Field(min_length=1, description=COLUMN_B_DESCRIPTION)
 
     catch_exceptions: bool = True
 
@@ -2363,7 +2365,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
             the expectation.
     """  # noqa: E501
 
-    column_list: List[str]
+    column_list: List[StrictStr]
 
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"
