@@ -315,7 +315,7 @@ class RendererConfiguration(pydantic_generics.GenericModel, Generic[RendererPara
                     else renderer_params_args
                 )
         elif "configuration" in values and values["configuration"] is not None:
-            values["expectation_type"] = values["configuration"].expectation_type
+            values["expectation_type"] = values["configuration"].type
             values["kwargs"] = values["configuration"].kwargs
 
         return values
