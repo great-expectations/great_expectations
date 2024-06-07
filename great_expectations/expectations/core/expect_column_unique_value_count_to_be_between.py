@@ -43,7 +43,7 @@ EXPECTATION_SHORT_DESCRIPTION = (
 )
 MIN_VALUE_DESCRIPTION = "The minimum number of unique values allowed."
 MAX_VALUE_DESCRIPTION = "The maximum number of unique values allowed."
-SUPPORTED_DATA_SOURCES = ["snowflake", "postgresql"]
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Cardinality"]
 
 

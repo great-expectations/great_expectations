@@ -41,18 +41,16 @@ EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the proportion of unique values to be between a minimum value and a maximum value."
 )
 MIN_VALUE_DESCRIPTION = (
-    "The minimum proportion of unique values.(Proportions are on the range 0 to 1)"
+    "The minimum proportion of unique values (Proportions are on the range 0 to 1)."
 )
 MAX_VALUE_DESCRIPTION = (
-    "The maximum proportion of unique values.(Proportions are on the range 0 to 1)"
+    "The maximum proportion of unique values (Proportions are on the range 0 to 1)."
 )
 STRICT_MIN_DESCRIPTION = (
-    "If True, the minimum proportion of unique values"
-    " must be strictly larger than min_value, default=False"
+    "If True, the minimum proportion of unique values" " must be strictly larger than min_value."
 )
 STRICT_MAX_DESCRIPTION = (
-    "If True, the maximum proportion of unique values"
-    " must be strictly smaller than max_value, default=False"
+    "If True, the maximum proportion of unique values" " must be strictly smaller than max_value."
 )
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Cardinality"]
@@ -79,9 +77,9 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
         max_value (float or None): \
             {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            {STRICT_MIN_DESCRIPTION}
+            {STRICT_MIN_DESCRIPTION} default=False
         strict_max (boolean): \
-            {STRICT_MAX_DESCRIPTION}
+            {STRICT_MAX_DESCRIPTION} default=False
 
     Other Parameters:
         result_format (str or None): \

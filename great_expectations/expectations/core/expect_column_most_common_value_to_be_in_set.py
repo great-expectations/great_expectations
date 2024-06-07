@@ -39,7 +39,7 @@ VALUE_SET_DESCRIPTION = "A list of potential values to match."
 TIES_OKAY_DESCRIPTION = (
     "If True, then the expectation will still succeed if values outside "
     "the designated set are as common (but not more common) "
-    "than designated values. Default False."
+    "than designated values."
 )
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Sets"]
@@ -61,7 +61,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         value_set (set-like): \
             {VALUE_SET_DESCRIPTION}
         ties_okay (boolean or None): \
-            {TIES_OKAY_DESCRIPTION}
+            {TIES_OKAY_DESCRIPTION} Default False.
 
     Other Parameters:
         result_format (str or None): \

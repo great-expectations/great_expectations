@@ -40,10 +40,10 @@ EXPECTATION_SHORT_DESCRIPTION = (
 MIN_VALUE_DESCRIPTION = "The minimum value for the column standard deviation."
 MAX_VALUE_DESCRIPTION = "The maximum value for the column standard deviation."
 STRICT_MIN_DESCRIPTION = (
-    "If True, the column standard deviation must be strictly larger than min_value, default=False."
+    "If True, the column standard deviation must be strictly larger than min_value."
 )
 STRICT_MAX_DESCRIPTION = (
-    "If True, the column standard deviation must be strictly smaller than max_value, default=False."
+    "If True, the column standard deviation must be strictly smaller than max_value."
 )
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Distribution"]
@@ -69,9 +69,9 @@ class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
         max_value (float or None): \
             {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            {STRICT_MIN_DESCRIPTION}
+            {STRICT_MIN_DESCRIPTION} default=False.
         strict_max (boolean): \
-            {STRICT_MAX_DESCRIPTION}
+            {STRICT_MAX_DESCRIPTION} default=False.
 
     Other Parameters:
         result_format (str or None): \
