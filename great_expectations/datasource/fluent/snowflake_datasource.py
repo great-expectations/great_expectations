@@ -217,6 +217,11 @@ class ConnectionDetails(FluentBaseModel):
     role: str
     numpy: bool = False
 
+    @classmethod
+    def required_fields(cls) -> list[str]:
+        """Returns the required fields for this model as defined in the schema."""
+        return cls.schema()["required"]
+
 
 @public_api
 class SnowflakeDatasource(SQLDatasource):
@@ -382,7 +387,8 @@ class SnowflakeDatasource(SQLDatasource):
             if is_connection_string or has_min_connection_detail_values:
                 return values
         raise ValueError(  # noqa: TRY003
-            "Must provide either a connection string or a combination of account, user, and password."  # noqa: E501
+            "Must provide either a connection string or"
+            f" a combination of {', '.join(ConnectionDetails.required_fields())} as keyword args."
         )
 
     @pydantic.validator("connection_string")
