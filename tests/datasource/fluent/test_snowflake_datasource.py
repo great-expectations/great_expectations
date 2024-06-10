@@ -11,7 +11,6 @@ from pytest import param
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.datasource.fluent import GxContextWarning
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
@@ -623,16 +622,27 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        if isinstance(datasource.connection_string, ConfigStr):
-            # expect a warning if connection string is a ConfigStr
-            with pytest.warns(GxContextWarning):
-                assert (
-                    not datasource.database
-                ), "Don't expect schema to be available without config_provider"
-            # attach context to enable config substitution
-            datasource._data_context = ephemeral_context_with_defaults
-
         assert datasource.database
+
+    def test_role(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        assert datasource.role
+
+    def test_warehouse(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        assert datasource.warehouse
 
 
 if __name__ == "__main__":

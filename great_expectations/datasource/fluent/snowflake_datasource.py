@@ -254,10 +254,30 @@ class SnowflakeDatasource(SQLDatasource):
 
     @property
     def database(self) -> str | None:
-        """Convenience property to get the `database` regardless of the connection string format."""
+        """
+        Convenience property to get the `database` regardless of the connection string format.
+        """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
         return _extract_path_sections(self.connection_string.path)["database"]
+
+    @property
+    def warehouse(self) -> str | None:
+        """
+        Convenience property to get the `warehouse` regardless of the connection string format.
+        """
+        if isinstance(self.connection_string, ConnectionDetails):
+            return self.connection_string.warehouse
+        return self.connection_string.params.get("warehouse", [None])[0]
+
+    @property
+    def role(self) -> str | None:
+        """
+        Convenience property to get the `role` regardless of the connection string format.
+        """
+        if isinstance(self.connection_string, ConnectionDetails):
+            return self.connection_string.role
+        return self.connection_string.params.get("role", [None])[0]
 
     @deprecated_method_or_class(
         version="1.0.0a4",
