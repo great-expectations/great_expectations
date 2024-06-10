@@ -256,6 +256,7 @@ class TestSecretMasking:
     [
         "http://my_user:${MY_PW}@example.com:8000/the/path/?query=here#fragment=is;this=bit",
         "http://${MY_USER}:${MY_PW}@example.com:8000/the/path/?query=here#fragment=is;this=bit",
+        "http://${MY_USER}:${MY_PW}@example.com:8000/the/path/?query=here&query=again&query=and_again",
         "snowflake://my_user:${MY_PW}@account/db",
         "snowflake://${MY_USER}:${MY_PW}@account/db",
         "postgresql+psycopg2://my_user:${MY_PW}@host/db",
@@ -335,6 +336,15 @@ class TestConfigUri:
             assert "my_user" not in repr(parsed)
             assert parsed.user
             assert "my_user" not in parsed.user
+
+    def test_params(self, uri: str):
+        parsed = pydantic.parse_obj_as(ConfigUri, uri)
+        assert isinstance(parsed.params, dict)
+
+        if parsed.query:
+            for q_key, values in parsed.params.items():
+                for value in values:
+                    assert f"{q_key}={value}" in parsed.query
 
 
 class TestConfigUriInvalid:
