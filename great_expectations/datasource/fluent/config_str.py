@@ -89,6 +89,7 @@ class ConfigStr(SecretStr):
         yield cls.validate
 
     @classmethod
+    @override
     def __modify_schema__(cls, field_schema: dict) -> None:
         """Update the generated schema when used in a pydantic model."""
         SecretStr.__modify_schema__(field_schema)
@@ -231,6 +232,7 @@ class ConfigUri(AnyUrl, ConfigStr):  # type: ignore[misc] # Mixin "validate" sig
         yield cls.validate  # equivalent to AnyUrl.validate
 
     @classmethod
+    @override
     def __modify_schema__(cls, field_schema: dict) -> None:
         """Update the generated schema when used in a pydantic model."""
         ConfigStr.__modify_schema__(field_schema)
