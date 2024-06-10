@@ -64,13 +64,16 @@
         "mostly": {
             "title": "Mostly",
             "default": 1.0,
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "type": "number",
             "minimum": 0.0,
             "maximum": 1.0,
-            "type": "number"
+            "multipleOf": 0.01
         },
         "column": {
             "title": "Column",
             "description": "The column name.",
+            "minLength": 1,
             "type": "string"
         },
         "metadata": {

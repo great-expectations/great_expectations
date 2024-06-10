@@ -164,15 +164,11 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             meta={},
             expectations=[
                 ExpectationConfiguration(
-                    expectation_type="expect_table_row_count_to_be_between",
+                    type="expect_table_row_count_to_be_between",
                     kwargs={"min_value": 0, "max_value": None},
                 ),
-                ExpectationConfiguration(
-                    expectation_type="expect_column_to_exist", kwargs={"column": "x"}
-                ),
-                ExpectationConfiguration(
-                    expectation_type="expect_column_to_exist", kwargs={"column": "y"}
-                ),
+                ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "x"}),
+                ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "y"}),
             ],
         )
     )

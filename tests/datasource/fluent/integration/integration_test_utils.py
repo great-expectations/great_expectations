@@ -101,8 +101,7 @@ def run_checkpoint_and_data_doc(
         assert r.success
         assert r.expectation_config
         assert (
-            r.result["observed_value"]
-            == expected_metric_values[r.expectation_config.expectation_type]["value"]
+            r.result["observed_value"] == expected_metric_values[r.expectation_config.type]["value"]
         )
 
         assert r.rendered_content is None

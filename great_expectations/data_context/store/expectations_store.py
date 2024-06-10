@@ -36,7 +36,7 @@ class ExpectationConfigurationDTO(pydantic.BaseModel):
         extra = pydantic.Extra.ignore
 
     id: str
-    expectation_type: str
+    type: str
     rendered_content: List[dict] = pydantic.Field(default_factory=list)
     kwargs: dict
     meta: Union[dict, None]

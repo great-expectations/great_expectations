@@ -21,7 +21,7 @@
       "meta": {},
       "expectation_config": {
         "meta": {},
-        "expectation_type": "expect_column_values_to_be_of_type",
+        "type": "expect_column_values_to_be_of_type",
         "kwargs": {
           "column": "ts",
           "type_": "DATETIME",
@@ -42,7 +42,7 @@
       "meta": {},
       "expectation_config": {
         "meta": {},
-        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
           "column": "received_ts",
           "type_list": ["DATETIME", "TIMESTAMP"],

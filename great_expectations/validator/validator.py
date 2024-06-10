@@ -539,7 +539,7 @@ class Validator:
 
                     if not configuration:
                         configuration = ExpectationConfiguration(
-                            expectation_type=name, kwargs=expectation_kwargs, meta=meta
+                            type=name, kwargs=expectation_kwargs, meta=meta
                         )
 
                     validation_result = ExpectationValidationResult(
@@ -693,7 +693,7 @@ class Validator:
             # Validating
             try:
                 assert (
-                    configuration.expectation_type is not None
+                    configuration.type is not None
                 ), "Given configuration should include expectation type"
             except AssertionError as e:
                 raise InvalidExpectationConfigurationError(str(e))
