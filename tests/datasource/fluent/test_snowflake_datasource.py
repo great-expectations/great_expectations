@@ -613,15 +613,6 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        if isinstance(datasource.connection_string, ConfigStr):
-            # expect a warning if connection string is a ConfigStr
-            with pytest.warns(GxContextWarning):
-                assert (
-                    not datasource.schema_
-                ), "Don't expect schema to be available without config_provider"
-            # attach context to enable config substitution
-            datasource._data_context = ephemeral_context_with_defaults
-
         assert datasource.schema_
 
     def test_database(

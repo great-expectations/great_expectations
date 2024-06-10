@@ -250,28 +250,14 @@ class SnowflakeDatasource(SQLDatasource):
         """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.schema_
-
-        subbed_str: str | None = _get_config_substituted_connection_string(
-            self, warning_msg="Unable to determine schema"
-        )
-        if not subbed_str:
-            return None
-        url_path: str = urllib.parse.urlparse(subbed_str).path
-        return _extract_path_sections(url_path)["schema"]
+        return _extract_path_sections(self.connection_string.path)["schema"]
 
     @property
     def database(self) -> str | None:
         """Convenience property to get the `database` regardless of the connection string format."""
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
-
-        subbed_str: str | None = _get_config_substituted_connection_string(
-            self, warning_msg="Unable to determine database"
-        )
-        if not subbed_str:
-            return None
-        url_path: str = urllib.parse.urlparse(subbed_str).path
-        return _extract_path_sections(url_path)["database"]
+        return _extract_path_sections(self.connection_string.path)["database"]
 
     @deprecated_method_or_class(
         version="1.0.0a4",
