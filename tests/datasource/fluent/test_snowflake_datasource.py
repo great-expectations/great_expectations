@@ -495,7 +495,7 @@ def test_conflicting_connection_string_and_args_raises_error(
     "connection_string, expected_errors",
     [
         pytest.param(
-            "user_login_name:password@account_identifier",
+            "user_login_name:password@account_identifier/db/schema?role=my_role&warehouse=my_wh",
             [
                 {
                     "loc": ("connection_string",),
@@ -523,7 +523,7 @@ def test_conflicting_connection_string_and_args_raises_error(
             id="missing scheme",
         ),
         pytest.param(
-            "snowflake://user_login_name@account_identifier",
+            "snowflake://user_login_name@account_identifier/db/schema?role=my_role&warehouse=my_wh",
             [
                 {
                     "loc": ("connection_string",),
@@ -551,7 +551,7 @@ def test_conflicting_connection_string_and_args_raises_error(
             id="bad password",
         ),
         pytest.param(
-            "snowflake://user_login_name:password@",
+            "snowflake://user_login_name:password@/db/schema?role=my_role&warehouse=my_wh",
             [
                 {
                     "loc": ("connection_string",),
@@ -577,6 +577,42 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
             ],
             id="bad domain",
+        ),
+        pytest.param(
+            "snowflake://user_login_name:password@account_identifier/db/schema?warehouse=my_wh",
+            [
+                {
+                    "ctx": {"msg": "missing role"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
+                    "type": "value_error",
+                },
+            ],
+            id="missing role",
+        ),
+        pytest.param(
+            "snowflake://user_login_name:password@account_identifier/db/schema?role=my_role",
+            [
+                {
+                    "ctx": {"msg": "missing warehouse"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
+                    "type": "value_error",
+                },
+            ],
+            id="missing warehouse",
         ),
     ],
 )
