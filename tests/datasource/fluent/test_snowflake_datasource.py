@@ -25,16 +25,20 @@ if TYPE_CHECKING:
 VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
     param(
         {
-            "connection_string": "snowflake://my_user:password@my_account/d_public/s_public?numpy=True"
+            "connection_string": "snowflake://my_user:password@my_account/d_public/s_public?numpy=True&role=my_role&warehouse=my_wh"
         },
         id="connection_string str",
     ),
     param(
-        {"connection_string": "snowflake://my_user:${MY_PASSWORD}@my_account/d_public/s_public"},
+        {
+            "connection_string": "snowflake://my_user:${MY_PASSWORD}@my_account/d_public/s_public?role=my_role&warehouse=my_wh"
+        },
         id="connection_string ConfigStr - password sub",
     ),
     param(
-        {"connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@my_account/d_public/s_public"},
+        {
+            "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@my_account/d_public/s_public?role=my_role&warehouse=my_wh"
+        },
         id="connection_string ConfigStr - user + password sub",
     ),
     param(
@@ -45,6 +49,8 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
                 "account": "my_account",
                 "schema": "s_public",
                 "database": "d_public",
+                "role": "my_role",
+                "warehouse": "my_wh",
             }
         },
         id="connection_string dict",
@@ -57,6 +63,8 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
                 "account": "my_account",
                 "schema": "s_public",
                 "database": "d_public",
+                "role": "my_role",
+                "warehouse": "my_wh",
             }
         },
         id="connection_string dict with password ConfigStr",
@@ -97,6 +105,8 @@ def test_snowflake_dsn():
                 "account": "my_account",
                 "schema": "s_public",
                 "database": "d_public",
+                "role": "my_role",
+                "warehouse": "my_wh",
             },
             id="old config format - top level keys",
         ),
@@ -135,7 +145,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -153,7 +163,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -171,7 +181,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -189,7 +199,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -217,7 +227,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -246,7 +256,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -274,7 +284,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -303,7 +313,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -332,7 +342,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -388,8 +398,8 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -402,6 +412,8 @@ def test_missing_required_params(
                 "user": "my_user",
                 "schema": "foo",
                 "database": "bar",
+                "role": "my_role",
+                "warehouse": "my_wh",
             },
             [
                 {
@@ -422,8 +434,8 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -435,6 +447,8 @@ def test_missing_required_params(
                 "user": "my_user",
                 "schema": "foo",
                 "database": "bar",
+                "warehouse": "baz",
+                "role": "qux",
             },
             {},
             [
@@ -457,7 +471,7 @@ def test_missing_required_params(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -502,8 +516,8 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -530,8 +544,8 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -558,8 +572,8 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -580,7 +594,9 @@ def test_invalid_connection_string_raises_dsn_error(
 @pytest.mark.skipif(True if not snowflake else False, reason="snowflake is not installed")
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
-    connection_string = "snowflake://my_user:password@my_account/my_db/my_schema"
+    connection_string = (
+        "snowflake://my_user:password@my_account/my_db/my_schema?role=my_role&warehouse=my_wh"
+    )
     datasource = SnowflakeDatasource(name="my_snowflake", connection_string=connection_string)
     # testing that this doesn't raise an exception
     datasource.get_execution_engine()
