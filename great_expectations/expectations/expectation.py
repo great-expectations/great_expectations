@@ -757,7 +757,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
             )
 
             if result.expectation_config is not None:
-                expectation_type = result.expectation_config.expectation_type
+                expectation_type = result.expectation_config.type
             else:
                 expectation_type = None
 
@@ -1270,7 +1270,7 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
         id = kwargs.pop("id", None)
         rendered_content = kwargs.pop("rendered_content", None)
         return ExpectationConfiguration(
-            expectation_type=camel_to_snake(self.__class__.__name__),
+            type=camel_to_snake(self.__class__.__name__),
             kwargs=kwargs,
             meta=meta,
             notes=notes,

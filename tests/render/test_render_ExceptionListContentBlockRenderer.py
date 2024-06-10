@@ -24,7 +24,7 @@ def test_exception_list_content_block_renderer():
                     "exception_traceback": 'Traceback (most recent call last):\n  File "/home/user/great_expectations/great_expectations/data_asset/data_asset.py", line 186, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File " /home/user/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/home/user/great_expectations/great_expectations/dataset/dataset.py", line 3388, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',  # noqa: E501
                 },
                 expectation_config=ExpectationConfiguration(
-                    expectation_type="expect_column_kl_divergence_to_be_less_than",
+                    type="expect_column_kl_divergence_to_be_less_than",
                     kwargs={
                         "column": "answer",
                         "partition_object": None,

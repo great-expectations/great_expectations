@@ -65,11 +65,11 @@ class InlineRenderer(Renderer):
         expectation_type: str
         renderer_types: List[AtomicRendererType]
         if isinstance(render_object, ExpectationConfiguration):
-            expectation_type = render_object.expectation_type
+            expectation_type = render_object.type
             renderer_types = [AtomicRendererType.PRESCRIPTIVE]
         elif isinstance(render_object, ExpectationValidationResult):
             if render_object.expectation_config:
-                expectation_type = render_object.expectation_config.expectation_type
+                expectation_type = render_object.expectation_config.type
             else:
                 raise InlineRendererError(  # noqa: TRY003
                     "ExpectationValidationResult passed to InlineRenderer._get_atomic_rendered_content_for_object is missing an expectation_config."  # noqa: E501

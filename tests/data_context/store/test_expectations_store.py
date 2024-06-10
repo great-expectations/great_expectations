@@ -194,7 +194,7 @@ _SUITE_CONFIG_WITH_EXPECTATIONS = _create_suite_config(
     "03d61d4e-003f-48e7-a3b2-f9f842384da3",
     [
         {
-            "expectation_type": "expect_column_to_exist",
+            "type": "expect_column_to_exist",
             "id": "c8a239a6-fb80-4f51-a90e-40c38dffdf91",
             "kwargs": {"column": "infinities"},
             "meta": {},

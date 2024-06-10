@@ -562,17 +562,13 @@ def basic_expectation_suite():
         meta={},
         expectations=[
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist",
+                type="expect_column_to_exist",
                 kwargs={"column": "infinities"},
             ),
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "nulls"}),
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "naturals"}),
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_unique",
+                type="expect_column_values_to_be_unique",
                 kwargs={"column": "naturals"},
             ),
         ],
@@ -1325,15 +1321,13 @@ def titanic_expectation_suite(empty_data_context_stats_enabled):
         name="Titanic.warning",
         meta={},
         expectations=[
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "PClass"}),
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "PClass"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_values_to_not_be_null",
+                type="expect_column_values_to_not_be_null",
                 kwargs={"column": "Name"},
             ),
             ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal",
+                type="expect_table_row_count_to_equal",
                 kwargs={"value": 1313},
             ),
         ],
@@ -1426,7 +1420,7 @@ def evr_failed():
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_match_regex",
+            type="expect_column_values_to_not_match_regex",
             kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
@@ -1447,7 +1441,7 @@ def evr_success():
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_be_between",
+            type="expect_table_row_count_to_be_between",
             kwargs={"min_value": 0, "max_value": None, "result_format": "SUMMARY"},
         ),
     )

@@ -119,7 +119,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         """
         Utilize Pydantic validaton and type coercion to ensure the final expectation configuration is valid.
         """  # noqa: E501
-        expectation_cls = get_expectation_impl(config.expectation_type)
+        expectation_cls = get_expectation_impl(config.type)
         kwargs = {**config.kwargs, **domain.domain_kwargs}
         expectation = expectation_cls(**kwargs, meta=config.meta)
         return expectation.configuration
