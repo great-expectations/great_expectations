@@ -637,7 +637,7 @@ def test_get_execution_engine_succeeds():
     datasource.get_execution_engine()
 
 
-@pytest.mark.snowflake
+@pytest.mark.unit
 @pytest.mark.parametrize("ds_config", VALID_DS_CONFIG_PARAMS)
 class TestConvenienceProperties:
     def test_schema(
