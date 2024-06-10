@@ -121,8 +121,8 @@
             "type": "boolean"
         },
         "library_metadata": {
-            "type": "object",
-            "const": {
+            "title": "Library Metadata",
+            "default": {
                 "maturity": "production",
                 "tags": [
                     "core expectation",
@@ -134,7 +134,8 @@
                 "requirements": [],
                 "has_full_test_suite": true,
                 "manually_reviewed_code": true
-            }
+            },
+            "type": "object"
         },
         "metadata": {
             "type": "object",
@@ -144,25 +145,45 @@
                     "type": "string",
                     "const": "column",
                     "description": "Column Aggregate"
+                },
+                "data_quality_issues": {
+                    "title": "Data Quality Issues",
+                    "type": "array",
+                    "const": [
+                        "Distribution"
+                    ]
+                },
+                "library_metadata": {
+                    "title": "Library Metadata",
+                    "type": "object",
+                    "const": {
+                        "maturity": "production",
+                        "tags": [
+                            "core expectation",
+                            "column aggregate expectation"
+                        ],
+                        "contributors": [
+                            "@great_expectations"
+                        ],
+                        "requirements": [],
+                        "has_full_test_suite": true,
+                        "manually_reviewed_code": true
+                    }
+                },
+                "short_description": {
+                    "title": "Short Description",
+                    "type": "string",
+                    "const": "Expect the column standard deviation to be between a minimum value and a maximum value."
+                },
+                "supported_data_sources": {
+                    "title": "Supported Data Sources",
+                    "type": "array",
+                    "const": [
+                        "Snowflake",
+                        "PostgreSQL"
+                    ]
                 }
             }
-        },
-        "data_quality_issues": {
-            "type": "array",
-            "const": [
-                "Distribution"
-            ]
-        },
-        "short_description": {
-            "type": "string",
-            "const": "Expect the column standard deviation to be between a minimum value and a maximum value."
-        },
-        "supported_data_sources": {
-            "type": "array",
-            "const": [
-                "Snowflake",
-                "PostgreSQL"
-            ]
         }
     },
     "required": [
