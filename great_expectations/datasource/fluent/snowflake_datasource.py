@@ -54,7 +54,7 @@ MISSING: Final = object()  # sentinel value to indicate missing values
 
 
 @functools.lru_cache(maxsize=4)
-def _extract_path_sections(url_path: str) -> dict[str, str]:
+def _get_database_and_schema_from_path(url_path: str) -> dict[Literal["database", "schema"], str]:
     """
     Extracts the database and schema from the path of a URL.
 
@@ -159,7 +159,7 @@ class SnowflakeDsn(AnyUrl):
 
         path: str = parts["path"]
         # raises UrlPathError if path is missing database/schema
-        _extract_path_sections(path)
+        _get_database_and_schema_from_path(path)
 
         return validated_parts
 
@@ -250,7 +250,7 @@ class SnowflakeDatasource(SQLDatasource):
         """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.schema_
-        return _extract_path_sections(self.connection_string.path)["schema"]
+        return _get_database_and_schema_from_path(self.connection_string.path)["schema"]
 
     @property
     def database(self) -> str | None:
@@ -259,7 +259,7 @@ class SnowflakeDatasource(SQLDatasource):
         """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
-        return _extract_path_sections(self.connection_string.path)["database"]
+        return _get_database_and_schema_from_path(self.connection_string.path)["database"]
 
     @property
     def warehouse(self) -> str | None:
