@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from numbers import Number
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 import numpy as np
 
@@ -229,8 +229,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    quantile_ranges: QuantileRange
-    allow_relative_error: Union[bool, str] = False
+    quantile_ranges: QuantileRange = pydantic.Field(description=QUANTILE_RANGES_DESCRIPTION)
+    allow_relative_error: Union[bool, str] = pydantic.Field(
+        False,
+        description=ALLOW_RELATIVE_ERROR_DESCRIPTION,
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -241,6 +244,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+
+    _library_metadata = library_metadata
 
     metric_dependencies = ("column.quantile_values",)
     success_keys = (
@@ -253,6 +258,37 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "quantile_ranges",
         "allow_relative_error",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnQuantileValuesToBeBetween]
+        ) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @pydantic.validator("quantile_ranges")
     def validate_quantile_ranges(cls, quantile_ranges: QuantileRange) -> Optional[QuantileRange]:
