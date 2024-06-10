@@ -134,7 +134,7 @@ class TestValidationRun:
         mock_validator.graph_validate.assert_called_with(
             configurations=[
                 ExpectationConfiguration(
-                    expectation_type="expect_column_max_to_be_between",
+                    type="expect_column_max_to_be_between",
                     kwargs={"column": "foo", "max_value": 1.0},
                 )
             ],
@@ -163,7 +163,7 @@ class TestValidationRun:
         mock_validator.graph_validate.assert_called_with(
             configurations=[
                 ExpectationConfiguration(
-                    expectation_type="expect_column_max_to_be_between",
+                    type="expect_column_max_to_be_between",
                     kwargs={"column": "foo", "max_value": 9000},
                 )
             ],
@@ -229,7 +229,7 @@ class TestValidationRun:
         mock_validator.graph_validate.assert_called_with(
             configurations=[
                 ExpectationConfiguration(
-                    expectation_type="expect_column_max_to_be_between",
+                    type="expect_column_max_to_be_between",
                     kwargs={"column": "foo", "max_value": 1.0},
                 )
             ],

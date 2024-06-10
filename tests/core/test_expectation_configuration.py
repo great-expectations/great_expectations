@@ -10,7 +10,7 @@ from great_expectations.expectations.expectation_configuration import (
 @pytest.fixture
 def config1():
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
         meta={"notes": "This is an expectation."},
     )
@@ -19,7 +19,7 @@ def config1():
 @pytest.fixture
 def config2():
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
         meta={"notes": "This is an expectation."},
     )
@@ -28,7 +28,7 @@ def config2():
 @pytest.fixture
 def config3():
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "BASIC"},
         meta={"notes": "This is another expectation."},
     )
@@ -37,7 +37,7 @@ def config3():
 @pytest.fixture
 def config4():
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={"column": "a", "value_set": [1, 2, 3], "result_format": "COMPLETE"},
         meta={"notes": "This is another expectation."},
     )
@@ -46,7 +46,7 @@ def config4():
 @pytest.fixture
 def config5():
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "a",
             "value_set": [1, 2],  # differs from others
@@ -59,7 +59,7 @@ def config5():
 @pytest.fixture
 def config6():
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "a",
             "value_set": [1, 2, 3, 4],  # differs from others
@@ -72,7 +72,7 @@ def config6():
 @pytest.fixture
 def config7():
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "a",
             "value_set": [1, 2, 3, 4],
@@ -121,7 +121,7 @@ def test_expectation_configuration_to_domain_obj(notes: str | list[str] | None):
     meta = {"foo": "bar"}
 
     config = ExpectationConfiguration(
-        expectation_type=expectation_type,
+        type=expectation_type,
         kwargs={"column": column, "value_set": value_set},
         notes=notes,
         meta=meta,

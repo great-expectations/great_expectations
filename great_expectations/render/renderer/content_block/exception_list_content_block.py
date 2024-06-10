@@ -92,7 +92,7 @@ class ExceptionListContentBlockRenderer(ContentBlockRenderer):
                             "template": template_str,
                             "params": {
                                 "column": column,
-                                "expectation_type": result.expectation_config.expectation_type,
+                                "expectation_type": result.expectation_config.type,
                                 "exception_message": result.exception_info["exception_message"],
                             },
                             "styling": styling,

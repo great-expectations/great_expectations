@@ -82,9 +82,7 @@ def test_get_expectation_suite_include_rendered_content(
         ExpectationSuite(name="this_data_asset_config_does_not_exist.default")
     )
     expectation_suite.expectation_configurations.append(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
+        ExpectationConfiguration(type="expect_table_row_count_to_equal", kwargs={"value": 10})
     )
     for expectation in expectation_suite.expectation_configurations:
         assert expectation.rendered_content is None
@@ -621,9 +619,7 @@ def test_add_expectation_to_expectation_suite(empty_data_context_stats_enabled):
         ExpectationSuite(name="my_new_expectation_suite")
     )
     expectation_suite.add_expectation_configuration(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
+        ExpectationConfiguration(type="expect_table_row_count_to_equal", kwargs={"value": 10})
     )
 
 
@@ -710,9 +706,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         expectation_suite_name=expectation_suite_name,
         data_context=context,
         expectations=[
-            ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal", kwargs={"value": 0}
-            ),
+            ExpectationConfiguration(type="expect_table_row_count_to_equal", kwargs={"value": 0}),
         ],
     )
     context.suites.add(expectation_suite)
@@ -738,9 +732,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
         expectation_suite_name=expectation_suite_name,
         data_context=context,
         expectations=[
-            ExpectationConfiguration(
-                expectation_type="expect_sky_to_be_color", kwargs={"color": "blue"}
-            ),
+            ExpectationConfiguration(type="expect_sky_to_be_color", kwargs={"color": "blue"}),
         ],
     )
     context.suites.add(expectation_suite)
