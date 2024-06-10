@@ -1,43 +1,43 @@
 {
   "expectations": [
     {
-      "expectation_type": "expect_column_to_exist",
+      "type": "expect_column_to_exist",
       "kwargs": {
         "column": "Name"
       }
     },
     {
-      "expectation_type": "expect_column_to_exist",
+      "type": "expect_column_to_exist",
       "kwargs": {
         "column": "PClass"
       }
     },
     {
-      "expectation_type": "expect_column_to_exist",
+      "type": "expect_column_to_exist",
       "kwargs": {
         "column": "Age"
       }
     },
     {
-      "expectation_type": "expect_column_to_exist",
+      "type": "expect_column_to_exist",
       "kwargs": {
         "column": "Sex"
       }
     },
     {
-      "expectation_type": "expect_column_to_exist",
+      "type": "expect_column_to_exist",
       "kwargs": {
         "column": "Survived"
       }
     },
     {
-      "expectation_type": "expect_column_to_exist",
+      "type": "expect_column_to_exist",
       "kwargs": {
         "column": "SexCode"
       }
     },
     {
-      "expectation_type": "expect_column_mean_to_be_between",
+      "type": "expect_column_mean_to_be_between",
       "kwargs": {
         "column": "Age",
         "max_value": 40,
@@ -45,7 +45,7 @@
       }
     },
     {
-      "expectation_type": "expect_column_values_to_be_between",
+      "type": "expect_column_values_to_be_between",
       "kwargs": {
         "column": "Age",
         "max_value": 80,
@@ -53,7 +53,7 @@
       }
     },
     {
-      "expectation_type": "expect_column_values_to_match_regex",
+      "type": "expect_column_values_to_match_regex",
       "kwargs": {
         "regex": "[A-Z][a-z]+(?: \\([A-Z][a-z]+\\))?, ",
         "column": "Name",
@@ -61,7 +61,7 @@
       }
     },
     {
-      "expectation_type": "expect_column_values_to_be_in_set",
+      "type": "expect_column_values_to_be_in_set",
       "kwargs": {
         "column": "PClass",
         "value_set": [

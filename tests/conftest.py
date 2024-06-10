@@ -562,17 +562,13 @@ def basic_expectation_suite():
         meta={},
         expectations=[
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist",
+                type="expect_column_to_exist",
                 kwargs={"column": "infinities"},
             ),
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "nulls"}),
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "naturals"}),
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_unique",
+                type="expect_column_values_to_be_unique",
                 kwargs={"column": "naturals"},
             ),
         ],
@@ -1325,15 +1321,13 @@ def titanic_expectation_suite(empty_data_context_stats_enabled):
         name="Titanic.warning",
         meta={},
         expectations=[
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "PClass"}),
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "PClass"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_values_to_not_be_null",
+                type="expect_column_values_to_not_be_null",
                 kwargs={"column": "Name"},
             ),
             ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal",
+                type="expect_table_row_count_to_equal",
                 kwargs={"value": 1313},
             ),
         ],
@@ -1426,7 +1420,7 @@ def evr_failed():
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_not_match_regex",
+            type="expect_column_values_to_not_match_regex",
             kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
@@ -1447,7 +1441,7 @@ def evr_success():
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_be_between",
+            type="expect_table_row_count_to_be_between",
             kwargs={"min_value": 0, "max_value": None, "result_format": "SUMMARY"},
         ),
     )
@@ -2205,3 +2199,20 @@ def filter_gx_datasource_warnings() -> Generator[None, None, None]:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=GxDatasourceWarning)
         yield
+
+
+@pytest.fixture(scope="function")
+def param_id(request: pytest.FixtureRequest) -> str:
+    """Return the parameter id of the current test.
+
+    Example:
+
+    ```python
+    @pytest.mark.parametrize("my_param", ["a", "b", "c"], ids=lambda x: x.upper())
+    def test_something(param_id: str, my_param: str):
+        assert my_param != param_id
+        assert my_param.upper() == param_id
+    ```
+    """
+    raw_name: str = request.node.name
+    return raw_name.split("[")[1].split("]")[0]

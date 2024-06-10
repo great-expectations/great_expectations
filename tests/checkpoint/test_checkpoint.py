@@ -446,7 +446,7 @@ class TestCheckpointResult:
                 ExpectationValidationResult(
                     success=True,
                     expectation_config=ExpectationConfiguration(
-                        expectation_type="expect_column_values_to_be_between",
+                        type="expect_column_values_to_be_between",
                         kwargs={
                             "batch_id": f"{self.datasource_name}-{self.asset_name}",
                             "column": self.column_name,

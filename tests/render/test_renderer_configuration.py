@@ -68,7 +68,7 @@ def test_successful_renderer_configuration_instantiation(
     include_column_name: bool,
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type=expectation_type,
+        type=expectation_type,
         kwargs=kwargs,
     )
     renderer_configuration = RendererConfiguration(
@@ -130,7 +130,7 @@ def test_renderer_configuration_add_param_validation(
     param_type: RendererValueType, value: Union[NotString, str, int]
 ):
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_table_row_count_to_equal",
+        type="expect_table_row_count_to_equal",
         kwargs={"value": value},
     )
     renderer_configuration = RendererConfiguration(configuration=expectation_configuration)

@@ -45,7 +45,7 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
 
     examples = [
         {
-            # "expectation_type": "expect_column_values_to_be_in_set",
+            # "type": "expect_column_values_to_be_in_set",
             "data": {
                 "x": [1, 2, 4],
                 "y": [1.1, 2.2, 5.5],

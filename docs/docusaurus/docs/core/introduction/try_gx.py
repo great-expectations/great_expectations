@@ -44,7 +44,7 @@ print(validation_result.describe())
 output1 = """
 # <snippet name="docs/docusaurus/docs/core/introduction/try_gx.py output1">
 {
-    "expectation_type": "expect_column_values_to_be_between",
+    "type": "expect_column_values_to_be_between",
     "success": true,
     "kwargs": {
         "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
@@ -85,7 +85,7 @@ print(failed_validation_result.describe())
 failed_output = """
 # <snippet name="docs/docusaurus/docs/core/introduction/try_gx.py failed output">
 {
-    "expectation_type": "expect_column_values_to_be_between",
+    "type": "expect_column_values_to_be_between",
     "success": false,
     "kwargs": {
         "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",

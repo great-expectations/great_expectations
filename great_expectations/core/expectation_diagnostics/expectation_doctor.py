@@ -484,7 +484,7 @@ class ExpectationDoctor:
                     for test in tests:
                         if test.output.get("success"):
                             return ExpectationConfiguration(
-                                expectation_type=self._expectation.expectation_type,
+                                type=self._expectation.expectation_type,
                                 kwargs=test.input,
                             )
 
@@ -495,7 +495,7 @@ class ExpectationDoctor:
                     for test in tests:
                         if test.input:
                             return ExpectationConfiguration(
-                                expectation_type=self._expectation.expectation_type,
+                                type=self._expectation.expectation_type,
                                 kwargs=test.input,
                             )
         return None

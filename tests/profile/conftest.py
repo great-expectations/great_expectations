@@ -77,6 +77,6 @@ def get_set_of_columns_and_expectations_from_suite(
         for i in suite.expectation_configurations
         if i.kwargs.get("column")
     }
-    expectations: Set[str] = {i.expectation_type for i in suite.expectation_configurations}
+    expectations: Set[str] = {i.type for i in suite.expectation_configurations}
 
     return columns, expectations
