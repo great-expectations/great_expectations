@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
 import altair as alt
 import numpy as np
 import pandas as pd
 from scipy import stats
 
-from great_expectations_v1.compatibility.pydantic import Field
+from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -94,6 +94,8 @@ BUCKETIZE_DATA_DESCRIPTION = (
     "this parameter to false allows evaluation of KL divergence with a None partition object for "
     "profiling against discrete data."
 )
+MIN_VALUE_DESCRIPTION = "The minimum value for the column."
+MAX_VALUE_DESCRIPTION = "The maximum value for the column."
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Distribution"]
 
@@ -130,6 +132,10 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
            {TAIL_WEIGHT_HOLDOUT_DESCRIPTION}
         bucketize_data (boolean): \
             {BUCKETIZE_DATA_DESCRIPTION}
+        min_value (float or None): \
+            {MIN_VALUE_DESCRIPTION}
+        max_value (float or None): \
+            {MAX_VALUE_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -299,13 +305,21 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    partition_object: Union[dict, None]
-    threshold: Union[float, None]
-    internal_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
-    tail_weight_holdout: Union[float, None] = Field(0, ge=0, le=1)
-    bucketize_data: bool = True
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
+    partition_object: Union[dict, None] = pydantic.Field(description=PARTITION_OBJECT_DESCRIPTION)
+    threshold: Union[float, None] = pydantic.Field(description=THRESHOLD_DESCRIPTION)
+    internal_weight_holdout: Union[float, None] = pydantic.Field(
+        default=0, ge=0, le=1, description=INTERNAL_WEIGHT_HOLDOUT_DESCRIPTION
+    )
+    tail_weight_holdout: Union[float, None] = pydantic.Field(
+        default=0, ge=0, le=1, description=TAIL_WEIGHT_HOLDOUT_DESCRIPTION
+    )
+    bucketize_data: bool = pydantic.Field(True, description=BUCKETIZE_DATA_DESCRIPTION)
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MAX_VALUE_DESCRIPTION
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -321,6 +335,8 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
+    _library_metadata = library_metadata
+
     success_keys = (
         "partition_object",
         "threshold",
@@ -333,6 +349,37 @@ class ExpectColumnKLDivergenceToBeLessThan(ColumnAggregateExpectation):
         "partition_object",
         "threshold",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnKLDivergenceToBeLessThan]
+        ) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     def get_validation_dependencies(
         self,
