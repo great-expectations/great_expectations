@@ -1,0 +1,228 @@
+{
+    "title": "Expect Column KL Divergence To Be Less Than",
+    "description": "Base class for column aggregate Expectations.\n\nThese types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,\nnumber of unique values, column type, etc.\n\n--Documentation--\n    - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/\n\nArgs:\n domain_keys (tuple): A tuple of the keys used to determine the domain of the\n     expectation.\n success_keys (tuple): A tuple of the keys used to determine the success of\n     the expectation.\n\n     - A  \"column\" key is required for column expectations.\n\nRaises:\n    InvalidExpectationConfigurationError: If no `column` is specified",
+    "type": "object",
+    "properties": {
+        "id": {
+            "title": "Id",
+            "type": "string"
+        },
+        "meta": {
+            "title": "Meta",
+            "type": "object"
+        },
+        "notes": {
+            "title": "Notes",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "result_format": {
+            "title": "Result Format",
+            "default": "BASIC",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/ResultFormat"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "catch_exceptions": {
+            "title": "Catch Exceptions",
+            "default": false,
+            "type": "boolean"
+        },
+        "rendered_content": {
+            "title": "Rendered Content",
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
+        },
+        "batch_id": {
+            "title": "Batch Id",
+            "type": "string"
+        },
+        "row_condition": {
+            "title": "Row Condition",
+            "type": "string"
+        },
+        "condition_parser": {
+            "title": "Condition Parser",
+            "type": "string"
+        },
+        "mostly": {
+            "title": "Mostly",
+            "default": 1.0,
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "multipleOf": 0.01
+        },
+        "column": {
+            "title": "Column",
+            "description": "The column name.",
+            "minLength": 1,
+            "type": "string"
+        },
+        "partition_object": {
+            "title": "Partition Object",
+            "description": "The expected partition object.",
+            "type": "object"
+        },
+        "threshold": {
+            "title": "Threshold",
+            "description": "The maximum KL divergence to for which to return success=True. If KL divergence is largerthan the provided threshold, the test will return success=False.",
+            "type": "number"
+        },
+        "internal_weight_holdout": {
+            "title": "Internal Weight Holdout",
+            "description": "The amount of weight to split uniformly among zero-weighted partition bins. internal_weight_holdout provides a mechanisms to make the test less strict by assigning positive weights to values observed in the data for which the partition explicitly expected zero weight.",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 1,
+            "type": "number"
+        },
+        "tail_weight_holdout": {
+            "title": "Tail Weight Holdout",
+            "description": "The amount of weight to add to the tails of the histogram.Tail weight holdout is split evenly between (-Infinity, min(partition_object['bins'])) and (max(partition_object['bins']), +Infinity). tail_weight_holdout provides a mechanism to make the test less strict by assigning positive weights to values observed in the data that are not present in the partition. With no tail_weight_holdout, any value observed outside the provided partition_object will cause KL divergence to rise to +Infinity. Defaults to 0.",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 1,
+            "type": "number"
+        },
+        "bucketize_data": {
+            "title": "Bucketize Data",
+            "description": "If True, then continuous data will be bucketized before evaluation. Setting this parameter to false allows evaluation of KL divergence with a None partition object for profiling against discrete data.",
+            "default": true,
+            "type": "boolean"
+        },
+        "min_value": {
+            "title": "Min Value",
+            "description": "The minimum value for the column.",
+            "anyOf": [
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ]
+        },
+        "max_value": {
+            "title": "Max Value",
+            "description": "The maximum value for the column.",
+            "anyOf": [
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            ]
+        },
+        "library_metadata": {
+            "title": "Library Metadata",
+            "default": {
+                "maturity": "production",
+                "tags": [
+                    "core expectation",
+                    "column aggregate expectation",
+                    "distributional expectation"
+                ],
+                "contributors": [
+                    "@great_expectations"
+                ],
+                "requirements": [],
+                "has_full_test_suite": true,
+                "manually_reviewed_code": true
+            },
+            "type": "object"
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "domain_type": {
+                    "title": "Domain Type",
+                    "type": "string",
+                    "const": "column",
+                    "description": "Column Aggregate"
+                },
+                "data_quality_issues": {
+                    "title": "Data Quality Issues",
+                    "type": "array",
+                    "const": [
+                        "Distribution"
+                    ]
+                },
+                "library_metadata": {
+                    "title": "Library Metadata",
+                    "type": "object",
+                    "const": {
+                        "maturity": "production",
+                        "tags": [
+                            "core expectation",
+                            "column aggregate expectation",
+                            "distributional expectation"
+                        ],
+                        "contributors": [
+                            "@great_expectations"
+                        ],
+                        "requirements": [],
+                        "has_full_test_suite": true,
+                        "manually_reviewed_code": true
+                    }
+                },
+                "short_description": {
+                    "title": "Short Description",
+                    "type": "string",
+                    "const": "Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the partition object to be lower than the provided threshold."
+                },
+                "supported_data_sources": {
+                    "title": "Supported Data Sources",
+                    "type": "array",
+                    "const": [
+                        "Snowflake",
+                        "PostgreSQL"
+                    ]
+                }
+            }
+        }
+    },
+    "required": [
+        "column"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "ResultFormat": {
+            "title": "ResultFormat",
+            "description": "An enumeration.",
+            "enum": [
+                "BOOLEAN_ONLY",
+                "BASIC",
+                "COMPLETE",
+                "SUMMARY"
+            ],
+            "type": "string"
+        }
+    }
+}

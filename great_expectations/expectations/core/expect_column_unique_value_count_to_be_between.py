@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -43,6 +44,12 @@ EXPECTATION_SHORT_DESCRIPTION = (
 )
 MIN_VALUE_DESCRIPTION = "The minimum number of unique values allowed."
 MAX_VALUE_DESCRIPTION = "The maximum number of unique values allowed."
+STRICT_MIN_DESCRIPTION = (
+    "If True, the column must have strictly more unique value count than min_value to pass."
+)
+STRICT_MAX_DESCRIPTION = (
+    "If True, the column must have strictly fewer unique value count than max_value to pass."
+)
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Cardinality"]
 
@@ -64,6 +71,10 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
             {MIN_VALUE_DESCRIPTION}
         max_value (int or None): \
             {MAX_VALUE_DESCRIPTION}
+        strict_min (bool): \
+            {STRICT_MIN_DESCRIPTION}
+        strict_max (bool): \
+            {STRICT_MAX_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -151,10 +162,20 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
-    strict_min: bool = False
-    strict_max: bool = False
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MAX_VALUE_DESCRIPTION
+    )
+    strict_min: bool = pydantic.Field(
+        False,
+        description=STRICT_MIN_DESCRIPTION,
+    )
+    strict_max: bool = pydantic.Field(
+        False,
+        description=STRICT_MAX_DESCRIPTION,
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -165,6 +186,8 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+
+    _library_metadata = library_metadata
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.distinct_values.count",)
@@ -180,6 +203,37 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
     )
 
     """ A Column Aggregate Metric Decorator for the Unique Value Count"""
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnUniqueValueCountToBeBetween]
+        ) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(  # noqa: C901, PLR0912
