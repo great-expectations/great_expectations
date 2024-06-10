@@ -46,9 +46,8 @@ if TYPE_CHECKING:
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 REQUIRED_QUERY_PARAMS: Final[Iterable[str]] = {  # errors will be thrown if any of these are missing
-    # TODO: require warehouse and role
-    # "warehouse",
-    # "role",
+    "warehouse",
+    "role",
 }
 
 MISSING: Final = object()  # sentinel value to indicate missing values
@@ -214,8 +213,8 @@ class ConnectionDetails(FluentBaseModel):
     schema_: str = pydantic.Field(
         ..., alias="schema", description="`schema` that the Datasource is mapped to."
     )  # schema is a reserved attr in BaseModel
-    warehouse: Optional[str] = None
-    role: Optional[str] = None
+    warehouse: str
+    role: str
     numpy: bool = False
 
 
