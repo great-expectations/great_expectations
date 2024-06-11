@@ -592,7 +592,9 @@
                 "user",
                 "password",
                 "database",
-                "schema"
+                "schema",
+                "warehouse",
+                "role"
             ],
             "additionalProperties": false
         }

@@ -11,7 +11,6 @@ from pytest import param
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.datasource.fluent import GxContextWarning
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
@@ -25,16 +24,20 @@ if TYPE_CHECKING:
 VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
     param(
         {
-            "connection_string": "snowflake://my_user:password@my_account/d_public/s_public?numpy=True"
+            "connection_string": "snowflake://my_user:password@my_account/d_public/s_public?numpy=True&role=my_role&warehouse=my_wh"
         },
         id="connection_string str",
     ),
     param(
-        {"connection_string": "snowflake://my_user:${MY_PASSWORD}@my_account/d_public/s_public"},
+        {
+            "connection_string": "snowflake://my_user:${MY_PASSWORD}@my_account/d_public/s_public?role=my_role&warehouse=my_wh"
+        },
         id="connection_string ConfigStr - password sub",
     ),
     param(
-        {"connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@my_account/d_public/s_public"},
+        {
+            "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@my_account/d_public/s_public?role=my_role&warehouse=my_wh"
+        },
         id="connection_string ConfigStr - user + password sub",
     ),
     param(
@@ -45,6 +48,8 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
                 "account": "my_account",
                 "schema": "s_public",
                 "database": "d_public",
+                "role": "my_role",
+                "warehouse": "my_wh",
             }
         },
         id="connection_string dict",
@@ -57,6 +62,8 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
                 "account": "my_account",
                 "schema": "s_public",
                 "database": "d_public",
+                "role": "my_role",
+                "warehouse": "my_wh",
             }
         },
         id="connection_string dict with password ConfigStr",
@@ -97,6 +104,8 @@ def test_snowflake_dsn():
                 "account": "my_account",
                 "schema": "s_public",
                 "database": "d_public",
+                "role": "my_role",
+                "warehouse": "my_wh",
             },
             id="old config format - top level keys",
         ),
@@ -135,7 +144,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -153,7 +162,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -171,7 +180,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -189,7 +198,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -217,7 +226,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -246,7 +255,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -274,7 +283,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -303,7 +312,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -332,7 +341,7 @@ def test_valid_config(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -388,8 +397,8 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -402,6 +411,8 @@ def test_missing_required_params(
                 "user": "my_user",
                 "schema": "foo",
                 "database": "bar",
+                "role": "my_role",
+                "warehouse": "my_wh",
             },
             [
                 {
@@ -422,8 +433,8 @@ def test_missing_required_params(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -435,6 +446,8 @@ def test_missing_required_params(
                 "user": "my_user",
                 "schema": "foo",
                 "database": "bar",
+                "warehouse": "baz",
+                "role": "qux",
             },
             {},
             [
@@ -457,7 +470,7 @@ def test_missing_required_params(
                 {
                     "loc": ("__root__",),
                     "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
@@ -482,7 +495,7 @@ def test_conflicting_connection_string_and_args_raises_error(
     "connection_string, expected_errors",
     [
         pytest.param(
-            "user_login_name:password@account_identifier",
+            "user_login_name:password@account_identifier/db/schema?role=my_role&warehouse=my_wh",
             [
                 {
                     "loc": ("connection_string",),
@@ -502,15 +515,15 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
             id="missing scheme",
         ),
         pytest.param(
-            "snowflake://user_login_name@account_identifier",
+            "snowflake://user_login_name@account_identifier/db/schema?role=my_role&warehouse=my_wh",
             [
                 {
                     "loc": ("connection_string",),
@@ -530,15 +543,15 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
             id="bad password",
         ),
         pytest.param(
-            "snowflake://user_login_name:password@",
+            "snowflake://user_login_name:password@/db/schema?role=my_role&warehouse=my_wh",
             [
                 {
                     "loc": ("connection_string",),
@@ -558,12 +571,48 @@ def test_conflicting_connection_string_and_args_raises_error(
                 },
                 {
                     "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of"
-                    " account, user, and password.",
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
                     "type": "value_error",
                 },
             ],
             id="bad domain",
+        ),
+        pytest.param(
+            "snowflake://user_login_name:password@account_identifier/db/schema?warehouse=my_wh",
+            [
+                {
+                    "ctx": {"msg": "missing role"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
+                    "type": "value_error",
+                },
+            ],
+            id="missing role",
+        ),
+        pytest.param(
+            "snowflake://user_login_name:password@account_identifier/db/schema?role=my_role",
+            [
+                {
+                    "ctx": {"msg": "missing warehouse"},
+                    "loc": ("connection_string",),
+                    "msg": "URL query param missing",
+                    "type": "value_error.url.query",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, "
+                    "user, password, database, schema, warehouse, role as keyword args.",
+                    "type": "value_error",
+                },
+            ],
+            id="missing warehouse",
         ),
     ],
 )
@@ -580,13 +629,15 @@ def test_invalid_connection_string_raises_dsn_error(
 @pytest.mark.skipif(True if not snowflake else False, reason="snowflake is not installed")
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
-    connection_string = "snowflake://my_user:password@my_account/my_db/my_schema"
+    connection_string = (
+        "snowflake://my_user:password@my_account/my_db/my_schema?role=my_role&warehouse=my_wh"
+    )
     datasource = SnowflakeDatasource(name="my_snowflake", connection_string=connection_string)
     # testing that this doesn't raise an exception
     datasource.get_execution_engine()
 
 
-@pytest.mark.snowflake
+@pytest.mark.unit
 @pytest.mark.parametrize("ds_config", VALID_DS_CONFIG_PARAMS)
 class TestConvenienceProperties:
     def test_schema(
@@ -597,15 +648,6 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        if isinstance(datasource.connection_string, ConfigStr):
-            # expect a warning if connection string is a ConfigStr
-            with pytest.warns(GxContextWarning):
-                assert (
-                    not datasource.schema_
-                ), "Don't expect schema to be available without config_provider"
-            # attach context to enable config substitution
-            datasource._data_context = ephemeral_context_with_defaults
-
         assert datasource.schema_
 
     def test_database(
@@ -616,16 +658,27 @@ class TestConvenienceProperties:
         ephemeral_context_with_defaults: AbstractDataContext,
     ):
         datasource = SnowflakeDatasource(name=param_id, **ds_config)
-        if isinstance(datasource.connection_string, ConfigStr):
-            # expect a warning if connection string is a ConfigStr
-            with pytest.warns(GxContextWarning):
-                assert (
-                    not datasource.database
-                ), "Don't expect schema to be available without config_provider"
-            # attach context to enable config substitution
-            datasource._data_context = ephemeral_context_with_defaults
-
         assert datasource.database
+
+    def test_role(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        assert datasource.role
+
+    def test_warehouse(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        assert datasource.warehouse
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import urllib.parse
 import warnings
 from typing import (
     TYPE_CHECKING,
@@ -164,6 +165,13 @@ class ConfigUri(AnyUrl, ConfigStr):  # type: ignore[misc] # Mixin "validate" sig
         instance = str.__new__(cls, built_url)
         instance.template_str = str(instance)
         return instance
+
+    @property
+    def params(self) -> dict[str, list[str]]:
+        """The query parameters as a dictionary."""
+        if not self.query:
+            return {}
+        return urllib.parse.parse_qs(self.query)
 
     @classmethod
     @override
