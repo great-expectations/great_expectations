@@ -22,34 +22,35 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 - You have [added a Checkpoint to your Expectation](/cloud/checkpoints/manage_checkpoints.md#add-a-checkpoint).
 
 
-## Create a local Airflow project and set dependencies
+## Run Airflow Standalone to create a freshh local Airflow environment
 
-1. Open a terminal, navigate to the directory where you want to create your Airflow project, and then run the following code:
-
-    ```bash title="Terminal input"
-    mkdir gx-cloud-airflow && cd gx-cloud-airflow
-    ```
-    After running the CLI, a new directory is created and you're taken to that directory.
-
-2. Start the Airflow Scheduler and Web Server
+1. The `airflow standalone` command initializes the database, creates a user, and starts all components.
 
     ``` title="Terminal input"
-    airflow scheduler
-    airflow webserver
+    airflow standalone
     ```
 
-    The scheduler manages task scheduling and the web server starts the UI for Airflow.
+    This command will eventually output a username a password for the Airflow UI like this:
 
-3. Access Airflow UI:
+    ``` title="Terminal input"
+    standalone | Airflow is ready
+    standalone | Login with username: admin  password: Bpu6RgmPMMaDeeq5
+    standalone | Airflow Standalone is for development purposes only. Do not use this in production!
+    ```
 
-    Once the web server is running, open a web browser and go to http://localhost:8080 (by default) to access the Airflow UI.
+2. Access Airflow UI:
+
+    Once the web server is running, open a web browser and go to http://localhost:8080 (by default) to access the Airflow UI using the username and password from the last step
 
 
 ## Create a DAG file for your GX Cloud Checkpoint
 
-1. Open a terminal, browse to the `dags` folder of your Airflow project, and then run the following code to create a new DAG named `gx_dag.py`:
+1. Open a terminal, browse to the `airflow` folder in your home directory, and then run the following code to create a new DAG named `gx_dag.py`:
 
     ```bash title="Terminal input"
+    cd ~/airflow
+    mkdir dags
+    cd dags
     touch gx_dag.py
     ```
 
@@ -71,7 +72,10 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
     def run_gx_airflow():
 
-        context = gx.get_context()
+        context = gx.get_context(
+            cloud_access_token=GX_CLOUD_ACCESS_TOKEN,
+            cloud_organization_id=GX_CLOUD_ORGANIZATION_ID,
+        )
         checkpoint = context.get_legacy_checkpoint(name=CHECKPOINT_NAME)
         checkpoint.run()
 
@@ -84,7 +88,7 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
     gx_dag = DAG(
         'gx_dag',
         default_args=default_args,
-        schedule_interval= '0 0 * * *', # This is set to run daily at midnight. Adjust as needed.
+        schedule= '0 0 * * *', # This is set to run daily at midnight. Adjust as needed.
         catchup=False
     )
 
@@ -101,6 +105,16 @@ Apache Airflow is an orchestration tool that allows you to schedule and monitor 
 
 ## Run the DAG (Manually)
 
-1. Sign in to Airflow. The default username and password are `admin`.
+1. Restart the airflow server to pick up the new DAG file.
 
-2. In the **Actions** column, click **Trigger DAG** for `gx_airflow` and confirm your DAG runs as expected.
+2. Sign in to Airflow using the username and password from the first standalone run
+
+3. In the **Actions** column, click **Trigger DAG** for `gx_dag` and confirm your DAG runs as expected.
+
+## Clean up local Airflow environment
+
+1. Delete the local files and sqllite database
+
+    ```bash title="Terminal input"
+    rm -rf ~/airflow
+    ```
