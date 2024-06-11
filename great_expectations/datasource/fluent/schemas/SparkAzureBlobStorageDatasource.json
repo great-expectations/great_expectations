@@ -105,7 +105,13 @@
                     {
                         "type": "string",
                         "writeOnly": true,
-                        "format": "password"
+                        "format": "password",
+                        "description": "Contains config templates to be substituted at runtime. Runtime values will never be serialized.",
+                        "pattern": ".*(?<!\\\\)\\$\\{(.*?)\\}|(?<!\\\\)\\$([_a-zA-Z][_a-zA-Z0-9]*).*",
+                        "examples": [
+                            "hello_${NAME}",
+                            "${MY_CFG_VAR}"
+                        ]
                     },
                     {}
                 ]
