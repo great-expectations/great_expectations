@@ -501,9 +501,9 @@ def type_schema(  # noqa: C901 - too complex
     indent: int = 4,
 ):
     """
-    Show all the json schemas for Fluent Datasources & DataAssets
+    Show all the json schemas for Fluent Datasources, DataAssets, and Expectations.
 
-    Generate json schema for each Datasource & DataAsset with `--sync`.
+    Generate json schema for each domain object with `--sync`.
     """
     import pandas
 

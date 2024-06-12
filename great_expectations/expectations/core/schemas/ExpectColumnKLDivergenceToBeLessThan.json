@@ -37,11 +37,6 @@
                 }
             ]
         },
-        "catch_exceptions": {
-            "title": "Catch Exceptions",
-            "default": false,
-            "type": "boolean"
-        },
         "rendered_content": {
             "title": "Rendered Content",
             "type": "array",
