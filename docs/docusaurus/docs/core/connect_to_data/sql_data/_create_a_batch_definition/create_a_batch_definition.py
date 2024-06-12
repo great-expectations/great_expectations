@@ -71,10 +71,10 @@ date_column = "pickup_datetime"
 daily_batch_definition = data_asset.add_batch_definition_daily(
     name="DAILY", column=date_column
 )
-monthly_batch_definition = data_source.add_batch_definition_monthly(
+monthly_batch_definition = data_asset.add_batch_definition_monthly(
     name="MONTHLY", column=date_column
 )
-yearly_batch_definition = data_source.add_batch_definition_yearly(
+yearly_batch_definition = data_asset.add_batch_definition_yearly(
     name="YEARLY", column=date_column
 )
 # </snippet>
