@@ -381,7 +381,7 @@ class ExpectationDiagnostics(SerializableDictDot):
                 )
             else:
                 expectation_config = ExpectationConfiguration(
-                    expectation_type=expectation_instance.expectation_type,
+                    type=expectation_instance.expectation_type,
                     kwargs=first_test.input,
                 )
                 validate_configuration_source = inspect.getsource(

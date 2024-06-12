@@ -11,7 +11,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_table_row_count_to_be_between",
+        "type": "expect_table_row_count_to_be_between",
         "kwargs": {
           "min_value": 0,
           "max_value": null,
@@ -38,7 +38,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_table_columns_to_match_ordered_list",
+        "type": "expect_table_columns_to_match_ordered_list",
         "kwargs": {
           "column_list": null,
           "result_format": "SUMMARY"
@@ -64,7 +64,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
           "column": "Unnamed: 0",
           "type_list": [
@@ -93,7 +93,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {
           "column": "Unnamed: 0",
           "min_value": null,
@@ -116,7 +116,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {
           "column": "Unnamed: 0",
           "min_value": null,
@@ -141,7 +141,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_be_null",
+        "type": "expect_column_values_to_not_be_null",
         "kwargs": {
           "column": "Unnamed: 0",
           "mostly": 0.5,
@@ -291,7 +291,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
           "column": "Unnamed: 0",
           "value_set": [],
@@ -318,7 +318,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_unique",
+        "type": "expect_column_values_to_be_unique",
         "kwargs": {
           "column": "Unnamed: 0",
           "result_format": "SUMMARY"
@@ -344,7 +344,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
           "column": "Name",
           "type_list": [
@@ -373,7 +373,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {
           "column": "Name",
           "min_value": null,
@@ -396,7 +396,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {
           "column": "Name",
           "min_value": null,
@@ -421,7 +421,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_be_null",
+        "type": "expect_column_values_to_not_be_null",
         "kwargs": {
           "column": "Name",
           "mostly": 0.5,
@@ -571,7 +571,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
           "column": "Name",
           "value_set": [],
@@ -619,7 +619,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_match_regex",
+        "type": "expect_column_values_to_not_match_regex",
         "kwargs": {
           "column": "Name",
           "regex": "^\\s+|\\s+$",
@@ -646,7 +646,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
           "column": "PClass",
           "type_list": [
@@ -675,7 +675,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {
           "column": "PClass",
           "min_value": null,
@@ -698,7 +698,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {
           "column": "PClass",
           "min_value": null,
@@ -723,7 +723,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_be_null",
+        "type": "expect_column_values_to_not_be_null",
         "kwargs": {
           "column": "PClass",
           "mostly": 0.5,
@@ -809,7 +809,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
           "column": "PClass",
           "value_set": [],
@@ -836,7 +836,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_match_regex",
+        "type": "expect_column_values_to_not_match_regex",
         "kwargs": {
           "column": "PClass",
           "regex": "^\\s+|\\s+$",
@@ -883,7 +883,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "type": "expect_column_distinct_values_to_be_in_set",
         "kwargs": {
           "column": "PClass",
           "value_set": null,
@@ -910,7 +910,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
           "column": "Age",
           "type_list": [
@@ -939,7 +939,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {
           "column": "Age",
           "min_value": null,
@@ -962,7 +962,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {
           "column": "Age",
           "min_value": null,
@@ -987,7 +987,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_be_null",
+        "type": "expect_column_values_to_not_be_null",
         "kwargs": {
           "column": "Age",
           "mostly": 0.5,
@@ -1137,7 +1137,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
           "column": "Age",
           "value_set": [],
@@ -1159,7 +1159,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_min_to_be_between",
+        "type": "expect_column_min_to_be_between",
         "kwargs": {
           "column": "Age",
           "min_value": null,
@@ -1182,7 +1182,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_max_to_be_between",
+        "type": "expect_column_max_to_be_between",
         "kwargs": {
           "column": "Age",
           "min_value": null,
@@ -1205,7 +1205,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_mean_to_be_between",
+        "type": "expect_column_mean_to_be_between",
         "kwargs": {
           "column": "Age",
           "min_value": null,
@@ -1228,7 +1228,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_median_to_be_between",
+        "type": "expect_column_median_to_be_between",
         "kwargs": {
           "column": "Age",
           "min_value": null,
@@ -1275,7 +1275,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_quantile_values_to_be_between",
+        "type": "expect_column_quantile_values_to_be_between",
         "kwargs": {
           "column": "Age",
           "quantile_ranges": {
@@ -1321,7 +1321,7 @@
         "exception_traceback": "Traceback (most recent call last):\n  File \"/home/user/great_expectations/great_expectations/data_asset/data_asset.py\", line 186, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File \" /home/user/great_expectations/great_expectations/dataset/dataset.py\", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File \"/home/user/great_expectations/great_expectations/dataset/dataset.py\", line 3388, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError(\"Invalid partition object.\")\nValueError: Invalid partition object.\n"
       },
       "expectation_config": {
-        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+        "type": "expect_column_kl_divergence_to_be_less_than",
         "kwargs": {
           "column": "Age",
           "partition_object": null,
@@ -1349,7 +1349,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
           "column": "Sex",
           "type_list": [
@@ -1378,7 +1378,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {
           "column": "Sex",
           "min_value": null,
@@ -1401,7 +1401,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {
           "column": "Sex",
           "min_value": null,
@@ -1426,7 +1426,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_be_null",
+        "type": "expect_column_values_to_not_be_null",
         "kwargs": {
           "column": "Sex",
           "mostly": 0.5,
@@ -1504,7 +1504,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
           "column": "Sex",
           "value_set": [],
@@ -1531,7 +1531,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_match_regex",
+        "type": "expect_column_values_to_not_match_regex",
         "kwargs": {
           "column": "Sex",
           "regex": "^\\s+|\\s+$",
@@ -1568,7 +1568,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "type": "expect_column_distinct_values_to_be_in_set",
         "kwargs": {
           "column": "Sex",
           "value_set": null,
@@ -1595,7 +1595,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
           "column": "Survived",
           "type_list": [
@@ -1624,7 +1624,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {
           "column": "Survived",
           "min_value": null,
@@ -1647,7 +1647,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {
           "column": "Survived",
           "min_value": null,
@@ -1672,7 +1672,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_be_null",
+        "type": "expect_column_values_to_not_be_null",
         "kwargs": {
           "column": "Survived",
           "mostly": 0.5,
@@ -1750,7 +1750,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
           "column": "Survived",
           "value_set": [],
@@ -1787,7 +1787,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "type": "expect_column_distinct_values_to_be_in_set",
         "kwargs": {
           "column": "Survived",
           "value_set": null,
@@ -1814,7 +1814,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
           "column": "SexCode",
           "type_list": [
@@ -1843,7 +1843,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {
           "column": "SexCode",
           "min_value": null,
@@ -1866,7 +1866,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {
           "column": "SexCode",
           "min_value": null,
@@ -1891,7 +1891,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_not_be_null",
+        "type": "expect_column_values_to_not_be_null",
         "kwargs": {
           "column": "SexCode",
           "mostly": 0.5,
@@ -1969,7 +1969,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
           "column": "SexCode",
           "value_set": [],
@@ -2006,7 +2006,7 @@
         "exception_traceback": null
       },
       "expectation_config": {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "type": "expect_column_distinct_values_to_be_in_set",
         "kwargs": {
           "column": "SexCode",
           "value_set": null,

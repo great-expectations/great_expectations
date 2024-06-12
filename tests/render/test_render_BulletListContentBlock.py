@@ -102,7 +102,7 @@ def test_all_expectations_using_test_definitions():
                     if test["in"].get("catch_exceptions"):
                         continue
                     fake_expectation = ExpectationConfiguration(
-                        expectation_type=test_definitions["expectation_type"],
+                        type=test_definitions["expectation_type"],
                         kwargs=test["in"],
                     )
                 else:

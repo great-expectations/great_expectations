@@ -164,7 +164,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
         name="validating_taxi_data",
         expectations=[
             ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_between",
+                type="expect_column_values_to_be_between",
                 kwargs={
                     "column": "passenger_count",
                     "min_value": 0,
@@ -202,7 +202,7 @@ def test_graph_validate(in_memory_runtime_context, basic_datasource: PandasDatas
     batch = batch_definition.get_batch()
 
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "b",
             "mostly": 0.9,
@@ -249,7 +249,7 @@ def test_graph_validate_with_runtime_config(
     batch = batch_definition.get_batch()
 
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        type="expect_column_value_z_scores_to_be_less_than",
         kwargs={"column": "b", "mostly": 1.0, "threshold": 2.0, "double_sided": True},
     )
     result = Validator(
@@ -302,7 +302,7 @@ def test_graph_validate_with_exception(basic_datasource: PandasDatasource, mocke
     batch = batch_definition.get_batch()
 
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "b",
             "mostly": 0.9,
@@ -334,7 +334,7 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
     batch = batch_definition.get_batch()
 
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
+        type="expect_column_max_to_be_between",
         kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
     )
     with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
@@ -535,14 +535,14 @@ def test_graph_validate_with_two_expectations_and_first_expectation_without_addi
     batch = batch_definition.get_batch()
 
     expectation_configuration_expect_column_values_to_be_null = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_null",
+        type="expect_column_values_to_be_null",
         kwargs={
             "column": "var",
         },
     )
 
     expectation_configuration_expect_column_values_to_be_in_set = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "var",
             "value_set": ["B", "C", "D", "F", "G", "H"],
@@ -684,14 +684,14 @@ def test_graph_validate_with_two_expectations_and_first_expectation_with_result_
     batch = batch_definition.get_batch()
 
     expectation_configuration_expect_column_values_to_be_null = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_null",
+        type="expect_column_values_to_be_null",
         kwargs={
             "column": "var",
         },
     )
 
     expectation_configuration_expect_column_values_to_be_in_set = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "var",
             "value_set": ["B", "C", "D", "F", "G", "H"],
@@ -813,20 +813,20 @@ def test_validator_with_exception_info_in_result():
         result = validator.graph_validate(
             configurations=[
                 ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_be_unique",
+                    type="expect_column_values_to_be_unique",
                     kwargs={
                         "column": "animals",
                     },
                 ),
                 ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_be_in_set",
+                    type="expect_column_values_to_be_in_set",
                     kwargs={
                         "column": "animals",
                         "value_set": ["cat", "fish", "dog"],
                     },
                 ),
                 ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_not_be_null",
+                    type="expect_column_values_to_not_be_null",
                     kwargs={
                         "column": "animals",
                     },

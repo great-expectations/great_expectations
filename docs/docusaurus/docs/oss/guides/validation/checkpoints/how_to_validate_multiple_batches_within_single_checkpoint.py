@@ -15,7 +15,7 @@ MY_BATCHING_REGEX = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.c
 asset = datasource.add_csv_asset("asset", batching_regex=MY_BATCHING_REGEX)
 
 ec = ExpectationConfiguration(
-    expectation_type="expect_column_values_to_not_be_null",
+    type="expect_column_values_to_not_be_null",
     kwargs={"column": "passenger_count"},
 )
 suite = context.suites.add(ExpectationSuite(name="example_suite", expectations=[ec]))

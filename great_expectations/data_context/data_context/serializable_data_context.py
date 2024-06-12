@@ -12,6 +12,10 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.typing_extensions import override
+from great_expectations.data_context.constants import (
+    CURRENT_GX_CONFIG_VERSION,
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
+)
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -20,8 +24,6 @@ from great_expectations.data_context.templates import (
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    CURRENT_GX_CONFIG_VERSION,
-    MINIMUM_SUPPORTED_CONFIG_VERSION,
     DataContextConfigDefaults,
 )
 from great_expectations.data_context.util import file_relative_path

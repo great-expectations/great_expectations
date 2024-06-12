@@ -194,7 +194,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_type_list",
+            type="expect_column_values_to_be_in_type_list",
             kwargs={
                 "column": "Car Insurance Premiums ($)",
                 "type_list": [
@@ -247,27 +247,6 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
     }
 
 
-# def test_ProfilingResultsColumnSectionRenderer_render_overview_table():
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_overview_table(evrs, content_blocks)
-
-# def test_ProfilingResultsColumnSectionRenderer_render_quantile_table():
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_quantile_table(evrs, content_blocks)
-
-# def test_ProfilingResultsColumnSectionRenderer_render_stats_table():
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_stats_table(evrs, content_blocks)
-
-# def test_ProfilingResultsColumnSectionRenderer_render_histogram(titanic_profiled_evrs_1):
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_histogram(evrs, content_blocks)
-
-# def test_ProfilingResultsColumnSectionRenderer_render_values_set():
-#     evrs = {}
-#     ProfilingResultsColumnSectionRenderer()._render_values_set(evrs, content_blocks)
-
-
 @pytest.mark.unit
 def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     titanic_profiled_evrs_1,
@@ -276,7 +255,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     distinct_values_evrs = [
         evr
         for evr in titanic_profiled_evrs_1.results
-        if evr.expectation_config.expectation_type == "expect_column_distinct_values_to_be_in_set"
+        if evr.expectation_config.type == "expect_column_distinct_values_to_be_in_set"
     ]
 
     assert len(distinct_values_evrs) == 4
@@ -333,7 +312,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
     assert content_blocks.to_json_dict() == expected
 
     expectation_with_unescaped_dollar_sign = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_type_list",
+        type="expect_column_values_to_be_in_type_list",
         kwargs={
             "column": "Car Insurance Premiums ($)",
             "type_list": [
@@ -380,7 +359,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
 @pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_notes():
     expectation_with_markdown_meta_notes = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_type_list",
+        type="expect_column_values_to_be_in_type_list",
         kwargs={
             "column": "Car Insurance Premiums ($)",
             "type_list": [
@@ -528,7 +507,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
 @pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta_notes_in_dict():
     expectation_with_string_notes_list_in_dict = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_type_list",
+        type="expect_column_values_to_be_in_type_list",
         kwargs={
             "column": "Car Insurance Premiums ($)",
             "type_list": [
@@ -695,7 +674,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
 @pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_meta_note_in_dict():
     expectation_with_single_string_note_in_dict = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_type_list",
+        type="expect_column_values_to_be_in_type_list",
         kwargs={
             "column": "Car Insurance Premiums ($)",
             "type_list": [
@@ -844,7 +823,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
 @pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta_notes():
     expectation_with_string_list_note = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_type_list",
+        type="expect_column_values_to_be_in_type_list",
         kwargs={
             "column": "Car Insurance Premiums ($)",
             "type_list": [
@@ -996,7 +975,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
 @pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_meta_note():
     expectation_with_single_string_note = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_type_list",
+        type="expect_column_values_to_be_in_type_list",
         kwargs={
             "column": "Car Insurance Premiums ($)",
             "type_list": [
@@ -1207,7 +1186,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_type_list",
+            type="expect_column_values_to_be_in_type_list",
             kwargs={
                 "column": "Name ($)",
                 "type_list": ["CHAR", "StringType", "TEXT", "VARCHAR", "str", "string"],
@@ -1296,7 +1275,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_min_to_be_between",
+            type="expect_column_min_to_be_between",
             kwargs={
                 "column": "live",
                 "min_value": None,
@@ -1390,7 +1369,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_min_to_be_between",
+            type="expect_column_min_to_be_between",
             kwargs={
                 "column": "live",
                 "min_value": {"$PARAMETER": "MIN_VAL_PARAM * 2"},
@@ -1516,7 +1495,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             "exception_traceback": None,
         },
         expectation_config=ExpectationConfiguration(
-            expectation_type="expect_column_min_to_be_between",
+            type="expect_column_min_to_be_between",
             kwargs={
                 "column": "start_date",
                 "min_value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
@@ -1637,7 +1616,7 @@ def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
                     "exception_traceback": None,
                 },
                 expectation_config=ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_be_in_type_list",
+                    type="expect_column_values_to_be_in_type_list",
                     kwargs={
                         "column": "live",
                         "type_list": None,
@@ -1687,7 +1666,7 @@ def test_ProfilingColumnPropertiesTableContentBlockRenderer():
                 "success": True,
                 "expectation_config": ExpectationConfiguration(
                     **{
-                        "expectation_type": "expect_column_values_to_not_match_regex",
+                        "type": "expect_column_values_to_not_match_regex",
                         "kwargs": {
                             "column": "race",
                             "regex": "^\\s+|\\s+$",
@@ -1715,7 +1694,7 @@ def test_ProfilingColumnPropertiesTableContentBlockRenderer():
                 "success": True,
                 "expectation_config": ExpectationConfiguration(
                     **{
-                        "expectation_type": "expect_column_unique_value_count_to_be_between",
+                        "type": "expect_column_unique_value_count_to_be_between",
                         "kwargs": {
                             "column": "gender",
                             "min_value": None,
@@ -1744,7 +1723,7 @@ def test_ProfilingColumnPropertiesTableContentBlockRenderer():
                 "success": True,
                 "expectation_config": ExpectationConfiguration(
                     **{
-                        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",  # noqa: E501
+                        "type": "expect_column_proportion_of_unique_values_to_be_between",
                         "kwargs": {
                             "column": "gender",
                             "min_value": None,
@@ -1774,7 +1753,7 @@ def test_ProfilingColumnPropertiesTableContentBlockRenderer():
                 "success": True,
                 "expectation_config": ExpectationConfiguration(
                     **{
-                        "expectation_type": "expect_column_values_to_not_be_null",
+                        "type": "expect_column_values_to_not_be_null",
                         "kwargs": {
                             "column": "gender",
                             "mostly": 0.5,
