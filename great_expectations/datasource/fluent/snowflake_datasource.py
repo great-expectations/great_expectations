@@ -46,16 +46,15 @@ if TYPE_CHECKING:
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 REQUIRED_QUERY_PARAMS: Final[Iterable[str]] = {  # errors will be thrown if any of these are missing
-    # TODO: require warehouse and role
-    # "warehouse",
-    # "role",
+    "warehouse",
+    "role",
 }
 
 MISSING: Final = object()  # sentinel value to indicate missing values
 
 
 @functools.lru_cache(maxsize=4)
-def _extract_path_sections(url_path: str) -> dict[str, str]:
+def _get_database_and_schema_from_path(url_path: str) -> dict[Literal["database", "schema"], str]:
     """
     Extracts the database and schema from the path of a URL.
 
@@ -160,7 +159,7 @@ class SnowflakeDsn(AnyUrl):
 
         path: str = parts["path"]
         # raises UrlPathError if path is missing database/schema
-        _extract_path_sections(path)
+        _get_database_and_schema_from_path(path)
 
         return validated_parts
 
@@ -214,9 +213,14 @@ class ConnectionDetails(FluentBaseModel):
     schema_: str = pydantic.Field(
         ..., alias="schema", description="`schema` that the Datasource is mapped to."
     )  # schema is a reserved attr in BaseModel
-    warehouse: Optional[str] = None
-    role: Optional[str] = None
+    warehouse: str
+    role: str
     numpy: bool = False
+
+    @classmethod
+    def required_fields(cls) -> list[str]:
+        """Returns the required fields for this model as defined in the schema."""
+        return cls.schema()["required"]
 
 
 @public_api
@@ -246,28 +250,34 @@ class SnowflakeDatasource(SQLDatasource):
         """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.schema_
-
-        subbed_str: str | None = _get_config_substituted_connection_string(
-            self, warning_msg="Unable to determine schema"
-        )
-        if not subbed_str:
-            return None
-        url_path: str = urllib.parse.urlparse(subbed_str).path
-        return _extract_path_sections(url_path)["schema"]
+        return _get_database_and_schema_from_path(self.connection_string.path)["schema"]
 
     @property
     def database(self) -> str | None:
-        """Convenience property to get the `database` regardless of the connection string format."""
+        """
+        Convenience property to get the `database` regardless of the connection string format.
+        """
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
+        return _get_database_and_schema_from_path(self.connection_string.path)["database"]
 
-        subbed_str: str | None = _get_config_substituted_connection_string(
-            self, warning_msg="Unable to determine database"
-        )
-        if not subbed_str:
-            return None
-        url_path: str = urllib.parse.urlparse(subbed_str).path
-        return _extract_path_sections(url_path)["database"]
+    @property
+    def warehouse(self) -> str | None:
+        """
+        Convenience property to get the `warehouse` regardless of the connection string format.
+        """
+        if isinstance(self.connection_string, ConnectionDetails):
+            return self.connection_string.warehouse
+        return self.connection_string.params.get("warehouse", [None])[0]
+
+    @property
+    def role(self) -> str | None:
+        """
+        Convenience property to get the `role` regardless of the connection string format.
+        """
+        if isinstance(self.connection_string, ConnectionDetails):
+            return self.connection_string.role
+        return self.connection_string.params.get("role", [None])[0]
 
     @deprecated_method_or_class(
         version="1.0.0a4",
@@ -383,7 +393,8 @@ class SnowflakeDatasource(SQLDatasource):
             if is_connection_string or has_min_connection_detail_values:
                 return values
         raise ValueError(  # noqa: TRY003
-            "Must provide either a connection string or a combination of account, user, and password."  # noqa: E501
+            "Must provide either a connection string or"
+            f" a combination of {', '.join(ConnectionDetails.required_fields())} as keyword args."
         )
 
     @pydantic.validator("connection_string")

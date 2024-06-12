@@ -1,4 +1,3 @@
-version: "3.2"
 services:
   rtd:
-    image: readthedocs/build:6.0
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}readthedocs/build:6.0
