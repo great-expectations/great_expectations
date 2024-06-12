@@ -61,15 +61,6 @@
             "title": "Condition Parser",
             "type": "string"
         },
-        "mostly": {
-            "title": "Mostly",
-            "default": 1.0,
-            "description": "Successful if at least `mostly` fraction of values match the expectation.",
-            "type": "number",
-            "minimum": 0.0,
-            "maximum": 1.0,
-            "multipleOf": 0.01
-        },
         "column_list": {
             "title": "Column List",
             "anyOf": [
@@ -82,6 +73,15 @@
                     "items": {}
                 }
             ]
+        },
+        "mostly": {
+            "title": "Mostly",
+            "default": 1.0,
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "multipleOf": 0.01
         },
         "ignore_row_if": {
             "title": "Ignore Row If",
