@@ -64,7 +64,7 @@ class ExpectColumnToExist(BatchExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format and meta.
 
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)

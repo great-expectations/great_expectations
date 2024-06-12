@@ -131,7 +131,7 @@ class ExpectMulticolumnValuesToBeEqual(MulticolumnMapExpectation):
     Returns:
         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to result_format, catch_exceptions, and meta.
+        Exact fields vary depending on the values passed to result_format and meta.
 
     See Also:
         [expect_column_pair_values_to_be_equal](https://greatexpectations.io/expectations/expect_column_pair_values_to_be_equal)
