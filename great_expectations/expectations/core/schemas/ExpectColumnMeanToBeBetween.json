@@ -64,13 +64,16 @@
         "mostly": {
             "title": "Mostly",
             "default": 1.0,
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "type": "number",
             "minimum": 0.0,
             "maximum": 1.0,
-            "type": "number"
+            "multipleOf": 0.01
         },
         "column": {
             "title": "Column",
             "description": "The column name.",
+            "minLength": 1,
             "type": "string"
         },
         "min_value": {
@@ -117,202 +120,53 @@
             "default": false,
             "type": "boolean"
         },
-        "library_metadata": {
+        "metadata": {
             "type": "object",
-            "const": {
-                "maturity": "production",
-                "tags": [
-                    "core expectation",
-                    "column aggregate expectation"
-                ],
-                "contributors": [
-                    "@great_expectations"
-                ],
-                "requirements": [],
-                "has_full_test_suite": true,
-                "manually_reviewed_code": true
-            }
-        },
-        "kwargs_json_schema_base_properties": {
-            "title": "Kwargs Json Schema Base Properties",
-            "default": {
-                "result_format": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string",
-                            "enum": [
-                                "BOOLEAN_ONLY",
-                                "BASIC",
-                                "SUMMARY",
-                                "COMPLETE"
-                            ]
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "result_format": {
-                                    "type": "string",
-                                    "enum": [
-                                        "BOOLEAN_ONLY",
-                                        "BASIC",
-                                        "SUMMARY",
-                                        "COMPLETE"
-                                    ]
-                                },
-                                "partial_unexpected_count": {
-                                    "type": "number"
-                                }
-                            }
-                        }
-                    ],
-                    "default": "BASIC"
+            "properties": {
+                "domain_type": {
+                    "title": "Domain Type",
+                    "type": "string",
+                    "const": "column",
+                    "description": "Column Aggregate"
                 },
-                "catch_exceptions": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "boolean"
-                        }
-                    ],
-                    "default": "false"
+                "data_quality_issues": {
+                    "title": "Data Quality Issues",
+                    "type": "array",
+                    "const": [
+                        "Numerical Data"
+                    ]
                 },
-                "meta": {
-                    "type": "object"
-                }
-            },
-            "type": "object"
-        },
-        "kwargs_json_schema": {
-            "title": "Kwargs Json Schema",
-            "default": {
-                "type": "object",
-                "properties": {
-                    "result_format": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "string",
-                                "enum": [
-                                    "BOOLEAN_ONLY",
-                                    "BASIC",
-                                    "SUMMARY",
-                                    "COMPLETE"
-                                ]
-                            },
-                            {
-                                "type": "object",
-                                "properties": {
-                                    "result_format": {
-                                        "type": "string",
-                                        "enum": [
-                                            "BOOLEAN_ONLY",
-                                            "BASIC",
-                                            "SUMMARY",
-                                            "COMPLETE"
-                                        ]
-                                    },
-                                    "partial_unexpected_count": {
-                                        "type": "number"
-                                    }
-                                }
-                            }
+                "library_metadata": {
+                    "title": "Library Metadata",
+                    "type": "object",
+                    "const": {
+                        "maturity": "production",
+                        "tags": [
+                            "core expectation",
+                            "column aggregate expectation"
                         ],
-                        "default": "BASIC"
-                    },
-                    "catch_exceptions": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "boolean"
-                            }
+                        "contributors": [
+                            "@great_expectations"
                         ],
-                        "default": "false"
-                    },
-                    "meta": {
-                        "type": "object"
-                    },
-                    "column": {
-                        "type": "string"
-                    },
-                    "min_value": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "number"
-                            }
-                        ]
-                    },
-                    "max_value": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "number"
-                            }
-                        ]
-                    },
-                    "strict_min": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "boolean"
-                            }
-                        ],
-                        "default": "false"
-                    },
-                    "strict_max": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "boolean"
-                            }
-                        ],
-                        "default": "false"
+                        "requirements": [],
+                        "has_full_test_suite": true,
+                        "manually_reviewed_code": true
                     }
                 },
-                "required": [
-                    "column"
-                ]
-            },
-            "type": "object"
-        },
-        "domain_type": {
-            "type": "string",
-            "const": "column",
-            "description": "Column Aggregate"
-        },
-        "data_quality_issues": {
-            "type": "array",
-            "const": [
-                "Numerical Data"
-            ]
-        },
-        "short_description": {
-            "type": "string",
-            "const": "Expect the column mean to be between a minimum value and a maximum value (inclusive)."
-        },
-        "supported_data_sources": {
-            "type": "array",
-            "const": [
-                "Snowflake",
-                "PostgreSQL"
-            ]
+                "short_description": {
+                    "title": "Short Description",
+                    "type": "string",
+                    "const": "Expect the column mean to be between a minimum value and a maximum value (inclusive)."
+                },
+                "supported_data_sources": {
+                    "title": "Supported Data Sources",
+                    "type": "array",
+                    "const": [
+                        "Snowflake",
+                        "PostgreSQL"
+                    ]
+                }
+            }
         }
     },
     "required": [

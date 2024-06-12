@@ -336,7 +336,9 @@ def type_check(  # noqa: C901, PLR0912
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
-UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
+UNIT_TEST_DEFAULT_TIMEOUT: float = (
+    2.0  # TODO: revert the timeout back to 1.5 or lower after resolving arc issues
+)
 
 
 @invoke.task(
@@ -492,7 +494,7 @@ def docker(
         " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
-def type_schema(  # noqa: C901, PLR0912 - too complex
+def type_schema(  # noqa: C901 - too complex
     ctx: Context,
     sync: bool = False,
     clean: bool = False,
@@ -514,21 +516,7 @@ def type_schema(  # noqa: C901, PLR0912 - too complex
     from great_expectations.datasource.fluent.sources import (
         _iter_all_registered_types,
     )
-    from great_expectations.expectations import (
-        ExpectColumnMaxToBeBetween,
-        ExpectColumnMeanToBeBetween,
-        ExpectColumnMedianToBeBetween,
-        ExpectColumnMinToBeBetween,
-        ExpectColumnValuesToBeInSet,
-        ExpectColumnValuesToBeInTypeList,
-        ExpectColumnValuesToBeNull,
-        ExpectColumnValuesToBeOfType,
-        ExpectColumnValuesToBeUnique,
-        ExpectColumnValuesToNotBeNull,
-        ExpectTableColumnsToMatchOrderedList,
-        ExpectTableRowCountToBeBetween,
-        ExpectTableRowCountToEqual,
-    )
+    from great_expectations.expectations import core
 
     data_source_schema_dir_root: Final[pathlib.Path] = (
         GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
@@ -596,19 +584,40 @@ def type_schema(  # noqa: C901, PLR0912 - too complex
 
     # handle expectations
     supported_expectations = [
-        ExpectColumnValuesToBeNull,
-        ExpectColumnValuesToNotBeNull,
-        ExpectColumnValuesToBeUnique,
-        ExpectColumnValuesToBeInSet,
-        ExpectColumnMaxToBeBetween,
-        ExpectColumnMeanToBeBetween,
-        ExpectColumnMedianToBeBetween,
-        ExpectColumnMinToBeBetween,
-        ExpectColumnValuesToBeInTypeList,
-        ExpectColumnValuesToBeOfType,
-        ExpectTableColumnsToMatchOrderedList,
-        ExpectTableRowCountToBeBetween,
-        ExpectTableRowCountToEqual,
+        core.ExpectColumnValuesToBeNull,
+        core.ExpectColumnValuesToNotBeNull,
+        core.ExpectColumnValuesToBeUnique,
+        core.ExpectColumnValuesToBeInSet,
+        core.ExpectColumnMaxToBeBetween,
+        core.ExpectColumnMeanToBeBetween,
+        core.ExpectColumnMedianToBeBetween,
+        core.ExpectColumnMinToBeBetween,
+        core.ExpectColumnValuesToBeInTypeList,
+        core.ExpectColumnValuesToBeOfType,
+        core.ExpectTableColumnsToMatchOrderedList,
+        core.ExpectTableRowCountToBeBetween,
+        core.ExpectTableRowCountToEqual,
+        core.ExpectColumnPairValuesToBeEqual,
+        core.ExpectMulticolumnSumToEqual,
+        core.ExpectCompoundColumnsToBeUnique,
+        core.ExpectSelectColumnValuesToBeUniqueWithinRecord,
+        core.ExpectColumnPairValuesAToBeGreaterThanB,
+        core.ExpectColumnToExist,
+        core.ExpectTableColumnCountToEqual,
+        core.ExpectTableColumnsToMatchSet,
+        core.ExpectTableColumnCountToBeBetween,
+        core.ExpectTableRowCountToEqualOtherTable,
+        core.ExpectColumnPairValuesToBeInSet,
+        core.ExpectColumnProportionOfUniqueValuesToBeBetween,
+        core.ExpectColumnUniqueValueCountToBeBetween,
+        core.ExpectColumnDistinctValuesToBeInSet,
+        core.ExpectColumnDistinctValuesToContainSet,
+        core.ExpectColumnDistinctValuesToEqualSet,
+        core.ExpectColumnMostCommonValueToBeInSet,
+        core.ExpectColumnStdevToBeBetween,
+        core.ExpectColumnSumToBeBetween,
+        core.ExpectColumnKLDivergenceToBeLessThan,
+        core.ExpectColumnQuantileValuesToBeBetween,
     ]
     for x in supported_expectations:
         schema_path = expectation_dir.joinpath(f"{x.__name__}.json")
@@ -1088,7 +1097,7 @@ def ci_tests(  # noqa: C901 - too complex (9)
     pytest_options = [f"--durations={slowest}", "-rEf"]
 
     if xdist:
-        pytest_options.append("-n auto")
+        pytest_options.append("-n 4")
 
     if timeout != 0:
         pytest_options.append(f"--timeout={timeout}")

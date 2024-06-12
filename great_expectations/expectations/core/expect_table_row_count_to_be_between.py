@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 EXPECTATION_SHORT_DESCRIPTION = "Expect the number of rows to be between two values."
 MIN_VALUE_DESCRIPTION = "The minimum number of rows, inclusive."
 MAX_VALUE_DESCRIPTION = "The maximum number of rows, inclusive."
-SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Volume"]
 
 
@@ -82,8 +82,8 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
 
     Supported Datasources:
-        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -144,7 +144,7 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
         default=None, description=MAX_VALUE_DESCRIPTION
     )
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "table expectation"],
         "contributors": ["@great_expectations"],
@@ -171,22 +171,30 @@ class ExpectTableRowCountToBeBetween(BatchExpectation):
             schema: Dict[str, Any], model: Type[ExpectTableRowCountToBeBetween]
         ) -> None:
             BatchExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["data_quality_issues"] = {
-                "type": "array",
-                "const": DATA_QUALITY_ISSUES,
-            }
-            schema["properties"]["library_metadata"] = {
-                "type": "object",
-                "const": model._library_metadata,
-            }
-            schema["properties"]["short_description"] = {
-                "type": "string",
-                "const": EXPECTATION_SHORT_DESCRIPTION,
-            }
-            schema["properties"]["supported_data_sources"] = {
-                "type": "array",
-                "const": SUPPORTED_DATASOURCES,
-            }
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @override

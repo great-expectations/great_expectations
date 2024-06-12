@@ -6,11 +6,14 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001  # used in pydantic validation
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
+)
+from great_expectations.expectations.model_field_types import (
+    ValueSet,  # noqa: TCH001  # type needed in pydantic validation
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -146,7 +149,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 }
     """  # noqa: E501
 
-    value_set: Union[list, set, SuiteParameterDict, None]
+    value_set: Optional[Union[SuiteParameterDict, ValueSet]]
 
     library_metadata = {
         "maturity": "production",

@@ -1,5 +1,4 @@
-version: "3.2"
 services:
   linkchecker:
     build: ./
-    image: linkchecker:1.0
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}library/linkchecker:1.0

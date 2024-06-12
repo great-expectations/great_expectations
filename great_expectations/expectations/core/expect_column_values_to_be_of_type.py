@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -12,10 +12,10 @@ from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.expectation import (
-    COLUMN_FIELD_DESCRIPTION,
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
+from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -80,7 +80,7 @@ TYPE__DESCRIPTION = """
     A string representing the data type that each column should have as entries. \
     Valid types are defined by the current backend implementation and are dynamically loaded.
     """
-SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Schema"]
 
 
@@ -102,7 +102,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     Args:
         column (str): \
-            {COLUMN_FIELD_DESCRIPTION}
+            {COLUMN_DESCRIPTION}
         type\\_ (str): \
             {TYPE__DESCRIPTION}
             For example, valid types for Pandas Datasources include any numpy dtype values \
@@ -137,8 +137,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
 
     Supported Datasources:
-        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -213,7 +213,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     type_: str = pydantic.Field(description=TYPE__DESCRIPTION)
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -242,22 +242,30 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnValuesToBeOfType]) -> None:
             ColumnMapExpectation.Config.schema_extra(schema, model)
-            schema["properties"]["data_quality_issues"] = {
-                "type": "array",
-                "const": DATA_QUALITY_ISSUES,
-            }
-            schema["properties"]["library_metadata"] = {
-                "type": "object",
-                "const": model._library_metadata,
-            }
-            schema["properties"]["short_description"] = {
-                "type": "string",
-                "const": EXPECTATION_SHORT_DESCRIPTION,
-            }
-            schema["properties"]["supported_data_sources"] = {
-                "type": "array",
-                "const": SUPPORTED_DATASOURCES,
-            }
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @override
     @classmethod
@@ -597,7 +605,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(  # noqa: C901, PLR0911, PLR0912
+def _get_dialect_type_module(  # noqa: C901, PLR0911
     execution_engine,
 ):
     if execution_engine.dialect_module is None:

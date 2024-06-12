@@ -64,13 +64,16 @@
         "mostly": {
             "title": "Mostly",
             "default": 1.0,
+            "description": "Successful if at least `mostly` fraction of values match the expectation.",
+            "type": "number",
             "minimum": 0.0,
             "maximum": 1.0,
-            "type": "number"
+            "multipleOf": 0.01
         },
         "column": {
             "title": "Column",
             "description": "The column name.",
+            "minLength": 1,
             "type": "string"
         },
         "type_": {
@@ -78,43 +81,53 @@
             "description": "\n    A string representing the data type that each column should have as entries.     Valid types are defined by the current backend implementation and are dynamically loaded.\n    ",
             "type": "string"
         },
-        "library_metadata": {
+        "metadata": {
             "type": "object",
-            "const": {
-                "maturity": "production",
-                "tags": [
-                    "core expectation",
-                    "column map expectation"
-                ],
-                "contributors": [
-                    "@great_expectations"
-                ],
-                "requirements": [],
-                "has_full_test_suite": true,
-                "manually_reviewed_code": true
+            "properties": {
+                "domain_type": {
+                    "title": "Domain Type",
+                    "type": "string",
+                    "const": "column",
+                    "description": "Column Map"
+                },
+                "data_quality_issues": {
+                    "title": "Data Quality Issues",
+                    "type": "array",
+                    "const": [
+                        "Schema"
+                    ]
+                },
+                "library_metadata": {
+                    "title": "Library Metadata",
+                    "type": "object",
+                    "const": {
+                        "maturity": "production",
+                        "tags": [
+                            "core expectation",
+                            "column map expectation"
+                        ],
+                        "contributors": [
+                            "@great_expectations"
+                        ],
+                        "requirements": [],
+                        "has_full_test_suite": true,
+                        "manually_reviewed_code": true
+                    }
+                },
+                "short_description": {
+                    "title": "Short Description",
+                    "type": "string",
+                    "const": "Expect a column to contain values of a specified data type."
+                },
+                "supported_data_sources": {
+                    "title": "Supported Data Sources",
+                    "type": "array",
+                    "const": [
+                        "Snowflake",
+                        "PostgreSQL"
+                    ]
+                }
             }
-        },
-        "domain_type": {
-            "type": "string",
-            "const": "column",
-            "description": "Column Map"
-        },
-        "data_quality_issues": {
-            "type": "array",
-            "const": [
-                "Schema"
-            ]
-        },
-        "short_description": {
-            "type": "string",
-            "const": "Expect a column to contain values of a specified data type."
-        },
-        "supported_data_sources": {
-            "type": "array",
-            "const": [
-                "Snowflake",
-                "PostgreSQL"
-            ]
         }
     },
     "required": [

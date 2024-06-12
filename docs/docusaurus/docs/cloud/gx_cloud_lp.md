@@ -34,5 +34,6 @@ import OverviewCard from '@site/src/components/OverviewCard';
   <LinkCard topIcon label="Manage Expectation Suites" description="Create or delete Expectation Suites." to="/cloud/expectation_suites/manage_expectation_suites" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Validations" description="Run a Validation, or view the Validation run history." to="/cloud/validations/manage_validations" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage Checkpoints" description="Add, run, edit, or delete a Checkpoint." to="/cloud/checkpoints/manage_checkpoints" icon="/img/small_gx_logo.png" />
+  <LinkCard topIcon label="Manage alerts" description="Add, edit, or delete alerts." to="/cloud/alerts/manage_alerts" icon="/img/small_gx_logo.png" />
   <LinkCard topIcon label="Manage users and access tokens" description="Manage GX Cloud users and access tokens." to="/cloud/users/manage_users" icon="/img/small_gx_logo.png" />
 </LinkCardGrid>

@@ -86,7 +86,7 @@ def get_table_columns_metric(
 @pytest.fixture(scope="module")
 def expectation_and_runtime_configuration_with_suite_parameters():
     configuration = ExpectationConfiguration(
-        expectation_type="expect_column_min_to_be_between",
+        type="expect_column_min_to_be_between",
         kwargs={
             "column": "live",
             "min_value": {"$PARAMETER": "MIN_VAL_PARAM"},

@@ -57,7 +57,7 @@ my_suite.show_expectations_by_expectation_type()
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py example_configuration_1">
 config = ExpectationConfiguration(
-    expectation_type="expect_column_values_to_be_between",
+    type="expect_column_values_to_be_between",
     kwargs={
         "column": "passenger_count",
         "max_value": 6,
@@ -72,7 +72,7 @@ config = ExpectationConfiguration(
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py updated_configuration">
 updated_config = ExpectationConfiguration(
-    expectation_type="expect_column_values_to_be_between",
+    type="expect_column_values_to_be_between",
     kwargs={
         "column": "passenger_count",
         "min_value": 1,
@@ -97,7 +97,7 @@ assert my_suite.expectations[1] == updated_config.to_domain_obj()
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py find_configuration">
 config_to_search = ExpectationConfiguration(
-    expectation_type="expect_column_values_to_be_between",
+    type="expect_column_values_to_be_between",
     kwargs={"column": "passenger_count"},
 )
 found_expectation = my_suite.find_expectations(config_to_search, match_type="domain")
@@ -109,7 +109,7 @@ assert found_expectation[0].to_domain_obj() == updated_config.to_domain_obj()
 
 # <snippet name="docs/docusaurus/docs/oss/guides/expectations/how_to_edit_an_expectation_suite.py remove_configuration">
 config_to_remove = ExpectationConfiguration(
-    expectation_type="expect_column_values_to_be_between",
+    type="expect_column_values_to_be_between",
     kwargs={"column": "passenger_count"},
 )
 my_suite.remove_expectation(
@@ -125,7 +125,7 @@ my_suite.show_expectations_by_expectation_type()
 
 assert len(my_suite.expectations) == 1
 assert my_suite.expectation_configurations[0] == ExpectationConfiguration(
-    expectation_type="expect_column_values_to_not_be_null",
+    type="expect_column_values_to_not_be_null",
     kwargs={"column": "pickup_datetime"},
 )
 
