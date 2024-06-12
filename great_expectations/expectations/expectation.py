@@ -336,16 +336,12 @@ class Expectation(pydantic.BaseModel, metaclass=MetaExpectation):
     result_format: Union[ResultFormat, dict] = ResultFormat.BASIC
     description: ClassVar[Union[str, None]] = None
 
-    catch_exceptions: bool = False
     rendered_content: Optional[List[RenderedAtomicContent]] = None
 
     version: ClassVar[str] = ge_version
     domain_keys: ClassVar[Tuple[str, ...]] = ()
     success_keys: ClassVar[Tuple[str, ...]] = ()
-    runtime_keys: ClassVar[Tuple[str, ...]] = (
-        "catch_exceptions",
-        "result_format",
-    )
+    runtime_keys: ClassVar[Tuple[str, ...]] = ("result_format",)
     args_keys: ClassVar[Tuple[str, ...]] = ()
 
     expectation_type: ClassVar[str]
@@ -1849,8 +1845,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
 
     column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
 
-    catch_exceptions: bool = True
-
     map_metric: ClassVar[Optional[str]] = None
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -2114,8 +2108,6 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
     column_A: StrictStr = Field(min_length=1, description=COLUMN_A_DESCRIPTION)
     column_B: StrictStr = Field(min_length=1, description=COLUMN_B_DESCRIPTION)
 
-    catch_exceptions: bool = True
-
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
         "batch_id",
@@ -2370,7 +2362,6 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"
     )
-    catch_exceptions: bool = True
 
     map_metric: ClassVar[Optional[str]] = None
     domain_keys = (
