@@ -46,6 +46,18 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     """Expect the column entries to be strings with length between a minimum value and a maximum value (inclusive).
@@ -101,8 +113,15 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         [expect_column_value_lengths_to_equal](https://greatexpectations.io/expectations/expect_column_value_lengths_to_equal)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         Numerical Data
