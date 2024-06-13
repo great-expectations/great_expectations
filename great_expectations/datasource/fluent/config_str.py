@@ -63,8 +63,15 @@ class ConfigStr(SecretStr):
         return f"{self.__class__.__name__}({self._display()!r})"
 
     @classmethod
-    def _validate_template_str_format(cls, v):
-        if TEMPLATE_STR_REGEX.search(v):
+    def str_contains_config_template(cls, v: str) -> bool:
+        """
+        Returns True if the input string contains a config template string.
+        """
+        return TEMPLATE_STR_REGEX.search(v) is not None
+
+    @classmethod
+    def _validate_template_str_format(cls, v: str) -> str | None:
+        if cls.str_contains_config_template(v):
             return v
         raise ValueError(
             cls.__name__
