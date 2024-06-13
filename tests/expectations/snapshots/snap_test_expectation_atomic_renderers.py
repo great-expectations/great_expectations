@@ -8,7 +8,7 @@ snapshots["test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_
     "name": "atomic.diagnostic.observed_value",
     "value": {
         "graph": {
-            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
             "autosize": "fit",
             "config": {"view": {"continuousHeight": 300, "continuousWidth": 400}},
             "data": {"name": "data-c49f2d3d7bdab36f9ec81f5a314a430c"},
@@ -88,7 +88,7 @@ snapshots[
     "name": "atomic.diagnostic.observed_value",
     "value": {
         "graph": {
-            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
             "autosize": "fit",
             "config": {"view": {"continuousHeight": 300, "continuousWidth": 400}},
             "data": {"name": "data-d8f1a1ab1f79e142d9ca399157673554"},
@@ -133,7 +133,7 @@ snapshots[
     "name": "atomic.diagnostic.observed_value",
     "value": {
         "graph": {
-            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
             "autosize": "fit",
             "config": {"view": {"continuousHeight": 300, "continuousWidth": 400}},
             "data": {"name": "data-d8f1a1ab1f79e142d9ca399157673554"},
@@ -274,7 +274,7 @@ snapshots["test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_le
     "name": "atomic.prescriptive.summary",
     "value": {
         "graph": {
-            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
             "autosize": "fit",
             "config": {"view": {"continuousHeight": 300, "continuousWidth": 400}},
             "data": {"name": "data-1cb20570b53cc3e67cb4883fd45e64cb"},
