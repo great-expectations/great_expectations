@@ -239,6 +239,8 @@ class ConfigUri(AnyUrl, ConfigStr):  # type: ignore[misc] # Mixin "validate" sig
         AnyUrl.__modify_schema__(field_schema)
         field_schema.update(
             {
+                "description": "Contains config templates for user:password in a URI"
+                " to be substituted at runtime. Runtime values will never be serialized.",
                 "examples": [
                     "snowflake://dickens:${PASSWORD}@host/db/schema",
                     "snowflake://${USER}:${PASSWORD}@host/db/schema",

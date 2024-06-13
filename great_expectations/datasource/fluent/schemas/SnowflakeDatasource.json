@@ -53,7 +53,7 @@
                     "type": "string",
                     "writeOnly": true,
                     "format": "uri",
-                    "description": "Contains config templates to be substituted at runtime. Runtime values will never be serialized.",
+                    "description": "Contains config templates for user:password in a URI to be substituted at runtime. Runtime values will never be serialized.",
                     "pattern": ".*(?<!\\\\)\\$\\{(.*?)\\}|(?<!\\\\)\\$([_a-zA-Z][_a-zA-Z0-9]*).*",
                     "examples": [
                         "snowflake://dickens:${PASSWORD}@host/db/schema",
