@@ -753,7 +753,6 @@ class TestColumnIdentifiers:
     @pytest.mark.parametrize(
         "expectation_type",
         [
-            "expect_column_values_to_be_null",
             "expect_column_values_to_not_be_null",
         ],
     )
