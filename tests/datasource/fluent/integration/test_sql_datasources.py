@@ -751,9 +751,10 @@ def _raw_query_check_column_exists(
 )
 class TestColumnIdentifiers:
     @pytest.mark.parametrize(
-        "expectation_type",
+        "expectation_type,kwargs",
         [
-            "expect_column_values_to_not_be_null",
+            ("expect_column_to_exist", {"column": None}),
+            ("expect_column_values_to_not_be_null", {"column": None, "mostly": 1}),
         ],
     )
     def test_column_expectation(
@@ -763,6 +764,7 @@ class TestColumnIdentifiers:
         table_factory: TableFactory,
         column_name: str | quoted_name,
         expectation_type: str,
+        kwargs: dict,
         request: pytest.FixtureRequest,
     ):
         param_id = request.node.callspec.id
@@ -784,6 +786,7 @@ class TestColumnIdentifiers:
 
         print(f"\ncolumn_name:\n  {column_name!r}")
         print(f"type:\n  {type(column_name)}\n")
+        kwargs["column"] = column_name
 
         table_factory(
             gx_engine=datasource.get_execution_engine(),
@@ -818,10 +821,7 @@ class TestColumnIdentifiers:
         suite.add_expectation_configuration(
             expectation_configuration=ExpectationConfiguration(
                 type=expectation_type,
-                kwargs={
-                    "column": column_name,
-                    "mostly": 1,
-                },
+                kwargs=kwargs,
             )
         )
         suite.save()
