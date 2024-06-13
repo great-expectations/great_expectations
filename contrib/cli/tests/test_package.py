@@ -58,7 +58,7 @@ def test_update_dependencies_with_valid_path(
 ):
     requirements_file = tmpdir.mkdir("tmp").join("requirements.txt")
     contents = """
-altair>=4.0.0,<5  # package
+altair>=4.0.0  # package
 Click>=7.1.2  # package
 mistune>=0.8.4,<2.0.0  # package
 numpy>=1.14.1  # package
@@ -68,7 +68,7 @@ ruamel.yaml>=0.16,<0.17.18  # package
 
     package._update_dependencies(str(requirements_file))
     assert package.dependencies == [
-        Dependency(text="altair", link="https://pypi.org/project/altair", version="<5, >=4.0.0"),
+        Dependency(text="altair", link="https://pypi.org/project/altair", version=">=4.0.0"),
         Dependency(text="Click", link="https://pypi.org/project/Click", version=">=7.1.2"),
         Dependency(
             text="mistune",
