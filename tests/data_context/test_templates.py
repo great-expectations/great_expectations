@@ -88,7 +88,7 @@ def project_help_comment():
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
-config_version: 3
+config_version: 4
 """  # noqa: E501
     return PROJECT_HELP_COMMENT
 

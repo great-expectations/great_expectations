@@ -67,6 +67,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class NoUserIdError(Exception):
+    def __init__(self):
+        super().__init__("No user id in /account/me response")
+
+
+class OrganizationIdNotSpecifiedError(Exception):
+    def __init__(self):
+        super().__init__(
+            "A request to GX Cloud is being attempted without an organization id configured. "
+            "Maybe you need to set the environment variable GX_CLOUD_ORGANIZATION_ID?"
+        )
+
+
 def _extract_fluent_datasources(config_dict: dict) -> dict:
     """
     When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
@@ -145,9 +158,13 @@ class CloudDataContext(SerializableDataContext):
         if not ENV_CONFIG.gx_analytics_enabled:
             return None
 
-        response = self._request_cloud_backend(cloud_config=self.ge_cloud_config, uri="accounts/me")
+        response = self._request_cloud_backend(
+            cloud_config=self.ge_cloud_config, resource="accounts/me"
+        )
         data = response.json()
-        user_id = data["user_id"]
+        user_id = data.get("user_id") or data.get("id")
+        if not user_id:
+            raise NoUserIdError()
         return uuid.UUID(user_id)
 
     @override
@@ -240,7 +257,7 @@ class CloudDataContext(SerializableDataContext):
         :return: the configuration object retrieved from the Cloud API
         """  # noqa: E501
         response = cls._request_cloud_backend(
-            cloud_config=cloud_config, uri="data-context-configuration"
+            cloud_config=cloud_config, resource="data_context_configuration"
         )
         config = cls._prepare_v1_config(config=response.json())
         return DataContextConfig(**config)
@@ -321,13 +338,16 @@ class CloudDataContext(SerializableDataContext):
         return config
 
     @classmethod
-    def _request_cloud_backend(cls, cloud_config: GXCloudConfig, uri: str) -> Response:
+    def _request_cloud_backend(cls, cloud_config: GXCloudConfig, resource: str) -> Response:
         access_token = cloud_config.access_token
         base_url = cloud_config.base_url
         organization_id = cloud_config.organization_id
+        if not organization_id:
+            raise OrganizationIdNotSpecifiedError()
 
         session = create_session(access_token=access_token)
-        response = session.get(f"{base_url}/organizations/{organization_id}/{uri}")
+        url = GXCloudStoreBackend.construct_versioned_url(base_url, organization_id, resource)
+        response = session.get(url)
 
         try:
             response.raise_for_status()

@@ -948,7 +948,7 @@ def get_default_mysql_url() -> str:
     Returns:
         String of default connection to Docker container
     """
-    return "mysql+pymysql://root@localhost/test_ci"
+    return "mysql+pymysql://root@127.0.0.1/test_ci"
 
 
 def get_default_trino_url() -> str:

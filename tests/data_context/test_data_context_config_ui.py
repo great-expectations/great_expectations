@@ -1118,7 +1118,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
 
     desired_config = {
         "data_context_id": data_context_config.data_context_id,
-        "config_version": 3.0,
+        "config_version": 4.0,
         "stores": {
             "checkpoint_store": {
                 "class_name": "CheckpointStore",
@@ -1163,7 +1163,7 @@ def test_data_context_config_defaults():
         "analytics_enabled": None,
         "data_context_id": None,
         "config_variables_file_path": None,
-        "config_version": 3,
+        "config_version": 4,
         "data_docs_sites": None,
         "fluent_datasources": {},
         "plugins_directory": None,

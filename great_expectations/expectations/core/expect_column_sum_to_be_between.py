@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -33,9 +35,19 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column to sum to be between a minimum value and a maximum value."
+)
+MIN_VALUE_DESCRIPTION = "The minimal sum allowed."
+MAX_VALUE_DESCRIPTION = "The maximal sum allowed."
+STRICT_MIN_DESCRIPTION = "If True, the minimal sum must be strictly larger than min_value."
+STRICT_MAX_DESCRIPTION = "If True, the maximal sum must be strictly smaller than max_value."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Distribution"]
+
 
 class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
-    """Expect the column to sum to be between a minimum value and a maximum value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_sum_to_be_between is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
@@ -46,15 +58,15 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name
+            {COLUMN_DESCRIPTION}
         min_value (comparable type or None): \
-            The minimal sum allowed.
+            {MIN_VALUE_DESCRIPTION}
         max_value (comparable type or None): \
-            The maximal sum allowed.
+            {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            If True, the minimal sum must be strictly larger than min_value, default=False
+            {STRICT_MIN_DESCRIPTION} default=False.
         strict_max (boolean): \
-            If True, the maximal sum must be strictly smaller than max_value, default=False
+            {STRICT_MAX_DESCRIPTION} default=False.
 
     Other Parameters:
         result_format (str or None): \
@@ -80,11 +92,11 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
           representing the actual column sum
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Distribution
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -100,21 +112,21 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
                     column="test",
                     min_value=2,
                     max_value=6
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 5.1
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -122,27 +134,31 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
                     column="test2",
                     min_value=2,
                     max_value=6
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": 13.5
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    min_value: Union[float, SuiteParameterDict, datetime, None] = None
-    max_value: Union[float, SuiteParameterDict, datetime, None] = None
-    strict_min: bool = False
-    strict_max: bool = False
+    min_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MIN_VALUE_DESCRIPTION
+    )
+    max_value: Union[float, SuiteParameterDict, datetime, None] = pydantic.Field(
+        None, description=MAX_VALUE_DESCRIPTION
+    )
+    strict_min: bool = pydantic.Field(False, description=STRICT_MIN_DESCRIPTION)
+    strict_max: bool = pydantic.Field(False, description=STRICT_MAX_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -153,6 +169,8 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+
+    _library_metadata = library_metadata
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.sum",)
@@ -170,6 +188,35 @@ class ExpectColumnSumToBeBetween(ColumnAggregateExpectation):
         "strict_min",
         "strict_max",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnSumToBeBetween]) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     """ A Column Map Metric Decorator for the Sum"""
 

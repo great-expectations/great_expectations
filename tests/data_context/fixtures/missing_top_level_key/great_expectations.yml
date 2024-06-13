@@ -1,4 +1,4 @@
 # This must be missing required keys
-config_version: 2
+config_version: 4
 stores: "foo"
 data_docs: "foo"

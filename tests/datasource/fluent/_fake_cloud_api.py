@@ -42,7 +42,7 @@ LOGGER = logging.getLogger(__name__)
 
 MISSING: Final = object()
 
-GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
+GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io/"
 
 DUMMY_JWT_TOKEN: Final[str] = (
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
@@ -115,6 +115,8 @@ FakeDBTypedDict = TypedDict(
         "expectation_suites": Dict[str, dict],
         "CHECKPOINT_NAMES": Set[str],
         "checkpoints": Dict[str, dict],
+        "VALIDATION_DEFINITION_NAMES": Set[str],
+        "validation_definitions": Dict[str, dict],
     },
 )
 
@@ -205,6 +207,8 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
                 },
             },
         },
+        "VALIDATION_DEFINITION_NAMES": set(),
+        "validation_definitions": {},
     }
 
 
@@ -781,6 +785,44 @@ def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
     return result
 
 
+def post_validation_definitions_cb(request: PreparedRequest) -> CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    if not request.body:
+        raise NotImplementedError("Handling missing body")
+
+    payload: dict = json.loads(request.body)
+    name = payload["data"]["attributes"]["validation_definition"]["name"]
+
+    validation_definitions: dict[str, dict] = _CLOUD_API_FAKE_DB["validation_definitions"]
+    validation_definition_names: set[str] = _CLOUD_API_FAKE_DB["VALIDATION_DEFINITION_NAMES"]
+
+    if name in validation_definitions:
+        result = CallbackResult(
+            409,  # not really a 409 in prod but it's a more informative status code
+            headers=DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "mock 400/409",
+                        "detail": f"'{name}' already defined",
+                        "source": None,
+                    }
+                ]
+            ).json(),
+        )
+    else:
+        id_ = str(uuid.uuid4())
+        payload["data"]["id"] = id_
+        validation_definitions[id_] = payload["data"]
+        validation_definition_names.add(name)
+        result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
+
+    LOGGER.debug(f"Response {result.status}")
+    return result
+
+
 # #######################
 # RequestMocks
 # #######################
@@ -793,10 +835,14 @@ def gx_cloud_api_fake_ctx(
     assert_all_requests_are_fired: bool = False,
 ) -> Generator[responses.RequestsMock, None, None]:
     """Mock the GX Cloud API for the lifetime of the context manager."""
-    org_url_base_V0 = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}"
-    org_url_base_V1 = f"{cloud_details.base_url}/api/v1/organizations/{cloud_details.org_id}"
-    dc_config_url = f"{org_url_base_V0}/data-context-configuration"
-    me_url = f"{org_url_base_V0}/accounts/me"
+    org_url_base_V0 = urllib.parse.urljoin(
+        cloud_details.base_url, f"organizations/{cloud_details.org_id}/"
+    )
+    org_url_base_V1 = urllib.parse.urljoin(
+        cloud_details.base_url, f"api/v1/organizations/{cloud_details.org_id}/"
+    )
+    dc_config_url = urllib.parse.urljoin(org_url_base_V0, "data-context-configuration")
+    me_url = urllib.parse.urljoin(org_url_base_V0, "accounts/me")
 
     assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
     _CLOUD_API_FAKE_DB.update(create_fake_db_seed_data(fds_config))
@@ -810,88 +856,93 @@ def gx_cloud_api_fake_ctx(
         resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base_V0}/datasources",
+            urllib.parse.urljoin(org_url_base_V0, "datasources"),
             get_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            f"{org_url_base_V0}/datasources",
+            urllib.parse.urljoin(org_url_base_V0, "datasources"),
             post_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(f"{org_url_base_V0}/datasources/{UUID_REGEX}"),
+            re.compile(urllib.parse.urljoin(org_url_base_V0, f"datasources/{UUID_REGEX}")),
             get_datasource_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(f"{org_url_base_V0}/datasources/{UUID_REGEX}"),
+            re.compile(urllib.parse.urljoin(org_url_base_V0, f"datasources/{UUID_REGEX}")),
             delete_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.PUT,
-            re.compile(f"{org_url_base_V0}/datasources/{UUID_REGEX}"),
+            re.compile(urllib.parse.urljoin(org_url_base_V0, f"datasources/{UUID_REGEX}")),
             put_datasource_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(f"{org_url_base_V0}/data-assets/{UUID_REGEX}"),
+            re.compile(urllib.parse.urljoin(org_url_base_V0, f"data-assets/{UUID_REGEX}")),
             delete_data_assets_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base_V1}/expectation-suites",
+            urllib.parse.urljoin(org_url_base_V1, "expectation-suites"),
             get_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}"),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"expectation-suites/{UUID_REGEX}")),
             get_expectation_suite_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            f"{org_url_base_V1}/expectation-suites",
+            urllib.parse.urljoin(org_url_base_V1, "expectation-suites"),
             post_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.PUT,
-            re.compile(f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}"),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"expectation-suites/{UUID_REGEX}")),
             put_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(f"{org_url_base_V1}/expectation-suites/{UUID_REGEX}"),
+            re.compile(urllib.parse.urljoin(org_url_base_V1, f"expectation-suites/{UUID_REGEX}")),
             delete_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            f"{org_url_base_V0}/checkpoints",
+            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
             get_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            f"{org_url_base_V0}/checkpoints",
+            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
             post_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            re.compile(f"{org_url_base_V0}/checkpoints/{UUID_REGEX}"),
+            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
             delete_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.DELETE,
-            f"{org_url_base_V0}/checkpoints",
+            urllib.parse.urljoin(org_url_base_V0, "checkpoints"),
             delete_checkpoint_by_name_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
-            re.compile(f"{org_url_base_V0}/checkpoints/{UUID_REGEX}"),
+            re.compile(urllib.parse.urljoin(org_url_base_V0, f"checkpoints/{UUID_REGEX}")),
             get_checkpoint_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
-            f"{org_url_base_V0}/validation-results",
+            urllib.parse.urljoin(org_url_base_V0, "validation-results"),
             post_validation_results_cb,
+        )
+        resp_mocker.add_callback(
+            responses.POST,
+            urllib.parse.urljoin(org_url_base_V0, "validation-definitions"),
+            post_validation_definitions_cb,
         )
 
         yield resp_mocker

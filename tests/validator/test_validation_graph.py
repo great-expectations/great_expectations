@@ -89,7 +89,7 @@ def validation_graph_with_single_edge(metric_edge: MetricEdge) -> ValidationGrap
 @pytest.fixture
 def expect_column_values_to_be_unique_expectation_config() -> ExpectationConfiguration:
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_unique",
+        type="expect_column_values_to_be_unique",
         meta={},
         kwargs={"column": "provider_id", "result_format": "BASIC"},
     )
@@ -98,7 +98,7 @@ def expect_column_values_to_be_unique_expectation_config() -> ExpectationConfigu
 @pytest.fixture
 def expect_column_value_z_scores_to_be_less_than_expectation_config() -> ExpectationConfiguration:
     return ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
             "mostly": 0.9,
@@ -128,7 +128,7 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
     execution_engine = cast(ExecutionEngine, PandasExecutionEngineStub())
 
     expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
             "mostly": 0.9,

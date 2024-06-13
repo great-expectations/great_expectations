@@ -77,7 +77,7 @@ def fake_expectation_config(
     Helper method to generate of ExpectationConfiguration objects for tests.
     """
     return ExpectationConfiguration(
-        expectation_type=expectation_type,
+        type=expectation_type,
         kwargs=config_kwargs,
     )
 
@@ -88,7 +88,7 @@ def fake_expectation_config(
     [
         (
             FakeMulticolumnExpectation,
-            fake_expectation_config("fake_multicolumn_expectation", {"column_list": []}),
+            fake_expectation_config("fake_multicolumn_expectation", {"column_list": ["column_2"]}),
         ),
         (
             FakeColumnMapExpectation,
@@ -122,7 +122,7 @@ def test_multicolumn_expectation_has_default_mostly(fake_expectation_cls, config
                 (
                     FakeMulticolumnExpectation,
                     fake_expectation_config(
-                        "fake_multicolumn_expectation", {"column_list": [], "mostly": x}
+                        "fake_multicolumn_expectation", {"column_list": ["column_2"], "mostly": x}
                     ),
                 )
                 for x in [0, 0.5, 1]
@@ -222,7 +222,7 @@ def test_expectation_configuration_property():
     expectation = gxe.ExpectColumnMaxToBeBetween(column="foo", min_value=0, max_value=10)
 
     assert expectation.configuration == ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
+        type="expect_column_max_to_be_between",
         kwargs={
             "column": "foo",
             "min_value": 0,
@@ -241,7 +241,7 @@ def test_expectation_configuration_property_recognizes_state_changes():
     expectation.mostly = 0.95
 
     assert expectation.configuration == ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
+        type="expect_column_max_to_be_between",
         kwargs={
             "column": "bar",
             "mostly": 0.95,

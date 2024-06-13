@@ -156,7 +156,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         type_counts = defaultdict(int)
 
         for evr in evrs.results:
-            type_counts[evr.expectation_config.expectation_type] += 1
+            type_counts[evr.expectation_config.type] += 1
 
         bullet_list_items = sorted(type_counts.items(), key=lambda kv: -1 * kv[1])
 
@@ -323,7 +323,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         for evr in type_evrs:
             column = evr.expectation_config.kwargs["column"]
-            if evr.expectation_config.expectation_type == "expect_column_values_to_be_in_type_list":
+            if evr.expectation_config.type == "expect_column_values_to_be_in_type_list":
                 if evr.expectation_config.kwargs["type_list"] is None:
                     column_types[column] = "unknown"
                     continue
