@@ -8,6 +8,7 @@ from great_expectations.core.suite_parameters import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
 )
+from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
@@ -25,9 +26,16 @@ try:
 except ImportError:
     pass
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column entries to be strings that match a given like pattern expression."
+)
+LIKE_PATTERN_DESCRIPTION = "The SQL like pattern expression the column entries should match."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Pattern Matching"]
+
 
 class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
-    """Expect the column entries to be strings that match a given like pattern expression.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_match_like_pattern is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
@@ -38,9 +46,9 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         like_pattern (str): \
-            The SQL like pattern expression the column entries should match.
+            {LIKE_PATTERN_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
@@ -71,11 +79,11 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Pattern Matching
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -89,16 +97,16 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
                 ExpectColumnValuesToMatchLikePattern(
                     column="test",
                     like_pattern="[a]%"
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -107,26 +115,26 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
                 ExpectColumnValuesToMatchLikePattern(
                     column="test2",
                     like_pattern="[a]%"
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 2,
                     "unexpected_percent": 66.66666666666666,
@@ -138,10 +146,10 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 66.66666666666666,
                     "unexpected_percent_nonmissing": 66.66666666666666
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     like_pattern: Union[str, SuiteParameterDict]

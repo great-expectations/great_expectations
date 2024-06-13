@@ -9,6 +9,7 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
+from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -30,9 +31,16 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column entries to be strings with length equal to the provided value."
+)
+VALUE_DESCRIPTION = "The expected value for a column entry length."
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Pattern Matching"]
+
 
 class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
-    """Expect the column entries to be strings with length equal to the provided value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     This expectation only works for string-type values. Invoking it on ints or floats will raise a TypeError.
 
@@ -45,9 +53,9 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         value (int): \
-            The expected value for a column entry length.
+            {VALUE_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
@@ -72,11 +80,11 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         [expect_column_value_lengths_to_be_between](https://greatexpectations.io/expectations/expect_column_value_lengths_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Pattern Matching
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -90,16 +98,16 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 ExpectColumnValueLengthsToEqual(
                     column="test",
                     value=5
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -108,26 +116,26 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
                 ExpectColumnValueLengthsToEqual(
                     column="test2",
                     value=5
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
@@ -138,10 +146,10 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     value: Union[float, SuiteParameterDict]

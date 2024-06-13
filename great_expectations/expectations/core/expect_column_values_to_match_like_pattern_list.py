@@ -9,6 +9,7 @@ from great_expectations.core.suite_parameters import (
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
 )
+from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.render.components import (
     LegacyRendererType,
     RenderedStringTemplateContent,
@@ -24,9 +25,24 @@ if TYPE_CHECKING:
         ExpectationValidationResult,
     )
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column entries to be strings that match any "
+    "of a provided list of like pattern expressions."
+)
+LIKE_PATTERN_DESCRIPTION = (
+    "The list of SQL like pattern expressions the column entries should match."
+)
+MATCH_ON_DESCRIPTION = (
+    "'any' or 'all'."
+    "Use 'any' if the value should match at least one like pattern in the list."
+    "Use 'all' if it should match each like pattern in the list."
+)
+SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
+DATA_QUALITY_ISSUES = ["Pattern Matching"]
+
 
 class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
-    """Expect the column entries to be strings that match any of a provided list of like pattern expressions.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_match_like_pattern_list is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
@@ -37,13 +53,11 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         like_pattern_list (List[str]): \
-            The list of SQL like pattern expressions the column entries should match.
+            {LIKE_PATTERN_DESCRIPTION}
         match_on (string): \
-            "any" or "all". \
-            Use "any" if the value should match at least one like pattern in the list. \
-            Use "all" if it should match each like pattern in the list.
+            {MATCH_ON_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
@@ -74,11 +88,11 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         [expect_column_values_to_not_match_like_pattern_list](https://greatexpectations.io/expectations/expect_column_values_to_not_match_like_pattern_list)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Pattern Matching
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -93,16 +107,16 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                     column="test",
                     like_pattern_list=["[aa]%", "[ab]%", "[ac]%"],
                     match_on="any"
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -111,10 +125,10 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -122,16 +136,16 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                     column="test2",
                     like_pattern_list=["[ad]%", "[a]%"],
                     match_on="all"
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
@@ -142,10 +156,10 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
     like_pattern_list: Union[List[str], SuiteParameterDict]
