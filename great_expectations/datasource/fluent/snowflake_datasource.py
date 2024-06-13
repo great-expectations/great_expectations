@@ -53,7 +53,7 @@ MISSING: Final = object()  # sentinel value to indicate missing values
 
 
 @functools.lru_cache(maxsize=4)
-def _extract_path_sections(
+def _get_database_and_schema_from_path(
     url_path: str,
 ) -> dict[Literal["schema", "database"], str | None]:
     """
@@ -145,13 +145,13 @@ class SnowflakeDsn(AnyUrl):
     @property
     def database(self) -> str | None:
         if self.path:
-            return _extract_path_sections(self.path)["database"]
+            return _get_database_and_schema_from_path(self.path)["database"]
         return None
 
     @property
     def schema_(self) -> str | None:
         if self.path:
-            return _extract_path_sections(self.path)["schema"]
+            return _get_database_and_schema_from_path(self.path)["schema"]
         return None
 
     @property
@@ -348,9 +348,9 @@ class SnowflakeDatasource(SQLDatasource):
 
         For Snowflake specifically we may represent the connection_string as a dict, which is not supported by SQLAlchemy.
         """
-        gx_execution_engine_type: Type[SqlAlchemyExecutionEngine] = (
-            self.execution_engine_type
-        )
+        gx_execution_engine_type: Type[
+            SqlAlchemyExecutionEngine
+        ] = self.execution_engine_type
 
         connection_string: str | None = (
             self.connection_string if isinstance(self.connection_string, str) else None
