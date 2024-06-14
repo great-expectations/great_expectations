@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
@@ -9,7 +9,10 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
 )
-from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
+)
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -59,7 +62,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -155,7 +158,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     value: Union[float, SuiteParameterDict]
 
     # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
@@ -163,6 +166,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.value_length.equals"
     success_keys = ("value", "mostly")
@@ -170,6 +174,37 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         "column",
         "value",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValueLengthsToEqual]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(
