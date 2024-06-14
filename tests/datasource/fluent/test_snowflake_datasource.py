@@ -575,6 +575,46 @@ class TestConvenienceProperties:
         else:
             assert datasource.database == datasource.connection_string.database
 
+    def test_warehouse(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.warehouse
+                ), "Don't expect schema to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.warehouse
+        else:
+            assert datasource.warehouse == datasource.connection_string.warehouse
+
+    def test_role(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.role
+                ), "Don't expect schema to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.role
+        else:
+            assert datasource.role == datasource.connection_string.role
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])

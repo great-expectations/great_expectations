@@ -241,6 +241,36 @@ class SnowflakeDatasource(SQLDatasource):
         url_path: str = urllib.parse.urlparse(subbed_str).path
         return _get_database_and_schema_from_path(url_path)["database"]
 
+    @property
+    def warehouse(self) -> str | None:
+        """Convenience property to get the `warehouse` regardless of the connection string format."""
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
+            return self.connection_string.warehouse
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine warehouse"
+        )
+        if not subbed_str:
+            return None
+        return urllib.parse.parse_qs(urllib.parse.urlparse(subbed_str).query).get(
+            "warehouse", [None]
+        )[0]
+
+    @property
+    def role(self) -> str | None:
+        """Convenience property to get the `role` regardless of the connection string format."""
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
+            return self.connection_string.role
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine role"
+        )
+        if not subbed_str:
+            return None
+        return urllib.parse.parse_qs(urllib.parse.urlparse(subbed_str).query).get(
+            "role", [None]
+        )[0]
+
     @pydantic.root_validator(pre=True)
     def _convert_root_connection_detail_fields(cls, values: dict) -> dict:
         """
