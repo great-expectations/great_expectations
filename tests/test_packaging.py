@@ -184,7 +184,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 78
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 74
     assert set(sorted_packages_with_pins_or_upper_bounds) == {
         (
             "requirements-dev-api-docs-test.txt",
@@ -202,14 +202,8 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-lite.txt", "ipykernel", (("<=", "6.17.1"),)),
         ("requirements-dev-lite.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
         ("requirements-dev-lite.txt", "snapshottest", (("==", "0.6.0"),)),
-        ("requirements-dev-mysql.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-dev-pagerduty.txt", "pypd", (("==", "1.1.0"),)),
         ("requirements-dev-snowflake.txt", "pandas", (("<", "2.2.0"),)),
-        (
-            "requirements-dev-sqlalchemy.txt",
-            "PyMySQL",
-            (("<", "0.10"), (">=", "0.9.3")),
-        ),
         ("requirements-dev-sqlalchemy.txt", "ipykernel", (("<=", "6.17.1"),)),
         (
             "requirements-dev-sqlalchemy.txt",
@@ -248,7 +242,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-test.txt", "mypy", (("==", "1.10.0"),)),
         ("requirements-dev-test.txt", "ruff", (("==", "0.4.5"),)),
         ("requirements-dev-test.txt", "snapshottest", (("==", "0.6.0"),)),
-        ("requirements-dev.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-dev.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
         ("requirements-dev.txt", "black", (("==", "23.10.1"),)),
@@ -269,7 +262,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-dev.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
         ("requirements-dev.txt", "xlrd", (("<", "2.0.0"), (">=", "1.1.0"))),
-        ("requirements-types.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-types.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-types.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
         ("requirements-types.txt", "black", (("==", "23.10.1"),)),
