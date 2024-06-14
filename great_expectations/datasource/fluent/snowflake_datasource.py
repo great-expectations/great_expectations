@@ -177,14 +177,18 @@ class ConnectionDetails(FluentBaseModel):
     """
     Information needed to connect to a Snowflake database.
     Alternative to a connection string.
+
+    https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#additional-connection-parameters
     """
 
     account: str
     user: str
     password: Union[ConfigStr, str]
-    database: Optional[str] = None
+    database: Optional[str] = pydantic.Field(
+        None, description="Default database for the connection"
+    )
     schema_: str = pydantic.Field(
-        None, alias="schema"
+        None, alias="schema", description="Default schema for the connection"
     )  # schema is a reserved attr in BaseModel
     warehouse: Optional[str] = None
     role: Optional[str] = None
