@@ -172,9 +172,9 @@ class ConnectionDetails(FluentBaseModel):
     account: str
     user: str
     password: Union[ConfigStr, str]
-    database: str
+    database: Optional[str] = None
     schema_: str = pydantic.Field(
-        ..., alias="schema"
+        None, alias="schema"
     )  # schema is a reserved attr in BaseModel
     warehouse: Optional[str] = None
     role: Optional[str] = None
