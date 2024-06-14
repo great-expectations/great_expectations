@@ -42,6 +42,18 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect column entries to not be in the set."
 DATA_QUALITY_ISSUES = ["Sets"]

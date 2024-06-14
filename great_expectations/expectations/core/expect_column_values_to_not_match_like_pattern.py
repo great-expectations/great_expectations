@@ -26,6 +26,8 @@ if TYPE_CHECKING:
         ExpectationValidationResult,
     )
 
+SUPPORTED_DATA_SOURCES = ["SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
+
 
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column entries to be strings that do NOT match a given like pattern expression."
