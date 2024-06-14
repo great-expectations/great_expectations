@@ -39,13 +39,13 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
                     "name": "table_asset_all_standard_fields",
                     "type": "table",
                     "table_name": "my_table",
-                    "schema": "s_public",
+                    "schema_name": "s_public",
                 },
                 {
                     "name": "table_asset_all_forward_compatible_fields",
                     "type": "table",
                     "table_name": "my_table",
-                    "schema": "s_public",
+                    "schema_name": "s_public",
                     "database": "d_public",
                     "database_name": "d_public",
                 },
@@ -54,13 +54,11 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
                     "name": "query_asset_all_standard_fields",
                     "type": "query",
                     "query": "SELECT 1",
-                    "schema": "s_public",
                 },
                 {
                     "name": "query_asset_all_forward_compatible_fields",
                     "type": "query",
                     "query": "SELECT 1",
-                    "schema": "s_public",
                     "database": "d_public",
                     "database_name": "d_public",
                 },
@@ -217,10 +215,11 @@ def test_valid_config(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    ["connection_string", "expected_errors"],
+    ["connection_string", "other_args", "expected_errors"],
     [
         pytest.param(
             "snowflake://user:password@",
+            {},
             [
                 {
                     "loc": ("connection_string",),
@@ -248,7 +247,46 @@ def test_valid_config(
             id="missing/invalid account",
         ),
         pytest.param(
+            "snowflake://user:password@account",
+            {
+                "assets": [
+                    {"name": "valid_asset", "type": "table"},
+                    {
+                        "name": "valid_but_with_fields_that_will_be_ignored",
+                        "type": "table",
+                        # these will be elided by some forward compatibility logic
+                        "database": "this will be ignored",
+                        "database_name": "this will be ignored",
+                    },
+                    {
+                        "name": "extra_fields",
+                        "type": "table",
+                        # these will be elided by some forward compatibility logic
+                        "database": "this will be ignored",
+                        "database_name": "this will be ignored",
+                        # these will not
+                        "db": "causes an error",
+                        "foo": "this too",
+                    },
+                ]
+            },
+            [
+                {
+                    "loc": ("assets", 2, "TableAsset", "db"),
+                    "msg": "extra fields not permitted",
+                    "type": "value_error.extra",
+                },
+                {
+                    "loc": ("assets", 2, "TableAsset", "foo"),
+                    "msg": "extra fields not permitted",
+                    "type": "value_error.extra",
+                },
+            ],
+            id="invalid assets",
+        ),
+        pytest.param(
             "snowflake://",
+            {},
             [
                 {
                     "loc": ("connection_string",),
@@ -277,14 +315,16 @@ def test_valid_config(
         ),
     ],
 )
-def test_missing_required_params(
+def test_invalid_params(
     connection_string: str,
+    other_args: dict,
     expected_errors: list[dict],  # TODO: use pydantic error dict
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
         ds = SnowflakeDatasource(
             name="my_sf_ds",
             connection_string=connection_string,
+            **other_args,
         )
         print(f"{ds!r}")
 
