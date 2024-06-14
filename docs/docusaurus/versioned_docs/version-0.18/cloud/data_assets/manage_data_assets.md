@@ -220,7 +220,7 @@ Additional Data Assets can only be added to Data Sources created in GX Cloud.
 
 5. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 4.
 
-7. Click **Finish**.
+6. Click **Finish**.
 
 
 ## Edit Data Source settings
