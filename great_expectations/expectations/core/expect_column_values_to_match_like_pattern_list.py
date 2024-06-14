@@ -40,8 +40,8 @@ MATCH_ON_DESCRIPTION = (
     "Use 'any' if the value should match at least one like pattern in the list. "
     "Use 'all' if it should match each like pattern in the list."
 )
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Pattern Matching"]
+SUPPORTED_DATA_SOURCES = ["SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
 
 
 class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
@@ -93,6 +93,9 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}

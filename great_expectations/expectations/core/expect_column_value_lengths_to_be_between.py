@@ -60,8 +60,18 @@ MIN_VALUE_DESCRIPTION = "The minimum value for a column entry length."
 MAX_VALUE_DESCRIPTION = "The maximum value for a column entry length."
 STRICT_MIN_DESCRIPTION = "If True, values must be strictly larger than min_value, default=False."
 STRICT_MAX_DESCRIPTION = "If True, values must be strictly smaller than max_value, default=False."
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Numerical Data"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
 
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
@@ -120,6 +130,13 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}

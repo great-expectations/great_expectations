@@ -36,8 +36,8 @@ EXPECTATION_SHORT_DESCRIPTION = (
 LIKE_PATTERN_LIST_DESCRIPTION = (
     "The list of SQL like pattern expressions the column entries should NOT match."
 )
-SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Pattern Matching"]
+SUPPORTED_DATA_SOURCES = ["SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
 
 
 class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
@@ -87,6 +87,9 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
