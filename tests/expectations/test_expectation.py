@@ -238,13 +238,11 @@ def test_expectation_configuration_property_recognizes_state_changes():
     expectation.column = "bar"
     expectation.min_value = 5
     expectation.max_value = 15
-    expectation.mostly = 0.95
 
     assert expectation.configuration == ExpectationConfiguration(
         expectation_type="expect_column_max_to_be_between",
         kwargs={
             "column": "bar",
-            "mostly": 0.95,
             "min_value": 5,
             "max_value": 15,
         },

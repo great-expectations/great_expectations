@@ -808,7 +808,6 @@ class TestColumnIdentifiers:
                 expectation_type=expectation_type,
                 kwargs={
                     "column": column_name,
-                    "mostly": 1,
                 },
             )
         )
