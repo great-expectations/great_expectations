@@ -93,6 +93,7 @@
         },
         "match_on": {
             "title": "Match On",
+            "description": "'any' or 'all'. Use 'any' if the value should match at least one regular expression in the list. Use 'all' if it should match each regular expression in the list.",
             "default": "any",
             "enum": [
                 "any",
