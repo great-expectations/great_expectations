@@ -270,17 +270,6 @@ class SnowflakeDatasource(SQLDatasource):
             values["connection_string"] = connection_details
         return values
 
-    @pydantic.validator("connection_string", pre=True)
-    def _check_config_template(cls, connection_string: Any) -> Any:
-        """
-        If connection_string has a config template, parse it as a ConfigStr, ignore other errors.
-        """
-        if isinstance(connection_string, str):
-            if ConfigStr.str_contains_config_template(connection_string):
-                LOGGER.debug("`connection_string` contains config template")
-                return pydantic.parse_obj_as(ConfigStr, connection_string)
-        return connection_string
-
     @pydantic.root_validator
     def _check_connection_string(cls, values: dict) -> dict:
         # keeping this validator isn't strictly necessary, but it provides a better error message
