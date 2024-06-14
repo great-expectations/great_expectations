@@ -52,13 +52,19 @@ The following table lists the available GX Cloud Expectations.
 
 5. Select an Expectation type. See [Available Expectation types](#available-expectation-types). 
 
-6. If selected data asset doesn't have expectation suites and has DATE or DATETIME columns, you can define a batch interval.
+6. If you are adding your first expectation on this data asset, you may be able to select a time-based Batch interval for that asset.
 
-   Select the **Entire table** tab to provide all Data Asset records to your Expectations and validations, or select the **Yearly**/**Monthly**/**Daily** tab to use subsets of Data Asset records for your Expectations and validations.
+- A batch is a feature of the data asset, and allows you to validate your data incrementally. A batch interval can only be defined once per data asset.
 
-   - Select **Yearly** to partition Data Asset records by year, select **Monthly** to partition Data Asset records by year and month, or select **Daily** to partition Data Asset records by year, month, and day.
+- In order to be able to select a  batch interval, the data asset must have at least one DATE or DATETIME column.
 
-   - **Batch column** - Select a name column from a prefilled list of DATE and DATETIME columns containing the date and time data.
+- Select the **Entire table** tab to provide all Data Asset records to your Expectations and validations, or select the **Yearly**/**Monthly**/**Daily** tab to use subsets of Data Asset records for your Expectations and validations.
+
+- Select **Yearly** to partition Data Asset records by year, select **Monthly** to partition Data Asset records by year and month, or select **Daily** to partition Data Asset records by year, month, and day.
+
+- **Batch column** - Select a name column from a prefilled list of DATE and DATETIME columns containing the date and time data.
+
+7. Complete the mandatory and optional fields for expectation.
 
 7. Complete the mandatory and optional fields for expectation.
 
