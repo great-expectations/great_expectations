@@ -245,6 +245,16 @@ module.exports = {
       ]
     },
     {
+      type: 'category',
+      label: 'Run Validations',
+      link: {type: 'doc', id: 'core/run_validations/run_validations'},
+      items: [
+        {type: 'doc', id: 'core/run_validations/create_a_validation_definition'},
+        {type: 'doc', id: 'core/run_validations/choose_result_format'},
+        {type: 'doc', id: 'core/run_validations/run_a_validation_definition'},
+      ]
+    },
+    {
       type: 'doc',
       id: 'oss/changelog',
       label: 'Changelog'
