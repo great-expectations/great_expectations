@@ -30,6 +30,10 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         id="connection_string str",
     ),
     param(
+        {"connection_string": "snowflake://my_user:password@my_account"},
+        id="min connection_string str",
+    ),
+    param(
         {
             "connection_string": "snowflake://my_user:${MY_PASSWORD}@my_account/d_public/s_public"
         },
@@ -40,6 +44,12 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@my_account/d_public/s_public"
         },
         id="connection_string ConfigStr - user + password sub",
+    ),
+    param(
+        {
+            "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@{MY_ACCOUNT}}/d_public/s_public"
+        },
+        id="connection_string ConfigStr - user, password, account sub",
     ),
     param(
         {
@@ -57,6 +67,16 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         {
             "connection_string": {
                 "user": "my_user",
+                "password": "password",
+                "account": "my_account",
+            }
+        },
+        id="min connection_string dict",
+    ),
+    param(
+        {
+            "connection_string": {
+                "user": "my_user",
                 "password": "${MY_PASSWORD}",
                 "account": "my_account",
                 "schema": "s_public",
@@ -65,6 +85,16 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         },
         id="connection_string dict with password ConfigStr",
     ),
+    param(
+        {
+            "connection_string": {
+                "user": "my_user",
+                "password": "${MY_PASSWORD}",
+                "account": "my_account",
+            }
+        },
+        id="min connection_string dict with password ConfigStr",
+    ),
 ]
 
 
@@ -72,10 +102,11 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
 def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MY_USER", "my_user")
     monkeypatch.setenv("MY_PASSWORD", "my_password")
+    monkeypatch.setenv("MY_ACCOUNT", "my_account")
 
 
 @pytest.mark.unit
-def test_snowflake_dsn():
+def test_snowflake_dsn_all_parts():
     dsn = pydantic.parse_obj_as(
         SnowflakeDsn,
         "snowflake://my_user:password@my_account/my_db/my_schema?role=my_role&warehouse=my_wh",
@@ -89,11 +120,31 @@ def test_snowflake_dsn():
     assert dsn.warehouse == "my_wh"
 
 
+@pytest.mark.unit
+def test_snowflake_dsn_minimal_parts():
+    dsn = pydantic.parse_obj_as(SnowflakeDsn, "snowflake://my_user:password@my_account")
+    assert dsn.user == "my_user"
+    assert dsn.password == "password"
+    assert dsn.account_identifier == "my_account"
+    assert not dsn.database
+    assert not dsn.schema_
+    assert not dsn.role
+    assert not dsn.warehouse
+
+
 @pytest.mark.snowflake  # TODO: make this a unit test
 @pytest.mark.parametrize(
     "config_kwargs",
     [
         *VALID_DS_CONFIG_PARAMS,
+        param(
+            {
+                "user": "my_user",
+                "password": "password",
+                "account": "my_account",
+            },
+            id="min old config format - top level keys",
+        ),
         param(
             {
                 "user": "my_user",
@@ -130,79 +181,7 @@ def test_valid_config(
     ["connection_string", "expected_errors"],
     [
         pytest.param(
-            "${MY_CONFIG_VAR}",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'domain' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - full connection string",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@${MY_CONFIG_VAR}/db/schema",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'domain' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - account (domain)",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@account/${MY_CONFIG_VAR}/schema",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'path' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - database (path)",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@account/db/${MY_CONFIG_VAR}",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'path' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - schema (path)",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@my_account",
+            "snowflake://user:password@",
             [
                 {
                     "loc": ("connection_string",),
@@ -217,8 +196,8 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
+                    "msg": "URL domain invalid",
+                    "type": "value_error.url.domain",
                 },
                 {
                     "loc": ("__root__",),
@@ -227,39 +206,10 @@ def test_valid_config(
                     "type": "value_error",
                 },
             ],
-            id="missing path",
+            id="missing/invalid account",
         ),
         pytest.param(
-            "snowflake://my_user:password@my_account//",
-            [
-                {
-                    "loc": ("connection_string",),
-                    "msg": "value is not a valid dict",
-                    "type": "type_error.dict",
-                },
-                {
-                    "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format "
-                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
-                    "type": "value_error",
-                },
-                {
-                    "ctx": {"msg": "missing database"},
-                    "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="missing database + schema",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@my_account/my_db",
+            "snowflake://",
             [
                 {
                     "loc": ("connection_string",),
@@ -274,8 +224,8 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
+                    "msg": "userinfo required in URL but missing",
+                    "type": "value_error.url.userinfo",
                 },
                 {
                     "loc": ("__root__",),
@@ -284,65 +234,7 @@ def test_valid_config(
                     "type": "value_error",
                 },
             ],
-            id="missing schema",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@my_account/my_db/",
-            [
-                {
-                    "loc": ("connection_string",),
-                    "msg": "value is not a valid dict",
-                    "type": "type_error.dict",
-                },
-                {
-                    "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format "
-                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
-                    "type": "value_error",
-                },
-                {
-                    "ctx": {"msg": "missing schema"},
-                    "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="missing schema 2",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@my_account//my_schema",
-            [
-                {
-                    "loc": ("connection_string",),
-                    "msg": "value is not a valid dict",
-                    "type": "type_error.dict",
-                },
-                {
-                    "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format "
-                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
-                    "type": "value_error",
-                },
-                {
-                    "ctx": {"msg": "missing database"},
-                    "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="missing database",
+            id="missing everything",
         ),
     ],
 )
@@ -659,8 +551,9 @@ class TestConvenienceProperties:
                 ), "Don't expect schema to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
-
-        assert datasource.schema_
+            _ = datasource.schema_
+        else:
+            assert datasource.schema_ == datasource.connection_string.schema_
 
     def test_database(
         self,
@@ -678,8 +571,49 @@ class TestConvenienceProperties:
                 ), "Don't expect schema to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.database
+        else:
+            assert datasource.database == datasource.connection_string.database
 
-        assert datasource.database
+    def test_warehouse(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.warehouse
+                ), "Don't expect schema to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.warehouse
+        else:
+            assert datasource.warehouse == datasource.connection_string.warehouse
+
+    def test_role(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.role
+                ), "Don't expect schema to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.role
+        else:
+            assert datasource.role == datasource.connection_string.role
 
 
 if __name__ == "__main__":
