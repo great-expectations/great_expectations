@@ -6,6 +6,7 @@ import pathlib
 import shutil
 import sys
 import uuid
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -363,10 +364,10 @@ def snowflake_ds(
         pytest.skip("no snowflake credentials")
     ds = context.sources.add_snowflake(
         "snowflake",
-        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public"
-        f"?warehouse=ci&role=ci&database=ci&schema={RAND_SCHEMA}",
+        connection_string="snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci"
+        f"/{RAND_SCHEMA}?warehouse=ci&role=ci",
         # NOTE: uncomment this and set SNOWFLAKE_USER to run tests against your own snowflake account
-        # connection_string="snowflake://${SNOWFLAKE_USER}@${SNOWFLAKE_CI_ACCOUNT}/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
+        # connection_string="snowflake://${SNOWFLAKE_USER}@oca29081.us-east-1/DEMO_DB/RESTAURANTS?warehouse=COMPUTE_WH&role=PUBLIC&authenticator=externalbrowser",
     )
     return ds
 
@@ -486,7 +487,7 @@ class TestTableIdentifiers:
         if not snowflake_ds:
             pytest.skip("no snowflake datasource")
         # create table
-        schema = get_random_identifier_name()
+        schema = RAND_SCHEMA
         table_factory(
             gx_engine=snowflake_ds.get_execution_engine(),
             table_names={table_name},
@@ -498,9 +499,7 @@ class TestTableIdentifiers:
         )
         print(f"snowflake tables:\n{pf(table_names)}))")
 
-        snowflake_ds.add_table_asset(
-            asset_name, table_name=table_name, schema_name=schema
-        )
+        snowflake_ds.add_table_asset(asset_name, table_name=table_name)
 
     @pytest.mark.sqlite
     def test_sqlite(
@@ -521,6 +520,9 @@ class TestTableIdentifiers:
 
         sqlite_ds.add_table_asset(asset_name, table_name=table_name)
 
+    @pytest.mark.filterwarnings(  # snowflake `add_table_asset` raises warning on passing a schema
+        "once::great_expectations.datasource.fluent.GxDatasourceWarning"
+    )
     @pytest.mark.parametrize(
         "datasource_type,schema",
         [
@@ -557,9 +559,12 @@ class TestTableIdentifiers:
             schema=schema,
         )
 
-        asset = datasource.add_table_asset(
-            asset_name, table_name=table_name, schema_name=schema
-        )
+        with warnings.catch_warnings():
+            # passing a schema to snowflake tables is deprecated
+            warnings.simplefilter("once", DeprecationWarning)
+            asset = datasource.add_table_asset(
+                asset_name, table_name=table_name, schema_name=schema
+            )
 
         suite = context.add_expectation_suite(
             expectation_suite_name=f"{datasource.name}-{asset.name}"
@@ -767,6 +772,9 @@ def _raw_query_check_column_exists(
         return True
 
 
+@pytest.mark.filterwarnings(
+    "once::DeprecationWarning"
+)  # snowflake `add_table_asset` raises warning on passing a schema
 @pytest.mark.parametrize(
     "column_name",
     [
