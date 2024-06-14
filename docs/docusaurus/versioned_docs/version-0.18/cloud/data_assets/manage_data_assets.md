@@ -131,7 +131,8 @@ Define the data you want GX Cloud to access within PostgreSQL.
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique across all Data Sources in GX Cloud.
 
 8. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 7.
-9. Click **Finish**.
+
+10. Click **Finish**.
 
 10. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
@@ -217,13 +218,7 @@ Additional Data Assets can only be added to Data Sources created in GX Cloud.
 
     - **Data Asset name**: Enter a name for the Data Asset. Data Asset names must be unique. If you use the same name for multiple Data Assets, each Data Asset must be associated with a unique Data Source. 
 
-5. Select the **Complete Asset** tab to provide all Data Asset records to your Expectations and validations, or select the **Batches** tab to use subsets of Data Asset records for your Expectations and validations. If you selected the **Batches** tab, complete the following fields:
-
-    - **Split Data Asset by** - Select **Year** to partition Data Asset records by year, select **Year - Month** to partition Data Asset records by year and month, or select **Year - Month - Day** to partition Data Asset records by year, month, and day.
-
-    - **Column of datetime type** - Enter the name of the column containing the date and time data.
-
-6. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 4.
+5. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 4.
 
 7. Click **Finish**.
 
