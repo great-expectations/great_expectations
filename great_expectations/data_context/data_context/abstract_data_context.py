@@ -540,7 +540,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return False
 
     def _add_fluent_datasource(
-        self, datasource: Optional[FluentDatasource] = None, **kwargs
+        self, datasource: Optional[FluentDatasource] = None, save_changes: bool = True, **kwargs
     ) -> FluentDatasource:
         if datasource:
             datasource_name = datasource.name
@@ -567,7 +567,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         return_obj = self.datasources.set_datasource(name=datasource_name, ds=datasource)
         assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
-        self._save_project_config()
+        if save_changes is True:
+            self._save_project_config()
 
         return return_obj
 
@@ -2442,8 +2443,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
             datasource._rebuild_asset_data_connectors()
-
-            self._add_fluent_datasource(datasource=datasource)
+            # since we are loading the datasource from existing config, we do not need to save it
+            self._add_fluent_datasource(datasource=datasource, save_changes=False)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
