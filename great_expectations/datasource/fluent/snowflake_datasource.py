@@ -422,6 +422,27 @@ class SnowflakeDatasource(SQLDatasource):
             )
         return connection_string
 
+    @pydantic.validator("assets", pre=True)
+    def _asset_forward_compatibility(cls, assets: list[dict]) -> list[dict]:
+        """
+        This validator is here to maintain compatibility with future versions of GX.
+        """
+        modified_assets: list[str] = []
+        try:
+            # if the incoming asset has a database_name, item we need to remove it and warn the user.
+            # future versions of GX will support a `database_name`.
+            if assets:
+                for asset in assets:
+                    database = asset.pop("database", None)
+                    database_name = asset.pop("database_name", None)
+                    if asset_name := asset.get("name") and (database or database_name):
+                        modified_assets.append(asset_name)
+        except Exception as e:
+            LOGGER.warning(
+                f"Error attempting forward compatibility modifications: {e!r}"
+            )
+        return assets
+
     class Config:
         @staticmethod
         def schema_extra(schema: dict, model: type[SnowflakeDatasource]) -> None:
