@@ -325,34 +325,6 @@ class SnowflakeDatasource(SQLDatasource):
             "Must provide either a connection string or a combination of account, user, and password."
         )
 
-    @pydantic.validator("connection_string")
-    def _check_for_required_query_params(
-        cls, connection_string: ConnectionDetails | SnowflakeDsn | ConfigUri
-    ) -> ConnectionDetails | SnowflakeDsn | ConfigUri:
-        """
-        If connection_string is a SnowflakeDsn,
-        check for required query parameters according to `REQUIRED_QUERY_PARAMS`.
-        """
-        if not isinstance(connection_string, (SnowflakeDsn, ConfigUri)):
-            return connection_string
-
-        missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
-
-        if connection_string.query:
-            query_params: dict[str, list[str]] = urllib.parse.parse_qs(
-                connection_string.query
-            )
-
-            for key in REQUIRED_QUERY_PARAMS:
-                if key in query_params:
-                    missing_keys.remove(key)
-
-        if missing_keys:
-            raise _UrlMissingQueryError(
-                msg=f"missing {', '.join(sorted(missing_keys))}",
-            )
-        return connection_string
-
     @pydantic.validator("assets", pre=True)
     def _asset_forward_compatibility(cls, assets: list[dict]) -> list[dict]:
         """
