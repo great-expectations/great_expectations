@@ -160,9 +160,17 @@
 }
 
 .modalTextareaInput {
-    min-height: 10rem;
+    min-height: 6rem;
     min-width: 38.5rem;
     max-width: 38.5rem;
+}
+
+.hiddenRadioButtonAdditionalInfo {
+    display: none;
+
+    [type="radio"]:checked ~ label ~ & {
+        display: block;
+    }
 }
 
 .modalTextInput:active, .modalTextInput:focus, .modalTextInput:hover {

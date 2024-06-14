@@ -22,7 +22,9 @@ export default function WasThisHelpful(){
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        description: '',
+        languageTypo: '',
+        inaccurate: '',
+        codeSampleErrors: ''
     });
 
     const handleChange = (e) => {
@@ -78,20 +80,22 @@ export default function WasThisHelpful(){
                 </div>
             </section>
 
-            {isOpen && <>
+            {!isOpen && <>
                 <div className={styles.overlay} onClick={dismissFeedbackModal}/>
                 <dialog className={styles.modal}>
                     <section className={styles.modalHeader}>
-                        <h5 className={styles.modalHeaderTitle}>Tell us more</h5>
+                        <h5 className={styles.modalHeaderTitle}>What is the problem?</h5>
                         <img src={closeImg} className={styles.modalHeaderCloseButton}
                              alt="Close icon" onClick={dismissFeedbackModal}/>
                     </section>
 
                     <form onSubmit={sendReview} className={styles.modalContent}>
 
-                        <div>If you’re not reporting documentation issues such as typos, missing content, or code inaccuracies, post your
-                        comments or feedback on <a href="https://discourse.greatexpectations.io/">Discourse</a>.
-                        Thank you for helping us improve our documentation.</div>
+                        <div>If you’re not reporting documentation issues such as typos, missing content, or code
+                            inaccuracies, post your
+                            comments or feedback on <a href="https://discourse.greatexpectations.io/">Discourse</a>.
+                            Thank you for helping us improve our documentation.
+                        </div>
 
                         <div className={styles.textInputs}>
                             <div className={styles.modalTextContainer}>
@@ -117,19 +121,58 @@ export default function WasThisHelpful(){
                                 />
                             </div>
                         </div>
-                        <div className={styles.modalTextContainer}>
-                            <label className={styles.modalTextLabel}>Tell us more*</label>
+
+                        <div>
+                            <input type="radio" id="language-typo" name="feedback" value="language-typo"/>
+                            <label htmlFor="language-typo" className={styles.modalTextLabel}>Language Typo</label>
                             <textarea
                                 name="description"
-                                value={formData.description}
-                                className={styles.modalTextInput + ' ' + styles.modalTextareaInput}
+                                value={formData.languageTypo}
+                                className={styles.modalTextInput + ' ' + styles.modalTextareaInput + ' ' + styles.hiddenRadioButtonAdditionalInfo}
                                 onChange={handleChange}
                                 required
-                                placeholder="Provide as much detail as possible about the documentation
-                                 issue you experienced. Detailed feedback helps us get the documentation updated quickly."
+                                placeholder="Describe the typo that you've found."
                             />
                         </div>
-                        <input type="submit" disabled={!formData.description} className={styles.submitButton} value="Submit"/>
+
+                        <div>
+                            <input type="radio" id="inaccurate" name="feedback" value="inaccurate"/>
+                            <label htmlFor="inaccurate" className={styles.modalTextLabel}>Inaccurate</label>
+                            <textarea
+                                name="inaccurate"
+                                value={formData.inaccurate}
+                                className={styles.modalTextInput + ' ' + styles.modalTextareaInput + ' ' + styles.hiddenRadioButtonAdditionalInfo}
+                                onChange={handleChange}
+                                required
+                                placeholder="Try to be specific and detailed."
+                            />
+                        </div>
+
+                        <div>
+                            <input type="radio" id="code-sample-errors" name="feedback" value="code-sample-errors"/>
+                            <label htmlFor="code-sample-errors" className={styles.modalTextLabel}>Code sample
+                                errors</label>
+                            <textarea
+                                name="code-sample-errors"
+                                value={formData.codeSampleErrors}
+                                className={styles.modalTextInput + ' ' + styles.modalTextareaInput + ' ' + styles.hiddenRadioButtonAdditionalInfo}
+                                onChange={handleChange}
+                                required
+                                placeholder="Try to be specific and detailed."
+                            />
+                        </div>
+
+                        <div>
+                            <input type="radio" id="need-gx-support" name="feedback" value="need-gx-support"/>
+                            <label htmlFor="need-gx-support" className={styles.modalTextLabel}>I need GX support</label>
+                            <p className={styles.hiddenRadioButtonAdditionalInfo}>
+                                Visit our <a href="https://docs.greatexpectations.io/docs/resources/get_support">Get Support
+                                page</a>.
+                            </p>
+                        </div>
+
+                        <input type="submit" disabled={!formData.description} className={styles.submitButton}
+                               value="Submit"/>
                     </form>
                 </dialog>
             </>}
