@@ -8,7 +8,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Final,
-    Iterable,
     Literal,
     Optional,
     Type,
@@ -42,14 +41,6 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
-
-REQUIRED_QUERY_PARAMS: Final[
-    Iterable[str]
-] = {  # errors will be thrown if any of these are missing
-    # TODO: require warehouse and role
-    # "warehouse",
-    # "role",
-}
 
 MISSING: Final = object()  # sentinel value to indicate missing values
 
@@ -241,6 +232,7 @@ class SnowflakeDatasource(SQLDatasource):
         """Convenience property to get the `database` regardless of the connection string format."""
         if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
+
         subbed_str: str | None = _get_config_substituted_connection_string(
             self, warning_msg="Unable to determine database"
         )
@@ -309,42 +301,6 @@ class SnowflakeDatasource(SQLDatasource):
         raise ValueError(
             "Must provide either a connection string or a combination of account, user, and password."
         )
-
-    @pydantic.validator("connection_string")
-    def _check_for_required_query_params(
-        cls, connection_string: ConnectionDetails | SnowflakeDsn | ConfigStr
-    ) -> ConnectionDetails | SnowflakeDsn | ConfigStr:
-        """
-        If connection_string is a SnowflakeDsn,
-        check for required query parameters according to `REQUIRED_QUERY_PARAMS`.
-        """
-        if not isinstance(connection_string, (SnowflakeDsn, ConfigStr)):
-            return connection_string
-
-        missing_keys: set[str] = set(REQUIRED_QUERY_PARAMS)
-        if isinstance(connection_string, ConfigStr):
-            query_str = connection_string.template_str.partition("?")[2]
-            # best effort: query could be part of the config substitution. Have to check this when adding assets.
-            if not query_str:
-                LOGGER.info(
-                    f"Unable to validate query parameters for {connection_string}"
-                )
-                return connection_string
-        else:
-            query_str = connection_string.query
-
-        if query_str:
-            query_params: dict[str, list[str]] = urllib.parse.parse_qs(query_str)
-
-            for key in REQUIRED_QUERY_PARAMS:
-                if key in query_params:
-                    missing_keys.remove(key)
-
-        if missing_keys:
-            raise _UrlMissingQueryError(
-                msg=f"missing {', '.join(sorted(missing_keys))}",
-            )
-        return connection_string
 
     class Config:
         @staticmethod
