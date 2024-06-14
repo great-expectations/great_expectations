@@ -340,10 +340,12 @@ class SnowflakeDatasource(SQLDatasource):
                     database_name = asset.pop("database_name", None)
                     if asset_name := asset.get("name") and (database or database_name):
                         modified_assets.append(asset_name)
+            if modified_assets:
+                LOGGER.info(
+                    f"Assets modified for forward compatibility: {', '.join(modified_assets)}"
+                )
         except Exception as e:
-            LOGGER.warning(
-                f"Error attempting forward compatibility modifications: {e!r}"
-            )
+            LOGGER.error(f"Error attempting forward compatibility modifications: {e!r}")
         return assets
 
     class Config:
