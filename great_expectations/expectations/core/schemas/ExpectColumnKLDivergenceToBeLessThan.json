@@ -192,8 +192,15 @@
                     "title": "Supported Data Sources",
                     "type": "array",
                     "const": [
-                        "Snowflake",
-                        "PostgreSQL"
+                        "Pandas",
+                        "Spark",
+                        "SQLite",
+                        "PostgreSQL",
+                        "MySQL",
+                        "MSSQL",
+                        "Redshift",
+                        "BigQuery",
+                        "Snowflake"
                     ]
                 }
             }
