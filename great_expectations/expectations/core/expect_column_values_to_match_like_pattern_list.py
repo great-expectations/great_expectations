@@ -165,8 +165,12 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    like_pattern_list: Union[List[str], SuiteParameterDict]
-    match_on: Literal["any", "all"] = "any"
+    like_pattern_list: Union[List[str], SuiteParameterDict] = pydantic.Field(
+        description=LIKE_PATTERN_DESCRIPTION
+    )
+    match_on: Literal["any", "all"] = pydantic.Field(
+        default="any", description=MATCH_ON_DESCRIPTION
+    )
 
     @pydantic.validator("like_pattern_list")
     def validate_like_pattern_list(

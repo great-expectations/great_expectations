@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -164,7 +165,9 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    regex: Union[str, SuiteParameterDict] = "(?s).*"
+    regex: Union[str, SuiteParameterDict] = pydantic.Field(
+        default="(?s).*", description=REGEX_DESCRIPTION
+    )
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",

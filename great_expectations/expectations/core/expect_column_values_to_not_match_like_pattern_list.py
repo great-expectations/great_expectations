@@ -162,7 +162,9 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    like_pattern_list: Union[List[str], SuiteParameterDict]
+    like_pattern_list: Union[List[str], SuiteParameterDict] = pydantic.Field(
+        description=LIKE_PATTERN_LIST_DESCRIPTION
+    )
 
     @pydantic.validator("like_pattern_list")
     def validate_like_pattern_list(

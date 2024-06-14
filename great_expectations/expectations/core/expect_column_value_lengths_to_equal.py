@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -155,7 +156,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    value: Union[float, SuiteParameterDict]
+    value: Union[float, SuiteParameterDict] = pydantic.Field(description=VALUE_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {

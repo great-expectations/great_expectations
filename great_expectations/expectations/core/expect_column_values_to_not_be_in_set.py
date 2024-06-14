@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001  # used in pydantic validation
 )
@@ -159,7 +160,9 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Optional[Union[SuiteParameterDict, ValueSet]]
+    value_set: Optional[Union[SuiteParameterDict, ValueSet]] = pydantic.Field(
+        description=VALUE_SET_DESCRIPTION
+    )
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",

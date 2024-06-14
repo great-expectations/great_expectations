@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, ClassVar, Dict, Tuple, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
@@ -147,8 +148,10 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     """  # noqa: E501
 
     condition_parser: Union[str, None] = "pandas"
-    threshold: Union[float, SuiteParameterDict]
-    double_sided: Union[bool, SuiteParameterDict]
+    threshold: Union[float, SuiteParameterDict] = pydantic.Field(description=THRESHOLD_DESCRIPTION)
+    double_sided: Union[bool, SuiteParameterDict] = pydantic.Field(
+        description=DOUBLE_SIDED_DESCRIPTION
+    )
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "column",
         "row_condition",
