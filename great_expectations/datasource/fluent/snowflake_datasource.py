@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import logging
 import urllib.parse
+import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,6 +21,7 @@ from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.datasource.fluent import GxContextWarning
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
@@ -68,6 +70,23 @@ def _get_database_and_schema_from_path(
         database = None
         schema = None
     return {"database": database, "schema": schema}
+
+
+def _get_config_substituted_connection_string(
+    datasource: SnowflakeDatasource,
+    warning_msg: str = "Unable to perform config substitution",
+) -> str | None:
+    if not isinstance(datasource.connection_string, ConfigStr):
+        raise TypeError("Config substitution is only supported for `ConfigStr`")
+    if not datasource._data_context:
+        warnings.warn(
+            f"{warning_msg} for {datasource.connection_string.template_str}. Likely missing a context.",
+            category=GxContextWarning,
+        )
+        return None
+    return datasource.connection_string.get_config_value(
+        datasource._data_context.config_provider
+    )
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -206,28 +225,29 @@ class SnowflakeDatasource(SQLDatasource):
 
         `schema_` to avoid conflict with Pydantic models schema property.
         """
-        if isinstance(self.connection_string, ConnectionDetails):
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.schema_
-        elif isinstance(self.connection_string, SnowflakeDsn):
-            # extra database and schema query parameters for the url
-            for key, value in self.connection_string.query_params():
-                if key.lower() == "schema":
-                    return value
-        # TODO: attempt to parse schema from a ConfigStr
-        return None
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine schema"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
+        return _get_database_and_schema_from_path(url_path)["schema"]
 
     @property
     def database(self) -> str | None:
         """Convenience property to get the `database` regardless of the connection string format."""
-        if isinstance(self.connection_string, ConnectionDetails):
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
             return self.connection_string.database
-        elif isinstance(self.connection_string, SnowflakeDsn):
-            # extra database and schema query parameters for the url
-            for key, value in self.connection_string.query_params():
-                if key.lower() == "database":
-                    return value
-        # TODO: attempt to parse database from a ConfigStr
-        return None
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine database"
+        )
+        if not subbed_str:
+            return None
+        url_path: str = urllib.parse.urlparse(subbed_str).path
+        return _get_database_and_schema_from_path(url_path)["database"]
 
     @pydantic.root_validator(pre=True)
     def _convert_root_connection_detail_fields(cls, values: dict) -> dict:
