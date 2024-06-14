@@ -83,16 +83,16 @@ yearly_batch_definition = data_asset.add_batch_definition_yearly(
 # Verify that the partitioned Batch Definitions are valid
 # <snippet name="docs/docusaurus/docs/core/connect_to_data/sql_data/_create_a_batch_definition/_create_a_batch_definition.md verify daily">
 daily_batch = daily_batch_definition.get_batch(
-    batch_parameters={"year": "2020", "month": "01", "day": "14"}
+    batch_parameters={"year": 2020, "month": 1, "day": 14}
 )
 daily_batch.head()
 
 monthly_batch = monthly_batch_definition.get_batch(
-    batch_parameters={"year": "2020", "month": "01"}
+    batch_parameters={"year": 2020, "month": 1}
 )
 monthly_batch.head()
 
-yearly_batch = yearly_batch_definition.get_batch(batch_parameters={"year": "2020"})
+yearly_batch = yearly_batch_definition.get_batch(batch_parameters={"year": 2020})
 yearly_batch.head()
 # </snippet>
 # </snippet>
