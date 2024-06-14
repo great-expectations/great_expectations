@@ -51,9 +51,8 @@
                 },
                 {
                     "type": "string",
-                    "minLength": 1,
-                    "maxLength": 65536,
-                    "format": "uri"
+                    "writeOnly": true,
+                    "format": "password"
                 },
                 {
                     "type": "string",
@@ -495,12 +494,12 @@
                 },
                 "database": {
                     "title": "Database",
-                    "description": "`database` that the Datasource is mapped to.",
+                    "description": "Default database for the connection",
                     "type": "string"
                 },
                 "schema": {
                     "title": "Schema",
-                    "description": "`schema` that the Datasource is mapped to.",
+                    "description": "Default schema for the connection",
                     "type": "string"
                 },
                 "warehouse": {
@@ -520,9 +519,7 @@
             "required": [
                 "account",
                 "user",
-                "password",
-                "database",
-                "schema"
+                "password"
             ],
             "additionalProperties": false
         }
