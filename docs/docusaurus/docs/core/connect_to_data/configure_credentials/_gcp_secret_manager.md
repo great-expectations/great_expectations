@@ -23,7 +23,7 @@ import PreReqFileDataContext from '../../_core_components/prerequisites/_file_da
 
    Values in `config_variables.yml` that match the regex `^secret\|projects\/[a-z0-9\_\-]{6,30}\/secrets` will be substituted with corresponding values from GCP Secret Manager.  However, if the keywords in the matching regex do not correspond to keywords in GCP Secret Manager no substitution will occur.
 
-   You can reference other stored credentials within the regex by wrapping their corresponding variable in `${` and `}`.  When multiple references are present in a value, the secrets manager substitution takes palce after all other substitutions have occurred.
+   You can reference other stored credentials within the regex by wrapping their corresponding variable in `${` and `}`.  When multiple references are present in a value, the secrets manager substitution takes place after all other substitutions have occurred.
 
    An entire connection string can be referenced from the secrets manager:
 

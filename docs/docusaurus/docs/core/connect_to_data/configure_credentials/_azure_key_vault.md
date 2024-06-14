@@ -23,7 +23,7 @@ import PreReqFileDataContext from '../../_core_components/prerequisites/_file_da
 
    Values in `config_variables.yml` that match the regex `^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net` will be substituted with corresponding values from Azure Key Vault.  However, if the keywords in the matching regex do not correspond to keywords in Azure Key Vault no substitution will occur.
 
-   You can reference other stored credentials within the regex by wrapping their corresponding variable in `${` and `}`.  When multiple references are present in a value, the secrets manager substitution takes palce after all other substitutions have occurred.
+   You can reference other stored credentials within the regex by wrapping their corresponding variable in `${` and `}`.  When multiple references are present in a value, the secrets manager substitution takes place after all other substitutions have occurred.
 
    An entire connection string can be referenced from the secrets manager:
 
