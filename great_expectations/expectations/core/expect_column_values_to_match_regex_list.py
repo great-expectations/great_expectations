@@ -181,7 +181,9 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     regex_list: Union[List[str], SuiteParameterDict] = pydantic.Field(
         description=REGEX_LIST_DESCRIPTION
     )
-    match_on: Literal["any", "all"] = "any"
+    match_on: Literal["any", "all"] = pydantic.Field(
+        default="any", description=MATCH_ON_DESCRIPTION
+    )
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",

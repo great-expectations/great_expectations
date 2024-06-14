@@ -58,8 +58,8 @@ EXPECTATION_SHORT_DESCRIPTION = (
 )
 MIN_VALUE_DESCRIPTION = "The minimum value for a column entry length."
 MAX_VALUE_DESCRIPTION = "The maximum value for a column entry length."
-STRICT_MIN_DESCRIPTION = "If True, values must be strictly larger than min_value, default=False."
-STRICT_MAX_DESCRIPTION = "If True, values must be strictly smaller than max_value, default=False."
+STRICT_MIN_DESCRIPTION = "If True, values must be strictly larger than min_value."
+STRICT_MAX_DESCRIPTION = "If True, values must be strictly smaller than max_value."
 DATA_QUALITY_ISSUES = ["Numerical Data"]
 SUPPORTED_DATA_SOURCES = [
     "Pandas",
@@ -94,9 +94,9 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         max_value (int or None): \
             {MAX_VALUE_DESCRIPTION}
         strict_min (boolean): \
-            {STRICT_MIN_DESCRIPTION}
+            {STRICT_MIN_DESCRIPTION} Default=False
         strict_max (boolean): \
-            {STRICT_MAX_DESCRIPTION}
+            {STRICT_MAX_DESCRIPTION} Default=False
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
