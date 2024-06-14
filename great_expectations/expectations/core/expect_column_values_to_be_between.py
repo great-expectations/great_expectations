@@ -39,17 +39,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
-SUPPORTED_DATA_SOURCES = [
-    "Pandas",
-    "Spark",
-    "SQLite",
-    "PostgreSQL",
-    "MSSQL",
-    "Redshift",
-    "BigQuery",
-    "Snowflake",
-]
-
 
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column entries to be between a minimum value and a maximum value (inclusive)."

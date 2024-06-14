@@ -35,9 +35,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
-SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
-
-
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the column entries to be strings that do not match "
     "any of a list of regular expressions. Matches can be anywhere in the string."

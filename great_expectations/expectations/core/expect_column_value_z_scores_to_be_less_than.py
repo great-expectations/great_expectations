@@ -39,18 +39,6 @@ SUPPORTED_DATA_SOURCES = [
     "Snowflake",
 ]
 
-SUPPORTED_DATA_SOURCES = [
-    "Pandas",
-    "Spark",
-    "SQLite",
-    "PostgreSQL",
-    "MySQL",
-    "MSSQL",
-    "Redshift",
-    "BigQuery",
-    "Snowflake",
-]
-
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
