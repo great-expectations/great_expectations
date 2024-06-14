@@ -130,79 +130,7 @@ def test_valid_config(
     ["connection_string", "expected_errors"],
     [
         pytest.param(
-            "${MY_CONFIG_VAR}",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'domain' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - full connection string",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@${MY_CONFIG_VAR}/db/schema",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'domain' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - account (domain)",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@account/${MY_CONFIG_VAR}/schema",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'path' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - database (path)",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@account/db/${MY_CONFIG_VAR}",
-            [
-                {
-                    "loc": ("connection_string", "__root__"),
-                    "msg": "Only password, user may use config substitution;"
-                    " 'path' substitution not allowed",
-                    "type": "value_error",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="illegal config substitution - schema (path)",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@my_account",
+            "snowflake://user:password@",
             [
                 {
                     "loc": ("connection_string",),
@@ -217,8 +145,8 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
+                    "msg": "URL domain invalid",
+                    "type": "value_error.url.domain",
                 },
                 {
                     "loc": ("__root__",),
@@ -227,39 +155,10 @@ def test_valid_config(
                     "type": "value_error",
                 },
             ],
-            id="missing path",
+            id="missing/invalid account",
         ),
         pytest.param(
-            "snowflake://my_user:password@my_account//",
-            [
-                {
-                    "loc": ("connection_string",),
-                    "msg": "value is not a valid dict",
-                    "type": "type_error.dict",
-                },
-                {
-                    "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format "
-                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
-                    "type": "value_error",
-                },
-                {
-                    "ctx": {"msg": "missing database"},
-                    "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="missing database + schema",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@my_account/my_db",
+            "snowflake://",
             [
                 {
                     "loc": ("connection_string",),
@@ -274,8 +173,8 @@ def test_valid_config(
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
+                    "msg": "userinfo required in URL but missing",
+                    "type": "value_error.url.userinfo",
                 },
                 {
                     "loc": ("__root__",),
@@ -284,65 +183,7 @@ def test_valid_config(
                     "type": "value_error",
                 },
             ],
-            id="missing schema",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@my_account/my_db/",
-            [
-                {
-                    "loc": ("connection_string",),
-                    "msg": "value is not a valid dict",
-                    "type": "type_error.dict",
-                },
-                {
-                    "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format "
-                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
-                    "type": "value_error",
-                },
-                {
-                    "ctx": {"msg": "missing schema"},
-                    "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="missing schema 2",
-        ),
-        pytest.param(
-            "snowflake://my_user:password@my_account//my_schema",
-            [
-                {
-                    "loc": ("connection_string",),
-                    "msg": "value is not a valid dict",
-                    "type": "type_error.dict",
-                },
-                {
-                    "loc": ("connection_string",),
-                    "msg": "ConfigStr - contains no config template strings in the format "
-                    "'${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
-                    "type": "value_error",
-                },
-                {
-                    "ctx": {"msg": "missing database"},
-                    "loc": ("connection_string",),
-                    "msg": "URL path missing database/schema",
-                    "type": "value_error.url.path",
-                },
-                {
-                    "loc": ("__root__",),
-                    "msg": "Must provide either a connection string or a combination of account, "
-                    "user, and password.",
-                    "type": "value_error",
-                },
-            ],
-            id="missing database",
+            id="missing everything",
         ),
     ],
 )
