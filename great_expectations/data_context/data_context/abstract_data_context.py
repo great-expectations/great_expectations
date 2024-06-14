@@ -567,7 +567,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return_obj = self.datasources.set_datasource(name=datasource_name, ds=datasource)
         assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
-        if save_changes is True:
+        if save_changes:
             self._save_project_config()
 
         return return_obj
