@@ -132,7 +132,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 8. Optional. Select **Add Data Asset** to add additional tables or queries and repeat step 7.
 
-10. Click **Finish**.
+9. Click **Finish**.
 
 10. Create an Expectation. See [Create an Expectation](/cloud/expectations/manage_expectations.md#create-an-expectation).
 
