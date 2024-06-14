@@ -1506,7 +1506,6 @@ class BatchExpectation(Expectation, ABC):
     batch_id: Union[str, None] = None
     row_condition: Union[str, None] = None
     condition_parser: Union[str, None] = None
-    mostly: Mostly = 1.0
 
     domain_keys: ClassVar[Tuple[str, ...]] = (
         "batch_id",
@@ -1848,6 +1847,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
     """  # noqa: E501
 
     column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
+    mostly: Mostly = 1.0
 
     catch_exceptions: bool = True
 
@@ -2113,6 +2113,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
 
     column_A: StrictStr = Field(min_length=1, description=COLUMN_A_DESCRIPTION)
     column_B: StrictStr = Field(min_length=1, description=COLUMN_B_DESCRIPTION)
+    mostly: Mostly = 1.0
 
     catch_exceptions: bool = True
 
@@ -2366,6 +2367,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
     """  # noqa: E501
 
     column_list: List[StrictStr]
+    mostly: Mostly = 1.0
 
     ignore_row_if: Literal["all_values_are_missing", "any_value_is_missing", "never"] = (
         "all_values_are_missing"

@@ -61,6 +61,12 @@
             "title": "Condition Parser",
             "type": "string"
         },
+        "column": {
+            "title": "Column",
+            "description": "The column name.",
+            "minLength": 1,
+            "type": "string"
+        },
         "mostly": {
             "title": "Mostly",
             "default": 1.0,
@@ -69,12 +75,6 @@
             "minimum": 0.0,
             "maximum": 1.0,
             "multipleOf": 0.01
-        },
-        "column": {
-            "title": "Column",
-            "description": "The column name.",
-            "minLength": 1,
-            "type": "string"
         },
         "metadata": {
             "type": "object",
