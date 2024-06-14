@@ -30,6 +30,10 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         id="connection_string str",
     ),
     param(
+        {"connection_string": "snowflake://my_user:password@my_account"},
+        id="min connection_string str",
+    ),
+    param(
         {
             "connection_string": "snowflake://my_user:${MY_PASSWORD}@my_account/d_public/s_public"
         },
@@ -40,6 +44,12 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@my_account/d_public/s_public"
         },
         id="connection_string ConfigStr - user + password sub",
+    ),
+    param(
+        {
+            "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@{MY_ACCOUNT}}/d_public/s_public"
+        },
+        id="connection_string ConfigStr - user, password, account sub",
     ),
     param(
         {
@@ -57,6 +67,16 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         {
             "connection_string": {
                 "user": "my_user",
+                "password": "password",
+                "account": "my_account",
+            }
+        },
+        id="min connection_string dict",
+    ),
+    param(
+        {
+            "connection_string": {
+                "user": "my_user",
                 "password": "${MY_PASSWORD}",
                 "account": "my_account",
                 "schema": "s_public",
@@ -65,6 +85,16 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         },
         id="connection_string dict with password ConfigStr",
     ),
+    param(
+        {
+            "connection_string": {
+                "user": "my_user",
+                "password": "${MY_PASSWORD}",
+                "account": "my_account",
+            }
+        },
+        id="min connection_string dict with password ConfigStr",
+    ),
 ]
 
 
@@ -72,10 +102,11 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
 def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MY_USER", "my_user")
     monkeypatch.setenv("MY_PASSWORD", "my_password")
+    monkeypatch.setenv("MY_ACCOUNT", "my_account")
 
 
 @pytest.mark.unit
-def test_snowflake_dsn():
+def test_snowflake_dsn_all_parts():
     dsn = pydantic.parse_obj_as(
         SnowflakeDsn,
         "snowflake://my_user:password@my_account/my_db/my_schema?role=my_role&warehouse=my_wh",
@@ -89,11 +120,31 @@ def test_snowflake_dsn():
     assert dsn.warehouse == "my_wh"
 
 
+@pytest.mark.unit
+def test_snowflake_dsn_minimal_parts():
+    dsn = pydantic.parse_obj_as(SnowflakeDsn, "snowflake://my_user:password@my_account")
+    assert dsn.user == "my_user"
+    assert dsn.password == "password"
+    assert dsn.account_identifier == "my_account"
+    assert not dsn.database
+    assert not dsn.schema_
+    assert not dsn.role
+    assert not dsn.warehouse
+
+
 @pytest.mark.snowflake  # TODO: make this a unit test
 @pytest.mark.parametrize(
     "config_kwargs",
     [
         *VALID_DS_CONFIG_PARAMS,
+        param(
+            {
+                "user": "my_user",
+                "password": "password",
+                "account": "my_account",
+            },
+            id="min old config format - top level keys",
+        ),
         param(
             {
                 "user": "my_user",
@@ -500,8 +551,9 @@ class TestConvenienceProperties:
                 ), "Don't expect schema to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
-
-        assert datasource.schema_
+            _ = datasource.schema_
+        else:
+            assert datasource.schema_ == datasource.connection_string.schema_
 
     def test_database(
         self,
@@ -519,8 +571,9 @@ class TestConvenienceProperties:
                 ), "Don't expect schema to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
-
-        assert datasource.database
+            _ = datasource.database
+        else:
+            assert datasource.database == datasource.connection_string.database
 
 
 if __name__ == "__main__":
