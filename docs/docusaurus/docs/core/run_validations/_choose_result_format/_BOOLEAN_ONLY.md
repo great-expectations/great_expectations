@@ -3,6 +3,5 @@ When the `result_format` is `"BOOLEAN_ONLY"` Validation Results do not include a
 To create a `"BOOLEAN_ONLY"` result format configuration use the following code:
 
 ```python title="Python"
-boolean_only_rf_dict = {}
-boolean_only_rf_dict["result_format"] = "BOOLEAN_ONLY"
+boolean_only_rf_dict = {"result_format": "BOOLEAN_ONLY"}
 ```

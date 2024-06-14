@@ -4,6 +4,5 @@ You can check the [Validation Results reference tables](#validation-results-refe
 To create a `"SUMMARY"` result format configuration use the following code:
 
 ```python title="Python"
-summary_rf_dict = {}
-summary_rf_dict["result_format"] = "SUMMARY"
+summary_rf_dict = {"result_format": "SUMMARY"}
 ```

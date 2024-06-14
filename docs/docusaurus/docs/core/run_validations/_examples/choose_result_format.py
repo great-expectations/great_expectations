@@ -8,12 +8,12 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 context = gx.get_context()
 
 datasource_name = "all_csv_files"
-path_to_datasource_files = "/Users/rachelreverie/PycharmProjects/pythonProject/core_sandbox/2024_05_23_notebooks/data/taxi_yellow_tripdata_samples"
+path_to_datasource_files = "/data/taxi_yellow_tripdata_samples"
 data_source = context.data_sources.add_pandas_filesystem(
     name=datasource_name, base_directory=path_to_datasource_files
 )
 
-asset_name = "csv_files"
+asset_name = "csv_file"
 csv_asset = data_source.add_csv_asset(asset_name)
 
 batch_definition_name = "2018-06_taxi2"
@@ -52,27 +52,23 @@ validation_name = "my_validation_definition"
 validation_definition = context.validation_definitions.get(validation_name)
 
 # BOOLEAN_ONLY Result Format
-boolean_result_format_dict = {}
-boolean_result_format_dict["result_format"] = "BOOLEAN_ONLY"
+boolean_result_format_dict = {"result_format": "BOOLEAN_ONLY"}
 boolean_only_result = validation_definition.run(
     result_format=boolean_result_format_dict
 )
 print(boolean_only_result)
 
 # BASIC Result Format
-basic_result_format_dict = {}
-basic_result_format_dict["result_format"] = "BASIC"
+basic_result_format_dict = {"result_format": "BASIC"}
 basic_result = validation_definition.run(result_format=basic_result_format_dict)
 print(basic_result)
 
 # SUMMARY Result Format
-summary_result_format_dict = {}
-summary_result_format_dict["result_format"] = "SUMMARY"
+summary_result_format_dict = {"result_format": "SUMMARY"}
 summary_result = validation_definition.run(result_format=summary_result_format_dict)
 print(summary_result)
 
 # COMPLETE Result Format
-complete_result_format_dict = {}
-complete_result_format_dict["result_format"] = "COMPLETE"
+complete_result_format_dict = {"result_format": "COMPLETE"}
 complete_result = validation_definition.run(result_format=complete_result_format_dict)
 print(complete_result)
