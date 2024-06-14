@@ -30,6 +30,45 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         id="connection_string str",
     ),
     param(
+        {
+            "connection_string": "snowflake://my_user:password@my_account/d_public/s_public"
+            "?warehouse=my_wh&role=my_role",
+            "assets": [
+                {"name": "min_table_asset", "type": "table"},
+                {
+                    "name": "table_asset_all_standard_fields",
+                    "type": "table",
+                    "table_name": "my_table",
+                    "schema": "s_public",
+                },
+                {
+                    "name": "table_asset_all_forward_compatible_fields",
+                    "type": "table",
+                    "table_name": "my_table",
+                    "schema": "s_public",
+                    "database": "d_public",
+                    "database_name": "d_public",
+                },
+                {"name": "min_query_asset", "type": "query", "query": "SELECT 1"},
+                {
+                    "name": "query_asset_all_standard_fields",
+                    "type": "query",
+                    "query": "SELECT 1",
+                    "schema": "s_public",
+                },
+                {
+                    "name": "query_asset_all_forward_compatible_fields",
+                    "type": "query",
+                    "query": "SELECT 1",
+                    "schema": "s_public",
+                    "database": "d_public",
+                    "database_name": "d_public",
+                },
+            ],
+        },
+        id="heterogenous assets",
+    ),
+    param(
         {"connection_string": "snowflake://my_user:password@my_account"},
         id="min connection_string str",
     ),
