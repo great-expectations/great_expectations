@@ -332,7 +332,7 @@ class SnowflakeDatasource(SQLDatasource):
         """
         modified_assets: list[str] = []
         try:
-            # if the incoming asset has a database_name, item we need to remove it and warn the user.
+            # if the incoming asset has a database_name, item we need to remove it.
             # future versions of GX will support a `database_name`.
             if assets:
                 for asset in assets:
