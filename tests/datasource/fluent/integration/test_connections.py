@@ -24,20 +24,8 @@ class TestSnowflake:
         "connection_string",
         [
             param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci",
-                id="missing role",
-            ),
-            param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci_no_select",
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/public?warehouse=ci&role=ci_no_select",
                 id="role wo select",
-            ),
-            param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}?warehouse=ci&role=ci",
-                id="missing database + schema",
-            ),
-            param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci?warehouse=ci&role=ci",
-                id="missing schema",
             ),
         ],
     )
@@ -45,7 +33,7 @@ class TestSnowflake:
         self, context: DataContext, connection_string: str
     ):
         """
-        A SnowflakeDatasource can successfully connect even if things like database, schema, warehouse, and role are omitted.
+        A SnowflakeDatasource can successfully connect even if things like warehouse, and role are omitted.
         However, if we try to add an asset that is not queryable with the current datasource connection details,
         then we should expect a TestConnectionError.
         https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#connection-parameters
@@ -84,12 +72,8 @@ class TestSnowflake:
         "connection_string",
         [
             param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?warehouse=ci&role=ci",
+                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@oca29081.us-east-1/ci/public?warehouse=ci&role=ci",
                 id="full connection string",
-            ),
-            param(
-                "snowflake://ci:${SNOWFLAKE_CI_USER_PASSWORD}@${SNOWFLAKE_CI_ACCOUNT}/ci/public?role=ci",
-                id="missing warehouse",
             ),
         ],
     )

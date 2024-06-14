@@ -366,6 +366,16 @@ module.exports = {
       ]
     },
     {
+      type: 'category',
+      label: 'Run Validations',
+      link: {type: 'doc', id: 'core/run_validations/run_validations'},
+      items: [
+        {type: 'doc', id: 'core/run_validations/create_a_validation_definition'},
+        {type: 'doc', id: 'core/run_validations/choose_result_format'},
+        {type: 'doc', id: 'core/run_validations/run_a_validation_definition'},
+      ]
+    },
+    {
       type: 'doc',
       id: 'oss/changelog',
       label: 'Changelog'
@@ -562,8 +572,8 @@ module.exports = {
             },
             {
               "type": "link",
-              "label": "Add a Validation and an Expectation Suite to a Checkpoint",
-              "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-validation-and-an-expectation-suite-to-a-checkpoint"
+              "label": "Add a Validation to a Checkpoint",
+              "href": "/docs/cloud/checkpoints/manage_checkpoints#add-a-validation-to-a-checkpoint"
             },
             {
               type: 'link',
@@ -584,6 +594,28 @@ module.exports = {
               type: 'link',
               label: 'Delete a Checkpoint',
               href: '/docs/cloud/checkpoints/manage_checkpoints#delete-a-checkpoint',
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Manage alerts',
+          link: { type: 'doc', id: 'cloud/alerts/manage_alerts' },
+          items: [
+            {
+              type: 'link',
+              label: 'Add a Slack alert',
+              href: '/docs/cloud/alerts/manage_alerts#add-a-slack-alert',
+            },
+            {
+              type: 'link',
+              label: 'Edit a Slack alert',
+              href: '/docs/cloud/alerts/manage_alerts#edit-a-slack-alert',
+            },
+            {
+              type: 'link',
+              label: 'Delete a Slack alert',
+              href: '/docs/cloud/alerts/manage_alerts#delete-a-slack-alert',
             },
           ]
         },

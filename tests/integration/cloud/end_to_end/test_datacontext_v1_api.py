@@ -28,7 +28,11 @@ def set_v1_get_context_endpoint():
 
 
 @pytest.mark.cloud
-def test_get_context(set_v1_get_context_endpoint: None):
+@pytest.mark.parametrize("analytics_enabled", [True, False])
+def test_get_context(set_v1_get_context_endpoint: None, monkeypatch, analytics_enabled):
+    from great_expectations.analytics.config import ENV_CONFIG
+
+    monkeypatch.setattr(ENV_CONFIG, "gx_analytics_enabled", analytics_enabled)
     context = gx.get_context(
         mode="cloud",
         cloud_base_url=os.environ.get("GX_CLOUD_BASE_URL"),
@@ -37,4 +41,4 @@ def test_get_context(set_v1_get_context_endpoint: None):
     )
     assert isinstance(context, CloudDataContext)
     # This assert is to ensure we are hitting the v1 and not the v0 endpoint.
-    assert context.config.config_version >= 4.0
+    assert context.config.config_version == 4.0

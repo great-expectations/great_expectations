@@ -51,7 +51,7 @@ def test_inline_renderer_instantiation_error_message(
     [
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal",
+                type="expect_table_row_count_to_equal",
                 kwargs={"value": 3},
             ),
             {"observed_value": 3},
@@ -81,7 +81,7 @@ def test_inline_renderer_instantiation_error_message(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_min_to_be_between",
+                type="expect_column_min_to_be_between",
                 kwargs={"column": "event_type", "min_value": 3, "max_value": 20},
             ),
             {"observed_value": 19},
@@ -117,7 +117,7 @@ def test_inline_renderer_instantiation_error_message(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_quantile_values_to_be_between",
+                type="expect_column_quantile_values_to_be_between",
                 kwargs={
                     "column": "user_id",
                     "quantile_ranges": {
@@ -210,7 +210,7 @@ def test_inline_renderer_instantiation_error_message(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_in_set",
+                type="expect_column_values_to_be_in_set",
                 kwargs={"column": "event_type", "value_set": [19, 22, 73]},
             ),
             {
@@ -259,7 +259,7 @@ def test_inline_renderer_instantiation_error_message(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_kl_divergence_to_be_less_than",
+                type="expect_column_kl_divergence_to_be_less_than",
                 kwargs={
                     "column": "user_id",
                     "partition_object": {
@@ -416,7 +416,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
     [
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal",
+                type="expect_table_row_count_to_equal",
                 kwargs={"value": 3},
             ),
             [
@@ -436,7 +436,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_min_to_be_between",
+                type="expect_column_min_to_be_between",
                 kwargs={"column": "event_type", "min_value": 3, "max_value": 20},
             ),
             [
@@ -462,7 +462,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_quantile_values_to_be_between",
+                type="expect_column_quantile_values_to_be_between",
                 kwargs={
                     "column": "user_id",
                     "quantile_ranges": {
@@ -523,7 +523,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_in_set",
+                type="expect_column_values_to_be_in_set",
                 kwargs={"column": "event_type", "value_set": [19, 22, 73]},
             ),
             [
@@ -553,7 +553,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_column_kl_divergence_to_be_less_than",
+                type="expect_column_kl_divergence_to_be_less_than",
                 kwargs={
                     "column": "user_id",
                     "partition_object": {
@@ -610,7 +610,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal",
+                type="expect_table_row_count_to_equal",
                 kwargs={"value": 3},
                 meta={
                     "notes": {
@@ -640,7 +640,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal",
+                type="expect_table_row_count_to_equal",
                 kwargs={"value": 3},
                 meta={
                     "notes": {
@@ -670,7 +670,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
         ),
         pytest.param(
             ExpectationConfiguration(
-                expectation_type="expect_table_row_count_to_equal",
+                type="expect_table_row_count_to_equal",
                 kwargs={"value": 3},
                 meta={
                     "notes": "This is the most important Expectation!!",

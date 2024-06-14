@@ -209,7 +209,7 @@ def test_expectation_suite_validation_result_returns_expected_shape(
                                 "min_value": 0.0,
                                 "max_value": 6.0,
                             },
-                            "expectation_type": "expect_column_values_to_be_between",
+                            "type": "expect_column_values_to_be_between",
                         }
                     ),
                 }
@@ -239,7 +239,7 @@ def test_expectation_suite_validation_result_returns_expected_shape(
                                 "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset",
                                 "column": "trip_distance",
                             },
-                            "expectation_type": "expect_column_values_to_not_be_null",
+                            "type": "expect_column_values_to_not_be_null",
                         }
                     ),
                 }

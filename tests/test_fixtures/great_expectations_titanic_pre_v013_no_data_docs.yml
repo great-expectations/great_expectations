@@ -1,6 +1,6 @@
 # This is a basic configuration for testing.
 # It has comments that should be preserved.
-config_version: 2
+config_version: 4
 plugins_directory: plugins/
 
 suite_parameter_store_name: suite_parameter_store
