@@ -1,9 +1,10 @@
 ## Data Quality: Ensuring Schema Consistency with Great Expectations
 
 When working with data, you might face common challenges that necessitate a data quality platform.
-Schema changes, such as changes in the information present or the type of information present, are
-among the top priority use cases for data assistants. Validating your data's schema is essential for
-ensuring its reliability and usability in downstream tasks. Great Expectations (GX) provides a
+Schema changes, such as the presence or type of information, are among the top priority use cases
+for data validation. Validating your data's schema involves ensuring that the structure of your
+dataset (e.g., column names and types) adheres to predefined rules. This step is crucial for
+maintaining data reliability and usability in downstream tasks. Great Expectations (GX) provides a
 powerful suite of schema-focused **Expectations** that allow you to define and enforce the
 structural integrity of your datasets. This guide will walk you through leveraging these
 Expectations to establish robust schema validation within your data pipelines.
@@ -115,6 +116,13 @@ business requirements and anticipates potential future expansion.
 
 ### Integrating Schema Validation
 
+**Steps:**
+1. **Define Expectations**: Set the rules for your data schema.
+2. **Save Expectations**: Store these rules for future validation checks.
+3. **Create Checkpoints**: Bundle your rules and specify where in the pipeline they need to be validated.
+4. **Run Validation**: Execute the validation checks at the specified checkpoints.
+5. **Review Results**: Inspect the outcomes and identify any issues.
+
 To incorporate these Expectations into your data pipelines:
 
 **1. Define Expectations**:
@@ -154,4 +162,6 @@ Great Expectations revolves around the **Context**, a central object that manage
 
 ### Conclusion
 
-Robust schema validation is fundamental to trustworthy data pipelines. Great Expectations empowers you to proactively define and enforce the structural integrity of your data, ensuring its reliability for critical analyses and decision-making processes. By incorporating these schema validation practices, you enhance data quality, reduce downstream errors, and foster a culture of data confidence within your organization.
+Robust schema validation is fundamental to trustworthy data pipelines. Great Expectations empowers you to proactively define and enforce the structural integrity of your data, ensuring its reliability for critical analyses and decision-making processes. By consistently incorporating schema validation practices, you enhance data quality, reduce downstream errors, and foster a strong culture of data confidence within your organization.
+
+Regularly review and update your Expectations as your data evolves, ensuring continued alignment with business requirements and data quality standards. Embrace a proactive, iterative approach to maintain high-quality data pipelines.
