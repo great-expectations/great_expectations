@@ -122,7 +122,8 @@ with business requirements and anticipates potential future expansion.
 
 ### Integrating Schema Validation
 
-**Steps:**
+Process overview:
+
 1. **Define Expectations**: Set the rules for your data schema.
 2. **Save Expectations**: Store these rules for future validation checks.
 3. **Create Checkpoints**: Bundle your rules and specify where in the pipeline they need to be validated.
