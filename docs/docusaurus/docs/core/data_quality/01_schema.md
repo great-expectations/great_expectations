@@ -1,6 +1,12 @@
 ## Data Quality: Ensuring Schema Consistency with Great Expectations
 
-Validating your data's schema is essential for ensuring its reliability and usability in downstream tasks. **Great Expectations (GX)** provides a powerful suite of schema-focused **Expectations** that allow you to define and enforce the structural integrity of your datasets. This guide will walk you through leveraging these Expectations to establish robust schema validation within your data pipelines.
+When working with data, you might face common challenges that necessitate a data quality platform.
+Schema changes, such as changes in the information present or the type of information present, are
+among the top priority use cases for data assistants. Validating your data's schema is essential for
+ensuring its reliability and usability in downstream tasks. Great Expectations (GX) provides a
+powerful suite of schema-focused **Expectations** that allow you to define and enforce the
+structural integrity of your datasets. This guide will walk you through leveraging these
+Expectations to establish robust schema validation within your data pipelines.
 
 ### Key Schema Expectations
 
@@ -43,8 +49,8 @@ compared to the previous Expectation, suitable for scenarios needing strict type
 ```python
 dataset.expect_column_values_to_be_of_type("transfer_amount", "float")
 ```
-*Use Case*: Critical in financial datasets where precision and type accuracy directly impact
-calculations and reporting, such as ensuring all transaction amounts are recorded as floats.
+*Use Case*: Handling data transferred using formats that do not embed schema (e.g., CSV), where
+apparent type changes can occur when new values appear.
 
 *Strategic Advice*: Opt for `expect_column_values_to_be_of_type` when dealing with columns where any
 type deviation could lead to significant processing errors or inaccuracies.
@@ -72,8 +78,7 @@ dataset.expect_table_columns_to_match_ordered_list([
     "transfer_amount", "transfer_date"
 ])
 ```
-*Use Case*: Implement in ETL workflows where downstream tasks are sequence-dependent, ensuring the
-column order remains unchanged through transformations.
+*Use Case*: Particularly relevant when handling scenarios such as changes in the order in which columns are computed during serialization.
 
 *Comparison Insight*: Use `expect_table_columns_to_match_ordered_list` over
 `expect_table_columns_to_match_set` when order matters, such as in scripts directly referencing
