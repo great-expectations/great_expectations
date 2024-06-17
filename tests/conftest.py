@@ -4121,9 +4121,7 @@ def alice_columnar_table_single_batch(empty_data_context):
             "timestamp_type": "TIMESTAMP",
             "very_small_user_id": 1000,
             "very_large_user_id": 999999999999,
-            "min_timestamp": datetime.datetime(
-                2004, 10, 19, 10, 23, 54
-            ),
+            "min_timestamp": datetime.datetime(2004, 10, 19, 10, 23, 54),
         },
         "rules": {
             "my_rule_for_user_ids": {
