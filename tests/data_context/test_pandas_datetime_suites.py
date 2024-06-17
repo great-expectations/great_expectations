@@ -14,13 +14,13 @@ def test_save_expectation_suite_with_datetime_objects(
 ):
     # create datetime evaluation parameters
     evaluation_parameters = {
-        "now": datetime.datetime.now(),
-        "now_minus_48h": datetime.datetime.now() - datetime.timedelta(days=2),
+        "now": datetime.datetime.now(),  # noqa: DTZ005
+        "now_minus_48h": datetime.datetime.now() - datetime.timedelta(days=2),  # noqa: DTZ005
     }
     test_data = {
         "data_refresh": [
-            datetime.datetime.now(),
-            datetime.datetime.now() - datetime.timedelta(days=1),
+            datetime.datetime.now(),  # noqa: DTZ005
+            datetime.datetime.now() - datetime.timedelta(days=1),  # noqa: DTZ005
         ]
     }
     test_df = pd.DataFrame(test_data)
@@ -62,8 +62,8 @@ def test_save_expectation_suite_with_datetime_objects(
 
         # Run validation via the action_list_operator
         run_id = {
-            "run_name": f"{dataset_name}_{datetime.datetime.now()}",
-            "run_time": datetime.datetime.now(),
+            "run_name": f"{dataset_name}_{datetime.datetime.now()}",  # noqa: DTZ005
+            "run_time": datetime.datetime.now(),  # noqa: DTZ005
         }
         results = context.run_validation_operator(
             "default",
@@ -86,8 +86,8 @@ def test_save_expectation_suite_with_datetime_objects(
         )
 
         run_id = {
-            "run_name": f"reloaded_{dataset_name}_{datetime.datetime.now()}",
-            "run_time": datetime.datetime.now(),
+            "run_name": f"reloaded_{dataset_name}_{datetime.datetime.now()}",  # noqa: DTZ005
+            "run_time": datetime.datetime.now(),  # noqa: DTZ005
         }
         reloaded_results = context.run_validation_operator(
             "default",

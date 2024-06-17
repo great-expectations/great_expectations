@@ -42,8 +42,8 @@ def test_expect_column_max_to_be_between_warn_parse_strings_as_datetimes(
     with pytest.warns(DeprecationWarning) as record:
         validator.expect_column_max_to_be_between(
             column="a",
-            min_value=datetime.strptime("2021-02-20", "%Y-%m-%d"),
-            max_value=datetime.strptime("2021-07-20", "%Y-%m-%d"),
+            min_value=datetime.strptime("2021-02-20", "%Y-%m-%d"),  # noqa: DTZ007
+            max_value=datetime.strptime("2021-07-20", "%Y-%m-%d"),  # noqa: DTZ007
             parse_strings_as_datetimes=True,
         )
     assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(

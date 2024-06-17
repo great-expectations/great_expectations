@@ -1192,7 +1192,7 @@ def test_batch_identifiers_datetime(
     batch_identifiers = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
-        "custom_key_0": datetime.datetime.utcnow(),
+        "custom_key_0": datetime.datetime.utcnow(),  # noqa: DTZ003
     }
 
     test_runtime_data_connector: RuntimeDataConnector = (

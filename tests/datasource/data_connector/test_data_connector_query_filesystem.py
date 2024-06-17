@@ -206,10 +206,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -279,10 +279,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -345,10 +345,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_int
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -389,10 +389,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -441,10 +441,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -492,10 +492,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_str
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -534,10 +534,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -608,10 +608,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -666,10 +666,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -740,10 +740,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -798,10 +798,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -849,10 +849,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -900,10 +900,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (
@@ -951,10 +951,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
             batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
+            and datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["timestamp"], "%Y%m%d"
             ).date()
-            > datetime.datetime(2020, 7, 15).date()
+            > datetime.datetime(2020, 7, 15).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list = (

@@ -200,10 +200,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
-            datetime.datetime.strptime(
+            datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["pickup_datetime"], "%Y-%m-%d %H"
             ).date()
-            == datetime.datetime(2020, 1, 1).date()
+            == datetime.datetime(2020, 1, 1).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list: List[
@@ -236,10 +236,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
-            datetime.datetime.strptime(
+            datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["pickup_datetime"], "%Y-%m-%d %H"
             ).date()
-            == datetime.datetime(2020, 1, 1).date()
+            == datetime.datetime(2020, 1, 1).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list: List[
@@ -276,10 +276,10 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
         return (
-            datetime.datetime.strptime(
+            datetime.datetime.strptime(  # noqa: DTZ007
                 batch_identifiers["pickup_datetime"], "%Y-%m-%d %H"
             ).date()
-            == datetime.datetime(2020, 1, 1).date()
+            == datetime.datetime(2020, 1, 1).date()  # noqa: DTZ001
         )
 
     returned_batch_definition_list: List[

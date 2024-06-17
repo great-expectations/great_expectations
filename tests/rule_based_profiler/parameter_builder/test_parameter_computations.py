@@ -210,10 +210,10 @@ def test_sanitize_parameter_name(
         pytest.param(
             "my_metric_4",
             {
-                "batch_id_0": datetime.datetime(2019, 1, 4, 0, 12, 12),
-                "batch_id_1": datetime.datetime(2019, 2, 21, 0, 12, 12),
-                "batch_id_2": datetime.datetime(2019, 3, 20, 0, 12, 12),
-                "batch_id_3": datetime.datetime(2019, 7, 13, 0, 12, 12),
+                "batch_id_0": datetime.datetime(2019, 1, 4, 0, 12, 12),  # noqa: DTZ001
+                "batch_id_1": datetime.datetime(2019, 2, 21, 0, 12, 12),  # noqa: DTZ001
+                "batch_id_2": datetime.datetime(2019, 3, 20, 0, 12, 12),  # noqa: DTZ001
+                "batch_id_3": datetime.datetime(2019, 7, 13, 0, 12, 12),  # noqa: DTZ001
             },
         ),
         pytest.param(

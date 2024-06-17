@@ -105,7 +105,7 @@ batch_request = RuntimeBatchRequest(
     data_asset_name="<YOUR_MEANGINGFUL_NAME>",  # This can be anything that identifies this data_asset for you
     batch_identifiers={
         "some_key_maybe_pipeline_stage": "prod",
-        "some_other_key_maybe_run_id": f"my_run_name_{datetime.date.today().strftime('%Y%m%d')}",
+        "some_other_key_maybe_run_id": f"my_run_name_{datetime.date.today().strftime('%Y%m%d')}",  # noqa: DTZ011
     },
     runtime_parameters={"batch_data": df},  # Your dataframe goes here
 )

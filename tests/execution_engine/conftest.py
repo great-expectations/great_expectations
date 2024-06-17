@@ -135,7 +135,7 @@ def test_sparkdf(spark_session) -> pyspark.DataFrame:
     def generate_ascending_list_of_datetimes(
         n, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
     ) -> List[datetime.datetime]:
-        start_time = datetime.datetime(
+        start_time = datetime.datetime(  # noqa: DTZ001
             start_date.year, start_date.month, start_date.day
         )
         seconds_between_dates = (end_date - start_date).total_seconds()

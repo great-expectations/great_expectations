@@ -688,7 +688,7 @@ def checkpoint_config() -> dict:
 
 @pytest.fixture
 def checkpoint_result(checkpoint_config: dict) -> CheckpointResult:
-    timestamp = dt.datetime(1996, 6, 1)
+    timestamp = dt.datetime(1996, 6, 1)  # noqa: DTZ001
     run_id = RunIdentifier(run_time=timestamp)
     run_results = {
         ValidationResultIdentifier(
