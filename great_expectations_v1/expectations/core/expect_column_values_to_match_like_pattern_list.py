@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Literal, Optional, Type, Union
 
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.core.suite_parameters import (
@@ -8,6 +8,10 @@ from great_expectations_v1.core.suite_parameters import (
 )
 from great_expectations_v1.expectations.expectation import (
     ColumnMapExpectation,
+)
+from great_expectations_v1.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations_v1.render.components import (
     LegacyRendererType,
@@ -24,9 +28,24 @@ if TYPE_CHECKING:
         ExpectationValidationResult,
     )
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column entries to be strings that match any "
+    "of a provided list of like pattern expressions."
+)
+LIKE_PATTERN_DESCRIPTION = (
+    "The list of SQL like pattern expressions the column entries should match."
+)
+MATCH_ON_DESCRIPTION = (
+    "'any' or 'all'. "
+    "Use 'any' if the value should match at least one like pattern in the list. "
+    "Use 'all' if it should match each like pattern in the list."
+)
+DATA_QUALITY_ISSUES = ["Pattern Matching"]
+SUPPORTED_DATA_SOURCES = ["SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
+
 
 class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
-    """Expect the column entries to be strings that match any of a provided list of like pattern expressions.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_match_like_pattern_list is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
@@ -37,17 +56,15 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         like_pattern_list (List[str]): \
-            The list of SQL like pattern expressions the column entries should match.
+            {LIKE_PATTERN_DESCRIPTION}
         match_on (string): \
-            "any" or "all". \
-            Use "any" if the value should match at least one like pattern in the list. \
-            Use "all" if it should match each like pattern in the list.
+            {MATCH_ON_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -78,7 +95,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Pattern Matching
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -93,16 +110,16 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                     column="test",
                     like_pattern_list=["[aa]%", "[ab]%", "[ac]%"],
                     match_on="any"
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -111,10 +128,10 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -122,16 +139,16 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                     column="test2",
                     like_pattern_list=["[ad]%", "[a]%"],
                     match_on="all"
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
@@ -142,14 +159,18 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    like_pattern_list: Union[List[str], SuiteParameterDict]
-    match_on: Literal["any", "all"] = "any"
+    like_pattern_list: Union[List[str], SuiteParameterDict] = pydantic.Field(
+        description=LIKE_PATTERN_DESCRIPTION
+    )
+    match_on: Literal["any", "all"] = pydantic.Field(
+        default="any", description=MATCH_ON_DESCRIPTION
+    )
 
     @pydantic.validator("like_pattern_list")
     def validate_like_pattern_list(
@@ -160,7 +181,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
         return like_pattern_list
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
@@ -170,6 +191,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.match_like_pattern_list"
     success_keys = ("mostly", "like_pattern_list", "match_on")
@@ -177,6 +199,37 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         "column",
         "like_pattern_list",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToMatchLikePatternList]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
