@@ -126,7 +126,9 @@ def test_column_partition_metric(
             operand_a=element.to_pydatetime()
             if isinstance(validator_with_data.execution_engine, PandasExecutionEngine)
             else element,
-            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),  # noqa: DTZ001
+            operand_b=(
+                datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)
+            ),
         )
         for idx, element in enumerate(results[desired_metric.id])
     )

@@ -50,7 +50,8 @@ def file_data_asset(tmp_path):
 def datetime_array():
     week_idx: int
     return [
-        datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))  # noqa: DTZ001
+        datetime.datetime(2021, 1, 1, 0, 0, 0)
+        + datetime.timedelta(days=(week_idx * 7))
         for week_idx in range(4)
     ]
 
