@@ -13,7 +13,7 @@ from pytest import param
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.datasource.fluent import GxContextWarning
+from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
@@ -33,6 +33,43 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": "snowflake://my_user:password@my_account/d_public/s_public?numpy=True"
         },
         id="connection_string str",
+    ),
+    param(
+        {
+            "connection_string": "snowflake://my_user:password@my_account/d_public/s_public"
+            "?warehouse=my_wh&role=my_role",
+            "assets": [
+                {"name": "min_table_asset", "type": "table"},
+                {
+                    "name": "table_asset_all_standard_fields",
+                    "type": "table",
+                    "table_name": "my_table",
+                    "schema_name": "s_public",
+                },
+                {
+                    "name": "table_asset_all_forward_compatible_fields",
+                    "type": "table",
+                    "table_name": "my_table",
+                    "schema_name": "s_public",
+                    "database": "d_public",
+                    "database_name": "d_public",
+                },
+                {"name": "min_query_asset", "type": "query", "query": "SELECT 1"},
+                {
+                    "name": "query_asset_all_standard_fields",
+                    "type": "query",
+                    "query": "SELECT 1",
+                },
+                {
+                    "name": "query_asset_all_forward_compatible_fields",
+                    "type": "query",
+                    "query": "SELECT 1",
+                    "database": "d_public",
+                    "database_name": "d_public",
+                },
+            ],
+        },
+        id="heterogenous assets",
     ),
     param(
         {"connection_string": "snowflake://my_user:password@my_account"},
@@ -195,10 +232,11 @@ def test_valid_config(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    ["connection_string", "expected_errors"],
+    ["connection_string", "other_args", "expected_errors"],
     [
         pytest.param(
             "snowflake://user:password@",
+            {},
             [
                 {
                     "loc": ("connection_string",),
@@ -226,7 +264,46 @@ def test_valid_config(
             id="missing/invalid account",
         ),
         pytest.param(
+            "snowflake://user:password@account",
+            {
+                "assets": [
+                    {"name": "valid_asset", "type": "table"},
+                    {
+                        "name": "valid_but_with_fields_that_will_be_ignored",
+                        "type": "table",
+                        # these will be elided by some forward compatibility logic
+                        "database": "this will be ignored",
+                        "database_name": "this will be ignored",
+                    },
+                    {
+                        "name": "extra_fields",
+                        "type": "table",
+                        # these will be elided by some forward compatibility logic
+                        "database": "this will be ignored",
+                        "database_name": "this will be ignored",
+                        # these will not
+                        "db": "causes an error",
+                        "foo": "this too",
+                    },
+                ]
+            },
+            [
+                {
+                    "loc": ("assets", 2, "TableAsset", "db"),
+                    "msg": "extra fields not permitted",
+                    "type": "value_error.extra",
+                },
+                {
+                    "loc": ("assets", 2, "TableAsset", "foo"),
+                    "msg": "extra fields not permitted",
+                    "type": "value_error.extra",
+                },
+            ],
+            id="invalid assets",
+        ),
+        pytest.param(
             "snowflake://",
+            {},
             [
                 {
                     "loc": ("connection_string",),
@@ -255,14 +332,16 @@ def test_valid_config(
         ),
     ],
 )
-def test_missing_required_params(
+def test_invalid_params(
     connection_string: str,
+    other_args: dict,
     expected_errors: list[dict],  # TODO: use pydantic error dict
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
         ds = SnowflakeDatasource(
             name="my_sf_ds",
             connection_string=connection_string,
+            **other_args,
         )
         print(f"{ds!r}")
 
@@ -481,6 +560,47 @@ def test_invalid_connection_string_raises_dsn_error(
         )
 
     assert expected_errors == exc_info.value.errors()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "asset",
+    [
+        {
+            "name": "database_name field",
+            "type": "table",
+            "table_name": "my_table",
+            "schema_name": "s_public",
+            "database_name": "d_public",
+        },
+        {
+            "name": "database field",
+            "type": "table",
+            "table_name": "my_table",
+            "schema_name": "s_public",
+            "database": "d_public",
+        },
+        {
+            "name": "all_forward_compatible_fields",
+            "type": "table",
+            "table_name": "my_table",
+            "schema_name": "s_public",
+            "database_name": "d_public",
+            "database": "d_public",
+        },
+    ],
+    ids=lambda x: x["name"],
+)
+def test_forward_compatibility_changes_raise_warning(asset: dict):
+    """If the datasource fields result in a forward compatibility change, a warning should be raised."""
+    with pytest.warns(GxDatasourceWarning):
+        ds = SnowflakeDatasource(
+            name="my_sf_ds",
+            connection_string="snowflake://my_user:password@my_account/d_public/s_public",
+            assets=[asset],
+        )
+        print(ds)
+    assert ds
 
 
 # TODO: Cleanup how we install test dependencies and remove this skipif
