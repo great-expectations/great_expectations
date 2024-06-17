@@ -15,7 +15,7 @@ def test_save_expectation_suite_with_datetime_objects(
     # create datetime evaluation parameters
     evaluation_parameters = {
         "now": datetime.datetime.now(),  # noqa: DTZ005
-        "now_minus_48h": datetime.datetime.now()
+        "now_minus_48h": datetime.datetime.now()  # noqa: DTZ005
         - datetime.timedelta(days=2),
     }
     test_data = {

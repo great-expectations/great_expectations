@@ -319,7 +319,9 @@ data_connectors:
     df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
-        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(),
+        lambda row: datetime.datetime.strptime(  # noqa: DTZ007
+            row["date"], "%Y-%m-%d"
+        ).date(),
         axis=1,
     )
     assert (
@@ -348,7 +350,10 @@ data_connectors:
     df_data = my_batch.data.dataframe
     assert df_data.shape == (4, 10)
     df_data["date"] = df_data.apply(
-        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(),
+        lambda row: datetime.datetime.strptime(  # noqa: DTZ007
+            row["date"],
+            "%Y-%m-%d",
+        ).date(),
         axis=1,
     )
     df_data["belongs_in_split"] = df_data.apply(

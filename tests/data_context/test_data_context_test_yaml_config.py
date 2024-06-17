@@ -934,7 +934,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         df_data = my_batch.data.dataframe
         assert df_data.shape == (10, 10)
         df_data["date"] = df_data.apply(
-            lambda row: datetime.datetime.strptime(
+            lambda row: datetime.datetime.strptime(  # noqa: DTZ007
                 row["date"], "%Y-%m-%d"
             ).date(),
             axis=1,
@@ -1152,7 +1152,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         df_data = my_batch.data.dataframe
         assert df_data.shape == (10, 10)
         df_data["date"] = df_data.apply(
-            lambda row: datetime.datetime.strptime(
+            lambda row: datetime.datetime.strptime(  # noqa: DTZ007
                 row["date"], "%Y-%m-%d"
             ).date(),
             axis=1,

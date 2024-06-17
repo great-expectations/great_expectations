@@ -285,7 +285,8 @@ class TestAddCitation:
         [
             pytest.param("2022-09-08", id="str override"),
             pytest.param(
-                datetime.datetime(2022, 9, 8), id="datetime override"
+                datetime.datetime(2022, 9, 8),  # noqa: DTZ001
+                id="datetime override",
             ),
         ],
     )
