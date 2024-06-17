@@ -763,7 +763,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._sources
 
     def _add_fluent_datasource(
-        self, datasource: Optional[FluentDatasource] = None, **kwargs
+        self, datasource: Optional[FluentDatasource] = None, save_changes=True, **kwargs
     ) -> FluentDatasource:
         if datasource:
             datasource_name = datasource.name
@@ -792,7 +792,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
-        self._save_project_config()
+        if save_changes:
+            self._save_project_config()
 
         return return_obj
 
@@ -5515,8 +5516,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
             datasource._rebuild_asset_data_connectors()
-
-            self._add_fluent_datasource(datasource=datasource)
+            # since we are loading the datasource from existing config, we do not need to save it
+            self._add_fluent_datasource(datasource=datasource, save_changes=False)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
