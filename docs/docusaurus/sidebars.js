@@ -56,135 +56,14 @@ module.exports = {
     },
     {
       type: 'category',
-      label: '🚧 Manage and access data',
-      link: {type: 'doc', id: 'core/manage_and_access_data/manage_and_access_data'},
+      label: 'Connect to data',
+      link: {type: 'doc', id: 'core/connect_to_data/connect_to_data'},
       items: [
-        {
-          type: 'category',
-          label: 'Connect to and request data',
-          link: {type: 'doc', id: 'core/manage_and_access_data/connect_to_data/connect_to_data'},
-          items: [
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/connect_to_data/file_system/file_system',
-              label: '🚧 Connect to file system data'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/connect_to_data/in_memory/in_memory',
-              label: '🚧 Connect to in memory data'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/connect_to_data/sql/sql',
-              label: '🚧 Connect to SQL database data'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/request_data',
-              label: '🚧 Request data'
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: '🚧 Manage Data Sources',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_data_sources/manage_data_sources'},
-          items: [
-            {
-              type: 'link',
-              label: '🚧 List available Data Sources',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_sources#list-available-data-sources',
-            },
-            {
-              type: 'link',
-              label: '🚧 Get an existing Data Source',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_sources#get-an-existing-data-source',
-            },
-            {
-              type: 'link',
-              label: '🚧 Delete a Data Source',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_sources#delete-a-data-source',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: '🚧 Manage Data Assets',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_data_assets'},
-          items: [
-            {
-              type: 'link',
-              label: '🚧 List all Data Assets in a Data Source',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#list-all-data-assets-in-a-data-source',
-            },
-            {
-              type: 'link',
-              label: '🚧 Get an existing Data Asset',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#get-an-existing-data-asset',
-            },
-            {
-              type: 'link',
-              label: '🚧 Add a Partitioner to a Data Asset',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#add-a-partitioner-to-a-data-asset',
-            },
-            {
-              type: 'link',
-              label: '🚧 Delete a Data Asset',
-              href: '/docs/1.0-prerelease/core/manage_and_access_data/manage_data_assets#delete-a-data-asset',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: '🚧 Manage Batch Requests',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_batch_requests'},
-          items: [
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: '🚧 Retrieve all Batches from a Data Asset'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: '🚧 Retrieve specific Batches from a Data Asset'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batch_requests',
-              label: '🚧 Iterate retrieved Batches'
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: '🚧 Manage Batches',
-          link: {type: 'doc', id: 'core/manage_and_access_data/manage_batches'},
-          items: [
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: '🚧 View a sample of the data in a Batch'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: '🚧 Validate a Batch against an Expectation'
-            },
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: '🚧 Validate a Batch against an Expectation Suite'
-            },
-            <!--TODO: Validation is being moved into the Batch object, are there other API changes? -->
-            {
-              type: 'doc',
-              id: 'core/manage_and_access_data/manage_batches',
-              label: '🚧 Get the Batch Request for a given Batch'
-            },
-          ]
-        },
+          {
+            type: 'doc',
+            id: 'core/connect_to_data/sql_data/sql_data',
+            label: 'Connect to data using SQL'
+          },
       ]
     },
     {
