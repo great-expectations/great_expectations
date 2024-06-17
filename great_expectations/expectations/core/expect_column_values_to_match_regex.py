@@ -1,13 +1,18 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_suite_parameter_string,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -30,11 +35,16 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer_configuration import AddParamArgs
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column entries to be strings that match a given regular expression."
+)
+REGEX_DESCRIPTION = "The regular expression the column entries should match."
+DATA_QUALITY_ISSUES = ["Pattern Matching"]
 SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
 
 
 class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
-    """Expect the column entries to be strings that match a given regular expression.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     Valid matches can be found \
     anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
@@ -49,13 +59,13 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         regex (str): \
-            The regular expression the column entries should match.
+            {REGEX_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -89,7 +99,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Pattern Matching
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -106,13 +116,13 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 0,
                     "unexpected_percent": 0.0,
@@ -121,10 +131,10 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 0.0,
                     "unexpected_percent_nonmissing": 0.0
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -134,13 +144,13 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 2,
                     "unexpected_percent": 66.66666666666666,
@@ -152,15 +162,17 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 66.66666666666666,
                     "unexpected_percent_nonmissing": 66.66666666666666
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    regex: Union[str, SuiteParameterDict] = "(?s).*"
+    regex: Union[str, SuiteParameterDict] = pydantic.Field(
+        default="(?s).*", description=REGEX_DESCRIPTION
+    )
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
@@ -170,6 +182,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.match_regex"
     success_keys = (
@@ -180,6 +193,37 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         "column",
         "regex",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToMatchRegex]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.QUESTION)

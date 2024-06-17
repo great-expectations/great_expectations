@@ -1,12 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
+)
+from great_expectations.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    MOSTLY_DESCRIPTION,
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.components import LegacyRendererType
@@ -21,11 +26,16 @@ if TYPE_CHECKING:
         ExpectationValidationResult,
     )
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the column entries to be strings that do NOT match a given like pattern expression."
+)
+LIKE_PATTERN_DESCRIPTION = "The SQL like pattern expression the column entries should NOT match."
+DATA_QUALITY_ISSUES = ["Pattern Matching"]
 SUPPORTED_DATA_SOURCES = ["SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
 
 
 class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
-    """Expect the column entries to be strings that do NOT match a given like pattern expression.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_values_to_not_match_like_pattern is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
@@ -36,13 +46,13 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         like_pattern (str): \
-            The SQL like pattern expression the column entries should NOT match.
+            {LIKE_PATTERN_DESCRIPTION}
 
     Other Parameters:
         mostly (None or a float between 0 and 1): \
-            Successful if at least mostly fraction of values match the expectation. \
+            {MOSTLY_DESCRIPTION} \
             For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly). Default 1.
         result_format (str or None): \
             Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
@@ -76,7 +86,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Pattern Matching
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -94,13 +104,13 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 1,
                     "unexpected_percent": 33.33333333333333,
@@ -111,10 +121,10 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 33.33333333333333,
                     "unexpected_percent_nonmissing": 33.33333333333333
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
@@ -124,13 +134,13 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
             )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "element_count": 3,
                     "unexpected_count": 3,
                     "unexpected_percent": 100,
@@ -143,15 +153,17 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
                     "missing_percent": 0.0,
                     "unexpected_percent_total": 100,
                     "unexpected_percent_nonmissing": 100
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    like_pattern: Union[str, SuiteParameterDict]
+    like_pattern: Union[str, SuiteParameterDict] = pydantic.Field(
+        description=LIKE_PATTERN_DESCRIPTION
+    )
 
-    library_metadata = {
+    library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
         "tags": ["core expectation", "column map expectation"],
         "contributors": [
@@ -161,6 +173,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+    _library_metadata = library_metadata
 
     map_metric = "column_values.not_match_like_pattern"
     success_keys = (
@@ -171,6 +184,37 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         "column",
         "like_pattern",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnValuesToNotMatchLikePattern]
+        ) -> None:
+            ColumnMapExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
