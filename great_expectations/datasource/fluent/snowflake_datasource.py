@@ -446,6 +446,9 @@ class SnowflakeDatasource(SQLDatasource):
                 url_args.pop(  # TODO: update models + validation to handle this
                     "password", None
                 )
+                LOGGER.info(
+                    "private_key detected, ignoring password and using private_key for authentication"
+                )
             engine_kwargs["connect_args"] = connect_args
         engine_kwargs["url"] = URL(**url_args)
 
