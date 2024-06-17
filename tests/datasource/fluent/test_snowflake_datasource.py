@@ -3,6 +3,7 @@ from __future__ import annotations
 from pprint import pformat as pf
 from sys import version_info as python_version
 from typing import TYPE_CHECKING, Final, Sequence
+from unittest.mock import ANY
 
 import pytest
 import sqlalchemy as sa
@@ -21,6 +22,7 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 if TYPE_CHECKING:
     from pytest.mark.structures import ParameterSet
+    from pytest_mock import MockerFixture
 
 VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
     param(
@@ -530,6 +532,75 @@ def test_get_engine_correctly_sets_application_query_param(
     sql_engine = my_sf_ds.get_engine()
     application_query_param = sql_engine.url.query.get("application")
     assert application_query_param == expected_query_param
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["config", "expected_called_with"],
+    [
+        param(
+            {
+                "name": "std connection_str",
+                "connection_string": "snowflake://user:password@account/db/schema?warehouse=wh&role=role",
+            },
+            {},
+            id="std connection_string str",
+        ),
+        param(
+            {
+                "name": "std connection_details",
+                "connection_string": {
+                    "user": "user",
+                    "password": "password",
+                    "account": "account",
+                    "database": "db",
+                    "schema": "schema",
+                    "warehouse": "wh",
+                    "role": "role",
+                },
+            },
+            {},
+            id="std connection_string dict",
+        ),
+        param(
+            {
+                "name": "conn str with connect_args",
+                "connection_string": "snowflake://user:password@account/db/schema?warehouse=wh&role=role",
+                "kwargs": {"connect_args": {"private_key": b"my_key"}},
+            },
+            {"connect_args": {"private_key": b"my_key"}},
+            id="connection_string str with connect_args",
+        ),
+        param(
+            {
+                "name": "conn details with connect_args",
+                "connection_string": {
+                    "user": "user",
+                    "password": "password",
+                    "account": "account",
+                    "database": "db",
+                    "schema": "schema",
+                    "warehouse": "wh",
+                    "role": "role",
+                },
+                "kwargs": {"connect_args": {"private_key": b"my_key"}},
+            },
+            {"connect_args": {"private_key": b"my_key"}},
+            id="connection_string dict with connect_args",
+        ),
+    ],
+)
+def test_create_engine_is_called_with_expected_kwargs(
+    mocker: MockerFixture, config: dict, expected_called_with: dict
+):
+    create_engine_spy = mocker.spy(sa, "create_engine")
+
+    datasource = SnowflakeDatasource(**config)
+    print(datasource)
+    engine = datasource.get_engine()
+    print(engine)
+
+    create_engine_spy.assert_called_once_with(ANY, **expected_called_with)
 
 
 @pytest.mark.snowflake

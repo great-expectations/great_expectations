@@ -439,10 +439,14 @@ class SnowflakeDatasource(SQLDatasource):
     ) -> sqlalchemy.Engine:
         url_args = self._get_url_args()
         url_args.update(kwargs)
+
+        engine_kwargs: dict[Literal["url", "connect_args"], Any] = {}
         if connect_args:
             if connect_args.get("private_key"):
                 url_args.pop(  # TODO: update models + validation to handle this
                     "password", None
                 )
-        url = URL(**url_args)
-        return sa.create_engine(url, connect_args=connect_args)
+            engine_kwargs["connect_args"] = connect_args
+        engine_kwargs["url"] = URL(**url_args)
+
+        return sa.create_engine(**engine_kwargs)
