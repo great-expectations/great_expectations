@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import functools
 import logging
+import re
 import urllib.parse
 import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
+    ClassVar,
     Final,
     Literal,
     Optional,
@@ -78,6 +80,34 @@ def _get_config_substituted_connection_string(
     return datasource.connection_string.get_config_value(
         datasource._data_context.config_provider
     )
+
+
+class AccountIdentifier(str):
+    """
+    Custom Pydantic model for the account identifier in SnowflakeDsn.
+
+    https://docs.snowflake.com/en/user-guide/admin-account-identifier#non-vps-account-locator-formats-by-cloud-platform-and-region
+
+    Expected formats:
+    1. <account_identifier>.<region>.<cloud> - e.g. abc12345.us-east-1.aws
+    2. <account_identifier>.<region> - e.g. abc12345.us-east-1
+    """
+
+    pattern: ClassVar[re.Pattern] = re.compile(r"^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+){1,2}$")
+
+    def __init__(self, v: str) -> None:
+        self.match = self.pattern.match(v)
+        super().__init__()
+
+    @classmethod
+    def __get_validators__(cls) -> Any:
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, value: str) -> str:
+        if not value:
+            raise ValueError("Account identifier cannot be empty")
+        return value
 
 
 class _UrlPasswordError(pydantic.UrlError):
@@ -181,7 +211,7 @@ class ConnectionDetails(FluentBaseModel):
     https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy#additional-connection-parameters
     """
 
-    account: str
+    account: AccountIdentifier
     user: str
     password: Union[ConfigStr, str]
     database: Optional[str] = pydantic.Field(
