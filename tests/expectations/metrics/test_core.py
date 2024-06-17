@@ -1202,7 +1202,9 @@ def test_column_partition_metric_pd():
     assert all(
         isclose(
             operand_a=element.to_pydatetime(),
-            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),  # noqa: DTZ001
+            operand_b=(
+                datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)  # noqa: DTZ001
+            ),
         )
         for idx, element in enumerate(results[desired_metric.id])
     )
