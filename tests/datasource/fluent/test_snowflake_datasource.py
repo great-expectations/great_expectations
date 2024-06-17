@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pprint import pformat as pf
 from sys import version_info as python_version
 from typing import TYPE_CHECKING, Final, Sequence
@@ -23,6 +24,8 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 if TYPE_CHECKING:
     from pytest.mark.structures import ParameterSet
     from pytest_mock import MockerFixture
+
+TEST_LOGGER: Final = logging.getLogger(__name__)
 
 VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
     param(
@@ -105,6 +108,18 @@ def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MY_USER", "my_user")
     monkeypatch.setenv("MY_PASSWORD", "my_password")
     monkeypatch.setenv("MY_ACCOUNT", "my_account")
+
+
+@pytest.fixture
+def sf_test_connection_noop(monkeypatch: pytest.MonkeyPatch) -> None:
+    TEST_LOGGER.warning(
+        "Monkeypatching SnowflakeDatasource.test_connection() to a noop"
+    )
+
+    def noop(self):
+        TEST_LOGGER.info(".test_connection noop")
+
+    monkeypatch.setattr(SnowflakeDatasource, "test_connection", noop)
 
 
 @pytest.mark.unit
@@ -591,11 +606,15 @@ def test_get_engine_correctly_sets_application_query_param(
     ],
 )
 def test_create_engine_is_called_with_expected_kwargs(
-    mocker: MockerFixture, config: dict, expected_called_with: dict
+    mocker: MockerFixture,
+    sf_test_connection_noop: None,
+    ephemeral_context_with_defaults: AbstractDataContext,
+    config: dict,
+    expected_called_with: dict,
 ):
     create_engine_spy = mocker.spy(sa, "create_engine")
 
-    datasource = SnowflakeDatasource(**config)
+    datasource = ephemeral_context_with_defaults.sources.add_snowflake(**config)
     print(datasource)
     engine = datasource.get_engine()
     print(engine)
