@@ -1,3 +1,4 @@
+import os
 import re
 from pathlib import Path
 
@@ -6,6 +7,18 @@ import pkg_resources  # noqa: TID251: TODO: switch to poetry
 from setuptools import find_packages, setup
 
 import versioneer
+
+SUPPORTED_PYTHON = ">=3.8,<3.12"
+
+
+def get_python_requires() -> str:
+    """
+    If the GX_PYTHON_EXPERIMENTAL environment variable is set,
+    return a version with no upper-bound.
+    """
+    if os.getenv("GX_PYTHON_EXPERIMENTAL"):
+        return ">=3.8"
+    return SUPPORTED_PYTHON
 
 
 def get_extras_require():
@@ -106,7 +119,7 @@ config = {
     "license": "Apache-2.0",
     "keywords": "data science testing pipeline data quality dataquality validation datavalidation",
     "include_package_data": True,
-    "python_requires": ">=3.8",
+    "python_requires": get_python_requires(),
     "classifiers": [
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
