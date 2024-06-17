@@ -132,6 +132,15 @@ Process overview:
 
 To incorporate these Expectations into your data pipelines:
 
+0. Prepare Sample Data:
+
+```python
+import pandas as pd
+
+data = []
+df = pd.DataFrame(data)
+```
+
 **1. Define Expectations**:
 Expectations are assertions about your dataset. Utilize `.expect_*` methods to specify schema rules.
 ```python
