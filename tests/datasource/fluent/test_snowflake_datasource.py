@@ -11,7 +11,7 @@ from pytest import param
 from great_expectations.compatibility import pydantic
 from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.datasource.fluent import GxContextWarning
+from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
@@ -543,6 +543,47 @@ def test_invalid_connection_string_raises_dsn_error(
         )
 
     assert expected_errors == exc_info.value.errors()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "asset",
+    [
+        {
+            "name": "database_name field",
+            "type": "table",
+            "table_name": "my_table",
+            "schema_name": "s_public",
+            "database_name": "d_public",
+        },
+        {
+            "name": "database field",
+            "type": "table",
+            "table_name": "my_table",
+            "schema_name": "s_public",
+            "database": "d_public",
+        },
+        {
+            "name": "all_forward_compatible_fields",
+            "type": "table",
+            "table_name": "my_table",
+            "schema_name": "s_public",
+            "database_name": "d_public",
+            "database": "d_public",
+        },
+    ],
+    ids=lambda x: x["name"],
+)
+def test_forward_compatibility_changes_raise_warning(asset: dict):
+    """If the datasource fields result in a forward compatibility change, a warning should be raised."""
+    with pytest.warns(GxDatasourceWarning):
+        ds = SnowflakeDatasource(
+            name="my_sf_ds",
+            connection_string="snowflake://my_user:password@my_account/d_public/s_public",
+            assets=[asset],
+        )
+        print(ds)
+    assert ds
 
 
 # TODO: Cleanup how we install test dependencies and remove this skipif

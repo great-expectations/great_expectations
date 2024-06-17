@@ -20,7 +20,7 @@ from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.datasource.fluent import GxContextWarning
+from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
     _check_config_substitutions_needed,
@@ -341,8 +341,11 @@ class SnowflakeDatasource(SQLDatasource):
                     if asset_name := asset.get("name") and (database or database_name):
                         modified_assets.append(asset_name)
             if modified_assets:
-                LOGGER.info(
-                    f"Assets modified for forward compatibility: {', '.join(modified_assets)}"
+                warnings.warn(
+                    f"Assets modified for forward compatibility: {', '.join(modified_assets)}."
+                    " Consider updating to the latest version of `great_expectations`.",
+                    category=GxDatasourceWarning,
+                    stacklevel=2,
                 )
         except Exception as e:
             LOGGER.error(f"Error attempting forward compatibility modifications: {e!r}")
