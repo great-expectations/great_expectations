@@ -549,7 +549,7 @@ def test_get_engine_correctly_sets_application_query_param(
     assert application_query_param == expected_query_param
 
 
-@pytest.mark.unit
+@pytest.mark.snowflake
 @pytest.mark.parametrize(
     ["config", "expected_called_with"],
     [
