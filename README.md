@@ -39,6 +39,11 @@ Data practitioners know that testing and documentation are essential for managin
 --------------------------------------------------
 -->
 
+## Python version support
+
+GX OSS supports Python `3.8` through `3.11`.
+Experimental support for Python `3.12` and later can be enabled by setting a `GX_PYTHON_EXPERIMENTAL` environment variable when installing `great_expectations`.
+
 Key features
 --------------------------------------------------
 

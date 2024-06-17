@@ -1111,7 +1111,7 @@ def test_TupleGCSStoreBackend_base_public_path():
             ("BBB",), b"bbb", content_encoding=None, content_type="image/png"
         )
 
-    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
+    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())  # noqa: DTZ003
     key = ValidationResultIdentifier(
         ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
         run_id,
@@ -1234,7 +1234,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
         with pytest.raises(InvalidKeyError):
             my_store.get(("non_existent_key",))
 
-    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())
+    run_id = RunIdentifier("my_run_id", datetime.datetime.utcnow())  # noqa: DTZ003
     key = ValidationResultIdentifier(
         ExpectationSuiteIdentifier(expectation_suite_name="my_suite_name"),
         run_id,

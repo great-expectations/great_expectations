@@ -438,8 +438,8 @@ def test_splitter_build_batch_request_allows_selecting_by_date_and_datetime_as_s
         "great_expectations.datasource.fluent.sql_datasource._splitter_and_sql_asset_to_batch_identifier_data"
     ) as mock_batch_identifiers:
         mock_batch_identifiers.return_value = [
-            {"pickup_date": datetime.datetime(2019, 2, 1)},
-            {"pickup_date": datetime.datetime(2019, 2, 2)},
+            {"pickup_date": datetime.datetime(2019, 2, 1)},  # noqa: DTZ001
+            {"pickup_date": datetime.datetime(2019, 2, 2)},  # noqa: DTZ001
         ]
         specified_batches = asset.get_batch_list_from_batch_request(
             asset.build_batch_request({"pickup_date": "2019-02-01 00:00:00"})

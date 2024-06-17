@@ -25,6 +25,7 @@ def files_with_deprecation_warnings() -> List[str]:
         "great_expectations/**/*.py", recursive=True
     )
     files_to_exclude = [
+        "great_expectations/compatibility/docstring_parser.py",
         "great_expectations/compatibility/google.py",
         "great_expectations/compatibility/pyspark.py",
         "great_expectations/compatibility/sqlalchemy_and_pandas.py",

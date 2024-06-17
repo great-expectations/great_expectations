@@ -202,7 +202,7 @@ def test_math_evaluation_paramaters():
 @pytest.mark.unit
 def test_temporal_evaluation_parameters():
     # allow 1 second for "now" tolerance
-    now = datetime.now()
+    now = datetime.now()  # noqa: DTZ005
     assert (
         (now - timedelta(weeks=1, seconds=3))
         < dateutil.parser.parse(
@@ -215,7 +215,7 @@ def test_temporal_evaluation_parameters():
 @pytest.mark.unit
 def test_temporal_evaluation_parameters_complex():
     # allow 1 second for "now" tolerance
-    now = datetime.now()
+    now = datetime.now()  # noqa: DTZ005
     # Choosing "2*3" == 6 weeks shows we can parse an expression inside a kwarg.
     assert (
         (now - timedelta(weeks=2 * 3, seconds=3))
@@ -345,16 +345,16 @@ def test_deduplicate_evaluation_parameter_dependencies():
             pd.DataFrame(
                 {
                     "my_date": [
-                        datetime(year=2017, month=1, day=1),
-                        datetime(year=2018, month=1, day=1),
-                        datetime(year=2019, month=1, day=1),
-                        datetime(year=2020, month=1, day=1),
+                        datetime(year=2017, month=1, day=1),  # noqa: DTZ001
+                        datetime(year=2018, month=1, day=1),  # noqa: DTZ001
+                        datetime(year=2019, month=1, day=1),  # noqa: DTZ001
+                        datetime(year=2020, month=1, day=1),  # noqa: DTZ001
                     ]
                 }
             ),
             (
-                ("my_min_date", datetime(2016, 12, 10)),
-                ("my_max_date", datetime(2022, 12, 13)),
+                ("my_min_date", datetime(2016, 12, 10)),  # noqa: DTZ001
+                ("my_max_date", datetime(2022, 12, 13)),  # noqa: DTZ001
             ),
             "expect_column_values_to_be_between",
             {

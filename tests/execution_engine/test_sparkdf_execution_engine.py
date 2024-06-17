@@ -774,7 +774,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         "metric_partial_fn": desired_aggregate_fn_metric_4,
         "table.columns": table_columns_metric,
     }
-    start = datetime.datetime.now()
+    start = datetime.datetime.now()  # noqa: DTZ005
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
     results = engine.resolve_metrics(
@@ -787,7 +787,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         metrics=metrics,
     )
     metrics.update(results)
-    end = datetime.datetime.now()
+    end = datetime.datetime.now()  # noqa: DTZ005
     print(end - start)
     assert metrics[desired_metric_1.id] == 3
     assert metrics[desired_metric_2.id] == 1

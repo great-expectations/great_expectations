@@ -180,7 +180,7 @@ def _get_exception_details(
     exc_details = [
         r["exception_info"]
         for r in validation_results
-        if r["exception_info"]["raised_exception"]
+        if r["exception_info"].get("raised_exception")
     ]
     if exc_details and prettyprint:
         print(f"{len(exc_details)} exception_info(s):\n{STAR_SEPARATOR}")

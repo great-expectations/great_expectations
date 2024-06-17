@@ -418,7 +418,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     }
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
-    start = datetime.datetime.now()
+    start = datetime.datetime.now()  # noqa: DTZ005
     results = execution_engine.resolve_metrics(
         metrics_to_resolve=(
             desired_metric_1,
@@ -429,7 +429,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
         metrics=metrics,
     )
     metrics.update(results)
-    end = datetime.datetime.now()
+    end = datetime.datetime.now()  # noqa: DTZ005
     print("t1")
     print(end - start)
     assert results[desired_metric_1.id] == 3

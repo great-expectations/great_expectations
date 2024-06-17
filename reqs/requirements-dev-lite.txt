@@ -3,20 +3,23 @@ flaky>=3.7.0 # for docs-integration tests that access cloud-resources that acces
 flask>=1.0.0 # for s3 test only (with moto)
 freezegun>=0.3.15
 ipykernel<=6.17.1 # Newest version (6.19.0 released on 12/7/2022) causes "WARNING  traitlets:client.py:1181 No handler found for comm target 'comm'" by "https://github.com/jupyter/nbclient/blob/main/nbclient/client.py" (version 0.7.2) to be emitted.
-moto>=2.0.0,<3.0.0
+moto[sns,s3]>=4.2.13,<5.0
 nbconvert>=5
 pact-python>=2.0.1
 pyfakefs>=4.5.1
 pytest>=6.2.0
 pytest-benchmark>=3.4.1
-pytest-cov>=2.8.1
-pytest-icdiff>=0.6
-pytest-mock>=3.8.2
-pytest-order>=0.9.5
-pytest-random-order>=1.0.4
-pytest-timeout>=2.1.0
-pytest-xdist>=3.3.1
-requirements-parser>=0.2.0
+pytest-cov>=5.0.0
+pytest-icdiff >= 0.9.0
+pytest-mock>=3.14.0
+pytest-order>=1.2.1
+pytest-random-order>=1.1.1
+pytest-timeout>=2.3.1
+pytest-xdist>=3.6.1
+requirements-parser>=0.9.0
 responses>=0.23.1 # requests mocking
-snapshottest==0.6.0 # GX Cloud atomic renderer tests
+setuptools>=70.0.0 # required for python 3.12
+# https://github.com/syrusakbary/snapshottest/issues/166
+# not compatible with python 3.12
+snapshottest==0.6.0; python_version < "3.12" # GX Cloud atomic renderer tests
 sqlalchemy>=1.4.0

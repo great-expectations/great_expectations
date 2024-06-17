@@ -39,7 +39,7 @@ def test_recursively_convert_to_json_serializable(tmp_path):
         "z": {1, 2, 3, 4, 5},
         "zz": (1, 2, 3),
         "zzz": [
-            datetime.datetime(2017, 1, 1),
+            datetime.datetime(2017, 1, 1),  # noqa: DTZ001
             datetime.date(2017, 5, 1),
         ],
         "np.bool": np.bool_([True, False, True]),

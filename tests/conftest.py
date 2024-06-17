@@ -3170,7 +3170,7 @@ def test_df(tmp_path_factory):
     def generate_ascending_list_of_datetimes(
         k, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
     ):
-        start_time = datetime.datetime(
+        start_time = datetime.datetime(  # noqa: DTZ001
             start_date.year, start_date.month, start_date.day
         )
         days_between_dates = (end_date - start_date).total_seconds()
@@ -4121,7 +4121,7 @@ def alice_columnar_table_single_batch(empty_data_context):
             "timestamp_type": "TIMESTAMP",
             "very_small_user_id": 1000,
             "very_large_user_id": 999999999999,
-            "min_timestamp": datetime.datetime(2004, 10, 19, 10, 23, 54),
+            "min_timestamp": datetime.datetime(2004, 10, 19, 10, 23, 54),  # noqa: DTZ001
         },
         "rules": {
             "my_rule_for_user_ids": {
@@ -7962,7 +7962,7 @@ def multibatch_generic_csv_generator():
     ) -> List[str]:
         data_path = pathlib.Path(data_path)
         if start_date is None:
-            start_date = datetime.datetime(2000, 1, 1)
+            start_date = datetime.datetime(2000, 1, 1)  # noqa: DTZ001
 
         file_list = []
         category_strings = {

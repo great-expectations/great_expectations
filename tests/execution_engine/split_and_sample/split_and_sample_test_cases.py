@@ -10,7 +10,7 @@ SINGLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
     pytest.param({"month": 10}, id="month_dict"),
     pytest.param("10-31-2018", id="dateutil parseable date string"),
     pytest.param(
-        datetime.datetime(2018, 10, 31, 0, 0, 0),
+        datetime.datetime(2018, 10, 31, 0, 0, 0),  # noqa: DTZ001
         id="datetime",
     ),
     pytest.param(
@@ -29,7 +29,7 @@ SINGLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
         id="non dateutil parseable date string",
     ),
     pytest.param(
-        datetime.datetime(2018, 11, 30, 0, 0, 0),
+        datetime.datetime(2018, 11, 30, 0, 0, 0),  # noqa: DTZ001
         marks=pytest.mark.xfail(strict=True),
         id="incorrect datetime should fail",
     ),
@@ -75,7 +75,7 @@ MULTIPLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
     pytest.param({"year": 2018, "month": 10}, id="year_and_month_dict"),
     pytest.param("10-31-2018", id="dateutil parseable date string"),
     pytest.param(
-        datetime.datetime(2018, 10, 30, 0, 0, 0),
+        datetime.datetime(2018, 10, 30, 0, 0, 0),  # noqa: DTZ001
         id="datetime",
     ),
     pytest.param(
@@ -99,7 +99,7 @@ MULTIPLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
         id="non dateutil parseable date string",
     ),
     pytest.param(
-        datetime.datetime(2018, 11, 30, 0, 0, 0),
+        datetime.datetime(2018, 11, 30, 0, 0, 0),  # noqa: DTZ001
         marks=pytest.mark.xfail(strict=True),
         id="incorrect datetime should fail",
     ),

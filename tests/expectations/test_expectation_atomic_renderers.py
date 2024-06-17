@@ -1,13 +1,25 @@
 import re
+import sys
 from pprint import pprint
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, Final, Union
 
 import pytest
+from packaging.version import Version
 
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import RenderedAtomicContent
+
+PYTHON_VERSION: Final[Version] = Version(
+    f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+)
+
+pytestmark = pytest.mark.skipif(
+    Version("3.12") <= PYTHON_VERSION,
+    reason="`snapshottest` incompatible with Python 3.12",
+)
+# https://github.com/syrusakbary/snapshottest/issues/166
 
 
 @pytest.fixture

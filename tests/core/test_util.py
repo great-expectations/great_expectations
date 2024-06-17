@@ -14,7 +14,7 @@ from great_expectations.core.util import (
 
 @pytest.mark.unit
 def test_substitute_all_strftime_format_strings():
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.utcnow()  # noqa: DTZ003
 
     input_dict = {
         "month_no": "%m",
