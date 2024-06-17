@@ -1,2 +1,2 @@
-clickhouse-sqlalchemy>=0.2.2
-pandas<2.2.0; python_version >= "3.9"
+clickhouse-sqlalchemy>=0.2.2; python_version < "3.12"
+clickhouse-sqlalchemy>=0.3.0; python_version >= "3.12" # SQLALchemy 2 support added in 0.3.0

@@ -573,7 +573,7 @@ def test_create_data_context_and_config_vars_in_code(
 
     context.data_sources.add_postgres("test_datasource", connection_string=connection_string)
 
-    assert mock_create_engine.called_once_with(
+    mock_create_engine.assert_called_once_with(
         "postgresql://DB_USER:pas$word@localhost:65432/DB_NAME"
     )
 
