@@ -186,6 +186,8 @@ jobs:
           flags: ${{ matrix.doc-step }}
 
   unit-tests:
+    env:
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
     strategy:
       matrix:
         os: [ubuntu-latest]

@@ -464,7 +464,6 @@ filterwarnings = [
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
     "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
     # pkg_resources is deprecated as an API, but third party libraries still use it
-    "ignore: pkg_resources is deprecated as an API.:DeprecationWarning",
     'ignore: Deprecated call to `pkg_resources.declare_namespace\(.*\)`',
 
 
