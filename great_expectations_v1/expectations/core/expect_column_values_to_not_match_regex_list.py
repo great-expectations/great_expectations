@@ -45,8 +45,6 @@ REGEX_LIST_DESCRIPTION = (
 DATA_QUALITY_ISSUES = ["Pattern Matching"]
 SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
 
-SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
-
 
 class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
