@@ -340,7 +340,7 @@ class SnowflakeDatasource(SQLDatasource):
                 {"oneOf": connection_string_prop}
             )
 
-    def _get_connect_args(self) -> dict[str, str | bool]:
+    def _get_url_args(self) -> dict[str, str | bool]:
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
         # dump as json dict to force serialization of things like AnyUrl
         return self._json_dict(exclude=excluded_fields, exclude_none=True)
@@ -434,8 +434,22 @@ class SnowflakeDatasource(SQLDatasource):
                 self._cached_connection_string = self.connection_string
         return self._engine
 
-    def _build_engine_with_connect_args(self, **kwargs) -> sqlalchemy.Engine:
-        connect_args = self._get_connect_args()
-        connect_args.update(kwargs)
-        url = URL(**connect_args)
-        return sa.create_engine(url)
+    def _build_engine_with_connect_args(
+        self, connect_args: dict[str, Any] | None = None, **kwargs
+    ) -> sqlalchemy.Engine:
+        url_args = self._get_url_args()
+        url_args.update(kwargs)
+
+        engine_kwargs: dict[Literal["url", "connect_args"], Any] = {}
+        if connect_args:
+            if connect_args.get("private_key"):
+                url_args.pop(  # TODO: update models + validation to handle this
+                    "password", None
+                )
+                LOGGER.info(
+                    "private_key detected, ignoring password and using private_key for authentication"
+                )
+            engine_kwargs["connect_args"] = connect_args
+        engine_kwargs["url"] = URL(**url_args)
+
+        return sa.create_engine(**engine_kwargs)
