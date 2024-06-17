@@ -20,7 +20,7 @@ pytest-timeout>=2.3.1
 pytest-xdist>=3.6.1
 requirements-parser>=0.9.0
 responses>=0.23.1 # requests mocking
-setuptools>=70.0.0
+setuptools>=70.0.0 # required for python 3.12
 # https://github.com/syrusakbary/snapshottest/issues/166
 # not compatible with python 3.12
 snapshottest==0.6.0; python_version < "3.12" # GX Cloud atomic renderer tests
