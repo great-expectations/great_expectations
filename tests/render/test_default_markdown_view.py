@@ -1,15 +1,8 @@
-import json
-import os
-from collections import OrderedDict
-
 import pytest
 
 import great_expectations as gx
 from great_expectations.core import (
     ExpectationSuite,
-)
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResultSchema,
 )
 from great_expectations.expectations.expectation_configuration import (
     ExpectationConfiguration,
@@ -30,43 +23,23 @@ pytestmark = pytest.mark.big
 
 
 @pytest.fixture()
-def validation_operator_result():
-    fixture_filename = os.path.join(  # noqa: PTH118
-        os.path.dirname(__file__),  # noqa: PTH120
-        "fixtures/ValidationOperatorResult_with_multiple_validation_results.json",
-    )
-    with open(fixture_filename) as infile:
-        validation_operator_result = json.load(infile, object_pairs_hook=OrderedDict)
-        run_results = validation_operator_result["run_results"]
-        for k, validation_result in run_results.items():
-            validation_result["validation_result"] = ExpectationSuiteValidationResultSchema().load(
-                validation_result["validation_result"]
-            )
-        return validation_operator_result
-
-
-@pytest.fixture()
 def expectation_suite_to_render_with_notes():
     expectation_suite = ExpectationSuite(
         name="default",
         meta={"great_expectations_version": "0.13.0-test"},
         expectations=[
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist",
+                type="expect_column_to_exist",
                 kwargs={"column": "infinities"},
             ),
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "nulls"}),
+            ExpectationConfiguration(type="expect_column_to_exist", kwargs={"column": "naturals"}),
             ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
-            ),
-            ExpectationConfiguration(
-                expectation_type="expect_column_distinct_values_to_be_in_set",
+                type="expect_column_distinct_values_to_be_in_set",
                 kwargs={"column": "irrationals", "value_set": ["*", "1st", "2nd"]},
             ),
             ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_unique",
+                type="expect_column_values_to_be_unique",
                 kwargs={"column": "testings"},
                 notes=[
                     "Example notes about this expectation. **Markdown** `Supported`.",

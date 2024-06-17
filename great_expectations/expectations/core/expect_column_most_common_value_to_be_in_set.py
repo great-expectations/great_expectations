@@ -1,13 +1,18 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union
 
+from great_expectations.compatibility import pydantic
 from great_expectations.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001  # used in pydantic validation
 )
 from great_expectations.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
+)
+from great_expectations.expectations.model_field_types import (
+    ValueSet,  # noqa: TCH001  # type needed in pydantic validation
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -31,8 +36,31 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the most common value to be within the designated value set."
+)
+VALUE_SET_DESCRIPTION = "A list of potential values to match."
+TIES_OKAY_DESCRIPTION = (
+    "If True, then the expectation will still succeed if values outside "
+    "the designated set are as common (but not more common) "
+    "than designated values."
+)
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Sets"]
+
+
 class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
-    """Expect the most common value to be within the designated value set.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_most_common_value_to_be_in_set is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
@@ -43,12 +71,11 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name
+            {COLUMN_DESCRIPTION}
         value_set (set-like): \
-            A list of potential values to match
+            {VALUE_SET_DESCRIPTION}
         ties_okay (boolean or None): \
-            If True, then the expectation will still succeed if values outside the designated set are as common \
-            (but not more common) than designated values. Default False.
+            {TIES_OKAY_DESCRIPTION} Default False.
 
     Other Parameters:
         result_format (str or None): \
@@ -73,11 +100,18 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
           most common value
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Sets
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test 	test2
@@ -92,52 +126,57 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
                     column="test2",
                     value_set=[1, 2, 4],
                     ties_okay=True
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       1
                     ]
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
                 ExpectColumnMostCommonValueToBeInSet(
                     column="test",
                     value_set=[1, 2, 4]
-            )
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
+                  }},
+                  "result": {{
                     "observed_value": [
                       1,
                       2,
                       4
                     ]
-                  },
-                  "meta": {},
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    value_set: Union[list, set, SuiteParameterDict, None]
-    ties_okay: Union[bool, None] = None
+    value_set: Optional[Union[SuiteParameterDict, ValueSet]] = pydantic.Field(
+        description=VALUE_SET_DESCRIPTION,
+    )
+    ties_okay: Union[bool, None] = pydantic.Field(
+        None,
+        description=TIES_OKAY_DESCRIPTION,
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -149,6 +188,8 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         "manually_reviewed_code": True,
     }
 
+    _library_metadata = library_metadata
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\  # noqa: E501
     metric_dependencies = ("column.most_common_value",)
     success_keys = (
@@ -159,6 +200,37 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
         "column",
         "value_set",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnMostCommonValueToBeInSet]
+        ) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @classmethod
     def _prescriptive_template(

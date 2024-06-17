@@ -6,6 +6,9 @@ name: ci
 #   2. Every 3 hours
 #   3. When we push a tag with a semver pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
 
+env:
+  ECR_PULL_THROUGH_REPOSITORY_URL: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/
+
 on:
   merge_group:
   pull_request:
@@ -55,9 +58,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -99,6 +102,7 @@ jobs:
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
+      AWS_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       # aws-redshift
       REDSHIFT_USERNAME: ${{secrets.REDSHIFT_USERNAME}}
@@ -120,13 +124,17 @@ jobs:
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
       - name: Run docs_snippet_checker
         run: |
           yarn install
           python ci/checks/validate_docs_snippets.py
       - name: Authenticate with GCP
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
 
@@ -149,7 +157,7 @@ jobs:
           ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -159,6 +167,13 @@ jobs:
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m '${{ matrix.doc-step }}'
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: "258143015559"
+
       - name: Run the tests
         run: invoke docs-snippet-tests '${{ matrix.doc-step }}' --up-services --verbose  --reports
 
@@ -180,10 +195,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache-dependency-path: |
@@ -194,7 +209,8 @@ jobs:
         run: pip install . -c constraints-dev.txt -r reqs/requirements-dev-test.txt
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5 --reports
+        # TODO: revert the timeout back to 1.5 or lower after resolving arc issues
+        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=2.0 --reports
 
       # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
@@ -207,12 +223,15 @@ jobs:
   doc-checks:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: enterprise-arc
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -249,9 +268,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -289,10 +308,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache-dependency-path: |
@@ -356,7 +375,10 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
       SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
-    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: enterprise-arc
     strategy:
       fail-fast: false
       matrix:
@@ -386,10 +408,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -401,6 +423,16 @@ jobs:
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
+
+      - name: Configure ECR AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::258143015559:role/github-amazonec2containerregistryreadonly
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Run the tests
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose  --reports
@@ -419,9 +451,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -437,9 +469,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.9"
           cache: "pip"
@@ -455,9 +487,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
@@ -473,9 +505,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
@@ -509,9 +541,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -527,9 +559,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.9"
           cache: "pip"
@@ -546,9 +578,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
           cache: "pip"
@@ -571,9 +603,9 @@ jobs:
           - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
@@ -613,7 +645,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Set up Python 3.8
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: "3.8"
       - name: Update pip
