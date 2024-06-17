@@ -1203,7 +1203,8 @@ def test_column_partition_metric_pd():
         isclose(
             operand_a=element.to_pydatetime(),
             operand_b=(
-                datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)  # noqa: DTZ001
+                datetime.datetime(2021, 1, 1, 0, 0, 0)
+                + (increment * idx)
             ),
         )
         for idx, element in enumerate(results[desired_metric.id])
@@ -1440,7 +1441,8 @@ def test_column_partition_metric_sa(sa):  # noqa: PLR0915
         isclose(
             operand_a=element,
             operand_b=(
-                datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)  # noqa: DTZ001
+                datetime.datetime(2021, 1, 1, 0, 0, 0)
+                + (increment * idx)
             ),
         )
         for idx, element in enumerate(results[desired_metric.id])
@@ -1684,7 +1686,8 @@ def test_column_partition_metric_spark(spark_session):  # noqa: PLR0915
         isclose(
             operand_a=element,
             operand_b=(
-                datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)  # noqa: DTZ001
+                datetime.datetime(2021, 1, 1, 0, 0, 0)
+                + (increment * idx)
             ),
         )
         for idx, element in enumerate(results[desired_metric.id])
