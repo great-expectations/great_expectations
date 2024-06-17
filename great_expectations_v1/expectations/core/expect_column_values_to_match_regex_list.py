@@ -49,8 +49,6 @@ MATCH_ON_DESCRIPTION = (
 DATA_QUALITY_ISSUES = ["Pattern Matching"]
 SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
 
-SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "PostgreSQL", "MySQL", "Redshift"]
-
 
 class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
