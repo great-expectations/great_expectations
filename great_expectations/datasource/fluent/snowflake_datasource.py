@@ -136,9 +136,9 @@ class AccountIdentifier(str):
         return None
 
     @property
-    def cloud(self) -> str | None:
+    def cloud(self) -> Literal["aws", "gcp", "azure"] | None:
         if self._match:
-            return self._match.group("cloud")
+            return self._match.group("cloud")  # type: ignore[return-value] # regex
         return None
 
 
