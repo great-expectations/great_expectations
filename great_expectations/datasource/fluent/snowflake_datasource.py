@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import functools
 import logging
 import urllib.parse
@@ -43,6 +44,25 @@ if TYPE_CHECKING:
 LOGGER: Final[logging.Logger] = logging.getLogger(__name__)
 
 MISSING: Final = object()  # sentinel value to indicate missing values
+
+
+@functools.lru_cache(maxsize=4)
+def _is_b64_encoded(sb: str | bytes) -> bool:
+    """
+    Check if a string or bytes is base64 encoded.
+    By decoding and then encoding it, we can check if it's the same.
+    """
+    try:
+        if isinstance(sb, str):
+            # If there's any unicode here, an exception will be thrown and the function will return false
+            sb_bytes = bytes(sb, "ascii")
+        elif isinstance(sb, bytes):
+            sb_bytes = sb
+        else:
+            raise ValueError("Argument must be string or bytes")
+        return base64.b64encode(base64.b64decode(sb_bytes)) == sb_bytes
+    except Exception:
+        return False
 
 
 @functools.lru_cache(maxsize=4)
@@ -351,6 +371,18 @@ class SnowflakeDatasource(SQLDatasource):
             LOGGER.error(f"Error attempting forward compatibility modifications: {e!r}")
         return assets
 
+    @pydantic.validator("kwargs")
+    def _base64_encode_private_key(cls, kwargs: dict) -> dict:
+        if connect_args := kwargs.get("connect_args", {}):
+            if private_key := connect_args.get("private_key"):
+                # test if it's already base64 encoded
+                if _is_b64_encoded(private_key):
+                    LOGGER.info("private_key is already base64 encoded")
+                else:
+                    LOGGER.info("private_key is not base64 encoded, encoding now")
+                    connect_args["private_key"] = base64.standard_b64encode(private_key)
+        return kwargs
+
     class Config:
         @staticmethod
         def schema_extra(schema: dict, model: type[SnowflakeDatasource]) -> None:
@@ -468,13 +500,16 @@ class SnowflakeDatasource(SQLDatasource):
 
         engine_kwargs: dict[Literal["url", "connect_args"], Any] = {}
         if connect_args:
-            if connect_args.get("private_key"):
+            if private_key := connect_args.get("private_key"):
                 url_args.pop(  # TODO: update models + validation to handle this
                     "password", None
                 )
                 LOGGER.info(
                     "private_key detected, ignoring password and using private_key for authentication"
                 )
+                # assume the private_key is base64 encoded
+                connect_args["private_key"] = base64.standard_b64decode(private_key)
+
             engine_kwargs["connect_args"] = connect_args
         engine_kwargs["url"] = URL(**url_args)
 
