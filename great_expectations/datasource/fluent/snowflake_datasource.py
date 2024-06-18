@@ -51,6 +51,8 @@ def _is_b64_encoded(sb: str | bytes) -> bool:
     """
     Check if a string or bytes is base64 encoded.
     By decoding and then encoding it, we can check if it's the same.
+
+    Copied from: https://stackoverflow.com/a/45928164/6304433
     """
     try:
         if isinstance(sb, str):
