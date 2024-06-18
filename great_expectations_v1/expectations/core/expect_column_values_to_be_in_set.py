@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
-from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001  # type needed in pydantic validation
 )
 from great_expectations_v1.expectations.expectation import (
-    COLUMN_DESCRIPTION,
     ColumnMapExpectation,
+)
+from great_expectations_v1.expectations.model_field_descriptions import COLUMN_DESCRIPTION
+from great_expectations_v1.expectations.model_field_types import (
+    ValueSet,  # noqa: TCH001  # type needed in pydantic validation
 )
 from great_expectations_v1.render import (
     LegacyDescriptiveRendererType,
@@ -48,7 +50,17 @@ if TYPE_CHECKING:
 
 EXPECTATION_SHORT_DESCRIPTION = "Expect each column value to be in a given set."
 VALUE_SET_ARG = "A set of objects used for comparison."
-SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
 DATA_QUALITY_ISSUES = ["Sets"]
 
 
@@ -91,8 +103,15 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         [expect_column_values_to_not_be_in_set](https://greatexpectations.io/expectations/expect_column_values_to_not_be_in_set)
 
     Supported Datasources:
-        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -168,7 +187,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Union[list, set, SuiteParameterDict] = pydantic.Field([])
+    value_set: Optional[Union[SuiteParameterDict, ValueSet]]
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
         "maturity": "production",
@@ -221,7 +240,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                     "supported_data_sources": {
                         "title": "Supported Data Sources",
                         "type": "array",
-                        "const": SUPPORTED_DATASOURCES,
+                        "const": SUPPORTED_DATA_SOURCES,
                     },
                 }
             )

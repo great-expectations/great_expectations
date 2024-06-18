@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from numbers import Number
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 import numpy as np
 
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.exceptions import InvalidExpectationConfigurationError
 from great_expectations_v1.expectations.expectation import (
+    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
@@ -54,9 +55,26 @@ class QuantileRange(pydantic.BaseModel):
     value_ranges: List[List[Union[float, int, None]]]
 
 
+EXPECTATION_SHORT_DESCRIPTION = (
+    "Expect the specific provided column quantiles "
+    "to be between a minimum value and a maximum value."
+)
+QUANTILE_RANGES_DESCRIPTION = (
+    "Key 'quantiles' is an increasingly ordered list of desired quantile values (floats). "
+    "Key 'value_ranges' is a list of 2-value lists that specify a lower and upper bound "
+    "(inclusive) for the corresponding quantile (with [min, max] ordering)."
+)
+ALLOW_RELATIVE_ERROR_DESCRIPTION = (
+    "Whether to allow relative error in quantile "
+    "communications on backends that support or require it."
+)
+SUPPORTED_DATA_SOURCES = ["Pandas", "Spark", "SQLite", "PostgreSQL", "MySQL", "MSSQL", "Redshift"]
+DATA_QUALITY_ISSUES = ["Numerical Data"]
+
+
 class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
     # noinspection PyUnresolvedReferences
-    """Expect the specific provided column quantiles to be between a minimum value and a maximum value.
+    __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
 
     expect_column_quantile_values_to_be_between is a \
     [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
@@ -69,14 +87,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
 
     Args:
         column (str): \
-            The column name.
+            {COLUMN_DESCRIPTION}
         quantile_ranges (dictionary with keys 'quantiles' and 'value_ranges'): \
-            Key 'quantiles' is an increasingly ordered list of desired quantile values (floats). \
-            Key 'value_ranges' is a list of 2-value lists that specify a lower and upper bound (inclusive) \
-            for the corresponding quantile (with [min, max] ordering). The length of the 'quantiles' list \
-            and the 'value_ranges' list must be equal.
+            {QUANTILE_RANGES_DESCRIPTION} The length of the 'quantiles' list and the 'value_ranges' list must be equal.
         allow_relative_error (boolean or string): \
-            Whether to allow relative error in quantile communications on backends that support or require it.
+            {ALLOW_RELATIVE_ERROR_DESCRIPTION}
 
     Other Parameters:
         result_format (str or None): \
@@ -106,11 +121,16 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
 
     Supported Datasources:
-        [Snowflake](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [PostgreSQL](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
-        Numerical Data
+        {DATA_QUALITY_ISSUES[0]}
 
     Example Data:
                 test
@@ -127,21 +147,21 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
             Input:
                 ExpectColumnQuantileValuesToBeBetween(
                     column="test",
-                    quantile_ranges={
+                    quantile_ranges={{
                         "quantiles": [0, .333, .667, 1],
                         "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
-                    }
-            )
+                    }}
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
-                    "observed_value": {
+                  }},
+                  "result": {{
+                    "observed_value": {{
                       "quantiles": [
                         0,
                         0.333,
@@ -154,39 +174,39 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                         3,
                         4
                       ]
-                    },
-                    "details": {
+                    }},
+                    "details": {{
                       "success_details": [
                         true,
                         true,
                         true,
                         true
                       ]
-                    }
-                  },
-                  "meta": {},
+                    }}
+                  }},
+                  "meta": {{}},
                   "success": true
-                }
+                }}
 
         Failing Case:
             Input:
                 ExpectColumnQuantileValuesToBeBetween(
                     column="test2",
-                    quantile_ranges={
+                    quantile_ranges={{
                         "quantiles": [0, .333, .667, 1],
                         "value_ranges": [[0,1], [2,3], [3,4], [4,5]]
-                    }
-            )
+                    }}
+                )
 
             Output:
-                {
-                  "exception_info": {
+                {{
+                  "exception_info": {{
                     "raised_exception": false,
                     "exception_traceback": null,
                     "exception_message": null
-                  },
-                  "result": {
-                    "observed_value": {
+                  }},
+                  "result": {{
+                    "observed_value": {{
                       "quantiles": [
                         0,
                         0.333,
@@ -199,23 +219,26 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                         5.0,
                         7.0
                       ]
-                    },
-                    "details": {
+                    }},
+                    "details": {{
                       "success_details": [
                         true,
                         true,
                         false,
                         false
                       ]
-                    }
-                  },
-                  "meta": {},
+                    }}
+                  }},
+                  "meta": {{}},
                   "success": false
-                }
+                }}
     """  # noqa: E501
 
-    quantile_ranges: QuantileRange
-    allow_relative_error: Union[bool, str] = False
+    quantile_ranges: QuantileRange = pydantic.Field(description=QUANTILE_RANGES_DESCRIPTION)
+    allow_relative_error: Union[bool, str] = pydantic.Field(
+        False,
+        description=ALLOW_RELATIVE_ERROR_DESCRIPTION,
+    )
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -226,6 +249,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "has_full_test_suite": True,
         "manually_reviewed_code": True,
     }
+
+    _library_metadata = library_metadata
 
     metric_dependencies = ("column.quantile_values",)
     success_keys = (
@@ -238,6 +263,37 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
         "quantile_ranges",
         "allow_relative_error",
     )
+
+    class Config:
+        @staticmethod
+        def schema_extra(
+            schema: Dict[str, Any], model: Type[ExpectColumnQuantileValuesToBeBetween]
+        ) -> None:
+            ColumnAggregateExpectation.Config.schema_extra(schema, model)
+            schema["properties"]["metadata"]["properties"].update(
+                {
+                    "data_quality_issues": {
+                        "title": "Data Quality Issues",
+                        "type": "array",
+                        "const": DATA_QUALITY_ISSUES,
+                    },
+                    "library_metadata": {
+                        "title": "Library Metadata",
+                        "type": "object",
+                        "const": model._library_metadata,
+                    },
+                    "short_description": {
+                        "title": "Short Description",
+                        "type": "string",
+                        "const": EXPECTATION_SHORT_DESCRIPTION,
+                    },
+                    "supported_data_sources": {
+                        "title": "Supported Data Sources",
+                        "type": "array",
+                        "const": SUPPORTED_DATA_SOURCES,
+                    },
+                }
+            )
 
     @pydantic.validator("quantile_ranges")
     def validate_quantile_ranges(cls, quantile_ranges: QuantileRange) -> Optional[QuantileRange]:
@@ -606,7 +662,9 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                     {
                         "content_block_type": "string_template",
                         "string_template": {
-                            "template": quantile_string if quantile_string else f"{quantile:3.2f}",
+                            "template": (
+                                quantile_string if quantile_string else f"{quantile:3.2f}"
+                            ),
                             "tooltip": {
                                 "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"  # noqa: E501
                                 if quantile == 0.50  # noqa: PLR2004

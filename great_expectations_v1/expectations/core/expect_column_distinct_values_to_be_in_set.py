@@ -7,12 +7,18 @@ import pandas as pd
 
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.core.suite_parameters import (
-    SuiteParameterDict,  # noqa: TCH001
+    SuiteParameterDict,  # noqa: TCH001  # used in pydantic validation
 )
 from great_expectations_v1.expectations.expectation import (
-    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
+)
+from great_expectations_v1.expectations.model_field_descriptions import (
+    COLUMN_DESCRIPTION,
+    VALUE_SET_DESCRIPTION,
+)
+from great_expectations_v1.expectations.model_field_types import (
+    ValueSet,  # noqa: TCH001  # type needed in pydantic validation
 )
 from great_expectations_v1.render import (
     LegacyDescriptiveRendererType,
@@ -43,8 +49,17 @@ if TYPE_CHECKING:
 EXPECTATION_SHORT_DESCRIPTION = (
     "Expect the set of distinct column values to be contained by a given set."
 )
-VALUE_SET_DESCRIPTION = "A set of objects used for comparison."
-SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
 DATA_QUALITY_ISSUES = ["Sets"]
 
 
@@ -89,8 +104,15 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         [expect_column_distinct_values_to_equal_set](https://greatexpectations.io/expectations/expect_column_distinct_values_to_equal_set)
 
     Supported Datasources:
-        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -175,8 +197,8 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
                 }}
     """  # noqa: E501
 
-    value_set: Union[list, set, SuiteParameterDict, None] = pydantic.Field(
-        default=[], description=VALUE_SET_DESCRIPTION
+    value_set: Optional[Union[SuiteParameterDict, ValueSet]] = pydantic.Field(
+        description=VALUE_SET_DESCRIPTION,
     )
 
     library_metadata = {
@@ -218,7 +240,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             }
             schema["properties"]["supported_data_sources"] = {
                 "type": "array",
-                "const": SUPPORTED_DATASOURCES,
+                "const": SUPPORTED_DATA_SOURCES,
             }
 
     @classmethod

@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
 from great_expectations_v1.compatibility import pydantic
 from great_expectations_v1.compatibility.typing_extensions import override
 from great_expectations_v1.expectations.expectation import (
-    COLUMN_DESCRIPTION,
     render_suite_parameter_string,
 )
+from great_expectations_v1.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations_v1.render import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
@@ -58,7 +58,17 @@ STRICT_MAX_DESCRIPTION = (
     "If True, the upper bound of the column maximum acceptable range"
     "must be strictly smaller than max_value, default=False"
 )
-SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
 DATA_QUALITY_ISSUES = ["Numerical Data"]
 
 
@@ -111,8 +121,15 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
 
     Supported Datasources:
-        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -226,7 +243,7 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
                     "supported_data_sources": {
                         "title": "Supported Data Sources",
                         "type": "array",
-                        "const": SUPPORTED_DATASOURCES,
+                        "const": SUPPORTED_DATA_SOURCES,
                     },
                 }
             )

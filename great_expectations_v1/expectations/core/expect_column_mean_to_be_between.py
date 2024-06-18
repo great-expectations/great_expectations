@@ -9,10 +9,10 @@ from great_expectations_v1.core.suite_parameters import (
     SuiteParameterDict,  # noqa: TCH001
 )
 from great_expectations_v1.expectations.expectation import (
-    COLUMN_DESCRIPTION,
     ColumnAggregateExpectation,
     render_suite_parameter_string,
 )
+from great_expectations_v1.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations_v1.render import (
     LegacyDescriptiveRendererType,
     LegacyRendererType,
@@ -50,7 +50,17 @@ STRICT_MIN_DESCRIPTION = (
 STRICT_MAX_DESCRIPTION = (
     "If True, the column mean must be strictly smaller than max_value, default=False"
 )
-SUPPORTED_DATASOURCES = ["Snowflake", "PostgreSQL"]
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
 DATA_QUALITY_ISSUES = ["Numerical Data"]
 
 
@@ -104,8 +114,15 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         [expect_column_stdev_to_be_between](https://greatexpectations.io/expectations/expect_column_stdev_to_be_between)
 
     Supported Datasources:
-        [{SUPPORTED_DATASOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
-        [{SUPPORTED_DATASOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
@@ -199,53 +216,6 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
         "strict_max",
     )
 
-    kwargs_json_schema_base_properties = {
-        "result_format": {
-            "oneOf": [
-                {"type": "null"},
-                {
-                    "type": "string",
-                    "enum": ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"],
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "result_format": {
-                            "type": "string",
-                            "enum": ["BOOLEAN_ONLY", "BASIC", "SUMMARY", "COMPLETE"],
-                        },
-                        "partial_unexpected_count": {"type": "number"},
-                    },
-                },
-            ],
-            "default": "BASIC",
-        },
-        "catch_exceptions": {
-            "oneOf": [{"type": "null"}, {"type": "boolean"}],
-            "default": "false",
-        },
-        "meta": {"type": "object"},
-    }
-
-    kwargs_json_schema = {
-        "type": "object",
-        "properties": {
-            **kwargs_json_schema_base_properties,
-            "column": {"type": "string"},
-            "min_value": {"oneOf": [{"type": "null"}, {"type": "number"}]},
-            "max_value": {"oneOf": [{"type": "null"}, {"type": "number"}]},
-            "strict_min": {
-                "oneOf": [{"type": "null"}, {"type": "boolean"}],
-                "default": "false",
-            },
-            "strict_max": {
-                "oneOf": [{"type": "null"}, {"type": "boolean"}],
-                "default": "false",
-            },
-        },
-        "required": ["column"],
-    }
-
     class Config:
         @staticmethod
         def schema_extra(schema: Dict[str, Any], model: Type[ExpectColumnMeanToBeBetween]) -> None:
@@ -270,7 +240,7 @@ class ExpectColumnMeanToBeBetween(ColumnAggregateExpectation):
                     "supported_data_sources": {
                         "title": "Supported Data Sources",
                         "type": "array",
-                        "const": SUPPORTED_DATASOURCES,
+                        "const": SUPPORTED_DATA_SOURCES,
                     },
                 }
             )

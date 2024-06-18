@@ -38,6 +38,22 @@ MAX_VALUE_DESCRIPTION = "The maximum number of columns, inclusive."
 SUPPORTED_DATA_SOURCES = ["Snowflake", "PostgreSQL"]
 DATA_QUALITY_ISSUES = ["Schema"]
 
+EXPECTATION_SHORT_DESCRIPTION = "Expect the number of columns to be between two values."
+MIN_VALUE_DESCRIPTION = "The minimum number of columns, inclusive."
+MAX_VALUE_DESCRIPTION = "The maximum number of columns, inclusive."
+SUPPORTED_DATA_SOURCES = [
+    "Pandas",
+    "Spark",
+    "SQLite",
+    "PostgreSQL",
+    "MySQL",
+    "MSSQL",
+    "Redshift",
+    "BigQuery",
+    "Snowflake",
+]
+DATA_QUALITY_ISSUES = ["Schema"]
+
 
 class ExpectTableColumnCountToBeBetween(BatchExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
@@ -81,6 +97,13 @@ class ExpectTableColumnCountToBeBetween(BatchExpectation):
     Supported Datasources:
         [{SUPPORTED_DATA_SOURCES[0]}](https://docs.greatexpectations.io/docs/application_integration_support/)
         [{SUPPORTED_DATA_SOURCES[1]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[2]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[3]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[4]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[5]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[6]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[7]}](https://docs.greatexpectations.io/docs/application_integration_support/)
+        [{SUPPORTED_DATA_SOURCES[8]}](https://docs.greatexpectations.io/docs/application_integration_support/)
 
     Data Quality Category:
         {DATA_QUALITY_ISSUES[0]}
