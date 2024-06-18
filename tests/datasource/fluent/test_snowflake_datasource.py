@@ -31,13 +31,13 @@ TEST_LOGGER: Final = logging.getLogger(__name__)
 VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
     param(
         {
-            "connection_string": "snowflake://my_user:password@my_account.us-east-1/d_public/s_public?numpy=True"
+            "connection_string": "snowflake://my_user:password@myAccount.us-east-1/d_public/s_public?numpy=True"
         },
         id="connection_string str",
     ),
     param(
         {
-            "connection_string": "snowflake://my_user:password@my_account.us-east-1/d_public/s_public"
+            "connection_string": "snowflake://my_user:password@myAccount.us-east-1/d_public/s_public"
             "?warehouse=my_wh&role=my_role",
             "assets": [
                 {"name": "min_table_asset", "type": "table"},
@@ -73,18 +73,18 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         id="heterogenous assets",
     ),
     param(
-        {"connection_string": "snowflake://my_user:password@my_account.us-east-1"},
+        {"connection_string": "snowflake://my_user:password@myAccount.us-east-1"},
         id="min connection_string str",
     ),
     param(
         {
-            "connection_string": "snowflake://my_user:${MY_PASSWORD}@my_account.us-east-1/d_public/s_public"
+            "connection_string": "snowflake://my_user:${MY_PASSWORD}@myAccount.us-east-1/d_public/s_public"
         },
         id="connection_string ConfigStr - password sub",
     ),
     param(
         {
-            "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@my_account.us-east-1/d_public/s_public"
+            "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@myAccount.us-east-1/d_public/s_public"
         },
         id="connection_string ConfigStr - user + password sub",
     ),
@@ -99,7 +99,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "password",
-                "account": "my_account.us-east-1",
+                "account": "myAccount.us-east-1",
                 "schema": "s_public",
                 "database": "d_public",
             }
@@ -111,7 +111,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "password",
-                "account": "my_account.us-east-1",
+                "account": "myAccount.us-east-1",
             }
         },
         id="min connection_string dict",
@@ -121,7 +121,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "${MY_PASSWORD}",
-                "account": "my_account.us-east-1",
+                "account": "myAccount.us-east-1",
                 "schema": "s_public",
                 "database": "d_public",
             }
@@ -133,7 +133,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "${MY_PASSWORD}",
-                "account": "my_account.us-east-1",
+                "account": "myAccount.us-east-1",
             }
         },
         id="min connection_string dict with password ConfigStr",
@@ -145,7 +145,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
 def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MY_USER", "my_user")
     monkeypatch.setenv("MY_PASSWORD", "my_password")
-    monkeypatch.setenv("MY_ACCOUNT", "my_account.us-east-1")
+    monkeypatch.setenv("MY_ACCOUNT", "myAccount.us-east-1")
 
 
 @pytest.fixture
@@ -171,6 +171,8 @@ class TestAccountIdentifier:
             "xy12345.europe-west4.gcp",
             "xy12345.us-east-1",
             "xy12345.central-us.azure",
+            "account.us-east-1",
+            "myAccount.us-east-1",
             # "xy12345", # TODO: this also matches the snowflake format but it's a special case
         ],
     )
@@ -189,6 +191,7 @@ class TestAccountIdentifier:
         "value",
         [
             "foobar",
+            "my_account.us-east-1",
             "xy12345.us-gov-west-1.aws.",
             "xy12345.europe-west4.gcp.bar",
             "xy12345.us-east-1.nope",
@@ -407,9 +410,9 @@ def test_invalid_params(
     "connection_string, connect_args, expected_errors",
     [
         pytest.param(
-            "snowflake://my_user:password@my_account/foo/bar?numpy=True",
+            "snowflake://my_user:password@myAccount.us-east-1/foo/bar?numpy=True",
             {
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
                 "user": "my_user",
                 "password": "123456",
                 "schema": "foo",
@@ -444,7 +447,7 @@ def test_invalid_params(
         pytest.param(
             None,
             {
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
                 "user": "my_user",
                 "schema": "foo",
                 "database": "bar",
@@ -475,7 +478,7 @@ def test_invalid_params(
         ),
         pytest.param(
             {
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
                 "user": "my_user",
                 "schema": "foo",
                 "database": "bar",
@@ -649,7 +652,7 @@ def test_forward_compatibility_changes_raise_warning(asset: dict):
     with pytest.warns(GxDatasourceWarning):
         ds = SnowflakeDatasource(
             name="my_sf_ds",
-            connection_string="snowflake://my_user:password@my_account/d_public/s_public",
+            connection_string="snowflake://my_user:password@myAccount.us-east-1/d_public/s_public",
             assets=[asset],
         )
         print(ds)
@@ -662,7 +665,9 @@ def test_forward_compatibility_changes_raise_warning(asset: dict):
 )
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
-    connection_string = "snowflake://my_user:password@my_account/my_db/my_schema"
+    connection_string = (
+        "snowflake://my_user:password@myAccount.us-east-1/my_db/my_schema"
+    )
     datasource = SnowflakeDatasource(
         name="my_snowflake", connection_string=connection_string
     )
@@ -740,7 +745,7 @@ def test_get_engine_correctly_sets_application_query_param(
                 "connection_string": {
                     "user": "user",
                     "password": "password",
-                    "account": "account",
+                    "account": "account.us-east-1",
                     "database": "db",
                     "schema": "schema",
                     "warehouse": "wh",
@@ -753,7 +758,7 @@ def test_get_engine_correctly_sets_application_query_param(
         param(
             {
                 "name": "conn str with connect_args",
-                "connection_string": "snowflake://user:password@account/db/schema?warehouse=wh&role=role",
+                "connection_string": "snowflake://user:password@account.us-east-1/db/schema?warehouse=wh&role=role",
                 "kwargs": {"connect_args": {"private_key": b"my_key"}},
             },
             {"connect_args": {"private_key": b"my_key"}},
@@ -765,7 +770,7 @@ def test_get_engine_correctly_sets_application_query_param(
                 "connection_string": {
                     "user": "user",
                     "password": "password",
-                    "account": "account",
+                    "account": "account.us-east-1",
                     "database": "db",
                     "schema": "schema",
                     "warehouse": "wh",
