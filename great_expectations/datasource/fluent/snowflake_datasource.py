@@ -95,12 +95,12 @@ class AccountIdentifier(str):
 
     TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
 
-    pattern: ClassVar[re.Pattern] = re.compile(
-        r"^(?P<account>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)(?:\.(?P<cloud>[a-zA-Z0-9-]+))?$"
+    PATTERN: ClassVar[re.Pattern] = re.compile(
+        r"^(?P<account>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)(?:\.(?P<cloud>aws|gcp|azure))?$"
     )
 
     def __init__(self, value: str) -> None:
-        self._match = self.pattern.match(value)
+        self._match = self.PATTERN.match(value)
 
     @classmethod
     def __get_validators__(cls) -> Any:
