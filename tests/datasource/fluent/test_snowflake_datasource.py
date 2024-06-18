@@ -724,7 +724,7 @@ def test_get_engine_correctly_sets_application_query_param(
                 "name": "std connection_str",
                 "connection_string": "snowflake://user:password@account/db/schema?warehouse=wh&role=role",
             },
-            {},
+            {"url": ANY},
             id="std connection_string str",
         ),
         param(
@@ -740,7 +740,9 @@ def test_get_engine_correctly_sets_application_query_param(
                     "role": "role",
                 },
             },
-            {},
+            {
+                "url": "snowflake://user:password@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
+            },
             id="std connection_string dict",
         ),
         param(
@@ -750,9 +752,8 @@ def test_get_engine_correctly_sets_application_query_param(
                 "kwargs": {"connect_args": {"private_key": b"my_key"}},
             },
             {
-                "connect_args": {
-                    "private_key": base64.standard_b64encode(b"my_key"),
-                },
+                "connect_args": {"private_key": b"my_key"},
+                "url": ANY,
             },
             id="connection_string str with connect_args",
         ),
@@ -771,8 +772,8 @@ def test_get_engine_correctly_sets_application_query_param(
                 "kwargs": {"connect_args": {"private_key": b"my_key"}},
             },
             {
-                "connect_args": {"private_key": base64.standard_b64encode(b"my_key")},
-                "url": "snowflake://user:@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
+                "connect_args": {"private_key": b"my_key"},
+                "url": "snowflake://user:password@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
             },
             id="connection_string dict with connect_args",
         ),
@@ -792,7 +793,7 @@ def test_create_engine_is_called_with_expected_kwargs(
     engine = datasource.get_engine()
     print(engine)
 
-    create_engine_spy.assert_called_once_with(ANY, **expected_called_with)
+    create_engine_spy.assert_called_once_with(**expected_called_with)
 
 
 @pytest.mark.snowflake

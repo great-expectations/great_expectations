@@ -503,6 +503,8 @@ class SnowflakeDatasource(SQLDatasource):
             url_args = self._get_url_args()
             url_args.update(kwargs)
             url = URL(**url_args)
+        else:
+            url_args = {}
 
         engine_kwargs: dict[Literal["url", "connect_args"], Any] = {}
         if connect_args:
