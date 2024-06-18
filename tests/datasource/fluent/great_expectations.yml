@@ -194,7 +194,7 @@ fluent_datasources:
           abs_container: "this_is_always_required"
   my_snowflake_ds:
     type: snowflake
-    connection_string: "snowflake://user_login_name:password@account_identifier/database/public?role=role_name&warehouse=wh"
+    connection_string: "snowflake://user_login_name:password@account.us-east-2/database/public?role=role_name&warehouse=wh"
     assets:
       my_table_asset_wo_splitters:
         id: d8b22f50-d3f9-4d04-9b4c-cfed86b157ff
@@ -202,7 +202,7 @@ fluent_datasources:
         table_name: my_table
   my_snowflake_ds_min_params:
     type: snowflake
-    connection_string: "snowflake://user_login_name:password@account_identifier"
+    connection_string: "snowflake://user_login_name:password@account.us-east-1"
     assets:
       my_table_asset_wo_splitters:
         id: 8def8331-2d7e-47e2-a8a3-e510fe6ea255
@@ -210,7 +210,7 @@ fluent_datasources:
         table_name: my_table
   my_snowflake_ds_with_connect_args:
     type: snowflake
-    account: "myorganization"
+    account: "myorganization.my-account"
     user: "testuser1"
     password: "foobarbaz"
     database: "testdb"
