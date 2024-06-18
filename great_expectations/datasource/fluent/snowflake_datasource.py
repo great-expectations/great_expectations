@@ -111,10 +111,10 @@ class AccountIdentifier(str):
 
     @classmethod
     def __get_validators__(cls) -> Any:
-        yield cls.validate
+        yield cls._validate
 
     @classmethod
-    def validate(cls, value: str) -> AccountIdentifier:
+    def _validate(cls, value: str) -> AccountIdentifier:
         if not value:
             raise ValueError("Account identifier cannot be empty")
         v = cls(value)
