@@ -122,59 +122,80 @@ with business requirements and anticipates potential future expansion.
 
 ### Integrating Schema Validation
 
-Process overview:
+Below is a tutorial that demonstrates schema validation of a Pandas DataFrame using GX.
 
-1. **Define Expectations**: Set the rules for your data schema.
-2. **Save Expectations**: Store these rules for future validation checks.
-3. **Create Checkpoints**: Bundle your rules and specify where in the pipeline they need to be validated.
-4. **Run Validation**: Execute the validation checks at the specified checkpoints.
-5. **Review Results**: Inspect the outcomes and identify any issues.
+Tutorial Process Overview:
 
-To incorporate these Expectations into your data pipelines:
+1. **Prepare Sample Data**: Create a sample dataset for testing and validation.
+2. **Connect to the Data**: Establish a connection to the sample data using Great Expectations.
+3. **Define Expectations**: Set the rules for your data schema.
+4. **Save Expectations**: Store these rules for future validation checks.
+5. **Create Checkpoints**: Bundle your rules and specify where in the pipeline they need to be validated.
+6. **Run Validation**: Execute the validation checks at the specified checkpoints.
+7. **Review Results**: Inspect the outcomes and identify any issues.
 
-0. Prepare Sample Data:
+**1. Prepare Sample Data**:
+
+Create a sample dataset using Pandas for testing and validation purposes.
 
 ```python
 import pandas as pd
 
-data = []
+data = [
+    {"sender_account_number": "1234567890", "transfer_amount": 1000.0},
+    {"sender_account_number": "9876543210", "transfer_amount": 500.0},
+    {"sender_account_number": "5555555555", "transfer_amount": 750.0}
+]
 df = pd.DataFrame(data)
 ```
 
-**1. Define Expectations**:
+**2. Connect to the Data**:
+
+Create a [Data Context](#) object using GX and connect to the sample data.
+
+```python
+import great_expectations as gx
+
+context = gx.get_context()
+data_source = context.sources.add_pandas(name="pandas dataframe")
+
+# TODO
+```
+
+**3. Define Expectations**:
 Expectations are assertions about your dataset. Utilize `.expect_*` methods to specify schema rules.
 ```python
 # Examples of defining expectations
 dataset.expect_column_to_exist("sender_account_number")
 dataset.expect_column_values_to_be_of_type("transfer_amount", "float")
+
+# TODO: add some Expectations that will fail
 ```
 
-**2. Save Expectations**:
+**4. Save Expectations**:
 Once defined, save these as an **Expectation Suite** for future reference and validation.
 ```python
 dataset.save_expectation_suite()
 ```
 
-**3. Create Checkpoints**:
+**5. Create Checkpoints**:
 **Checkpoints** bundle your Expectations to validate your data at specific points within your pipeline. They encapsulate the process of executing validations.
 ```python
 checkpoint = context.add_or_update_checkpoint(name="checkpoint", validator=dataset)
 ```
 
-**4. Run Validation**:
+**6. Run Validation**:
 Triggering a Checkpoint will run through the Expectations and validate your dataset against them.
 ```python
 checkpoint_result = checkpoint.run()
 ```
 
-**5. Review Results**:
+**7. Review Results**:
 After running the Checkpoint, you can inspect the validation outcomes and address any discrepancies.
 ```python
 context.view_validation_result(checkpoint_result)
 ```
 
-**Context**:
-Great Expectations revolves around the **Context**, a central object that manages everything from Expectation Suites to the configuration of data sources and validation results.
 
 ### Conclusion
 
