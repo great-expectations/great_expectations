@@ -471,9 +471,8 @@ class SnowflakeDatasource(SQLDatasource):
                             "application": self._get_snowflake_partner_application()
                         }
                     )
-                    self._engine = sa.create_engine(
-                        url,
-                        **kwargs,
+                    self._engine = self._build_engine_with_connect_args(
+                        url=url, **kwargs
                     )
                 else:
                     self._engine = self._build_engine_with_connect_args(
@@ -495,10 +494,15 @@ class SnowflakeDatasource(SQLDatasource):
         return self._engine
 
     def _build_engine_with_connect_args(
-        self, connect_args: dict[str, Any] | None = None, **kwargs
+        self,
+        url: URL | None = None,
+        connect_args: dict[str, Any] | None = None,
+        **kwargs,
     ) -> sqlalchemy.Engine:
-        url_args = self._get_url_args()
-        url_args.update(kwargs)
+        if not url:
+            url_args = self._get_url_args()
+            url_args.update(kwargs)
+            url = URL(**url_args)
 
         engine_kwargs: dict[Literal["url", "connect_args"], Any] = {}
         if connect_args:
@@ -513,6 +517,7 @@ class SnowflakeDatasource(SQLDatasource):
                 connect_args["private_key"] = base64.standard_b64decode(private_key)
 
             engine_kwargs["connect_args"] = connect_args
-        engine_kwargs["url"] = URL(**url_args)
+
+        engine_kwargs["url"] = url
 
         return sa.create_engine(**engine_kwargs)

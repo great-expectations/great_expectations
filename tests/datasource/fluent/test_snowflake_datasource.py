@@ -771,7 +771,7 @@ def test_get_engine_correctly_sets_application_query_param(
                 "kwargs": {"connect_args": {"private_key": b"my_key"}},
             },
             {
-                "connect_args": {"private_key": b"my_key"},
+                "connect_args": {"private_key": base64.standard_b64encode(b"my_key")},
                 "url": "snowflake://user:@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
             },
             id="connection_string dict with connect_args",
