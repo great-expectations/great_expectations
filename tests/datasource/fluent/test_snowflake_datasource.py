@@ -167,6 +167,7 @@ class TestAccountIdentifier:
         [
             "abc12345.us-east-1.aws",
             "xy12345.us-gov-west-1.aws",
+            "xy12345.us-gov-west-1",
             "xy12345.europe-west4.gcp",
             "xy12345.us-east-1",
             "xy12345.central-us.azure",

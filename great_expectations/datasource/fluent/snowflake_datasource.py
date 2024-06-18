@@ -96,7 +96,7 @@ class AccountIdentifier(str):
     TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
 
     PATTERN: ClassVar[re.Pattern] = re.compile(
-        r"^(?P<account>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)(?:\.(?P<cloud>aws|gcp|azure))?$"
+        r"^(?P<account>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)(\.(?P<cloud>aws|gcp|azure))?(?=$)"
     )
 
     def __init__(self, value: str) -> None:
