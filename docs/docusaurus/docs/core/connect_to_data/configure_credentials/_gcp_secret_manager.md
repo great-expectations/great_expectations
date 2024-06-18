@@ -19,7 +19,7 @@ import PreReqFileDataContext from '../../_core_components/prerequisites/_file_da
 
 2. Reference GCP Secret Manager variables in `config_variables.yml`.
 
-   By default, `config_variables.yml` is located at: 'great_expectations/uncomitted/config_variables.yml' in your File Data Context.
+   By default, `config_variables.yml` is located at: 'gx/uncomitted/config_variables.yml' in your File Data Context.
 
    Values in `config_variables.yml` that match the regex `^secret\|projects\/[a-z0-9\_\-]{6,30}\/secrets` will be substituted with corresponding values from GCP Secret Manager.  However, if the keywords in the matching regex do not correspond to keywords in GCP Secret Manager no substitution will occur.
 

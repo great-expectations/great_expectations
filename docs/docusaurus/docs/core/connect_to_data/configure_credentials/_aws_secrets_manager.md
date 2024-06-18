@@ -19,7 +19,7 @@ import PreReqFileDataContext from '../../_core_components/prerequisites/_file_da
 
 2. Reference AWS Secrets Manager variables in `config_variables.yml`.
 
-   By default, `config_variables.yml` is located at: 'great_expectations/uncomitted/config_variables.yml' in your File Data Context.
+   By default, `config_variables.yml` is located at: 'gx/uncomitted/config_variables.yml' in your File Data Context.
 
    Values in `config_variables.yml` that start with `secret|arn:aws:secretsmanager` will be substituted with corresponding values from the AWS Secrets Manager.  However, if the keywords following `secret|arn:aws:secretsmanager` do not correspond to keywords in AWS Secrets Manager no substitution will occur.
 
