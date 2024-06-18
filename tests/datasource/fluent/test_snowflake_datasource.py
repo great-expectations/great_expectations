@@ -19,6 +19,8 @@ from great_expectations.datasource.fluent.snowflake_datasource import (
     AccountIdentifier,
     SnowflakeDatasource,
     SnowflakeDsn,
+    SQLDatasource,
+    TestConnectionError,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
@@ -158,6 +160,23 @@ def sf_test_connection_noop(monkeypatch: pytest.MonkeyPatch) -> None:
         TEST_LOGGER.info(".test_connection noop")
 
     monkeypatch.setattr(SnowflakeDatasource, "test_connection", noop)
+
+
+@pytest.fixture
+def sql_ds_test_connection_always_fail(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Monkey patch the parent class' test_connection() method to always fail.
+    Useful for testing the extra handling that SnowflakeDatasource.test_connection() provides.
+    """
+    TEST_LOGGER.warning(
+        "Monkeypatching SQLDatasource.test_connection() to a always fail"
+    )
+
+    def fail(self, test_assets: bool = True):
+        TEST_LOGGER.info("SQLDatasource.test_connection() always fail")
+        raise TestConnectionError("always fail")
+
+    monkeypatch.setattr(SQLDatasource, "test_connection", fail)
 
 
 @pytest.mark.unit
@@ -798,6 +817,61 @@ def test_create_engine_is_called_with_expected_kwargs(
     print(engine)
 
     create_engine_spy.assert_called_once_with(ANY, **expected_called_with)
+
+
+@pytest.mark.unit
+@pytest.mark.filterwarnings(GxDatasourceWarning)
+class TestConnectionTest:
+    @pytest.mark.parametrize(
+        "connection_string",
+        [
+            "snowflake://user:password@xy12345.us-east-2.aws",
+            {
+                "user": "user",
+                "account": "xy12345.us-east-1.aws",
+                "password": "password",
+            },
+        ],
+        ids=type,
+    )
+    def test_w_valid_account_identifier_format(
+        self, sql_ds_test_connection_always_fail: None, connection_string: str | dict
+    ):
+        sf = SnowflakeDatasource(
+            name="my_sf",
+            connection_string=connection_string,
+        )
+        with pytest.raises(TestConnectionError, match="always fail") as exc_info:
+            sf.test_connection()
+
+        assert not exc_info.value.__cause__, "The error has no initial cause"
+
+    @pytest.mark.parametrize(
+        "connection_string",
+        [
+            "snowflake://user:password@invalid_format",
+            {
+                "user": "user",
+                "account": "invalid_format",
+                "password": "password",
+            },
+        ],
+        ids=type,
+    )
+    def test_warns_about_account_identifier_format(
+        self, sql_ds_test_connection_always_fail: None, connection_string: str | dict
+    ):
+        sf = SnowflakeDatasource(name="my_sf", connection_string=connection_string)
+        with pytest.raises(
+            TestConnectionError,
+            match="Ensure you have the correct account identifier format",
+        ) as exc_info:
+            sf.test_connection()
+
+        print(f"{exc_info.value!r}")
+        assert (
+            repr(exc_info.value.__cause__) == "TestConnectionError('always fail')"
+        ), "Original Error should be preserved"
 
 
 @pytest.mark.snowflake

@@ -87,11 +87,12 @@ class AccountIdentifier(str):
     """
     Custom Pydantic model for the account identifier in SnowflakeDsn.
 
-    https://docs.snowflake.com/en/user-guide/admin-account-identifier#non-vps-account-locator-formats-by-cloud-platform-and-region
+    https://docs.snowflake.com/en/user-guide/admin-account-identifier
 
     Expected formats:
-    1. <account_identifier>.<region>.<cloud> - e.g. abc12345.us-east-1.aws
-    2. <account_identifier>.<region> - e.g. abc12345.us-east-1
+    1. <orgname>.<account_name> - e.g. myOrg.myAccount
+    2. <account_identifier>.<region>.<cloud> - e.g. abc12345.us-east-1.aws
+    3. <account_identifier>.<region> - e.g. abc12345.us-east-1
     """
 
     FORMAT_TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
@@ -102,7 +103,7 @@ class AccountIdentifier(str):
 
     WARNING_TEMPLATE: ClassVar[str] = (
         "Account identifier {value} does not match expected format {format_template} ; it MAY be invalid. "
-        "https://docs.snowflake.com/en/user-guide/admin-account-identifier#format-2-account-locator-in-a-region"
+        "https://docs.snowflake.com/en/user-guide/admin-account-identifier"
     )
 
     def __init__(self, value: str) -> None:
