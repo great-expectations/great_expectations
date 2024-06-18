@@ -107,14 +107,15 @@ def _get_config_substituted_connection_string(
 
 class AccountIdentifier(str):
     """
-    Custom Pydantic model for the account identifier in SnowflakeDsn.
+    Custom Pydantic compatible `str` type for the account identifier in
+    a `SnowflakeDsn` or `ConnectionDetails`.
 
     https://docs.snowflake.com/en/user-guide/admin-account-identifier
 
     Expected formats:
-    1. <orgname>.<account_name> - e.g. myOrg.myAccount
-    2. <account_identifier>.<region>.<cloud> - e.g. abc12345.us-east-1.aws
-    3. <account_identifier>.<region> - e.g. abc12345.us-east-1
+    1. `<orgname>.<account_name>` - e.g. `"myOrg.myAccount"`
+    2. `<account_identifier>.<region>.<cloud>` - e.g. `"abc12345.us-east-1.aws"`
+    3. `<account_identifier>.<region>` - e.g. `"abc12345.us-east-1"`
     """
 
     FORMAT_TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
