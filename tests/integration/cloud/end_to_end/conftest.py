@@ -12,6 +12,7 @@ import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.data_context import CloudDataContext
+from great_expectations.datasource.fluent import GxDatasourceWarning
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
 LOGGER: Final = logging.getLogger("tests")
 
 
+@pytest.mark.filterwarnings(GxDatasourceWarning)  # type: ignore[arg-type] # pytest is wrong
 @pytest.fixture(scope="module")
 def context() -> CloudDataContext:
     context = gx.get_context(
