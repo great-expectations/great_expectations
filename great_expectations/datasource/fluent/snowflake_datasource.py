@@ -35,6 +35,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
     FluentBaseModel,
     SQLDatasource,
     SQLDatasourceError,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -93,10 +94,15 @@ class AccountIdentifier(str):
     2. <account_identifier>.<region> - e.g. abc12345.us-east-1
     """
 
-    TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
+    FORMAT_TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
 
     PATTERN: ClassVar[re.Pattern] = re.compile(
         r"^(?P<account>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)(\.(?P<cloud>aws|gcp|azure))?(?=$)"
+    )
+
+    WARNING_TEMPLATE: ClassVar[str] = (
+        "Account identifier {value} does not match expected format {format_template} ; it MAY be invalid. "
+        "https://docs.snowflake.com/en/user-guide/admin-account-identifier#format-2-account-locator-in-a-region"
     )
 
     def __init__(self, value: str) -> None:
@@ -113,8 +119,9 @@ class AccountIdentifier(str):
         v = cls(value)
         if not v._match:
             warnings.warn(
-                f"Account identifier {value} does not match expected format {cls.TEMPLATE} ; it MAY be invalid. "
-                "https://docs.snowflake.com/en/user-guide/admin-account-identifier#format-2-account-locator-in-a-region",
+                cls.WARNING_TEMPLATE.format(
+                    value=value, format_template=cls.FORMAT_TEMPLATE
+                ),
                 category=GxDatasourceWarning,
             )
         return v
@@ -209,10 +216,16 @@ class SnowflakeDsn(AnyUrl):
         return urllib.parse.parse_qs(self.query)
 
     @property
-    def account_identifier(self) -> str:
+    def account_identifier(self) -> AccountIdentifier:
         """Alias for host."""
         assert self.host
-        return self.host
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=GxDatasourceWarning)
+            return AccountIdentifier(self.host)
+
+    @property
+    def account(self) -> AccountIdentifier:
+        return self.account_identifier
 
     @property
     def database(self) -> str | None:
@@ -276,6 +289,24 @@ class SnowflakeDatasource(SQLDatasource):
     # TODO: add props for account, user, password, etc?
 
     @property
+    def account(self) -> AccountIdentifier | None:
+        """Convenience property to get the `account` regardless of the connection string format."""
+        if isinstance(self.connection_string, (ConnectionDetails, SnowflakeDsn)):
+            return self.connection_string.account
+
+        subbed_str: str | None = _get_config_substituted_connection_string(
+            self, warning_msg="Unable to determine account"
+        )
+        if not subbed_str:
+            return None
+        hostname = urllib.parse.urlparse(subbed_str).hostname
+        if hostname:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=GxDatasourceWarning)
+            return AccountIdentifier(hostname)
+        return None
+
+    @property
     def schema_(self) -> str | None:
         """
         Convenience property to get the `schema` regardless of the connection string format.
@@ -336,6 +367,25 @@ class SnowflakeDatasource(SQLDatasource):
         return urllib.parse.parse_qs(urllib.parse.urlparse(subbed_str).query).get(
             "role", [None]
         )[0]
+
+    @override
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the SnowflakeDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the SQLDatasource, whether to test them as well.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        try:
+            super().test_connection(test_assets=test_assets)
+        except TestConnectionError as e:
+            if self.account and not self.account.match:
+                raise TestConnectionError(
+                    f"Ensure you have the correct account identifier format: {AccountIdentifier.WARNING_TEMPLATE.format(value=self.account, format_template=AccountIdentifier.FORMAT_TEMPLATE)}"
+                ) from e
+            raise
 
     @pydantic.root_validator(pre=True)
     def _convert_root_connection_detail_fields(cls, values: dict) -> dict:

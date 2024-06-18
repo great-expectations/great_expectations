@@ -836,7 +836,7 @@ class TestConvenienceProperties:
             with pytest.warns(GxContextWarning):
                 assert (
                     not datasource.database
-                ), "Don't expect schema to be available without config_provider"
+                ), "Don't expect database to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
             _ = datasource.database
@@ -856,7 +856,7 @@ class TestConvenienceProperties:
             with pytest.warns(GxContextWarning):
                 assert (
                     not datasource.warehouse
-                ), "Don't expect schema to be available without config_provider"
+                ), "Don't expect warehouse to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
             _ = datasource.warehouse
@@ -876,12 +876,32 @@ class TestConvenienceProperties:
             with pytest.warns(GxContextWarning):
                 assert (
                     not datasource.role
-                ), "Don't expect schema to be available without config_provider"
+                ), "Don't expect role to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
             _ = datasource.role
         else:
             assert datasource.role == datasource.connection_string.role
+
+    def test_account(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.account
+                ), "Don't expect account to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.account
+        else:
+            assert datasource.account == datasource.connection_string.account
 
 
 if __name__ == "__main__":
