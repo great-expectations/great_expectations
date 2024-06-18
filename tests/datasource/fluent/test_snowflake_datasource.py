@@ -652,7 +652,7 @@ def test_forward_compatibility_changes_raise_warning(asset: dict):
     with pytest.warns(GxDatasourceWarning):
         ds = SnowflakeDatasource(
             name="my_sf_ds",
-            connection_string="snowflake://my_user:password@myAccount.us-east-1/d_public/s_public",
+            connection_string="snowflake://my_user:password@account.us-east-1/d_public/s_public",
             assets=[asset],
         )
         print(ds)
@@ -680,14 +680,14 @@ def test_get_execution_engine_succeeds():
     "connection_string",
     [
         param(
-            "snowflake://my_user:password@my_account/my_db/my_schema?numpy=True",
+            "snowflake://my_user:password@account.us-east-1/my_db/my_schema?numpy=True",
             id="connection_string str",
         ),
         param(
             {
                 "user": "my_user",
                 "password": "password",
-                "account": "my_account",
+                "account": "account.us-east-1",
                 "database": "foo",
                 "schema": "bar",
             },
