@@ -16,6 +16,7 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
+    AccountIdentifier,
     SnowflakeDatasource,
     SnowflakeDsn,
 )
@@ -157,6 +158,53 @@ def sf_test_connection_noop(monkeypatch: pytest.MonkeyPatch) -> None:
         TEST_LOGGER.info(".test_connection noop")
 
     monkeypatch.setattr(SnowflakeDatasource, "test_connection", noop)
+
+
+@pytest.mark.unit
+class TestAccountIdentifier:
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "abc12345.us-east-1.aws",
+            "xy12345.us-gov-west-1.aws",
+            "xy12345.europe-west4.gcp",
+            "xy12345.us-east-1",
+            # "xy12345",
+        ],
+    )
+    def test_parsing_valid(self, value: str):
+        print(f"{value=}")
+        locator, _, _remainder = value.partition(".")
+        cloud_region_id, _, cloud_service = _remainder.partition(".")
+
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+
+        assert account_identifier.account == locator
+        assert account_identifier.region == (cloud_region_id or None)
+        assert account_identifier.cloud == (cloud_service or None)
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "foobar",
+            "xy12345.us-gov-west-1.aws.",
+            "xy12345.europe-west4.gcp.bar",
+            "xy12345.us-east-1.nope",
+            "xy12345.",
+        ],
+    )
+    def test_parsing_unmatched_format_raises_warning(self, value: str):
+        """
+        Ensure that a warning is raised when the account identifier does not match the expected format.
+        This does not necessarily mean that the account identifier is invalid, but it we should prompt the user to check.
+        """
+        print(f"{value=}")
+        with pytest.warns(
+            GxDatasourceWarning,
+            match=f"Account identifier {value} does not match expected format",
+        ):
+            account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+            print(account_identifier)
 
 
 @pytest.mark.unit

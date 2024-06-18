@@ -93,21 +93,53 @@ class AccountIdentifier(str):
     2. <account_identifier>.<region> - e.g. abc12345.us-east-1
     """
 
-    pattern: ClassVar[re.Pattern] = re.compile(r"^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+){1,2}$")
+    TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
 
-    def __init__(self, v: str) -> None:
-        self.match = self.pattern.match(v)
-        super().__init__()
+    pattern: ClassVar[re.Pattern] = re.compile(
+        r"^(?P<account>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)(?:\.(?P<cloud>[a-zA-Z0-9-]+))?$"
+    )
+
+    def __init__(self, value: str) -> None:
+        self._match = self.pattern.match(value)
 
     @classmethod
     def __get_validators__(cls) -> Any:
         yield cls.validate
 
     @classmethod
-    def validate(cls, value: str) -> str:
+    def validate(cls, value: str) -> AccountIdentifier:
         if not value:
             raise ValueError("Account identifier cannot be empty")
-        return value
+        v = cls(value)
+        if not v._match:
+            warnings.warn(
+                f"Account identifier {value} does not match expected format {cls.TEMPLATE} ; it MAY be invalid. "
+                "https://docs.snowflake.com/en/user-guide/admin-account-identifier#format-2-account-locator-in-a-region",
+                category=GxDatasourceWarning,
+            )
+        return v
+
+    @property
+    def match(self) -> re.Match[str] | None:
+        return self._match
+
+    @property
+    def account(self) -> str | None:
+        if self._match:
+            return self._match.group("account")
+        return None
+
+    @property
+    def region(self) -> str | None:
+        if self._match:
+            return self._match.group("region")
+        return None
+
+    @property
+    def cloud(self) -> str | None:
+        if self._match:
+            return self._match.group("cloud")
+        return None
 
 
 class _UrlPasswordError(pydantic.UrlError):
