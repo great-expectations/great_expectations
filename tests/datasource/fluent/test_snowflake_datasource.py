@@ -821,7 +821,7 @@ def test_create_engine_is_called_with_expected_kwargs(
 
 
 @pytest.mark.unit
-@pytest.mark.filterwarnings(GxDatasourceWarning)
+@pytest.mark.filterwarnings(GxDatasourceWarning)  # type: ignore[arg-type] # improper type hint in pytest
 class TestConnectionTest:
     @pytest.mark.parametrize(
         "connection_string",
