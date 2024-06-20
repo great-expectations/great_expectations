@@ -1,13 +1,26 @@
 ---
 title: Test an Expectation
 ---
+import TabItem from '@theme/TabItem';
+import Tabs from '@theme/Tabs';
+
+import PrereqPython from '../_core_components/prerequisites/_python_installation.md';
+import PrereqGxInstallation from '../_core_components/prerequisites/_gx_installation.md';
+import PrereqDatacontext from '../_core_components/prerequisites/_preconfigured_data_context.md';
+import PrereqDataSourceAndAssetConnectedToData from '../_core_components/prerequisites/_data_source_asset_and_batch_definition.md';
+import PrereqExpectation from '../_core_components/prerequisites/_expectation.md';
 
 ## Prerequisites
 
-- Python
-- GX installed
-- An Expectation
-- A Data Context with a fully configured Data Source, Data Asset, and Batch Definition.
+- <PrereqPython/>.
+- <PrereqGxInstallation/>.
+- <PrereqDatacontext/>.
+- <PrereqDataSourceAndAssetConnectedToData/>.
+- <PrereqExpectation/>.
+
+<Tabs>
+
+<TabItem value="procedure" label="Procedure">
 
 1. Retrieve your Batch Definition.
 
@@ -46,20 +59,26 @@ title: Test an Expectation
 
    ```python title="Python output"
    {
+     # highlight-start
      "success": false,
+     # highlight-end
      "expectation_config": {
        "expectation_type": "expect_column_max_to_be_between",
        "kwargs": {
          "batch_id": "2018-06_taxi",
          "column": "passenger_count",
+         # highlight-start
          "min_value": 4.0,
          "max_value": 5.0
+         # highlight-end
        },
        "meta": {},
        "id": "38368501-4599-433a-8c6a-28f5088a4d4a"
      },
      "result": {
+     # highlight-start
        "observed_value": 6
+     # highlight-end
      },
      "meta": {},
      "exception_info": {
@@ -88,24 +107,30 @@ title: Test an Expectation
    print(new_validation_results)
    ```
 
-   This time, the updated Expectation accurately describes the data and the validation succeeds:
+   This time, the updated Expectation accurately describes the data and the validation succeds:
 
    ```python title="Python output"
    {
+     # highlight-start
      "success": true,
+     # highlight-end
      "expectation_config": {
        "expectation_type": "expect_column_max_to_be_between",
        "kwargs": {
          "batch_id": "2018-06_taxi",
          "column": "passenger_count",
+         # highlight-start
          "min_value": 1.0,
          "max_value": 6.0
+         # highlight-end
        },
        "meta": {},
        "id": "38368501-4599-433a-8c6a-28f5088a4d4a"
      },
      "result": {
+       # highlight-start
        "observed_value": 6
+       # highlight-end
      },
      "meta": {},
      "exception_info": {
@@ -114,8 +139,17 @@ title: Test an Expectation
        "exception_message": null
      }
    }
+   ```
 
-```python title="Python"
+   For more information about Validation Results, what they contain, and how to adjust their verbosity see [Choose result format](../run_validations/choose_result_format.md).
+
+
+</TabItem>
+
+<TabItem value="sample_code" label="Sample code">
+
+
+   ```python title="Python"
    import great_expectations as gx
    import great_expectations.expectations as gxe
 
@@ -123,7 +157,7 @@ title: Test an Expectation
    context = gx.get_context()
 
    # The Expectation to test:
-   expectation = gxe.ExpectColumnMaxToBeBetween(column="passenger_count", min_value=4, max_value=6)
+   expectation = gxe.ExpectColumnMaxToBeBetween(column="passenger_count", min_value=4, max_value=5)
 
    # Retrieve a Batch of data to test your Expectation on.
    datasource_name = "all_csv_files"
@@ -139,12 +173,14 @@ title: Test an Expectation
    
    # Optional. Modify the Expectation and test again:
    
-   ```python title="Python"
    expectation.min_value = 1
    expectation.max_value = 6
    
-   validation_results = batch.validate(expectation)
-   print(validation_results)
+   new_validation_results = batch.validate(expectation)
+   print(new_validation_results)
    ```
-   
-```
+
+</TabItem>
+
+</Tabs>
+
