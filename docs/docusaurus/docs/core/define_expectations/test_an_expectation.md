@@ -10,6 +10,8 @@ import PrereqDatacontext from '../_core_components/prerequisites/_preconfigured_
 import PrereqDataSourceAndAssetConnectedToData from '../_core_components/prerequisites/_data_source_asset_and_batch_definition.md';
 import PrereqExpectation from '../_core_components/prerequisites/_expectation.md';
 
+Data can be validated against individual Expectations.  This workflow is generally used when engaging in exploration of new data, or when building out a set of Expectations to comprehensively describe the state that your data should conform to.
+
 ## Prerequisites
 
 - <PrereqPython/>.
