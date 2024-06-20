@@ -1,8 +1,6 @@
 ---
 title: Test an Expectation
 description: Test an individual Expectation by validating a Batch of data.
-toc_min_heading_level: 1
-toc_max_heading_level: 1
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
@@ -15,7 +13,7 @@ import PrereqExpectation from '../_core_components/prerequisites/_expectation.md
 
 Data can be validated against individual Expectations.  This workflow is generally used when engaging in exploration of new data, or when building out a set of Expectations to comprehensively describe the state that your data should conform to.
 
-## Prerequisites
+<h2>Prerequisites</h2>
 
 - <PrereqPython/>.
 - <PrereqGxInstallation/>.

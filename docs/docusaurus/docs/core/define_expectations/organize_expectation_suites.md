@@ -1,8 +1,6 @@
 ---
 title: Organize Expectations into an Expectation Suite
 description: Create and populate a GX Core Expectation Suite with Python.
-toc_min_heading_level: 1
-toc_max_heading_level: 1
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
@@ -14,7 +12,7 @@ import PrereqPreconfiguredDataSourceAndAsset from '../_core_components/prerequis
 
 An Expectation Suite contains a group of Expectations that describe the same set of data.  Combining all the Expectations that you apply to a given set of data into an Expectation Suite allows you to evaluate them as a group, rather than individually.  All of the Expectations that you use to validate your data in production workflows should be grouped into Expectation Suites.
 
-## Prerequisites
+<h2>Prerequisites</h2>
 
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.

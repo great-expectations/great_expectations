@@ -1,7 +1,5 @@
 ---
 title: Run a Validation Definition
-toc_min_heading_level: 1
-toc_max_heading_level: 1
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
@@ -13,7 +11,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
 
 
 
-## Prerequisites
+<h2>Prerequisites</h2>
 
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.

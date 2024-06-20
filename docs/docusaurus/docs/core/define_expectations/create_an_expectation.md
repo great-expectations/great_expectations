@@ -1,8 +1,6 @@
 ---
 title: Create an Expectation
 description: Create and modify an Expectation in Python.
-toc_min_heading_level: 1
-toc_max_heading_level: 1
 ---
 import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
 import PrereqGxInstalled from '../_core_components/prerequisites/_gx_installation.md';
@@ -14,7 +12,7 @@ import Tabs from '@theme/Tabs';
 
 An Expectation is a verifiable assertion about your data. Expectations make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality. 
 
-## Prerequisites
+<h2>Prerequisites</h2>
 
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.
