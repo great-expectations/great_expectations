@@ -19,7 +19,7 @@ import PreReqFileDataContext from '../../_core_components/prerequisites/_file_da
 
 2. Reference Azure Key Vault variables in `config_variables.yml`.
 
-   By default, `config_variables.yml` is located at: 'great_expectations/uncomitted/config_variables.yml' in your File Data Context.
+   By default, `config_variables.yml` is located at: 'gx/uncomitted/config_variables.yml' in your File Data Context.
 
    Values in `config_variables.yml` that match the regex `^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net` will be substituted with corresponding values from Azure Key Vault.  However, if the keywords in the matching regex do not correspond to keywords in Azure Key Vault no substitution will occur.
 
