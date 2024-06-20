@@ -1,5 +1,7 @@
 ---
 title: Create a Validation Definition
+toc_min_heading_level: 1
+toc_max_heading_level: 1
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';

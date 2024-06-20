@@ -1,7 +1,8 @@
 ---
 title: Create an Expectation
 description: Create and modify an Expectation in Python.
-hide_table_of_contents: true
+toc_min_heading_level: 1
+toc_max_heading_level: 1
 ---
 import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
 import PrereqGxInstalled from '../_core_components/prerequisites/_gx_installation.md';

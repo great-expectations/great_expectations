@@ -68,8 +68,8 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Create Expectations',
-      link: { type: 'doc', id: 'core/create_expectations/create_expectations' },
+      label: 'Define Expectations',
+      link: { type: 'doc', id: 'core/define_expectations/define_expectations' },
       items: [
         {
           type: 'doc',
