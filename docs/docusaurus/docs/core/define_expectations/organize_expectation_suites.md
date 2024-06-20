@@ -1,6 +1,7 @@
 ---
 title: Organize Expectations into an Expectation Suite
 description: Create and populate a GX Core Expectation Suite with Python.
+hide_table_of_contents: true
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
