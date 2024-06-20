@@ -71,85 +71,20 @@ module.exports = {
       label: 'Create Expectations',
       link: { type: 'doc', id: 'core/create_expectations/create_expectations' },
       items: [
-        // 'oss/guides/expectations/create_expectations_overview',
         {
-          type: 'category',
-          label: 'Manage Expectations',
-          link: { type: 'doc', id: 'core/create_expectations/expectations/manage_expectations' },
-          items: [
-            {
-              type: 'link',
-              label: 'Create an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#create-an-expectation',
-            },
-            {
-              type: 'link',
-              label: 'Test an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#test-an-expectation',
-            },
-            {
-              type: 'link',
-              label: 'Modify an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#modify-an-expectation',
-            },
-            {
-              type: 'link',
-              label: 'Customize an Expectation Class',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectations/manage_expectations#customize-an-expectation-class',
-            },
-          ]
+          type: 'doc',
+          id: 'core/define_expectations/create_an_expectation',
+          label: 'Create an Expectation'
         },
-      {
-          type: 'category',
-          label: 'Manage Expectation Suites',
-          link: { type: 'doc', id: 'core/create_expectations/expectation_suites/manage_expectation_suites' },
-          items: [
-            {
-              type: 'link',
-              label: 'Create an Expectation Suite',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#create-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Get an existing Expectation Suite',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#get-an-existing-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Rename an Expectation Suite',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#rename-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Delete an Expectation Suite',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#delete-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Add Expectations',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#add-expectations-to-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Get an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#get-an-expectation-from-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Edit a single Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#edit-a-single-expectation-in-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Edit multiple Expectations',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#edit-multiple-expectations-in-an-expectation-suite',
-            },
-            {
-              type: 'link',
-              label: 'Delete an Expectation',
-              href: '/docs/1.0-prerelease/core/create_expectations/expectation_suites/manage_expectation_suites#delete-an-expectation-from-an-expectation-suite',
-            },
-          ]
+        {
+          type: 'doc',
+          id: 'core/define_expectations/test_an_expectation',
+          label: 'Test an Expectation'
+        },
+        {
+          type: 'doc',
+          id: 'core/define_expectations/organize_expectation_suites',
+          label: 'Organize Expectations into an Expectation Suite'
         },
       ]
     },

@@ -1,6 +1,6 @@
 ---
-title: Organize Expectations into Expectation Suites
-description: Create and populate GX Core Expectation Suites with Python.
+title: Organize Expectations into an Expectation Suite
+description: Create and populate a GX Core Expectation Suite with Python.
 ---
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
@@ -19,6 +19,10 @@ An Expectation Suite contains a group of Expectations that describe the same set
 - Recommended. <PrereqPreconfiguredDataContext/>.
 - Recommended. <PrereqPreconfiguredDataSourceAndAsset/>.
 
+
+<Tabs>
+
+<TabItem value="procedure" label="Procedure">
 
 1. Retrieve or create a Data Context.
 
@@ -86,3 +90,39 @@ An Expectation Suite contains a group of Expectations that describe the same set
    existing_suite_name = "my_expectation_suite"  # replace this with the name of your Expectation Suite
    suite = context.suites.get(name=existing_suite_name)
    ```
+
+</TabItem>
+
+<TabItem value="sample_code" label="Sample code">
+
+```python title="Python input"
+import great_expectations as gx
+from great_expectations.core.expectation_suite import ExpectationSuite
+import great_expectations.expectations as gxe
+
+context = gx.get_context()
+expectation = gxe.ExpectColumnValuesToNotBeNull(column="passenger_count")
+
+# Create an Expectation Suite
+suite_name = "my_expectation_suite"
+suite = ExpectationSuite(name=suite_name)
+
+# Add a previously created Expectation to the Expectation Suite
+suite.add_expectation(expectation)
+
+# Add an Expectation to the Expectation Suite when it is created
+suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
+
+# Update the configuration of an Expectation, then push the changes to the Expectation Suite
+expectation.column = "pickup_location_id"
+expectation.save()
+
+# Retrieve an Expectation Suite from the Data Context
+existing_suite_name = "my_expectation_suite"  # replace this with the name of your Expectation Suite
+suite = context.suites.get(name=existing_suite_name)
+```
+
+
+</TabItem>
+
+</Tabs>
