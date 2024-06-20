@@ -3,8 +3,6 @@ title: 'Define Expectations'
 description: Create and modify Expectations, then organize them into Expectation Suites.
 hide_feedback_survey: true
 hide_title: true
-toc_min_heading_level: 1
-toc_max_heading_level: 1
 ---
 
 import LinkCardGrid from '@site/src/components/LinkCardGrid';
