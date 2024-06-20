@@ -194,6 +194,19 @@ def add_dataframe_to_db(  # noqa: PLR0913
             # but using the base class here since sqlalchemy is an optional dependency and this
             # warning type only exists in sqlalchemy < 2.0.
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+            # To filter:
+            # UserWarning: pandas only supports SQLAlchemy connectable (engine/connection)
+            # or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects
+            # are not tested. Please consider using SQLAlchemy.
+            # This warning is being raised in:
+            # "marker-tests (athena or clickhouse or openpyxl or pyarrow or project
+            # or sqlite or aws_creds, 3.9)" - also python 3.10, 3.11
+            # tests using the following dependencies:
+            # pyathena-2.25.2
+            # pandas-2.2.2
+            # sqlalchemy-1.4.52
+            # clickhouse-driver-0.2.8 clickhouse-sqlalchemy-0.2.6
+            warnings.filterwarnings(action="ignore", category=UserWarning)
             df.to_sql(
                 name=name,
                 con=con,
