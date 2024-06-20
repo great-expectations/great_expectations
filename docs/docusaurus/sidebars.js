@@ -553,6 +553,15 @@ module.exports = {
     },
   ],
   learn: [
+    {
+      type: 'category',
+      label: 'Data quality use cases',
+      link: { type: 'doc', id: 'reference/learn/data_quality_use_cases/dq_use_cases_lp' },
+      items: [
+        'reference/learn/data_quality_use_cases/schema',
+        'reference/learn/data_quality_use_cases/missingness'
+      ]
+    },
       'reference/learn/usage_statistics',
       'reference/learn/glossary'
   ],
