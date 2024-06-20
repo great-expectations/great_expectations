@@ -29,7 +29,6 @@ div.theme-code-block {
     display: flex;
     font-size: var(--p-md-font-size);
     opacity: 0.75;
-    text-transform: capitalize;
 
     &::before {
       background: url('/img/file-solid.svg') 0 50% no-repeat;

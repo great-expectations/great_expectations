@@ -34,7 +34,7 @@ def integer_and_datetime_sample_dataset() -> dict:
             11,
         ],
         "b": [
-            datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))
+            datetime.datetime(2021, 1, 1, 0, 0, 0) + datetime.timedelta(days=(week_idx * 7))  # noqa: DTZ001
             for week_idx in range(12)
         ],
     }
@@ -140,7 +140,7 @@ def _test_column_partition_metric(
             operand_a=element.to_pydatetime()
             if isinstance(validator_with_data.execution_engine, PandasExecutionEngine)
             else element,
-            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),
+            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),  # noqa: DTZ001
         )
         for idx, element in enumerate(results[desired_metric.id])
     )
