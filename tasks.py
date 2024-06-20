@@ -618,6 +618,20 @@ def type_schema(  # noqa: C901 - too complex
         core.ExpectColumnSumToBeBetween,
         core.ExpectColumnKLDivergenceToBeLessThan,
         core.ExpectColumnQuantileValuesToBeBetween,
+        core.ExpectColumnValueLengthsToBeBetween,
+        core.ExpectColumnValueLengthsToEqual,
+        core.ExpectColumnValueZScoresToBeLessThan,
+        core.ExpectColumnValuesToBeBetween,
+        core.ExpectColumnValuesToMatchLikePattern,
+        core.ExpectColumnValuesToMatchLikePatternList,
+        core.ExpectColumnValuesToMatchRegex,
+        core.ExpectColumnValuesToMatchRegexList,
+        core.ExpectColumnValuesToNotBeInSet,
+        core.ExpectColumnValuesToNotBeNull,
+        core.ExpectColumnValuesToNotMatchLikePattern,
+        core.ExpectColumnValuesToNotMatchLikePatternList,
+        core.ExpectColumnValuesToNotMatchRegex,
+        core.ExpectColumnValuesToNotMatchRegexList,
     ]
     for x in supported_expectations:
         schema_path = expectation_dir.joinpath(f"{x.__name__}.json")
