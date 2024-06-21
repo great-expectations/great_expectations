@@ -43,40 +43,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
    suite = ExpectationSuite(name=suite_name)
    ```
 
-4. Create an Expectation.
-
-   In this procedure, your Expectation is stored in the variable `expectation`.  For information on creating an Expectation see [Create an Expectation](./create_an_expectation.md).
-
-5. Add the Expectation to the Expectation Suite.
-
-   An Expectation Suite's `add_expectation(...)` method takes in an instance of an Expectation and adds it to the Expectation Suite's configuraton: 
-
-   ```python title="Python input"
-   suite.add_expectation(expectation)
-   ```
-   
-   You can also instantiate an Expectation at the same time as you add it to an Expectation Suite:
-
-   ```python title="Python input"
-   import great_expectations.expectations as gxe
-   
-   suite.add_expectation(gxe.ExpectColumnValuesToNotBeNull(column="pickup_datetime"))
-   ```
-
-   If you have a configured Data Source, Data Asset, and Batch Definition you can test your Expectation before adding it to your Expectation Suite.  To do this see [Test an Expectation](./test_an_expectation.md).
-
-   However, if you test and modify an Expectation _after_ you have added it to your Expectation Suite you must explicitly save those modifications before they will be pushed to the Expectation Suite itself:
-
-   ```python title="Python input"
-   expectation.column = "pickup_location_id"
-   expectation.save()
-   ```
-
-6. Continue to create and add additional Expectations
-   
-   Repeat the process of creating, testing, and adding Expectations to your Expectation Suite until the Expectation Suite adequately describes your data's ideal state.
-
-7. Add the Expectation Suite to your Data Context
+3. Add the Expectation Suite to your Data Context
 
    Once you have finalized the contents of your Expectation Suite you should save it to your Data Context:  
 
@@ -90,6 +57,33 @@ An Expectation Suite contains a group of Expectations that describe the same set
    existing_suite_name = "my_expectation_suite"  # replace this with the name of your Expectation Suite
    suite = context.suites.get(name=existing_suite_name)
    ```
+
+4. Create an Expectation.
+
+   In this procedure, your Expectation is stored in the variable `expectation`.  For information on creating an Expectation see [Create an Expectation](./create_an_expectation.md).
+
+5. Add the Expectation to the Expectation Suite.
+
+   An Expectation Suite's `add_expectation(...)` method takes in an instance of an Expectation and adds it to the Expectation Suite's configuraton: 
+
+   ```python title="Python input"
+   suite.add_expectation(expectation)
+   ```
+
+   If you have a configured Data Source, Data Asset, and Batch Definition you can test your Expectation before adding it to your Expectation Suite.  To do this see [Test an Expectation](./test_an_expectation.md).
+
+   However, if you test and modify an Expectation _after_ you have added it to your Expectation Suite you must explicitly save those modifications before they will be pushed to the Expectation Suite's configuration:
+
+   ```python title="Python input"
+   expectation.column = "pickup_location_id"
+   expectation.save()
+   ```
+   
+   Because the `save()` method is updating an Expectation Suite's configuration with the modified Expectation it will only function if the Expectation Suite has already been added to your Data Context.
+
+6. Continue to create and add additional Expectations
+   
+   Repeat the process of creating, testing, and adding Expectations to your Expectation Suite until the Expectation Suite adequately describes your data's ideal state.
 
 </TabItem>
 

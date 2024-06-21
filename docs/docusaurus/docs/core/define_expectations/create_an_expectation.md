@@ -10,7 +10,7 @@ import StandardArgumentsTable from './_expectations/_standard_arguments_table.md
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-An Expectation is a verifiable assertion about your data. Expectations make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality. 
+An Expectation is a verifiable assertion about your data. Expectations make implicit assumptions about your data explicit, and they provide a flexible, declarative language for describing expected behavior. They can help you better understand your data and help you improve data quality.
 
 <h2>Prerequisites</h2>
 
@@ -31,18 +31,12 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
    from great_expectations import expectations as gxe
    ```
 
-2. Determine the Expectation's evaluation parameters
+2. Determine the Expectation's parameters
 
    To determine the parameters your Expectation uses to evaluate data, reference the Expectation's entry in the [Expectation Gallery](https://greatexpectations.io/expectations/).  Under the **Args** section you will find a list of parameters that are necessary for the Expectation to be evaluated, along with the a description of the value that should be provided.
 
-   Parameters with a default value do not need to be set.  Parameters that are set to `None` can be provided at runtime.  Values for all other parameters must be provided when the Expectation is created.
-
-   For example, take the [**Args** section for `ExpectColumnMaxToBeBetween` in the Expectation Gallery](https://greatexpectations.io/expectations/expect_column_max_to_be_between#args).  In this section, you will see that for `ExpectColumnMaxToBeBetween`'s parameters:
-
-      - `column` must be a string.  Since it cannot be set to `None` its value must be provided when the Expectation is created.
-      - `min_value` and `max_value` can be either set when the Expectation is created, or be set to `None` when the Expectation is created and then have appropriate values passed in at runtime, instead.
-      - `strict_min` and `strict_max` both have default values that can be overriden when the Expectation is created, or left as is.  Because they cannot be set to `None` when the Expectation is created these parameters also cannot be passed in at runtime.
-
+   Parameters that indicate a column, list of columns, or a table must be provided when the Expectation is created.  The value in these parameters is used to differentiate instances of the same Expectation class.  All other parameters can be set when the Expectation is created or be assigned a dictionary lookup that will allow them to be set at runtime.
+   
 3. Optional. Determine the Expectation's other parameters
 
    In addition to the parameters that are required for an Expectation to evaluate data all Expectations also support some standard parameters that determine how strictly Expectations are evaluated and permit the addition of metadata.  In the Expectations Gallery these are found under each Expectation's **Other Parameters** section.
@@ -52,66 +46,61 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
    <StandardArgumentsTable/>
 
 4. Create the Expectation.
-
+  
    Using the Expectation class you picked and the parameters you determined when referencing the Expectation Gallery, you can create your Expectation.
 
-   In this example the `ExpectColumnMaxToBeBetween` Expectation is created and all of its parameters are defined in advance while leaving `strict_min` and `strict_max` as their default values:
+   <Tabs queryString="expectation_parameters" groupId="expectation_parameters" defaultValue='preset' values={[{label: 'Preset parameters', value:'preset'}, {label: 'Runtime parameters', value:'runtime'}]}>
 
-   ```python title="Python"
-   preset_expectation = gxe.ExpectColumnMaxToBeBetween(
-       column="passenger_count",
-       min_value=4,
-       max_value=6
-   )
-   ```
+   <TabItem value="preset" label="Preset parameters">
    
-   While in this example the same `ExpectColumnMaxToBeBetween` Expectation is created, but the values for `min_value` and `max_value` will be provided at runtime rather than set when the Expectation is created:
+      In this example the `ExpectColumnMaxToBeBetween` Expectation is created and all of its parameters are defined in advance while leaving `strict_min` and `strict_max` as their default values:
 
-   ```python title="Python"
-   runtime_expectation = gxe.ExpectColumnMaxToBeBetween(
-       column="passenger_count",
-       min_value=None,
-       max_value=None
-   )
-   ```
+      ```python title="Python"
+      preset_expectation = gxe.ExpectColumnMaxToBeBetween(
+          column="passenger_count",
+          min_value=4,
+          max_value=6
+      )
+      ```
+
+   </TabItem>
    
-   The runtime `expectation_parameters` dictionary for the above example would look like:
+   <TabItem value="runtime" label="Runtime parameters">
 
-   ```python title="Python"
-   runtime_expectation_parameters = {
-      "min_value": 4,
-      "max_value": 6
-   }
-   ```
+      Runtime parameters are provided by passing a dictionary to the `expectation_parameters` argument of a Checkpoint's `run()` method.
+      
+      To indicate which key in the `expectation_parameters` dictionary corresponds to a given parameter in an Expectation you define a lookup as the value of the parameter when the Expectation is created.  This is done by passing in a dictionary with the key `$PARAMETER` when the Expectation is created.  The value associated with the `$PARAMETER` key is the lookup used to find the parameter in the runtime dictionary.
 
-   In some cases, you may have Expectations with the same parameters all of which are intended to be passed in at runtime.  When you create these Expectations you can provide instructions for GX to look up a specific parameter under a different name in the runtime `expectations_parameter` dictionary.  This is done by setting the value for the parameter as a dictionary containing the key `$PARAMETER` paired with the key to look for in the `expectations_parameter` dictionary.
-
-   In this example, `ExpectColumnMaxToBeBetween` is set for both the `passenger_count` and the `fare` fields, and the values for `min_value` and `max_value` in each Expectation will be passed in at runtime.  To differentiate between the parameters for each Expectation a more specific key is set for finding the parameter in the runtime `expectation_parameters` dictionary:
-
-   ```python title="Python"
-   passenger_expectation = gxe.ExpectColumnMaxToBeBetween(
-      column="passenger_count",
-      min_value={"$PARAMETER": "expect_passenger_max_to_be_above"},
-      max_value={"$PARAMETER": "expect_passenger_max_to_be_below"}
-   )
+      In this example, `ExpectColumnMaxToBeBetween` is created for both the `passenger_count` and the `fare` fields, and the values for `min_value` and `max_value` in each Expectation will be passed in at runtime.  To differentiate between the parameters for each Expectation a more specific key is set for finding each parameter in the runtime `expectation_parameters` dictionary:
    
-   fare_expectation = gxe.ExpectColumnMaxToBeBetween(
-      column="fare",
-      min_value={"$PARAMETER": expect_fare_max_to_be_above"},
-      max_value={"$PARAMETER": expect_fare_max_to_be_below"}
-   )
-   ```
-   
-   The runtime `expectation_parameters` dictionary for the above example would look like:
+      ```python title="Python"
+      passenger_expectation = gxe.ExpectColumnMaxToBeBetween(
+         column="passenger_count",
+         min_value={"$PARAMETER": "expect_passenger_max_to_be_above"},
+         max_value={"$PARAMETER": "expect_passenger_max_to_be_below"}
+      )
 
-   ```python title="Python"
-   runtime_expectation_parameters = {
-      "expect_passenger_max_to_be_above": 4,
-      "expect_passenger_max_to_be_below": 6,
-      "expect_fare_max_to_be_above": 10.00,
-      "expect_fare_max_to_be_below": 500.00
-   }
-   ```
+      fare_expectation = gxe.ExpectColumnMaxToBeBetween(
+         column="fare",
+         min_value={"$PARAMETER": expect_fare_max_to_be_above"},
+         max_value={"$PARAMETER": expect_fare_max_to_be_below"}
+      )
+      ```
+
+      The runtime `expectation_parameters` dictionary for the above example would look like:
+   
+      ```python title="Python"
+      runtime_expectation_parameters = {
+         "expect_passenger_max_to_be_above": 4,
+         "expect_passenger_max_to_be_below": 6,
+         "expect_fare_max_to_be_above": 10.00,
+         "expect_fare_max_to_be_below": 500.00
+      }
+      ``` 
+
+   </TabItem>
+
+   </Tabs>
 
 </TabItem>
 
@@ -128,26 +117,9 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
        max_value=6
    )
    
-   # This Expectation requires `min_value` and `max_value`
-   #   to be passed in at runtime:
-   runtime_expectation = gxe.ExpectColumnMaxToBeBetween(
-       column="passenger_count",
-       min_value=None,
-       max_value=None
-   )
-   
-   # This is an example of a dictionary that could be passed in at runtime
-   #  above Expectation.  A different dictionary with different values
-   #  (but the same keys) could be passed in every time the Expectation
-   #  is run.
-   runtime_expectation_parameters = {
-      "min_value": 4,
-      "max_value": 6
-   }
-   
    # In this case, two Expectations are created that will be passed
-   #  parameters at runtime, so a way to differentiate between the two
-   #  in the runtime dictionary needs to be specified.
+   #  parameters at runtime, and unique lookups are defined for each
+   #  Expectations' parameters.
 
    passenger_expectation = gxe.ExpectColumnMaxToBeBetween(
       column="passenger_count",
