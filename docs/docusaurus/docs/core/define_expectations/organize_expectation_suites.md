@@ -101,6 +101,9 @@ expectation = gxe.ExpectColumnValuesToNotBeNull(column="passenger_count")
 suite_name = "my_expectation_suite"
 suite = ExpectationSuite(name=suite_name)
 
+# Add the Expectation Suite to the Data Context
+suite = context.suites.add(suite)
+
 # Add a previously created Expectation to the Expectation Suite
 suite.add_expectation(expectation)
 
