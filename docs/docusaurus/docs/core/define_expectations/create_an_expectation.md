@@ -82,8 +82,8 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
 
       fare_expectation = gxe.ExpectColumnMaxToBeBetween(
          column="fare",
-         min_value={"$PARAMETER": expect_fare_max_to_be_above"},
-         max_value={"$PARAMETER": expect_fare_max_to_be_below"}
+         min_value={"$PARAMETER": "expect_fare_max_to_be_above"},
+         max_value={"$PARAMETER": "expect_fare_max_to_be_below"}
       )
       ```
 
@@ -128,8 +128,8 @@ An Expectation is a verifiable assertion about your data. Expectations make impl
    )
    fare_expectation = gxe.ExpectColumnMaxToBeBetween(
       column="fare",
-      min_value={"$PARAMETER": expect_fare_max_to_be_above"},
-      max_value={"$PARAMETER": expect_fare_max_to_be_below"}
+      min_value={"$PARAMETER": "expect_fare_max_to_be_above"},
+      max_value={"$PARAMETER": "expect_fare_max_to_be_below"}
    )
    
    # A dictionary containing the parameters for both of the above
