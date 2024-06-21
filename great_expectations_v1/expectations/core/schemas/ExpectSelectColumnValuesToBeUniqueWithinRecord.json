@@ -63,16 +63,10 @@
         },
         "column_list": {
             "title": "Column List",
-            "anyOf": [
-                {
-                    "type": "array",
-                    "items": {}
-                },
-                {
-                    "type": "array",
-                    "items": {}
-                }
-            ]
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "mostly": {
             "title": "Mostly",
