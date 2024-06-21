@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Sequence, Type, Union
 
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -173,7 +173,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
                 }}
     """  # noqa: E501
 
-    column_list: Union[tuple, list]
+    column_list: Sequence[str]
     ignore_row_if: str = "all_values_are_missing"
 
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
