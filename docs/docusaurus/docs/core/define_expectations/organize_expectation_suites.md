@@ -79,7 +79,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
    expectation.save()
    ```
    
-   Because the `save()` method is updating an Expectation Suite's configuration with the modified Expectation it will only function if the Expectation Suite has already been added to your Data Context.
+   Because the `save()` method of a modified Expectation updates its Expectation Suite's configuration, the `save()` method will only function if the Expectation Suite has been added to your Data Context.
 
 6. Continue to create and add additional Expectations
    
