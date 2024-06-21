@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union, Sequence
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Sequence, Type, Union
 
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
