@@ -87,7 +87,7 @@ Expectations can be built directly from the domain knowledge of subject matter e
 
 For a list of available Expectations, see [the Expectation Gallery](https://greatexpectations.io/expectations/).
 
-For more information, see [Create and manage Expectations and Expectation Suites](/core/create_expectations/create_expectations.md).
+For more information, see [Create an Expectation](/core/define_expectations/create_an_expectation.md).
 
 ### Expectation Suites
 
@@ -95,14 +95,14 @@ Expectation Suites are collections of Expectations describing your data.  When G
 
 You can define multiple Expectation Suites for the same data to cover different use cases.  An example could be having one Expectation Suite for raw data, and a more strict Expectation Suite for that same data post-processing.  Because an Expectation Suite is decoupled from a specific source of data, you can apply the same Expectation Suite against multiple, disparate Data Sources.  For instance, you can reuse an Expectation Suite that was created around an older set of data to validate the quality of a new set of data.
 
-For more information, see [Manage Expectation Suites](/core/create_expectations/expectation_suites/manage_expectation_suites.md).
+For more information, see [Organize Expectations into Expectation Suites](/core/define_expectations/organize_expectation_suites.md).
 
 ### Custom Expectations
 
 A built-in library of more than 50 common expectations is included with GX.  However, you can also create custom Expectations if you need a more specialized one for your data validation.  You can also use custom Expectations that have been contributed by other GX community members by installing them as Plugins.
 
 For more information, see:
-- [Create Custom Expectations](/core/create_expectations/expectations/manage_expectations.md#customize-an-expectation-class)
+- [Create Custom Expectations](/core/customize_expectations/customize_expectations.md)
 
 ## Checkpoints
 
@@ -110,7 +110,7 @@ For more information, see:
 
 A Checkpoint is the primary means for validating data in a production deployment of GX. Checkpoints provide an abstraction for bundling a Batch (or Batches) of data with an Expectation Suite (or several), and then running those Expectations against the paired data.
 
-For more information, see [Manage Checkpoints](/core/validate_data/checkpoints/manage_checkpoints.md).
+For more information, see [Trigger Actions based on results](/core/trigger_actions_based_on_results/trigger_actions_based_on_results.md).
 
 ### Validation Results
 
@@ -122,4 +122,4 @@ The Validation Results returned by GX tell you how your data corresponds to what
 
 One of the most powerful features of Checkpoints is that you can configure them to run Actions. The Validation Results generated when a Checkpoint runs determine what Actions are performed. Typical use cases include sending email, Slack messages, or custom notifications. Another common use case is updating Data Docs sites. Actions can be used to do anything you are capable of programming in Python. Actions are a versatile tool for integrating Checkpoints in your pipeline's workflow.
 
-For more information, see [Manage Checkpoints](/core/validate_data/checkpoints/manage_checkpoints.md#add-actions-to-a-checkpoint).
+For more information, see [Manage Checkpoints](/core/trigger_actions_based_on_results/create_a_checkpoint_with_actions.md).
