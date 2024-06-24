@@ -20,43 +20,16 @@ robust schema validation within your data pipelines, helping to catch and addres
 issues before they propagate through your data ecosystem. This guide will walk you through
 leveraging these Expectations to implement effective schema validation in your data workflows.
 
-### Sample Data Overview
+### Data Preview
 
-To illustrate schema validation with Great Expectations, we’ll use a sample dataset representing
-financial transactions. Here’s a quick look at what our sample data contains:
+Here's a glimpse of the sample dataset we'll use to demonstrate schema validation:
 
-```python
-import pandas as pd
+| type     | sender_account_number  | recipient_fullname | transfer_amount | transfer_date       |
+|----------|------------------------|--------------------|-----------------|---------------------|
+| domestic | 244084670977           | Jaxson Duke        | 9143.40         | 2024-05-01 01:12    |
+| domestic | 954005011218           | Nelson O’Connell   | 3285.21         | 2024-05-01 05:08    |
 
-data = [
-    {'type': 'domestic',
-     'sender_account_number': 244084670977,
-     'recipient_fullname': 'Jaxson Duke',
-     'recipient_address': '50 E 53rd St',
-     'recipient_phone': '+1-566-675-5951x933',
-     'recipient_bankname': 'M&T Bank',
-     'recipient_account_number': 962975843020,
-     'transfer_amount': 9143.40,
-     'transfer_date': '2024-05-01 01:12'
-    },
-    {'type': 'domestic',
-     'sender_account_number': 954005011218,
-     'recipient_fullname': 'Nelson O’Connell',
-     'recipient_address': '84 Cabrini Blvd',
-     'recipient_phone': '001-817-645-5875x3579',
-     'recipient_bankname': 'Wells Fargo Bank',
-     'recipient_account_number': 434903524241,
-     'transfer_amount': 3285.21,
-     'transfer_date': '2024-05-01 05:08'
-    },
-]
-
-df = pd.DataFrame(data)
-```
-
-This dataset includes columns like `sender_account_number`, `recipient_fullname`, `transfer_amount`,
-and `transfer_date`. Now, let’s explore core Expectations for schema validation, delving into their
-practical applications and nuances.
+This dataset includes columns like `sender_account_number`, `recipient_fullname`, `transfer_amount`, and `transfer_date`.
 
 ### Key Schema Expectations
 
