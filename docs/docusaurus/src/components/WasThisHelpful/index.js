@@ -22,9 +22,8 @@ export default function WasThisHelpful(){
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        languageTypo: '',
-        inaccurate: '',
-        codeSampleErrors: ''
+        selectedValue: '',
+        description: ''
     });
 
     const handleChange = (e) => {
@@ -71,110 +70,117 @@ export default function WasThisHelpful(){
     const closeImg = useBaseUrl(`img/close_icon.svg`);
 
     return <>
-            <hr className={styles.feedbackDivider}/>
-            <section className={styles.feedbackCard}>
-                <h3 className={styles.feedbackCardTitle}>Was this topic helpful?</h3>
-                <div className={styles.feedbackCardActions}>
-                    <button disabled={feedbackSent} className={styles.feedbackButton} onClick={() => handleFeedbackReaction('docs_feedback.yes')}>Yes</button>
-                    <button disabled={feedbackSent} className={styles.feedbackButton} onClick={handleNegativeFeedbackReaction}>No</button>
-                </div>
-            </section>
+        <hr className={styles.feedbackDivider}/>
 
-            {!isOpen && <>
-                <div className={styles.overlay} onClick={dismissFeedbackModal}/>
-                <dialog className={styles.modal}>
-                    <section className={styles.modalHeader}>
-                        <h5 className={styles.modalHeaderTitle}>What is the problem?</h5>
-                        <img src={closeImg} className={styles.modalHeaderCloseButton}
-                             alt="Close icon" onClick={dismissFeedbackModal}/>
-                    </section>
 
-                    <form onSubmit={sendReview} className={styles.modalContent}>
+        { !feedbackSent && <section className={styles.feedbackCard}>
+            <h3 className={styles.feedbackCardTitle}>Was this topic helpful?</h3>
+            <div className={styles.feedbackCardActions}>
+                <button disabled={feedbackSent} className={styles.feedbackButton}
+                        onClick={() => handleFeedbackReaction('docs_feedback.yes')}>Yes
+                </button>
+                <button disabled={feedbackSent} className={styles.feedbackButton}
+                        onClick={handleNegativeFeedbackReaction}>No
+                </button>
+            </div>
+        </section>}
 
-                        <div>If you’re not reporting documentation issues such as typos, missing content, or code
-                            inaccuracies, post your
-                            comments or feedback on <a href="https://discourse.greatexpectations.io/">Discourse</a>.
-                            Thank you for helping us improve our documentation.
-                        </div>
+        {isOpen && <>
+            <div className={styles.overlay} onClick={dismissFeedbackModal}/>
+            <dialog className={styles.modal}>
+                <section className={styles.modalHeader}>
+                    <h5 className={styles.modalHeaderTitle}>What is the problem?</h5>
+                    <img src={closeImg} className={styles.modalHeaderCloseButton}
+                         alt="Close icon" onClick={dismissFeedbackModal}/>
+                </section>
 
-                        <div className={styles.textInputs}>
-                            <div className={styles.modalTextContainer}>
-                                <label className={styles.modalTextLabel}>Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    className={styles.modalTextInput}
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    placeholder="Phillip"
-                                />
-                            </div>
-                            <div className={styles.modalTextContainer}>
-                                <label className={styles.modalTextLabel}>Email</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    className={styles.modalTextInput}
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    placeholder="your_email@domain.com"
-                                />
-                            </div>
-                        </div>
+                <form onSubmit={sendReview} className={styles.modalContent}>
 
-                        <div>
-                            <input type="radio" id="language-typo" name="feedback" value="language-typo"/>
-                            <label htmlFor="language-typo" className={styles.modalTextLabel}>Language Typo</label>
-                            <textarea
-                                name="description"
-                                value={formData.languageTypo}
-                                className={styles.modalTextInput + ' ' + styles.modalTextareaInput + ' ' + styles.hiddenRadioButtonAdditionalInfo}
+                    <div className={styles.textInputs}>
+                        <div className={styles.modalTextContainer}>
+                            <label className={styles.modalTextLabel}>Name (optional)</label>
+                            <input
+                                type="text"
+                                name="name"
+                                className={styles.modalTextInput}
+                                value={formData.name}
                                 onChange={handleChange}
-                                required
-                                placeholder="Describe the typo that you've found."
+                                placeholder="Phillip"
                             />
                         </div>
-
-                        <div>
-                            <input type="radio" id="inaccurate" name="feedback" value="inaccurate"/>
-                            <label htmlFor="inaccurate" className={styles.modalTextLabel}>Inaccurate</label>
-                            <textarea
-                                name="inaccurate"
-                                value={formData.inaccurate}
-                                className={styles.modalTextInput + ' ' + styles.modalTextareaInput + ' ' + styles.hiddenRadioButtonAdditionalInfo}
+                        <div className={styles.modalTextContainer}>
+                            <label className={styles.modalTextLabel}>Email (optional)</label>
+                            <input
+                                type="email"
+                                name="email"
+                                className={styles.modalTextInput}
+                                value={formData.email}
                                 onChange={handleChange}
-                                required
-                                placeholder="Try to be specific and detailed."
+                                placeholder="your_email@domain.com"
                             />
                         </div>
+                    </div>
 
-                        <div>
-                            <input type="radio" id="code-sample-errors" name="feedback" value="code-sample-errors"/>
-                            <label htmlFor="code-sample-errors" className={styles.modalTextLabel}>Code sample
-                                errors</label>
-                            <textarea
-                                name="code-sample-errors"
-                                value={formData.codeSampleErrors}
-                                className={styles.modalTextInput + ' ' + styles.modalTextareaInput + ' ' + styles.hiddenRadioButtonAdditionalInfo}
-                                onChange={handleChange}
-                                required
-                                placeholder="Try to be specific and detailed."
-                            />
-                        </div>
+                    <div>
+                        <label className={styles.radioOption}>
+                            <input type="radio" name="selectedValue" value="language-typo"
+                                   checked={formData.selectedValue === 'language-typo'} onChange={handleChange}/>
+                            Language Typo
+                        </label>
+                    </div>
 
-                        <div>
-                            <input type="radio" id="need-gx-support" name="feedback" value="need-gx-support"/>
-                            <label htmlFor="need-gx-support" className={styles.modalTextLabel}>I need GX support</label>
-                            <p className={styles.hiddenRadioButtonAdditionalInfo}>
-                                Visit our <a href="https://docs.greatexpectations.io/docs/resources/get_support">Get Support
-                                page</a>.
-                            </p>
-                        </div>
+                    <div>
+                        <label className={styles.radioOption}>
+                            <input type="radio" name="selectedValue" value="inaccurate"
+                                   checked={formData.selectedValue === 'inaccurate'} onChange={handleChange}/>
+                            Inaccurate
+                        </label>
+                    </div>
 
-                        <input type="submit" disabled={!formData.description} className={styles.submitButton}
-                               value="Submit"/>
-                    </form>
-                </dialog>
-            </>}
+                    <div>
+                        <label className={styles.radioOption}>
+                            <input type="radio" name="selectedValue" value="code-sample-errors"
+                                   checked={formData.selectedValue === 'code-sample-errors'}
+                                   onChange={handleChange}/>
+                            Code sample errors
+                        </label>
+                    </div>
+
+                    <div>
+                        <label className={styles.radioOption}>
+                            <input type="radio" name="selectedValue" value="need-gx-support"
+                                   checked={formData.selectedValue === 'need-gx-support'}
+                                   onChange={handleChange}/>
+                            I need GX support
+                        </label>
+                    </div>
+
+                    {formData.selectedValue === 'need-gx-support' &&
+                        <p style={{marginBottom: '0'}}>
+                            Visit our <a href="https://docs.greatexpectations.io/docs/resources/get_support">Get
+                            Support
+                            page</a>.
+                        </p>}
+
+                    {['language-typo', 'inaccurate', 'code-sample-errors'].includes(formData.selectedValue) &&
+                        <textarea
+                            name="description"
+                            value={formData.description}
+                            className={styles.modalTextInput + ' ' + styles.modalTextareaInput}
+                            onChange={handleChange}
+                            placeholder="Try to be specific and detailed."
+                        />
+                    }
+
+                    <input type="submit" disabled={!formData.description} className={styles.submitButton}
+                           value="Submit"/>
+                </form>
+            </dialog>
+        </>}
+
+        { feedbackSent &&
+            <div class="alert alert--secondary" role="alert">
+                Thank you for helping us improve our documentation!
+            </div> }
     </>
 }
