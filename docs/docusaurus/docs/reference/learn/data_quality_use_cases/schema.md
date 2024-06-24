@@ -144,8 +144,8 @@ with business requirements and anticipates potential future expansion.
 
 ### Integrating Schema Validation
 
-Here's a brief overview of the steps to setup GX to get you started. For more detailed guidance on
-common setup steps, be sure to check out the related sections in our GX documentation.
+Here's a brief overview of the steps to setup GX to validate your data schema. For more detailed
+guidance on common setup steps, be sure to check out the related sections in our GX documentation.
 
 1. **Prepare Sample Data**: Creating a sample dataset for testing and validation.
 2. **Connect to the Data**: [Establish a connection to the sample data](#) using Great Expectations.
@@ -155,9 +155,175 @@ common setup steps, be sure to check out the related sections in our GX document
 6. **Run Validation**: [Execute the validation checks](#) at the specified checkpoints.
 7. **Review Results**: [Inspect the outcomes](#) and identify any issues.
 
-### Enhanced Examples & scenarios
+### Examples & Scenarios
 
-TODO:
+#### Comparative Analysis: Ensuring Schema Consistency in Financial Transfers
+
+**Context**: In financial transfers, adhering to a fixed schema is paramount for regulatory compliance and operational accuracy. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions.
+
+**Goal**: Validate two datasets to ensure the presence of specific columns and correct column count.
+
+```python
+import pandas as pd
+import great_expectations as gx
+
+# Sample datasets
+data_1 = [
+    {'type': 'domestic', 'sender_account_number': '244084670977', 'recipient_fullname': 'Jaxson Duke', 'transfer_amount': 9143.40, 'transfer_date': '2024-05-01 01:12'},
+    {'type': 'domestic', 'sender_account_number': '954005011218', 'recipient_fullname': 'Nelson O’Connell', 'transfer_amount': 3285.21, 'transfer_date': '2024-05-01 05:08'}
+]
+data_2 = [
+    {'type': 'domestic', 'sender_account_number': '842374923847', 'recipient_fullname': 'Alex Smith', 'transfer_amount': 5783.18, 'transfer_date': '2024-04-12 15:35'},
+    # Missing 'recipient_fullname'
+    {'type': 'domestic', 'sender_account_number': '673894027340', 'transfer_amount': 8493.14, 'transfer_date': '2024-04-21 09:50'}
+]
+
+df1 = pd.DataFrame(data_1)
+df2 = pd.DataFrame(data_2)
+
+context = gx.get_context()
+
+expectation_suite_name = "schema_comparison_suite"
+context.create_expectation_suite(expectation_suite_name)
+
+validator_1 = context.get_validator(df1, expectation_suite_name=expectation_suite_name)
+validator_2 = context.get_validator(df2, expectation_suite_name=expectation_suite_name)
+
+# Define Expectations
+validator_1.expect_column_to_exist("recipient_fullname")
+validator_2.expect_column_to_exist("recipient_fullname")
+
+validator_1.expect_table_column_count_to_equal(5)
+validator_2.expect_table_column_count_to_equal(5)
+
+# Run validation
+result_1 = validator_1.validate()
+result_2 = validator_2.validate()
+
+print("Validation Result 1:", result_1)
+print("Validation Result 2:", result_2)
+```
+
+**Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
+
+#### Different Expectation Suites: Strict vs. Relaxed Type Checking
+
+**Context**: In some contexts, both the names and order of columns can be critically important. Using different suites to enforce these aspects can help maintain consistency.
+
+**Goal**: Validate datasets to ensure columns appear in the correct order and all required columns are present.
+
+```python
+# First Expectation Suite: strict column order
+expectation_suite_name_1 = "schema_ordered_columns"
+suite_1 = context.create_expectation_suite(expectation_suite_name_1)
+validator_1 = context.get_validator(df1, expectation_suite_name=expectation_suite_name_1)
+validator_1.expect_table_columns_to_match_ordered_list([
+    "type", "sender_account_number", "recipient_fullname", "transfer_amount", "transfer_date"
+])
+
+# Second Expectation Suite: relaxed column order
+expectation_suite_name_2 = "schema_unordered_columns"
+suite_2 = context.create_expectation_suite(expectation_suite_name_2)
+validator_2 = context.get_validator(df2, expectation_suite_name=expectation_suite_name_2)
+validator_2.expect_table_columns_to_match_set([
+    "type", "sender_account_number", "recipient_fullname", "transfer_amount", "transfer_date"
+])
+
+# Run validation
+result_ordered = validator_1.validate()
+result_unordered = validator_2.validate()
+
+print("Ordered Columns Validation Result:", result_ordered)
+print("Unordered Columns Validation Result:", result_unordered)
+```
+
+**Insight**: The strict suite ensures that columns appear in the specified order, crucial in contexts where order matters for processing logic, while the relaxed suite allows flexibility but ensures all required columns are present.
+
+#### Step-by-Step Walkthrough: Managing Column Existence
+
+**Context**: Dynamic data pipelines often encounter varying schemas, making it critical to ensure certain columns exist at different stages.
+
+**Goal**: Validate datasets to ensure the existence of expected columns and provide actionable insights for missing columns.
+
+1. **Creating Validators and Setting Expectations**:
+
+    ```python
+    validator_1.expect_column_to_exist("recipient_fullname")
+    validator_2.expect_column_to_exist("recipient_account_number")  # Assume this column should be there
+    ```
+
+2. **Running and Debugging Validation**:
+
+    ```python
+    try:
+        result_1 = validator_1.validate()
+        print("Validation Result 1:", result_1)
+    except Exception as e:
+        print("Error in validation 1:", str(e))
+
+    try:
+        result_2 = validator_2.validate()
+        print("Validation Result 2:", result_2)
+    except Exception as e:
+        print("Error in validation 2:", str(e))
+    ```
+
+3. **Analyzing Errors**:
+
+    ```python
+    if not result_1["success"]:
+        for validation in result_1["results"]:
+            if not validation["success"]:
+                print(f"Expectation Failed: {validation['expectation_config']['kwargs']}")
+
+    if not result_2["success"]:
+        for validation in result_2["results"]:
+            if not validation["success"]:
+                print(f"Expectation Failed: {validation['expectation_config']['kwargs']}")
+    ```
+
+**Insight**: Ensures that critical columns are present at key stages, allowing for early detection of schema inconsistencies, which minimizes downstream processing issues.
+
+#### Industry-Specific Scenarios: Healthcare Data Validation
+
+**Context**: In healthcare, ensuring the schema of patient records is consistent is critical for patient safety and regulatory compliance.
+
+**Goal**: Validate healthcare datasets to ensure the existence and correct order of critical
+columns, maintaining the integrity of patient records.
+
+```python
+# Sample dataset
+healthcare_data = [
+    {'patient_id': '1234', 'patient_name': 'John Doe', 'dob': '1980-01-01', 'diagnosis': 'Hypertension', 'treatment': 'Medication'},
+    {'patient_id': '5678', 'patient_name': 'Jane Roe', 'dob': '1985-05-15', 'diagnosis': 'Diabetes'}
+]
+
+df_healthcare = pd.DataFrame(healthcare_data)
+context = gx.get_context()
+
+# Define the expectation suite
+expectation_suite_name = "healthcare_schema"
+context.create_expectation_suite(expectation_suite_name)
+
+validator_healthcare = context.get_validator(df_healthcare, expectation_suite_name=expectation_suite_name)
+
+# Define Expectations
+validator_healthcare.expect_column_to_exist("treatment")
+validator_healthcare.expect_column_values_to_be_of_type("patient_id", "str")
+validator_healthcare.expect_column_values_to_be_of_type("dob", "str")
+validator_healthcare.expect_table_columns_to_match_ordered_list([
+    "patient_id", "patient_name", "dob", "diagnosis", "treatment"
+])
+
+# Run validation
+result_healthcare = validator_healthcare.validate()
+
+print("Healthcare Validation Result:", result_healthcare)
+```
+
+**Insight**: Ensuring `patient_id` and `dob` are strings, and columns appear in the correct order,
+is critical for maintaining accurate patient records, which is essential for treatment and
+compliance.
 
 ### Conclusion
 
