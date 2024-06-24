@@ -65,7 +65,13 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
 
    If the list of Actions for a Checkpoint is empty, the Checkpoint can still run. Its Validation Results are saved to the Data Context, but no tasks are executed.
 
-3. Create the Checkpoint.
+3. Optional. Choose the Result Format
+
+   When a Checkpoint is created you can adjust the verbosity of the Validation Results it generates by setting a Result Format.  A Checkpoint's Result Format will be applied to all Validation Results in the Checkpoint every time they are run.  By default, a Checkpoint uses a `SUMMARY` result format: it indicates the success or failure of each Expectation in a Validation Definition, along with a partial set of the observed values and metrics that indicate why the Expectation succeeded or failed.
+
+   For more information on configuring a Result Format, see [Choose a Result Format](/core/trigger_actions_based_on_results/choose_a_result_format/choose_a_result_format.md).
+
+5. Create the Checkpoint.
 
    The Checkpoint class is imported from the `from great_expectations.checkpoint.checkpoint` module:
 
@@ -73,18 +79,19 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
    from great_expectations.checkpoint.checkpoint import Checkpoint
    ```
    
-   You instantiate a Checkpoint by providing the lists of Validation Definitions and Actions that you previously created, as well as a unique name for the Checkpoint, to the Checkpoint class:
+   You instantiate a Checkpoint by providing the lists of Validation Definitions and Actions that you previously created, as well as a unique name for the Checkpoint, to the Checkpoint class.  The Checkpoint's Result Format can optionally be set, as well:
 
    ```python title="Python"
    checkpoint_name = "my_checkpoint"
    checkpoint = Checkpoint(
         name=checkpoint_name,
-        validation_definitions=validation_definitions
-        actions=action_list
+        validation_definitions=validation_definitions,
+        actions=action_list,
+        result_format = {"result_format": "COMPLETE"}
    )
    ```
 
-5. Add the Checkpoint to your Data Context.
+6. Add the Checkpoint to your Data Context.
 
    Once you create a Checkpoint you should save it to your Data Context for future use: 
 
@@ -136,8 +143,9 @@ action_list = [
 checkpoint_name = "my_checkpoint"
 checkpoint = Checkpoint(
      name=checkpoint_name,
-     validation_definitions=validation_definitions
-     actions=action_list
+     validation_definitions=validation_definitions,
+     actions=action_list,
+     result_format = {"result_format": "COMPLETE"}
 )
 
 # Save the Checkpoint to the Data Context
