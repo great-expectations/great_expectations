@@ -244,7 +244,7 @@ An Expectation Suite contains a group of Expectations that describe the same set
 
   `expectation.save()` is explicitly used to update the configuration of an Expectation in an Expectation Suite.
   
-  An Expectation Suite continues to use the Expectation's original values unless you save your modifications. You can [test changes to an Expectation](/core/create_expectations/expectations/manage_expectations.md#test-an-expectation) without running `expectation.save()`, but those changes will not persist in the Expectation Suite until `expectation.save()` is run.
+  An Expectation Suite continues to use the Expectation's original values unless you save your modifications. You can [test changes to an Expectation](/core/_create_expectations/expectations/manage_expectations.md#test-an-expectation) without running `expectation.save()`, but those changes will not persist in the Expectation Suite until `expectation.save()` is run.
 
 </TabItem>
 
