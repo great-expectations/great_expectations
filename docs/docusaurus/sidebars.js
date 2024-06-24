@@ -99,6 +99,16 @@ module.exports = {
       ]
     },
     {
+      type: 'category',
+      label: 'Trigger actions based on results',
+      link: {type: 'doc', id: 'core/trigger_actions_based_on_results/trigger_actions_based_on_results'},
+      items: [
+        {type: 'doc', id: 'core/trigger_actions_based_on_results/create_a_checkpoint_with_actions'},
+        {type: 'doc', id: 'core/trigger_actions_based_on_results/choose_a_result_format/choose_a_result_format'},
+        {type: 'doc', id: 'core/trigger_actions_based_on_results/run_a_checkpoint'},
+      ]
+    },
+    {
       type: 'doc',
       id: 'oss/changelog',
       label: 'Changelog'
