@@ -84,10 +84,10 @@ def test_save_project_does_not_break(seeded_file_context: FileDataContext):
 
 
 @pytest.mark.filesystem
-def test_variables_save_config_does_not_break(seeded_file_context: FileDataContext):
+def test_variables_save_does_not_break(seeded_file_context: FileDataContext):
     print(f"\tcontext.fluent_config ->\n{seeded_file_context.fluent_config}\n")
     print(f"\tcontext.variables ->\n{seeded_file_context.variables}")
-    seeded_file_context.variables.save_config()
+    seeded_file_context.variables.save()
 
 
 @pytest.mark.filesystem
