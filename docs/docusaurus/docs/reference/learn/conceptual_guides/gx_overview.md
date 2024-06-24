@@ -15,7 +15,7 @@ GX is a Python library that provides a framework for describing the acceptable s
 When working with GX you use the following four core components to access, store, and manage underlying objects and processes:
 
 - **[Data Context:](#data-context)** Manages the settings and metadata for a GX project, and provides an entry point to the GX Python API.
-- **[Data Sources:](#datasources)** Connects to your Data Source, and organizes retrieved data for future use.
+- **[Data Sources:](#data-sources)** Connects to your Data Source, and organizes retrieved data for future use.
 - **[Expectations:](#expectations)** Identifies the standards to which your data should conform.
 - **[Checkpoints:](#checkpoints)** Validates a set of Expectations against a specific set of data.
 
