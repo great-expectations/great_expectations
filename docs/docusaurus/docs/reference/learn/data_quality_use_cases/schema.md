@@ -157,6 +157,8 @@ guidance on common setup steps, be sure to check out the related sections in our
 
 ### Examples & Scenarios
 
+-- TODO: these are mostly pseudo code ----
+
 #### Comparative Analysis: Ensuring Schema Consistency in Financial Transfers
 
 **Context**: In financial transfers, adhering to a fixed schema is paramount for regulatory compliance and operational accuracy. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions.
@@ -334,6 +336,8 @@ compliance.
 - **Logging and Monitoring**: Implement detailed logging and alerting for schema validation failures.
 
 **Additional Resources**:
+
+--- TODO ----
 
 - [Great Expectations Official Documentation](https://docs.greatexpectations.io/)
 - [Common Schema Validation Pitfalls](#)
