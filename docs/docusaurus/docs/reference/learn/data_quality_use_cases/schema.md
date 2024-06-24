@@ -145,10 +145,28 @@ Create a sample dataset using Pandas for testing and validation purposes.
 import pandas as pd
 
 data = [
-    {"sender_account_number": "1234567890", "transfer_amount": 1000.0},
-    {"sender_account_number": "9876543210", "transfer_amount": 500.0},
-    {"sender_account_number": "5555555555", "transfer_amount": 750.0}
+    {'type': 'domestic',
+     'sender_account_number': 244084670977,
+     'recipient_fullname': 'Jaxson Duke',
+     'recipient_address': '50 E 53rd St',
+     'recipient_phone': '+1-566-675-5951x933',
+     'recipient_bankname': 'M&T Bank',
+     'recipient_account_number': 962975843020,
+     'transfer_amount': 9143.40,
+     'transfer_date': '2024-05-01 01:12'
+    },
+    {'type': 'domestic',
+     'sender_account_number': 954005011218,
+     'recipient_fullname': 'Nelson O’Connell',
+     'recipient_address': '84 Cabrini Blvd',
+     'recipient_phone': '001-817-645-5875x3579',
+     'recipient_bankname': 'Wells Fargo Bank',
+     'recipient_account_number': 434903524241,
+     'transfer_amount': 3285.21,
+     'transfer_date': '2024-05-01 05:08'
+    },
 ]
+
 df = pd.DataFrame(data)
 ```
 
