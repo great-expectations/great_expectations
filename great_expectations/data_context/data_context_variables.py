@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
+from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -59,6 +60,7 @@ class DataContextVariableSchema(str, enum.Enum):
         return value in cls._value2member_map_
 
 
+@public_api
 @dataclass
 class DataContextVariables(ABC):
     """
@@ -114,6 +116,7 @@ class DataContextVariables(ABC):
         substituted_val: Any = self.config_provider.substitute_config(val)
         return substituted_val
 
+    @public_api
     def save_config(self) -> Any:
         """
         Persist any changes made to variables utilizing the configured Store.
