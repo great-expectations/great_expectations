@@ -62,7 +62,7 @@ export default function WasThisHelpful(){
                 $survey_response_1: formData.email,
                 $survey_response_2: formData.description,
                 $survey_response_3: pathname,
-                $survey_response_4: formData.selectedValue
+                $survey_response_4: formData.selectedValue.replaceAll('-', ' ')
             })
             setIsOpen(false)
         }
@@ -169,7 +169,7 @@ export default function WasThisHelpful(){
                             value={formData.description}
                             className={styles.modalTextInput + ' ' + styles.modalTextareaInput}
                             onChange={handleChange}
-                            placeholder="Try to be specific and detailed."
+                            placeholder={formData.selectedValue === 'language-typo' ? "Describe the typo that you've found." : "Try to be specific and detailed."}
                         />
                     }
 
