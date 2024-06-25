@@ -10,6 +10,21 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.16
+* [FEATURE] Add new `ConfigUri` type ([#10000](https://github.com/great-expectations/great_expectations/pull/10000))
+* [FEATURE] Snowflake - minimal support for key-pair auth ([#10031](https://github.com/great-expectations/great_expectations/pull/10031))
+* [FEATURE] Snowflake - Forward compatibility updates ([#10036](https://github.com/great-expectations/great_expectations/pull/10036))
+* [BUGFIX] fix snowflake schema introspection for `expect_column_values_to_be_in_type_list` and `expect_column_values_to_be_of_type` ([#9906](https://github.com/great-expectations/great_expectations/pull/9906))
+* [BUGFIX] 0.18.x - Avoid writing to great_expectations.yml during init ([#10040](https://github.com/great-expectations/great_expectations/pull/10040))
+* [BUGFIX] Snowflake - Fix `private_key` Unicode serialization errors ([#10046](https://github.com/great-expectations/great_expectations/pull/10046))
+* [DOCS] release_prep 0.18.15 ([#9984](https://github.com/great-expectations/great_expectations/pull/9984))
+* [MAINTENANCE] 0.18.x - mypy `1.7.1` -> `1.10` ([#9988](https://github.com/great-expectations/great_expectations/pull/9988))
+* [MAINTENANCE] 0.18.x - CVE 2024 36039 ([#10033](https://github.com/great-expectations/great_expectations/pull/10033))
+* [MAINTENANCE] Revert Snowflake field requirement changes for `0.18.x` ([#10012](https://github.com/great-expectations/great_expectations/pull/10012))
+* REVERTED - [FEATURE] SnowflakeDatasource - Require `database` and `schema` fields ([#9980](https://github.com/great-expectations/great_expectations/pull/9980))
+* REVERTED - [FEATURE] Snowflake - use `Datasource` level `schema` when creating `TableAsset` ([#9992](https://github.com/great-expectations/great_expectations/pull/9992))
+* REVERTED - [FEATURE] Restrict substitutable sections for `Snowflake.connection_string` ([#10002](https://github.com/great-expectations/great_expectations/pull/10002))
+
 ### 0.18.15
 * [BUGFIX] fix checkpoint name in slack notif ([#9964](https://github.com/great-expectations/great_expectations/pull/9964))
 * [BUGFIX] 0.18.x -  Prevent Error on Read Only Filesystem ([#9977](https://github.com/great-expectations/great_expectations/pull/9977))
