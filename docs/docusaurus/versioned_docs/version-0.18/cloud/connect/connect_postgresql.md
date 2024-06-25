@@ -45,7 +45,7 @@ To validate data stored in a PostgreSQL database from GX Cloud, you must add the
 
 5. Enter a meaningful name for the Data Source in the **Data Source name** field.
 
-6. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
+6. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
 
 7. Click **Connect**.
 

@@ -161,7 +161,7 @@ Define the data you want GX Cloud to access within PostgreSQL.
 
 3. Enter a meaningful name for the Data Asset in the **Data Source name** field.
 
-4. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2//YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
+4. Enter a connection string in the **Connection string** field. The connection string format is `postgresql+psycopg2://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName`. 
 
 5. Click **Connect**.
 
