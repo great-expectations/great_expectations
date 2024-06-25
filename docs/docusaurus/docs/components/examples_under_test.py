@@ -1,3 +1,8 @@
+"""
+This file contains the integration test fixtures for documentation example scripts that are
+under CI test.
+"""
+
 docs_tests = []
 
 connecting_to_a_datasource = [
@@ -103,5 +108,7 @@ expectation_tests = [
     # ),
 ]
 
+# Extend the docs_tests list with the above sublists (only the docs_tests list is imported
+# into `test_script_runner.py` and actually used in CI checks).
 docs_tests.extend(connecting_to_a_datasource)
 docs_tests.extend(expectation_tests)
