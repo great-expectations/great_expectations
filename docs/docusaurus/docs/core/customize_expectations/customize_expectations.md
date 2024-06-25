@@ -1,6 +1,6 @@
 ---
 title: 'Customize Expectations'
-description: Learn how to customize Expectation classes, add notes and metadata, and use SQL queries and row conditions to add an additional filter on what data the Expectation evaluates.
+description: Add domain and internal knowledge to Expectations to express more specific criteria and precise evaluation for Expectations about data.
 hide_feedback_survey: true
 hide_title: true
 ---
@@ -10,7 +10,7 @@ import LinkCard from '@site/src/components/LinkCard';
 import OverviewCard from '@site/src/components/OverviewCard';
 
 <OverviewCard title={frontMatter.title}>
-  Learn how to customize Expectation classes, add notes and metadata, and use SQL queries and row conditions to add an additional filter on what data the Expectation evaluates.
+  Add domain and internal knowledge to Expectations to express more specific criteria and precise evaluation for Expectations about data. 
 </OverviewCard>
 
 <LinkCardGrid>
