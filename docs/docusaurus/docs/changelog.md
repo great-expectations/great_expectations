@@ -11,10 +11,10 @@ title: Changelog
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
 ### 0.18.16
-* [FEATURE] SnowflakeDatasource - Require `database` and `schema` fields ([#9980](https://github.com/great-expectations/great_expectations/pull/9980))
-* [FEATURE] Snowflake - use `Datasource` level `schema` when creating `TableAsset` ([#9992](https://github.com/great-expectations/great_expectations/pull/9992))
+* REVERTED -[FEATURE] SnowflakeDatasource - Require `database` and `schema` fields ([#9980](https://github.com/great-expectations/great_expectations/pull/9980))
+* REVERTED - [FEATURE] Snowflake - use `Datasource` level `schema` when creating `TableAsset` ([#9992](https://github.com/great-expectations/great_expectations/pull/9992))
 * [FEATURE] Add new `ConfigUri` type ([#10000](https://github.com/great-expectations/great_expectations/pull/10000))
-* [FEATURE] Restrict substitutable sections for `Snowflake.connection_string` ([#10002](https://github.com/great-expectations/great_expectations/pull/10002))
+* REVERTED - [FEATURE] Restrict substitutable sections for `Snowflake.connection_string` ([#10002](https://github.com/great-expectations/great_expectations/pull/10002))
 * [FEATURE] Snowflake - minimal support for key-pair auth ([#10031](https://github.com/great-expectations/great_expectations/pull/10031))
 * [FEATURE] Snowflake - Forward compatibility updates ([#10036](https://github.com/great-expectations/great_expectations/pull/10036))
 * [BUGFIX] fix snowflake schema introspection for `expect_column_values_to_be_in_type_list` and `expect_column_values_to_be_of_type` ([#9906](https://github.com/great-expectations/great_expectations/pull/9906))
