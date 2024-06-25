@@ -61,7 +61,8 @@ export default function WasThisHelpful(){
                 $survey_response: formData.name,
                 $survey_response_1: formData.email,
                 $survey_response_2: formData.description,
-                $survey_response_3: pathname
+                $survey_response_3: pathname,
+                $survey_response_4: formData.selectedValue
             })
             setIsOpen(false)
         }
