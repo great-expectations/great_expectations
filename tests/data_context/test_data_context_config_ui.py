@@ -1177,7 +1177,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
     desired_config = {
         "data_context_id": data_context_config.data_context_id,
         "checkpoint_store_name": "checkpoint_store",
-        "config_version": 3.0,
+        "config_version": 4.0,
         "suite_parameter_store_name": "suite_parameter_store",
         "expectations_store_name": "expectations_store",
         "stores": {
@@ -1226,7 +1226,7 @@ def test_data_context_config_defaults():
         "data_context_id": None,
         "checkpoint_store_name": None,
         "config_variables_file_path": None,
-        "config_version": 3,
+        "config_version": 4,
         "data_docs_sites": None,
         "suite_parameter_store_name": None,
         "expectations_store_name": None,

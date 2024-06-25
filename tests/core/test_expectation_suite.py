@@ -38,7 +38,7 @@ def fake_expectation_suite_name() -> str:
 @pytest.fixture
 def expect_column_values_to_be_in_set_col_a_with_meta() -> ExpectationConfiguration:
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "a",
             "value_set": [1, 2, 3],
@@ -51,7 +51,7 @@ def expect_column_values_to_be_in_set_col_a_with_meta() -> ExpectationConfigurat
 def expect_column_values_to_be_in_set_col_a_with_meta_dict() -> dict:
     # Note, value_set is distinct to ensure this is treated as a different expectation
     return {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
             "column": "a",
             "value_set": [1, 2, 3, 4, 5],
@@ -770,7 +770,7 @@ class TestEqDunder:
 @pytest.fixture
 def exp2() -> ExpectationConfiguration:
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={"column": "b", "value_set": [-1, -2, -3]},
         meta={"notes": "This is an expectation."},
     )
@@ -779,7 +779,7 @@ def exp2() -> ExpectationConfiguration:
 @pytest.fixture
 def exp3() -> ExpectationConfiguration:
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "b",
             "value_set": [-1, -2, -3],
@@ -791,7 +791,7 @@ def exp3() -> ExpectationConfiguration:
 @pytest.fixture
 def exp4() -> ExpectationConfiguration:
     return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
+        type="expect_column_values_to_be_in_set",
         kwargs={
             "column": "b",
             "value_set": [1, 2, 3],
@@ -803,7 +803,7 @@ def exp4() -> ExpectationConfiguration:
 @pytest.fixture
 def column_pair_expectation() -> ExpectationConfiguration:
     return ExpectationConfiguration(
-        expectation_type="expect_column_pair_values_to_be_in_set",
+        type="expect_column_pair_values_to_be_in_set",
         kwargs={
             "column_A": "1",
             "column_B": "b",
@@ -815,7 +815,7 @@ def column_pair_expectation() -> ExpectationConfiguration:
 @pytest.fixture
 def table_exp1() -> ExpectationConfiguration:
     return ExpectationConfiguration(
-        expectation_type="expect_table_columns_to_match_ordered_list",
+        type="expect_table_columns_to_match_ordered_list",
         kwargs={"column_list": ["a", "b", "c"]},
     )
 
@@ -823,16 +823,14 @@ def table_exp1() -> ExpectationConfiguration:
 @pytest.fixture
 def table_exp2() -> ExpectationConfiguration:
     return ExpectationConfiguration(
-        expectation_type="expect_table_row_count_to_be_between",
+        type="expect_table_row_count_to_be_between",
         kwargs={"min_value": 0, "max_value": 1},
     )
 
 
 @pytest.fixture
 def table_exp3() -> ExpectationConfiguration:
-    return ExpectationConfiguration(
-        expectation_type="expect_table_row_count_to_equal", kwargs={"value": 1}
-    )
+    return ExpectationConfiguration(type="expect_table_row_count_to_equal", kwargs={"value": 1})
 
 
 @pytest.fixture
@@ -947,7 +945,7 @@ def test_add_expectation_fails_validation(empty_suite_with_meta: ExpectationSuit
     expectation_type = "my_fake_expectation"
     kwargs = {"foo": "bar"}
     expectation_configuration = ExpectationConfiguration(
-        expectation_type=expectation_type,
+        type=expectation_type,
         kwargs=kwargs,
     )
 

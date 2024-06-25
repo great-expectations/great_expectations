@@ -71,7 +71,7 @@ assert column_name is not None, "Please set column_name."
 # Look up all expectations types here - https://greatexpectations.io/expectations/
 expectation_configuration = gx.core.ExpectationConfiguration(
     **{
-        "expectation_type": "expect_column_min_to_be_between",
+        "type": "expect_column_min_to_be_between",
         "kwargs": {"column": column_name, "min_value": 0.1},
         "meta": {},
     }

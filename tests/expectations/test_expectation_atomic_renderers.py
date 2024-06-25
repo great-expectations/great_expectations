@@ -1,8 +1,10 @@
 import re
+import sys
 from pprint import pprint
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, Final, Union
 
 import pytest
+from packaging.version import Version
 
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.expectations.expectation_configuration import (
@@ -11,13 +13,23 @@ from great_expectations.expectations.expectation_configuration import (
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import RenderedAtomicContent
 
+PYTHON_VERSION: Final[Version] = Version(
+    f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+)
+
+pytestmark = pytest.mark.skipif(
+    Version("3.12") <= PYTHON_VERSION,
+    reason="`snapshottest` incompatible with Python 3.12",
+)
+# https://github.com/syrusakbary/snapshottest/issues/166
+
 
 @pytest.fixture
 def expectation_configuration_kwargs():
     # These below fields are defaults; specific tests will overwrite as deemed necessary
     return {
         "id": "abcdefgh-ijkl-mnop-qrst-uvwxyz123456",
-        "expectation_type": "",
+        "type": "",
         "kwargs": {},
         "meta": {},
     }
@@ -33,7 +45,7 @@ def get_prescriptive_rendered_content(
         # Overwrite any fields passed in from test and instantiate ExpectationConfiguration
         expectation_configuration_kwargs.update(update_dict)
         config = ExpectationConfiguration(**expectation_configuration_kwargs)
-        expectation_type = expectation_configuration_kwargs["expectation_type"]
+        expectation_type = expectation_configuration_kwargs["type"]
 
         # Programatically determine the renderer implementations
         renderer_impl = get_renderer_impl(
@@ -69,7 +81,7 @@ def get_diagnostic_rendered_content(
         evr_kwargs.update(update_dict)
         evr = ExpectationValidationResult(**evr_kwargs)
         expectation_config = evr_kwargs["expectation_config"]
-        expectation_type = expectation_config["expectation_type"]
+        expectation_type = expectation_config["type"]
 
         # Programatically determine the renderer implementations
         renderer_impl = get_renderer_impl(
@@ -112,7 +124,7 @@ def test_atomic_prescriptive_summary_expect_column_distinct_values_to_be_in_set(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_be_in_set",
+        "type": "expect_column_distinct_values_to_be_in_set",
         "kwargs": {
             "column": "my_column",
             "value_set": [1, 2, 3],
@@ -131,7 +143,7 @@ def test_atomic_prescriptive_summary_expect_column_distinct_values_to_contain_se
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_contain_set",
+        "type": "expect_column_distinct_values_to_contain_set",
         "kwargs": {
             "column": "my_column",
             "value_set": ["a", "b", "c"],
@@ -151,7 +163,7 @@ def test_atomic_prescriptive_summary_expect_column_distinct_values_to_equal_set(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_distinct_values_to_equal_set",
+        "type": "expect_column_distinct_values_to_equal_set",
         "kwargs": {
             "column": "my_column",
             "value_set": ["a", "b", "c"],
@@ -171,7 +183,7 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+        "type": "expect_column_kl_divergence_to_be_less_than",
         "kwargs": {
             "column": "min_event_time",
             "partition_object": {
@@ -201,7 +213,7 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
-        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+        "type": "expect_column_kl_divergence_to_be_less_than",
         "kwargs": {
             "column": "min_event_time",
             "partition_object": {
@@ -248,7 +260,7 @@ def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_d
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
-        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+        "type": "expect_column_kl_divergence_to_be_less_than",
         "kwargs": {
             "column": "boolean_event",
             "partition_object": {
@@ -293,7 +305,7 @@ def test_atomic_prescriptive_summary_expect_column_max_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_max_to_be_between",
+        "type": "expect_column_max_to_be_between",
         "kwargs": {
             "column": "my_column",
             "min_value": 1,
@@ -313,7 +325,7 @@ def test_atomic_prescriptive_summary_expect_column_mean_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_mean_to_be_between",
+        "type": "expect_column_mean_to_be_between",
         "kwargs": {
             "column": "my_column",
             "min_value": 3,
@@ -333,7 +345,7 @@ def test_atomic_prescriptive_summary_expect_column_median_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_median_to_be_between",
+        "type": "expect_column_median_to_be_between",
         "kwargs": {
             "column": "my_column",
             "min_value": 5,
@@ -353,7 +365,7 @@ def test_atomic_prescriptive_summary_expect_column_min_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_min_to_be_between",
+        "type": "expect_column_min_to_be_between",
         "kwargs": {
             "column": "my_column",
             "min_value": 1,
@@ -374,7 +386,7 @@ def test_atomic_prescriptive_summary_expect_column_most_common_value_to_be_in_se
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_most_common_value_to_be_in_set",
+        "type": "expect_column_most_common_value_to_be_in_set",
         "kwargs": {
             "column": "my_column",
             "value_set": [1, 2, 3],
@@ -398,7 +410,7 @@ def test_atomic_prescriptive_summary_expect_column_pair_cramers_phi_value_to_be_
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_pair_cramers_phi_value_to_be_less_than",
+        "type": "expect_column_pair_cramers_phi_value_to_be_less_than",
         "kwargs": {
             "column_A": "foo",
             "column_B": "bar",
@@ -417,7 +429,7 @@ def test_atomic_prescriptive_summary_expect_column_pair_values_a_to_be_greater_t
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_pair_values_a_to_be_greater_than_b",
+        "type": "expect_column_pair_values_a_to_be_greater_than_b",
         "kwargs": {
             "column_A": "foo",
             "column_B": "bar",
@@ -440,7 +452,7 @@ def test_atomic_prescriptive_summary_expect_column_pair_values_to_be_equal(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_pair_values_to_be_equal",
+        "type": "expect_column_pair_values_to_be_equal",
         "kwargs": {
             "column_A": "foo",
             "column_B": "bar",
@@ -479,7 +491,7 @@ def test_atomic_prescriptive_summary_expect_column_proportion_of_unique_values_t
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+        "type": "expect_column_proportion_of_unique_values_to_be_between",
         "kwargs": {
             "column": "my_column",
             "min_value": 10,
@@ -499,7 +511,7 @@ def test_atomic_prescriptive_summary_expect_column_quantile_values_to_be_between
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_quantile_values_to_be_between",
+        "type": "expect_column_quantile_values_to_be_between",
         "kwargs": {
             "column": "Unnamed: 0",
             "quantile_ranges": {
@@ -531,7 +543,7 @@ def test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_be
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
-        "expectation_type": "expect_column_quantile_values_to_be_between",
+        "type": "expect_column_quantile_values_to_be_between",
         "kwargs": {
             "column": "Unnamed: 0",
             "quantile_ranges": {
@@ -574,7 +586,7 @@ def test_atomic_prescriptive_summary_expect_column_stdev_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_stdev_to_be_between",
+        "type": "expect_column_stdev_to_be_between",
         "kwargs": {
             "column": "my_column",
             "min_value": 10,
@@ -593,7 +605,7 @@ def test_atomic_prescriptive_summary_expect_column_sum_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_sum_to_be_between",
+        "type": "expect_column_sum_to_be_between",
         "kwargs": {
             "column": "my_column",
             "min_value": 10,
@@ -612,7 +624,7 @@ def test_atomic_prescriptive_summary_expect_column_to_exist(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_to_exist",
+        "type": "expect_column_to_exist",
         "kwargs": {
             "column": "my_column",
             "column_index": 5,
@@ -631,7 +643,7 @@ def test_atomic_prescriptive_summary_expect_column_unique_value_count_to_be_betw
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_unique_value_count_to_be_between",
+        "type": "expect_column_unique_value_count_to_be_between",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -652,7 +664,7 @@ def test_atomic_prescriptive_summary_expect_column_value_lengths_to_be_between(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_value_lengths_to_be_between",
+        "type": "expect_column_value_lengths_to_be_between",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -672,7 +684,7 @@ def test_atomic_prescriptive_summary_expect_column_value_lengths_to_equal(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_value_lengths_to_equal",
+        "type": "expect_column_value_lengths_to_equal",
         "kwargs": {
             "column": "my_column",
             "value": 100,
@@ -700,7 +712,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_between",
+        "type": "expect_column_values_to_be_between",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -721,7 +733,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_dateutil_parseab
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
+        "type": "expect_column_values_to_be_dateutil_parseable",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -740,7 +752,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_decreasing(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_decreasing",
+        "type": "expect_column_values_to_be_decreasing",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -760,7 +772,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_in_set(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_in_set",
+        "type": "expect_column_values_to_be_in_set",
         "kwargs": {
             "column": "my_column",
             "value_set": [1, 2, 3, 4],
@@ -782,7 +794,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_in_type_list(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_in_type_list",
+        "type": "expect_column_values_to_be_in_type_list",
         "kwargs": {
             "column": "my_column",
             "type_list": ["type_a", "type_b", "type_c"],
@@ -803,7 +815,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_increasing(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_increasing",
+        "type": "expect_column_values_to_be_increasing",
         "kwargs": {
             "column": "my_column",
             "strictly": True,
@@ -824,7 +836,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_json_parseable(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_json_parseable",
+        "type": "expect_column_values_to_be_json_parseable",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -842,7 +854,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_null(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_null",
+        "type": "expect_column_values_to_be_null",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -860,7 +872,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_null",
+        "type": "expect_column_values_to_be_null",
         "kwargs": {
             "column": "my_column",
             "mostly": 1.0,
@@ -878,7 +890,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_of_type(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_of_type",
+        "type": "expect_column_values_to_be_of_type",
         "kwargs": {
             "column": "my_column",
             "type_": "my_type",
@@ -897,7 +909,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_unique(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_be_unique",
+        "type": "expect_column_values_to_be_unique",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -916,7 +928,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_json_schema(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_match_json_schema",
+        "type": "expect_column_values_to_match_json_schema",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -953,7 +965,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_regex(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_match_regex",
+        "type": "expect_column_values_to_match_regex",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -973,7 +985,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_regex_list(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_match_regex_list",
+        "type": "expect_column_values_to_match_regex_list",
         "kwargs": {
             "column": "my_column",
             "regex_list": ["^superconductive$", "ge|great_expectations"],
@@ -994,7 +1006,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_match_strftime_form
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_match_strftime_format",
+        "type": "expect_column_values_to_match_strftime_format",
         "kwargs": {
             "column": "my_column",
             "strftime_format": "%Y-%m",
@@ -1014,7 +1026,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_be_in_set(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_not_be_in_set",
+        "type": "expect_column_values_to_not_be_in_set",
         "kwargs": {
             "column": "my_column",
             "value_set": [1, 2, 3],
@@ -1034,7 +1046,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_be_null(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_not_be_null",
+        "type": "expect_column_values_to_not_be_null",
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
@@ -1071,7 +1083,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_not_match_regex",
+        "type": "expect_column_values_to_not_match_regex",
         "kwargs": {
             "column": "my_column",
             "regex": "^superconductive$",
@@ -1091,7 +1103,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_not_match_regex_lis
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_column_values_to_not_match_regex_list",
+        "type": "expect_column_values_to_not_match_regex_list",
         "kwargs": {
             "column": "my_column",
             "regex_list": ["^a", "^b", "^c"],
@@ -1110,7 +1122,7 @@ def test_atomic_prescriptive_summary_expect_compound_columns_to_be_unique(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_compound_columns_to_be_unique",
+        "type": "expect_compound_columns_to_be_unique",
         "kwargs": {
             "column_list": ["my_first_col", "my_second_col", "my_third_col"],
             "mostly": 0.8,
@@ -1137,7 +1149,7 @@ def test_atomic_prescriptive_summary_expect_multicolumn_values_to_be_unique(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_multicolumn_values_to_be_unique",
+        "type": "expect_multicolumn_values_to_be_unique",
         "kwargs": {
             "column_list": ["A", "B", "C"],
             "ignore_row_if": "foo",
@@ -1157,7 +1169,7 @@ def test_atomic_prescriptive_summary_expect_select_column_values_to_be_unique_wi
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_select_column_values_to_be_unique_within_record",
+        "type": "expect_select_column_values_to_be_unique_within_record",
         "kwargs": {
             "column_list": ["my_first_column", "my_second_column"],
             "mostly": 0.8,
@@ -1177,7 +1189,7 @@ def test_atomic_prescriptive_summary_expect_table_column_count_to_be_between(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_table_column_count_to_be_between",
+        "type": "expect_table_column_count_to_be_between",
         "kwargs": {
             "min_value": 5,
             "max_value": None,
@@ -1195,7 +1207,7 @@ def test_atomic_prescriptive_summary_expect_table_column_count_to_equal(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_table_column_count_to_equal",
+        "type": "expect_table_column_count_to_equal",
         "kwargs": {
             "value": 10,
         },
@@ -1213,7 +1225,7 @@ def test_atomic_prescriptive_summary_expect_table_columns_to_match_ordered_list(
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_table_columns_to_match_ordered_list",
+        "type": "expect_table_columns_to_match_ordered_list",
         "kwargs": {"column_list": ["a", "b", "c"]},
     }
     rendered_content = get_prescriptive_rendered_content(update_dict)
@@ -1228,7 +1240,7 @@ def test_atomic_prescriptive_summary_expect_table_columns_to_match_set(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_table_columns_to_match_set",
+        "type": "expect_table_columns_to_match_set",
         "kwargs": {
             "column_set": ["a", "b", "c"],
             "exact_match": True,
@@ -1246,7 +1258,7 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_be_between(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_table_row_count_to_be_between",
+        "type": "expect_table_row_count_to_be_between",
         "kwargs": {"max_value": None, "min_value": 1},
     }
     rendered_content = get_prescriptive_rendered_content(update_dict)
@@ -1261,7 +1273,7 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_equal(
     snapshot, get_prescriptive_rendered_content
 ):
     update_dict = {
-        "expectation_type": "expect_table_row_count_to_equal",
+        "type": "expect_table_row_count_to_equal",
         "kwargs": {"value": 10},
     }
     rendered_content = get_prescriptive_rendered_content(update_dict)
@@ -1277,7 +1289,7 @@ def test_atomic_prescriptive_summary_expect_table_row_count_to_equal_other_table
     get_prescriptive_rendered_content,
 ):
     update_dict = {
-        "expectation_type": "expect_table_row_count_to_equal_other_table",
+        "type": "expect_table_row_count_to_equal_other_table",
         "kwargs": {
             "other_table_name": {
                 "schema": {"type": "string"},
@@ -1300,7 +1312,7 @@ def test_atomic_diagnostic_observed_value_without_result(snapshot, get_diagnosti
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
-        "expectation_type": "expect_table_row_count_to_equal",
+        "type": "expect_table_row_count_to_equal",
         "kwargs": {},
     }
     update_dict = {
@@ -1320,7 +1332,7 @@ def test_atomic_diagnostic_observed_value_with_numeric_observed_value(
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
-        "expectation_type": "expect_table_row_count_to_equal",
+        "type": "expect_table_row_count_to_equal",
         "kwargs": {},
     }
     update_dict = {
@@ -1341,7 +1353,7 @@ def test_atomic_diagnostic_observed_value_with_str_observed_value(
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
-        "expectation_type": "expect_table_row_count_to_equal",
+        "type": "expect_table_row_count_to_equal",
         "kwargs": {},
     }
     update_dict = {
@@ -1362,7 +1374,7 @@ def test_atomic_diagnostic_observed_value_with_unexpected_percent(
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
-        "expectation_type": "expect_table_row_count_to_equal",
+        "type": "expect_table_row_count_to_equal",
         "kwargs": {},
     }
     update_dict = {
@@ -1383,7 +1395,7 @@ def test_atomic_diagnostic_observed_value_with_empty_result(
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`  # noqa: E501
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.  # noqa: E501
     expectation_config = {
-        "expectation_type": "expect_table_row_count_to_equal",
+        "type": "expect_table_row_count_to_equal",
         "kwargs": {},
     }
     update_dict = {

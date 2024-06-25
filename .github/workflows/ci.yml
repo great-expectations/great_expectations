@@ -6,6 +6,9 @@ name: ci
 #   2. Every 3 hours
 #   3. When we push a tag with a semver pattern x.y.z (for example 0.0.1) which is the pattern we use for releases.
 
+env:
+  ECR_PULL_THROUGH_REPOSITORY_URL: 258143015559.dkr.ecr.us-east-1.amazonaws.com/docker-hub/
+
 on:
   merge_group:
   pull_request:
@@ -36,13 +39,13 @@ concurrency:
 
 jobs:
   ci-does-not-run-on-draft-pull-requests:
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     if: github.event.pull_request.draft == true
     steps:
       - run: echo "CI jobs won't run because this is a draft pull request."
 
   ci-is-on-main-repo:
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     # job only runs on main repo where we have access to credentials, or as part of the release
     if: |
       github.event.pull_request.head.repo.full_name == github.repository ||
@@ -52,7 +55,7 @@ jobs:
       - run: echo "This CI step only runs on the main repo, where we have access to credentials."
 
   static-analysis:
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,7 +86,7 @@ jobs:
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
       github.event_name == 'merge_group'
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         doc-step:
@@ -99,6 +102,7 @@ jobs:
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
+      AWS_REGION: ${{secrets.AWS_DEFAULT_REGION}}
       AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       # aws-redshift
       REDSHIFT_USERNAME: ${{secrets.REDSHIFT_USERNAME}}
@@ -163,6 +167,13 @@ jobs:
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m '${{ matrix.doc-step }}'
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registries: "258143015559"
+
       - name: Run the tests
         run: invoke docs-snippet-tests '${{ matrix.doc-step }}' --up-services --verbose  --reports
 
@@ -175,10 +186,12 @@ jobs:
           flags: ${{ matrix.doc-step }}
 
   unit-tests:
+    env:
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
     strategy:
       matrix:
-        os: [enterprise-arc]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        os: [ubuntu-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     runs-on: ${{ matrix.os }}
 
@@ -198,7 +211,8 @@ jobs:
         run: pip install . -c constraints-dev.txt -r reqs/requirements-dev-test.txt
 
       - name: Run the unit tests
-        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=1.5 --reports
+        # TODO: revert the timeout back to 1.5 or lower after resolving arc issues
+        run: invoke ci-tests -m "unit" --xdist --slowest=10 --timeout=2.0 --reports
 
       # upload coverage report to codecov
       - name: Upload coverage reports to Codecov
@@ -211,6 +225,9 @@ jobs:
   doc-checks:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
+    permissions:
+      id-token: write
+      contents: read
     runs-on: enterprise-arc
     steps:
       - name: Checkout
@@ -250,7 +267,7 @@ jobs:
       (github.event.pull_request.draft == false && github.base_ref == 'develop') ||
       (github.event_name == 'push' && contains(github.ref, 'refs/tags/1.')) ||
       github.event_name == 'merge_group'
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -274,7 +291,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     env:
       GX_CLOUD_BASE_URL: ${{vars.MERCURY_BASE_URL}}
       PACT_BROKER_READ_WRITE_TOKEN: ${{secrets.PACT_BROKER_READ_WRITE_TOKEN}}
@@ -344,6 +361,7 @@ jobs:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
     env:
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
       # aws
       AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
       AWS_DEFAULT_REGION: ${{secrets.AWS_DEFAULT_REGION}}
@@ -360,6 +378,9 @@ jobs:
       SNOWFLAKE_SCHEMA: ${{secrets.SNOWFLAKE_SCHEMA}}
       SNOWFLAKE_WAREHOUSE: ${{secrets.SNOWFLAKE_WAREHOUSE}}
       SNOWFLAKE_ROLE: ${{secrets.SNOWFLAKE_ROLE}}
+    permissions:
+      id-token: write
+      contents: read
     runs-on: enterprise-arc
     strategy:
       fail-fast: false
@@ -376,15 +397,23 @@ jobs:
           - snowflake
           - spark
           - trino
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         exclude:
           # TODO: would like to adopt `actionlint` pre-commit hook
           # but false positive here and inability to do an inline ignore
           # prevents this https://github.com/rhysd/actionlint/issues/237
           - python-version: ${{ github.event_name == 'pull_request' && '3.9' }}
           - python-version: ${{ github.event_name == 'pull_request' && '3.10' }}
+          - python-version: ${{ github.event_name == 'pull_request' && '3.11' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.9' }}
           - python-version: ${{ github.event_name == 'merge_group' && '3.10' }}
+          - python-version: ${{ github.event_name == 'merge_group' && '3.11' }}
+          - python-version: "3.12" # need sqlalchemy 2.0 support
+            markers: snowflake
+          - python-version: "3.12" # clickhouse/pyathena need dependency update
+            markers: athena or clickhouse or openpyxl or pyarrow or project or sqlite or aws_creds
+          - python-version: "3.12" # numpy related issue
+            markers: databricks
 
     steps:
       - name: Checkout
@@ -404,6 +433,16 @@ jobs:
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
+      - name: Configure ECR AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::258143015559:role/github-amazonec2containerregistryreadonly
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Run the tests
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose  --reports
 
@@ -418,7 +457,7 @@ jobs:
   py38-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -436,7 +475,7 @@ jobs:
   py39-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -454,7 +493,7 @@ jobs:
   py310-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -472,7 +511,7 @@ jobs:
   py311-min-versions:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -487,10 +526,30 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
 
+  py312-min-versions:
+    env:
+      GX_PYTHON_EXPERIMENTAL: true # allow for python 3.12+
+    needs: [unit-tests, static-analysis]
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: reqs/requirements-dev-test.txt
+      - name: Install dependencies
+        run: pip install . -c ci/constraints-test/py312-min-install.txt -r reqs/requirements-dev-test.txt
+      - name: Run the tests
+        run: invoke ci-tests -m unit --xdist --slowest=10  --timeout=2.0
+
   pydantic-v1:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -508,7 +567,7 @@ jobs:
   numpy-2:
     needs: [unit-tests, static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -527,7 +586,7 @@ jobs:
 
   airflow-min-versions:
     needs: [unit-tests, static-analysis]
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -546,7 +605,7 @@ jobs:
   import_gx:
     needs: [static-analysis]
     if: github.event.pull_request.draft == false
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
@@ -581,13 +640,14 @@ jobs:
         py39-min-versions,
         py310-min-versions,
         py311-min-versions,
+        py312-min-versions,
         pydantic-v1,
         airflow-min-versions,
         import_gx,
       ]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     name: Build and publish Python distributions to PyPI
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/great-expectations
@@ -629,13 +689,14 @@ jobs:
         py39-min-versions,
         py310-min-versions,
         py311-min-versions,
+        py312-min-versions,
         pydantic-v1,
         airflow-min-versions,
         import_gx,
         build-n-publish,
       ]
     if: always() && !cancelled() && contains(needs.*.result, 'failure') && github.event_name != 'pull_request' && github.event_name != 'merge_group'
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Scheduled CI job failure
         id: slack
@@ -651,7 +712,7 @@ jobs:
 
   notify_on_release:
     needs: [build-n-publish]
-    runs-on: enterprise-arc
+    runs-on: ubuntu-latest
     steps:
       - name: Announce Release
         id: slack

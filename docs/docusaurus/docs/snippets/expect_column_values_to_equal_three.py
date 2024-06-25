@@ -230,7 +230,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
                     "string_template": {
                         "template": exception_message_template_str,
                         "params": {
-                            "expectation_type": result.expectation_config.expectation_type,
+                            "expectation_type": result.expectation_config.type,
                             "exception_message": result.exception_info[
                                 "exception_message"
                             ],

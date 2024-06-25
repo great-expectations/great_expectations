@@ -15,7 +15,7 @@ def test_expectation_string_renderer_styling():
     renderer = ExpectationStringRenderer()
     result = renderer.render(
         ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_unique",
+            type="expect_column_values_to_be_unique",
             kwargs={"column": "Name"},
         )
     )
@@ -24,7 +24,7 @@ def test_expectation_string_renderer_styling():
 
     result = renderer.render(
         ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_unique",
+            type="expect_column_values_to_be_unique",
             kwargs={"column": "Name", "mostly": 0.3},
         )
     )
@@ -37,7 +37,7 @@ def test_expectation_string_renderer_styling():
 
     result = renderer.render(
         ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_unique",
+            type="expect_column_values_to_be_unique",
             kwargs={"column": "Name", "mostly": 0.32345},
         )
     )

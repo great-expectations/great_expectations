@@ -330,7 +330,7 @@ class ExpectationValidationResult(SerializableDictDot):
         metric_name_parts = metric_name.split(".")
         metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
-        if metric_name_parts[0] == self.expectation_config.expectation_type:
+        if metric_name_parts[0] == self.expectation_config.type:
             curr_metric_kwargs = get_metric_kwargs_id(metric_kwargs=self.expectation_config.kwargs)
             if metric_kwargs_id != curr_metric_kwargs:
                 raise gx_exceptions.UnavailableMetricError(
@@ -365,7 +365,7 @@ class ExpectationValidationResult(SerializableDictDot):
 
     def describe_dict(self) -> dict:
         if self.expectation_config:
-            expectation_type = self.expectation_config.expectation_type
+            expectation_type = self.expectation_config.type
             kwargs = self.expectation_config.kwargs
         else:
             expectation_type = None
@@ -594,7 +594,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             else:
                 for result in self.results:
                     try:
-                        if metric_name_parts[0] == result.expectation_config.expectation_type:
+                        if metric_name_parts[0] == result.expectation_config.type:
                             metric_value = result.get_metric(metric_name, **kwargs)
                             break
                     except gx_exceptions.UnavailableMetricError:
