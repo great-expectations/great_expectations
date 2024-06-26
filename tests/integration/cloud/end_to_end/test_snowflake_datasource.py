@@ -57,28 +57,26 @@ def datasource(
         "echo": True
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = False
-    datasource = context.add_or_update_datasource(datasource=datasource)
+    datasource: SnowflakeDatasource = context.add_or_update_datasource(
+        datasource=datasource
+    )
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = True
-    datasource_dict = datasource.dict()
-    # this is a bug - LATIKU-448
-    # call to datasource.dict() results in a ConfigStr that fails pydantic
-    # validation on SnowflakeDatasource
-    datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
-    datasource = context.sources.add_or_update_snowflake(**datasource_dict)
+
+    datasource: SnowflakeDatasource = context.sources.add_or_update_snowflake(
+        **datasource.dict()
+    )
     assert datasource.kwargs == {
         "echo": True
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = False
-    datasource_dict = datasource.dict()
-    # this is a bug - LATIKU-448
-    # call to datasource.dict() results in a ConfigStr that fails pydantic
-    # validation on SnowflakeDatasource
-    datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
-    _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)
+
+    _ = context.add_or_update_datasource(**datasource.dict())
+    datasource: SnowflakeDatasource = context.get_datasource(
+        datasource_name=datasource_name
+    )
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
