@@ -43,7 +43,7 @@ def datasource(
     get_missing_datasource_error_type: type[Exception],
 ) -> Iterator[SnowflakeDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
-    datasource = context.sources.add_snowflake(
+    datasource: SnowflakeDatasource = context.sources.add_snowflake(
         name=datasource_name,
         connection_string=connection_string,
         create_temp_table=False,
@@ -57,26 +57,20 @@ def datasource(
         "echo": True
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = False
-    datasource: SnowflakeDatasource = context.add_or_update_datasource(
-        datasource=datasource
-    )
+    datasource = context.add_or_update_datasource(datasource=datasource)
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = True
 
-    datasource: SnowflakeDatasource = context.sources.add_or_update_snowflake(
-        **datasource.dict()
-    )
+    datasource = context.sources.add_or_update_snowflake(**datasource.dict())
     assert datasource.kwargs == {
         "echo": True
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = False
 
     _ = context.add_or_update_datasource(**datasource.dict())
-    datasource: SnowflakeDatasource = context.get_datasource(
-        datasource_name=datasource_name
-    )
+    datasource = context.get_datasource(datasource_name=datasource_name)
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
