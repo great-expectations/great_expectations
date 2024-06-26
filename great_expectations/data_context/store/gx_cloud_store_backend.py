@@ -114,6 +114,12 @@ def get_user_friendly_error_message(
         errors = error_json.get("errors")
         if errors:
             support_message.append(json.dumps(errors))
+        elif (  # error doesn't conform to the standard format but we still want to expose it
+            # TODO: remove this once our error format has stabilized
+            response.status_code
+            in (400, 409, 422)
+        ):
+            support_message.append(json.dumps(error_json))
 
     except json.JSONDecodeError:
         support_message.append(
@@ -224,7 +230,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         filter_properties_dict(properties=self._config, inplace=True)
 
     @override
-    def _get(self, key: Tuple[GXCloudRESTResource, str | None, str | None]) -> ResponsePayload:  # type: ignore[override]
+    def _get(
+        self, key: Tuple[GXCloudRESTResource, str | None, str | None]
+    ) -> ResponsePayload:  # type: ignore[override]
         url = self.get_url_for_key(key=key)
 
         # if name is included in the key, add as a param
