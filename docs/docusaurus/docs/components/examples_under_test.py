@@ -5,6 +5,7 @@ under CI test.
 
 docs_tests = []
 
+# TODO: As we get these example tests working, uncomment/update to add them to CI.
 connecting_to_a_datasource = [
     # # Create a Data Source
     # IntegrationTestFixture(
@@ -53,6 +54,7 @@ connecting_to_a_datasource = [
     # ),
 ]
 
+# TODO: As we get these example tests working, uncomment/update to add them to CI.
 expectation_tests = [
     # # Expectation example scripts
     # IntegrationTestFixture(

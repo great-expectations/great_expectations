@@ -11,7 +11,7 @@ import PrereqCheckpoint from '../_core_components/prerequisites/_checkpoint.md';
 
 Running a Checkpoint will cause it to validate all of its Validation Definitions.  It will then execute its Actions based on the results returned from those Validation Definitions.  Finally, the Validation Results will be returned by the Checkpoint.
 
-At runtime, a Checkpoint can take in a `batch_parameters` dictionary that filters the Batches in each Validation Definition.  A Checkpoint will also accept an `expectation_parameters` dictionary that provides values for the parameters of the any Expectations that have been configured to accept parameters at runtime.
+At runtime, a Checkpoint can take in a `batch_parameters` dictionary that selects the Batch to validate from each Validation Definition.  A Checkpoint will also accept an `expectation_parameters` dictionary that provides values for the parameters of the any Expectations that have been configured to accept parameters at runtime.
 
 <h2>Prerequisites</h2>
 - <PrereqPythonInstalled/>.
@@ -27,7 +27,7 @@ In this procedure your Data Context is assumed to be stored in the variable `con
 
 1. Optional. Define Batch parameters.
 
-   Batch parameters are used to specify a Batch of data for retrieval from a Batch Definition.  Batch parameters are provided as a flat dictionary to the `batch_parameters` argument of a Checkpoint's `run(...)` method.
+   Batch parameters are used to specify a Batch of data for retrieval from a Batch Definition.  Batch parameters are provided as a dictionary to the `batch_parameters` argument of a Checkpoint's `run(...)` method.
 
    The Batch parameters accepted by a Validation Definition are determined by its Batch Definition.
 
@@ -41,7 +41,7 @@ In this procedure your Data Context is assumed to be stored in the variable `con
 
    To pass parameters to Expectations at runtime the Expectation must be configured to find parameter values through a dictionary lookup.  This is done when the Expectation is created.
 
-   You then pass a flat dictionary to the `expectation_parameters` argument of a Checkpoint's `run` method.  The contents of this dictionary consist of keys that were defined when the Checkpoint's Expectations were created, paired with the values that should be used for the Expectations' corresponding parmeters when the Checkpoint runs.
+   You then pass a dictionary to the `expectation_parameters` argument of a Checkpoint's `run` method.  The contents of this dictionary consist of keys that were defined for parameters when the Checkpoint's Expectations were created, paired with the values that should be used for the corresponding parmeters when the Checkpoint runs.
 
    Below is an example of a `ExpectColumnValuesToBeBetween` Expectation that is set to accept parameters at runtime, and an `expectation_parameters` dictionary that provides those parameters:
 
