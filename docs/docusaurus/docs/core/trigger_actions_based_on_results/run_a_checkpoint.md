@@ -43,7 +43,7 @@ In this procedure your Data Context is assumed to be stored in the variable `con
 
    You then pass a dictionary to the `expectation_parameters` argument of a Checkpoint's `run` method.  The contents of this dictionary consist of keys that were defined for parameters when the Checkpoint's Expectations were created, paired with the values that should be used for the corresponding parmeters when the Checkpoint runs.
 
-   Below is an example of a `ExpectColumnValuesToBeBetween` Expectation that is set to accept parameters at runtime, and an `expectation_parameters` dictionary that provides those parameters:
+   Below is an example of an `ExpectColumnValuesToBeBetween` Expectation that is set to accept parameters at runtime, and an `expectation_parameters` dictionary that provides those parameters:
 
    ```python title="Python"
    expectation = ExpectColumnValuesToBeBetween(
