@@ -39,7 +39,7 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
 
    You can find the available Actions that come with GX in the [GX API documenation alongside the Checkpoint class](/reference/api/checkpoint/Checkpoint_class.mdx).
 
-   To import an Action, you will retrieve the class from the `great_expectations.checkpoint.actions` module:
+   Actions can be imported from the `great_expectations.checkpoint.actions` module:
 
    ```python title="Python"
    from great_expectations.checkpoint.actions import SlackNotificationAction, UpdateDataDocsAction
