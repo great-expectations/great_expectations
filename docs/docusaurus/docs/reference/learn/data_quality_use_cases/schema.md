@@ -22,7 +22,7 @@ leveraging these Expectations to implement effective schema validation in your d
 
 ### Data Preview
 
-Here's a glimpse of the sample dataset we'll use to demonstrate schema validation:
+Below is a sample of the dataset that is referenced by examples and explanations within this article.
 
 | type     | sender_account_number  | recipient_fullname | transfer_amount | transfer_date       |
 |----------|------------------------|--------------------|-----------------|---------------------|
@@ -33,8 +33,7 @@ This dataset includes columns like `sender_account_number`, `recipient_fullname`
 
 ### Key Schema Expectations
 
-Let's explore core Expectations for schema validation, delving into their practical applications and
-nuances:
+Explore core Expectations for schema validation, delving into their practical applications and nuances:
 
 **1. `expect_column_to_exist`**:
 Ensures the presence of a specified column in your dataset. This Expectation is foundational for
