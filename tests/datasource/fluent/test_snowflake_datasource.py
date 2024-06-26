@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import logging
 from pprint import pformat as pf
 from sys import version_info as python_version
@@ -26,6 +27,29 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 TEST_LOGGER: Final = logging.getLogger(__name__)
+
+_EXAMPLE_PRIVATE_KEY: Final[
+    bytes
+] = b"""-----BEGIN RSA PRIVATE KEY-----
+MIICXAIBAAKBgHpFdCdKOGLaiMH9t1th1lKqJVcDwfnlP2lpneANbbsgHb6/4U2U
+ua085zlNYhZ5xJsnSdqIAfragzuVYNk2OCpoN1Qkq4oWad0a4cEB2QBtP9js0dVW
+xQObJM8t1ZLHB3Lw1NCqB6OefkP7XlE0w6aXRZ5IWwvVC86cBXVBmBXzAgMBAAEC
+gYABR6TVnHNGpZ702OEIdde2ec12QbXQFdQ6GD7sz3cslEN7caq8Eyh2ZcLN2L+E
+GLY0IY8mWHIc3BivkPq4i1a/JyRUzEToJvjVd8J1slrzz8ryMOAiPbxt33IpgGL3
+/8KgOLYxjdg5bpn6sCZlOXy7WYjl1H8TBw8CzZF41Ha24QJBAM7U+8m0hyknbnBD
+gKXGb0eHIBx0zlPaNJwDHUcJXujxbVfwVjKWLy07JoXRiAgPuVszIMhu0r+Xa87L
+W2WLdTsCQQCXVm0He7SaytnrlAFck5/L4EjtWaAQGfmV4eawI2HemWMjj0tukdFt
+wAWHDuKYMb+bg21OU2XQxollYYJfk/apAkBaSe10WuNZ2sXCKiWBuIMhZWJmKbNc
+NXgb1tw0A2o0JBhIeDkYsij8BMNHTXWllz+iCUq5VG+ZhX9hcbJ/PIa7AkEAjfgd
+v+9ktfGmDUGDJX23YmK9BywU5AX6BYkuB/6pSVFLl4hNkyRn+zUv+ksUdwH0Zccd
+O2UxFnGpYtnenBsKQQJBAMX2tgFcg//t1Li4+dxlTvZZ/clZCLpWXp4HQgBwzxMN
+wpDoF40OzNYrrKIboU4BJFOMOBWAS4DFDYGdfLVS99g=
+-----END RSA PRIVATE KEY-----"""
+
+_EXAMPLE_B64_ENCODED_PRIVATE_KEY: Final[bytes] = base64.standard_b64encode(
+    _EXAMPLE_PRIVATE_KEY
+)
+
 
 VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
     param(
@@ -136,6 +160,28 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             }
         },
         id="min connection_string dict with password ConfigStr",
+    ),
+    param(
+        {
+            "connection_string": {
+                "user": "my_user",
+                "password": "DUMMY_VALUE",
+                "account": "my_account",
+            },
+            "kwargs": {"connect_args": {"private": _EXAMPLE_PRIVATE_KEY}},
+        },
+        id="private_key auth",
+    ),
+    param(
+        {
+            "connection_string": {
+                "user": "my_user",
+                "password": "DUMMY_VALUE",
+                "account": "my_account",
+            },
+            "kwargs": {"connect_args": {"private": _EXAMPLE_B64_ENCODED_PRIVATE_KEY}},
+        },
+        id="private_key auth b64 encoded",
     ),
 ]
 
@@ -678,7 +724,7 @@ def test_get_engine_correctly_sets_application_query_param(
                 "name": "std connection_str",
                 "connection_string": "snowflake://user:password@account/db/schema?warehouse=wh&role=role",
             },
-            {},
+            {"url": ANY},
             id="std connection_string str",
         ),
         param(
@@ -694,7 +740,9 @@ def test_get_engine_correctly_sets_application_query_param(
                     "role": "role",
                 },
             },
-            {},
+            {
+                "url": "snowflake://user:password@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
+            },
             id="std connection_string dict",
         ),
         param(
@@ -703,7 +751,10 @@ def test_get_engine_correctly_sets_application_query_param(
                 "connection_string": "snowflake://user:password@account/db/schema?warehouse=wh&role=role",
                 "kwargs": {"connect_args": {"private_key": b"my_key"}},
             },
-            {"connect_args": {"private_key": b"my_key"}},
+            {
+                "connect_args": {"private_key": b"my_key"},
+                "url": ANY,
+            },
             id="connection_string str with connect_args",
         ),
         param(
@@ -720,7 +771,10 @@ def test_get_engine_correctly_sets_application_query_param(
                 },
                 "kwargs": {"connect_args": {"private_key": b"my_key"}},
             },
-            {"connect_args": {"private_key": b"my_key"}},
+            {
+                "connect_args": {"private_key": b"my_key"},
+                "url": "snowflake://user:password@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
+            },
             id="connection_string dict with connect_args",
         ),
     ],
@@ -739,7 +793,7 @@ def test_create_engine_is_called_with_expected_kwargs(
     engine = datasource.get_engine()
     print(engine)
 
-    create_engine_spy.assert_called_once_with(ANY, **expected_called_with)
+    create_engine_spy.assert_called_once_with(**expected_called_with)
 
 
 @pytest.mark.snowflake
