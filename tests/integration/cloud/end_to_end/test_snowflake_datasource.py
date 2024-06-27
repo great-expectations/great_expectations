@@ -57,7 +57,7 @@ def datasource(
         "echo": True
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = False
-    datasource = context.add_or_update_datasource(datasource=datasource)
+    datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment] # more specific type
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
@@ -70,7 +70,7 @@ def datasource(
     datasource.kwargs["echo"] = False
 
     _ = context.add_or_update_datasource(**datasource.dict())
-    datasource = context.get_datasource(datasource_name=datasource_name)
+    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment] # more specific type
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
