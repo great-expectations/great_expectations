@@ -35,6 +35,8 @@ This dataset includes columns like `sender_account_number`, `recipient_fullname`
 
 Explore core Expectations for schema validation, delving into their practical applications and nuances:
 
+---
+
 **1. `expect_column_to_exist`**:
 Ensures the presence of a specified column in your dataset. This Expectation is foundational for
 schema validation, verifying that critical columns are included, thus preventing data processing
@@ -54,6 +56,8 @@ Implement this Expectation early in your data pipeline to catch missing columns 
 as possible, minimizing downstream errors and rework.
 :::
 
+---
+
 **2. `expect_column_values_to_be_in_type_list`**:
 Ensures that the values in a specified column are within a specified type list. This Expectation is
 useful for columns with varied permissible types, such as mixed-type fields often found in legacy
@@ -68,6 +72,8 @@ not be strictly enforced, aiding smooth data migration and validation.
 
 **GX Tip**: Combine this Expectation with detailed logging to track which types are most frequently
 encountered, aiding in eventual standardization efforts.
+
+---
 
 **3. `expect_column_values_to_be_of_type`**:
 Validates that the values within a column are of a specific data type. This is more stringent
