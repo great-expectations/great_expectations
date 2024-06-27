@@ -150,19 +150,6 @@ but the general structure remains bounded within a predictable range.
 **GX Tip**: Regularly review the allowed range as your dataset evolves, ensuring it aligns
 with business requirements and anticipates potential future expansion.
 
-### Integrating Schema Validation
-
-Here's a brief overview of the steps to setup GX to validate your data schema. For more detailed
-guidance on common setup steps, be sure to check out the related sections in our GX documentation.
-
-1. **Prepare Sample Data**: Creating a sample dataset for testing and validation.
-2. **Connect to the Data**: [Establish a connection to the sample data](#) using Great Expectations.
-3. **Define Expectations**: Utilize `.expect_*` methods to specify schema rules.
-4. **Save Expectations**: [Store these rules](#) for future validation checks.
-5. **Create Checkpoints**: [Bundle your rules](#) and specify where in the pipeline they need to be validated.
-6. **Run Validation**: [Execute the validation checks](#) at the specified checkpoints.
-7. **Review Results**: [Inspect the outcomes](#) and identify any issues.
-
 ### Examples & Scenarios
 
 -- TODO: these are mostly pseudo code ----
