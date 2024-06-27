@@ -121,7 +121,9 @@ class AccountIdentifier(str):
         a. `<account_locator>.<region>.<cloud>` - e.g. `"abc12345.us-east-1.aws"`
     """
 
-    FORMAT_TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
+    FORMAT_TEMPLATE: ClassVar[
+        str
+    ] = "<account_identifier>.<region>.<cloud> or <orgname>-<account_name>"
 
     PATTERN: ClassVar[re.Pattern] = re.compile(
         r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
@@ -141,12 +143,18 @@ class AccountIdentifier(str):
         yield cls._validate
 
     @classmethod
-    def __get_schema__(cls) -> dict:
+    def get_schema(cls) -> dict:
+        """Can be used by Pydantic models to customize the generated jsonschema."""
         return {
             "title": cls.__name__,
             "type": "string",
             "pattern": cls.PATTERN.pattern,
-            "examples": ["abc12345.us-east-1.aws", "myOrg.myAccount"],
+            "examples": [
+                "myOrg-my_account",
+                "myOrg-my_account",
+                "myOrg.my_account",
+                "abc12345.us-east-1.aws",
+            ],
         }
 
     @classmethod
