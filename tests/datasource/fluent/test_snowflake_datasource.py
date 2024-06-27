@@ -849,7 +849,7 @@ def test_get_engine_correctly_sets_application_query_param(
                 },
             },
             {
-                "url": "snowflake://user:password@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
+                "url": "snowflake://user:password@account.us-east-1/db/schema?application=great_expectations_core&role=role&warehouse=wh",
             },
             id="std connection_string dict",
         ),
@@ -881,7 +881,7 @@ def test_get_engine_correctly_sets_application_query_param(
             },
             {
                 "connect_args": {"private_key": b"my_key"},
-                "url": "snowflake://user:password@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
+                "url": "snowflake://user:password@account.us-east-1/db/schema?application=great_expectations_core&role=role&warehouse=wh",
             },
             id="connection_string dict with connect_args",
         ),
