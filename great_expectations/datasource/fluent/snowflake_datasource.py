@@ -127,13 +127,12 @@ class AccountIdentifier(str):
     FORMATS: ClassVar[
         str
     ] = "<orgname>-<account_name> or <account_locator>.<region>.<cloud>"
+    
     FMT_1: ClassVar[
         str
     ] = r"^(?P<orgname>[a-zA-Z0-9]+)[.-](?P<account_name>[a-zA-Z0-9-_]+)$"
     FMT_2: ClassVar[str] = (
         r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
-        #
-        # invalid account identifier
     )
     PATTERN: ClassVar[re.Pattern] = re.compile(f"{FMT_1}|{FMT_2}")
 
