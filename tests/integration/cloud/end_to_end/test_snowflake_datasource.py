@@ -19,6 +19,8 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
+pytestmark: Final = pytest.mark.cloud
+
 RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
 
 ConnectionDetailKeys = Literal[
@@ -244,7 +246,6 @@ def checkpoint(
         context.get_checkpoint(name=checkpoint_name)
 
 
-@pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
     batch_request: BatchRequest,
@@ -268,7 +269,6 @@ def test_interactive_validator(
     assert len(expectation_suite.expectations) == expectation_count + 1
 
 
-@pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     checkpoint_result = checkpoint.run()
     assert checkpoint_result.success is True
