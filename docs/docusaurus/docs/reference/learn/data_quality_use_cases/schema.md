@@ -281,47 +281,6 @@ print("Unordered Columns Validation Result:", result_unordered)
 
 **Insight**: Ensures that critical columns are present at key stages, allowing for early detection of schema inconsistencies, which minimizes downstream processing issues.
 
-#### Industry-Specific Scenarios: Healthcare Data Validation
-
-**Context**: In healthcare, ensuring the schema of patient records is consistent is critical for patient safety and regulatory compliance.
-
-**Goal**: Validate healthcare datasets to ensure the existence and correct order of critical
-columns, maintaining the integrity of patient records.
-
-```python
-# Sample dataset
-healthcare_data = [
-    {'patient_id': '1234', 'patient_name': 'John Doe', 'dob': '1980-01-01', 'diagnosis': 'Hypertension', 'treatment': 'Medication'},
-    {'patient_id': '5678', 'patient_name': 'Jane Roe', 'dob': '1985-05-15', 'diagnosis': 'Diabetes'}
-]
-
-df_healthcare = pd.DataFrame(healthcare_data)
-context = gx.get_context()
-
-# Define the expectation suite
-expectation_suite_name = "healthcare_schema"
-context.create_expectation_suite(expectation_suite_name)
-
-validator_healthcare = context.get_validator(df_healthcare, expectation_suite_name=expectation_suite_name)
-
-# Define Expectations
-validator_healthcare.expect_column_to_exist("treatment")
-validator_healthcare.expect_column_values_to_be_of_type("patient_id", "str")
-validator_healthcare.expect_column_values_to_be_of_type("dob", "str")
-validator_healthcare.expect_table_columns_to_match_ordered_list([
-    "patient_id", "patient_name", "dob", "diagnosis", "treatment"
-])
-
-# Run validation
-result_healthcare = validator_healthcare.validate()
-
-print("Healthcare Validation Result:", result_healthcare)
-```
-
-**Insight**: Ensuring `patient_id` and `dob` are strings, and columns appear in the correct order,
-is critical for maintaining accurate patient records, which is essential for treatment and
-compliance.
-
 ### Community Best Practices
 
 #### Common Pitfalls and How to Avoid Them
