@@ -193,7 +193,6 @@ yaml = YAMLHandler()
 
 
 T = TypeVar("T", dict, list, str)
-DST = TypeVar("DST", FluentDatasource, BaseDatasource, LegacyDatasource)
 
 
 @public_api
@@ -868,9 +867,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: None = ...,
         initialize: bool = ...,
-        datasource: DST = ...,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
         **kwargs,
-    ) -> DST:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
         """
         A `datasource` is provided.
         `name` should not be provided.
@@ -891,9 +890,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         initialize: bool = True,
-        datasource: DST | None = None,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
-    ) -> DST | BaseDatasource | FluentDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
         """Add a new Datasource to the data context, with configuration provided as kwargs.
 
         --Documentation--
@@ -1057,9 +1056,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_datasource(
         self,
         name: None = ...,
-        datasource: DST = ...,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
         **kwargs,
-    ) -> DST:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """
         A `datasource` is provided.
         `name` should not be provided.
@@ -1071,9 +1070,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_datasource(
         self,
         name: str | None = None,
-        datasource: DST | None = None,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
-    ) -> DST | BaseDatasource | FluentDatasource | LegacyDatasource:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """Add a new Datasource or update an existing one on the context depending on whether
         it already exists or not. The configuration is provided as kwargs.
 
