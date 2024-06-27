@@ -52,7 +52,7 @@ For more on Expectation naming conventions, see the [Expectations section](../..
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/query_expectation_template.py).
+You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/a502fad53a0ba10acb924a664b5a94f058e30c14/docs/docusaurus/versioned_docs/version-0.18/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py#L4).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
@@ -330,7 +330,7 @@ For more on Expectation naming conventions, see the [Expectations section](../..
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/query_expectation_template.py).
+You can find the template file for a custom [`QueryExpectation` here](https://github.com/great-expectations/great_expectations/blob/a502fad53a0ba10acb924a664b5a94f058e30c14/docs/docusaurus/versioned_docs/version-0.18/oss/guides/expectations/creating_custom_expectations/query_expectation_template.py#L4).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
