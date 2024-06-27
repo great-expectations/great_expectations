@@ -260,12 +260,11 @@ Robust schema validation is fundamental to trustworthy data pipelines. Great Exp
 
 However, schema validation is just one aspect of a comprehensive data quality strategy. Achieving high-quality data requires a multifaceted approach involving:
 
--- TODO: update this list to link to our 6 other planned DQ articles ---
-
-1. **Consistency**: Ensuring that data remains uniform across different datasets and systems.
-2. **Completeness**: Verifying that all necessary data entries are present and accounted for.
-3. **Accuracy**: Maintaining the correctness of the data in correspondence with real-world values.
-4. **Integrity**: Safeguarding against data corruption and ensuring reliable storage and retrieval mechanisms.
-5. **Timeliness**: Ensuring data is up-to-date and refreshed in appropriate intervals to remain relevant.
+1. **Data Integrity**: Ensures that data remains accurate and consistent over its lifecycle by validating key constraints.
+2. **Missing Data**: Identifies and validates gaps in datasets to maintain completeness and usability.
+3. **Patterns and Formats**: Ensures that data values adhere to expected formats or patterns for consistency.
+4. **Cardinality and Membership**: Ensures that columns maintain correct unique counts and that values belong to a specified set.
+5. **Data Volume**: Monitors and validates the number of records to ensure they fall within expected bounds.
+6. **Numerical Data**: Validates numerical data properties and distributions to detect anomalies.
 
 To effectively handle these dimensions, consider integrating various Expectations to cover these broader data quality aspects. Regular validation, monitoring, and iterations are key to maintaining high standards.
