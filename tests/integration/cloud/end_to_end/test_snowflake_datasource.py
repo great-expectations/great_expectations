@@ -112,8 +112,6 @@ def test_create_4xx_error_message_handling(
     details_override: dict[str, str | None],
     expected_err_pattern: str,
 ):
-    datasource_name = f"i{uuid.uuid4().hex}"
-
     connection = {**connection_details, **details_override}
     with pytest.raises(
         StoreBackendError,
@@ -121,7 +119,7 @@ def test_create_4xx_error_message_handling(
         + expected_err_pattern,
     ):
         _: SnowflakeDatasource = context.sources.add_snowflake(
-            name=datasource_name,
+            name=f"i{uuid.uuid4().hex}",
             connection_string={  # filter out falsey values
                 k: v for k, v in connection.items() if v
             },
