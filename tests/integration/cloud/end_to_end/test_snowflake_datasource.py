@@ -84,8 +84,24 @@ def test_create_datasource(
             {"schema": None},
             r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"schema"\],'
             r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
-        )
+        ),
+        (
+            {"database": None},
+            r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"database"\],'
+            r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
+        ),
+        (
+            {"warehouse": None},
+            r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"warehouse"\],'
+            r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
+        ),
+        (
+            {"role": None},
+            r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"role"\],'
+            r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
+        ),
     ],
+    ids=lambda x: str(x[0]),
 )
 def test_create_failure_error_message(
     context: CloudDataContext,
