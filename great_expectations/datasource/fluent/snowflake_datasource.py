@@ -406,7 +406,7 @@ class SnowflakeDatasource(SQLDatasource):
         except TestConnectionError as e:
             if self.account and not self.account.match:
                 raise TestConnectionError(
-                    f"Ensure you have the correct account identifier format: {AccountIdentifier.WARNING_TEMPLATE.format(value=self.account, format_template=AccountIdentifier.FORMAT_TEMPLATE)}"
+                    f"Possible account identifier issue: {AccountIdentifier.WARNING_TEMPLATE.format(value=self.account, format_template=AccountIdentifier.FORMAT_TEMPLATE)}"
                 ) from e
             raise
 
