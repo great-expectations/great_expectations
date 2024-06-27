@@ -83,7 +83,7 @@ def test_create_datasource(
         (
             {"schema": None},
             r'.*"loc": ["snowflake", "connection_string", "SnowflakeConnectionDetails", "schema"],'
-            r' "msg": "Field required", "type": "missing"',
+            r' "msg": "Field required", "type": "missing".*',
         )
     ],
 )
@@ -98,7 +98,8 @@ def test_create_failure_error_message(
     connection = {**connection_details, **details_override}
     with pytest.raises(
         StoreBackendError,
-        match=r"Unable to set object in GX Cloud Store Backend:" + expected_err_pattern,
+        match=r"Unable to set object in GX Cloud Store Backend: "
+        + expected_err_pattern,
     ):
         _: SnowflakeDatasource = context.sources.add_snowflake(
             name=datasource_name,
