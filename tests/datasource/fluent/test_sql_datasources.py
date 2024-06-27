@@ -358,7 +358,7 @@ def test_specific_datasource_warnings(
     ],
     ids=lambda x: x["name"],
 )
-def test_datasource_autophagy(
+def test_recreate_from_dict(
     monkeypatch: pytest.MonkeyPatch,
     create_engine_fake: None,
     ephemeral_context_with_defaults: EphemeralDataContext,
