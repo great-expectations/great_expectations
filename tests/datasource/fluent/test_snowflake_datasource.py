@@ -270,7 +270,7 @@ class TestAccountIdentifier:
 
         account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
 
-        assert account_identifier.account == locator
+        assert account_identifier.account_locator == locator
         assert account_identifier.region == (cloud_region_id or None)
         assert account_identifier.cloud == (cloud_service or None)
 

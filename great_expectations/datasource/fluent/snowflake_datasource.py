@@ -113,15 +113,19 @@ class AccountIdentifier(str):
     https://docs.snowflake.com/en/user-guide/admin-account-identifier
 
     Expected formats:
-    1. `<orgname>.<account_name>` - e.g. `"myOrg.myAccount"`
-    2. `<account_identifier>.<region>.<cloud>` - e.g. `"abc12345.us-east-1.aws"`
-    3. `<account_identifier>.<region>` - e.g. `"abc12345.us-east-1"`
+    1. Account name in your organization
+        a. `<orgname>-<account_name>` - e.g. `"myOrg-my_account"`
+        b. `<orgname>-<account-name>` - e.g. `"myOrg-my-account"`
+        c. `<orgname>.<account_name>` - e.g. `"myOrg.my_account"`
+    2. Account locator in a region
+        a. `<account_locator>.<region>.<cloud>` - e.g. `"abc12345.us-east-1.aws"`
     """
 
     FORMAT_TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
 
     PATTERN: ClassVar[re.Pattern] = re.compile(
-        r"^(?P<account>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)(\.(?P<cloud>aws|gcp|azure))?(?=$)"
+        r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)"
+        r"|^(?P<orgname>[a-zA-Z0-9]+)[.-](?P<account_name>[a-zA-Z0-9-_]+)$"
     )
 
     WARNING_TEMPLATE: ClassVar[str] = (
@@ -164,9 +168,9 @@ class AccountIdentifier(str):
         return self._match
 
     @property
-    def account(self) -> str | None:
+    def account_locator(self) -> str | None:
         if self._match:
-            return self._match.group("account")
+            return self._match.group("account_locator")
         return None
 
     @property
@@ -180,6 +184,29 @@ class AccountIdentifier(str):
         if self._match:
             return self._match.group("cloud")  # type: ignore[return-value] # regex
         return None
+
+    @property
+    def orgname(self) -> str | None:
+        if self._match:
+            return self._match.group("orgname")
+        return None
+
+    @property
+    def account_name(self) -> str | None:
+        if self._match:
+            return self._match.group("account_name")
+        return None
+
+    def as_tuple(
+        self,
+    ) -> tuple[str | None, str | None, str | None] | tuple[str | None, str | None]:
+        fmt1 = (self.account_locator, self.region, self.cloud)
+        if any(fmt1):
+            return fmt1
+        fmt2 = (self.orgname, self.account_name)
+        if any(fmt2):
+            return fmt2
+        raise ValueError("Account identifier does not match either expected format")
 
 
 class _UrlPasswordError(pydantic.UrlError):
