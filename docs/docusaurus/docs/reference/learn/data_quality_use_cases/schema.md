@@ -254,11 +254,8 @@ print("Unordered Columns Validation Result:", result_unordered)
 
 **Additional Resources on the Web**:
 
---- TODO: Find external resources that complement our material. Intention here is to demonstrate our commitment to offering comprehensive data quality knowledge beyond just our GX tool----
-
-- [Great Expectations Official Documentation](https://docs.greatexpectations.io/)
-- [Common Schema Validation Pitfalls](#)
-- [Community Best Practices](#)
+- [Data Quality with Great Expectations](https://astrafy.io/the-hub/blog/technical/data-quality-with-great-expectations)
+- [AWS Well-Architected: Validate the data quality of source systems before transferring data for analytics](https://docs.aws.amazon.com/wellarchitected/latest/analytics-lens/best-practice-1.1---validate-the-data-quality-of-source-systems-before-transferring-data-for-analytics..html)
 
 ## The Path Forward
 
