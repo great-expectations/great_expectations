@@ -101,7 +101,7 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
         ),
     ],
 )
-class TestConfigPasstrough:
+class TestConfigPassthrough:
     def test_kwargs_passed_to_create_engine(
         self,
         create_engine_spy: mock.MagicMock,
