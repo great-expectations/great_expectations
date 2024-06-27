@@ -124,7 +124,7 @@ class AccountIdentifier(str):
     FORMAT_TEMPLATE: ClassVar[str] = "<account_identifier>.<region>.<cloud>"
 
     PATTERN: ClassVar[re.Pattern] = re.compile(
-        r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)"
+        r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
         r"|^(?P<orgname>[a-zA-Z0-9]+)[.-](?P<account_name>[a-zA-Z0-9-_]+)$"
     )
 
