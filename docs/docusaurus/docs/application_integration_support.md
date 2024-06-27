@@ -20,23 +20,23 @@ The following are the levels of support provided by GX:
 
 The following table defines the GX Cloud, GX Core, and Community Supported integrations.
 
-| Integration Type      | GX Cloud²                 | GX Core                                                                       | Community                         |
-| --------------------- | ------------------------- | ----------------------------------------------------------------------------- | --------------------------------- |
-| Data Sources¹         | Snowflake<br/> PostgreSQL | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>Spark<br/>Pandas | Redshift<br/>MSSQL<br/>MySQL<br/> |
-| Configuration Stores³ | In-app                    | File system                                                                   | None                              |
-| Actions               | Slack                     | Slack ⁴<br/>Email                                                             | None                              |
-| Credential Store      | Environment variables     | Environment variables <br/> YAML⁴                                             | None                              |
-| Orchestrator          | Airflow ⁵                 | Airflow ⁵                                                                     | None                              |
+| Integration Type      | GX Cloud                   | GX Core                                                                       | Community                         |
+| --------------------- | -------------------------- | ----------------------------------------------------------------------------- | --------------------------------- |
+| Data Sources¹         | Snowflake<br/> PostgreSQL² | Snowflake<br/>PostgreSQL<br/>Sqlite<br/>Databricks (SQL)<br/>Spark<br/>Pandas | Redshift<br/>MSSQL<br/>MySQL<br/> |
+| Configuration Stores³ | In-app                     | File system                                                                   | None                              |
+| Actions               | Slack                      | Slack ⁴<br/>Email                                                             | None                              |
+| Credential Store      | Environment variables      | Environment variables <br/> YAML⁴                                             | None                              |
+| Orchestrator          | Airflow ⁵                  | Airflow ⁵                                                                     | None                              |
 
 ¹ We've also seen GX work with the following data sources in the past but we can't guarentee ongoing compatibility. These data sources include Clickhouse, Vertica, Dremio, Teradata, Athena, EMR Spark, AWS Glue, Microsoft Fabric, Trino, Pandas on (S3, GCS, Azure), Databricks (Spark), and Spark on (S3, GCS, Azure).<br/>
 ² Support for BigQuery in GX Cloud will be available in a future release.<br/>
 ³ This includes configuration storage for Expectations, Checkpoints, Validation Definitions, and Validation Result<br/>
 ⁴ config_variables.yml<br/>
-⁵ Although only Airflow is supported, GX Cloud and GX OSS should work with any orchestrator that executes Python code.<br/>
+⁵ Although only Airflow is supported, GX Cloud and GX Core should work with any orchestrator that executes Python code.<br/>
 
 ### GX components
 
-The following table defines the GX components supported by GX Cloud and GX OSS.
+The following table defines the GX components supported by GX Cloud and GX Core.
 
 | Component    | GX Cloud                                                                                        | GX Core                                                               | Community                                                                  |
 | ------------ | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -45,7 +45,7 @@ The following table defines the GX components supported by GX Cloud and GX OSS.
 
 ### Operating systems
 
-The following table defines the operating systems supported by GX Cloud and GX OSS.
+The following table defines the operating systems supported by GX Cloud and GX Core.
 
 | GX Cloud    | GX Core   | Community |
 | ----------- | --------- | --------- |
@@ -55,7 +55,7 @@ The following table defines the operating systems supported by GX Cloud and GX O
 
 ### Python versions
 
-The following table defines the Python versions supported by GX Cloud and GX OSS. GX typically follows the [Python release cycle](https://devguide.python.org/versions/).
+The following table defines the Python versions supported by GX Cloud and GX Core. GX typically follows the [Python release cycle](https://devguide.python.org/versions/).
 
 | GX Cloud    | GX Core     | Community   |
 | ----------- | ----------- | ----------- |
@@ -63,7 +63,7 @@ The following table defines the Python versions supported by GX Cloud and GX OSS
 
 ### GX versions
 
-The following table defines the GX versions supported by GX Cloud and GX OSS.
+The following table defines the GX versions supported by GX Cloud and GX Core.
 
 | GX Cloud | GX Core | Community     |
 | -------- | ------- | ------------- |
