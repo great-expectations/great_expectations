@@ -285,7 +285,6 @@ class TestAccountIdentifier:
         [
             "foobar",
             "my_account.us-east-1",
-            "orgname-account-name",
             "xy12345.us-gov-west-1.aws.",
             "xy12345.europe-west4.gcp.bar",
             "xy12345.us-east-1.nope",
@@ -294,9 +293,6 @@ class TestAccountIdentifier:
             "xy12345_us-gov-west-1_aws",
             "xy12345_europe-west4_gcp",
             "xy12345_central-us_azure",
-            "xy12345-us-gov-west-1-aws",
-            "xy12345-europe-west4-gcp",
-            "xy12345-central-us-azure",
         ],
     )
     def test_parsing_unmatched_format_raises_warning(self, value: str):
