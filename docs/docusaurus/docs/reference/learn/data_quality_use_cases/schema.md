@@ -240,9 +240,11 @@ print("Unordered Columns Validation Result:", result_unordered)
 
 #### Common Pitfalls and How to Avoid Them
 
-- **Inconsistent Data Types**: Regularly monitor data ingestion points to ensure type consistency.
-- **Schema Evolution**: Establish a process for schema versioning and backward compatibility.
-- **Logging and Monitoring**: Implement detailed logging and alerting for schema validation failures.
+- **Inconsistent Data Types**: Inconsistencies in data types can arise when data is ingested from diverse sources or when schema definitions are updated without comprehensive checks. These inconsistencies often lead to processing errors, making analyses unreliable. Regular monitoring of data ingestion points and strict enforcement of type consistency through your data validation framework can mitigate these issues.
+
+- **Schema Evolution**: Evolving business requirements often necessitate changes in data schemas, which if not managed correctly, can lead to significant disruptions. Schema changes can break data pipelines and lead to data compatibility issues. Implementing a structured process for schema versioning and maintaining backward compatibility can help ensure that these changes are less disruptive.
+
+- **Logging and Monitoring**: Even the best validation setup can fail without proper logging and monitoring. Undetected schema validation failures can propagate through the data pipeline unnoticed, leading to broader issues. Detailed logging and real-time monitoring are essential to create an audit trail and enable quick detection and resolution of schema validation problems, maintaining the integrity of your data pipelines.
 
 **Additional Resources on the Web**:
 
