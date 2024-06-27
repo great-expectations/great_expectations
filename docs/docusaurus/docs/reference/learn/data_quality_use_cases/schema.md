@@ -1,6 +1,6 @@
 ---
 sidebar_label: 'Schema'
-title: 'Data quality: Ensuring schema consistency with Great Expectations'
+title: 'Ensuring schema consistency with Great Expectations'
 ---
 
 **Data schema** refers to the structural blueprint of a dataset, encompassing elements such as column
