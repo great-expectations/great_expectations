@@ -20,7 +20,7 @@ robust schema validation within your data pipelines, helping to catch and addres
 issues before they propagate through your data ecosystem. This guide will walk you through
 leveraging these Expectations to implement effective schema validation in your data workflows.
 
-### Data Preview
+## Data Preview
 
 Below is a sample of the dataset that is referenced by examples and explanations within this article.
 
@@ -31,11 +31,11 @@ Below is a sample of the dataset that is referenced by examples and explanations
 
 This dataset includes columns like `sender_account_number`, `recipient_fullname`, `transfer_amount`, and `transfer_date`.
 
-### Key Schema Expectations
+## Key Schema Expectations
 
 Explore core Expectations for schema validation, delving into their practical applications and nuances:
 
-#### 1. `expect_column_to_exist`
+### `expect_column_to_exist`
 
 Ensures the presence of a specified column in your dataset. This Expectation is foundational for
 schema validation, verifying that critical columns are included, thus preventing data processing
@@ -150,11 +150,11 @@ but the general structure remains bounded within a predictable range.
 **GX Tip**: Regularly review the allowed range as your dataset evolves, ensuring it aligns
 with business requirements and anticipates potential future expansion.
 
-### Examples & Scenarios
+## Examples & Scenarios
 
 -- TODO: these are mostly pseudo code ----
 
-#### Comparative Analysis: Ensuring Schema Consistency in Financial Transfers
+### Comparative Analysis: Ensuring Schema Consistency in Financial Transfers
 
 **Context**: In financial transfers, adhering to a fixed schema is paramount for regulatory compliance and operational accuracy. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions.
 
@@ -203,7 +203,7 @@ print("Validation Result 2:", result_2)
 
 **Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
 
-#### Different Expectation Suites: Strict vs. Relaxed Type Checking
+### Different Expectation Suites: Strict vs. Relaxed Type Checking
 
 **Context**: In some contexts, both the names and order of columns can be critically important. Using different suites to enforce these aspects can help maintain consistency.
 
@@ -236,9 +236,9 @@ print("Unordered Columns Validation Result:", result_unordered)
 
 **Insight**: The strict suite ensures that columns appear in the specified order, crucial in contexts where order matters for processing logic, while the relaxed suite allows flexibility but ensures all required columns are present.
 
-### Community Best Practices
+## Community Best Practices
 
-#### Common Pitfalls and How to Avoid Them
+### Common Pitfalls and How to Avoid Them
 
 - **Inconsistent Data Types**: Inconsistencies in data types can arise when data is ingested from diverse sources or when schema definitions are updated without comprehensive checks. These inconsistencies often lead to processing errors, making analyses unreliable. Regular monitoring of data ingestion points and strict enforcement of type consistency through your data validation framework can mitigate these issues.
 
@@ -254,7 +254,7 @@ print("Unordered Columns Validation Result:", result_unordered)
 - [Common Schema Validation Pitfalls](#)
 - [Community Best Practices](#)
 
-### The Path Forward
+## The Path Forward
 
 Robust schema validation is fundamental to trustworthy data pipelines. Great Expectations empowers you to proactively define and enforce the structural integrity of your data, ensuring its reliability for critical analyses and decision-making processes. By consistently incorporating schema validation practices, you enhance data quality, reduce downstream errors, and foster a strong culture of data confidence within your organization.
 
