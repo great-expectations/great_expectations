@@ -169,7 +169,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "DUMMY_VALUE",
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
             },
             "kwargs": {"connect_args": {"private": _EXAMPLE_PRIVATE_KEY}},
         },
@@ -180,7 +180,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "DUMMY_VALUE",
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
             },
             "kwargs": {"connect_args": {"private": _EXAMPLE_B64_ENCODED_PRIVATE_KEY}},
         },

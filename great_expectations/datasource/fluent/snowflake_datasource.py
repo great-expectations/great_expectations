@@ -137,6 +137,15 @@ class AccountIdentifier(str):
         yield cls._validate
 
     @classmethod
+    def __get_schema__(cls) -> dict:
+        return {
+            "title": cls.__name__,
+            "type": "string",
+            "pattern": cls.PATTERN.pattern,
+            "examples": ["abc12345.us-east-1.aws", "myOrg.myAccount"],
+        }
+
+    @classmethod
     def _validate(cls, value: str) -> AccountIdentifier:
         if not value:
             raise ValueError("Account identifier cannot be empty")
