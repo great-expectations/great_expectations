@@ -5,8 +5,10 @@ import uuid
 from typing import TYPE_CHECKING, Final, Iterator
 
 import pytest
+from typing_extensions import Literal
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.exceptions import StoreBackendError
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -18,6 +20,10 @@ if TYPE_CHECKING:
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
 RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
+
+ConnectionDetailKeys = Literal[
+    "account", "user", "password", "database", "schema", "warehouse", "role"
+]
 
 
 @pytest.fixture(scope="module")
@@ -34,6 +40,60 @@ def connection_string() -> str:
         )
     else:
         pytest.skip("no snowflake credentials")
+
+
+@pytest.fixture(scope="module")
+def connection_details() -> dict[ConnectionDetailKeys, str]:
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
+        return {
+            "account": "oca29081.us-east-1",
+            "user": "ci",
+            "password": "${SNOWFLAKE_CI_USER_PASSWORD}",
+            "database": "ci",
+            "schema": RANDOM_SCHEMA,
+            "warehouse": "ci",
+            "role": "ci",
+        }
+    pytest.skip("no snowflake credentials")
+
+
+@pytest.fixture(scope="module", params=["connection_string", "connection_details"])
+def connections(
+    request: pytest.FixtureRequest,
+) -> str | dict[ConnectionDetailKeys, str]:
+    """Parametrized fixture that returns both a connection string and connection details."""
+    return request.getfixturevalue(request.param)
+
+
+def test_create_datasource(
+    context: CloudDataContext, connections: str | dict[str, str]
+):
+    datasource_name = f"i{uuid.uuid4().hex}"
+    _: SnowflakeDatasource = context.sources.add_snowflake(
+        name=datasource_name,
+        connection_string=connections,
+    )
+
+
+@pytest.mark.parametrize(
+    ["details_override", "expected_err_pattern"], [({"schema": None}, "schema missing")]
+)
+def test_create_failure_error_message(
+    context: CloudDataContext,
+    connection_details: dict[str, str],
+    details_override: dict[str, str | None],
+    expected_err_pattern: str,
+):
+    datasource_name = f"i{uuid.uuid4().hex}"
+
+    connection = {**connection_details, **details_override}
+    with pytest.raises(StoreBackendError, match=expected_err_pattern):
+        _: SnowflakeDatasource = context.sources.add_snowflake(
+            name=datasource_name,
+            connection_string={  # filter out falsey values
+                k: v for k, v in connection.items() if v
+            },
+        )
 
 
 @pytest.fixture(scope="module")
