@@ -35,9 +35,8 @@ This dataset includes columns like `sender_account_number`, `recipient_fullname`
 
 Explore core Expectations for schema validation, delving into their practical applications and nuances:
 
----
+#### 1. `expect_column_to_exist`
 
-**1. `expect_column_to_exist`**:
 Ensures the presence of a specified column in your dataset. This Expectation is foundational for
 schema validation, verifying that critical columns are included, thus preventing data processing
 errors due to missing fields.
