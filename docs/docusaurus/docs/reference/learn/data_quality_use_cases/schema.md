@@ -330,9 +330,9 @@ compliance.
 - **Schema Evolution**: Establish a process for schema versioning and backward compatibility.
 - **Logging and Monitoring**: Implement detailed logging and alerting for schema validation failures.
 
-**Additional Resources**:
+**Additional Resources on the Web**:
 
---- TODO ----
+--- TODO: Find external resources that complement our material. Intention here is to demonstrate our commitment to offering comprehensive data quality knowledge beyond just our GX tool----
 
 - [Great Expectations Official Documentation](https://docs.greatexpectations.io/)
 - [Common Schema Validation Pitfalls](#)
