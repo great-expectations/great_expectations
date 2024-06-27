@@ -123,12 +123,14 @@ class AccountIdentifier(str):
 
     FORMAT_TEMPLATE: ClassVar[
         str
-    ] = "<account_identifier>.<region>.<cloud> or <orgname>-<account_name>"
-
-    PATTERN: ClassVar[re.Pattern] = re.compile(
-        r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
-        r"|^(?P<orgname>[a-zA-Z0-9]+)[.-](?P<account_name>[a-zA-Z0-9-_]+)$"
-    )
+    ] = "<account_locator>.<region>.<cloud> or <orgname>-<account_name>"
+    FMT_1: ClassVar[
+        str
+    ] = r"^(?P<orgname>[a-zA-Z0-9]+)[.-](?P<account_name>[a-zA-Z0-9-_]+)$"
+    FMT_2: ClassVar[
+        str
+    ] = r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
+    PATTERN: ClassVar[re.Pattern] = re.compile(f"{FMT_1}|{FMT_2}")
 
     MSG_TEMPLATE: ClassVar[str] = (
         "Account identifier {value} does not match expected format {format_template} ; it MAY be invalid. "
@@ -179,33 +181,48 @@ class AccountIdentifier(str):
         return self._match
 
     @property
-    def account_locator(self) -> str | None:
-        if self._match:
-            return self._match.group("account_locator")
-        return None
-
-    @property
-    def region(self) -> str | None:
-        if self._match:
-            return self._match.group("region")
-        return None
-
-    @property
-    def cloud(self) -> Literal["aws", "gcp", "azure"] | None:
-        if self._match:
-            return self._match.group("cloud")  # type: ignore[return-value] # regex
-        return None
-
-    @property
     def orgname(self) -> str | None:
+        """
+        Part of format 1:
+        * `<orgname>-<account_name>`
+        * `<orgname>-<account-name>`
+        * `<orgname>.<account_name>`
+        """
         if self._match:
             return self._match.group("orgname")
         return None
 
     @property
     def account_name(self) -> str | None:
+        """
+        Part of format 1:
+        * `<orgname>-<account_name>`
+        * `<orgname>-<account-name>`
+        * `<orgname>.<account_name>`
+        """
         if self._match:
             return self._match.group("account_name")
+        return None
+
+    @property
+    def account_locator(self) -> str | None:
+        """Part of format 2: `<account_locator>.<region>.<cloud>`"""
+        if self._match:
+            return self._match.group("account_locator")
+        return None
+
+    @property
+    def region(self) -> str | None:
+        """Part of format 2: `<account_locator>.<region>.<cloud>`"""
+        if self._match:
+            return self._match.group("region")
+        return None
+
+    @property
+    def cloud(self) -> Literal["aws", "gcp", "azure"] | None:
+        """Part of format 2: `<account_locator>.<region>.<cloud>`"""
+        if self._match:
+            return self._match.group("cloud")  # type: ignore[return-value] # regex
         return None
 
     def as_tuple(
