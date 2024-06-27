@@ -87,7 +87,7 @@ def test_create_datasource(
             id="schema missing",
         ),
         pytest.param(
-            {"database": None},
+            {"database": None, "schema": None},
             r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"database"\],'
             r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
             id="database missing",
