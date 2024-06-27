@@ -115,7 +115,7 @@ def get_user_friendly_error_message(
         if errors:
             support_message.append(json.dumps(errors))
         elif (  # error doesn't conform to the standard format but we still want to expose it
-            # TODO: remove this once our error format has stabilized
+            # TODO: consider removing this once our error format has stabilized
             response.status_code
             in (400, 409, 422)
         ):
