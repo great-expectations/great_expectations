@@ -44,11 +44,15 @@ errors due to missing fields.
 dataset.expect_column_to_exist("sender_account_number")
 ```
 
-**Use Case**: Ideal during data ingestion or integration of multiple data sources to ensure that
+:::info[Use Case]
+Ideal during data ingestion or integration of multiple data sources to ensure that
 essential fields are present before proceeding with downstream processing.
+:::
 
-**GX Tip**: Implement this Expectation early in your data pipeline to catch missing columns as soon
+:::tip[GX Tip]
+Implement this Expectation early in your data pipeline to catch missing columns as soon
 as possible, minimizing downstream errors and rework.
+:::
 
 **2. `expect_column_values_to_be_in_type_list`**:
 Ensures that the values in a specified column are within a specified type list. This Expectation is
