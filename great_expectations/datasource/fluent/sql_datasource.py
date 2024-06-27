@@ -1075,6 +1075,13 @@ class SQLDatasource(Datasource):
         """Returns the default execution engine type."""
         return SqlAlchemyExecutionEngine
 
+    @pydantic.validator("connection_string", pre=True)
+    def _config_str_instance_compatibility(cls, v: Union[ConfigStr, str]) -> str:
+        """If a ConfigStr is passed, we need to convert it back to string for pydantic to validate it."""
+        if isinstance(v, ConfigStr):
+            return str(v)
+        return v
+
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
