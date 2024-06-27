@@ -10,6 +10,7 @@ from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_suite_parameter_string,
 )
+from great_expectations.compatibility.pydantic import Field, StrictStr
 from great_expectations.expectations.model_field_descriptions import COLUMN_DESCRIPTION
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
@@ -134,7 +135,7 @@ class ExpectColumnToExist(BatchExpectation):
             }}
     """  # noqa: E501
 
-    column: str
+    column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
     column_index: Union[int, SuiteParameterDict, None] = None
 
     # This dictionary contains metadata for display in the public gallery

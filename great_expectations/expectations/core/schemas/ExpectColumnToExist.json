@@ -63,6 +63,8 @@
         },
         "column": {
             "title": "Column",
+            "description": "The column name.",
+            "minLength": 1,
             "type": "string"
         },
         "column_index": {
