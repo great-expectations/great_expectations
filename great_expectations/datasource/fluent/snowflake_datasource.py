@@ -312,9 +312,7 @@ class SnowflakeDsn(AnyUrl):
     def account_identifier(self) -> AccountIdentifier:
         """Alias for host."""
         assert self.host
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=GxDatasourceWarning)
-            return AccountIdentifier(self.host)
+        return AccountIdentifier(self.host)
 
     @property
     def account(self) -> AccountIdentifier:
