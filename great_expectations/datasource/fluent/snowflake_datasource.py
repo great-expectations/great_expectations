@@ -119,6 +119,9 @@ class AccountIdentifier(str):
         c. `<orgname>.<account_name>` - e.g. `"myOrg.my_account"`
     2. Account locator in a region
         a. `<account_locator>.<region>.<cloud>` - e.g. `"abc12345.us-east-1.aws"`
+
+    The cloud group is optional if on aws but expecting it to be there makes it easier to distinguish formats.
+    GX does not throw errors based on the regex parsing result.
     """
 
     FORMAT_TEMPLATE: ClassVar[
@@ -127,9 +130,11 @@ class AccountIdentifier(str):
     FMT_1: ClassVar[
         str
     ] = r"^(?P<orgname>[a-zA-Z0-9]+)[.-](?P<account_name>[a-zA-Z0-9-_]+)$"
-    FMT_2: ClassVar[
-        str
-    ] = r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
+    FMT_2: ClassVar[str] = (
+        r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
+        #
+        # invalid account identifier
+    )
     PATTERN: ClassVar[re.Pattern] = re.compile(f"{FMT_1}|{FMT_2}")
 
     MSG_TEMPLATE: ClassVar[str] = (
