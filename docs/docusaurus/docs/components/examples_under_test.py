@@ -1,5 +1,5 @@
-from tests.integration.integration_test_fixture import IntegrationTestFixture
 from tests.integration.backend_dependencies import BackendDependencies
+from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 docs_tests = []
 
