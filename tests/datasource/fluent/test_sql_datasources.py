@@ -101,7 +101,7 @@ def create_engine_fake(monkeypatch: pytest.MonkeyPatch) -> None:
         ),
     ],
 )
-class TestConfigPasstrough:
+class TestConfigPassthrough:
     def test_kwargs_passed_to_create_engine(
         self,
         create_engine_spy: mock.MagicMock,
@@ -335,6 +335,46 @@ def test_specific_datasource_warnings(
             context.sources.add_sql(
                 name="my_datasource", connection_string=connection_string
             ).test_connection()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "config",
+    [
+        {
+            "name": "connection_string only",
+            "connection_string": "sqlite:///",
+        },
+        {
+            "name": "no subs + kwargs",
+            "connection_string": "sqlite:///",
+            "kwargs": {"isolation_level": "SERIALIZABLE"},
+        },
+        {
+            "name": "subs + kwargs",
+            "connection_string": "sqlite:///${MY_VAR}",
+            "kwargs": {"isolation_level": "SERIALIZABLE"},
+        },
+    ],
+    ids=lambda x: x["name"],
+)
+def test_recreate_from_dict(
+    monkeypatch: pytest.MonkeyPatch,
+    create_engine_fake: None,
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    config: dict,
+):
+    """
+    Test that .dict() method of a datasource can be fed back into the constructor to recreate the datasource.
+    """
+    monkeypatch.setenv("MY_VAR", "my_var_value")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        d1 = ephemeral_context_with_defaults.sources.add_sql(**config)
+        ephemeral_context_with_defaults.delete_datasource(d1.name)
+        d2 = ephemeral_context_with_defaults.sources.add_sql(**d1.dict())
+    assert d1 == d2
 
 
 if __name__ == "__main__":
