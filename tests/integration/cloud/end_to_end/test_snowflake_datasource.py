@@ -78,7 +78,14 @@ def test_create_datasource(
 
 
 @pytest.mark.parametrize(
-    ["details_override", "expected_err_pattern"], [({"schema": None}, "schema missing")]
+    ["details_override", "expected_err_pattern"],
+    [
+        (
+            {"schema": None},
+            r'.*"loc": ["snowflake", "connection_string", "SnowflakeConnectionDetails", "schema"],'
+            r' "msg": "Field required", "type": "missing"',
+        )
+    ],
 )
 def test_create_failure_error_message(
     context: CloudDataContext,
@@ -89,7 +96,10 @@ def test_create_failure_error_message(
     datasource_name = f"i{uuid.uuid4().hex}"
 
     connection = {**connection_details, **details_override}
-    with pytest.raises(StoreBackendError, match=expected_err_pattern):
+    with pytest.raises(
+        StoreBackendError,
+        match=r"Unable to set object in GX Cloud Store Backend:" + expected_err_pattern,
+    ):
         _: SnowflakeDatasource = context.sources.add_snowflake(
             name=datasource_name,
             connection_string={  # filter out falsey values
