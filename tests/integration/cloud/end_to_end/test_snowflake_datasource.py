@@ -82,8 +82,8 @@ def test_create_datasource(
     [
         (
             {"schema": None},
-            r'.*"loc": ["snowflake", "connection_string", "SnowflakeConnectionDetails", "schema"],'
-            r' "msg": "Field required", "type": "missing".*',
+            r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"schema"\],'
+            r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
         )
     ],
 )
