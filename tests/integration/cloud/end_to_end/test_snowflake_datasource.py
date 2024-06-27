@@ -106,7 +106,7 @@ def test_create_datasource(
         ),
     ],
 )
-def test_create_failure_error_message(
+def test_create_4xx_error_message_handling(
     context: CloudDataContext,
     connection_details: dict[str, str],
     details_override: dict[str, str | None],
