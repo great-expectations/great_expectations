@@ -130,13 +130,17 @@ class AccountIdentifier(str):
         r"|^(?P<orgname>[a-zA-Z0-9]+)[.-](?P<account_name>[a-zA-Z0-9-_]+)$"
     )
 
-    WARNING_TEMPLATE: ClassVar[str] = (
+    MSG_TEMPLATE: ClassVar[str] = (
         "Account identifier {value} does not match expected format {format_template} ; it MAY be invalid. "
         "https://docs.snowflake.com/en/user-guide/admin-account-identifier"
     )
 
     def __init__(self, value: str) -> None:
         self._match = self.PATTERN.match(value)
+
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({super().__repr__()})"
 
     @classmethod
     def __get_validators__(cls) -> Any:
@@ -163,11 +167,10 @@ class AccountIdentifier(str):
             raise ValueError("Account identifier cannot be empty")
         v = cls(value)
         if not v._match:
-            warnings.warn(
-                cls.WARNING_TEMPLATE.format(
+            LOGGER.info(
+                cls.MSG_TEMPLATE.format(
                     value=value, format_template=cls.FORMAT_TEMPLATE
                 ),
-                category=GxDatasourceWarning,
             )
         return v
 

@@ -227,6 +227,24 @@ def sql_ds_test_connection_always_fail(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.unit
 class TestAccountIdentifier:
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "orgname.account_name",
+            "orgname-account_name",
+            "abc12345.us-east-1.aws",
+            "xy12345.us-gov-west-1.aws",
+            "xy12345.europe-west4.gcp",
+            "xy12345.central-us.azure",
+        ],
+    )
+    def test_str_and_repr_methods(self, value: str):
+        account_identifier: AccountIdentifier = pydantic.parse_obj_as(
+            AccountIdentifier, value
+        )
+        assert str(account_identifier) == value
+        assert repr(account_identifier) == f"AccountIdentifier({value!r})"
+
     @pytest.mark.parametrize("separator", [".", "-"])
     def test_fmt1_hyphen_parse(self, separator: Literal[".", "-"]):
         orgname = "orgname"
@@ -235,6 +253,7 @@ class TestAccountIdentifier:
         print(f"{value=}")
 
         account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert account_identifier.match
 
         assert account_identifier.account_name == account_name
         assert account_identifier.orgname == orgname
@@ -248,6 +267,7 @@ class TestAccountIdentifier:
         print(f"{value=}")
 
         account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert account_identifier.match
 
         assert account_identifier.account_name == account_name
         assert account_identifier.orgname == orgname
@@ -269,6 +289,7 @@ class TestAccountIdentifier:
         cloud_region_id, _, cloud_service = _remainder.partition(".")
 
         account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert account_identifier.match
 
         assert account_identifier.account_locator == locator
         assert account_identifier.region == (cloud_region_id or None)
@@ -295,18 +316,12 @@ class TestAccountIdentifier:
             "xy12345_central-us_azure",
         ],
     )
-    def test_parsing_unmatched_format_raises_warning(self, value: str):
-        """
-        Ensure that a warning is raised when the account identifier does not match the expected format.
-        This does not necessarily mean that the account identifier is invalid, but it we should prompt the user to check.
-        """
+    def test_invalid_formats(self, value: str):
+        """Test that an invalid format does not match but can still be stringified as the original value."""
         print(f"{value=}")
-        with pytest.warns(
-            GxDatasourceWarning,
-            match=f"Account identifier {value} does not match expected format",
-        ):
-            account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
-            print(account_identifier)
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert not account_identifier.match
+        assert str(account_identifier) == value
 
 
 @pytest.mark.unit
