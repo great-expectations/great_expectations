@@ -187,19 +187,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate  # noqa: E501
     # test_yml_config module so AbstractDataContext is not so cluttered.
-    FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     _ROOT_CONF_DIR = pathlib.Path.home() / ".great_expectations"
     _ROOT_CONF_FILE = _ROOT_CONF_DIR / "great_expectations.conf"
     _ETC_CONF_DIR = pathlib.Path("/etc")
     _ETC_CONF_FILE = _ETC_CONF_DIR / "great_expectations.conf"
     GLOBAL_CONFIG_PATHS = [_ROOT_CONF_FILE, _ETC_CONF_FILE]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
-    MIGRATION_WEBSITE: str = "https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
-
-    PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
-    PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND = 3
-    PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND = 4
-    PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
     # instance attribute type annotations
     fluent_config: GxConfig
@@ -556,7 +549,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return False
 
     def _add_fluent_datasource(
-        self, datasource: Optional[FluentDatasource] = None, **kwargs
+        self, datasource: Optional[FluentDatasource] = None, save_changes: bool = True, **kwargs
     ) -> FluentDatasource:
         if datasource:
             datasource_name = datasource.name
@@ -583,7 +576,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         return_obj = self.datasources.set_datasource(name=datasource_name, ds=datasource)
         assert isinstance(return_obj, FluentDatasource)
         return_obj._data_context = self
-        self._save_project_config()
+        if save_changes:
+            self._save_project_config()
 
         return return_obj
 
@@ -2458,8 +2452,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
             datasource._rebuild_asset_data_connectors()
-
-            self._add_fluent_datasource(datasource=datasource)
+            # since we are loading the datasource from existing config, we do not need to save it
+            self._add_fluent_datasource(datasource=datasource, save_changes=False)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """

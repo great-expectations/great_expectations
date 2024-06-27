@@ -43,6 +43,10 @@ from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
+from great_expectations.data_context.constants import (
+    CURRENT_GX_CONFIG_VERSION,
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
+)
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.util import (
     convert_to_json_serializable,  # noqa: TID251
@@ -63,13 +67,6 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-CURRENT_GX_CONFIG_VERSION = 3
-FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
-MINIMUM_SUPPORTED_CONFIG_VERSION = 2
-DEFAULT_USAGE_STATISTICS_URL = (
-    "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-)
 
 
 # NOTE 121822: (kilo59) likely won't moving to marshmallow v4 so we don't care about this
@@ -1072,7 +1069,12 @@ class GXCloudConfig(DictDot):
         if access_token is None:
             raise ValueError("Access token cannot be None.")  # noqa: TRY003
 
-        self.base_url = base_url
+        # The base url doesn't point to a specific resource but is the prefix for constructing GX
+        # cloud urls. We want it to end in a '/' so we can manipulate it using tools such as
+        # urllib.parse.urljoin. `urljoin` will strip the last part of the path if it thinks it is
+        # a specific resource  (ie not trailing /). So we append a '/' to the base_url if it
+        # doesn't exist.
+        self.base_url = base_url if base_url[-1] == "/" else base_url + "/"
         self.organization_id = organization_id
         self.access_token = access_token
 
@@ -1187,39 +1189,6 @@ class DataContextConfigSchema(Schema):
                     data["config_version"], CURRENT_GX_CONFIG_VERSION
                 ),
                 validation_error=ValidationError(message="config version too high"),
-            )
-
-        if data["config_version"] < CURRENT_GX_CONFIG_VERSION and (
-            "checkpoint_store_name" in data
-            or any(
-                store_config["class_name"] == "CheckpointStore"
-                for store_config in data["stores"].values()
-            )
-        ):
-            raise gx_exceptions.InvalidDataContextConfigError(
-                "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(  # noqa: E501
-                    data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
-                ),
-                validation_error=ValidationError(
-                    message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(  # noqa: E501
-                        data["config_version"], float(CURRENT_GX_CONFIG_VERSION)
-                    )
-                ),
-            )
-
-        if (
-            data["config_version"] >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE
-            and "validation_operators" in data
-            and data["validation_operators"] is not None
-        ):
-            logger.warning(
-                f"""You appear to be using a legacy capability with the latest config version \
-({data["config_version"]}).\n    Your data context with this configuration version uses validation_operators, which \
-are being deprecated.  Please consult the V3 API migration guide \
-https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and \
-update your configuration to be compatible with the version number {CURRENT_GX_CONFIG_VERSION}.\n    (This message \
-will appear repeatedly until your configuration is updated.)
-"""  # noqa: E501
             )
 
 

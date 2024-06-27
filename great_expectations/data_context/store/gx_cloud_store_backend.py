@@ -227,16 +227,22 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 str(response.text),
                 str(jsonError),
             )
-            raise StoreBackendError(f"Unable to get object in GX Cloud Store Backend: {jsonError}")  # noqa: TRY003
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to get object in GX Cloud Store Backend: {jsonError}"
+            ) from jsonError
         except requests.HTTPError as http_err:
             raise StoreBackendError(  # noqa: TRY003
                 f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"  # noqa: E501
-            )
+            ) from http_err
+        except requests.ConnectionError as conn_err:
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to get object in GX Cloud Store Backend: {conn_err}"
+            ) from conn_err
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)  # noqa: TRY401
             raise StoreBackendTransientError(  # noqa: TRY003
                 "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
-            )
+            ) from timeout_exc
 
     @override
     def _move(self) -> None:  # type: ignore[override]
@@ -302,12 +308,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             raise StoreBackendError(  # noqa: TRY003
                 f"Unable to update object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"  # noqa: E501
-            )
+            ) from http_exc
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)  # noqa: TRY401
             raise StoreBackendTransientError(  # noqa: TRY003
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
-            )
+            ) from timeout_exc
         except Exception as e:
             logger.debug(repr(e))
             raise StoreBackendError(  # noqa: TRY003
@@ -396,7 +402,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             logger.exception(timeout_exc)  # noqa: TRY401
             raise StoreBackendTransientError(  # noqa: TRY003
                 "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
-            )
+            ) from timeout_exc
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(f"Unable to set object in GX Cloud Store Backend: {e}") from e  # noqa: TRY003
@@ -446,7 +452,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             return keys
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(f"Unable to list keys in GX Cloud Store Backend: {e}")  # noqa: TRY003
+            raise StoreBackendError(f"Unable to list keys in GX Cloud Store Backend: {e}") from e  # noqa: TRY003
 
     @override
     def get_url_for_key(  # type: ignore[override]
@@ -499,15 +505,17 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             logger.exception(http_exc)  # noqa: TRY401
             raise StoreBackendError(  # noqa: TRY003
                 f"Unable to delete object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"  # noqa: E501
-            )
+            ) from http_exc
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)  # noqa: TRY401
             raise StoreBackendTransientError(  # noqa: TRY003
                 "Unable to delete object in GX Cloud Store Backend: This is likely a transient error. Please try again."  # noqa: E501
-            )
+            ) from timeout_exc
         except Exception as e:
             logger.debug(str(e))
-            raise StoreBackendError(f"Unable to delete object in GX Cloud Store Backend: {e!r}")  # noqa: TRY003
+            raise StoreBackendError(  # noqa: TRY003
+                f"Unable to delete object in GX Cloud Store Backend: {e!r}"
+            ) from e
 
     def _get_one_or_none_from_response_data(
         self,
@@ -609,10 +617,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         resource_type, _id, _resource_name = key
         try:
             GXCloudRESTResource(resource_type)
-        except ValueError:
+        except ValueError as e:
             raise TypeError(  # noqa: TRY003
                 f"The provided resource_type {resource_type} is not a valid GXCloudRESTResource"
-            )
+            ) from e
 
     @classmethod
     def construct_versioned_url(
