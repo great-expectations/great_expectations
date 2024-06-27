@@ -963,7 +963,7 @@ class TestConnectionTest:
         sf = SnowflakeDatasource(name="my_sf", connection_string=connection_string)
         with pytest.raises(
             TestConnectionError,
-            match=f"Account identifier 'invalid_format' does not match expected format {AccountIdentifier.FORMAT_TEMPLATE} ; it MAY be invalid. "
+            match=f"Account identifier 'invalid_format' does not match expected format {AccountIdentifier.FORMATS} ; it MAY be invalid. "
             "https://docs.snowflake.com/en/user-guide/admin-account-identifier",
         ) as exc_info:
             sf.test_connection()

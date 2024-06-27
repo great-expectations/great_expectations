@@ -124,7 +124,7 @@ class AccountIdentifier(str):
     GX does not throw errors based on the regex parsing result.
     """
 
-    FORMAT_TEMPLATE: ClassVar[
+    FORMATS: ClassVar[
         str
     ] = "<orgname>-<account_name> or <account_locator>.<region>.<cloud>"
     FMT_1: ClassVar[
@@ -138,7 +138,7 @@ class AccountIdentifier(str):
     PATTERN: ClassVar[re.Pattern] = re.compile(f"{FMT_1}|{FMT_2}")
 
     MSG_TEMPLATE: ClassVar[str] = (
-        "Account identifier '{value}' does not match expected format {format_template} ; it MAY be invalid. "
+        "Account identifier '{value}' does not match expected format {formats} ; it MAY be invalid. "
         "https://docs.snowflake.com/en/user-guide/admin-account-identifier"
     )
 
@@ -159,6 +159,7 @@ class AccountIdentifier(str):
         return {
             "title": cls.__name__,
             "type": "string",
+            "description": f"Snowflake Account identifiers can be in one of two formats: {cls.FORMATS}",
             "pattern": cls.PATTERN.pattern,
             "examples": [
                 "myOrg-my_account",
@@ -175,9 +176,7 @@ class AccountIdentifier(str):
         v = cls(value)
         if not v._match:
             LOGGER.info(
-                cls.MSG_TEMPLATE.format(
-                    value=value, format_template=cls.FORMAT_TEMPLATE
-                ),
+                cls.MSG_TEMPLATE.format(value=value, formats=cls.FORMATS),
             )
         return v
 
@@ -360,6 +359,11 @@ class ConnectionDetails(FluentBaseModel):
     role: Optional[str] = None
     numpy: bool = False
 
+    class Config:
+        @staticmethod
+        def schema_extra(schema, model) -> None:
+            schema["properties"]["account"] = AccountIdentifier.get_schema()
+
 
 @public_api
 class SnowflakeDatasource(SQLDatasource):
@@ -476,7 +480,7 @@ class SnowflakeDatasource(SQLDatasource):
                 raise TestConnectionError(
                     AccountIdentifier.MSG_TEMPLATE.format(
                         value=self.account,
-                        format_template=AccountIdentifier.FORMAT_TEMPLATE,
+                        formats=AccountIdentifier.FORMATS,
                     )
                 ) from e
             raise
