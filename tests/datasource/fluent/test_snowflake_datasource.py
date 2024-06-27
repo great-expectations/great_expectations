@@ -4,7 +4,7 @@ import base64
 import logging
 from pprint import pformat as pf
 from sys import version_info as python_version
-from typing import TYPE_CHECKING, Final, Sequence
+from typing import TYPE_CHECKING, Final, Literal, Sequence
 from unittest.mock import ANY
 
 import pytest
@@ -227,22 +227,43 @@ def sql_ds_test_connection_always_fail(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.unit
 class TestAccountIdentifier:
+    @pytest.mark.parametrize("separator", [".", "-"])
+    def test_fmt1_hyphen_parse(self, separator: Literal[".", "-"]):
+        orgname = "orgname"
+        account_name = "account-name"
+        value = f"{orgname}{separator}{account_name}"
+        print(f"{value=}")
+
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+
+        assert account_identifier.account_name == account_name
+        assert account_identifier.orgname == orgname
+        assert account_identifier.as_tuple() == (orgname, account_name)
+
+    @pytest.mark.parametrize("separator", [".", "-"])
+    def test_fmt1_underscore_parse(self, separator: Literal[".", "-"]):
+        orgname = "orgname"
+        account_name = "account_name"
+        value = f"{orgname}{separator}{account_name}"
+        print(f"{value=}")
+
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+
+        assert account_identifier.account_name == account_name
+        assert account_identifier.orgname == orgname
+        assert account_identifier.as_tuple() == (orgname, account_name)
+
     @pytest.mark.parametrize(
         "value",
         [
-            "orgname.account-name",
             "abc12345.us-east-1.aws",
             "xy12345.us-gov-west-1.aws",
-            "xy12345.us-gov-west-1",
             "xy12345.europe-west4.gcp",
-            "xy12345.us-east-1",
             "xy12345.central-us.azure",
-            "account.us-east-1",
-            "myAccount.us-east-1",
-            # "xy12345", # TODO: this also matches the snowflake format but it's a special case
         ],
     )
-    def test_parsing_valid(self, value: str):
+    def test_fmt2_parse(self, value: str):
+        """The cloud portion is technically optional if the the provider is AWS, but expecting greatly simplifies our parsing logic"""
         print(f"{value=}")
         locator, _, _remainder = value.partition(".")
         cloud_region_id, _, cloud_service = _remainder.partition(".")
@@ -253,16 +274,29 @@ class TestAccountIdentifier:
         assert account_identifier.region == (cloud_region_id or None)
         assert account_identifier.cloud == (cloud_service or None)
 
+        assert account_identifier.as_tuple() == (
+            locator,
+            cloud_region_id,
+            cloud_service,
+        )
+
     @pytest.mark.parametrize(
         "value",
         [
             "foobar",
             "my_account.us-east-1",
+            "orgname-account-name",
             "xy12345.us-gov-west-1.aws.",
             "xy12345.europe-west4.gcp.bar",
             "xy12345.us-east-1.nope",
             "xy12345.",
             "xy12345.central-us.bazar",
+            "xy12345_us-gov-west-1_aws",
+            "xy12345_europe-west4_gcp",
+            "xy12345_central-us_azure",
+            "xy12345-us-gov-west-1-aws",
+            "xy12345-europe-west4-gcp",
+            "xy12345-central-us-azure",
         ],
     )
     def test_parsing_unmatched_format_raises_warning(self, value: str):
