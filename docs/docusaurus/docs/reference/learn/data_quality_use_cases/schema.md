@@ -55,9 +55,9 @@ Implement this Expectation early in your data pipeline to catch missing columns 
 as possible, minimizing downstream errors and rework.
 :::
 
----
 
-**2. `expect_column_values_to_be_in_type_list`**:
+### `expect_column_values_to_be_in_type_list`
+
 Ensures that the values in a specified column are within a specified type list. This Expectation is
 useful for columns with varied permissible types, such as mixed-type fields often found in legacy
 databases.
@@ -72,9 +72,9 @@ not be strictly enforced, aiding smooth data migration and validation.
 **GX Tip**: Combine this Expectation with detailed logging to track which types are most frequently
 encountered, aiding in eventual standardization efforts.
 
----
 
-**3. `expect_column_values_to_be_of_type`**:
+### `expect_column_values_to_be_of_type`
+
 Validates that the values within a column are of a specific data type. This is more stringent
 compared to the previous Expectation, suitable for scenarios needing strict type adherence.
 
@@ -88,7 +88,8 @@ apparent type changes can occur when new values appear.
 **GX Tip**: Opt for `expect_column_values_to_be_of_type` when dealing with columns where
 any type deviation could lead to significant processing errors or inaccuracies.
 
-**4. `expect_table_column_count_to_equal`**:
+### `expect_table_column_count_to_equal`
+
 Ensures the dataset has an exact number of columns. This precise Expectation is for datasets with a
 fixed schema structure, providing a strong safeguard against unexpected changes.
 
@@ -102,7 +103,8 @@ any deviation can lead to compliance violations.
 **GX Tip**: Periodically review and update this Expectation alongside any schema changes,
 especially when new regulatory requirements emerge.
 
-**5. `expect_table_columns_to_match_ordered_list`**:
+### `expect_table_columns_to_match_ordered_list`
+
 Validates the exact order of columns. This is crucial when processing pipelines depend on a specific
 column order, ensuring consistency and reliability.
 
@@ -119,7 +121,8 @@ columns are computed during serialization.
 **GX Tip**: Use `expect_table_columns_to_match_ordered_list` over
 `expect_table_columns_to_match_set` when order matters, such as in scripts directly referencing column positions.
 
-**6. `expect_table_columns_to_match_set`**:
+### `expect_table_columns_to_match_set`
+
 Checks that the dataset contains specific columns, without regard to order. This Expectation offers
 flexibility where column presence is more critical than their sequence.
 
@@ -136,7 +139,8 @@ warehousing operations where column integrity is crucial, but order might vary.
 **GX Tip**: Opt for `expect_table_columns_to_match_set` when integrating datasets from
 various sources where column order might differ, but consistency in available data is required.
 
-**7. `expect_table_column_count_to_be_between`**:
+### `expect_table_column_count_to_be_between`
+
 Validates that the number of columns falls within a specific range, offering flexibility for
 datasets that can expand or contract within a known boundary.
 
