@@ -66,12 +66,15 @@ databases.
 dataset.expect_column_values_to_be_in_type_list("account_type", ["int", "str"])
 ```
 
-**Use Case**: Suitable for datasets transitioning from older systems where type consistency might
+:::info[Use Case]
+Suitable for datasets transitioning from older systems where type consistency might
 not be strictly enforced, aiding smooth data migration and validation.
+:::
 
-**GX Tip**: Combine this Expectation with detailed logging to track which types are most frequently
+:::tip[GX Tip]
+Combine this Expectation with detailed logging to track which types are most frequently
 encountered, aiding in eventual standardization efforts.
-
+:::
 
 ### `expect_column_values_to_be_of_type`
 
@@ -82,11 +85,15 @@ compared to the previous Expectation, suitable for scenarios needing strict type
 dataset.expect_column_values_to_be_of_type("transfer_amount", "float")
 ```
 
-**Use Case**: Handling data transferred using formats that do not embed schema (e.g., CSV), where
+:::info[Use Case]
+Handling data transferred using formats that do not embed schema (e.g., CSV), where
 apparent type changes can occur when new values appear.
+:::
 
-**GX Tip**: Opt for `expect_column_values_to_be_of_type` when dealing with columns where
+:::tip[GX Tip]
+Opt for `expect_column_values_to_be_of_type` when dealing with columns where
 any type deviation could lead to significant processing errors or inaccuracies.
+:::
 
 ### `expect_table_column_count_to_equal`
 
@@ -97,11 +104,15 @@ fixed schema structure, providing a strong safeguard against unexpected changes.
 dataset.expect_table_column_count_to_equal(7)
 ```
 
-**Use Case**: Perfect for regulatory reporting scenarios where the schema is strictly defined, and
+:::info[Use Case]
+Perfect for regulatory reporting scenarios where the schema is strictly defined, and
 any deviation can lead to compliance violations.
+:::
 
-**GX Tip**: Periodically review and update this Expectation alongside any schema changes,
+:::tip[GX Tip]
+Periodically review and update this Expectation alongside any schema changes,
 especially when new regulatory requirements emerge.
+:::
 
 ### `expect_table_columns_to_match_ordered_list`
 
@@ -115,11 +126,15 @@ dataset.expect_table_columns_to_match_ordered_list([
 ])
 ```
 
-**Use Case**: Particularly relevant when handling scenarios such as changes in the order in which
+:::info[Use Case]
+Particularly relevant when handling scenarios such as changes in the order in which
 columns are computed during serialization.
+:::
 
-**GX Tip**: Use `expect_table_columns_to_match_ordered_list` over
+:::tip[GX Tip]
+Use `expect_table_columns_to_match_ordered_list` over
 `expect_table_columns_to_match_set` when order matters, such as in scripts directly referencing column positions.
+:::
 
 ### `expect_table_columns_to_match_set`
 
@@ -133,11 +148,15 @@ dataset.expect_table_columns_to_match_set([
 ])
 ```
 
-**Use Case**: Useful for datasets that might undergo reordering during preprocessing; key for data
+:::info[Use Case]
+Useful for datasets that might undergo reordering during preprocessing; key for data
 warehousing operations where column integrity is crucial, but order might vary.
+:::
 
-**GX Tip**: Opt for `expect_table_columns_to_match_set` when integrating datasets from
+:::tip[GX Tip]
+Opt for `expect_table_columns_to_match_set` when integrating datasets from
 various sources where column order might differ, but consistency in available data is required.
+:::
 
 ### `expect_table_column_count_to_be_between`
 
@@ -148,11 +167,15 @@ datasets that can expand or contract within a known boundary.
 dataset.expect_table_column_count_to_be_between(min_value=5, max_value=7)
 ```
 
-**Use Case**: Beneficial for evolving datasets where additional columns could be added over time,
+:::info[Use Case]
+Beneficial for evolving datasets where additional columns could be added over time,
 but the general structure remains bounded within a predictable range.
+:::
 
-**GX Tip**: Regularly review the allowed range as your dataset evolves, ensuring it aligns
+:::tip[GX Tip]
+Regularly review the allowed range as your dataset evolves, ensuring it aligns
 with business requirements and anticipates potential future expansion.
+:::
 
 ## Examples & Scenarios
 
