@@ -920,7 +920,6 @@ def test_create_engine_is_called_with_expected_kwargs(
 
 
 @pytest.mark.unit
-@pytest.mark.filterwarnings(GxDatasourceWarning)  # type: ignore[arg-type] # improper type hint in pytest
 class TestConnectionTest:
     @pytest.mark.parametrize(
         "connection_string",
@@ -964,7 +963,8 @@ class TestConnectionTest:
         sf = SnowflakeDatasource(name="my_sf", connection_string=connection_string)
         with pytest.raises(
             TestConnectionError,
-            match="Ensure you have the correct account identifier format",
+            match=f"Account identifier 'invalid_format' does not match expected format {AccountIdentifier.FORMAT_TEMPLATE} ; it MAY be invalid. "
+            "https://docs.snowflake.com/en/user-guide/admin-account-identifier",
         ) as exc_info:
             sf.test_connection()
 

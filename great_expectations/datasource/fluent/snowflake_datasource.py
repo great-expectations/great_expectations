@@ -126,7 +126,7 @@ class AccountIdentifier(str):
 
     FORMAT_TEMPLATE: ClassVar[
         str
-    ] = "<account_locator>.<region>.<cloud> or <orgname>-<account_name>"
+    ] = "<orgname>-<account_name> or <account_locator>.<region>.<cloud>"
     FMT_1: ClassVar[
         str
     ] = r"^(?P<orgname>[a-zA-Z0-9]+)[.-](?P<account_name>[a-zA-Z0-9-_]+)$"
@@ -138,7 +138,7 @@ class AccountIdentifier(str):
     PATTERN: ClassVar[re.Pattern] = re.compile(f"{FMT_1}|{FMT_2}")
 
     MSG_TEMPLATE: ClassVar[str] = (
-        "Account identifier {value} does not match expected format {format_template} ; it MAY be invalid. "
+        "Account identifier '{value}' does not match expected format {format_template} ; it MAY be invalid. "
         "https://docs.snowflake.com/en/user-guide/admin-account-identifier"
     )
 
@@ -474,7 +474,10 @@ class SnowflakeDatasource(SQLDatasource):
         except TestConnectionError as e:
             if self.account and not self.account.match:
                 raise TestConnectionError(
-                    f"Possible account identifier issue: {AccountIdentifier.WARNING_TEMPLATE.format(value=self.account, format_template=AccountIdentifier.FORMAT_TEMPLATE)}"
+                    AccountIdentifier.MSG_TEMPLATE.format(
+                        value=self.account,
+                        format_template=AccountIdentifier.FORMAT_TEMPLATE,
+                    )
                 ) from e
             raise
 
