@@ -572,6 +572,8 @@ filterwarnings = [
     'ignore: Passing a BlockManager to PandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
     # Example Actual Warning: DeprecationWarning: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.
     'ignore: Passing a BlockManager to CustomPandasDataset is deprecated and will raise in a future version. Use public APIs instead.:DeprecationWarning',
+    # Example Actual Warning: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+    'ignore: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.',
 
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
