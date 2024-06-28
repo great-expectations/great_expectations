@@ -4,7 +4,7 @@ import base64
 import logging
 from pprint import pformat as pf
 from sys import version_info as python_version
-from typing import TYPE_CHECKING, Final, Sequence
+from typing import TYPE_CHECKING, Final, Literal, Sequence
 from unittest.mock import ANY
 
 import pytest
@@ -17,8 +17,11 @@ from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import GxContextWarning, GxDatasourceWarning
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
+    AccountIdentifier,
     SnowflakeDatasource,
     SnowflakeDsn,
+    SQLDatasource,
+    TestConnectionError,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
@@ -54,13 +57,13 @@ _EXAMPLE_B64_ENCODED_PRIVATE_KEY: Final[bytes] = base64.standard_b64encode(
 VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
     param(
         {
-            "connection_string": "snowflake://my_user:password@my_account/d_public/s_public?numpy=True"
+            "connection_string": "snowflake://my_user:password@myAccount.us-east-1/d_public/s_public?numpy=True"
         },
         id="connection_string str",
     ),
     param(
         {
-            "connection_string": "snowflake://my_user:password@my_account/d_public/s_public"
+            "connection_string": "snowflake://my_user:password@myAccount.us-east-1/d_public/s_public"
             "?warehouse=my_wh&role=my_role",
             "assets": [
                 {"name": "min_table_asset", "type": "table"},
@@ -96,18 +99,18 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
         id="heterogenous assets",
     ),
     param(
-        {"connection_string": "snowflake://my_user:password@my_account"},
+        {"connection_string": "snowflake://my_user:password@myAccount.us-east-1"},
         id="min connection_string str",
     ),
     param(
         {
-            "connection_string": "snowflake://my_user:${MY_PASSWORD}@my_account/d_public/s_public"
+            "connection_string": "snowflake://my_user:${MY_PASSWORD}@myAccount.us-east-1/d_public/s_public"
         },
         id="connection_string ConfigStr - password sub",
     ),
     param(
         {
-            "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@my_account/d_public/s_public"
+            "connection_string": "snowflake://${MY_USER}:${MY_PASSWORD}@myAccount.us-east-1/d_public/s_public"
         },
         id="connection_string ConfigStr - user + password sub",
     ),
@@ -122,7 +125,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "password",
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
                 "schema": "s_public",
                 "database": "d_public",
             }
@@ -134,7 +137,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "password",
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
             }
         },
         id="min connection_string dict",
@@ -144,7 +147,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "${MY_PASSWORD}",
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
                 "schema": "s_public",
                 "database": "d_public",
             }
@@ -156,7 +159,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "${MY_PASSWORD}",
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
             }
         },
         id="min connection_string dict with password ConfigStr",
@@ -166,7 +169,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "DUMMY_VALUE",
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
             },
             "kwargs": {"connect_args": {"private": _EXAMPLE_PRIVATE_KEY}},
         },
@@ -177,7 +180,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
             "connection_string": {
                 "user": "my_user",
                 "password": "DUMMY_VALUE",
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
             },
             "kwargs": {"connect_args": {"private": _EXAMPLE_B64_ENCODED_PRIVATE_KEY}},
         },
@@ -190,7 +193,7 @@ VALID_DS_CONFIG_PARAMS: Final[Sequence[ParameterSet]] = [
 def seed_env_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MY_USER", "my_user")
     monkeypatch.setenv("MY_PASSWORD", "my_password")
-    monkeypatch.setenv("MY_ACCOUNT", "my_account")
+    monkeypatch.setenv("MY_ACCOUNT", "myAccount.us-east-1")
 
 
 @pytest.fixture
@@ -205,15 +208,131 @@ def sf_test_connection_noop(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(SnowflakeDatasource, "test_connection", noop)
 
 
+@pytest.fixture
+def sql_ds_test_connection_always_fail(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Monkey patch the parent class' test_connection() method to always fail.
+    Useful for testing the extra handling that SnowflakeDatasource.test_connection() provides.
+    """
+    TEST_LOGGER.warning(
+        "Monkeypatching SQLDatasource.test_connection() to a always fail"
+    )
+
+    def fail(self, test_assets: bool = True):
+        TEST_LOGGER.info("SQLDatasource.test_connection() always fail")
+        raise TestConnectionError("always fail")
+
+    monkeypatch.setattr(SQLDatasource, "test_connection", fail)
+
+
+@pytest.mark.unit
+class TestAccountIdentifier:
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "orgname.account_name",
+            "orgname-account_name",
+            "abc12345.us-east-1.aws",
+            "xy12345.us-gov-west-1.aws",
+            "xy12345.europe-west4.gcp",
+            "xy12345.central-us.azure",
+        ],
+    )
+    def test_str_and_repr_methods(self, value: str):
+        account_identifier: AccountIdentifier = pydantic.parse_obj_as(
+            AccountIdentifier, value
+        )
+        assert str(account_identifier) == value
+        assert repr(account_identifier) == f"AccountIdentifier({value!r})"
+
+    @pytest.mark.parametrize("separator", [".", "-"])
+    def test_fmt1_hyphen_parse(self, separator: Literal[".", "-"]):
+        orgname = "orgname"
+        account_name = "account-name"
+        value = f"{orgname}{separator}{account_name}"
+        print(f"{value=}")
+
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert account_identifier.match
+
+        assert account_identifier.account_name == account_name
+        assert account_identifier.orgname == orgname
+        assert account_identifier.as_tuple() == (orgname, account_name)
+
+    @pytest.mark.parametrize("separator", [".", "-"])
+    def test_fmt1_underscore_parse(self, separator: Literal[".", "-"]):
+        orgname = "orgname"
+        account_name = "account_name"
+        value = f"{orgname}{separator}{account_name}"
+        print(f"{value=}")
+
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert account_identifier.match
+
+        assert account_identifier.account_name == account_name
+        assert account_identifier.orgname == orgname
+        assert account_identifier.as_tuple() == (orgname, account_name)
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "abc12345.us-east-1.aws",
+            "xy12345.us-gov-west-1.aws",
+            "xy12345.europe-west4.gcp",
+            "xy12345.central-us.azure",
+        ],
+    )
+    def test_fmt2_parse(self, value: str):
+        """The cloud portion is technically optional if the the provider is AWS, but expecting greatly simplifies our parsing logic"""
+        print(f"{value=}")
+        locator, _, _remainder = value.partition(".")
+        cloud_region_id, _, cloud_service = _remainder.partition(".")
+
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert account_identifier.match
+
+        assert account_identifier.account_locator == locator
+        assert account_identifier.region == (cloud_region_id or None)
+        assert account_identifier.cloud == (cloud_service or None)
+
+        assert account_identifier.as_tuple() == (
+            locator,
+            cloud_region_id,
+            cloud_service,
+        )
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "foobar",
+            "my_account.us-east-1",
+            "xy12345.us-gov-west-1.aws.",
+            "xy12345.europe-west4.gcp.bar",
+            "xy12345.us-east-1.nope",
+            "xy12345.",
+            "xy12345.central-us.bazar",
+            "xy12345_us-gov-west-1_aws",
+            "xy12345_europe-west4_gcp",
+            "xy12345_central-us_azure",
+        ],
+    )
+    def test_invalid_formats(self, value: str):
+        """Test that an invalid format does not match but can still be stringified as the original value."""
+        print(f"{value=}")
+        account_identifier = pydantic.parse_obj_as(AccountIdentifier, value)
+        assert not account_identifier.match
+        assert str(account_identifier) == value
+
+
 @pytest.mark.unit
 def test_snowflake_dsn_all_parts():
     dsn = pydantic.parse_obj_as(
         SnowflakeDsn,
-        "snowflake://my_user:password@my_account/my_db/my_schema?role=my_role&warehouse=my_wh",
+        "snowflake://my_user:password@xy12345.us-east-1/my_db/my_schema?role=my_role&warehouse=my_wh",
     )
     assert dsn.user == "my_user"
     assert dsn.password == "password"
-    assert dsn.account_identifier == "my_account"
+    assert dsn.account_identifier == "xy12345.us-east-1"
     assert dsn.database == "my_db"
     assert dsn.schema_ == "my_schema"
     assert dsn.role == "my_role"
@@ -222,10 +341,12 @@ def test_snowflake_dsn_all_parts():
 
 @pytest.mark.unit
 def test_snowflake_dsn_minimal_parts():
-    dsn = pydantic.parse_obj_as(SnowflakeDsn, "snowflake://my_user:password@my_account")
+    dsn = pydantic.parse_obj_as(
+        SnowflakeDsn, "snowflake://my_user:password@xy12345.us-east-1"
+    )
     assert dsn.user == "my_user"
     assert dsn.password == "password"
-    assert dsn.account_identifier == "my_account"
+    assert dsn.account_identifier == "xy12345.us-east-1"
     assert not dsn.database
     assert not dsn.schema_
     assert not dsn.role
@@ -241,7 +362,7 @@ def test_snowflake_dsn_minimal_parts():
             {
                 "user": "my_user",
                 "password": "password",
-                "account": "my_account",
+                "account": "xy12345.us-east-1",
             },
             id="min old config format - top level keys",
         ),
@@ -249,7 +370,7 @@ def test_snowflake_dsn_minimal_parts():
             {
                 "user": "my_user",
                 "password": "password",
-                "account": "my_account",
+                "account": "xy12345.us-east-1",
                 "schema": "s_public",
                 "database": "d_public",
             },
@@ -400,9 +521,9 @@ def test_invalid_params(
     "connection_string, connect_args, expected_errors",
     [
         pytest.param(
-            "snowflake://my_user:password@my_account/foo/bar?numpy=True",
+            "snowflake://my_user:password@myAccount.us-east-1/foo/bar?numpy=True",
             {
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
                 "user": "my_user",
                 "password": "123456",
                 "schema": "foo",
@@ -437,7 +558,7 @@ def test_invalid_params(
         pytest.param(
             None,
             {
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
                 "user": "my_user",
                 "schema": "foo",
                 "database": "bar",
@@ -468,7 +589,7 @@ def test_invalid_params(
         ),
         pytest.param(
             {
-                "account": "my_account",
+                "account": "myAccount.us-east-1",
                 "user": "my_user",
                 "schema": "foo",
                 "database": "bar",
@@ -642,7 +763,7 @@ def test_forward_compatibility_changes_raise_warning(asset: dict):
     with pytest.warns(GxDatasourceWarning):
         ds = SnowflakeDatasource(
             name="my_sf_ds",
-            connection_string="snowflake://my_user:password@my_account/d_public/s_public",
+            connection_string="snowflake://my_user:password@account.us-east-1/d_public/s_public",
             assets=[asset],
         )
         print(ds)
@@ -655,7 +776,9 @@ def test_forward_compatibility_changes_raise_warning(asset: dict):
 )
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
-    connection_string = "snowflake://my_user:password@my_account/my_db/my_schema"
+    connection_string = (
+        "snowflake://my_user:password@myAccount.us-east-1/my_db/my_schema"
+    )
     datasource = SnowflakeDatasource(
         name="my_snowflake", connection_string=connection_string
     )
@@ -668,14 +791,14 @@ def test_get_execution_engine_succeeds():
     "connection_string",
     [
         param(
-            "snowflake://my_user:password@my_account/my_db/my_schema?numpy=True",
+            "snowflake://my_user:password@account.us-east-1/my_db/my_schema?numpy=True",
             id="connection_string str",
         ),
         param(
             {
                 "user": "my_user",
                 "password": "password",
-                "account": "my_account",
+                "account": "account.us-east-1",
                 "database": "foo",
                 "schema": "bar",
             },
@@ -733,7 +856,7 @@ def test_get_engine_correctly_sets_application_query_param(
                 "connection_string": {
                     "user": "user",
                     "password": "password",
-                    "account": "account",
+                    "account": "account.us-east-1",
                     "database": "db",
                     "schema": "schema",
                     "warehouse": "wh",
@@ -741,14 +864,14 @@ def test_get_engine_correctly_sets_application_query_param(
                 },
             },
             {
-                "url": "snowflake://user:password@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
+                "url": "snowflake://user:password@account.us-east-1/db/schema?application=great_expectations_core&role=role&warehouse=wh",
             },
             id="std connection_string dict",
         ),
         param(
             {
                 "name": "conn str with connect_args",
-                "connection_string": "snowflake://user:password@account/db/schema?warehouse=wh&role=role",
+                "connection_string": "snowflake://user:password@account.us-east-1/db/schema?warehouse=wh&role=role",
                 "kwargs": {"connect_args": {"private_key": b"my_key"}},
             },
             {
@@ -763,7 +886,7 @@ def test_get_engine_correctly_sets_application_query_param(
                 "connection_string": {
                     "user": "user",
                     "password": "password",
-                    "account": "account",
+                    "account": "account.us-east-1",
                     "database": "db",
                     "schema": "schema",
                     "warehouse": "wh",
@@ -773,7 +896,7 @@ def test_get_engine_correctly_sets_application_query_param(
             },
             {
                 "connect_args": {"private_key": b"my_key"},
-                "url": "snowflake://user:password@account/db/schema?application=great_expectations_core&role=role&warehouse=wh",
+                "url": "snowflake://user:password@account.us-east-1/db/schema?application=great_expectations_core&role=role&warehouse=wh",
             },
             id="connection_string dict with connect_args",
         ),
@@ -794,6 +917,61 @@ def test_create_engine_is_called_with_expected_kwargs(
     print(engine)
 
     create_engine_spy.assert_called_once_with(**expected_called_with)
+
+
+@pytest.mark.unit
+class TestConnectionTest:
+    @pytest.mark.parametrize(
+        "connection_string",
+        [
+            "snowflake://user:password@xy12345.us-east-2.aws",
+            {
+                "user": "user",
+                "account": "xy12345.us-east-1.aws",
+                "password": "password",
+            },
+        ],
+        ids=type,
+    )
+    def test_w_valid_account_identifier_format(
+        self, sql_ds_test_connection_always_fail: None, connection_string: str | dict
+    ):
+        sf = SnowflakeDatasource(
+            name="my_sf",
+            connection_string=connection_string,
+        )
+        with pytest.raises(TestConnectionError, match="always fail") as exc_info:
+            sf.test_connection()
+
+        assert not exc_info.value.__cause__, "The error has no initial cause"
+
+    @pytest.mark.parametrize(
+        "connection_string",
+        [
+            "snowflake://user:password@invalid_format",
+            {
+                "user": "user",
+                "account": "invalid_format",
+                "password": "password",
+            },
+        ],
+        ids=type,
+    )
+    def test_warns_about_account_identifier_format(
+        self, sql_ds_test_connection_always_fail: None, connection_string: str | dict
+    ):
+        sf = SnowflakeDatasource(name="my_sf", connection_string=connection_string)
+        with pytest.raises(
+            TestConnectionError,
+            match=f"Account identifier 'invalid_format' does not match expected format {AccountIdentifier.FORMATS} ; it MAY be invalid. "
+            "https://docs.snowflake.com/en/user-guide/admin-account-identifier",
+        ) as exc_info:
+            sf.test_connection()
+
+        print(f"{exc_info.value!r}")
+        assert (
+            repr(exc_info.value.__cause__) == "TestConnectionError('always fail')"
+        ), "Original Error should be preserved"
 
 
 @pytest.mark.snowflake
@@ -832,7 +1010,7 @@ class TestConvenienceProperties:
             with pytest.warns(GxContextWarning):
                 assert (
                     not datasource.database
-                ), "Don't expect schema to be available without config_provider"
+                ), "Don't expect database to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
             _ = datasource.database
@@ -852,7 +1030,7 @@ class TestConvenienceProperties:
             with pytest.warns(GxContextWarning):
                 assert (
                     not datasource.warehouse
-                ), "Don't expect schema to be available without config_provider"
+                ), "Don't expect warehouse to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
             _ = datasource.warehouse
@@ -872,12 +1050,32 @@ class TestConvenienceProperties:
             with pytest.warns(GxContextWarning):
                 assert (
                     not datasource.role
-                ), "Don't expect schema to be available without config_provider"
+                ), "Don't expect role to be available without config_provider"
             # attach context to enable config substitution
             datasource._data_context = ephemeral_context_with_defaults
             _ = datasource.role
         else:
             assert datasource.role == datasource.connection_string.role
+
+    def test_account(
+        self,
+        ds_config: dict,
+        seed_env_vars: None,
+        param_id: str,
+        ephemeral_context_with_defaults: AbstractDataContext,
+    ):
+        datasource = SnowflakeDatasource(name=param_id, **ds_config)
+        if isinstance(datasource.connection_string, ConfigStr):
+            # expect a warning if connection string is a ConfigStr
+            with pytest.warns(GxContextWarning):
+                assert (
+                    not datasource.account
+                ), "Don't expect account to be available without config_provider"
+            # attach context to enable config substitution
+            datasource._data_context = ephemeral_context_with_defaults
+            _ = datasource.account
+        else:
+            assert datasource.account == datasource.connection_string.account
 
 
 if __name__ == "__main__":

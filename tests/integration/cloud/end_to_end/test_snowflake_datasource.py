@@ -5,8 +5,10 @@ import uuid
 from typing import TYPE_CHECKING, Final, Iterator
 
 import pytest
+from typing_extensions import Literal
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.exceptions import StoreBackendError
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -17,7 +19,13 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.sql_datasource import TableAsset
     from tests.integration.cloud.end_to_end.conftest import TableFactory
 
+pytestmark: Final = pytest.mark.cloud
+
 RANDOM_SCHEMA: Final[str] = f"i{uuid.uuid4().hex}"
+
+ConnectionDetailKeys = Literal[
+    "account", "user", "password", "database", "schema", "warehouse", "role"
+]
 
 
 @pytest.fixture(scope="module")
@@ -37,13 +45,95 @@ def connection_string() -> str:
 
 
 @pytest.fixture(scope="module")
+def connection_details() -> dict[ConnectionDetailKeys, str]:
+    if os.getenv("SNOWFLAKE_CI_USER_PASSWORD") and os.getenv("SNOWFLAKE_CI_ACCOUNT"):
+        return {
+            "account": "oca29081.us-east-1",
+            "user": "ci",
+            "password": "${SNOWFLAKE_CI_USER_PASSWORD}",
+            "database": "ci",
+            "schema": RANDOM_SCHEMA,
+            "warehouse": "ci",
+            "role": "ci",
+        }
+    pytest.skip("no snowflake credentials")
+
+
+@pytest.fixture(scope="module", params=["connection_string", "connection_details"])
+def connections(
+    request: pytest.FixtureRequest,
+) -> str | dict[ConnectionDetailKeys, str]:
+    """Parametrized fixture that returns both a connection string and connection details."""
+    return request.getfixturevalue(request.param)
+
+
+def test_create_datasource(
+    context: CloudDataContext, connections: str | dict[str, str]
+):
+    datasource_name = f"i{uuid.uuid4().hex}"
+    _: SnowflakeDatasource = context.sources.add_snowflake(
+        name=datasource_name,
+        connection_string=connections,
+    )
+
+
+@pytest.mark.parametrize(
+    ["details_override", "expected_err_pattern"],
+    [
+        pytest.param(
+            {"schema": None},
+            r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"schema"\],'
+            r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
+            id="schema missing",
+        ),
+        pytest.param(
+            {"database": None, "schema": None},
+            r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"database"\],'
+            r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
+            id="database missing",
+        ),
+        pytest.param(
+            {"warehouse": None},
+            r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"warehouse"\],'
+            r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
+            id="warehouse missing",
+        ),
+        pytest.param(
+            {"role": None},
+            r'.*"loc":\s*\["snowflake",\s*"connection_string",\s*"SnowflakeConnectionDetails",\s*"role"\],'
+            r'\s*"msg":\s*"Field required",\s*"type":\s*"missing".*',
+            id="role missing",
+        ),
+    ],
+)
+def test_create_4xx_error_message_handling(
+    context: CloudDataContext,
+    connection_details: dict[str, str],
+    details_override: dict[str, str | None],
+    expected_err_pattern: str,
+):
+    connection = {**connection_details, **details_override}
+    with pytest.raises(
+        StoreBackendError,
+        match=r"Unable to set object in GX Cloud Store Backend: "
+        + expected_err_pattern,
+    ):
+        _: SnowflakeDatasource = context.sources.add_snowflake(
+            name=f"i{uuid.uuid4().hex}",
+            connection_string={  # filter out falsey values
+                k: v for k, v in connection.items() if v
+            },
+        )
+
+
+@pytest.fixture(scope="module")
 def datasource(
     context: CloudDataContext,
     connection_string: str | ConfigStr,
     get_missing_datasource_error_type: type[Exception],
 ) -> Iterator[SnowflakeDatasource]:
     datasource_name = f"i{uuid.uuid4().hex}"
-    datasource = context.sources.add_snowflake(
+    datasource: SnowflakeDatasource = context.sources.add_snowflake(
         name=datasource_name,
         connection_string=connection_string,
         create_temp_table=False,
@@ -57,28 +147,20 @@ def datasource(
         "echo": True
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = False
-    datasource = context.add_or_update_datasource(datasource=datasource)
+    datasource = context.add_or_update_datasource(datasource=datasource)  # type: ignore[assignment] # more specific type
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = True
-    datasource_dict = datasource.dict()
-    # this is a bug - LATIKU-448
-    # call to datasource.dict() results in a ConfigStr that fails pydantic
-    # validation on SnowflakeDatasource
-    datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
-    datasource = context.sources.add_or_update_snowflake(**datasource_dict)
+
+    datasource = context.sources.add_or_update_snowflake(**datasource.dict())
     assert datasource.kwargs == {
         "echo": True
     }, "The datasource was not updated in the previous method call."
     datasource.kwargs["echo"] = False
-    datasource_dict = datasource.dict()
-    # this is a bug - LATIKU-448
-    # call to datasource.dict() results in a ConfigStr that fails pydantic
-    # validation on SnowflakeDatasource
-    datasource_dict["connection_string"] = str(datasource_dict["connection_string"])
-    _ = context.add_or_update_datasource(**datasource_dict)
-    datasource = context.get_datasource(datasource_name=datasource_name)
+
+    _ = context.add_or_update_datasource(**datasource.dict())
+    datasource = context.get_datasource(datasource_name=datasource_name)  # type: ignore[assignment] # more specific type
     assert datasource.kwargs == {
         "echo": False
     }, "The datasource was not updated in the previous method call."
@@ -192,7 +274,6 @@ def checkpoint(
         context.get_checkpoint(name=checkpoint_name)
 
 
-@pytest.mark.cloud
 def test_interactive_validator(
     context: CloudDataContext,
     batch_request: BatchRequest,
@@ -216,7 +297,6 @@ def test_interactive_validator(
     assert len(expectation_suite.expectations) == expectation_count + 1
 
 
-@pytest.mark.cloud
 def test_checkpoint_run(checkpoint: Checkpoint):
     checkpoint_result = checkpoint.run()
     assert checkpoint_result.success is True
