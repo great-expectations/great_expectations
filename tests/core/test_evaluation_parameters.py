@@ -110,7 +110,7 @@ def test_math_suite_paramaters():
 @pytest.mark.unit
 def test_temporal_suite_parameters():
     # allow 1 second for "now" tolerance
-    now = datetime.now()
+    now = datetime.now()  # noqa: DTZ005
     assert (
         (now - timedelta(weeks=1, seconds=3))
         < dateutil.parser.parse(parse_suite_parameter("now() - timedelta(weeks=1, seconds=2)"))
@@ -121,7 +121,7 @@ def test_temporal_suite_parameters():
 @pytest.mark.unit
 def test_temporal_suite_parameters_complex():
     # allow 1 second for "now" tolerance
-    now = datetime.now()
+    now = datetime.now()  # noqa: DTZ005
     # Choosing "2*3" == 6 weeks shows we can parse an expression inside a kwarg.
     assert (
         (now - timedelta(weeks=2 * 3, seconds=3))

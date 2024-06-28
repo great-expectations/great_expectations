@@ -1518,7 +1518,7 @@ def test_df(tmp_path_factory):
     def generate_ascending_list_of_datetimes(
         k, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
     ):
-        start_time = datetime.datetime(start_date.year, start_date.month, start_date.day)
+        start_time = datetime.datetime(start_date.year, start_date.month, start_date.day)  # noqa: DTZ001
         days_between_dates = (end_date - start_date).total_seconds()
 
         datetime_list = [
@@ -1905,7 +1905,7 @@ def multibatch_generic_csv_generator():
     ) -> List[str]:
         data_path = pathlib.Path(data_path)
         if start_date is None:
-            start_date = datetime.datetime(2000, 1, 1)
+            start_date = datetime.datetime(2000, 1, 1)  # noqa: DTZ001
 
         file_list = []
         category_strings = {

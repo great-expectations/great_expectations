@@ -1,5 +1,5 @@
 services:
   trino_db:
-    image: trinodb/trino:latest
+    image: ${ECR_PULL_THROUGH_REPOSITORY_URL}trinodb/trino:latest
     ports:
       - "8088:8080"
