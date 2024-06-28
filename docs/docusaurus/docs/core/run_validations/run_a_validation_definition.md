@@ -11,7 +11,7 @@ import PrereqValidationDefinition from '../_core_components/prerequisites/_valid
 
 
 
-## Prerequisites
+<h2>Prerequisites</h2>
 
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.

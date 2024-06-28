@@ -50,13 +50,25 @@ The following table lists the available GX Cloud Expectations.
 
 4. Click **New Expectation**.
 
-5. Select an Expectation type. See [Available Expectation types](#available-expectation-types).
+5. Select an Expectation type. See [Available Expectation types](#available-expectation-types). 
 
-6. Complete the mandatory and optional fields.
+6. If you are adding your first expectation on this data asset, you may be able to select a time-based Batch interval for that asset.
 
-7. Click **Save** or click **Save & Add More** and then repeat steps 5 and 6 to add additional Expectations.
+- A batch is a feature of the data asset, and allows you to validate your data incrementally. A batch interval can only be defined once per data asset.
 
-8. Optional. Run a Validation. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
+- In order to be able to select a  batch interval, the data asset must have at least one DATE or DATETIME column.
+
+- Select the **Entire table** tab to provide all Data Asset records to your Expectations and validations, or select the **Yearly**/**Monthly**/**Daily** tab to use subsets of Data Asset records for your Expectations and validations.
+
+- Select **Yearly** to partition Data Asset records by year, select **Monthly** to partition Data Asset records by year and month, or select **Daily** to partition Data Asset records by year, month, and day.
+
+- **Batch column** - Select a name column from a prefilled list of DATE and DATETIME columns containing the date and time data.
+
+7. Complete the mandatory and optional fields for expectation.
+
+8. Click **Save** or click **Save & Add More** and then repeat steps 4 and 5 to add additional Expectations.
+
+9. Optional. Run a Validation. See [Run a Validation](/cloud/validations/manage_validations.md#run-a-validation).
 
 ## Edit an Expectation
 

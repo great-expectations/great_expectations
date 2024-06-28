@@ -16,7 +16,7 @@ import StepRequestADataContext from '../_core_components/common_steps/_request_a
 
 A Validation Definition is a fixed reference that links a Batch of data to an Expectation Suite. It can be run by itself to validate the referenced data against the associated Expectations for testing or data exploration.  Multiple Validation Definitions can also be provided to a Checkpoint which, when run, executes Actions based on the Validation Results for each provided Validation Definition.
 
-## Prerequisites
+<h2>Prerequisites</h2>
 
 - <PrereqPythonInstalled/>.
 - <PrereqGxInstalled/>.

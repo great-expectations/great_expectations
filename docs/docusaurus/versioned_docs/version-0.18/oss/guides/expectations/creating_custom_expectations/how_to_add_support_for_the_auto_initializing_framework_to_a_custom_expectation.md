@@ -47,14 +47,14 @@ The `DomainBuilder` configuration requries a `class_name` and `module_name`.  In
   - `MapMetricColumnDomainBuilder`: This `DomainBuilder` allows you to choose columns based on Map Metrics, which give a yes/no answer for individual values or rows.
   - `CategoricalColumnDomainBuilder`: This `DomainBuilder` allows you to choose columns based on their cardinality (number of unique values).
   :::note
-  `CategoricalColumnDomainBuilder` will take in various `cardinality_limit_mode` values for cardinality. For a full listing of valid modes, along with the associated values, please refer to [the `CardinalityLimitMode` enum in the source code on our GitHub](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/helpers/cardinality_checker.py).
+  `CategoricalColumnDomainBuilder` will take in various `cardinality_limit_mode` values for cardinality. For a full listing of valid modes, along with the associated values, please refer to [the `CardinalityLimitMode` enum in the source code on our GitHub](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/experimental/rule_based_profiler/helpers/cardinality_checker.py).
   :::
 
 - **`module_name`**: is `great_expectations.rule_based_profiler.domain_builder`, which is common for all `DomainBuilders`.
 
 ### Modify the `ParameterBuilder`
 
-Our example contains a configuration for one `ParamterBuilder`, a `NumericMetricRangeMultiBatchParameterBuilder`.  You can find the other types of `ParameterBuilder` by browsing [the source code in our GitHub](https://github.com/great-expectations/great_expectations/tree/develop/great_expectations/rule_based_profiler/parameter_builder).  For the `NumericMetricRangeMultiBatchParameterBuilder` the configuration key-value pairs consist of:
+Our example contains a configuration for one `ParamterBuilder`, a `NumericMetricRangeMultiBatchParameterBuilder`.  You can find the other types of `ParameterBuilder` by browsing [the source code in our GitHub](https://github.com/great-expectations/great_expectations/blob/a502fad53a0ba10acb924a664b5a94f058e30c14/great_expectations/experimental/rule_based_profiler/parameter_builder/parameter_builder.py#L4).  For the `NumericMetricRangeMultiBatchParameterBuilder` the configuration key-value pairs consist of:
 
 * `name`: an arbitrary name assigned to this `ParameterBuilder` configuration.
 * `class_name`: the name of the class that corresponds to the `ParameterBuilder` defined by this configuration.

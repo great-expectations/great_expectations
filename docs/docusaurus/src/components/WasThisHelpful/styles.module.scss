@@ -149,6 +149,14 @@
     margin-bottom: 0.25rem;
 }
 
+.radioOption {
+    font: var(--ifm-font-size-base) var(--ifm-font-family-base);
+    font-size: 1.125rem;
+    input {
+        margin-right: 0.5rem;
+    }
+}
+
 .modalTextInput {
     border: 1px solid var(--gray-700);
     border-radius: 20px;
@@ -160,7 +168,7 @@
 }
 
 .modalTextareaInput {
-    min-height: 10rem;
+    min-height: 6rem;
     min-width: 38.5rem;
     max-width: 38.5rem;
 }
@@ -191,7 +199,6 @@
         background-color: var(--gray-400);
     }
 }
-
 
 @media (max-width: $mobile-sm-breakpoint) {
     .modal {
