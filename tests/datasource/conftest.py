@@ -69,11 +69,12 @@ def test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine(
     )
 
 
-@pytest.mark.skipif(
-    PYTHON_VERSION > Version("3.11"), reason="Fails on Python 3.12"
-)  # FIXME: before removing experimental status for Python 3.12
 @pytest.fixture
 def glue_titanic_catalog():
+    # FIXME: before removing experimental status for Python 3.12
+    if PYTHON_VERSION > Version("3.11"):
+        pytest.skip("Fails on Python 3.12")
+
     try:
         import boto3
     except ImportError:
