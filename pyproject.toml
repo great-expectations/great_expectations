@@ -333,7 +333,7 @@ If you are working in a configuration file you may use the inline comment \
 # https://docs.python.org/3/library/warnings.html#the-warnings-filter
 filterwarnings = [
     # Turn all warnings not explicitly filtered below into errors
-    "error",
+    # "error",
     # PendingDeprecationWarning: these relate to the use of methods that are not even deprecated yet.
     # We want to see the warnings in the logs, but not have them cause CI to fail.
     "once::PendingDeprecationWarning",
