@@ -10,6 +10,10 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.18.17
+* [FEATURE] Snowflake - Better Account Identifier related TestConnectionErrors ([#10043](https://github.com/great-expectations/great_expectations/pull/10043))
+* [BUGFIX] Fix `get_user_friendly_error_message` with non-standard formats ([#10061](https://github.com/great-expectations/great_expectations/pull/10061))
+
 ### 0.18.16
 * [FEATURE] Add new `ConfigUri` type ([#10000](https://github.com/great-expectations/great_expectations/pull/10000))
 * [FEATURE] Snowflake - minimal support for key-pair auth ([#10031](https://github.com/great-expectations/great_expectations/pull/10031))
