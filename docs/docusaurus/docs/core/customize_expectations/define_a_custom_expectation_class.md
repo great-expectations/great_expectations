@@ -4,6 +4,11 @@ title: Customize an Expectation Class
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
+import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
+import PrereqGxInstalled from '../_core_components/prerequisites/_gx_installation.md';
+import PrereqPreconfiguredDataContext from '../_core_components/prerequisites/_preconfigured_data_context.md';
+import PrereqPreconfiguredDataSourceAndAsset from '../_core_components/prerequisites/_data_source_and_asset_connected_to_data.md';
+
 Existing Expectation Classes can be customized to include additional information such as buisness logic, more descriptive naming conventions, and specialized rendering for Data Docs.  This is done by subclassing an existing Expectation class and populating the subclass with default values and customized attributes.
 
 Advantages of subclassing an Expectation and providing customized attributes rather than creating an instance of the parent Expectation and passing in parameters include:
@@ -14,9 +19,10 @@ Advantages of subclassing an Expectation and providing customized attributes rat
 
 <h2>Prerequisites</h2>
 
-- Python
-- GX installation
-- Data Context
+- <PrereqPythonInstalled/>.
+- <PrereqGxInstalled/>.
+- <PrereqPreconfiguredDataContext/>.
+- Recommended. <PrereqPreconfiguredDataSourceAndAsset/> for [testing your customized Expectation](/core/define_expectations/test_an_expectation.md).
 
 <Tabs>
 
@@ -45,7 +51,7 @@ Advantages of subclassing an Expectation and providing customized attributes rat
 
    The attributes that can be overriden correspond to the parameters required by the base Expectation.  These can be referenced from the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-   In this example, we specify that the default column for `ExpectValidPassengerCount` is `passenger_count` and the default range is between `1` and `6`:
+   In this example, the default column for `ExpectValidPassengerCount` is set to `passenger_count` and the default value range for the column is defined as between `1` and `6`:
 
    ```python title="Python"
    class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):

@@ -4,6 +4,10 @@ title: Apply Conditional Expectations to specific rows within a Batch
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
+import PrereqPythonInstalled from '../_core_components/prerequisites/_python_installation.md';
+import PrereqGxInstalled from '../_core_components/prerequisites/_gx_installation.md';
+import PrereqPreconfiguredDataContext from '../_core_components/prerequisites/_preconfigured_data_context.md';
+import PrereqPreconfiguredDataSourceAndAsset from '../_core_components/prerequisites/_data_source_and_asset_connected_to_data.md';
 
 :::note
 Conditional Expectations are **experimental**, and they are available for Pandas, Spark, and SQLAlchemy backends.
@@ -20,10 +24,11 @@ To solve this issue GX allows you to define Conditional Expectations that only a
 Great Expectations lets you express Conditional Expectations with a `row_condition` argument that can be passed to all Expectations that evaluate rows within a Dataset.  The `row_condition` argument should be a boolean expression string.  The Conditional Expectation will validate rows that result in the `row_condition` string being `true`.  When the `row_condition` string evaluates as `false`, the row in question will not be validated by the Expectation.
 
 ### Prerequisites
-- python
-- gx installed
-- a data context
-- an Expectation Suite
+
+- <PrereqPythonInstalled/>.
+- <PrereqGxInstalled/>.
+- <PrereqPreconfiguredDataContext/>.
+- Recommended. <PrereqPreconfiguredDataSourceAndAsset/> for [testing your customized Expectation](/core/define_expectations/test_an_expectation.md).
 
 <Tabs>
 
