@@ -111,12 +111,12 @@ class AccountIdentifier(str):
     a `SnowflakeDsn` or `ConnectionDetails`.
 
     https://docs.snowflake.com/en/user-guide/admin-account-identifier
+    https://docs.snowflake.com/user-guide/organizations-connect
 
     Expected formats:
     1. Account name in your organization
         a. `<orgname>-<account_name>` - e.g. `"myOrg-my_account"`
         b. `<orgname>-<account-name>` - e.g. `"myOrg-my-account"`
-        c. `<orgname>.<account_name>` - e.g. `"myOrg.my_account"`
     2. Account locator in a region
         a. `<account_locator>.<region>.<cloud>` - e.g. `"abc12345.us-east-1.aws"`
 
@@ -130,7 +130,7 @@ class AccountIdentifier(str):
 
     FMT_1: ClassVar[
         str
-    ] = r"^(?P<orgname>[a-zA-Z0-9]+)[.-](?P<account_name>[a-zA-Z0-9-_]+)$"
+    ] = r"^(?P<orgname>[a-zA-Z0-9]+)[-](?P<account_name>[a-zA-Z0-9-_]+)$"
     FMT_2: ClassVar[
         str
     ] = r"^(?P<account_locator>[a-zA-Z0-9]+)\.(?P<region>[a-zA-Z0-9-]+)\.(?P<cloud>aws|gcp|azure)$"
@@ -163,7 +163,6 @@ class AccountIdentifier(str):
             "examples": [
                 "myOrg-my_account",
                 "myOrg-my_account",
-                "myOrg.my_account",
                 "abc12345.us-east-1.aws",
             ],
         }
