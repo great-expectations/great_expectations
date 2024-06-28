@@ -11,7 +11,7 @@ import PrereqPreconfiguredDataSourceAndAsset from '../_core_components/prerequis
 
 Among the available Expectations, the `UnexpectedRowsExpectation` is designed to facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.  By default, `UnexpectedRowsExpectation` consciders validation successful when no rows are returned by the provided SQL query.
 
-You customize an `UnexpectedRowsExpectation` in essentially the same manner as you would [define a custom Expectation](./define_a_custom_expectation_class.md), by subclassing `UnexpectedRowsExpectation` and providing customized default attributes and text for Data Docs. However, there are some caveats around the `UnexpectedRowsExpectation`'s `unexpected_rows_query` attribute that deserve further detail.
+You customize an `UnexpectedRowsExpectation` in essentially the same manner as you would [define a custom Expectation](/core/customize_expectations/define_a_custom_expectation_class.md), by subclassing `UnexpectedRowsExpectation` and providing customized default attributes and text for Data Docs. However, there are some caveats around the `UnexpectedRowsExpectation`'s `unexpected_rows_query` attribute that deserve further detail.
 
 <!-- TODO: Do we want to discuss custom `_validate(...)` logic here, or should that be held for a future topic on building custom Expectation classes from scratch? -->
 
