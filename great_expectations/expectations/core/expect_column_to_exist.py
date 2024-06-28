@@ -136,7 +136,7 @@ class ExpectColumnToExist(BatchExpectation):
     """  # noqa: E501
 
     column: StrictStr = Field(min_length=1, description=COLUMN_DESCRIPTION)
-    column_index: Union[int, SuiteParameterDict, None] = None
+    column_index: Union[int, SuiteParameterDict, None] = Field(default=None, description=COLUMN_INDEX_DESCRIPTION)
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata: ClassVar[Dict[str, Union[str, list, bool]]] = {
