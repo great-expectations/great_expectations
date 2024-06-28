@@ -20,7 +20,7 @@ robust schema validation within your data pipelines, helping to catch and addres
 issues before they propagate through your data ecosystem. This guide will walk you through
 leveraging these Expectations to implement effective schema validation in your data workflows.
 
-## Data Preview
+## Data preview
 
 Below is a sample of the dataset that is referenced by examples and explanations within this article.
 
@@ -31,19 +31,21 @@ Below is a sample of the dataset that is referenced by examples and explanations
 
 This dataset includes columns like `sender_account_number`, `recipient_fullname`, `transfer_amount`, and `transfer_date`.
 
-## Key Schema Expectations
+## Key schema Expectations
 
 Explore core Expectations for schema validation, delving into their practical applications and nuances:
 
-### `expect_column_to_exist`
+### Expect Column to Exist
 
 Ensures the presence of a specified column in your dataset. This Expectation is foundational for
 schema validation, verifying that critical columns are included, thus preventing data processing
-errors due to missing fields.
+errors due to missing fields. ([Link to Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_to_exist))
 
 ```python
 dataset.expect_column_to_exist("sender_account_number")
 ```
+
 
 :::info[Use Case]
 Ideal during data ingestion or integration of multiple data sources to ensure that
@@ -56,11 +58,12 @@ as possible, minimizing downstream errors and rework.
 :::
 
 
-### `expect_column_values_to_be_in_type_list`
+### Expect Column Values to be in Type List
 
 Ensures that the values in a specified column are within a specified type list. This Expectation is
 useful for columns with varied permissible types, such as mixed-type fields often found in legacy
-databases.
+databases. ([Link to Expectation
+Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list))
 
 ```python
 dataset.expect_column_values_to_be_in_type_list("account_type", ["int", "str"])
@@ -76,10 +79,11 @@ Combine this Expectation with detailed logging to track which types are most fre
 encountered, aiding in eventual standardization efforts.
 :::
 
-### `expect_column_values_to_be_of_type`
+### Expect Column Values to be of Type
 
 Validates that the values within a column are of a specific data type. This is more stringent
-compared to the previous Expectation, suitable for scenarios needing strict type adherence.
+compared to the previous Expectation, suitable for scenarios needing strict type adherence. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_column_values_to_be_of_type))
 
 ```python
 dataset.expect_column_values_to_be_of_type("transfer_amount", "float")
@@ -95,10 +99,11 @@ Opt for `expect_column_values_to_be_of_type` when dealing with columns where
 any type deviation could lead to significant processing errors or inaccuracies.
 :::
 
-### `expect_table_column_count_to_equal`
+### Expect Table Column Count to Equal
 
 Ensures the dataset has an exact number of columns. This precise Expectation is for datasets with a
-fixed schema structure, providing a strong safeguard against unexpected changes.
+fixed schema structure, providing a strong safeguard against unexpected changes. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_equal))
 
 ```python
 dataset.expect_table_column_count_to_equal(7)
@@ -114,10 +119,11 @@ Periodically review and update this Expectation alongside any schema changes,
 especially when new regulatory requirements emerge.
 :::
 
-### `expect_table_columns_to_match_ordered_list`
+### Expect Table Columns to Match Ordered List
 
 Validates the exact order of columns. This is crucial when processing pipelines depend on a specific
-column order, ensuring consistency and reliability.
+column order, ensuring consistency and reliability. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list))
 
 ```python
 dataset.expect_table_columns_to_match_ordered_list([
@@ -136,10 +142,11 @@ Use `expect_table_columns_to_match_ordered_list` over
 `expect_table_columns_to_match_set` when order matters, such as in scripts directly referencing column positions.
 :::
 
-### `expect_table_columns_to_match_set`
+### Expect Table Columns to Match Set
 
 Checks that the dataset contains specific columns, without regard to order. This Expectation offers
-flexibility where column presence is more critical than their sequence.
+flexibility where column presence is more critical than their sequence. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_columns_to_match_set))
 
 ```python
 dataset.expect_table_columns_to_match_set([
@@ -158,10 +165,11 @@ Opt for `expect_table_columns_to_match_set` when integrating datasets from
 various sources where column order might differ, but consistency in available data is required.
 :::
 
-### `expect_table_column_count_to_be_between`
+### Expect Table Column Count to be Between
 
 Validates that the number of columns falls within a specific range, offering flexibility for
-datasets that can expand or contract within a known boundary.
+datasets that can expand or contract within a known boundary. ([Link
+to Expectation Gallery](https://greatexpectations.io/expectations/expect_table_column_count_to_be_between))
 
 ```python
 dataset.expect_table_column_count_to_be_between(min_value=5, max_value=7)
@@ -177,11 +185,11 @@ Regularly review the allowed range as your dataset evolves, ensuring it aligns
 with business requirements and anticipates potential future expansion.
 :::
 
-## Examples & Scenarios
+## Examples and scenarios
 
 -- TODO: these are mostly pseudo code ----
 
-### Comparative Analysis: Ensuring Schema Consistency in Financial Transfers
+### Comparative analysis: Ensuring schema consistency in financial transfers
 
 **Context**: In financial transfers, adhering to a fixed schema is paramount for regulatory compliance and operational accuracy. Ensuring that all necessary columns are present and correctly typed can prevent significant operational disruptions.
 
@@ -235,7 +243,7 @@ Snippet:
 
 **Insight**: Dataset 2 fails to validate due to the absence of `recipient_fullname` in one of the rows and the correct column count, highlighting how missing critical columns can disrupt financial processing or lead to compliance issues.
 
-### Different Expectation Suites: Strict vs. Relaxed Type Checking
+### Different Expectation suites: Strict vs. relaxed type checking
 
 **Context**: In some contexts, both the names and order of columns can be critically important. Using different suites to enforce these aspects can help maintain consistency.
 
@@ -268,9 +276,9 @@ print("Unordered Columns Validation Result:", result_unordered)
 
 **Insight**: The strict suite ensures that columns appear in the specified order, crucial in contexts where order matters for processing logic, while the relaxed suite allows flexibility but ensures all required columns are present.
 
-## Community Best Practices
+## Community best practices
 
-### Common Pitfalls and How to Avoid Them
+### Common pitfalls and how to avoid them
 
 - **Inconsistent Data Types**: Inconsistencies in data types can arise when data is ingested from diverse sources or when schema definitions are updated without comprehensive checks. These inconsistencies often lead to processing errors, making analyses unreliable. Regular monitoring of data ingestion points and strict enforcement of type consistency through your data validation framework can mitigate these issues.
 
@@ -280,12 +288,12 @@ print("Unordered Columns Validation Result:", result_unordered)
 
 - **Logging and Monitoring**: Even the best validation setup can fail without proper logging and monitoring. Undetected schema validation failures can propagate through the data pipeline unnoticed, leading to broader issues. Detailed logging and real-time monitoring are essential to create an audit trail and enable quick detection and resolution of schema validation problems, maintaining the integrity of your data pipelines.
 
-### Additional Resources on the Web
+### Additional resources on the web
 
 - [Data Quality with Great Expectations](https://astrafy.io/the-hub/blog/technical/data-quality-with-great-expectations)
 - [AWS Well-Architected: Validate the data quality of source systems before transferring data for analytics](https://docs.aws.amazon.com/wellarchitected/latest/analytics-lens/best-practice-1.1---validate-the-data-quality-of-source-systems-before-transferring-data-for-analytics..html)
 
-## The Path Forward
+## The path forward
 
 Robust schema validation is fundamental to trustworthy data pipelines. Great Expectations empowers you to proactively define and enforce the structural integrity of your data, ensuring its reliability for critical analyses and decision-making processes. By consistently incorporating schema validation practices, you enhance data quality, reduce downstream errors, and foster a strong culture of data confidence within your organization.
 
