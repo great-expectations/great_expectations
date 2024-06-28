@@ -122,6 +122,8 @@ class AccountIdentifier(str):
 
     The cloud group is optional if on aws but expecting it to be there makes it easier to distinguish formats.
     GX does not throw errors based on the regex parsing result.
+
+    The `.` separated version of the Account name format is not supported with SQLAlchemy.
     """
 
     FORMATS: ClassVar[
@@ -188,7 +190,6 @@ class AccountIdentifier(str):
         Part of format 1:
         * `<orgname>-<account_name>`
         * `<orgname>-<account-name>`
-        * `<orgname>.<account_name>`
         """
         if self._match:
             return self._match.group("orgname")
@@ -200,7 +201,6 @@ class AccountIdentifier(str):
         Part of format 1:
         * `<orgname>-<account_name>`
         * `<orgname>-<account-name>`
-        * `<orgname>.<account_name>`
         """
         if self._match:
             return self._match.group("account_name")
