@@ -67,10 +67,10 @@ The following table defines the supported GX Cloud and GX OSS integrations.
 
 The following table defines the GX components supported by GX Cloud and GX OSS.
 
-| Component    | GX Cloud                                                                                         | GX OSS                                                                       |
-|--------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
-| Expectations | See [Available Expectations](/cloud/expectations/manage_expectations.md#available-expectations). | See [Create Expectations](/core/create_expectations/create_expectations.md). |
-| GX Agent     | All versions                                                                                     | N/A                                                                          |
+| Component    | GX Cloud                                                                                         | GX OSS                                                                            |
+|--------------|--------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| Expectations | See [Available Expectations](/cloud/expectations/manage_expectations.md#available-expectations). | See [Create an Expectation](/core/define_expectations/create_an_expectation.md). |
+| GX Agent     | All versions                                                                                     | N/A                                                                               |
 
 
 ## Community-supported
