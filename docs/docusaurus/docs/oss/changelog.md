@@ -500,4 +500,4 @@ slug: /core/changelog
 * [MAINTENANCE] Ignore pandas `DeprecationWarning` for legacy `PandasDataset` ([#9472](https://github.com/great-expectations/great_expectations/pull/9472))
 
 ### Older Changelist
-Older changelist can be found at [https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.18/oss/changelog.md](docs/docusaurus/versioned_docs/version-0.18/oss/changelog.md)
+Older changelist can be found at [docs/docusaurus/versioned_docs/version-0.18/oss/changelog.md](https://github.com/great-expectations/great_expectations/blob/develop/docs/docusaurus/versioned_docs/version-0.18/oss/changelog.md)
