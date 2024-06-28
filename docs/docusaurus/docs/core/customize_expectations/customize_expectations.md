@@ -25,14 +25,14 @@ import OverviewCard from '@site/src/components/OverviewCard';
       topIcon 
       label="Define a custom Expectation class"
       description="Define an Expectation class with additional notes and default attributes by subclassing an existing Expectation."
-      to="/core/customize_expectations/define_a_custom_expectation" 
+      to="/core/customize_expectations/define_a_custom_expectation_class" 
       icon="/img/expectation_icon.svg" 
   />
   <LinkCard 
       topIcon 
       label="Use SQL to define a custom Expectation"
       description="Create an Expectation that operates by evaluating the results of a customized SQL query."
-      to="/core/customize_expectations/use_sql_to_define_a_custom_expectation.md" 
+      to="/core/customize_expectations/use_sql_to_define_a_custom_expectation" 
       icon="/img/expectation_icon.svg" 
     /> 
 </LinkCardGrid>
