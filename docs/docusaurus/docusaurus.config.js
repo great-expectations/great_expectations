@@ -10,7 +10,7 @@ module.exports = {
   tagline: 'Always know what to expect from your data.',
   url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
-  customFields: { posthogApiKey: config.parsed.POSTHOG_API_KEY },
+  customFields: {posthogApiKey: config.parsed.POSTHOG_API_KEY},
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
   favicon: '/img/gx-mark.png',
