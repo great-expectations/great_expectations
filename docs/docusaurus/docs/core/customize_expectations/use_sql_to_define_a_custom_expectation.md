@@ -59,14 +59,14 @@ You customize an `UnexpectedRowsExpectation` in essentially the same manner as y
 
 5. Customize the rendering of the new Expectation when displayed in Data Docs.
 
-   As with other Expectations, the `render_text` attribute contains the text describing the customized Expectation when your results are rendered into Data Docs.  It can be set when an Expectation class is defined or edited as an attribute of an Expectation instance.  You can format the `render_text` string with Markdown syntax:
+   As with other Expectations, the `description` attribute contains the text describing the customized Expectation when your results are rendered into Data Docs.  It can be set when an Expectation class is defined or edited as an attribute of an Expectation instance.  You can format the `description` string with Markdown syntax:
 
    ```python title="Python"
    class ExpectPassengerCountToBeLegal(UnexpectedRowsExpectation):
        column: str = "passenger_count"
        unexpected_rows_query: str = "SELECT * FROM {batch} WHERE passenger_count > 6"
        # highlight-start
-       render_text: str = "There should be no more than **6** passengers."
+       description: str = "There should be no more than **6** passengers."
        # highlight-end
    ```
 
@@ -88,7 +88,7 @@ from great_expectations.expectations import UnexpectedRowsExpectation
 
 class ExpectPassengerCountToBeLegal(UnexpectedRowsExpectation):
    unexpected_rows_query: str = "SELECT * FROM {batch} WHERE passenger_count > 6"
-   render_text: str = "There should be no more than **6** passengers."
+   description: str = "There should be no more than **6** passengers."
 
 context = gx.get_context()
 

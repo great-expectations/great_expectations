@@ -64,7 +64,7 @@ Advantages of subclassing an Expectation and providing customized attributes rat
 
 5. Customize the rendering of the new Expectation when displayed in Data Docs.
 
-   The `render_text` attribute contains the text describing the customized Expectation when your results are rendered into Data Docs.  It can be set when an Expectation class is defined or edited as an attribute of an Expectation instance.  You can format the `render_text` string with Markdown syntax:
+   The `description` attribute contains the text describing the customized Expectation when your results are rendered into Data Docs.  It can be set when an Expectation class is defined or edited as an attribute of an Expectation instance.  You can format the `description` string with Markdown syntax:
 
    ```python title="Python"
    class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
@@ -72,7 +72,7 @@ Advantages of subclassing an Expectation and providing customized attributes rat
        min_value: int = 1
        max_value: int = 6
        # highlight-start
-       render_text: str = "There should be between **1** and **6** passengers."
+       description: str = "There should be between **1** and **6** passengers."
        # highlight-end
    ```
 
@@ -82,10 +82,10 @@ Advantages of subclassing an Expectation and providing customized attributes rat
 
    ```python title="Python"
    expectation1 = ExpectValidPassengerCount()  # Uses the predefined default values
-   expectation2 = ExpectValidPassengerCount(column="occupied_seats")  # Uses a different column than the default, but keeps the default min_value, max_value, and render_text.
+   expectation2 = ExpectValidPassengerCount(column="occupied_seats")  # Uses a different column than the default, but keeps the default min_value, max_value, and description.
    ```
    
-   It is best to use the predefined default values when a customized Expectation is created.  This ensures that the `render_text` remains accurate to the values that the Expectation uses.  It also allows you to update all instances of the customized Expectation by editing the default values in the customized Expectation's class definition rather than having to update each instance individually in their Expectation Suites.
+   It is best to use the predefined default values when a customized Expectation is created.  This ensures that the `description` remains accurate to the values that the Expectation uses.  It also allows you to update all instances of the customized Expectation by editing the default values in the customized Expectation's class definition rather than having to update each instance individually in their Expectation Suites.
 
 </TabItem>
 
@@ -99,12 +99,12 @@ class ExpectValidPassengerCount(ExpectColumnValueToBeBetween):
   column: str = "passenger_count"
   min_value: int = 1
   max_value: int = 6
-  render_text: str = "There should be between **1** and **6** passengers."
+  description: str = "There should be between **1** and **6** passengers."
 
 context = gx.get_context()
 
 expectation1 = ExpectValidPassengerCount()  # Uses the predefined default values
-expectation2 = ExpectValidPassengerCount(column="occupied_seats")  # Uses a different column than the default, but keeps the default min_value, max_value, and render_text.
+expectation2 = ExpectValidPassengerCount(column="occupied_seats")  # Uses a different column than the default, but keeps the default min_value, max_value, and description.
 
 data_source_name = "my_taxi_data"
 asset_name = "2018_taxi_data"
