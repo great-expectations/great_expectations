@@ -120,8 +120,6 @@ def create_sqlite_source() -> (
     return _create_sqlite_source
 
 
-# TODO: figure this out before merging
-@pytest.mark.xfail(reason="why are these tests are now failing???")
 @pytest.mark.unit
 @pytest.mark.parametrize(
     [

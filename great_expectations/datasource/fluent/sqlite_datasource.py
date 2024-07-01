@@ -15,14 +15,12 @@ from typing import (
 
 from great_expectations._docs_decorators import public_api
 from great_expectations.compatibility import pydantic
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.typing_extensions import override
 from great_expectations.core.partitioners import (
     PartitionerConvertedDatetime,
 )
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,
-    _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
@@ -45,6 +43,7 @@ if TYPE_CHECKING:
         DataAsset,
         SortersDefinition,
     )
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 # This module serves as an example of how to extend _SQLAssets for specific backends. The steps are:
 # 1. Create a plain class with the extensions necessary for the specific backend.
@@ -142,11 +141,6 @@ class SqliteDatasource(SQLDatasource):
     # class var definitions
     asset_types: ClassVar[List[Type[DataAsset]]] = [SqliteTableAsset, SqliteQueryAsset]
 
-    if sa:  # sqlalchemy might not be installed
-        _poolclass: ClassVar[Optional[Type[sa.pool.Pool]]] = sa.pool.StaticPool
-    else:
-        _poolclass = None
-
     # Subclass instance var overrides
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
@@ -157,23 +151,32 @@ class SqliteDatasource(SQLDatasource):
     _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
     @override
-    def _create_engine(self) -> sa.engine.Engine:
+    def get_execution_engine(self) -> SqlAlchemyExecutionEngine:
         """
-        Create the engine from the connection string, applying config substitutions.
-        Also set the poolclass to StaticPool to avoid issues with multithreading.
+        Overrides get_execution_engine in SQLDatasource.
+
+        For SQLite we end up creating 2 different execution engines, one for testing the connection
+        and one to be used for all other operations.
         """
-        model_dict = self.dict(
+
+        current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
+            # by default we exclude unset values to prevent lots of extra values in the yaml files
+            # but we want to include them here
+            exclude_unset=False,
         )
-        _check_config_substitutions_needed(
-            self, model_dict, raise_warning_if_provider_not_present=True
-        )
-        # the connection_string has had config substitutions applied
-        connection_string = model_dict.pop("connection_string")
-        kwargs = model_dict.pop("kwargs", {})
-        # if needed a user could set a different `_poolclass` on the datasource.
-        return sa.create_engine(connection_string, poolclass=self._poolclass, **kwargs)
+        if (
+            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
+            or not self._execution_engine
+        ):
+            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
+            engine_kwargs = current_execution_engine_kwargs.pop("kwargs", {})
+            self._execution_engine = self._execution_engine_type()(
+                **current_execution_engine_kwargs,
+                **engine_kwargs,
+            )
+        return self._execution_engine
 
     @public_api
     @override
