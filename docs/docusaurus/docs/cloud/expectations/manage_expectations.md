@@ -10,7 +10,7 @@ An Expectation is a verifiable assertion about your data. They make implicit ass
 
 :::info Custom SQL Query Expectations
 
-To create custom SQL query Expectations, you'll need to use the GX API. See [Customize an Expectation Class](/core/create_expectations/expectations/manage_expectations.md#customize-an-expectation-class).
+To create custom SQL query Expectations, you'll need to use the GX API. See [Customize Expectations](/core/customize_expectations/customize_expectations.md).
 
 :::
 

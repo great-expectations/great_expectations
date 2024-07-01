@@ -23,7 +23,7 @@ Use Validation Definitions to associate data with Expectation Suites for Checkpo
       topIcon 
       label="Create a Validation Definition"
       description="Associate a Batch of data with an Expectation Suite."
-      to="/core/validate_data/validation_definitions/manage_validation_definitions#create-a-validation-definition" 
+      to="/core/_validate_data/validation_definitions/manage_validation_definitions#create-a-validation-definition" 
       icon="/img/expectation_icon.svg" 
   />
 
@@ -31,7 +31,7 @@ Use Validation Definitions to associate data with Expectation Suites for Checkpo
     topIcon 
     label="Get a Validation Definition by name"
     description="Retrieve a single, specific Validation Definition from your Data Context."
-    to="/core/validate_data/validation_definitions/manage_validation_definitions#get-a-validation-definition-by-name" 
+    to="/core/_validate_data/validation_definitions/manage_validation_definitions#get-a-validation-definition-by-name" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -39,7 +39,7 @@ Use Validation Definitions to associate data with Expectation Suites for Checkpo
     topIcon 
     label="Get a Validation Definition by attributes"
     description="Retrieve related Validation Definitions by referencing their shared attributes."
-    to="/core/validate_data/validation_definitions/manage_validation_definitions#get-validation-definitions-by-attributes" 
+    to="/core/_validate_data/validation_definitions/manage_validation_definitions#get-validation-definitions-by-attributes" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -47,7 +47,7 @@ Use Validation Definitions to associate data with Expectation Suites for Checkpo
     topIcon 
     label="Delete a Validation Definition"
     description="Remove a Validation Definition from your Data Context."
-    to="/core/validate_data/checkpoints/manage_checkpoints" 
+    to="/core/_validate_data/checkpoints/manage_checkpoints" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -55,7 +55,7 @@ Use Validation Definitions to associate data with Expectation Suites for Checkpo
     topIcon 
     label="Rename a Validation Definition"
     description="Replace an existing Validation Definition with a renamed one."
-    to="/core/validate_data/checkpoints/manage_checkpoints" 
+    to="/core/_validate_data/checkpoints/manage_checkpoints" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -63,7 +63,7 @@ Use Validation Definitions to associate data with Expectation Suites for Checkpo
     topIcon 
     label="Run a Validation Definition"
     description="Validate an Expectation Suite against a Batch of data using a Validation Definition."
-    to="/core/validate_data/checkpoints/manage_checkpoints" 
+    to="/core/_validate_data/checkpoints/manage_checkpoints" 
     icon="/img/expectation_icon.svg" 
   />
   
@@ -79,7 +79,7 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
       topIcon 
       label="Create a Checkpoint"
       description="Create a Checkpoint."
-      to="/core/validate_data/validation_definitions/manage_validation_definitions#create-a-validation-definition" 
+      to="/core/_validate_data/validation_definitions/manage_validation_definitions#create-a-validation-definition" 
       icon="/img/expectation_icon.svg" 
   />
 
@@ -87,7 +87,7 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
     topIcon 
     label="List available Checkpoints"
     description="List available Checkpoints."
-    to="/core/validate_data/checkpoints/manage_checkpoints#list-available-checkpoints" 
+    to="/core/_validate_data/checkpoints/manage_checkpoints#list-available-checkpoints" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -95,15 +95,15 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
     topIcon 
     label="Get a Checkpoint by name"
     description="Get a Checkpoint by name."
-    to="/core/validate_data/checkpoints/manage_checkpoints#get-a-checkpoint-by-name" 
+    to="/core/_validate_data/checkpoints/manage_checkpoints#get-a-checkpoint-by-name" 
     icon="/img/expectation_icon.svg" 
   />
 
   <LinkCard 
     topIcon 
     label="Get Checkpoints by attributes"
-    description="/core/validate_data/checkpoints/manage_checkpoints#get-checkpoints-by-attributes."
-    to="/core/validate_data/checkpoints/manage_checkpoints#get-checkpoints-by-attributes" 
+    description="Retrieve a Checkpoint through attribute references"
+    to="/core/_validate_data/checkpoints/manage_checkpoints#get-checkpoints-by-attributes" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -111,7 +111,7 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
     topIcon 
     label="Update a Checkpoint"
     description="Update a Checkpoint."
-    to="/core/validate_data/checkpoints/manage_checkpoints#update-a-checkpoint" 
+    to="/core/_validate_data/checkpoints/manage_checkpoints#update-a-checkpoint" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -119,7 +119,7 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
     topIcon 
     label="Delete a Checkpoint"
     description="Delete a Checkpoint."
-    to="/core/validate_data/checkpoints/manage_checkpoints#delete-a-checkpoint" 
+    to="/core/_validate_data/checkpoints/manage_checkpoints#delete-a-checkpoint" 
     icon="/img/expectation_icon.svg" 
   />
 
@@ -127,7 +127,7 @@ A Checkpoint executes one or more Validation Definitions and then performs a set
     topIcon 
     label="Run a Checkpoint"
     description="Run a Checkpoint."
-    to="/core/validate_data/checkpoints/manage_checkpoints#run-a-checkpoint" 
+    to="/core/_validate_data/checkpoints/manage_checkpoints#run-a-checkpoint" 
     icon="/img/expectation_icon.svg" 
   />
   
