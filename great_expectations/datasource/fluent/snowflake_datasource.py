@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import TYPE_CHECKING, Final, Literal, Optional, Union
 import urllib.parse
 import warnings
 from typing import (
