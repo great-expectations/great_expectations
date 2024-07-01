@@ -364,7 +364,11 @@ def test_get_engine_is_used_for_sqlalchemy_execution_engine(
     """
     datasource = datasource_type(name="my_datasource", connection_string="sqlite:///")
 
-    assert datasource.get_engine() is datasource.get_execution_engine().engine
+    assert repr(datasource.get_engine()) == repr(datasource.get_execution_engine().engine)
+
+    # SqliteDatasource retains the old behavior that produces 2 separate engines
+    if not isinstance(datasource, SqliteDatasource):
+        assert datasource.get_engine() is datasource.get_execution_engine().engine
 
 
 if __name__ == "__main__":
