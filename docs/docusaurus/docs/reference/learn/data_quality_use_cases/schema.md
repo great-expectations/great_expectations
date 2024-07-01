@@ -35,7 +35,7 @@ This dataset includes columns like `sender_account_number`, `recipient_fullname`
 
 Explore core Expectations for schema validation, delving into their practical applications and nuances:
 
-### `expect_column_to_exist`
+### Expect Column to Exist
 
 Ensures the presence of a specified column in your dataset. This Expectation is foundational for
 schema validation, verifying that critical columns are included, thus preventing data processing
@@ -56,7 +56,7 @@ as possible, minimizing downstream errors and rework.
 :::
 
 
-### `expect_column_values_to_be_in_type_list`
+### Expect Column Values to be in Type List
 
 Ensures that the values in a specified column are within a specified type list. This Expectation is
 useful for columns with varied permissible types, such as mixed-type fields often found in legacy
@@ -76,7 +76,7 @@ Combine this Expectation with detailed logging to track which types are most fre
 encountered, aiding in eventual standardization efforts.
 :::
 
-### `expect_column_values_to_be_of_type`
+### Expect Column Values to be of Type
 
 Validates that the values within a column are of a specific data type. This is more stringent
 compared to the previous Expectation, suitable for scenarios needing strict type adherence.
@@ -95,7 +95,7 @@ Opt for `expect_column_values_to_be_of_type` when dealing with columns where
 any type deviation could lead to significant processing errors or inaccuracies.
 :::
 
-### `expect_table_column_count_to_equal`
+### Expect Table Column Count to Equal
 
 Ensures the dataset has an exact number of columns. This precise Expectation is for datasets with a
 fixed schema structure, providing a strong safeguard against unexpected changes.
@@ -114,7 +114,7 @@ Periodically review and update this Expectation alongside any schema changes,
 especially when new regulatory requirements emerge.
 :::
 
-### `expect_table_columns_to_match_ordered_list`
+### Expect Table Columns to Match Ordered List
 
 Validates the exact order of columns. This is crucial when processing pipelines depend on a specific
 column order, ensuring consistency and reliability.
@@ -136,7 +136,7 @@ Use `expect_table_columns_to_match_ordered_list` over
 `expect_table_columns_to_match_set` when order matters, such as in scripts directly referencing column positions.
 :::
 
-### `expect_table_columns_to_match_set`
+### Expect Table Columns to Match Set
 
 Checks that the dataset contains specific columns, without regard to order. This Expectation offers
 flexibility where column presence is more critical than their sequence.
@@ -158,7 +158,7 @@ Opt for `expect_table_columns_to_match_set` when integrating datasets from
 various sources where column order might differ, but consistency in available data is required.
 :::
 
-### `expect_table_column_count_to_be_between`
+### Expect Table Column Count to be Between
 
 Validates that the number of columns falls within a specific range, offering flexibility for
 datasets that can expand or contract within a known boundary.
