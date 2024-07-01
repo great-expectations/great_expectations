@@ -114,6 +114,7 @@ class TestConfigPasstrough:
         ds_kwargs: dict,
         filter_gx_datasource_warnings: None,
     ):
+        """Test that kwargs are passed to sqlalchemy.create_engine() are as expected."""
         monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
         context = ephemeral_context_with_defaults
@@ -124,7 +125,9 @@ class TestConfigPasstrough:
         create_engine_spy.assert_called_once_with(
             "sqlite:///",
             **{
-                **ds.dict(include={"kwargs"}, exclude_unset=False)["kwargs"],
+                **ds.dict(include={"kwargs"}, exclude_unset=False, exclude={"data_context"})[
+                    "kwargs"
+                ],
                 **ds_kwargs.get("kwargs", {}),
             },
         )
@@ -137,6 +140,13 @@ class TestConfigPasstrough:
         ds_kwargs: dict,
         filter_gx_datasource_warnings: None,
     ):
+        """
+        Test that the datasource config is passed to the GX SqlAlchemyExecutionEngine constructor
+        are as expected.
+
+        This is different from the sqlalchemy.create_engine() but it should include an engine'
+        create by that factory function.
+        """
         monkeypatch.setenv("MY_CONN_STR", "sqlite:///")
 
         context = ephemeral_context_with_defaults
@@ -148,19 +158,20 @@ class TestConfigPasstrough:
         expected_args: dict[str, Any] = {
             # kwargs that we expect are passed to SqlAlchemyExecutionEngine
             # including datasource field default values
-            **ds.dict(
-                exclude_unset=False,
-                exclude={"kwargs", *ds_kwargs.keys(), *ds._get_exec_engine_excludes()},
-            ),
-            **{k: v for k, v in ds_kwargs.items() if k not in ["kwargs"]},
-            **ds_kwargs.get("kwargs", {}),
             # config substitution should have been performed
-            **ds.dict(include={"connection_string"}, config_provider=ds._config_provider),
+            **ds.dict(
+                include={"connection_string", "create_temp_table"},
+                config_provider=ds._config_provider,
+                exclude_unset=False,
+                exclude={"kwargs", *ds._get_exec_engine_excludes()},
+            ),
+            "data_context": context,
+            "engine": ds.get_engine(),
         }
         assert "create_temp_table" in expected_args
 
-        print(f"\nExpected SqlAlchemyExecutionEngine arguments:\n{pf(expected_args)}")
-        gx_sqlalchemy_execution_engine_spy.assert_called_once_with(**expected_args)
+        print(f"\nExpected SqlAlchemyExecutionEngine arguments:\n{pf(expected_args, depth=1)}")
+        gx_sqlalchemy_execution_engine_spy.assert_called_once_with(ds.name, **expected_args)
 
 
 @pytest.mark.unit
