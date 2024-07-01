@@ -342,7 +342,8 @@ def test_get_engine_is_used_for_sqlalchemy_execution_engine(
     datasource_type: type[SQLDatasource],
 ):
     """
-    This test ensures that the engine returned by get_engine() is used for the gx `SQLAlchemyExecutionEngine`.
+    This test ensures that the engine returned by get_engine() is used for the gx
+    `SQLAlchemyExecutionEngine`.
     """
     datasource = datasource_type(name="my_datasource", connection_string="sqlite:///")
 

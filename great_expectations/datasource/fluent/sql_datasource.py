@@ -986,30 +986,19 @@ class SQLDatasource(Datasource):
         """
         Overrides get_execution_engine in Datasource
 
-        Standard behavior is to assume all top-level Datasource config (unless part of `cls._EXTRA_EXCLUDED_EXEC_ENG_ARGS`)
+        Standard behavior is to assume all top-level Datasource config
+        (unless part of `cls._EXTRA_EXCLUDED_EXEC_ENG_ARGS`)
         should be passed to the GX ExecutionEngine constructor.
+
         For SQLAlchemy this would lead to creating 2 different `sqlalchemy.engine.Engine` objects
-        one for the Datasource and one for the ExecutionEngine. This is wasteful and causes multiple connections to
-        the database to be created
+        one for the Datasource and one for the ExecutionEngine.
+        This is wasteful and causes multiple connections to the database to be created
         """
-        gx_execution_engine_type: Type[
-            SqlAlchemyExecutionEngine
-        ] = self.execution_engine_type
+        gx_execution_engine_type: Type[SqlAlchemyExecutionEngine] = self.execution_engine_type
 
         # connection_string could be a ConfigStr or dict in some subclasses
         connection_string: str | None = (
             self.connection_string if isinstance(self.connection_string, str) else None
-        # =======
-        # Overrides get_execution_engine in Datasource
-        # because we need to pass the kwargs as keyvalue args to the execution engine
-        # when then passes them to the engine.
-        current_execution_engine_kwargs = self.dict(
-            exclude=self._get_exec_engine_excludes(),
-            config_provider=self._config_provider,
-            # by default we exclude unset values to prevent lots of extra values in the yaml files
-            # but we want to include them here
-            exclude_unset=False,
-        # >>>>>>> develop
         )
 
         gx_exec_engine = gx_execution_engine_type(
