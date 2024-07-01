@@ -4,25 +4,25 @@ title: Choose result format
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-import GxData from '../_core_components/_data.jsx';
+import GxData from '../../_core_components/_data.jsx';
 
-import PrereqPython from '../_core_components/prerequisites/_python_installation.md'
-import PrereqGx from '../_core_components/prerequisites/_gx_installation.md'
-import PrereqDataContext from '../_core_components/prerequisites/_preconfigured_data_context.md'
-import PrereqValidationDefinition from '../_core_components/prerequisites/_validation_definition.md'
+import PrereqPython from '../../_core_components/prerequisites/_python_installation.md'
+import PrereqGx from '../../_core_components/prerequisites/_gx_installation.md'
+import PrereqDataContext from '../../_core_components/prerequisites/_preconfigured_data_context.md'
+import PrereqValidationDefinition from '../../_core_components/prerequisites/_validation_definition.md'
 
-import BasicResultFormat from './_choose_result_format/_BASIC.md';
-import BooleanOnlyResultFormat from './_choose_result_format/_BOOLEAN_ONLY.md';
-import CompleteResultFormat from './_choose_result_format/_COMPLETE.md';
-import SummaryResultFormat from './_choose_result_format/_SUMMARY.md';
+import BasicResultFormat from './_BASIC.md';
+import BooleanOnlyResultFormat from './_BOOLEAN_ONLY.md';
+import CompleteResultFormat from './_COMPLETE.md';
+import SummaryResultFormat from './_SUMMARY.md';
 
-import ResultFormatKeyReferenceTable from './_choose_result_format/_optional_key_reference_table.md';
-import ResultOutputReferenceTable from './_choose_result_format/_result_output_reference_table.md';
-import ResultVerbosityReferenceTable from './_choose_result_format/_result_verbosity_reference_table.md';
+import ResultFormatKeyReferenceTable from './_optional_key_reference_table.md';
+import ResultOutputReferenceTable from './_result_output_reference_table.md';
+import ResultVerbosityReferenceTable from './_result_verbosity_reference_table.md';
 
-import AdditionalSettingsBasic from './_choose_result_format/_additional_settings/_BASIC.md';
-import AdditionalSettingsSummary from './_choose_result_format/_additional_settings/_SUMMARY.md';
-import AdditionalSettingsComplete from './_choose_result_format/_additional_settings/_COMPLETE.md';
+import AdditionalSettingsBasic from './_additional_settings/_BASIC.md';
+import AdditionalSettingsSummary from './_additional_settings/_SUMMARY.md';
+import AdditionalSettingsComplete from './_additional_settings/_COMPLETE.md';
 
 
 When you validate data with {GxData.product_name} you can set the level of detail returned in your Validation Results by specifying a value for the optional `result_format` parameter.  These settings will be applied to the results returned by each validated Expectation.
@@ -66,7 +66,7 @@ The `result_format` parameter takes in a dictionary of configuration settings.
 
    </Tabs>
 
-3. Optional. Specify configurations for additional settings available to the base `result_format`.
+2. Optional. Specify configurations for additional settings available to the base `result_format`.
 
    Once you have defined the base configuration in your `result_format` key, you can further tailor the format of your Validation Results by defining additional key/value pairs in your Result Format dictionary.
 
@@ -92,46 +92,11 @@ The `result_format` parameter takes in a dictionary of configuration settings.
 
    </Tabs>
 
-## Apply a Result Format configuration
+3. Apply the Result Format to a Checkpoint or Validation Definition.
 
-You can pass a `result_format` configuration in to a Validation Definition's `.run(...)` method.
+   You can define a persisting Result Format configuration by passing it in as the `result_format` parameter when a Checkpoint is created.  The Result Format will be applied every time the Checkpoint is run.  For more information on creating a Checkpoint see [Create a Checkpoint with Actions](/core/trigger_actions_based_on_results/create_a_checkpoint_with_actions.md).
 
-### Prerequisites
-- <PrereqPython/>.
-- <PrereqGx/>.
-- <PrereqDataContext/>.
-- <PrereqValidationDefinition/>.
-- A [Result Format configuration](#define-a-result-format-configuration). In these examples your result format is stored as a dictionary in the variable `my_result_format`.
-
-### Apply a Result Format configuration to a Validation Definition
-
-1. Retrieve your Validation Definition.
-
-   Update the value of `definition_name` in the following code and execute it to retrieve your Validation Definition:
-
-   ```python title="Python
-   import great_expectations as gx
-   context = gx.get_context
-   
-   definition_name = "my_validation_definition"
-   my_validation_definition = context.validation_definitions.get(name=definition_name)
-   ```
-
-2. Pass the Result Format to the Validation Definition at runtime:
-
-   ```python title="Python"
-   my_validation_definition.run(result_format=my_result_format)
-   ```
-
-   :::tip
-   You can also create a persisting Result Format configuration by passing it in as the `result_format` parameter when a Checkpoint is created.  The Result Format will be applied every time the Checkpoint is run.
-   :::
-
-4. Review your results:
-
-   ```python title="Python"
-   print(validation_result)
-   ```
+   You can also pass a `result_format` configuration in to a Validation Definition's `.run(...)` method to apply the Result Format configuration to the Validation Results that are returned.  This `result_format` configuration does not persist with the Validation Definition and will only apply to the current execution of the `.run(...)` method.  For more information on running a Validation Definition outside of a Checkpoint see [Run a Validation Definition](/core/run_validations/run_a_validation_definition.md).
 
 ## Validation Results reference tables
 

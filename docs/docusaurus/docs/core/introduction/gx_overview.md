@@ -12,7 +12,7 @@ GX is a framework for describing data using expressive tests and then validating
 
 GX is built around the following five core components:
 
-- **[Data Sources:](#datasources)** Connect to your data, and organize data for testing.
+- **[Data Sources:](#data-sources)** Connect to your data, and organize data for testing.
 - **[Expectations:](#expectations)** Identify the standards to which your data should conform.
 - **[Validation Definitions:](#validation-definitions)** Link a set of Expectations to a specific set of data.
 - **[Checkpoints:](#checkpoints)** Facilitate the integration of GX into data pipelines by allowing you to run automated actions based on the results of validations.
