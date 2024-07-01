@@ -164,7 +164,7 @@ class AccountIdentifier(str):
             "pattern": cls.PATTERN.pattern,
             "examples": [
                 "myOrg-my_account",
-                "myOrg-my_account",
+                "myOrg-my-account",
                 "abc12345.us-east-1.aws",
             ],
         }

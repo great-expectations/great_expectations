@@ -478,7 +478,7 @@
                     "pattern": "^(?P<orgname>[a-zA-Z0-9]+)[-](?P<account_name>[a-zA-Z0-9-_]+)$|^(?P<account_locator>[a-zA-Z0-9]+)\\.(?P<region>[a-zA-Z0-9-]+)\\.(?P<cloud>aws|gcp|azure)$",
                     "examples": [
                         "myOrg-my_account",
-                        "myOrg-my_account",
+                        "myOrg-my-account",
                         "abc12345.us-east-1.aws"
                     ]
                 },
