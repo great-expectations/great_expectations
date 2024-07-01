@@ -16,6 +16,7 @@ from great_expectations.datasource.fluent import (
     SQLDatasource,
     SqliteDatasource,
 )
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import TableAsset
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
@@ -168,7 +169,12 @@ class TestConfigPasstrough:
             "data_context": context,
             "engine": ds.get_engine(),
         }
-        assert "create_temp_table" in expected_args
+        if isinstance(ds.connection_string, (ConfigStr, dict)):
+            # if the connection_string is a ConfigStr or dict
+            # we don't expect the GX SqlAlchemyExecutionEngine to have been passed it
+            expected_args["connection_string"] = None
+
+        assert "create_temp_table" in expected_args  # we've had issues with this
 
         print(f"\nExpected SqlAlchemyExecutionEngine arguments:\n{pf(expected_args, depth=1)}")
         gx_sqlalchemy_execution_engine_spy.assert_called_once_with(ds.name, **expected_args)
