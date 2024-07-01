@@ -108,6 +108,16 @@ module.exports = {
       ]
     },
     {
+      type: 'category',
+      label: 'Customize Expectations',
+      link: {type: 'doc', id: 'core/customize_expectations/customize_expectations'},
+      items: [
+        {type: 'doc', id: 'core/customize_expectations/expectation_row_conditions'},
+        {type: 'doc', id: 'core/customize_expectations/define_a_custom_expectation_class'},
+        {type: 'doc', id: 'core/customize_expectations/use_sql_to_define_a_custom_expectation'},
+      ]
+    },
+    {
       type: 'doc',
       id: 'oss/changelog',
       label: 'Changelog'
